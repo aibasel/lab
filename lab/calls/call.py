@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# TODO: Log why program was killed.
-
 import os
 import resource
 import signal
@@ -26,6 +24,7 @@ import subprocess
 import time
 
 from lab.calls.processgroup import ProcessGroup
+from lab.calls.log import set_property
 
 
 LOG_INTERVAL = 5
@@ -50,8 +49,8 @@ def set_limit(kind, amount):
 
 
 class Call(subprocess.Popen):
-    def __init__(self, args, time_limit=1800, mem_limit=2048, kill_delay=5,
-                 check_interval=0.1, **kwargs):
+    def __init__(self, args, name='call', time_limit=1800, mem_limit=2048,
+                 kill_delay=5, check_interval=0.1, **kwargs):
         """Make system calls with time and memory constraints.
 
         *args* and *kwargs* will be passed to the base
@@ -67,6 +66,7 @@ class Call(subprocess.Popen):
         *check_interval* is the time in seconds between two queries to the
         process group status.
         """
+        self.name = name
         self.time_limit = time_limit
         self.wall_clock_time_limit = time_limit * 1.5
         self.mem_limit = mem_limit
@@ -101,6 +101,13 @@ class Call(subprocess.Popen):
     def kill(self):
         print "aborting children with SIGKILL..."
         kill_pgrp(self.pid, signal.SIGKILL)
+
+    def _log(self, msg):
+        print "%s: %s" % (self.name, msg)
+
+    def _set_property(self, prop, value):
+        self._log("%s = %s" % (prop, value))
+        set_property("%s_%s" % (self.name, prop), value)
 
     def log(self, real_time, total_time, total_vsize):
         print "wall-clock time: %.2f" % (time.time() - self.wall_clock_start_time)
@@ -144,9 +151,18 @@ class Call(subprocess.Popen):
                 self.log(real_time, total_time, total_vsize)
                 last_log_time = real_time
 
-            try_term = (total_time >= self.time_limit or
-                        real_time >= self.wall_clock_time_limit or
-                        total_vsize > self.mem_limit)
+            try_term = False
+            # Log why program was terminated.
+            if total_time >= self.time_limit:
+                self._set_property('timeout', 1)
+                try_term = True
+            elif real_time >= self.wall_clock_time_limit:
+                self._set_property('wall_clock_timeout', 1)
+                try_term = True
+            elif total_vsize > self.mem_limit:
+                self._set_propert('mem_limit_exceeded', 1)
+                try_term = True
+
             try_kill = (total_time >= self.time_limit + self.kill_delay or
                         real_time >= 1.5 * self.wall_clock_time_limit +
                         self.kill_delay or
