@@ -170,8 +170,7 @@ class SearchRun(DownwardRun):
                           '--plan-file', 'sas_plan']
         self.add_command('search', search_cmd, stdin='output',
                          time_limit=exp.limits['search_time'],
-                         mem_limit=exp.limits['search_memory'],
-                         abort_on_failure=False)
+                         mem_limit=exp.limits['search_memory'])
 
         # Validation
         self.require_resource('VALIDATE')

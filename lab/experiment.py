@@ -21,8 +21,6 @@
 Main module for experiment creation
 """
 
-# TODO: Run parsers unconditionally even if previous command failed.
-
 import os
 import sys
 import logging
@@ -40,7 +38,7 @@ except ImportError:
     from lab.external.ordereddict import OrderedDict
 
 
-DEFAULT_ABORT_ON_FAILURE = True
+DEFAULT_ABORT_ON_FAILURE = False
 # How many tasks to group into one top-level directory
 SHARD_SIZE = 100
 
