@@ -21,6 +21,8 @@
 Main module for experiment creation
 """
 
+# TODO: Run parsers unconditionally even if previous command failed.
+
 import os
 import sys
 import logging
@@ -444,8 +446,9 @@ class Run(_Buildable):
             parts = [cmd_string]
             if kwargs_string:
                 parts.append(kwargs_string)
-            call = ('retcode = Call(%s, **redirects).wait()\n'
-                    'save_returncode("%s", retcode)\n') % (', '.join(parts), name)
+            call = ('retcode = Call(%s, name="%s", **redirects).wait()\n'
+                    'save_returncode("%s", retcode)\n' %
+                    (', '.join(parts), name, name))
             if abort_on_failure:
                 call += ('if not retcode == 0:\n'
                          '    print_(driver_err, "%s returned %%s" %% retcode)\n'
