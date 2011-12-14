@@ -21,11 +21,14 @@ from lab.downward.checkouts import Translator, Preprocessor, Planner
 from lab.downward.reports.absolute import AbsoluteReport
 from lab.downward.reports.ipc import IpcReport
 from lab.downward.reports.scatter import ScatterPlotReport
+from lab.downward.reports.suite import SuiteReport
 from lab.environments import LocalEnvironment
 from lab.downward import configs
 from lab.experiment import Step
+from lab import tools
 
 EXPNAME = 'myexp'
+REPORTS = os.path.join(tools.USER_DIR, 'reports')
 REPO = '/home/jendrik/projects/Downward/downward'
 
 combinations = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO))]
@@ -47,13 +50,15 @@ for config in configs.ipc_optimal_subset():
     exp.add_config(*config)
 
 # The next step should be done explicitly
-abs_domain_report_file = 'results/%s-abs-d.html' % EXPNAME
-abs_problem_report_file = 'results/%s-abs-p.html' % EXPNAME
+abs_domain_report_file = os.path.join(REPORTS, '%s-abs-d.html' % EXPNAME)
+abs_problem_report_file = os.path.join(REPORTS, '%s-abs-p.html' % EXPNAME)
 #exp.add_report(AbsoluteReport, outfile=abs_report_file)
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain'), exp.eval_dir, abs_domain_report_file))
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem'), exp.eval_dir, abs_problem_report_file))
-exp.add_step(Step('report-ipc', IpcReport('coverage'), exp.eval_dir, 'results/ipc.tex'))
-exp.add_step(Step('report-scatter', ScatterPlotReport(), exp.eval_dir, 'results/scatter.tex'))
+exp.add_step(Step('report-ipc', IpcReport('coverage'), exp.eval_dir, os.path.join(REPORTS, 'ipc.tex')))
+exp.add_step(Step('report-scatter', ScatterPlotReport(), exp.eval_dir, os.path.join(REPORTS, 'scatter.tex')))
+exp.add_step(Step('report-scatter', ScatterPlotReport(), exp.eval_dir, os.path.join(REPORTS, 'scatter.tex')))
+exp.add_step(Step('report-suite', SuiteReport(), exp.eval_dir, os.path.join(REPORTS, 'suite.py')))
 
 # exp.steps is a list that can be manipulated:
 # steps can be removed, appended, replaced and inserted
