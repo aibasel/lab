@@ -45,7 +45,7 @@ class Experiment(object):
         self.add_step(Step('build', self.build, overwrite=True)) # TODO: remove overwrite
         self.add_step(self.environment.get_start_exp_step())
         self.add_step(Step('fetch', self.fetcher, self.path))
-        #self.add_step(Step('report', self.report, self.eval_dir)) # TODO: add default report?
+        #self.add_step(Step('report', self.report, self.eval_dir)) # TODO: add default report? Add self.reports_dir?
 
     @property
     def name(self):
@@ -498,8 +498,7 @@ class Step(object):
     def __call__(self):
         try:
             self.func(*self.args, **self.kwargs)
-        except ValueError, err:
-            print dir(err)
+        except (ValueError, TypeError), err:
             logging.error('Could not run step: %s' % self)
             import traceback
             traceback.print_exc()
