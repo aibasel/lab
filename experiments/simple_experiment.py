@@ -7,39 +7,44 @@ from subprocess import call
 
 sys.path.insert(0, '/home/jendrik/projects/Downward/lab/')
 
-# Use the full paths here to demonstrate the layout
-# Later we could use __init__.py files to simplify things a bit
-from lab.fetcher import Fetcher
-#from lab.downward_parser import DownwardParser
-from lab.experiment import Experiment, Run
-from lab.environments import LocalEnvironment, GkiGridEnvironment
+from lab.experiment import Experiment
+from lab.environments import LocalEnvironment
 from lab.experiment import Step
+from lab.reports import Report
+from lab import tools
+
+EXPNAME = 'simple-exp'
+EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
+REPORT = os.path.join(tools.DEFAULT_REPORTS_DIR, 'simple-report.html')
 
 env = LocalEnvironment()
-exp = Experiment(path='/home/jendrik/my-simple-exp', env=env)
-exp.add_resource('SIMPLE_PARSER_PY', '/home/jendrik/projects/Downward/lab/lab/simple_parser.py', 'simple_parser.py')
+exp = Experiment(path=EXPPATH, env=env)
+exp.add_resource('SIMPLE_PARSER', 'simple_parser.py', 'simple_parser.py')
 
 run = exp.add_run()
 run.add_command('list-dir', ['ls'])
-run.set_property('id', ['toplevel'])
-run.require_resource('SIMPLE_PARSER_PY')
-run.add_command('parse', ['SIMPLE_PARSER_PY'])
+run.set_property('id', ['current-dir'])
+run.require_resource('SIMPLE_PARSER')
+run.add_command('parse', ['SIMPLE_PARSER'])
 
-#exp.add_report()
+# Make a default report
+exp.add_step(Step('report', Report(), exp.eval_dir, REPORT))
 
 # Compress the experiment directory
-exp.add_step(Step('zip-exp-dir', call, ['tar', '-czf', exp.path + '.tar.gz', exp.path]))
-
-def copy_results():
-    dest = os.path.join(os.path.expanduser('~'), '.public_html/',
-                        os.path.basename(abs_report_file))
-    shutil.copy2(abs_report_file, dest)
+print exp.path
+exp.add_step(Step('zip-exp-dir', call,
+                  ['tar', '-czf', exp.name + '.tar.gz', exp.name],
+                  cwd=os.path.dirname(exp.path)))
 
 # Copy the results
-#exp.add_step(Step('copy-results', copy_results))
+def copy_results():
+    dest = os.path.join(os.path.expanduser('~'), '.public_html/',
+                        os.path.basename(REPORT))
+    shutil.copy2(REPORT, dest)
+exp.add_step(Step('copy-results', copy_results))
 
 # Remove the experiment directory
-#exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
+exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
 
 # This method parses the commandline. We assume this file is called exp.py.
 # Supported styles:
@@ -48,9 +53,3 @@ def copy_results():
 # ./exp.py next
 # ./exp.py rest      # runs all remaining steps
 exp()
-
-# Thoughts:
-# The only difference between the Call and Step classes is that a call is
-# executed when it is created, but a step has a run() method. They should
-# probably be unified.
-
