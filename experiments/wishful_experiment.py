@@ -69,7 +69,7 @@ exp.add_step(Step('report-rel', RelativeReport('problem', filters=[lama_and_yY])
 def copy_results():
     dest = os.path.join(os.path.expanduser('~'), '.public_html/',
                         os.path.basename(abs_domain_report_file))
-    shutil.copy2(abs_report_file, dest)
+    shutil.copy2(abs_domain_report_file, dest)
 
 # Copy the results
 exp.add_step(Step('copy-results', copy_results))

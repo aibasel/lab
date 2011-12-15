@@ -24,18 +24,18 @@ def remove_missing(iterable):
 
 
 class IpcReport(Report):
-    def __init__(self, attribute, squeeze=True, page_size='a4', **kwargs):
+    def __init__(self, squeeze=True, page_size='a4', **kwargs):
         """
         attribute: The analyzed attribute (e.g. "expanded")
         squeeze: Use small fonts to fit in more data
         page_size: Set the page size for the latex report
         """
         Report.__init__(self, **kwargs)
-        # TODO: rename focus to attribute
-        assert attribute in SCORES
+        assert len(self.attributes) == 1, self.attributes
+        self.attribute = self.attributes[0]
+        assert self.attribute in SCORES
         assert page_size in ['a2', 'a3', 'a4']
 
-        self.attribute = attribute
         self.attribute_name = self.attribute
         self.squeeze = squeeze
         self.page_size = page_size
