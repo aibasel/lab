@@ -150,6 +150,14 @@ def _prepare_search_run(exp, run, config_nick, config):
 class DownwardExperiment(Experiment):
     def __init__(self, path, env, repo, combinations, compact=True):
         """
+        The preprocess fetcher creates the following directory structure:
+
+        - PREPROCESSED_TASKS_DIR
+            - TRANSLATOR_REV-PREPROCESSOR_REV
+                - DOMAIN
+                    - PROBLEM
+                        - output, etc.
+
         compact: Link to preprocessing files instead of copying them. Only use
                  this option if the preprocessed files will NOT be changed
                  during the experiment.
@@ -221,29 +229,16 @@ class DownwardExperiment(Experiment):
         checkouts.checkout(self.combinations)
         checkouts.compile(self.combinations)
         if stage == 'preprocess':
-            self._prepare_preprocess()
+            self.path = self.preprocess_exp_path
             self._make_preprocess_runs()
         elif stage == 'search':
+            self.path = self.search_exp_path
             self._make_search_runs()
         else:
             logging.error('There is no stage "%s"' % stage)
             sys.exit(1)
 
         Experiment.build(self, overwrite=overwrite)
-
-    def _prepare_preprocess(self):
-        """
-        When the fetcher is run the following directory structure is created:
-
-        - PREPROCESSED_TASKS_DIR
-            - TRANSLATOR_REV-PREPROCESSOR_REV
-                - DOMAIN
-                    - PROBLEM
-                        - output, etc.
-        """
-        # Use unique dir for the preprocess experiment
-        self.path = self.preprocess_exp_path
-        logging.info('Experiment directory set to %s' % self.path)
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # Copy the whole translate directory
