@@ -56,26 +56,6 @@ class Experiment(object):
     def eval_dir(self):
         return self.path + '-eval'
 
-    @property
-    def compact_exp_path(self):
-        """
-        Return the relative path if path is a subdir of the cwd else return
-        the absolute path.
-        """
-        assert os.path.isabs(self.path)
-        relpath = os.path.relpath(self.path)
-        is_subpath = not relpath.startswith('../')
-        if is_subpath:
-            return relpath
-        return self.path
-
-    @property
-    def compact_main_script_path(self):
-        """Return the path to the run script in a compact form."""
-        compact_path = self.compact_exp_path
-        prefix = "" if os.path.isabs(compact_path) else "./"
-        return os.path.join(prefix, compact_path, "run")
-
     def add_step(self, step):
         self.steps.append(step)
 
