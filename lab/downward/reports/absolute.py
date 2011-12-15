@@ -19,15 +19,24 @@ class AbsoluteReport(PlanningReport):
         """
         self.resolution = resolution
         PlanningReport.__init__(self, *args, **kwargs)
+        self._orig_groups = None
+        self._orig_groups_domain_prob = None
 
-    def write(self):
-        # Save the unfiltered groups for faster retrieval
-        if self.resolution == 'domain':
-            self.orig_groups = self.data.groups('config', 'domain')
-        else:
-            self.orig_groups = self.data.groups('config', 'domain', 'problem')
-        self.orig_groups_domain_prob = self.data.groups('domain', 'problem')
-        PlanningReport.write(self)
+    @property
+    def orig_groups(self):
+        if not self._orig_groups:
+            # Save the unfiltered groups for faster retrieval
+            if self.resolution == 'domain':
+                self._orig_groups = self.data.groups('config', 'domain')
+            else:
+                self._orig_groups = self.data.groups('config', 'domain', 'problem')
+        return self._orig_groups
+
+    @property
+    def orig_groups_domain_prob(self):
+        if not self._orig_groups_domain_prob:
+            self._orig_groups_domain_prob = self.data.groups('domain', 'problem')
+        return self._orig_groups_domain_prob
 
     def _attribute_is_absolute(self, attribute):
         """
