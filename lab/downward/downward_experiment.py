@@ -228,6 +228,7 @@ class DownwardExperiment(Experiment):
         self.set_property('stage', stage)
         checkouts.checkout(self.combinations)
         checkouts.compile(self.combinations)
+        self.runs = []
         if stage == 'preprocess':
             self.path = self.preprocess_exp_path
             self._make_preprocess_runs()
