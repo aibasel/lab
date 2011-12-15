@@ -23,10 +23,11 @@ lama = ["--heuristic",
 blind = ["--search", "astar(blind())"]
 
 def pdb_max_states(max_states):
-    return ["--search", "astar(pdb(max_states=%i))" % max_states]
+    return ('pdb%d' % max_states,
+            ['--search', 'astar(pdb(max_states=%d))' % max_states])
 
 def ipdbi(imp):
-    return ["--search", "astar(ipdb(min_improvement=%d))" % imp]
+    return ("ipdbi%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
 
 seq_opt_fdss_1 = "ipc seq-opt-fdss-1 --plan-file sas_plan"
 
