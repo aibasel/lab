@@ -1,3 +1,9 @@
+import logging
+import sys
+
+from lab.downward.reports.absolute import AbsoluteReport
+
+
 class RelativeReport(AbsoluteReport):
     """
     Write a relative report about the focus attribute, e.g.
@@ -6,20 +12,22 @@ class RelativeReport(AbsoluteReport):
     | **gripper     ** | 1.0              | 0.6102           |
     | **zenotravel  ** | 1.0              | 0.8095           |
     """
-    def __init__(self, parser=ReportArgParser(parents=[report_type_parser])):
-        parser.add_argument('--rel-change', default=0, type=int,
-            help='percentage that the value must have changed between two '
-                'configs to be appended to the result table')
-        parser.add_argument('--abs-change', default=0.0, type=float,
-            help='only add pairs of values to the result if their absolute '
-                 'difference is bigger than this number')
+    def __init__(self, resolution, rel_change=0, abs_change=0.0):
+        """
+        rel_change = Percentage that the value must have changed between two
+                     configs to be appended to the result table.
+        abs_change = Only add pairs of values to the result if their absolute
+                     difference is bigger than this number
+        """
+        AbsoluteReport.__init__(self, resolution)
 
-        AbsoluteReport.__init__(self, parser=parser)
-
+    def write(self):
         configs = self.get_configs()
         if not len(configs) == 2:
-            sys.exit('Relative reports can only be performed for 2 configs. '
-                     'Selected configs: "%s"' % configs)
+            logging.error('Relative reports are only possible for 2 configs. '
+                          'Selected configs: "%s"' % configs)
+            sys.exit(1)
+        AbsoluteReport.write(self)
 
     def _get_table(self, attribute):
         table = AbsoluteReport._get_table(self, attribute)
