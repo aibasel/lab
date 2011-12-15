@@ -1,18 +1,22 @@
+import logging
+
+try:
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+except ImportError, err:
+    logging.error('matplotlib could not be found: %s' % err)
+    sys.exit(1)
+
 from absolute import AbsoluteReport
+from lab import tools
 
 
 class ScatterPlotReport(AbsoluteReport):
-    def __init__(self):
-        AbsoluteReport.__init__(self, 'problem')
+    def __init__(self, *args, **kwargs):
+        AbsoluteReport.__init__(self, 'problem', *args, **kwargs)
+        assert len(self.attributes) == 1, self.attributes
 
     def write_plot(self, attribute, filename):
-        try:
-            from matplotlib.backends.backend_agg import FigureCanvasAgg
-            from matplotlib.figure import Figure
-        except ImportError, err:
-            logging.error('matplotlib could not be found: %s' % err)
-            sys.exit(1)
-
         table = self._get_table(attribute)
         cfg1, cfg2 = table.cols
         columns = table.get_columns()
@@ -54,8 +58,7 @@ class ScatterPlotReport(AbsoluteReport):
         ax = fig.add_subplot(111)
 
         # Make a descriptive title and set axis labels
-        suite = ' (%s)' % ','.join(self.suite) if self.suite else ''
-        title = ''.join([attribute, suite, ' by ', self.resolution])
+        title = ' '.join([attribute, 'by', self.resolution])
         ax.set_title(title, fontsize=14)
         ax.set_xlabel(cfg1, fontsize=12)
         ax.set_ylabel(cfg2, fontsize=12)
@@ -95,7 +98,6 @@ class ScatterPlotReport(AbsoluteReport):
 
     def write(self):
         assert len(self.get_configs()) == 2, self.get_configs()
-        assert len(self.attributes) == 1, self.attributes
 
         filename = self.get_filename()
         if not filename.endswith('.png'):
