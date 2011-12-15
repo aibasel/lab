@@ -519,7 +519,10 @@ class Step(object):
         try:
             self.func(*self.args, **self.kwargs)
         except ValueError, err:
-            logging.error('%s: %s' % (err, self))
+            print dir(err)
+            logging.error('Could not run step: %s' % self)
+            import traceback
+            traceback.print_exc()
 
     def __str__(self):
         funcname = getattr(self.func, '__name__', None) or self.func.__class__.__name__
