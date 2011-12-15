@@ -60,7 +60,7 @@ exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=attribute
 exp.add_step(Step('report-ipc', IpcReport('coverage'), exp.eval_dir, os.path.join(REPORTS, 'ipc.tex')))
 exp.add_step(Step('report-scatter', ScatterPlotReport(attributes=['expansions'], filters=[lama_and_yY]), exp.eval_dir, os.path.join(REPORTS, 'scatter.png')))
 exp.add_step(Step('report-suite', SuiteReport(), exp.eval_dir, os.path.join(REPORTS, 'suite.py')))
-exp.add_step(Step('report-rel', RelativeReport('problem'), exp.eval_dir, os.path.join(REPORTS, 'rel.html')))
+exp.add_step(Step('report-rel', RelativeReport('problem', filters=[lama_and_yY]), exp.eval_dir, os.path.join(REPORTS, 'rel.html')))
 
 # exp.steps is a list that can be manipulated:
 # steps can be removed, appended, replaced and inserted
