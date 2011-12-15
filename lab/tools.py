@@ -28,8 +28,11 @@ SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SCRIPTS_DIR)
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 CALLS_DIR = os.path.join(SCRIPTS_DIR, 'calls')
-USER_DIR = os.path.join(os.path.expanduser('~'), 'downwardlab')
+USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
 REPORTS_DIR = os.path.join(USER_DIR, 'reports')
+
+DEFAULT_EXP_DIR = os.path.join(USER_DIR, 'experiments')
+DEFAULT_REPORTS_DIR = os.path.join(USER_DIR, 'reports')
 
 
 def setup_logging(level):
