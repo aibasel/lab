@@ -6,10 +6,8 @@ import sys
 import platform
 from subprocess import call
 
-sys.path.insert(0, '/home/jendrik/projects/Downward/lab/')
-
 from lab.experiment import Experiment
-from lab.environments import LocalEnvironment
+from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.experiment import Step
 from lab.reports import Report
 from lab import tools
