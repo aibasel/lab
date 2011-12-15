@@ -25,6 +25,7 @@ from lab.downward import configs
 from lab.experiment import Step
 from lab import tools
 
+
 EXPNAME = 'test-exp'
 EXPPATH = os.path.join(tools.USER_DIR, 'experiments', EXPNAME)
 REPORTS = os.path.join(tools.USER_DIR, 'reports')
@@ -55,7 +56,6 @@ def lama_and_yY(run):
 
 abs_domain_report_file = os.path.join(REPORTS, '%s-abs-d.html' % EXPNAME)
 abs_problem_report_file = os.path.join(REPORTS, '%s-abs-p.html' % EXPNAME)
-#exp.add_report(AbsoluteReport, outfile=abs_report_file)
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES), exp.eval_dir, abs_domain_report_file))
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES), exp.eval_dir, abs_problem_report_file))
 #exp.add_step(Step('report-ipc', IpcReport(attributes=['coverage']), exp.eval_dir, os.path.join(REPORTS, 'ipc.tex')))

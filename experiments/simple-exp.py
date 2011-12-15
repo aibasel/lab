@@ -3,6 +3,7 @@
 import os
 import shutil
 import sys
+import platform
 from subprocess import call
 
 sys.path.insert(0, '/home/jendrik/projects/Downward/lab/')
@@ -14,11 +15,16 @@ from lab.reports import Report
 from lab import tools
 
 EXPNAME = 'simple-exp'
-EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
-REPORT = os.path.join(tools.DEFAULT_REPORTS_DIR, 'simple-report.html')
+if platform.node() == 'habakuk':
+    EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
+    REPORT = os.path.join('/home/downward/jendrik/reports', EXPNAME + '.html')
+    ENV = GkiGridEnvironment()
+else:
+    EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
+    REPORT = os.path.join(tools.DEFAULT_REPORTS_DIR, 'simple-report.html')
+    ENV = LocalEnvironment()
 
-env = LocalEnvironment()
-exp = Experiment(path=EXPPATH, env=env)
+exp = Experiment(path=EXPPATH, env=ENV)
 exp.add_resource('SIMPLE_PARSER', 'simple_parser.py', 'simple_parser.py')
 
 run = exp.add_run()
