@@ -62,7 +62,7 @@ class Report(object):
                     all found numerical attributes
         filters:    list of functions that are given a run and return True or False
         """
-        self.attributes = attributes
+        self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
         self.filters = filters or []
