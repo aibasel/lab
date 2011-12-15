@@ -1,9 +1,8 @@
 import sys
-import os
 import logging
 from collections import defaultdict
 
-from lab.reports import Report, ReportArgParser
+from lab.reports import Report
 from lab.external.datasets import missing
 from lab import tools
 

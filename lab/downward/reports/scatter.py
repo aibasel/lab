@@ -1,4 +1,5 @@
 import logging
+import sys
 
 try:
     from matplotlib.backends.backend_agg import FigureCanvasAgg

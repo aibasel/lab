@@ -9,8 +9,6 @@ logging.basicConfig(level=logging.DEBUG,
 
 from tools import copy, prod
 from reports import gm
-import checkouts
-import downward_experiments
 import tools
 
 base = os.path.join('/tmp', str(datetime.datetime.now()))

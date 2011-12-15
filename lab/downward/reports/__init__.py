@@ -5,16 +5,10 @@ Module that permits generating downward reports by reading properties files
 
 from __future__ import with_statement, division
 
-import sys
-import os
 import logging
-from collections import defaultdict
-import itertools
 
-from lab import tools
-from lab.external.datasets import missing, not_missing
 from lab import reports
-from lab.reports import Report, ReportArgParser, Table
+from lab.reports import Report, Table
 
 
 class PlanningTable(Table):

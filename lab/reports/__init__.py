@@ -12,7 +12,6 @@ import collections
 import cPickle
 import hashlib
 import subprocess
-import operator
 import math
 from collections import defaultdict
 
@@ -49,23 +48,25 @@ class ReportArgParser(tools.ArgParser):
 
         self.add_argument('--open', default=False, action='store_true',
                     dest='open_report',
-                    help='open the report file after writing it')
+                    help='')
 
 
 class Report(object):
     """
     Base class for all reports
     """
-    def __init__(self, attributes=None, format='html', filters=None):
+    def __init__(self, attributes=None, format='html', filters=None, open=False):
         """
         attributes: the analyzed attributes (e.g. coverage). If omitted, use
                     all found numerical attributes
         filters:    list of functions that are given a run and return True or False
+        open:       open the report file after writing it
         """
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
         self.filters = filters or []
+        self.open_report = open # TODO: currently unsupported
 
         self.report_type = 'report'
 

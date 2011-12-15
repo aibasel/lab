@@ -1,3 +1,5 @@
+import sys
+
 from lab.downward.reports import PlanningReport
 
 

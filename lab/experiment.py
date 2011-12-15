@@ -498,7 +498,7 @@ class Step(object):
     def __call__(self):
         try:
             self.func(*self.args, **self.kwargs)
-        except (ValueError, TypeError), err:
+        except (ValueError, TypeError):
             logging.error('Could not run step: %s' % self)
             import traceback
             traceback.print_exc()

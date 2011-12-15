@@ -1,7 +1,6 @@
 import os
 import sys
 import logging
-import re
 import itertools
 
 from lab import tools
