@@ -21,13 +21,16 @@ tools.makedirs(PREPROCESSED_TASKS_DIR)
 DOWNWARD_SCRIPTS_DIR = os.path.join(tools.SCRIPTS_DIR, 'downward', 'scripts')
 
 
-# TODO: Make limits keyword args of DownwardExperiment
-LIMIT_TRANSLATE_TIME = 7200
-LIMIT_TRANSLATE_MEMORY = 8192
-LIMIT_PREPROCESS_TIME = 7200
-LIMIT_PREPROCESS_MEMORY = 8192
-LIMIT_SEARCH_TIME = 1800
-LIMIT_SEARCH_MEMORY = 2048
+# Limits can be overwritten in DownwardExperiment
+LIMITS = {
+    'translate_time': 7200,
+    'translate_memory': 8192,
+    'preprocess_time': 7200,
+    'preprocess_memory': 8192,
+    'search_time': 1800,
+    'search_memory': 2048,
+    }
+
 
 # At least one of those must be found (First is taken if many are present)
 PLANNER_BINARIES = ['downward', 'downward-debug', 'downward-profile',
@@ -55,6 +58,7 @@ class DownwardRun(Run):
         self.problem = problem
 
         self.set_properties()
+        self.save_limits()
 
     def set_properties(self):
         self.domain_name = self.problem.domain
@@ -71,14 +75,11 @@ class DownwardRun(Run):
         self.set_property('domain', self.domain_name)
         self.set_property('problem', self.problem_name)
 
-        self.set_property('limit_translate_time', LIMIT_TRANSLATE_TIME)
-        self.set_property('limit_translate_memory', LIMIT_TRANSLATE_MEMORY)
-        self.set_property('limit_preprocess_time', LIMIT_PREPROCESS_TIME)
-        self.set_property('limit_preprocess_memory', LIMIT_PREPROCESS_MEMORY)
-        self.set_property('limit_search_time', LIMIT_SEARCH_TIME)
-        self.set_property('limit_search_memory', LIMIT_SEARCH_MEMORY)
-
         self.set_property('experiment_name', self.experiment.name)
+
+    def save_limits(self):
+        for name, limit in self.experiment.limits.items():
+            self.set_property('limit_' + name, limit)
 
 
 def _prepare_preprocess_run(exp, run):
@@ -90,12 +91,12 @@ def _prepare_preprocess_run(exp, run):
     run.add_resource("PROBLEM", run.problem.problem_file(), "problem.pddl")
 
     run.add_command('translate', [run.translator.shell_name, 'DOMAIN', 'PROBLEM'],
-                    time_limit=LIMIT_TRANSLATE_TIME,
-                    mem_limit=LIMIT_TRANSLATE_MEMORY)
+                    time_limit=exp.limits['translate_time'],
+                    mem_limit=exp.limits['translate_memory'])
     run.add_command('preprocess', [run.preprocessor.shell_name],
                     stdin='output.sas',
-                    time_limit=LIMIT_PREPROCESS_TIME,
-                    mem_limit=LIMIT_PREPROCESS_MEMORY)
+                    time_limit=exp.limits['preprocess_time'],
+                    mem_limit=exp.limits['preprocess_memory'])
     run.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
     ext_config = '-'.join([run.translator.name, run.preprocessor.name])
@@ -122,8 +123,8 @@ def _prepare_search_run(exp, run, config_nick, config):
         search_cmd = [run.planner.shell_name, '--portfolio', config_nick,
                       '--plan-file', 'sas_plan']
     run.add_command('search', search_cmd, stdin='output',
-                    time_limit=LIMIT_SEARCH_TIME,
-                    mem_limit=LIMIT_SEARCH_MEMORY,
+                    time_limit=exp.limits['search_time'],
+                    mem_limit=exp.limits['search_memory'],
                     abort_on_failure=False)
     run.declare_optional_output("sas_plan")
 
@@ -148,7 +149,7 @@ def _prepare_search_run(exp, run, config_nick, config):
 
 
 class DownwardExperiment(Experiment):
-    def __init__(self, path, env, repo, combinations, compact=True):
+    def __init__(self, path, env, repo, combinations, compact=True, limits=None):
         """
         The preprocess fetcher creates the following directory structure:
 
@@ -161,6 +162,8 @@ class DownwardExperiment(Experiment):
         compact: Link to preprocessing files instead of copying them. Only use
                  this option if the preprocessed files will NOT be changed
                  during the experiment.
+        limits: Dictionary of limits that can be used to overwrite the default
+                limits.
         """
         Experiment.__init__(self, path, env)
 
@@ -173,6 +176,10 @@ class DownwardExperiment(Experiment):
         self.suites = []
         self.configs = []
         self.portfolios = []
+
+        self.limits = LIMITS
+        if limits:
+            self.limits.update(limits)
 
         # Do not copy the .obj directory into the experiment directory.
         self.ignores.append('*.obj')
@@ -273,7 +280,7 @@ class DownwardExperiment(Experiment):
                 logging.error('Portfolio file %s could not be found.' % portfolio)
                 sys.exit(1)
             name = os.path.basename(portfolio)
-            self.add_resource(shell_escape(name), portfolio, planner.get_path_dest(name))
+            self.add_resource(shell_escape(name), portfolio, planner.get_path_dest('search', name))
 
         # The tip changeset has the newest validator version so we use this one
         validate = os.path.join(self.repo, 'src', 'validate')
@@ -299,7 +306,7 @@ class DownwardExperiment(Experiment):
         for translator, preprocessor, planner in self.combinations:
             self._prepare_planner(planner)
 
-            for config_nick, config in self.configs:
+            for config_nick, config in self.configs + [(path, '') for path in self.portfolios]:
                 for prob in self.problems:
                     self._make_search_run(translator, preprocessor, planner,
                                           config_nick, config, prob)
