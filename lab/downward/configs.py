@@ -29,7 +29,8 @@ def pdb_max_states(max_states):
 def ipdbi(imp):
     return ("ipdbi%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
 
-seq_opt_fdss_1 = "ipc seq-opt-fdss-1 --plan-file sas_plan"
+seq_opt_fdss_1 = ["ipc", "seq-opt-fdss-1", "--plan-file", "sas_plan"]
+lama11 = ["ipc", "seq-sat-lama-2011", "--plan-file", "sas_plan"]
 
 def ipc_optimal_subset():
     return [
