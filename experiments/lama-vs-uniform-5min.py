@@ -20,12 +20,12 @@ from lab.experiment import Step
 from lab import tools
 
 
-EXPNAME = os.path.splitext(os.path.basename(__file__))[0]
+EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
 if platform.node() == 'habakuk':
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
     REPORTS = '/home/downward/jendrik/reports'
     REPO = '/home/downward/jendrik/fastr'
-    SUITE = 'IPC11'
+    SUITE = 'gripper:prob01.pddl'
     ENV = GkiGridEnvironment()
     PORTFOLIOS = '/home/downward/jendrik/fastr/new-scripts/portfolios'
 else:

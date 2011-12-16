@@ -47,7 +47,7 @@ class Fetcher(object):
         # Get all run_dirs
         run_dirs = sorted(glob(os.path.join(exp_dir, 'runs-*-*', '*')))
         for index, run_dir in enumerate(run_dirs, 1):
-            logging.info('Evaluating: %6d/%d' % (index, total_dirs))
+            logging.info('Fetching: %6d/%d' % (index, total_dirs))
             id_string, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all)
 
             if write_combined_props:

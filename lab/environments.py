@@ -99,4 +99,4 @@ class GkiGridEnvironment(Environment):
             file.write(script)
 
     def get_start_exp_step(self):
-        return Step('start', call, ['qsub', self.main_script_file])
+        return Step('start', call, ['qsub', self.main_script_file], cwd=self.exp.path)
