@@ -220,7 +220,8 @@ class DownwardExperiment(Experiment):
         suite can either be a string or a list of strings.
         """
         if isinstance(suite, basestring):
-            self.suites.append(suite)
+            parts = [part.strip() for part in suite.split(',')]
+            self.suites.extend([part for part in parts if part])
         else:
             self.suites.extend(suite)
 
