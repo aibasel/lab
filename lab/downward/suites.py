@@ -342,23 +342,19 @@ def select_evenly_spread(seq, num_items):
     return [seq[int(round(index))] for index in float_indices]
 
 
-if __name__ == '__main__':
-    print build_suite([
-        'gripper',
-        'gripper:prob01.pddl',
-        # Four times the same suite:
-        'downward_suites.py:TEST',
-        'downward_suites.py:suite_test',
-        'TEST',
-        'suite_test',
-        # Four times the same suite:
-        'downward_suites.py:TEST_FIRST',
-        'downward_suites.py:suite_test_first',
-        'TEST_FIRST',
-        'suite_test_first',
-        # Four times the same suite:
-        'downward_suites.py:TEST_FIRST2',
-        'downward_suites.py:suite_test_first2',
-        'TEST_FIRST2',
-        'suite_test_first2',
-        ])
+def suite_ipc11():
+    return ["ipc11-barman",
+            "ipc11-elevators",
+            "ipc11-floortile",
+            "ipc11-nomystery",
+            "ipc11-openstacks",
+            "ipc11-parcprinter",
+            "ipc11-parking",
+            "ipc11-pegsol",
+            "ipc11-scanalyzer",
+            "ipc11-sokoban",
+            "ipc11-tidybot",
+            "ipc11-transport",
+            "ipc11-visitall",
+            "ipc11-woodworking",
+            ]
