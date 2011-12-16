@@ -25,7 +25,7 @@ if platform.node() == 'habakuk':
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
     REPORTS = '/home/downward/jendrik/reports'
     REPO = '/home/downward/jendrik/fastr'
-    SUITE = 'gripper:prob01.pddl'
+    SUITE = 'IPC11'
     ENV = GkiGridEnvironment()
     PORTFOLIOS = '/home/downward/jendrik/fastr/new-scripts/portfolios'
 else:
