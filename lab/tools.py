@@ -207,15 +207,15 @@ def get_command_output(cmd, **kwargs):
 
 
 class Properties(dict):
-    def __init__(self, filename=None, **kwargs):
+    def __init__(self, filename=None):
         self.filename = filename
         self.load(filename)
-        dict.__init__(self, **kwargs)
+        dict.__init__(self)
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
             return
-        with open(self.filename) as f:
+        with open(filename) as f:
             self.update(json.load(f))
 
     def write(self):
