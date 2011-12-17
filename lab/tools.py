@@ -38,7 +38,6 @@ def setup_logging(level):
 
     # Handler which writes LOG_LEVEL messages or higher to stdout
     console = logging.StreamHandler(sys.stdout)
-    #console.setLevel(level)
     # set a format which is simpler for console use
     format='%(asctime)-s %(levelname)-8s %(message)s'
     formatter = logging.Formatter(format)
@@ -134,38 +133,12 @@ def natural_sort(alist):
     return sorted(alist, key=extract_numbers)
 
 
-def listdir(path):
-    return [filename for filename in os.listdir(path)
-            if filename != '.svn']
-
-
 def find_file(basenames, dir='.'):
     for basename in basenames:
         path = os.path.join(dir, basename)
         if os.path.exists(path):
             return path
     raise IOError('none found in %r: %r' % (dir, basenames))
-
-
-def convert_to_correct_type(val):
-    """
-    Safely evaluate an expression node or a string containing a Python
-    expression.
-    The string or node provided may only consist of the following Python
-    literal structures: strings, numbers, tuples, lists, dicts, booleans
-    and None.
-
-    Unused for now.
-    """
-    import ast
-    try:
-        out_val = ast.literal_eval(str(val))
-        logging.debug('Converted value %s to %s' % (repr(val), repr(out_val)))
-        return out_val
-    except (ValueError, SyntaxError):
-        pass
-    #logging.debug('Could not convert value %s' % repr(val))
-    return val
 
 
 def import_python_file(filename):
