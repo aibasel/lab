@@ -30,32 +30,6 @@ class PlanningReport(Report):
     def __init__(self, *args, **kwargs):
         Report.__init__(self, *args, **kwargs)
 
-        self.problems = []
-        self.configs = []
-
-        def filter_by_problem(run):
-            """
-            If suite is set, only process problems from the suite,
-            otherwise process all problems
-            """
-            return any(prob.domain == run['domain'] and
-                       prob.problem == run['problem'] for prob in self.problems)
-
-        def filter_by_config(run):
-            """
-            If configs is set, only process those configs, otherwise process
-            all configs
-            """
-            return any(config == run['config'] for config in self.configs)
-
-        filter_funcs = []
-        if self.configs:
-            filter_funcs.append(filter_by_config)
-        if self.problems:
-            filter_funcs.append(filter_by_problem)
-        if filter_funcs:
-            self.data.filter(*filter_funcs)
-
     def get_markup(self):
         # list of (attribute, table) pairs
         tables = []

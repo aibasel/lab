@@ -23,9 +23,6 @@ class Checkout(object):
             checkout_dir = os.path.join(REV_CACHE_DIR, checkout_dir)
         self.checkout_dir = os.path.abspath(checkout_dir)
 
-    def __lt__(self, other):
-        return self.name < other.name
-
     def __eq__(self, other):
         return self.name == other.name
 

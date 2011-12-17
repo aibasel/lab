@@ -42,15 +42,6 @@ def gm(values):
     return round(tools.prod([val ** exp for val in values]), 4)
 
 
-class ReportArgParser(tools.ArgParser):
-    def __init__(self, *args, **kwargs):
-        tools.ArgParser.__init__(self, *args, add_help=True, **kwargs)
-
-        self.add_argument('--open', default=False, action='store_true',
-                    dest='open_report',
-                    help='')
-
-
 class Report(object):
     """
     Base class for all reports
@@ -384,8 +375,3 @@ class Table(collections.defaultdict):
             text += self.get_row_markup(name, summary_row)
         text += ' '.join(self.info)
         return text
-
-
-if __name__ == "__main__":
-    report = Report()
-    report.write()
