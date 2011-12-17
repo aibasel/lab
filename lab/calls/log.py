@@ -9,12 +9,12 @@ def print_(stream, text):
     stream.write('%s\n' % text)
     stream.flush()
 
-def add_property(name, value):
+def set_property(name, value):
     properties = Properties(filename='properties')
     properties[name] = value
     properties.write()
 
 def save_returncode(command_name, value):
-    add_property('%s_returncode' % command_name.lower(), str(value))
+    set_property('%s_returncode' % command_name.lower(), str(value))
     error = 0 if value == 0 else 1
-    add_property('%s_error' % command_name.lower(), error)
+    set_property('%s_error' % command_name.lower(), error)

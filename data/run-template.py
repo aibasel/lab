@@ -12,9 +12,12 @@ sys.path.insert(0, lab_dir)
 
 from calls.call import Call
 from calls.log import print_, redirects, save_returncode, driver_log, driver_err
+from calls.log import set_property
 
 sys.stdout = driver_log
 sys.stderr = driver_err
+
+set_property('queue', os.environ.get('QUEUE'))
 
 
 """VARIABLES"""
