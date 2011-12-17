@@ -11,7 +11,7 @@ import tools
 class Fetcher(object):
     def fetch_dir(self, run_dir, eval_dir, copy_all=False):
         prop_file = os.path.join(run_dir, 'properties')
-        props = tools.Properties(prop_file)
+        props = tools.Properties(filename=prop_file)
         id = props.get('id')
         # Abort if an id cannot be read.
         if not id:
@@ -33,7 +33,7 @@ class Fetcher(object):
 
         write_combined_props: Write the combined properties file.
         """
-        exp_props = tools.Properties(os.path.join(exp_dir, 'properties'))
+        exp_props = tools.Properties(filename=os.path.join(exp_dir, 'properties'))
         total_dirs = exp_props.get('runs')
 
         assert not exp_dir.endswith('/')
@@ -42,7 +42,7 @@ class Fetcher(object):
 
         if write_combined_props:
             combined_props_filename = os.path.join(eval_dir, 'properties')
-            combined_props = tools.Properties(combined_props_filename)
+            combined_props = tools.Properties(filename=combined_props_filename)
 
         # Get all run_dirs
         run_dirs = sorted(glob(os.path.join(exp_dir, 'runs-*-*', '*')))
@@ -52,7 +52,7 @@ class Fetcher(object):
 
             if write_combined_props:
                 props['id-string'] = id_string
-                combined_props[id_string] = props.dict()
+                combined_props[id_string] = props
 
         tools.makedirs(eval_dir)
         if write_combined_props:

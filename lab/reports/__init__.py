@@ -222,7 +222,7 @@ class Report(object):
             logging.info('Reloading: %s' % reload)
         if reload:
             logging.info('Reading properties file')
-            combined_props = tools.Properties(combined_props_file)
+            combined_props = tools.Properties(filename=combined_props_file)
             logging.info('Reading properties file finished')
             data = combined_props.get_dataset()
             logging.info('Finished turning properties into dataset')

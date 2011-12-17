@@ -8,16 +8,10 @@ import logging
 import contextlib
 import time
 import math
+import json
 
 from external import argparse
-from external.configobj import ConfigObj
 from external.datasets import DataSet
-
-# Patch configobj's unrepr method. Our version is much faster, but depends on
-# Python 2.6.
-import external.configobj
-from ast import literal_eval as unrepr
-external.configobj.unrepr = unrepr
 
 
 LOG_LEVEL = None
@@ -212,10 +206,22 @@ def get_command_output(cmd, **kwargs):
     return stdout.strip()
 
 
-class Properties(ConfigObj):
-    def __init__(self, *args, **kwargs):
-        kwargs['unrepr'] = True
-        ConfigObj.__init__(self, *args, interpolation=False, **kwargs)
+class Properties(dict):
+    def __init__(self, filename=None, **kwargs):
+        self.filename = filename
+        self.load(filename)
+        dict.__init__(self, **kwargs)
+
+    def load(self, filename):
+        if not filename or not os.path.exists(filename):
+            return
+        with open(self.filename) as f:
+            self.update(json.load(f))
+
+    def write(self):
+        assert self.filename
+        with open(self.filename, 'w') as f:
+            json.dump(self, f, indent=4)
 
     def get_dataset(self):
         data = DataSet()
