@@ -93,22 +93,20 @@ class Experiment(object):
         return run
 
     def __call__(self):
-        argparser = tools.ArgParser()
+        argparser = tools.ArgParser(epilog=self.get_steps_text())
         argparser.add_argument('steps', nargs='*')
         args = argparser.parse_args()
         if not args.steps:
-            self.print_steps()
+            argparser.print_help()
             sys.exit()
         for step_name in args.steps:
             self.process_step_name(step_name)
 
-    def print_steps(self):
-        # TODO: incorporate this into argparse help
-        print
-        print 'Available steps:'
-        print '================'
+    def get_steps_text(self):
+        lines = ['Available steps:', '================']
         for number, step in enumerate(self.steps, start=1):
-            print str(number).rjust(2), step.name.ljust(30), step
+            lines.append(' '.join([str(number).rjust(2), step.name.ljust(30), str(step)]))
+        return '\n'.join(lines)
 
     def process_step_name(self, step_name):
         if step_name.isdigit():
@@ -509,9 +507,3 @@ class Step(object):
                                ', '.join([repr(arg) for arg in self.args]),
                                ', ' if self.args and self.kwargs else '',
                                ', '.join(['%s=%s' % item for item in self.kwargs.items()]))
-
-
-
-if __name__ == '__main__':
-    exp = Experiment()
-    exp.build()
