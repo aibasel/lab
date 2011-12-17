@@ -199,7 +199,9 @@ class Properties(dict):
     def get_dataset(self):
         data = DataSet()
         for run_id, run in sorted(self.items()):
-            data.append(**run)
+            # HACK: Python < 2.6.5 doesn't allow unicode keyword args.
+            no_unicode = dict((k.encode('ascii'), v) for (k, v) in run.items())
+            data.append(**no_unicode)
         return data
 
 
