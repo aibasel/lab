@@ -27,6 +27,7 @@ class Experiment(object):
         self.environment.exp = self
         self.fetcher = Fetcher()
         self.shard_size = SHARD_SIZE
+        self.argparser = tools.ArgParser()
 
         self.runs = []
         self.resources = []
@@ -42,7 +43,7 @@ class Experiment(object):
         self.reports = []
 
         self.steps = []
-        self.add_step(Step('build', self.build, overwrite=True)) # TODO: remove overwrite
+        self.add_step(Step('build', self.build))
         self.add_step(self.environment.get_start_exp_step())
         self.add_step(Step('fetch', self.fetcher, self.path))
         #self.add_step(Step('report', self.report, self.eval_dir)) # TODO: add default report? Add self.reports_dir?
@@ -93,13 +94,13 @@ class Experiment(object):
         return run
 
     def __call__(self):
-        argparser = tools.ArgParser(epilog=self.get_steps_text())
-        argparser.add_argument('steps', nargs='*')
-        args = argparser.parse_args()
-        if not args.steps:
-            argparser.print_help()
+        self.argparser.epilog = self.get_steps_text()
+        self.argparser.add_argument('steps', nargs='*')
+        self.args = self.argparser.parse_args()
+        if not self.args.steps:
+            self.argparser.print_help()
             sys.exit()
-        for step_name in args.steps:
+        for step_name in self.args.steps:
             self.process_step_name(step_name)
 
     def get_steps_text(self):
@@ -294,6 +295,10 @@ class Run(object):
         self.resources.append((source, dest, required, symlink))
         self.env_vars[resource_name] = dest
 
+    def add_new_file(self, resource_name, dest, content):
+        self.new_files.append((dest, content))
+        self.env_vars[resource_name] = dest
+
     def add_command(self, name, command, **kwargs):
         """Adds a command to the run.
 
@@ -416,7 +421,7 @@ class Run(object):
         for old, new in [('VARIABLES', env_vars_text), ('CALLS', calls_text)]:
             run_script = run_script.replace('"""%s"""' % old, new)
 
-        self.new_files.append(('run', run_script))
+        self.add_new_file('RUN_SCRIPT', 'run', run_script)
         return
 
     def _build_linked_resources(self):
@@ -427,12 +432,12 @@ class Run(object):
         self.experiment.environment.build_linked_resources(self)
 
     def _build_resources(self):
-        for name, content in self.new_files:
-            filename = self._get_abs_path(name)
+        for dest, content in self.new_files:
+            filename = self._get_abs_path(dest)
             with open(filename, 'w') as file:
                 logging.debug('Writing file "%s"' % filename)
                 file.write(content)
-                if name == 'run':
+                if dest == 'run':
                     # Make run script executable
                     os.chmod(filename, 0755)
 
@@ -506,4 +511,4 @@ class Step(object):
         return '%s(%s%s%s)' % (funcname,
                                ', '.join([repr(arg) for arg in self.args]),
                                ', ' if self.args and self.kwargs else '',
-                               ', '.join(['%s=%s' % item for item in self.kwargs.items()]))
+                               ', '.join(['%s=%s' % (k, repr(v)) for (k, v) in self.kwargs.items()]))
