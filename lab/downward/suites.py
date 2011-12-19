@@ -222,6 +222,45 @@ def suite_ipc08_all_strips():
             suite_ipc08_opt_only_strips() +
             suite_ipc08_sat_only_strips())
 
+def suite_ipc11_opt():
+    return [
+        "barman-opt11-strips",
+        "elevators-opt11-strips",
+        "floortile-opt11-strips",
+        "nomystery-opt11-strips",
+        "openstacks-opt11-strips",
+        "parcprinter-opt11-strips",
+        "parking-opt11-strips",
+        "pegsol-opt11-strips",
+        "scanalyzer-opt11-strips",
+        "sokoban-opt11-strips",
+        "tidybot-opt11-strips",
+        "transport-opt11-strips",
+        "visitall-opt11-strips",
+        "woodworking-opt11-strips",
+        ]
+
+def suite_ipc11_sat():
+    return [
+        "barman-sat11-strips",
+        "elevators-sat11-strips",
+        "floortile-sat11-strips",
+        "nomystery-sat11-strips",
+        "openstacks-sat11-strips",
+        "parcprinter-sat11-strips",
+        "parking-sat11-strips",
+        "pegsol-sat11-strips",
+        "scanalyzer-sat11-strips",
+        "sokoban-sat11-strips",
+        "tidybot-sat11-strips",
+        "transport-sat11-strips",
+        "visitall-sat11-strips",
+        "woodworking-sat11-strips",
+        ]
+
+def suite_ipc11_all():
+    return suite_ipc11_opt() + suite_ipc11_sat()
+
 def suite_pdb_tests():
     return [
         "logistics00",
@@ -312,7 +351,7 @@ def suite_optimal():
 
 def suite_all():
     domains = suite_ipc_one_to_five() + suite_lmcut_domains()
-    domains += suite_ipc08_all()
+    domains += suite_ipc08_all() + suite_ipc11_all()
     return list(sorted(set(domains)))
 
 
