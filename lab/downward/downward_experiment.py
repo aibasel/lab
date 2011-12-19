@@ -9,8 +9,9 @@ import logging
 import itertools
 
 from lab.experiment import Run, Experiment
-import checkouts
-import suites
+from lab.downward import checkouts
+from lab.downward.checkouts import Translator, Preprocessor, Planner
+from lab.downward import suites
 from lab import tools
 from lab.experiment import Step
 
@@ -149,7 +150,7 @@ def _prepare_search_run(exp, run, config_nick, config):
 
 
 class DownwardExperiment(Experiment):
-    def __init__(self, path, env, repo, combinations, compact=True, limits=None):
+    def __init__(self, path, env, repo, combinations=None, compact=True, limits=None):
         """
         The preprocess fetcher creates the following directory structure:
 
@@ -171,7 +172,8 @@ class DownwardExperiment(Experiment):
         self.search_exp_path = self.path
         self.preprocess_exp_path = self.path + '-p'
 
-        self.combinations = combinations
+        self.combinations = (combinations or
+                    [(Translator(repo), Preprocessor(repo), Planner(repo))])
         self.compact = compact
         self.suites = []
         self.configs = []
@@ -187,7 +189,7 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
 
-        require_src_dirs(self, combinations)
+        require_src_dirs(self, self.combinations)
         self.add_resource('PREPROCESS_PARSER',
                           os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
                           'preprocess_parser.py')
@@ -200,7 +202,7 @@ class DownwardExperiment(Experiment):
 
         # Set experiment path temporarily to the preprocess experiment path
         self.path = self.preprocess_exp_path
-        self.add_step(Step('build-preprocess-exp', self.build, stage='preprocess', overwrite=True))
+        self.add_step(Step('build-preprocess-exp', self.build, stage='preprocess'))
         self.add_step(self.environment.get_start_exp_step())
         self.add_step(Step('fetch-preprocess-results', self.fetcher,
                            self.preprocess_exp_path, eval_dir=PREPROCESSED_TASKS_DIR,
