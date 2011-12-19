@@ -10,6 +10,7 @@ import re
 import os
 import sys
 
+# The lab directory is added automatically in the Experiment constructor
 sys.path.insert(0, '../../lab')
 from parser import Parser
 
