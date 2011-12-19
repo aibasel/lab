@@ -11,6 +11,7 @@ SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 class Environment(object):
     def __init__(self):
         self.exp = None
+        self.main_script_file = None
 
     def write_main_script(self):
         raise NotImplementedError
@@ -22,10 +23,6 @@ class Environment(object):
         """
         pass
 
-    @property
-    def main_script_file(self):
-        raise NotImplementedError
-
 
 class LocalEnvironment(Environment):
     def __init__(self, processes=1):
@@ -35,9 +32,7 @@ class LocalEnvironment(Environment):
         assert processes <= cores, cores
         self.processes = processes
 
-    @property
-    def main_script_file(self):
-        return self.exp._get_abs_path('run')
+        self.main_script_file = 'run'
 
     def write_main_script(self):
         dirs = [repr(os.path.relpath(run.path, self.exp.path)) for run in self.exp.runs]
@@ -48,13 +43,10 @@ class LocalEnvironment(Environment):
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
-        with open(self.main_script_file, 'w') as file:
-            file.write(script)
-            # Make run script executable
-            os.chmod(file.name, 0755)
+        self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
     def get_start_exp_step(self):
-        return Step('run-exp', call, [self.main_script_file], cwd=self.exp.path)
+        return Step('run-exp', call, ['./' + self.main_script_file], cwd=self.exp.path)
 
 
 class GkiGridEnvironment(Environment):
@@ -65,9 +57,7 @@ class GkiGridEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
 
-    @property
-    def main_script_file(self):
-        return self.exp._get_abs_path(self.exp.name + '.q')
+        self.main_script_file = self.exp.name + '.q'
 
     def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
@@ -77,12 +67,10 @@ class GkiGridEnvironment(Environment):
             'num_tasks': num_tasks,
             'queue': self.queue,
             'priority': self.priority,
-        }
+            }
         template_file = os.path.join(tools.DATA_DIR, 'gkigrid-job-header-template')
         script_template = open(template_file).read()
-        script = script_template % job_params
-
-        script += '\n'
+        script = script_template % job_params + '\n'
 
         run_groups = tools.divide_list(self.exp.runs, self.runs_per_task)
 
@@ -94,8 +82,7 @@ class GkiGridEnvironment(Environment):
                 script += '  ./run\n'
             script += 'fi\n'
 
-        with open(self.main_script_file, 'w') as file:
-            file.write(script)
+        self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
     def get_start_exp_step(self):
         return Step('start', call, ['qsub', self.main_script_file], cwd=self.exp.path)
