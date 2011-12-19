@@ -40,7 +40,7 @@ class LocalEnvironment(Environment):
         return self.exp._get_abs_path('run')
 
     def write_main_script(self):
-        dirs = [repr(os.path.relpath(run.dir, self.exp.path)) for run in self.exp.runs]
+        dirs = [repr(os.path.relpath(run.path, self.exp.path)) for run in self.exp.runs]
         replacements = {'DIRS': ',\n'.join(dirs),
                         'PROCESSES': str(self.processes)}
 
@@ -90,7 +90,7 @@ class GkiGridEnvironment(Environment):
             script += 'if [[ $SGE_TASK_ID == %s ]]; then\n' % task_id
             for run in run_group:
                 # Change into the run dir
-                script += '  cd %s\n' % os.path.relpath(run.dir, self.exp.path)
+                script += '  cd %s\n' % os.path.relpath(run.path, self.exp.path)
                 script += '  ./run\n'
             script += 'fi\n'
 

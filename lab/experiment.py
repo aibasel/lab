@@ -20,8 +20,96 @@ DEFAULT_ABORT_ON_FAILURE = True
 SHARD_SIZE = 100
 
 
-class Experiment(object):
+class _Buildable(object):
+    def __init__(self):
+        self.resources = []
+        self.new_files = []
+        self.env_vars = {}
+        self.ignores = []
+
+        self.properties = tools.Properties()
+
+    def set_property(self, name, value):
+        """
+        Add a key-value property. These can be used later for evaluation.
+
+        Example:
+        >>> exp.set_property('translator', '4321')
+        """
+        self.properties[name] = value
+
+    def add_resource(self, resource_name, source, dest, required=True, symlink=False):
+        """
+        Example:
+        >>> experiment.add_resource('PLANNER', 'path/to/planner', 'dest-name')
+
+        Includes a "global" file, i.e., one needed for all runs, into the
+        experiment archive. In case of GkiGridExperiment, copies it to the
+        main directory of the experiment. The name "PLANNER" is an ID for
+        this resource that can also be used to refer to it in shell scripts.
+
+        Example:
+        >>> run.add_resource('DOMAIN', '../benchmarks/gripper/domain.pddl',
+                             'domain.pddl')
+
+        Copy "../benchmarks/gripper/domain.pddl" into the run
+        directory under name "domain.pddl" and make it available as
+        resource "DOMAIN" (usable as environment variable $DOMAIN).
+        """
+        if not (source, dest) in self.resources:
+            self.resources.append((source, dest, required, symlink))
+        self.env_vars[resource_name] = dest
+
+    def _get_abs_path(self, rel_path):
+        """
+        Return absolute path by applying rel_path to the base dir
+
+        Example:
+        >>> _get_abs_path('mytest.q')
+        /home/user/mytestjob/mytest.q
+        """
+        return os.path.join(self.path, rel_path)
+
+    def _get_rel_path(self, abs_path):
+        return os.path.relpath(abs_path, start=self.path)
+
+    def _build_properties_file(self):
+        self.properties.filename = self._get_abs_path('properties')
+        self.properties.write()
+
+    def _build_resources(self):
+        for dest, content in self.new_files:
+            filename = self._get_abs_path(dest)
+            with open(filename, 'w') as file:
+                logging.debug('Writing file "%s"' % filename)
+                file.write(content)
+                if dest == 'run':
+                    # Make run script executable
+                    os.chmod(filename, 0755)
+
+        for source, dest, required, symlink in self.resources:
+            if required and not os.path.exists(source):
+                logging.error('The required resource can not be found: %s' %
+                              source)
+                sys.exit(1)
+            dest = self._get_abs_path(dest)
+            if symlink:
+                source = self._get_rel_path(source)
+                os.symlink(source, dest)
+                logging.debug('Linking from %s to %s' % (source, dest))
+                continue
+
+            logging.debug('Copying %s to %s' % (source, dest))
+            tools.copy(source, dest, required, self.ignores)
+
+    def add_new_file(self, resource_name, dest, content):
+        self.new_files.append((dest, content))
+        self.env_vars[resource_name] = dest
+
+
+class Experiment(_Buildable):
     def __init__(self, path, env):
+        _Buildable.__init__(self)
         self.path = os.path.abspath(path)
         self.environment = env
         self.environment.exp = self
@@ -30,17 +118,11 @@ class Experiment(object):
         self.argparser = tools.ArgParser()
 
         self.runs = []
-        self.resources = []
-        self.env_vars = {}
-        self.ignores = []
 
-        self.properties = tools.Properties()
         self.set_property('experiment_file', os.path.basename(sys.argv[0]))
 
         # Include the experiment code
         self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
-
-        self.reports = []
 
         self.steps = []
         self.add_step(Step('build', self.build))
@@ -59,30 +141,6 @@ class Experiment(object):
 
     def add_step(self, step):
         self.steps.append(step)
-
-    def set_property(self, name, value):
-        """
-        Add a key-value property to the experiment. These can be used later for
-        evaluation
-
-        Example:
-        >>> exp.set_property('translator', '4321')
-        """
-        self.properties[name] = value
-
-    def add_resource(self, resource_name, source, dest, required=True):
-        """
-        Example:
-        >>> experiment.add_resource('PLANNER', 'path/to/planner', 'dest-name')
-
-        Includes a "global" file, i.e., one needed for all runs, into the
-        experiment archive. In case of GkiGridExperiment, copies it to the
-        main directory of the experiment. The name "PLANNER" is an ID for
-        this resource that can also be used to refer to it in shell scripts.
-        """
-        if not (source, dest) in self.resources:
-            self.resources.append((source, dest, required))
-        self.env_vars[resource_name] = dest
 
     def add_run(self, run=None):
         """
@@ -166,16 +224,6 @@ class Experiment(object):
         self._build_runs()
         self._build_properties_file()
 
-    def _get_abs_path(self, rel_path):
-        """
-        Return absolute path by applying rel_path to the experiment's base dir
-
-        Example:
-        >>> _get_abs_path('mytest.q')
-        /home/user/mytestjob/mytest.q
-        """
-        return os.path.join(self.path, rel_path)
-
     def _set_run_dirs(self):
         """
         Sets the relative run directories as instance variables for all runs
@@ -196,24 +244,14 @@ class Experiment(object):
                 current_run += 1
                 rel_dir = os.path.join(get_shard_dir(shard_number),
                                        run_number(current_run))
-                run.dir = self._get_abs_path(rel_dir)
-                run.set_property('run_dir', os.path.relpath(run.dir, self.path))
+                run.path = self._get_abs_path(rel_dir)
+                run.set_property('run_dir', os.path.relpath(run.path, self.path))
 
     def _build_main_script(self):
         """
         Generates the main script
         """
         self.environment.write_main_script()
-
-    def _build_resources(self):
-        for source, dest, required in self.resources:
-            dest = self._get_abs_path(dest)
-            logging.debug('Copying %s to %s' % (source, dest))
-            try:
-                tools.copy(source, dest, required, self.ignores)
-            except IOError, err:
-                msg = 'Error: The file "%s" could not be copied to "%s": %s'
-                raise SystemExit(msg % (source, dest, err))
 
     def _build_runs(self):
         """
@@ -227,41 +265,21 @@ class Experiment(object):
             if index % 100 == 0:
                 logging.info('Built run %6d/%d' % (index, num_runs))
 
-    def _build_properties_file(self):
-        self.properties.filename = self._get_abs_path('properties')
-        self.properties.write()
 
-
-class Run(object):
+class Run(_Buildable):
     """
     A Task can consist of one or multiple Runs
     """
     def __init__(self, experiment):
+        _Buildable.__init__(self)
         self.experiment = experiment
 
-        self.dir = ''
-
-        self.resources = []
+        self.path = ''
         self.linked_resources = []
-        self.env_vars = {}
-        self.new_files = []
-
         self.commands = OrderedDict()
 
         self.optional_output = []
         self.required_output = []
-
-        self.properties = tools.Properties()
-
-    def set_property(self, name, value):
-        """
-        Add a key-value property to a run. These can be used later for
-        evaluation.
-
-        Example:
-        >>> run.set_property('domain', 'gripper')
-        """
-        self.properties[name] = value
 
     def require_resource(self, resource_name):
         """
@@ -280,24 +298,6 @@ class Run(object):
         need to set up the PLANNER environment variable.
         """
         self.linked_resources.append(resource_name)
-
-    def add_resource(self, resource_name, source, dest, required=True,
-                     symlink=False):
-        """
-        Example:
-        >>> run.add_resource('DOMAIN', '../benchmarks/gripper/domain.pddl',
-                             'domain.pddl')
-
-        Copy "../benchmarks/gripper/domain.pddl" into the run
-        directory under name "domain.pddl" and make it available as
-        resource "DOMAIN" (usable as environment variable $DOMAIN).
-        """
-        self.resources.append((source, dest, required, symlink))
-        self.env_vars[resource_name] = dest
-
-    def add_new_file(self, resource_name, dest, content):
-        self.new_files.append((dest, content))
-        self.env_vars[resource_name] = dest
 
     def add_command(self, name, command, **kwargs):
         """Adds a command to the run.
@@ -354,9 +354,9 @@ class Run(object):
         After having made all the necessary adjustments with the methods above,
         this method can be used to write everything to the disk.
         """
-        assert self.dir
+        assert self.path
 
-        tools.overwrite_dir(self.dir)
+        tools.overwrite_dir(self.path)
         # We need to build the linked resources before the run script.
         # Only this way we have all resources in self.resources
         # (linked ones too)
@@ -431,31 +431,6 @@ class Run(object):
         """
         self.experiment.environment.build_linked_resources(self)
 
-    def _build_resources(self):
-        for dest, content in self.new_files:
-            filename = self._get_abs_path(dest)
-            with open(filename, 'w') as file:
-                logging.debug('Writing file "%s"' % filename)
-                file.write(content)
-                if dest == 'run':
-                    # Make run script executable
-                    os.chmod(filename, 0755)
-
-        for source, dest, required, symlink in self.resources:
-            if required and not os.path.exists(source):
-                logging.error('The required resource can not be found: %s' %
-                              source)
-                sys.exit(1)
-            dest = self._get_abs_path(dest)
-            if symlink:
-                source = self._get_rel_path(source)
-                os.symlink(source, dest)
-                logging.debug('Linking from %s to %s' % (source, dest))
-                continue
-
-            logging.debug('Copying %s to %s' % (source, dest))
-            tools.copy(source, dest, required)
-
     def _build_properties_file(self):
         # Check correctness of id property
         run_id = self.properties.get('id')
@@ -466,20 +441,7 @@ class Run(object):
             logging.error('id must be a list, but %s is not' % run_id)
             sys.exit(1)
         self.properties['id'] = [str(item) for item in run_id]
-
-        self.properties.filename = self._get_abs_path('properties')
-        self.properties.write()
-
-    def _get_abs_path(self, rel_path):
-        """
-        Example:
-        >>> _get_abs_path('run')
-        /home/user/mytestjob/runs-00001-00100/run
-        """
-        return os.path.join(self.dir, rel_path)
-
-    def _get_rel_path(self, abs_path):
-        return os.path.relpath(abs_path, start=self.dir)
+        _Buildable._build_properties_file(self)
 
 
 class Step(object):
