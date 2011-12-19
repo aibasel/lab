@@ -54,7 +54,7 @@ class LocalEnvironment(Environment):
             os.chmod(file.name, 0755)
 
     def get_start_exp_step(self):
-        return Step('run-exp', call, [self.main_script_file])
+        return Step('run-exp', call, [self.main_script_file], cwd=self.exp.path)
 
 
 class GkiGridEnvironment(Environment):
