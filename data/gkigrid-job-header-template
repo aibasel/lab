@@ -1,4 +1,6 @@
 #! /bin/bash
+### Set name.
+#$ -N %(name)s
 ### Set shell.
 #$ -S /bin/bash
 ### Don't send emails.

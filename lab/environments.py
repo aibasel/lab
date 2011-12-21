@@ -11,7 +11,7 @@ SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 class Environment(object):
     def __init__(self):
         self.exp = None
-        self.main_script_file = None
+        self.main_script_file = 'run'
 
     def write_main_script(self):
         raise NotImplementedError
@@ -31,8 +31,6 @@ class LocalEnvironment(Environment):
         cores = multiprocessing.cpu_count()
         assert processes <= cores, cores
         self.processes = processes
-
-        self.main_script_file = 'run'
 
     def write_main_script(self):
         dirs = [repr(os.path.relpath(run.path, self.exp.path)) for run in self.exp.runs]
@@ -57,14 +55,10 @@ class GkiGridEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
 
-
-    @property
-    def main_script_file(self):
-        return self.exp.name + '.q'
-
     def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
         job_params = {
+            'name': self.exp.name,
             'logfile': self.exp.name + '.log',
             'errfile': self.exp.name + '.err',
             'num_tasks': num_tasks,
