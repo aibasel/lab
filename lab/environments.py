@@ -57,7 +57,10 @@ class GkiGridEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
 
-        self.main_script_file = self.exp.name + '.q'
+
+    @property
+    def main_script_file(self):
+        return self.exp.name + '.q'
 
     def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
