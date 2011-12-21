@@ -13,7 +13,8 @@ def process_dir(dir):
     try:
         number = dir.split('/')[-1]
         print 'Starting run %s/%s' % (number, str(len(dirs)).zfill(5))
-        run = subprocess.call(['./run'], cwd=dir, stdout=sys.stdout, stderr=sys.stderr)
+        run = subprocess.Popen(['./run'], cwd=dir, stdout=sys.stdout, stderr=sys.stderr)
+        run.wait()
     except KeyboardInterrupt:
         print 'Call to run interrupted'
         run.terminate()
