@@ -462,11 +462,12 @@ class Step(object):
 
     def __call__(self):
         try:
-            self.func(*self.args, **self.kwargs)
+            return self.func(*self.args, **self.kwargs)
         except (ValueError, TypeError):
             logging.error('Could not run step: %s' % self)
             import traceback
             traceback.print_exc()
+            return 1
 
     def __str__(self):
         funcname = getattr(self.func, '__name__', None) or self.func.__class__.__name__
