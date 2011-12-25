@@ -198,29 +198,12 @@ class Report(object):
             msg = 'Properties file not found at %s'
             logging.error(msg % combined_props_file)
             sys.exit(1)
-        dump_path = os.path.join(self.eval_dir, 'data_dump')
-        logging.info('Reading properties file without parsing')
-        properties_contents = open(combined_props_file).read()
-        logging.info('Calculating properties hash')
-        new_checksum = hashlib.md5(properties_contents).digest()
-        # Reload when the properties file changed or when no dump exists
-        reload = True
-        if os.path.exists(dump_path):
-            logging.info('Reading data dump')
-            old_checksum, data = cPickle.load(open(dump_path, 'rb'))
-            logging.info('Reading data dump finished')
-            reload = (not old_checksum == new_checksum)
-            logging.info('Reloading: %s' % reload)
-        if reload:
-            logging.info('Reading properties file')
-            combined_props = tools.Properties(filename=combined_props_file)
-            logging.info('Reading properties file finished')
-            data = combined_props.get_dataset()
-            logging.info('Finished turning properties into dataset')
-            # Pickle data for faster future use
-            cPickle.dump((new_checksum, data), open(dump_path, 'wb'),
-                         cPickle.HIGHEST_PROTOCOL)
-            logging.info('Wrote data dump')
+
+        logging.info('Reading properties file')
+        combined_props = tools.Properties(filename=combined_props_file)
+        logging.info('Reading properties file finished')
+        data = combined_props.get_dataset()
+        logging.info('Finished turning properties into dataset')
         return data
 
     def _apply_filters(self):

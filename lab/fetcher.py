@@ -57,18 +57,3 @@ class Fetcher(object):
         tools.makedirs(eval_dir)
         if write_combined_props:
             combined_props.write()
-            self.write_data_dump(combined_props)
-
-    def write_data_dump(self, combined_props):
-        combined_props_file = combined_props.filename
-        dump_path = combined_props_file.replace('properties', 'data_dump')
-        logging.info('Reading properties file without parsing')
-        properties_contents = open(combined_props_file).read()
-        logging.info('Calculating properties hash')
-        new_checksum = hashlib.md5(properties_contents).digest()
-        data = combined_props.get_dataset()
-        logging.info('Finished turning properties into dataset')
-        # Pickle data for faster future use
-        cPickle.dump((new_checksum, data), open(dump_path, 'wb'),
-                     cPickle.HIGHEST_PROTOCOL)
-        logging.info('Wrote data dump')
