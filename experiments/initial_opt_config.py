@@ -1,15 +1,15 @@
 #! /usr/bin/env python
-
 """
-Questions:
-
-How do we add values like "quality"?
+This experiment runs the "initial" optimal tuning configuration on some STRIPS
+domains.
 """
 
+import getpass
 import os
 import platform
 import shutil
 import sys
+from subprocess import call
 
 from lab.downward.downward_experiment import DownwardExperiment
 from lab.downward.checkouts import Translator, Preprocessor, Planner
@@ -20,6 +20,7 @@ from lab.experiment import Step
 from lab import tools
 
 
+USER = getpass.getuser()
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
 if platform.node() == 'habakuk':
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
@@ -50,39 +51,43 @@ exp = DownwardExperiment(path=EXPPATH, env=ENV, repo=REPO,
                          combinations=COMBINATIONS, limits=LIMITS)
 
 exp.add_suite(SUITE)
-
 exp.add_config('opt-initial', CONFIG)
 
-#exp.steps.insert(5, Step('clear-results', shutil.rmtree, exp.eval_dir))
-
+# Add report steps
 abs_domain_report_file = os.path.join(REPORTS, '%s-abs-d.html' % EXPNAME)
 abs_problem_report_file = os.path.join(REPORTS, '%s-abs-p.html' % EXPNAME)
-exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES), exp.eval_dir, abs_domain_report_file))
-exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES), exp.eval_dir, abs_problem_report_file))
+exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
+                                                 exp.eval_dir, abs_domain_report_file))
+exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
+                                                 exp.eval_dir, abs_problem_report_file))
 
-# exp.steps is a list that can be manipulated:
-# steps can be removed, appended, replaced and inserted
-#exp.steps.insert(6, Step('report-abs', AbsoluteReport('domain', attributes=['coverage']), exp.eval_dir, 'report-abs.html'))
-#del exp.steps[7]
-
-# Compress the experiment directory
-#exp.add_step(Step('zip-exp-dir', Call, ['tar', '-cvzf', exp.path + '.tar.gz', exp.path]))
-
-def copy_results():
-    dest = os.path.join(os.path.expanduser('~'), '.public_html/',
-                        os.path.basename(abs_domain_report_file))
-    shutil.copy2(abs_domain_report_file, dest)
+# Write suite with solved problems
+def solved(run):
+    return run['coverage'] == 1
+suite_file = os.path.join(REPORTS, '%s_solved_suite.py')
+exp.add_step(Step('report-suite', SuiteReport(filters=solved), exp.eval_dir, suite_file))
 
 # Copy the results
+def copy_results():
+    for path in [abs_domain_report_file, abs_problem_report_file]:
+        name = os.path.basename(path)
+        dest = os.path.join(os.path.expanduser('~'), '.public_html/', name)
+        shutil.copy2(path, dest)
+        print 'Copied report to file://%s' % dest
+        print 'http://www.informatik.uni-freiburg.de/~%s/%s' % (USER, name)
 exp.add_step(Step('copy-results', copy_results))
 
+# Compress the experiment directory
+exp.add_step(Step('zip-exp-dir', call,
+                  ['tar', '-czf', exp.name + '.tar.gz', exp.name],
+                  cwd=os.path.dirname(exp.path)))
+
 # Remove the experiment directory
-#exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
+exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
 
 # This method parses the commandline. We assume this file is called exp.py.
 # Supported styles:
 # ./exp.py 1
 # ./exp.py 4 5 6
-# ./exp.py next
-# ./exp.py rest      # runs all remaining steps
+# ./exp.py all
 exp()
