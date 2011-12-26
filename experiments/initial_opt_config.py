@@ -14,6 +14,7 @@ from subprocess import call
 from lab.downward.downward_experiment import DownwardExperiment
 from lab.downward.checkouts import Translator, Preprocessor, Planner
 from lab.downward.reports.absolute import AbsoluteReport
+from lab.downward.reports.suite import SuiteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.downward import configs
 from lab.experiment import Step
@@ -64,8 +65,8 @@ exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTE
 # Write suite with solved problems
 def solved(run):
     return run['coverage'] == 1
-suite_file = os.path.join(REPORTS, '%s_solved_suite.py')
-exp.add_step(Step('report-suite', SuiteReport(filters=solved), exp.eval_dir, suite_file))
+suite_file = os.path.join(REPORTS, '%s_solved_suite.py' % EXPNAME)
+exp.add_step(Step('report-suite', SuiteReport(filters=[solved]), exp.eval_dir, suite_file))
 
 # Copy the results
 def copy_results():
