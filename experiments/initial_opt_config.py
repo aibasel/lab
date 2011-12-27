@@ -4,7 +4,6 @@ This experiment runs the "initial" optimal tuning configuration on some STRIPS
 domains.
 """
 
-import getpass
 import os
 import platform
 import shutil
@@ -21,7 +20,6 @@ from lab.experiment import Step
 from lab import tools
 
 
-USER = getpass.getuser()
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
 if platform.node() == 'habakuk':
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
@@ -69,14 +67,7 @@ suite_file = os.path.join(REPORTS, '%s_solved_suite.py' % EXPNAME)
 exp.add_step(Step('report-suite', SuiteReport(filters=[solved]), exp.eval_dir, suite_file))
 
 # Copy the results
-def copy_results():
-    for path in [abs_domain_report_file, abs_problem_report_file]:
-        name = os.path.basename(path)
-        dest = os.path.join(os.path.expanduser('~'), '.public_html/', name)
-        shutil.copy2(path, dest)
-        print 'Copied report to file://%s' % dest
-        print 'http://www.informatik.uni-freiburg.de/~%s/%s' % (USER, name)
-exp.add_step(Step('copy-results', copy_results))
+exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
 
 # Compress the experiment directory
 exp.add_step(Step('zip-exp-dir', call,

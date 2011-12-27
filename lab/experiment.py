@@ -475,3 +475,19 @@ class Step(object):
                                ', '.join([repr(arg) for arg in self.args]),
                                ', ' if self.args and self.kwargs else '',
                                ', '.join(['%s=%s' % (k, repr(v)) for (k, v) in self.kwargs.items()]))
+
+    @classmethod
+    def publish_reports(cls, *report_files):
+        import getpass
+        import shutil
+        user = getpass.getuser()
+
+        def publish_reports():
+            for path in report_files:
+                name = os.path.basename(path)
+                dest = os.path.join(os.path.expanduser('~'), '.public_html/', name)
+                shutil.copy2(path, dest)
+                print 'Copied report to file://%s' % dest
+                print 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user, name)
+
+        return cls('publish_reports', publish_reports)
