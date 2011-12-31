@@ -206,7 +206,7 @@ class DownwardExperiment(Experiment):
                            self.preprocess_exp_path, eval_dir=PREPROCESSED_TASKS_DIR,
                            copy_all=True, write_combined_props=False))
         self.add_step(Step('build-search-exp', self.build, stage='search'))
-        #self.add_step(self.environment.get_start_exp_step())
+        self.add_step(Step('run-search-exp', self.run, stage='search'))
         self.add_step(Step('fetch-search-results', self.fetcher, self.search_exp_path))
 
     @property
