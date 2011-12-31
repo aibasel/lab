@@ -1,24 +1,17 @@
 #! /usr/bin/env python
-"""
-This experiment runs the "initial" optimal tuning configuration on some STRIPS
-domains.
-"""
 
 import os
 import platform
-import shutil
 import sys
-from subprocess import call
 
 from lab.downward.downward_experiment import DownwardExperiment
-from lab.downward.checkouts import Translator, Preprocessor, Planner
 from lab.downward.reports.absolute import AbsoluteReport
-from lab.downward.reports.suite import SuiteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
-from lab.downward import configs
 from lab.experiment import Step
 from lab import tools
 
+
+DIR = os.path.join(tools.BASE_DIR, 'examples', 'progress')
 
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
 if platform.node() == 'habakuk':
@@ -35,10 +28,8 @@ else:
     ENV = LocalEnvironment()
 
 ATTRIBUTES = None  # Include all attributes
-LIMITS = {'search_time': 1800}
-COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO))]
 
-CONFIG = ["--landmarks", "lmg=lm_rhw(only_causal_landmarks=false,"
+OPT1 =   ["--landmarks", "lmg=lm_rhw(only_causal_landmarks=false,"
                          "disjunctive_landmarks=true,"
                          "conjunctive_landmarks=true,no_orders=false)",
           "--heuristic", "hLMCut=lmcut()",
@@ -46,11 +37,22 @@ CONFIG = ["--landmarks", "lmg=lm_rhw(only_causal_landmarks=false,"
           "--heuristic", "hCombinedMax=max([hLM,hLMCut])",
           "--search", "astar(hCombinedMax,mpd=true,pathmax=false,cost_type=0)"]
 
-exp = DownwardExperiment(path=EXPPATH, env=ENV, repo=REPO,
-                         combinations=COMBINATIONS, limits=LIMITS)
+class ProgressExperiment(DownwardExperiment):
+    def __init__(self, *args, **kwargs):
+        DownwardExperiment.__init__(self, *args, **kwargs)
+        self.add_resource('PROGRESS_PARSER',
+                          os.path.join(DIR, 'progress-parser.py'),
+                          'progress-parser.py')
+
+    def _make_search_runs(self):
+        DownwardExperiment._make_search_runs(self)
+        for run in self.runs:
+            run.add_command('parse-progress', ['PROGRESS_PARSER'])
+
+exp = ProgressExperiment(path=EXPPATH, env=ENV, repo=REPO)
 
 exp.add_suite(SUITE)
-exp.add_config('opt-initial', CONFIG)
+exp.add_config('opt-initial', OPT1)
 
 # Add report steps
 abs_domain_report_file = os.path.join(REPORTS, '%s-abs-d.html' % EXPNAME)
@@ -60,22 +62,8 @@ exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
                                                  exp.eval_dir, abs_problem_report_file))
 
-# Write suite with solved problems
-def solved(run):
-    return run['coverage'] == 1
-suite_file = os.path.join(REPORTS, '%s_solved_suite.py' % EXPNAME)
-exp.add_step(Step('report-suite', SuiteReport(filters=[solved]), exp.eval_dir, suite_file))
-
 # Copy the results
 exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
-
-# Compress the experiment directory
-exp.add_step(Step('zip-exp-dir', call,
-                  ['tar', '-czf', exp.name + '.tar.gz', exp.name],
-                  cwd=os.path.dirname(exp.path)))
-
-# Remove the experiment directory
-exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
 
 
 if __name__ == '__main__':
