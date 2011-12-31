@@ -126,7 +126,7 @@ class Experiment(_Buildable):
 
         self.steps = []
         self.add_step(Step('build', self.build))
-        self.add_step(self.environment.get_start_exp_step())
+        self.add_step(Step('start', self.run))
         self.add_step(Step('fetch', self.fetcher, self.path))
         #self.add_step(Step('report', self.report, self.eval_dir)) # TODO: add default report? Add self.reports_dir?
 
@@ -198,6 +198,9 @@ class Experiment(_Buildable):
             logging.error('The return value was: %s' % returnval)
             return True
         return False
+
+    def run(self):
+        self.environment.start_exp()
 
     def build(self, overwrite=False, only_main_script=False, no_main_script=False):
         """

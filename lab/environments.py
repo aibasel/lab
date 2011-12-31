@@ -43,8 +43,8 @@ class LocalEnvironment(Environment):
 
         self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
-    def get_start_exp_step(self):
-        return Step('run-exp', call, ['./' + self.main_script_file], cwd=self.exp.path)
+    def start_exp(self):
+        tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)
 
 
 class GkiGridEnvironment(Environment):
@@ -81,5 +81,5 @@ class GkiGridEnvironment(Environment):
 
         self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
-    def get_start_exp_step(self):
-        return Step('start', call, ['qsub', self.main_script_file], cwd=self.exp.path)
+    def start_exp(self):
+        tools.run_command(['qsub', self.main_script_file], cwd=self.exp.path)

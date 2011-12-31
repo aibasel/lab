@@ -200,17 +200,14 @@ class DownwardExperiment(Experiment):
         # Remove the default experiment steps
         self.steps = []
 
-        # Set experiment path temporarily to the preprocess experiment path
-        self.path = self.preprocess_exp_path
         self.add_step(Step('build-preprocess-exp', self.build, stage='preprocess'))
-        self.add_step(self.environment.get_start_exp_step())
+        self.add_step(Step('run-preprocess-exp', self.run, stage='preprocess'))
         self.add_step(Step('fetch-preprocess-results', self.fetcher,
                            self.preprocess_exp_path, eval_dir=PREPROCESSED_TASKS_DIR,
                            copy_all=True, write_combined_props=False))
-        self.path = self.search_exp_path
         self.add_step(Step('build-search-exp', self.build, stage='search'))
-        self.add_step(self.environment.get_start_exp_step())
-        self.add_step(Step('fetch-search-results', self.fetcher, self.path))
+        #self.add_step(self.environment.get_start_exp_step())
+        self.add_step(Step('fetch-search-results', self.fetcher, self.search_exp_path))
 
     @property
     def problems(self):
@@ -232,6 +229,16 @@ class DownwardExperiment(Experiment):
 
     def add_portfolio(self, portfolio_file):
         self.portfolios.append(portfolio_file)
+
+    def run(self, stage):
+        if stage == 'preprocess':
+            self.path = self.preprocess_exp_path
+        elif stage == 'search':
+            self.path = self.search_exp_path
+        else:
+            logging.error('There is no stage "%s"' % stage)
+            sys.exit(1)
+        Experiment.run(self)
 
     def build(self, stage, overwrite=False):
         # Save the experiment stage in the properties
