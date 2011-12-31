@@ -168,7 +168,7 @@ def run_command(cmd, **kwargs):
     Runs command cmd and returns the output
     """
     assert type(cmd) is list
-    logging.info('Running command: %s' % ' '.join(cmd))
+    logging.info('Running command: %s %s' % (' '.join(cmd), kwargs))
     return subprocess.call(cmd, **kwargs)
 
 def get_command_output(cmd, **kwargs):
