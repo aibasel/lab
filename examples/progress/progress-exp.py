@@ -10,6 +10,8 @@ from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.experiment import Step
 from lab import tools
 
+from progress_report import ProgressReport
+
 
 DIR = os.path.join(tools.BASE_DIR, 'examples', 'progress')
 
@@ -37,6 +39,12 @@ OPT1 =   ["--landmarks", "lmg=lm_rhw(only_causal_landmarks=false,"
           "--heuristic", "hCombinedMax=max([hLM,hLMCut])",
           "--search", "astar(hCombinedMax,mpd=true,pathmax=false,cost_type=0)"]
 
+LMCUT =  ["--heuristic", "hLMCut=lmcut()",
+          "--search", "astar(hLMCut,mpd=true,pathmax=false,cost_type=0)"]
+
+IPDB =   ["--heuristic", "hipdb=ipdb()",
+          "--search", "astar(hipdb,mpd=true,pathmax=false,cost_type=0)"]
+
 class ProgressExperiment(DownwardExperiment):
     def __init__(self, *args, **kwargs):
         DownwardExperiment.__init__(self, *args, **kwargs)
@@ -53,6 +61,8 @@ exp = ProgressExperiment(path=EXPPATH, env=ENV, repo=REPO)
 
 exp.add_suite(SUITE)
 exp.add_config('opt-initial', OPT1)
+exp.add_config('lmcut', LMCUT)
+exp.add_config('ipdb', IPDB)
 
 # Add report steps
 abs_domain_report_file = os.path.join(REPORTS, '%s-abs-d.html' % EXPNAME)
@@ -61,6 +71,8 @@ exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES
                                                  exp.eval_dir, abs_domain_report_file))
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
                                                  exp.eval_dir, abs_problem_report_file))
+progress_report_path = os.path.join(exp.eval_dir, 'progress.html')
+exp.add_step(Step('report-progress', ProgressReport(), exp.eval_dir, progress_report_path))
 
 # Copy the results
 exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
