@@ -10,7 +10,8 @@ import math
 import sys
 from collections import defaultdict
 
-sys.path.insert(0, '../../lab')
+# The lab directory is added automatically in the Experiment constructor
+sys.path.insert(0, 'labcode')
 from parser import Parser
 import tools
 
@@ -21,7 +22,7 @@ def check(props):
         assert props.get('preprocess_error') == 1, msg
 
     if props.get('cost') is not None:
-        assert props.get('search_time') is not None
+        assert props.get('search_time') is not None, 'cost without search_time'
 
 
 # Search functions ------------------------------------------------------------

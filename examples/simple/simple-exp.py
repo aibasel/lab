@@ -23,7 +23,7 @@ else:
     ENV = LocalEnvironment()
 
 exp = Experiment(path=EXPPATH, env=ENV)
-exp.add_resource('SIMPLE_PARSER', 'simple_parser.py', 'simple_parser.py')
+exp.add_resource('SIMPLE_PARSER', 'simple-parser.py', 'simple-parser.py')
 
 run = exp.add_run()
 run.add_command('list-dir', ['ls'])

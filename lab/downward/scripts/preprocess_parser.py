@@ -11,7 +11,7 @@ import os
 import sys
 
 # The lab directory is added automatically in the Experiment constructor
-sys.path.insert(0, '../../lab')
+sys.path.insert(0, 'labcode')
 from parser import Parser
 
 

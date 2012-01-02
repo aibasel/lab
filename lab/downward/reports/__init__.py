@@ -27,6 +27,7 @@ class PlanningTable(Table):
 
 
 class PlanningReport(Report):
+    # TODO: Remove dataset in favor of self.configs, self.problems, self.get_run(domain, problem, config)?
     def __init__(self, *args, **kwargs):
         Report.__init__(self, *args, **kwargs)
 

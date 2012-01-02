@@ -7,7 +7,7 @@ import os
 # make sure we're in the run directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-lab_dir = os.path.abspath("../../lab")
+lab_dir = os.path.abspath('../../labcode')
 sys.path.insert(0, lab_dir)
 
 from calls.call import Call
