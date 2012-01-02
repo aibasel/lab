@@ -3,6 +3,8 @@
 #$ -N %(name)s
 ### Set shell.
 #$ -S /bin/bash
+### Pass environment variables to the grid engine.
+#$ -V
 ### Don't send emails.
 #$ -m n
 ### Execute job from current working directory.
