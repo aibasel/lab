@@ -200,15 +200,22 @@ class Report(object):
             sys.exit(1)
 
         logging.info('Reading properties file')
-        combined_props = tools.Properties(filename=combined_props_file)
+        self.props = tools.Properties(filename=combined_props_file)
         logging.info('Reading properties file finished')
-        data = combined_props.get_dataset()
+        data = self.props.get_dataset()
+        print data
         logging.info('Finished turning properties into dataset')
         return data
 
     def _apply_filters(self):
-        if self.filters:
-            self.data.filter(*self.filters)
+        if not self.filters:
+            return
+        self.data.filter(*self.filters)
+        new_props = {}
+        for run_id, run in self.props.items():
+            if all(filter(run) for filter in self.filters):
+                new_props[run_id] = run
+        self.props = new_props
 
 
 class Table(collections.defaultdict):
