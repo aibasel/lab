@@ -94,6 +94,9 @@ class _Buildable(object):
                 sys.exit(1)
             dest = self._get_abs_path(dest)
             if symlink:
+                # Do not create a symlink if the file doesn't exist.
+                if not os.path.exists(source):
+                    continue
                 source = self._get_rel_path(source)
                 os.symlink(source, dest)
                 logging.debug('Linking from %s to %s' % (source, dest))
