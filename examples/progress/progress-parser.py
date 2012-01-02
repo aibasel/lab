@@ -2,20 +2,20 @@
 
 import re
 import sys
-sys.path.insert(0, '../../lab')
+sys.path.insert(0, 'labcode')
 
 from parser import Parser
 
 
-regex = re.compile(r'^f = (\d+) \[\d+ evaluated, \d+ expanded, t=(.+)s\]$')
+regex = re.compile(r'^f = (\d+) \[(\d+) evaluated, (\d+) expanded, t=(.+)s\]$')
 
 def f_values(content, props):
     values = []
     for line in content.splitlines():
         match = regex.match(line)
         if match:
-            print 'MATCH'
-            values.append((float(match.group(2)), int(match.group(1))))
+            values.append([int(match.group(1)), int(match.group(2)),
+                           int(match.group(3)), float(match.group(4))])
     props['f_values'] = values
 
 
