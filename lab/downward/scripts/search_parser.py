@@ -11,9 +11,8 @@ import sys
 from collections import defaultdict
 
 # The lab directory is added automatically in the Experiment constructor
-sys.path.insert(0, 'labcode')
-from parser import Parser
-import tools
+from lab.parser import Parser
+from lab import tools
 
 
 def check(props):

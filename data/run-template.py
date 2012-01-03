@@ -7,12 +7,9 @@ import os
 # make sure we're in the run directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-lab_dir = os.path.abspath('../../lab')
-sys.path.insert(0, lab_dir)
-
-from calls.call import Call
-from calls.log import print_, redirects, save_returncode, driver_log, driver_err
-from calls.log import set_property
+from lab.calls.call import Call
+from lab.calls.log import print_, redirects, save_returncode, driver_log, driver_err
+from lab.calls.log import set_property
 
 sys.stdout = driver_log
 sys.stderr = driver_err

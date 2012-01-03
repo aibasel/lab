@@ -4,7 +4,7 @@ import signal
 import subprocess
 import resource
 
-from processgroup import ProcessGroup
+from lab.calls.processgroup import ProcessGroup
 
 
 def kill_pgrp(pgrp, sig, show_error=True):

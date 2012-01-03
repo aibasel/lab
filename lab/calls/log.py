@@ -1,4 +1,4 @@
-from tools import Properties
+from lab.tools import Properties
 
 redirects = {'stdout': open('run.log', 'a'), 'stderr': open('run.err', 'a')}
 driver_log = open('driver.log', 'a')
