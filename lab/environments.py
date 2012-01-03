@@ -47,7 +47,6 @@ class LocalEnvironment(Environment):
         self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
     def start_exp(self):
-        env =
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
                           env=self.get_env())
 
