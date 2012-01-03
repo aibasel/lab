@@ -2,9 +2,8 @@
 
 import re
 import sys
-sys.path.insert(0, 'labcode')
 
-from parser import Parser
+from lab.parser import Parser
 
 
 regex = re.compile(r'^f = (\d+) \[(\d+) evaluated, (\d+) expanded, t=(.+)s\]$')

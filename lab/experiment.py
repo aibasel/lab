@@ -125,7 +125,7 @@ class Experiment(_Buildable):
         self.set_property('experiment_file', os.path.basename(sys.argv[0]))
 
         # Include the experiment code
-        self.add_resource('LAB', tools.SCRIPTS_DIR, 'labcode')
+        self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
 
         self.steps = []
         self.add_step(Step('build', self.build))

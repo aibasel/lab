@@ -1,10 +1,11 @@
 #! /usr/bin/env python
 
-import os
 import sys
-sys.path.insert(0, os.path.abspath('labcode'))
+import os
 
-from parser import Parser
+print sys.path
+from lab.parser import Parser
+
 
 def wordcount(content, props):
     props['lines'] = len(content.splitlines())

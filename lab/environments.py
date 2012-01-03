@@ -5,8 +5,6 @@ from subprocess import call
 from experiment import Step
 import tools
 
-SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
-
 
 class Environment(object):
     def __init__(self):
@@ -44,7 +42,8 @@ class LocalEnvironment(Environment):
         self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
     def start_exp(self):
-        tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)
+        tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
+                          env={'PYTHONPATH': self.exp.path})
 
 
 class GkiGridEnvironment(Environment):
@@ -82,4 +81,5 @@ class GkiGridEnvironment(Environment):
         self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
     def start_exp(self):
-        tools.run_command(['qsub', self.main_script_file], cwd=self.exp.path)
+        tools.run_command(['qsub', self.main_script_file], cwd=self.exp.path,
+                          env={'PYTHONPATH': self.exp.path})
