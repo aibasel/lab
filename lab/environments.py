@@ -14,6 +14,11 @@ class Environment(object):
     def write_main_script(self):
         raise NotImplementedError
 
+    def get_env(self):
+        env = os.environ.copy()
+        env['PYTHONPATH'] = self.exp.path
+        return env
+
     def build_linked_resources(self, run):
         """
         Only if we are building an argo experiment, we need to add all linked
@@ -42,8 +47,9 @@ class LocalEnvironment(Environment):
         self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
     def start_exp(self):
+        env =
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
-                          env={'PYTHONPATH': self.exp.path})
+                          env=self.get_env())
 
 
 class GkiGridEnvironment(Environment):
@@ -82,4 +88,4 @@ class GkiGridEnvironment(Environment):
 
     def start_exp(self):
         tools.run_command(['qsub', self.main_script_file], cwd=self.exp.path,
-                          env={'PYTHONPATH': self.exp.path})
+                          env=self.get_env())
