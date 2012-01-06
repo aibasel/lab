@@ -5,6 +5,10 @@ import logging
 from lab.external import txt2tags
 
 
+def raw(s):
+    return '""%s""' % s
+
+
 def _get_config(target):
 
     config = {}
