@@ -72,7 +72,10 @@ exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
                                                  exp.eval_dir, abs_problem_report_file))
 progress_report_path = os.path.join(exp.eval_dir, 'progress.html')
-exp.add_step(Step('report-progress', ProgressReport(filters=[lambda run: run['domain'] == 'blocks']), exp.eval_dir, progress_report_path))
+exp.add_step(Step('report-progress', ProgressReport(filters=[
+        lambda run: (True#run['domain'] == 'blocks' #and
+                     #run['problem'] == 'probBLOCKS-10-2.pddl'
+                     )]), exp.eval_dir, progress_report_path))
 
 # Copy the results
 exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))

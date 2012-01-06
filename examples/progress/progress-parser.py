@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import re
-import sys
 
 from lab.parser import Parser
 
