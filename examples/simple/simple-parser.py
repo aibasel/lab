@@ -3,7 +3,6 @@
 import sys
 import os
 
-print sys.path
 from lab.parser import Parser
 
 
