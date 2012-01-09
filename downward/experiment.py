@@ -37,6 +37,8 @@ LIMITS = {
 PLANNER_BINARIES = ['downward', 'downward-debug', 'downward-profile',
                     'release-search', 'search']
 
+PREPROCESS_OUTPUT_FILES = ["*.groups", "output.sas", "output"]
+
 
 def shell_escape(s):
     return s.upper().replace('-', '_').replace(' ', '_').replace('.', '_')
@@ -83,70 +85,74 @@ class DownwardRun(Run):
             self.set_property('limit_' + name, limit)
 
 
-def _prepare_preprocess_run(exp, run):
-    output_files = ["*.groups", "output.sas", "output"]
+class PreprocessRun(DownwardRun):
+    def __init__(self, exp, translator, preprocessor, planner, problem):
+        DownwardRun.__init__(self, exp, translator, preprocessor, planner, problem)
 
-    run.require_resource(run.preprocessor.shell_name)
+        self.require_resource(self.preprocessor.shell_name)
 
-    run.add_resource("DOMAIN", run.problem.domain_file(), "domain.pddl")
-    run.add_resource("PROBLEM", run.problem.problem_file(), "problem.pddl")
+        self.add_resource("DOMAIN", self.problem.domain_file(), "domain.pddl")
+        self.add_resource("PROBLEM", self.problem.problem_file(), "problem.pddl")
 
-    run.add_command('translate', [run.translator.shell_name, 'DOMAIN', 'PROBLEM'],
-                    time_limit=exp.limits['translate_time'],
-                    mem_limit=exp.limits['translate_memory'])
-    run.add_command('preprocess', [run.preprocessor.shell_name],
-                    stdin='output.sas',
-                    time_limit=exp.limits['preprocess_time'],
-                    mem_limit=exp.limits['preprocess_memory'])
-    run.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
+        self.add_command('translate', [self.translator.shell_name, 'DOMAIN', 'PROBLEM'],
+                         time_limit=exp.limits['translate_time'],
+                         mem_limit=exp.limits['translate_memory'])
+        self.add_command('preprocess', [self.preprocessor.shell_name],
+                         stdin='output.sas',
+                         time_limit=exp.limits['preprocess_time'],
+                         mem_limit=exp.limits['preprocess_memory'])
+        self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
-    ext_config = '-'.join([run.translator.name, run.preprocessor.name])
-    run.set_property('config', ext_config)
-    run.set_property('id', [ext_config, run.domain_name, run.problem_name])
+        ext_config = '-'.join([self.translator.name, self.preprocessor.name])
+        self.set_property('config', ext_config)
+        self.set_property('id', [ext_config, self.domain_name, self.problem_name])
 
-    for output_file in output_files:
-        run.declare_optional_output(output_file)
+        for output_file in PREPROCESS_OUTPUT_FILES:
+            self.declare_optional_output(output_file)
 
 
-def _prepare_search_run(exp, run, config_nick, config):
-    run.require_resource(run.planner.shell_name)
-    if config:
-        # We have a single planner configuration
-        assert isinstance(config_nick, basestring), config_nick
-        if not isinstance(config, list):
-            logging.error('Config strings are not supported. Please use a list: %s' %
-                          config)
-            sys.exit(1)
-        search_cmd = [run.planner.shell_name] + config
-    else:
-        # We have a portfolio, config_nick is the path to the portfolio file
-        config_nick = os.path.basename(config_nick)
-        search_cmd = [run.planner.shell_name, '--portfolio', config_nick,
-                      '--plan-file', 'sas_plan']
-    run.add_command('search', search_cmd, stdin='output',
-                    time_limit=exp.limits['search_time'],
-                    mem_limit=exp.limits['search_memory'],
-                    abort_on_failure=False)
-    run.declare_optional_output("sas_plan")
+class SearchRun(DownwardRun):
+    def __init__(self, exp, translator, preprocessor, planner, problem, config_nick, config):
+        DownwardRun.__init__(self, exp, translator, preprocessor, planner, problem)
 
-    # Validation
-    run.require_resource('VALIDATE')
-    run.require_resource('DOWNWARD_VALIDATE')
-    run.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
-                                 'PROBLEM'])
-    run.add_command('parse-search', ['SEARCH_PARSER'])
+        self.require_resource(self.planner.shell_name)
+        if config:
+            # We have a single planner configuration
+            assert isinstance(config_nick, basestring), config_nick
+            if not isinstance(config, list):
+                logging.error('Config strings are not supported. Please use a list: %s' %
+                              config)
+                sys.exit(1)
+            search_cmd = [self.planner.shell_name] + config
+        else:
+            # We have a portfolio, config_nick is the path to the portfolio file
+            config_nick = os.path.basename(config_nick)
+            search_cmd = [self.planner.shell_name, '--portfolio', config_nick,
+                          '--plan-file', 'sas_plan']
+        self.add_command('search', search_cmd, stdin='output',
+                         time_limit=exp.limits['search_time'],
+                         mem_limit=exp.limits['search_memory'],
+                         abort_on_failure=False)
+        self.declare_optional_output("sas_plan")
 
-    run.set_property('config_nick', config_nick)
-    run.set_property('commandline_config', config)
+        # Validation
+        self.require_resource('VALIDATE')
+        self.require_resource('DOWNWARD_VALIDATE')
+        self.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
+                                      'PROBLEM'])
+        self.add_command('parse-search', ['SEARCH_PARSER'])
 
-    # If all three parts have the same revision don't clutter the reports
-    names = [run.translator.name, run.preprocessor.name, run.planner.name]
-    if len(set(names)) == 1:
-        names = [names[0]]
-    ext_config = '-'.join(names + [config_nick])
+        self.set_property('config_nick', config_nick)
+        self.set_property('commandline_config', config)
 
-    run.set_property('config', ext_config)
-    run.set_property('id', [ext_config, run.domain_name, run.problem_name])
+        # If all three parts have the same revision don't clutter the reports
+        names = [self.translator.name, self.preprocessor.name, self.planner.name]
+        if len(set(names)) == 1:
+            names = [names[0]]
+        ext_config = '-'.join(names + [config_nick])
+
+        self.set_property('config', ext_config)
+        self.set_property('id', [ext_config, self.domain_name, self.problem_name])
 
 
 class DownwardExperiment(Experiment):
@@ -308,9 +314,7 @@ class DownwardExperiment(Experiment):
             self._prepare_translator_and_preprocessor(translator, preprocessor)
 
             for prob in self.problems:
-                run = DownwardRun(self, translator, preprocessor, planner, prob)
-                _prepare_preprocess_run(self, run)
-                self.add_run(run)
+                self.add_run(PreprocessRun(self, translator, preprocessor, planner, prob))
 
     def _make_search_runs(self):
         for translator, preprocessor, planner in self.combinations:
@@ -329,15 +333,13 @@ class DownwardExperiment(Experiment):
         def path(filename):
             return os.path.join(preprocess_dir, filename)
 
-        run = DownwardRun(self, translator, preprocessor, planner, prob)
+        run = SearchRun(self, translator, preprocessor, planner, prob, config_nick, config)
         self.add_run(run)
 
         run.set_property('preprocess_dir', preprocess_dir)
 
         run.set_property('compact', self.compact)
         sym = self.compact
-
-        _prepare_search_run(self, run, config_nick, config)
 
         # Add the preprocess files for later parsing
         run.add_resource('OUTPUT', path('output'), 'output', symlink=sym)
