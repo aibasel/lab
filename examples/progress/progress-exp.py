@@ -4,8 +4,8 @@ import os
 import platform
 import sys
 
-from lab.downward.downward_experiment import DownwardExperiment
-from lab.downward.reports.absolute import AbsoluteReport
+from downward.experiment import DownwardExperiment
+from downward.reports.absolute import AbsoluteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.experiment import Step
 from lab import tools

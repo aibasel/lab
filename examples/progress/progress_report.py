@@ -4,10 +4,11 @@ import logging
 import sys
 
 from lab.reports import Report, Table
-from lab.downward.reports import PlanningReport
 from lab.reports import avg, gm
 from lab.external.datasets import missing, not_missing
 from lab.reports.markup import raw
+
+from downward.reports import PlanningReport
 
 
 COLORS = {True: 'green', False: 'red', None: 'gray'}
@@ -57,8 +58,7 @@ class HighestFastestFSelector(ConfigSelector):
         """Return highest f value that was reached under timeout seconds."""
         f_max = -1
         needed_time = -1
-        #for f, evaluations, expansions, time in values:
-        for time, f in run['f_values']:
+        for f, evaluations, expansions, time in run['f_values']:
             if time > timeout:
                 break
             f_max = f
@@ -78,7 +78,7 @@ class FastestFSelector(ConfigSelector):
         values = run['f_values']
         if not values:
             return sys.maxint
-        time, f = values[0]
+        f, evaluations, expansions, time = values[0]
         return time
 
 
@@ -95,8 +95,50 @@ class HighestFirstFSelector(ConfigSelector):
         values = run['f_values']
         if not values:
             return sys.maxint, sys.maxint
-        time, f = values[0]
+        f, evaluations, expansions, time = values[0]
         return -f, time
+
+
+class HighestFLeastExpansionsSelector(ConfigSelector):
+    def __init__(self, timeout):
+        name = 'Highest F-Value, least expansions, timeout %d' % timeout
+        ConfigSelector.__init__(self, name, timeout)
+
+    def sort(self, run):
+        f_max, expansions = self.get_highest_f_value(run, self.timeout)
+        return -f_max, expansions
+
+    def get_highest_f_value(self, run, timeout):
+        """Return highest f value that was reached under timeout seconds."""
+        f_max = -1
+        needed_expansions = -1
+        for f, evaluations, expansions, time in run['f_values']:
+            if time > timeout:
+                break
+            f_max = f
+            needed_expansions = expansions
+        return f_max, needed_expansions
+
+
+class HighestFLeastEvaluationsSelector(ConfigSelector):
+    def __init__(self, timeout):
+        name = 'Highest F-Value, least evaluations, timeout %d' % timeout
+        ConfigSelector.__init__(self, name, timeout)
+
+    def sort(self, run):
+        f_max, evaluations = self.get_highest_f_value(run, self.timeout)
+        return -f_max, evaluations
+
+    def get_highest_f_value(self, run, timeout):
+        """Return highest f value that was reached under timeout seconds."""
+        f_max = -1
+        needed_evaluations = -1
+        for f, evaluations, expansions, time in run['f_values']:
+            if time > timeout:
+                break
+            f_max = f
+            needed_evaluations = evaluations
+        return f_max, needed_evaluations
 
 
 class ProgressReport(Report):
@@ -199,6 +241,8 @@ class ProgressReport(Report):
         selectors += [HighestFastestFSelector(t) for t in [10]]
         #selectors += [FastestFSelector(10)]
         #selectors += [HighestFirstFSelector(10)]
+        selectors += [HighestFLeastExpansionsSelector(10)]
+        selectors += [HighestFLeastEvaluationsSelector(10)]
         for selector in selectors:
             selection = {}
             for domain, problem in self.problems:
@@ -206,10 +250,10 @@ class ProgressReport(Report):
                 selection[(domain, problem)] = selector.select_for_problem(runs)
 
             evaluation, corrects, incorrects, coverage, cum_time, mean_runtime_factor = self.evaluate(selection)
+            success = corrects / (corrects + incorrects) if corrects + incorrects > 0 else 0
             markup += ('===%s===\nCorrect: %d, False: %d, Success: %.2f, '
                         'Coverage: %d, Time: %.2f, Mean runtime factor: %.2f\n%s\n' % (
-                    selector.name,
-                    corrects, incorrects, corrects / (corrects + incorrects),
+                    selector.name, corrects, incorrects, success,
                     coverage, cum_time, mean_runtime_factor,
                     self.get_table(selection, evaluation)))
 
