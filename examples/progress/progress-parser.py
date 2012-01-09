@@ -5,6 +5,7 @@ import re
 from lab.parser import Parser
 
 
+# t reports the current total_time.
 regex = re.compile(r'^f = (\d+) \[(\d+) evaluated, (\d+) expanded, t=(.+)s\]$')
 
 def f_values(content, props):
