@@ -31,19 +31,18 @@ else:
 
 ATTRIBUTES = None  # Include all attributes
 
-OPT1 =   ["--landmarks", "lmg=lm_rhw(only_causal_landmarks=false,"
-                         "disjunctive_landmarks=true,"
-                         "conjunctive_landmarks=true,no_orders=false)",
-          "--heuristic", "hLMCut=lmcut()",
-          "--heuristic", "hLM=lmcount(lmg,admissible=true)",
-          "--heuristic", "hCombinedMax=max([hLM,hLMCut])",
-          "--search", "astar(hCombinedMax,mpd=true,pathmax=false,cost_type=0)"]
+MAS1 = ["--search",
+        "astar(merge_and_shrink(merge_strategy=merge_linear_reverse_level,"
+        "shrink_strategy=shrink_bisimulation(max_states=infinity,threshold=1,"
+        "greedy=true,group_by_h=false)))"]
+MAS2 = ["--search",
+        "astar(merge_and_shrink(merge_strategy=merge_linear_reverse_level,"
+        "shrink_strategy=shrink_bisimulation(max_states=200000,greedy=false,"
+        "group_by_h=true)))"]
+LMCOUNT = ["--search",
+           "astar(lmcount(lm_merged([lm_rhw(),lm_hm(m=1)]),admissible=true),mpd=true)"]
+LMCUT = ["--search", "astar(lmcut())"]
 
-LMCUT =  ["--heuristic", "hLMCut=lmcut()",
-          "--search", "astar(hLMCut,mpd=true,pathmax=false,cost_type=0)"]
-
-IPDB =   ["--heuristic", "hipdb=ipdb()",
-          "--search", "astar(hipdb,mpd=true,pathmax=false,cost_type=0)"]
 
 class ProgressExperiment(DownwardExperiment):
     def __init__(self, *args, **kwargs):
@@ -60,9 +59,10 @@ class ProgressExperiment(DownwardExperiment):
 exp = ProgressExperiment(path=EXPPATH, env=ENV, repo=REPO)
 
 exp.add_suite(SUITE)
-exp.add_config('opt-initial', OPT1)
+exp.add_config('mas1', MAS1)
+exp.add_config('mas2', MAS2)
+exp.add_config('lmcount', LMCOUNT)
 exp.add_config('lmcut', LMCUT)
-exp.add_config('ipdb', IPDB)
 
 # Add report steps
 abs_domain_report_file = os.path.join(REPORTS, '%s-abs-d.html' % EXPNAME)
