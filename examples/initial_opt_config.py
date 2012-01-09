@@ -10,12 +10,12 @@ import shutil
 import sys
 from subprocess import call
 
-from lab.downward.downward_experiment import DownwardExperiment
-from lab.downward.checkouts import Translator, Preprocessor, Planner
-from lab.downward.reports.absolute import AbsoluteReport
-from lab.downward.reports.suite import SuiteReport
+from downward.experiment import DownwardExperiment
+from downward.checkouts import Translator, Preprocessor, Planner
+from downward.reports.absolute import AbsoluteReport
+from downward.reports.suite import SuiteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
-from lab.downward import configs
+from downward import configs
 from lab.experiment import Step
 from lab import tools
 
