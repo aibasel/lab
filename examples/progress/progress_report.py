@@ -2,6 +2,7 @@ from __future__ import division
 
 import logging
 import sys
+from collections import defaultdict
 
 from lab.reports import Report, Table
 from lab.reports import avg, gm
@@ -47,7 +48,7 @@ class ConfigSelector(object):
 
 class HighestFastestFSelector(ConfigSelector):
     def __init__(self, timeout):
-        name = 'Highest F-Value, timeout %d' % timeout
+        name = 'Highest fastest F-Value, timeout %d' % timeout
         ConfigSelector.__init__(self, name, timeout)
 
     def sort(self, run):
@@ -167,16 +168,28 @@ class ProgressReport(Report):
         return total_time
 
     def get_total_times(self, domain, problem):
-        return [self.get_total_time(config, domain, problem) for config in self.configs]
+        orig_times = [self.get_total_time(config, domain, problem) for config in self.configs]
+        return [t if t <= self.limit_search_time else self.time_unsolved for t in orig_times]
 
     def get_coverage(self, config):
-        return sum(run['coverage'] for run in self.props.values() if run['config'] == config)
+        return sum(run['coverage'] for run in self.props.values()
+                   if run['config'] == config and run['total_time'] <= self.limit_search_time)
+
+    def get_portfolio_coverage(self, time_limits):
+        coverage = 0
+        for domain, problem in self.problems:
+            for config in self.configs:
+                run = self.get_run(config, domain, problem)
+                if run['total_time'] <= time_limits[config]:
+                    coverage += 1
+                    break
+        return coverage
 
     def get_time(self, config):
         return sum(run['total_time'] for run in self.props.values() if run['config'] == config and
                    run['coverage'] == 1)
 
-    def evaluate(self, selection):
+    def evaluate(self, selection, presearch_timeout, remaining_time):
         evaluation = {}
         correct_choices = 0
         false_choices = 0
@@ -189,8 +202,7 @@ class ProgressReport(Report):
             best_configs = [self.configs[i] for i in min_indices(times)]
             correct = selected_config in best_configs
             total_time = self.get_value(selected_config, domain, problem, 'total_time')
-            solved = total_time <= self.remaining_time_after_presearch
-            print domain, problem, total_time, min(times), total_time / min(times)
+            solved = (total_time <= remaining_time)# or total_time <= presearch_timeout) # TODO: Add
             runtime_factors.append(total_time / min(times))
             if solved:
                 coverage += 1
@@ -214,9 +226,6 @@ class ProgressReport(Report):
         self.configs = list(sorted(configs))
         self.problems = list(sorted(problems))
 
-        self.limit_search_time = self.props.values()[0]['limit_search_time']
-        self.remaining_time_after_presearch = self.limit_search_time # TODO: Make more precise
-
         for run_id, run in self.props.items():
             total_time = run.get('total_time')
             if total_time is None:
@@ -231,31 +240,42 @@ class ProgressReport(Report):
             if run.get('coverage') is None:
                 self.props[run_id]['coverage'] = 0
 
+        self.limit_search_time = 900#self.props.values()[0]['limit_search_time']
+        self.time_unsolved = self.limit_search_time + 1
+
+        uniform_limits = defaultdict(lambda: self.limit_search_time / len(self.configs))
+
         markup = 'Problems: %d\n\n' % len(self.problems)
-        markup += 'Coverage and Times:\n' + ''.join(['- %s: %d, %.2f\n' %
-                (config, self.get_coverage(config), self.get_time(config))
-                                          for config in self.configs])
+        markup += 'Coverage:\n' + ''.join(['- %s: %d\n' %
+                (config, self.get_coverage(config))
+                                          for config in self.configs]) + '\n\n'
+        markup += 'Coverage uniform portfolio: %d\n\n' % self.get_portfolio_coverage(uniform_limits)
         markup += '\n\nExpected random success: %.2f\n' % (1 / len(self.configs))
 
+        #TODO: Report times for portfolio by averaging over the times it takes to solve a problem for all possible config orders
+
         selectors = []
-        selectors += [HighestFastestFSelector(t) for t in [10]]
+        selectors += [HighestFastestFSelector(t) for t in [10, 15, 20, 30, 40, 50, 60]]
         #selectors += [FastestFSelector(10)]
         #selectors += [HighestFirstFSelector(10)]
-        selectors += [HighestFLeastExpansionsSelector(10)]
-        selectors += [HighestFLeastEvaluationsSelector(10)]
+        #selectors += [HighestFLeastExpansionsSelector(10)]
+        #selectors += [HighestFLeastEvaluationsSelector(10)]
         for selector in selectors:
+            assert len(self.configs) * selector.timeout <= self.limit_search_time
             selection = {}
             for domain, problem in self.problems:
                 runs = self.get_runs(domain, problem)
                 selection[(domain, problem)] = selector.select_for_problem(runs)
 
-            evaluation, corrects, incorrects, coverage, cum_time, mean_runtime_factor = self.evaluate(selection)
+            evaluation, corrects, incorrects, coverage, cum_time, mean_runtime_factor = self.evaluate(selection,
+                        selector.timeout, self.limit_search_time - (len(self.configs) * selector.timeout))
             success = corrects / (corrects + incorrects) if corrects + incorrects > 0 else 0
-            markup += ('===%s===\nCorrect: %d, False: %d, Success: %.2f, '
-                        'Coverage: %d, Time: %.2f, Mean runtime factor: %.2f\n%s\n' % (
+            markup += ('=== %s ===\nCorrect: %d, False: %d, Success: %.2f, '
+                       'Coverage: %d, Time: %.2f, Mean runtime factor: %.2f\n%s\n' % (
                     selector.name, corrects, incorrects, success,
                     coverage, cum_time, mean_runtime_factor,
-                    self.get_table(selection, evaluation)))
+                    ''#self.get_table(selection, evaluation)
+                    ))
 
         return markup
 
