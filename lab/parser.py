@@ -4,7 +4,7 @@ import re
 from collections import defaultdict
 import logging
 
-import tools
+from lab import tools
 
 
 class _MultiPattern(object):
