@@ -156,8 +156,9 @@ class Report(object):
                          'created.')
 
         doc.add_text(markup)
-        print 'REPORT MARKUP:\n'
-        print doc
+        if len(markup) < 100000:
+            print 'REPORT MARKUP:\n'
+            print doc
         return doc.render(self.output_format, {'toc': 1})
 
     def write(self):
@@ -203,7 +204,6 @@ class Report(object):
         self.props = tools.Properties(filename=combined_props_file)
         logging.info('Reading properties file finished')
         data = self.props.get_dataset()
-        print data
         logging.info('Finished turning properties into dataset')
         return data
 
@@ -211,7 +211,7 @@ class Report(object):
         if not self.filters:
             return
         self.data.filter(*self.filters)
-        new_props = {}
+        new_props = tools.Properties(self.props.filename)
         for run_id, run in self.props.items():
             if all(filter(run) for filter in self.filters):
                 new_props[run_id] = run
@@ -220,7 +220,7 @@ class Report(object):
 
 class Table(collections.defaultdict):
     def __init__(self, title='', highlight=True, min_wins=True,
-                 numeric_rows=False):
+                 numeric_rows=True):
         """
         If numeric_rows is True, we do not make the first column bold.
         """
