@@ -44,20 +44,16 @@ class Report(object):
     """
     Base class for all reports
     """
-    def __init__(self, attributes=None, format='html', filters=None, open=False):
+    def __init__(self, attributes=None, format='html', filters=None):
         """
         attributes: the analyzed attributes (e.g. coverage). If omitted, use
                     all found numerical attributes
         filters:    list of functions that are given a run and return True or False
-        open:       open the report file after writing it
         """
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
         self.filters = filters or []
-        self.open_report = open # TODO: currently unsupported
-
-        self.report_type = 'report'
 
     def __call__(self, eval_dir, outfile):
         """
@@ -165,27 +161,6 @@ class Report(object):
         with open(filename, 'w') as file:
             file.write(content)
             logging.info('Wrote file://%s' % filename)
-
-    def open(self):
-        """
-        If the --open parameter is set, tries to open the report
-        """
-        filename = self.get_filename()
-        if not self.open_report or not os.path.exists(filename):
-            return
-
-        dir, filename = os.path.split(filename)
-        os.chdir(dir)
-        if self.output_format == 'tex':
-            subprocess.call(['pdflatex', filename])
-            filename = filename.replace('tex', 'pdf')
-        subprocess.call(['xdg-open', filename])
-
-        # Remove unnecessary files
-        extensions = ['aux', 'log']
-        filename_prefix, old_ext = os.path.splitext(os.path.basename(filename))
-        for ext in extensions:
-            tools.remove(filename_prefix + '.' + ext)
 
     def _load_data(self):
         """
