@@ -6,6 +6,7 @@ Module that permits generating downward reports by reading properties files
 from __future__ import with_statement, division
 
 import logging
+from collections import defaultdict
 
 from lab import reports
 from lab.reports import Report, Table
@@ -27,9 +28,34 @@ class PlanningTable(Table):
 
 
 class PlanningReport(Report):
-    # TODO: Remove dataset in favor of self.configs, self.problems, self.get_run(domain, problem, config)?
     def __init__(self, *args, **kwargs):
         Report.__init__(self, *args, **kwargs)
+
+    def _load_data(self):
+        Report._load_data(self)
+        self.process_data()
+
+    def process_data(self):
+        # Use local variables first to save lookups
+        problems = set()
+        domains = defaultdict(list)
+        configs = set()
+        problem_runs = defaultdict(list)
+        runs = {}
+        for run_name, run in self.props.items():
+            configs.add(run['config'])
+            domain, problem, config = run['domain'], run['problem'], run['config']
+            problems.add((domain, problem))
+            problem_runs[(domain, problem)].append(run)
+            # TODO: Remove once props keys are lists
+            runs[(domain, problem, config)] = run
+        for domain, problem in problems:
+            domains[domain].append(problem)
+        self.configs = list(sorted(configs))
+        self.problems = list(sorted(problems))
+        self.domains = domains
+        self.problem_runs = problem_runs
+        self.runs = runs
 
     def get_markup(self):
         # list of (attribute, table) pairs

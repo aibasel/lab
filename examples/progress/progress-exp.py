@@ -17,13 +17,11 @@ DIR = os.path.join(tools.BASE_DIR, 'examples', 'progress')
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
 if platform.node() == 'habakuk':
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
-    REPORTS = '/home/downward/jendrik/reports'
     REPO = '/home/downward/jendrik/downward'
     SUITE = 'LMCUT_DOMAINS'
     ENV = GkiGridEnvironment()
 else:
     EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
-    REPORTS = tools.DEFAULT_REPORTS_DIR
     REPO = '/home/jendrik/projects/Downward/downward'
     SUITE = 'gripper:prob01.pddl'
     ENV = LocalEnvironment()
@@ -65,12 +63,9 @@ exp.add_config('lmcut', LMCUT)
 
 # Add report steps
 progress_report_path = os.path.join(exp.eval_dir, 'progress.html')
-exp.add_step(Step('report-progress', ProgressReport(filters=[
-        lambda run: (True#run['domain'] == 'blocks' #and
-                     #run['problem'] == 'probBLOCKS-10-2.pddl'
-                     )]), exp.eval_dir, progress_report_path))
-abs_domain_report_file = os.path.join(REPORTS, '%s-abs-d.html' % EXPNAME)
-abs_problem_report_file = os.path.join(REPORTS, '%s-abs-p.html' % EXPNAME)
+exp.add_step(Step('report-progress', ProgressReport(), exp.eval_dir, progress_report_path))
+abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
+abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
 oracle_eval_dir = os.path.join(exp.eval_dir, '..', 'progress-oracle-eval')
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
                                                  oracle_eval_dir, abs_domain_report_file))
@@ -81,9 +76,7 @@ def remove_single_searches(run):
     return run.get('config_nick') not in ['mas1', 'mas2', 'lmcount', 'lmcut']
 
 exp.add_step(Step('report-oracle-d', AbsoluteReport('domain', attributes=ATTRIBUTES, filters=[remove_single_searches]),
-                                                 oracle_eval_dir, os.path.join(REPORTS, '%s-oracle-d.html' % EXPNAME)))
-#exp.add_step(Step('report-oracle-p', AbsoluteReport('problem', attributes=ATTRIBUTES, filters=[remove_single_searches]),
-#                                                 oracle_eval_dir, os.path.join(REPORTS, '%s-oracle-p.html' % EXPNAME)))
+                                                 oracle_eval_dir, os.path.join(exp.eval_dir, '%s-oracle-d.html' % EXPNAME)))
 
 #exp.add_step(Step('report-dynamic', call,
 #                  ['/home/jendrik/projects/Downward/fastr/new-scripts/downward-reports.py',
@@ -94,9 +87,4 @@ exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_fil
 
 
 if __name__ == '__main__':
-    # This method parses the commandline. We assume this file is called exp.py.
-    # Supported styles:
-    # ./exp.py 1
-    # ./exp.py 4 5 6
-    # ./exp.py all
     exp()

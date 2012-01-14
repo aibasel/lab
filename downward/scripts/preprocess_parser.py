@@ -127,12 +127,6 @@ class PreprocessParser(Parser):
     def add_preprocess_parsing(self):
         """Add some preprocess specific parsing"""
 
-        # TODO: Set required to True
-        #parser.add_pattern('translate_error', r'translate_error = (\d)',
-        #                 file='preprocess-properties', type=int, required=False)
-        #parser.add_pattern('preprocess_error', r'preprocess_error = (\d)',
-        #                 file='preprocess-properties', type=int, required=False)
-
         # Parse the preprocessor output. We need to parse the translator values
         # from the preprocessor output for older revisions. In newer revisions the
         # values are overwritten by values from the translator output.

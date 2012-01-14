@@ -21,32 +21,6 @@ class AbsoluteReport(PlanningReport):
         self.resolution = resolution
         PlanningReport.__init__(self, *args, **kwargs)
 
-    def _load_data(self):
-        PlanningReport._load_data(self)
-        self.process_data()
-
-    def process_data(self):
-        # Use local variables first to save lookups
-        problems = set()
-        domains = defaultdict(list)
-        configs = set()
-        problem_runs = defaultdict(list)
-        runs = {}
-        for run_name, run in self.props.items():
-            configs.add(run['config'])
-            domain, problem, config = run['domain'], run['problem'], run['config']
-            problems.add((domain, problem))
-            problem_runs[(domain, problem)].append(run)
-            # TODO: Remove once props keys are lists
-            runs[(domain, problem, config)] = run
-        for domain, problem in problems:
-            domains[domain].append(problem)
-        self.configs = list(sorted(configs))
-        self.problems = list(sorted(problems))
-        self.domains = domains
-        self.problem_runs = problem_runs
-        self.runs = runs
-
     def _attribute_is_absolute(self, attribute):
         """
         The domain-wise sum of the values for coverage and *_error even makes

@@ -5,7 +5,8 @@ import sys
 from collections import defaultdict
 import itertools
 
-from lab.reports import Report, Table
+from lab.reports import Table
+from downward.reports import PlanningReport
 from lab.reports import gm
 from lab.reports.markup import raw
 from lab import tools
@@ -157,9 +158,9 @@ def get_mean_portfolio_time(times, timeout):
     return gm(cum_times)
 
 
-class ProgressReport(Report):
+class ProgressReport(PlanningReport):
     def __init__(self, *args, **kwargs):
-        Report.__init__(self, *args, **kwargs)
+        PlanningReport.__init__(self, *args, **kwargs)
 
     def get_run(self, config, domain, problem):
         return self.props['-'.join([config, domain, problem])]
@@ -251,14 +252,6 @@ class ProgressReport(Report):
         return evaluation, correct_choices, false_choices, coverage, cum_time, gm(runtime_factors)
 
     def get_markup(self):
-        problems = set()
-        configs = set()
-        for run_name, run in self.props.items():
-            configs.add(run['config'])
-            problems.add((run['domain'], run['problem']))
-        self.configs = list(sorted(configs))
-        self.problems = list(sorted(problems))
-
         for run_id, run in self.props.items():
             total_time = run.get('total_time')
             if total_time is None:
