@@ -1,6 +1,7 @@
 import getpass
 import logging
 import shutil
+import sys
 
 
 class Step(object):
@@ -49,40 +50,35 @@ class Step(object):
 
 
 class Sequence(list):
-    #def __init__(self, *args, **kwargs):
-    #    list.__init__(self, *args, **kwargs)
+    def process_step_names(self, names):
+        for step_name in names:
+            self.process_step_name(step_name)
 
     def process_step_name(self, step_name):
         if step_name.isdigit():
             try:
                 step = self[int(step_name) - 1]
             except IndexError:
-                logging.error('There is no step number %s' % step_name)
-                sys.exit(1)
+                logging.critical('There is no step number %s' % step_name)
             self.run_step(step)
         elif step_name == 'next':
             raise NotImplementedError
         elif step_name == 'all':
             # Run all steps
             for step in self.steps:
-                error = self.run_step(step)
-                if error:
-                    break
+                self.run_step(step)
         else:
             for step in self:
                 if step.name == step_name:
                     self.run_step(step)
                     return
-            logging.error('There is no step called %s' % step_name)
+            logging.critical('There is no step called %s' % step_name)
 
     def run_step(self, step):
         logging.info('Running %s: %s' % (step.name, step))
         returnval = step()
         if returnval:
-            logging.error('An error occured in %s' % step)
-            logging.error('The return value was: %s' % returnval)
-            return True
-        return False
+            logging.critical('An error occured in %s, the return value was %s' % (step, returnval))
 
     def get_steps_text(self):
         lines = ['Available steps:', '================']
