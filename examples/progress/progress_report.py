@@ -1,13 +1,16 @@
 from __future__ import division
 
 import logging
+import os
 import sys
 from collections import defaultdict
+import itertools
 
 from lab.reports import Report, Table
 from lab.reports import avg, gm
 from lab.external.datasets import missing, not_missing
 from lab.reports.markup import raw
+from lab import tools
 
 from downward.reports import PlanningReport
 
@@ -40,10 +43,13 @@ def min_indices(iterable):
 class ConfigSelector(object):
     def __init__(self, name, timeout):
         self.name = name
-        self.timeout = timeout
+        self.timeout = float(timeout)
 
     def select_for_problem(self, runs):
         return sorted(runs, key=self.sort)[0]['config']
+
+    def __str__(self):
+        return 'oracle-%d' % self.timeout
 
 
 class HighestFastestFSelector(ConfigSelector):
@@ -142,6 +148,19 @@ class HighestFLeastEvaluationsSelector(ConfigSelector):
         return f_max, needed_evaluations
 
 
+def get_mean_portfolio_time(times, timeout):
+    times = [min(time, timeout) for time in times]
+    cum_times = []
+    for order in itertools.permutations(times):
+        cum_time = 0
+        for time in order:
+            cum_time += time
+            if time < timeout:
+                break
+        cum_times.append(cum_time)
+    return gm(cum_times)
+
+
 class ProgressReport(Report):
     def __init__(self, *args, **kwargs):
         Report.__init__(self, *args, **kwargs)
@@ -180,6 +199,7 @@ class ProgressReport(Report):
         for domain, problem in self.problems:
             for config in self.configs:
                 run = self.get_run(config, domain, problem)
+                #print time_limits[config]
                 if run['total_time'] <= time_limits[config]:
                     coverage += 1
                     break
@@ -189,7 +209,7 @@ class ProgressReport(Report):
         return sum(run['total_time'] for run in self.props.values() if run['config'] == config and
                    run['coverage'] == 1)
 
-    def evaluate(self, selection, presearch_timeout, remaining_time):
+    def evaluate(self, selection, selector, remaining_time):
         evaluation = {}
         correct_choices = 0
         false_choices = 0
@@ -197,13 +217,31 @@ class ProgressReport(Report):
         cum_time = 0
         runtime_factors = []
         for domain, problem in self.problems:
+            run_id = '%s-%s-%s' % (selector, domain, problem)
+            run = {}
+            run['domain'] = domain
+            run['problem'] = problem
+            run['config'] = str(selector)
             selected_config = selection[(domain, problem)]
             times = self.get_total_times(domain, problem)
             best_configs = [self.configs[i] for i in min_indices(times)]
             correct = selected_config in best_configs
             total_time = self.get_value(selected_config, domain, problem, 'total_time')
-            solved = (total_time <= remaining_time)# or total_time <= presearch_timeout) # TODO: Add
+            solved_in_presearch = any(t <= selector.timeout for t in times)
+            if solved_in_presearch:
+                total_time = get_mean_portfolio_time(times, selector.timeout)
+            else:
+                total_time = len(self.configs) * selector.timeout + total_time
+            solved = (total_time <= remaining_time or solved_in_presearch)
             runtime_factors.append(total_time / min(times))
+            run['coverage'] = int(solved)
+            if solved:
+                # TODO: Account for solutions found during presearch
+                run['total_time'] = total_time
+            elif 'total_time' in run:
+                del run['total_time']
+            if self.limit_search_time == 1800:
+                self.new_props[run_id] = run
             if solved:
                 coverage += 1
                 cum_time += total_time
@@ -240,44 +278,87 @@ class ProgressReport(Report):
             if run.get('coverage') is None:
                 self.props[run_id]['coverage'] = 0
 
-        self.limit_search_time = 900#self.props.values()[0]['limit_search_time']
-        self.time_unsolved = self.limit_search_time + 1
+        self.new_props = tools.Properties()
 
-        uniform_limits = defaultdict(lambda: self.limit_search_time / len(self.configs))
+        self.selectors = []
+        self.selectors += [HighestFastestFSelector(t) for t in [1, 10, 15, 20, 30]]
+        #self.selectors += [FastestFSelector(10)]
+        #self.selectors += [HighestFirstFSelector(10)]
+        #self.selectors += [HighestFLeastExpansionsSelector(10)]
+        #self.selectors += [HighestFLeastEvaluationsSelector(10)]
 
+        table = Table(title='Timeout', highlight=True, min_wins=False)
         markup = 'Problems: %d\n\n' % len(self.problems)
-        markup += 'Coverage:\n' + ''.join(['- %s: %d\n' %
-                (config, self.get_coverage(config))
-                                          for config in self.configs]) + '\n\n'
-        markup += 'Coverage uniform portfolio: %d\n\n' % self.get_portfolio_coverage(uniform_limits)
-        markup += '\n\nExpected random success: %.2f\n' % (1 / len(self.configs))
+
+        for time_limit in [10, 50, 100, 150, 300, 600, 900, 1200, 1500, 1800]:
+            self.limit_search_time = float(time_limit) #self.props.values()[0]['limit_search_time']
+            self.time_unsolved = self.limit_search_time + 1
+            self.uniform_limits = defaultdict(lambda: self.limit_search_time / len(self.configs))
+            table.add_row(str(time_limit), self.get_table_row(time_limit))
+            if time_limit == 1800:
+                self.add_portfolio_values()
+
+
+        new_props_file = os.path.abspath(os.path.join(self.props.filename, '..', '..', 'progress-oracle-eval', 'properties'))
+        print new_props_file
+        tools.remove(new_props_file)
+        tools.makedirs(os.path.dirname(new_props_file))
+        self.props.filename = new_props_file
+        self.props.update(self.new_props)
+        for run_id, run in self.props.items():
+            total_time = run.get('total_time')
+            if total_time == self.time_unsolved:
+                del self.props[run_id]['total_time']
+        self.props.write()
+        return markup + str(table)
+
+    def add_portfolio_values(self):
+        config = 'uniform_portfolio'
+        for domain, problem in self.problems:
+            run_id = '%s-%s-%s' % (config, domain, problem)
+            run = {}
+            run['domain'] = domain
+            run['problem'] = problem
+            run['config'] = config
+            times = self.get_total_times(domain, problem)
+            timeout = self.limit_search_time / len(self.configs)
+            solved = any(t <= timeout for t in times)
+            run['coverage'] = int(solved)
+            if solved:
+                run['total_time'] = get_mean_portfolio_time(times, timeout)
+            self.new_props[run_id] = run
+
+    def get_table_row(self, total_time_limit):
+        row = {}
+
+        for config in self.configs:
+            row[config] = self.get_coverage(config)
+
+        row['uniform portfolio'] = self.get_portfolio_coverage(self.uniform_limits)
+        #markup += '\n\nExpected random success: %.2f\n' % (1 / len(self.configs))
 
         #TODO: Report times for portfolio by averaging over the times it takes to solve a problem for all possible config orders
 
-        selectors = []
-        selectors += [HighestFastestFSelector(t) for t in [10, 15, 20, 30, 40, 50, 60]]
-        #selectors += [FastestFSelector(10)]
-        #selectors += [HighestFirstFSelector(10)]
-        #selectors += [HighestFLeastExpansionsSelector(10)]
-        #selectors += [HighestFLeastEvaluationsSelector(10)]
-        for selector in selectors:
-            assert len(self.configs) * selector.timeout <= self.limit_search_time
+
+        for selector in self.selectors:
+            if len(self.configs) * selector.timeout > self.limit_search_time:
+                continue
             selection = {}
             for domain, problem in self.problems:
                 runs = self.get_runs(domain, problem)
                 selection[(domain, problem)] = selector.select_for_problem(runs)
 
             evaluation, corrects, incorrects, coverage, cum_time, mean_runtime_factor = self.evaluate(selection,
-                        selector.timeout, self.limit_search_time - (len(self.configs) * selector.timeout))
+                        selector, self.limit_search_time - (len(self.configs) * selector.timeout))
             success = corrects / (corrects + incorrects) if corrects + incorrects > 0 else 0
-            markup += ('=== %s ===\nCorrect: %d, False: %d, Success: %.2f, '
-                       'Coverage: %d, Time: %.2f, Mean runtime factor: %.2f\n%s\n' % (
-                    selector.name, corrects, incorrects, success,
-                    coverage, cum_time, mean_runtime_factor,
-                    ''#self.get_table(selection, evaluation)
-                    ))
-
-        return markup
+            #markup += ('=== %s ===\nCorrect: %d, False: %d, Success: %.2f, '
+            #           'Coverage: %d, Mean runtime factor: %.2f\n%s\n' % (
+            #        selector.name, corrects, incorrects, success,
+            #        coverage, mean_runtime_factor,
+            #        ''#self.get_table(selection, evaluation)
+            #        ))
+            row[selector.name] = coverage
+        return row
 
     def get_table(self, selection, evaluation):
         table = Table(highlight=False)
@@ -286,7 +367,7 @@ class ProgressReport(Report):
                 selected = (config == selection[(domain, problem)])
                 correct = evaluation.get((domain, problem))
                 run = self.get_run(config, domain, problem)
-                text = '%s -> %.2f' % (raw(run['f_values']), run['total_time'])
+                text = '%s -> %.2f' % (raw(run['f_values']), run.get('total_time'))
                 if selected:
                     color = COLORS[correct]
                     text = '{{%s|color:%s}}' % (text, color)
