@@ -2,8 +2,8 @@ import math
 import os
 from subprocess import call
 
-from experiment import Step
-import tools
+from lab.steps import Step
+from lab import tools
 
 
 class Environment(object):

@@ -13,7 +13,7 @@ from downward import checkouts
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward import suites
 from lab import tools
-from lab.experiment import Step
+from lab.steps import Step, Sequence
 
 
 PREPROCESSED_TASKS_DIR = os.path.join(tools.USER_DIR, 'preprocessed-tasks')
@@ -204,7 +204,7 @@ class DownwardExperiment(Experiment):
                           'search_parser.py')
 
         # Remove the default experiment steps
-        self.steps = []
+        self.steps = Sequence()
 
         self.add_step(Step('build-preprocess-exp', self.build, stage='preprocess'))
         self.add_step(Step('run-preprocess-exp', self.run, stage='preprocess'))

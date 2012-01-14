@@ -16,20 +16,18 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.suite import SuiteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from downward import configs
-from lab.experiment import Step
+from lab.steps import Step
 from lab import tools
 
 
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
 if platform.node() == 'habakuk':
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
-    REPORTS = '/home/downward/jendrik/reports'
     REPO = '/home/downward/jendrik/downward'
     SUITE = 'LMCUT_DOMAINS'
     ENV = GkiGridEnvironment()
 else:
     EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
-    REPORTS = tools.DEFAULT_REPORTS_DIR
     REPO = '/home/jendrik/projects/Downward/downward'
     SUITE = 'gripper:prob01.pddl'
     ENV = LocalEnvironment()
@@ -53,8 +51,8 @@ exp.add_suite(SUITE)
 exp.add_config('opt-initial', CONFIG)
 
 # Add report steps
-abs_domain_report_file = os.path.join(REPORTS, '%s-abs-d.html' % EXPNAME)
-abs_problem_report_file = os.path.join(REPORTS, '%s-abs-p.html' % EXPNAME)
+abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
+abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
                                                  exp.eval_dir, abs_domain_report_file))
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
@@ -63,7 +61,7 @@ exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTE
 # Write suite with solved problems
 def solved(run):
     return run['coverage'] == 1
-suite_file = os.path.join(REPORTS, '%s_solved_suite.py' % EXPNAME)
+suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
 exp.add_step(Step('report-suite', SuiteReport(filters=[solved]), exp.eval_dir, suite_file))
 
 # Copy the results
