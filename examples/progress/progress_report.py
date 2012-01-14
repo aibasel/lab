@@ -232,7 +232,6 @@ class ProgressReport(Report):
             runtime_factors.append(total_time / min(times))
             run['coverage'] = int(solved)
             if solved:
-                # TODO: Account for solutions found during presearch
                 run['total_time'] = total_time
             elif 'total_time' in run:
                 del run['total_time']
@@ -332,9 +331,6 @@ class ProgressReport(Report):
 
         row['uniform portfolio'] = self.get_portfolio_coverage(self.uniform_limits)
         #markup += '\n\nExpected random success: %.2f\n' % (1 / len(self.configs))
-
-        #TODO: Report times for portfolio by averaging over the times it takes to solve a problem for all possible config orders
-
 
         for selector in self.selectors:
             if len(self.configs) * selector.timeout > self.limit_search_time:

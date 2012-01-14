@@ -72,7 +72,6 @@ def _get_config(target):
 
 
 class Document(object):
-    #TODO: Allow pre-/postprocessing
     def __init__(self, title='', author='', date='%%date(%Y-%m-%d)'):
         self.title = title
         self.author = author
