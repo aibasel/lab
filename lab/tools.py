@@ -87,7 +87,7 @@ def round_to_next_power_of_ten(i):
 
 def makedirs(dir):
     """
-    mkdir variant that does not complain when the dir already exists
+    makedirs variant that does not complain when the dir already exists
     """
     try:
         os.makedirs(dir)
@@ -163,17 +163,26 @@ def import_python_file(filename):
         sys.exit(1)
 
 
+def _log_command(cmd, kwargs):
+    assert isinstance(cmd, list)
+    # Do not show complete env variables, only show PYTHONPATH
+    kwargs_clean = kwargs.copy()
+    env = kwargs_clean.get('env')
+    if env:
+        pythonpath = env.get('PYTHONPATH')
+        if pythonpath:
+            kwargs_clean['env'] = {'PYTHONPATH': pythonpath, '...': '...'}
+    logging.info('Running command: %s %s' % (' '.join(cmd), kwargs_clean))
+
 def run_command(cmd, **kwargs):
     """
     Runs command cmd and returns the output
     """
-    assert type(cmd) is list
-    logging.info('Running command: %s %s' % (' '.join(cmd), kwargs))
+    _log_command(cmd, kwargs)
     return subprocess.call(cmd, **kwargs)
 
 def get_command_output(cmd, **kwargs):
-    assert type(cmd) is list
-    logging.info('Running command: %s' % ' '.join(cmd))
+    _log_command(cmd, kwargs)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, **kwargs)
     stdout, _ = p.communicate()
     return stdout.strip()
