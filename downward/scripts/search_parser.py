@@ -7,7 +7,6 @@ from __future__ import division
 
 import re
 import math
-import sys
 from collections import defaultdict
 
 # The lab directory is added automatically in the Experiment constructor

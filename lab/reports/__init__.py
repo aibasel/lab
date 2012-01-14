@@ -9,8 +9,6 @@ import os
 import sys
 import logging
 import collections
-import cPickle
-import hashlib
 import subprocess
 import math
 from collections import defaultdict

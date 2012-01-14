@@ -6,8 +6,6 @@ This experiment uses outdated lab API.
 
 import os
 import platform
-import shutil
-import sys
 
 from lab.downward.downward_experiment import DownwardExperiment
 from lab.downward.checkouts import Translator, Preprocessor, Planner
@@ -54,10 +52,5 @@ exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTE
 # Remove the experiment directory
 #exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
 
-# This method parses the commandline. We assume this file is called exp.py.
-# Supported styles:
-# ./exp.py 1
-# ./exp.py 4 5 6
-# ./exp.py next
-# ./exp.py rest      # runs all remaining steps
+# This method parses the commandline.
 exp()

@@ -2,8 +2,6 @@
 
 import os
 import platform
-import sys
-from subprocess import call
 
 from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport

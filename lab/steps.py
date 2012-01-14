@@ -1,7 +1,7 @@
 import getpass
+import os
 import logging
 import shutil
-import sys
 
 
 class Step(object):
@@ -9,9 +9,6 @@ class Step(object):
         """
         When the step is executed args and kwargs will be passed to the
         callable func.
-        A step's returncode is saved in an instance variable.
-        If bool(step.returncode) == True then we do not automatically proceed
-        to the next step.
         """
         self.name = name
         self.func = func
@@ -22,10 +19,9 @@ class Step(object):
         try:
             return self.func(*self.args, **self.kwargs)
         except (ValueError, TypeError):
-            logging.error('Could not run step: %s' % self)
             import traceback
             traceback.print_exc()
-            return 1
+            logging.critical('Could not run step: %s' % self)
 
     def __str__(self):
         funcname = getattr(self.func, '__name__', None) or self.func.__class__.__name__

@@ -1,8 +1,6 @@
 import math
 import os
-from subprocess import call
 
-from lab.steps import Step
 from lab import tools
 
 

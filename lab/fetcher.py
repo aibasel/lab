@@ -1,11 +1,8 @@
-import cPickle
 from glob import glob
-import hashlib
 import logging
 import os
-import sys
 
-import tools
+from lab import tools
 
 
 class Fetcher(object):

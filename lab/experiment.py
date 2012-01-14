@@ -12,7 +12,6 @@ import logging
 from lab import tools
 from lab.external.ordereddict import OrderedDict
 from lab.fetcher import Fetcher
-from lab.reports import Report
 from lab.steps import Step, Sequence
 
 

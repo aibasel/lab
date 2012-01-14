@@ -1,18 +1,14 @@
 from __future__ import division
 
-import logging
 import os
 import sys
 from collections import defaultdict
 import itertools
 
 from lab.reports import Report, Table
-from lab.reports import avg, gm
-from lab.external.datasets import missing, not_missing
+from lab.reports import gm
 from lab.reports.markup import raw
 from lab import tools
-
-from downward.reports import PlanningReport
 
 
 COLORS = {True: 'green', False: 'red', None: 'gray'}
@@ -350,7 +346,7 @@ class ProgressReport(Report):
 
             evaluation, corrects, incorrects, coverage, cum_time, mean_runtime_factor = self.evaluate(selection,
                         selector, self.limit_search_time - (len(self.configs) * selector.timeout))
-            success = corrects / (corrects + incorrects) if corrects + incorrects > 0 else 0
+            #success = corrects / (corrects + incorrects) if corrects + incorrects > 0 else 0
             #markup += ('=== %s ===\nCorrect: %d, False: %d, Success: %.2f, '
             #           'Coverage: %d, Mean runtime factor: %.2f\n%s\n' % (
             #        selector.name, corrects, incorrects, success,
