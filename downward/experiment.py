@@ -348,8 +348,7 @@ class DownwardExperiment(Experiment):
         run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas', symlink=sym)
         run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl', symlink=sym)
         run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl', symlink=sym)
-        run.add_resource('PREPROCESS_PROPERTIES', path('properties'),
-                         'preprocess-properties', symlink=sym)
+        run.add_resource('PREPROCESS_PROPERTIES', path('properties'), 'properties')
 
         # The logs have to be copied, not linked
         run.add_resource('RUN_LOG', path('run.log'), 'run.log')

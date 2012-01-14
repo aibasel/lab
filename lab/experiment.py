@@ -74,8 +74,13 @@ class _Buildable(object):
         return os.path.relpath(abs_path, start=self.path)
 
     def _build_properties_file(self):
-        self.properties.filename = self._get_abs_path('properties')
-        self.properties.write()
+        """
+        Load existing properties file if there is any and update it with the new
+        properties.
+        """
+        combined_props = tools.Properties(self._get_abs_path('properties'))
+        combined_props.update(self.properties)
+        combined_props.write()
 
     def _build_resources(self):
         for dest, content in self.new_files:
