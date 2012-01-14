@@ -9,7 +9,6 @@ import os
 import sys
 import logging
 import collections
-import subprocess
 import math
 from collections import defaultdict
 
@@ -59,16 +58,15 @@ class Report(object):
         """
         eval_dir: path to results directory
         """
-        if not eval_dir.endswith('eval'):
-            msg = ('The source directory does not end with eval. '
+        if not eval_dir.endswith('-eval'):
+            msg = ('The source directory does not end with "-eval". '
                    'Are you sure you this is an evaluation directory? (Y/N): ')
-            answer = raw_input(msg)
-            if not answer.upper() == 'Y':
+            if not raw_input(msg).upper() == 'Y':
                 sys.exit()
         self.eval_dir = os.path.abspath(eval_dir)
         self.outfile = outfile
 
-        self.data = self._load_data()
+        self._load_data()
         self.all_attributes = sorted(self.data.get_attributes())
         logging.info('Available attributes: %s' % self.all_attributes)
 
@@ -163,9 +161,6 @@ class Report(object):
             logging.info('Wrote file://%s' % filename)
 
     def _load_data(self):
-        """
-        The data is reloaded for every attribute, but read only once from disk
-        """
         combined_props_file = os.path.join(self.eval_dir, 'properties')
         if not os.path.exists(combined_props_file):
             msg = 'Properties file not found at %s'
@@ -174,9 +169,8 @@ class Report(object):
         logging.info('Reading properties file')
         self.props = tools.Properties(filename=combined_props_file)
         logging.info('Reading properties file finished')
-        data = self.props.get_dataset()
+        self.data = self.props.get_dataset()
         logging.info('Finished turning properties into dataset')
-        return data
 
     def _apply_filters(self):
         if not self.filters:
