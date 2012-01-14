@@ -90,9 +90,8 @@ class _Buildable(object):
 
         for source, dest, required, symlink in self.resources:
             if required and not os.path.exists(source):
-                logging.error('The required resource can not be found: %s' %
-                              source)
-                sys.exit(1)
+                logging.critical('The required resource can not be found: %s' %
+                                 source)
             dest = self._get_abs_path(dest)
             if symlink:
                 # Do not create a symlink if the file doesn't exist.
@@ -161,8 +160,7 @@ class Experiment(_Buildable):
         if not self.args.steps:
             self.argparser.print_help()
             sys.exit()
-        for step_name in self.args.steps:
-            self.steps.process_step_name(step_name)
+        self.steps.process_step_names(self.args.steps)
 
     def run(self):
         self.environment.start_exp()
@@ -346,12 +344,10 @@ class Run(_Buildable):
             abort_on_failure = kwargs.pop('abort_on_failure',
                                           DEFAULT_ABORT_ON_FAILURE)
             if not type(cmd) is list:
-                logging.error('Commands have to be lists of strings. '
-                              'The command <%s> is not a list.' % cmd)
-                sys.exit(1)
+                logging.critical('Commands have to be lists of strings. '
+                                 'The command <%s> is not a list.' % cmd)
             if not cmd:
-                logging.error('Command "%s" cannot be empty' % name)
-                sys.exit(1)
+                logging.critical('Command "%s" cannot be empty' % name)
 
             # Support running globally installed binaries
             def format_arg(arg):
@@ -403,10 +399,8 @@ class Run(_Buildable):
         # Check correctness of id property
         run_id = self.properties.get('id')
         if run_id is None:
-            logging.error('Each run must have an id')
-            sys.exit(1)
+            logging.critical('Each run must have an id')
         if not type(run_id) is list:
-            logging.error('id must be a list, but %s is not' % run_id)
-            sys.exit(1)
+            logging.critical('id must be a list, but %s is not' % run_id)
         self.properties['id'] = [str(item) for item in run_id]
         _Buildable._build_properties_file(self)

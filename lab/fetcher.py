@@ -15,8 +15,7 @@ class Fetcher(object):
         id = props.get('id')
         # Abort if an id cannot be read.
         if not id:
-            logging.error('id is not set in %s.' % prop_file)
-            sys.exit(1)
+            logging.critical('id is not set in %s.' % prop_file)
 
         dest_dir = os.path.join(eval_dir, *id)
         if copy_all:

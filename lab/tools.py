@@ -29,6 +29,16 @@ DEFAULT_EXP_DIR = os.path.join(USER_DIR, 'experiments')
 DEFAULT_REPORTS_DIR = os.path.join(USER_DIR, 'reports')
 
 
+class ErrorAbortHandler(logging.StreamHandler):
+    """
+    Custom logging Handler that exits when an error is encountered.
+    """
+    def emit(self, record):
+        logging.StreamHandler.emit(self, record)
+        if record.levelno >= logging.CRITICAL:
+            sys.exit('aborting')
+
+
 def setup_logging(level):
     # Python adds a default handler if some log is written before now
     # Remove all handlers that have been added automatically
@@ -37,7 +47,7 @@ def setup_logging(level):
         root_logger.removeHandler(handler)
 
     # Handler which writes LOG_LEVEL messages or higher to stdout
-    console = logging.StreamHandler(sys.stdout)
+    console = ErrorAbortHandler(sys.stdout)
     # set a format which is simpler for console use
     format='%(asctime)-s %(levelname)-8s %(message)s'
     formatter = logging.Formatter(format)
@@ -158,9 +168,8 @@ def import_python_file(filename):
         module = __import__(module_name)
         return module
     except ImportError, err:
-        logging.error('File "%s" could not be imported: %s' % (filename, err))
         print traceback.format_exc()
-        sys.exit(1)
+        logging.critical('File "%s" could not be imported: %s' % (filename, err))
 
 
 def _log_command(cmd, kwargs):
@@ -268,9 +277,8 @@ def copy(src, dest, required=True, ignores=None):
         else:
             fast_updatetree(src, dest)
     elif required:
-        logging.error('Required path %s cannot be copied to %s' %
-                      (os.path.abspath(src), os.path.abspath(dest)))
-        sys.exit(1)
+        logging.critical('Required path %s cannot be copied to %s' %
+                         (os.path.abspath(src), os.path.abspath(dest)))
     else:
         # Do not warn if an optional file cannot be copied.
         return

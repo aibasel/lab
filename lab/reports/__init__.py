@@ -84,9 +84,8 @@ class Report(object):
             # Make sure that all selected attributes are present in the dataset
             not_found = set(self.attributes) - set(self.all_attributes)
             if not_found:
-                logging.error('The following attributes are not present in '
-                              'the dataset: %s' % sorted(not_found))
-                sys.exit(1)
+                logging.critical('The following attributes are not present in '
+                                 'the dataset: %s' % sorted(not_found))
         self.attributes.sort()
         logging.info('Selected Attributes: %s' % self.attributes)
 
@@ -197,8 +196,7 @@ class Report(object):
         combined_props_file = os.path.join(self.eval_dir, 'properties')
         if not os.path.exists(combined_props_file):
             msg = 'Properties file not found at %s'
-            logging.error(msg % combined_props_file)
-            sys.exit(1)
+            logging.critical(msg % combined_props_file)
 
         logging.info('Reading properties file')
         self.props = tools.Properties(filename=combined_props_file)
