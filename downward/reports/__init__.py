@@ -68,7 +68,6 @@ class PlanningReport(Report):
             problems.add((domain, problem))
             problem_runs[(domain, problem)].append(run)
             domain_runs[(domain, config)].append(run)
-            # TODO: Remove once props keys are lists
             runs[(domain, problem, config)] = run
         for domain, problem in problems:
             domains[domain].append(problem)
@@ -85,7 +84,6 @@ class PlanningReport(Report):
                 func(runs)
                 # update the data with the new properties
                 for run in runs:
-                    # TODO: Change to list and move config to end.
                     run_id = '-'.join((run['config'], run['domain'], run['problem']))
                     self.props[run_id] = run
 

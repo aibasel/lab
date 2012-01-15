@@ -404,7 +404,7 @@ class Run(_Buildable):
         run_id = self.properties.get('id')
         if run_id is None:
             logging.critical('Each run must have an id')
-        if not type(run_id) is list:
+        if not isinstance(run_id, list):
             logging.critical('id must be a list, but %s is not' % run_id)
         self.properties['id'] = [str(item) for item in run_id]
         _Buildable._build_properties_file(self)

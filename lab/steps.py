@@ -71,7 +71,7 @@ class Sequence(list):
             raise NotImplementedError
         elif step_name == 'all':
             # Run all steps
-            for step in self.steps:
+            for step in self:
                 self.run_step(step)
         else:
             for step in self:

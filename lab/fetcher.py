@@ -9,17 +9,17 @@ class Fetcher(object):
     def fetch_dir(self, run_dir, eval_dir, copy_all=False):
         prop_file = os.path.join(run_dir, 'properties')
         props = tools.Properties(filename=prop_file)
-        id = props.get('id')
+        run_id = props.get('id')
         # Abort if an id cannot be read.
-        if not id:
+        if not run_id:
             logging.critical('id is not set in %s.' % prop_file)
 
-        dest_dir = os.path.join(eval_dir, *id)
+        dest_dir = os.path.join(eval_dir, *run_id)
         if copy_all:
             tools.makedirs(dest_dir)
             tools.fast_updatetree(run_dir, dest_dir)
 
-        return '-'.join(id), props
+        return run_id, props
 
     def __call__(self, exp_dir, eval_dir=None, copy_all=False, write_combined_props=True):
         """
@@ -44,11 +44,10 @@ class Fetcher(object):
         run_dirs = sorted(glob(os.path.join(exp_dir, 'runs-*-*', '*')))
         for index, run_dir in enumerate(run_dirs, 1):
             logging.info('Fetching: %6d/%d' % (index, total_dirs))
-            id_string, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all)
+            run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all)
 
             if write_combined_props:
-                props['id-string'] = id_string
-                combined_props[id_string] = props
+                combined_props['-'.join(run_id)] = props
 
         tools.makedirs(eval_dir)
         if write_combined_props:
