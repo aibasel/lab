@@ -34,25 +34,16 @@ run.add_command('parse', ['SIMPLE_PARSER'])
 exp.add_step(Step('report', Report(), exp.eval_dir, REPORT))
 
 # Compress the experiment directory
-print exp.path
-exp.add_step(Step('zip-exp-dir', call,
-                  ['tar', '-czf', exp.name + '.tar.gz', exp.name],
-                  cwd=os.path.dirname(exp.path)))
+exp.add_step(Step.zip_exp_dir(exp))
 
-# Copy the results
-def copy_results():
-    dest = os.path.join(os.path.expanduser('~'), '.public_html/',
-                        os.path.basename(REPORT))
-    shutil.copy2(REPORT, dest)
-exp.add_step(Step('copy-results', copy_results))
+exp.add_step(Step.publish_reports(REPORT))
 
 # Remove the experiment directory
-exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
+exp.add_step(Step.remove_exp_dir(exp))
 
 # This method parses the commandline. We assume this file is called exp.py.
 # Supported styles:
 # ./exp.py 1
 # ./exp.py 4 5 6
-# ./exp.py next
-# ./exp.py rest      # runs all remaining steps
+# ./exp.py all
 exp()

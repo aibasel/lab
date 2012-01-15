@@ -2,6 +2,7 @@ import getpass
 import os
 import logging
 import shutil
+from subprocess import call
 
 
 class Step(object):
@@ -43,6 +44,15 @@ class Step(object):
                 print 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user, name)
 
         return cls('publish_reports', publish_reports)
+
+    @classmethod
+    def zip_exp_dir(cls, exp):
+        return cls('zip-exp-dir', call, ['tar', '-czf', exp.name + '.tar.gz', exp.name],
+                   cwd=os.path.dirname(exp.path))
+
+    @classmethod
+    def remove_exp_dir(cls, exp):
+        return cls('remove-exp-dir', shutil.rmtree, exp.path)
 
 
 class Sequence(list):
