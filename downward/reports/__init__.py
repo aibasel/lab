@@ -60,12 +60,14 @@ class PlanningReport(Report):
         domains = defaultdict(list)
         configs = set()
         problem_runs = defaultdict(list)
+        domain_runs = defaultdict(list)
         runs = {}
         for run_name, run in self.props.items():
             configs.add(run['config'])
             domain, problem, config = run['domain'], run['problem'], run['config']
             problems.add((domain, problem))
             problem_runs[(domain, problem)].append(run)
+            domain_runs[(domain, config)].append(run)
             # TODO: Remove once props keys are lists
             runs[(domain, problem, config)] = run
         for domain, problem in problems:
@@ -74,6 +76,7 @@ class PlanningReport(Report):
         self.problems = list(sorted(problems))
         self.domains = domains
         self.problem_runs = problem_runs
+        self.domain_runs = domain_runs
         self.runs = runs
 
     def compute_derived_properties(self):
