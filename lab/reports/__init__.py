@@ -67,6 +67,7 @@ class Report(object):
         self.outfile = outfile
 
         self._load_data()
+        # TODO: Remove datasets
         self.all_attributes = sorted(self.data.get_attributes())
         logging.info('Available attributes: %s' % self.all_attributes)
 

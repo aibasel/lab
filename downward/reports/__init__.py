@@ -9,6 +9,7 @@ import logging
 from collections import defaultdict
 
 from lab import reports
+from lab import tools
 from lab.reports import Report, Table
 
 
@@ -27,13 +28,46 @@ class PlanningTable(Table):
             self.add_summary_function('AVERAGE', reports.avg)
 
 
+def quality(problem_runs):
+    """IPC score."""
+    min_cost = tools.minimum(run.get('cost') for run in problem_runs)
+    for run in problem_runs:
+        cost = run.get('cost')
+        if cost is None:
+            quality = 0.0
+        elif cost == 0:
+            assert min_cost == 0
+            quality = 1.0
+        else:
+            quality = min_cost / cost
+        run['quality'] = round(quality, 4)
+
+
 class PlanningReport(Report):
     def __init__(self, *args, **kwargs):
         Report.__init__(self, *args, **kwargs)
+        self.derived_properties = []
+        self.add_derived_property(quality)
+
+    def add_derived_property(self, func):
+        self.derived_properties.append(func)
 
     def _load_data(self):
         Report._load_data(self)
         self.process_data()
+        self.compute_derived_properties()
+
+    def compute_derived_properties(self):
+        for func in self.derived_properties:
+            for (domain, problem), runs in self.problem_runs.items():
+                print runs[0].get('quality')
+                func(runs)
+                print runs[0].get('quality')
+                # update the data with the new properties
+                for run in runs:
+                    # TODO: Change to list and move config to end.
+                    run_id = '-'.join((run['config'], run['domain'], run['problem']))
+                    self.props[run_id] = run
 
     def process_data(self):
         # Use local variables first to save lookups

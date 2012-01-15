@@ -108,7 +108,6 @@ class Parser(object):
     def __init__(self):
         self.file_parsers = defaultdict(_FileParser)
         self.check = None
-        self.postprocess_functions = []
 
     def add_pattern(self, name, regex, group=1, file='run.log', required=True,
                     type=int, flags=''):
@@ -156,19 +155,6 @@ class Parser(object):
         on them to assert some things.
         """
         self.check = function
-
-    def apply_postprocess_functions(self, combined_props):
-        if not self.postprocess_functions:
-            return
-
-        prob_to_runs = defaultdict(list)
-        for run_name, run in combined_props.items():
-            prob = '%s:%s' % (run['domain'], run['problem'])
-            prob_to_runs[prob].append(run)
-
-        for func in self.postprocess_functions:
-            for prob, problem_runs in prob_to_runs.items():
-                func(problem_runs)
 
     def parse(self, run_dir='.', copy_all=False):
         prop_file = os.path.join(run_dir, 'properties')

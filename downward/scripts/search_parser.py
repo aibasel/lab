@@ -220,20 +220,6 @@ def check_min_values(content, props):
 # -----------------------------------------------------------------------------
 
 
-def quality(problem_runs):
-    min_cost = tools.minimum(run.get('cost') for run in problem_runs)
-    for run in problem_runs:
-        cost = run.get('cost')
-        if cost is None:
-            quality = 0.0
-        elif cost == 0:
-            assert min_cost == 0
-            quality = 1.0
-        else:
-            quality = min_cost / cost
-        run['quality'] = round(quality, 4)
-
-
 def get_bisimulation_results(content, props):
     # Sets "mas_complete" to 1 if a M&S heuristic was computed completely
     # and resulted in an abstraction with finite goal distance for the
@@ -417,7 +403,6 @@ class SearchParser(Parser):
         self.add_search_functions()
 
         self.set_check(check)
-        self.postprocess_functions.append(quality)
 
     def add_search_parsing(self):
         self.add_pattern('landmarks', r'Discovered (\d+?) landmarks', type=int,
