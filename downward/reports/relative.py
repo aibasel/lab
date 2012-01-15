@@ -24,10 +24,9 @@ class RelativeReport(AbsoluteReport):
         self.abs_change = abs_change
 
     def write(self):
-        configs = self.get_configs()
-        if not len(configs) == 2:
+        if not len(self.configs) == 2:
             logging.error('Relative reports are only possible for 2 configs. '
-                          'Selected configs: "%s"' % configs)
+                          'Selected configs: "%s"' % self.configs)
             sys.exit(1)
         AbsoluteReport.write(self)
 

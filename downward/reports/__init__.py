@@ -45,31 +45,16 @@ def quality(problem_runs):
 
 class PlanningReport(Report):
     def __init__(self, *args, **kwargs):
+        self.derived_properties = kwargs.pop('derived_properties', [])
         Report.__init__(self, *args, **kwargs)
-        self.derived_properties = []
-        self.add_derived_property(quality)
+        self.derived_properties.append(quality)
 
-    def add_derived_property(self, func):
-        self.derived_properties.append(func)
-
-    def _load_data(self):
-        Report._load_data(self)
-        self.process_data()
+    def scan_data(self):
+        self.scan_planning_data()
         self.compute_derived_properties()
+        Report.scan_data(self)
 
-    def compute_derived_properties(self):
-        for func in self.derived_properties:
-            for (domain, problem), runs in self.problem_runs.items():
-                print runs[0].get('quality')
-                func(runs)
-                print runs[0].get('quality')
-                # update the data with the new properties
-                for run in runs:
-                    # TODO: Change to list and move config to end.
-                    run_id = '-'.join((run['config'], run['domain'], run['problem']))
-                    self.props[run_id] = run
-
-    def process_data(self):
+    def scan_planning_data(self):
         # Use local variables first to save lookups
         problems = set()
         domains = defaultdict(list)
@@ -91,6 +76,16 @@ class PlanningReport(Report):
         self.problem_runs = problem_runs
         self.runs = runs
 
+    def compute_derived_properties(self):
+        for func in self.derived_properties:
+            for (domain, problem), runs in self.problem_runs.items():
+                func(runs)
+                # update the data with the new properties
+                for run in runs:
+                    # TODO: Change to list and move config to end.
+                    run_id = '-'.join((run['config'], run['domain'], run['problem']))
+                    self.props[run_id] = run
+
     def get_markup(self):
         # list of (attribute, table) pairs
         tables = []
@@ -103,10 +98,6 @@ class PlanningReport(Report):
 
         return ''.join(['+ %s +\n%s\n' % (attr, table)
                         for (attr, table) in tables])
-
-    def get_configs(self):
-        """Return the list of configs."""
-        return list(set([run['config'] for run in self.data]))
 
     def _get_empty_table(self, attribute):
         '''

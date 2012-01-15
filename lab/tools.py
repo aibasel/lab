@@ -11,7 +11,6 @@ import math
 import json
 
 from external import argparse
-from external.datasets import DataSet
 
 
 LOG_LEVEL = None
@@ -213,14 +212,6 @@ class Properties(dict):
         assert self.filename
         with open(self.filename, 'w') as f:
             json.dump(self, f, indent=4)
-
-    def get_dataset(self):
-        data = DataSet()
-        for run_id, run in sorted(self.items()):
-            # HACK: Python < 2.6.5 doesn't allow unicode keyword args.
-            no_unicode = dict((k.encode('ascii'), v) for (k, v) in run.items())
-            data.append(**no_unicode)
-        return data
 
 
 def fast_updatetree(src, dst, ignore=None):

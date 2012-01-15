@@ -11,7 +11,6 @@ from collections import defaultdict
 
 # The lab directory is added automatically in the Experiment constructor
 from lab.parser import Parser
-from lab import tools
 
 
 def check(props):

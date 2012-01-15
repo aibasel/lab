@@ -99,7 +99,7 @@ class ScatterPlotReport(AbsoluteReport):
         canvas.print_figure(filename, dpi=100)
 
     def write(self):
-        assert len(self.get_configs()) == 2, self.get_configs()
+        assert len(self.configs) == 2, self.configs
 
         filename = self.get_filename()
         if not filename.endswith('.png'):

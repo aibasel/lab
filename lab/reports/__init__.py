@@ -15,7 +15,6 @@ from collections import defaultdict
 from lab import tools
 from markup import Document
 from lab.external import txt2tags
-from lab.external.datasets import missing
 
 
 def avg(values):
@@ -66,9 +65,8 @@ class Report(object):
         self.eval_dir = os.path.abspath(eval_dir)
         self.outfile = outfile
 
-        self._load_data()
-        # TODO: Remove datasets
-        self.all_attributes = sorted(self.data.get_attributes())
+        self.load_data()
+        self.scan_data()
         logging.info('Available attributes: %s' % self.all_attributes)
 
         if not self.attributes:
@@ -89,8 +87,9 @@ class Report(object):
 
     def _get_numerical_attributes(self):
         def is_numerical(attribute):
-            for val in self.data.key(attribute)[0]:
-                if val is missing:
+            for run_id, run in self.props.items():
+                val = run.get(attribute)
+                if val is None:
                     continue
                 return type(val) in [int, float]
             logging.info("Attribute %s is missing in all runs." % attribute)
@@ -115,9 +114,7 @@ class Report(object):
         get_text() method.
         """
         table = Table(highlight=False)
-        for run_id, run_group in sorted(self.data.groups('id-string')):
-            assert len(run_group) == 1, run_group
-            run = run_group.items[0]
+        for run_id, run in self.props.items():
             del run['id']
             for key, value in run.items():
                 if type(value) is list:
@@ -161,7 +158,13 @@ class Report(object):
             file.write(content)
             logging.info('Wrote file://%s' % filename)
 
-    def _load_data(self):
+    def scan_data(self):
+        attributes = set()
+        for run_id, run in self.props.items():
+            attributes |= set(run.keys())
+        self.all_attributes = list(sorted(attributes))
+
+    def load_data(self):
         combined_props_file = os.path.join(self.eval_dir, 'properties')
         if not os.path.exists(combined_props_file):
             msg = 'Properties file not found at %s'
@@ -170,17 +173,15 @@ class Report(object):
         logging.info('Reading properties file')
         self.props = tools.Properties(filename=combined_props_file)
         logging.info('Reading properties file finished')
-        self.data = self.props.get_dataset()
-        logging.info('Finished turning properties into dataset')
 
     def _apply_filters(self):
         if not self.filters:
             return
-        self.data.filter(*self.filters)
-        new_props = tools.Properties(self.props.filename)
+        new_props = tools.Properties()
         for run_id, run in self.props.items():
             if all(filter(run) for filter in self.filters):
                 new_props[run_id] = run
+        new_props.filename = self.props.filename
         self.props = new_props
 
 

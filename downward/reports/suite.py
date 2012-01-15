@@ -19,11 +19,9 @@ class SuiteReport(PlanningReport):
         PlanningReport.__init__(self, *args, **kwargs)
 
     def get_text(self):
-        if len(self.data) == 0:
+        if not self.props:
             sys.exit('No problems match those filters')
-        problems = [run['domain'] + ':' + run['problem'] for run in self.data]
-        # Sort and remove duplicates
-        problems = sorted(set(problems))
+        problems = [domain + ':' + problem for domain, problem in self.problems]
         problems = ['        "%s",\n' % problem for problem in problems]
         output = ('def suite():\n    return [\n%s    ]\n' % ''.join(problems))
         print '\nSUITE:'
