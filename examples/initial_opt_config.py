@@ -66,12 +66,10 @@ exp.add_step(Step('report-suite', SuiteReport(filters=[solved]), exp.eval_dir, s
 exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
 
 # Compress the experiment directory
-exp.add_step(Step('zip-exp-dir', call,
-                  ['tar', '-czf', exp.name + '.tar.gz', exp.name],
-                  cwd=os.path.dirname(exp.path)))
+exp.add_step(Step.zip_exp_dir(exp))
 
 # Remove the experiment directory
-exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
+exp.add_step(Step.remove_exp_dir(exp))
 
 
 if __name__ == '__main__':

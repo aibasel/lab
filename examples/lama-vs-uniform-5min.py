@@ -49,8 +49,5 @@ abs_problem_report_file = os.path.join(REPORTS, '%s-abs-p.html' % EXPNAME)
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES), exp.eval_dir, abs_domain_report_file))
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES), exp.eval_dir, abs_problem_report_file))
 
-# Remove the experiment directory
-#exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
-
 # This method parses the commandline.
 exp()
