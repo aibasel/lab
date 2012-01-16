@@ -74,11 +74,6 @@ def generate_problems(benchmarks_dir, description):
     gripper:prob01.pddl
     gripper
     TEST
-    mysuitefile.py:mytest
-    mysuitefile.py:MYTEST
-
-    TEST_FIRST5
-    mysuitefile.py:MYTEST_FIRST5
     """
     range_expr = re.compile(r'.+_([-]?\d+)TO([-]?\d+)', re.IGNORECASE)
     range_result = range_expr.search(description)
@@ -108,7 +103,7 @@ def generate_problems(benchmarks_dir, description):
         if not suite_func:
             raise SystemExit("unknown suite: %s" % func_name)
         for domain_name in suite_func():
-            domain = Domain(domain_name)
+            domain = Domain(benchmarks_dir, domain_name)
             for problem in domain.problems[start - 1:end]:
                 yield problem
     elif isinstance(description, Problem):
