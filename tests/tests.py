@@ -7,9 +7,9 @@ import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)-s %(levelname)-8s %(message)s',)
 
-from tools import copy, prod
-from reports import gm
-import tools
+from lab.tools import copy, prod
+from lab.reports import gm
+from lab import tools
 
 base = os.path.join('/tmp', str(datetime.datetime.now()))
 os.mkdir(base)
@@ -58,7 +58,7 @@ def gm_old(values):
 def test_gm1():
     lists = [1, 2, 4, 5], [0.4, 0.8], [2, 8], [10 ** (-5), 5000]
     for l in lists:
-        assert gm_old(l) == gm(l)
+        assert round(gm_old(l), 2) == round(gm(l), 2)
 
 
 def test_rounding():
