@@ -270,20 +270,19 @@ class Table(collections.defaultdict):
 
         min_wins = self.min_wins
 
-        text = '| %-30s ' % (row_name)
+        parts = ['| %-30s' % (row_name)]
         for value in values:
             is_min = (value == min_value)
             is_max = (value == max_value)
             if self.highlight and only_one_value:
                 value_text = '{{%s|color:Gray}}' % value
             elif self.highlight and (min_wins and is_min or
-                                        not min_wins and is_max):
+                                     not min_wins and is_max):
                 value_text = '**%s**' % value
             else:
                 value_text = str(value)
-            text += '| %-16s ' % value_text
-        text += '|\n'
-        return text
+            parts.append('%-16s' % value_text)
+        return ' | '.join(parts) + ' |'
 
     def add_summary_function(self, name, func):
         """
@@ -300,8 +299,6 @@ class Table(collections.defaultdict):
         | **gripper     ** | 118              | 72               |
         | **zenotravel  ** | 21               | 17               |
         """
-        text = '|| %-29s | ' % self.title
-
         def get_col_markup(col):
             # Allow custom sorting of the column names
             if '-SORT:' in col:
@@ -309,9 +306,11 @@ class Table(collections.defaultdict):
             # Escape config names to prevent unvoluntary markup
             return '%-16s' % ('""%s""' % col)
 
-        text += ' | '.join(get_col_markup(col) for col in self.cols) + ' |\n'
+        header = ('|| %-29s | ' % self.title +
+                  ' | '.join(get_col_markup(col) for col in self.cols) + ' |')
+        table_rows = [header]
         for row in self.rows:
-            text += self.get_row_markup(row)
+            table_rows.append(self.get_row_markup(row))
         for name, func in self.summary_funcs:
             summary_row = {}
             for col, content in self.get_columns().items():
@@ -320,6 +319,5 @@ class Table(collections.defaultdict):
                     summary_row[col] = func(content)
                 else:
                     summary_row[col] = None
-            text += self.get_row_markup(name, summary_row)
-        text += ' '.join(self.info)
-        return text
+            table_rows.append(self.get_row_markup(name, summary_row))
+        return '\n'.join(table_rows) + ' '.join(self.info)
