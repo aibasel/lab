@@ -186,17 +186,12 @@ class Report(object):
 
 
 class Table(collections.defaultdict):
-    def __init__(self, title='', highlight=True, min_wins=True,
-                 numeric_rows=True):
-        """
-        If numeric_rows is True, we do not make the first column bold.
-        """
+    def __init__(self, title='', highlight=True, min_wins=True):
         collections.defaultdict.__init__(self, dict)
 
         self.title = title
         self.highlight = highlight
         self.min_wins = min_wins
-        self.numeric_rows = numeric_rows
 
         self.summary_funcs = []
         self.column_order = {}
@@ -275,11 +270,7 @@ class Table(collections.defaultdict):
 
         min_wins = self.min_wins
 
-        text = ''
-        if self.numeric_rows:
-            text += '| %-30s ' % (row_name)
-        else:
-            text += '| %-30s ' % ('**' + row_name + '**')
+        text = '| %-30s ' % (row_name)
         for value in values:
             is_min = (value == min_value)
             is_max = (value == max_value)
