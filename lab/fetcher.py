@@ -30,7 +30,6 @@ class Fetcher(object):
         write_combined_props: Write the combined properties file.
         """
         exp_props = tools.Properties(filename=os.path.join(exp_dir, 'properties'))
-        total_dirs = exp_props.get('runs')
 
         assert not exp_dir.endswith('/')
         eval_dir = eval_dir or exp_dir + '-eval'
@@ -42,6 +41,7 @@ class Fetcher(object):
 
         # Get all run_dirs
         run_dirs = sorted(glob(os.path.join(exp_dir, 'runs-*-*', '*')))
+        total_dirs = len(run_dirs)
         for index, run_dir in enumerate(run_dirs, 1):
             logging.info('Fetching: %6d/%d' % (index, total_dirs))
             run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all)
