@@ -21,26 +21,34 @@ class Fetcher(object):
 
         return run_id, props
 
-    def __call__(self, exp_dir, eval_dir=None, copy_all=False, write_combined_props=True):
+    def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True):
         """
+        This method can be used to copy properties from exp-dirs or eval-dirs
+        into eval-dirs. If the destination eval-dirs already exist, the data
+        will be merged. This means src_dir can either be an exp-dir or an
+        eval-dir and eval_dir can be a new or existing directory.
+
         copy_all: Copy all files from run dirs to a new directory tree.
                   Without this option only the combined properties file is
                   written do disk.
 
         write_combined_props: Write the combined properties file.
         """
-        exp_props = tools.Properties(filename=os.path.join(exp_dir, 'properties'))
+        src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
+        fetch_from_eval_dir = 'runs' in src_props or src_dir.endswith('-eval')
+        logging.info('Fetching from evaluation dir: %s' % fetch_from_eval_dir)
 
-        assert not exp_dir.endswith('/')
-        eval_dir = eval_dir or exp_dir + '-eval'
-        logging.info('Fetching files from %s -> %s' % (exp_dir, eval_dir))
+        eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
+        logging.info('Fetching files from %s -> %s' % (src_dir, eval_dir))
 
         if write_combined_props:
-            combined_props_filename = os.path.join(eval_dir, 'properties')
-            combined_props = tools.Properties(filename=combined_props_filename)
+            # Load properties in the eval_dir if there are any already.
+            combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
+            if fetch_from_eval_dir:
+                combined_props.update(src_props)
 
-        # Get all run_dirs
-        run_dirs = sorted(glob(os.path.join(exp_dir, 'runs-*-*', '*')))
+        # Get all run_dirs. None will be found if we fetch from an eval dir.
+        run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
         total_dirs = len(run_dirs)
         for index, run_dir in enumerate(run_dirs, 1):
             logging.info('Fetching: %6d/%d' % (index, total_dirs))
