@@ -5,6 +5,50 @@ import logging
 from lab.external import txt2tags
 
 
+TABLE_HEAD_BG = '#aaa'
+BLOCKQUOTE_BG = '#ccc'
+
+CSS = """\
+<style type="text/css">
+    body {
+        font-family: Ubuntu, Helvetica, Arial, sans-serif;
+    }
+    blockquote {
+        margin: 1em 2em;
+        border-left: 2px solid #999;
+        font-style: oblique;
+        padding-left: 1em;
+    }
+    blockquote:first-letter {
+        margin: .2em .1em .1em 0;
+        font-size: 160%%;
+        font-weight: bold;
+    }
+    blockquote:first-line {
+        font-weight: bold;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    td, th {
+        <!--border: 1px solid #888;--> <!--Allow tables without borders-->
+        padding: 3px 7px 2px 7px;
+    }
+    th {
+        text-align: left;
+        padding-top: 5px;
+        padding-bottom: 4px;
+        background-color: %(TABLE_HEAD_BG)s;
+        color: #ffffff;
+    }
+    hr.heavy {
+        height: 2px;
+        background-color: black;
+    }
+</style>
+""" % globals()
+
+
 def raw(s):
     return '""%s""' % s
 
@@ -26,6 +70,9 @@ def _get_config(target):
         config['toc'] = 0
         config['css-inside'] = 1
         config['css-sugar'] = 1
+
+        # Custom css
+        config['postproc'].append([r'</head>', CSS + '</head>'])
 
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\\\\', r'<br />'])
