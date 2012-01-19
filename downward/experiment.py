@@ -330,6 +330,7 @@ class DownwardExperiment(Experiment):
         preprocess_dir = os.path.join(PREPROCESSED_TASKS_DIR,
                                       translator.name + '-' + preprocessor.name,
                                       prob.domain, prob.problem)
+
         def path(filename):
             return os.path.join(preprocess_dir, filename)
 

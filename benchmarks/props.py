@@ -28,7 +28,7 @@ PROPS = dict(tools.Properties(PROPFILE))
 print 'DONE READING'
 
 
-DIC      = {}
+DIC = {}
 NB_ITERS = int(sys.argv[2])
 
 

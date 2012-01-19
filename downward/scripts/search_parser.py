@@ -355,7 +355,7 @@ def get_bisimulation_results(content, props):
     else:
         props["mas_complete"] = int(False)
         props["mas_unsolvable"] = int(False)
-        return # incomplete run -- don't set variables
+        return  # incomplete run -- don't set variables
 
     assert len(states) == variable_count - 1
     assert len(arcs) == variable_count - 1

@@ -48,7 +48,7 @@ def setup_logging(level):
     # Handler which writes LOG_LEVEL messages or higher to stdout
     console = ErrorAbortHandler(sys.stdout)
     # set a format which is simpler for console use
-    format='%(asctime)-s %(levelname)-8s %(message)s'
+    format = '%(asctime)-s %(levelname)-8s %(message)s'
     formatter = logging.Formatter(format)
     # tell the handler to use this format
     console.setFormatter(formatter)
@@ -91,7 +91,7 @@ def divide_list(seq, size):
 
 def round_to_next_power_of_ten(i):
     assert i > 0
-    return 10**math.ceil(math.log10(i))
+    return 10 ** math.ceil(math.log10(i))
 
 
 def makedirs(dir):
@@ -151,7 +151,7 @@ def find_file(basenames, dir='.'):
 
 
 def import_python_file(filename):
-    parent_dir =  os.path.dirname(filename)
+    parent_dir = os.path.dirname(filename)
     if parent_dir not in sys.path:
         sys.path.insert(0, parent_dir)
     filename = os.path.normpath(filename)
@@ -283,13 +283,14 @@ def csv(string):
 def get_terminal_size():
     import struct
     try:
-        import fcntl, termios
+        import fcntl
+        import termios
     except ImportError:
         return (None, None)
 
     try:
         data = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, 4 * '00')
-        height, width = struct.unpack('4H',data)[:2]
+        height, width = struct.unpack('4H', data)[:2]
         return (height, width)
     except Exception:
         return (None, None)

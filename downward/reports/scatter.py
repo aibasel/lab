@@ -69,7 +69,7 @@ class ScatterPlotReport(AbsoluteReport):
         ax.grid(b=True, linestyle='-', color='0.75')
 
         # Generate the scatter plot
-        ax.scatter(values1, values2, s=20, marker='o', c='r');
+        ax.scatter(values1, values2, s=20, marker='o', c='r')
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         ax.plot([0.001, plot_size], [0.001, plot_size], 'k')
@@ -87,12 +87,14 @@ class ScatterPlotReport(AbsoluteReport):
         for axis in (ax.xaxis, ax.yaxis):
             formatter = axis.get_major_formatter()
             old_format_call = formatter.__call__
+
             def new_format_call(x, pos):
                 if x == 0:
                     return 0
                 if x == missing_val:
-                    return 'Missing' # '$\mathdefault{None^{\/}}$' no effect
+                    return 'Missing'  # '$\mathdefault{None^{\/}}$' no effect
                 return old_format_call(x, pos)
+
             formatter.__call__ = new_format_call
 
         # Save the generated scatter plot to a PNG file

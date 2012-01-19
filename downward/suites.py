@@ -17,6 +17,7 @@ class Repository(object):
                    if not d.startswith(".")]
         domains.sort()
         self.domains = [Domain(domain) for domain in domains]
+
     def __iter__(self):
         return iter(self.domains)
 
@@ -31,14 +32,19 @@ class Domain(object):
                                           not p.startswith(".")])
         tools.natural_sort(problems)
         self.problems = [Problem(benchmarks_dir, domain, problem) for problem in problems]
+
     def __str__(self):
         return self.domain
+
     def __repr__(self):
         return "<Domain %s>" % self.domain
+
     def __hash__(self):
         return hash(self.domain)
+
     def __cmp__(self, other):
         return cmp(self.domain, other.domain)
+
     def __iter__(self):
         return iter(self.problems)
 
@@ -48,16 +54,22 @@ class Problem(object):
         self.benchmarks_dir = benchmarks_dir
         self.domain = domain
         self.problem = problem
+
     def __str__(self):
         return "%s:%s" % (self.domain, self.problem)
+
     def __repr__(self):
         return "<Problem %s:%s>" % (self.domain, self.problem)
+
     def __hash__(self):
         return hash((self.domain, self.problem))
+
     def __cmp__(self, other):
         return cmp((self.domain, self.problem), (other.domain, other.problem))
+
     def problem_file(self):
         return os.path.join(self.benchmarks_dir, self.domain, self.problem)
+
     def domain_file(self):
         domain_basenames = ["domain.pddl",
                             self.problem[:4] + "domain.pddl",

@@ -23,12 +23,18 @@ class _MultiPattern(object):
         flag = 0
 
         for char in flags:
-            if   char == 'M': flag |= re.M
-            elif char == 'L': flag |= re.L
-            elif char == 'S': flag |= re.S
-            elif char == 'I': flag |= re.I
-            elif char == 'U': flag |= re.U
-            elif char == 'X': flag |= re.X
+            if   char == 'M':
+                flag |= re.M
+            elif char == 'L':
+                flag |= re.L
+            elif char == 'S':
+                flag |= re.S
+            elif char == 'I':
+                flag |= re.I
+            elif char == 'U':
+                flag |= re.U
+            elif char == 'X':
+                flag |= re.X
 
         self.regex = re.compile(regex, flag)
 
