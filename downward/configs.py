@@ -1,9 +1,12 @@
 """
 Detailed syntax explanations are available at
 http://alfons.informatik.uni-freiburg.de/downward/PlannerUsage
+
+Configs do not have to be added here. For an easier reference, add them to
+your experiment script directly.
 """
 
-# Eager A* search with landmark-cut heuristic (previously configuration ou)
+# Eager A* search with landmark-cut heuristic
 lmcut = ["--search", "astar(lmcut())"]
 
 fF = ["--heuristic", "hff=ff()", "--search", "lazy_greedy(hff, preferred=hff)"]

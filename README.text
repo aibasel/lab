@@ -9,7 +9,7 @@ downward
 ========
 A second package that makes use of the lab package is located in "downward".
 It can be used to run experiments and create custom reports for the
-Fast Downward planning system (www.fast-downward.org).
+[Fast Downward planning system](www.fast-downward.org).
 In "examples" you find several example Fast Downward experiments.
 
 
@@ -17,4 +17,7 @@ Requirements
 ============
 - Python 2.6 or 2.7
 - Only tested on Linux
-- The base directory (containing "lab" and "downward") must be on the PYTHONPATH
+- The base directory (containing "lab" and "downward") must be on the
+  PYTHONPATH:
+    # in your bashrc:
+    export PYTHONPATH=/path/to/base/dir
