@@ -35,11 +35,11 @@ class Fetcher(object):
         write_combined_props: Write the combined properties file.
         """
         src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
-        fetch_from_eval_dir = 'runs' in src_props or src_dir.endswith('-eval')
-        logging.info('Fetching from evaluation dir: %s' % fetch_from_eval_dir)
+        fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
 
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching files from %s -> %s' % (src_dir, eval_dir))
+        logging.info('Fetching from evaluation dir: %s' % fetch_from_eval_dir)
 
         if write_combined_props:
             # Load properties in the eval_dir if there are any already.
