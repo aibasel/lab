@@ -18,6 +18,5 @@ Requirements
 - Python 2.6 or 2.7
 - Only tested on Linux
 - The base directory (containing "lab" and "downward") must be on the
-  PYTHONPATH:
-    # in your bashrc:
-    export PYTHONPATH=/path/to/base/dir
+  PYTHONPATH, so you might want to add "export PYTHONPATH=/path/to/base/dir"
+  to your .bashrc
