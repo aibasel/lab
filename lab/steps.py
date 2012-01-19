@@ -41,7 +41,7 @@ class Step(object):
                 dest = os.path.join(os.path.expanduser('~'), '.public_html/', name)
                 shutil.copy2(path, dest)
                 print 'Copied report to file://%s' % dest
-                print 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user, name)
+                print '-> http://www.informatik.uni-freiburg.de/~%s/%s' % (user, name)
 
         return cls('publish_reports', publish_reports)
 

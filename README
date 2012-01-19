@@ -8,8 +8,7 @@ The directory "examples/simple" contains a very basic usage example.
 A second package that makes use of the lab package is located in "downward".
 It can be used to run experiments and create custom reports for the
 Fast Downward planning system (www.fast-downward.org).
-The script "examples/initial-opt-config.py" is an example Fast Downward
-experiment.
+In "examples" you find several example Fast Downward experiments.
 
 
 === Requirements ===
