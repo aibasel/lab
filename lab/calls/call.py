@@ -60,6 +60,14 @@ class Call(subprocess.Popen):
 
         subprocess.Popen.__init__(self, args, preexec_fn=prepare_call, **kwargs)
 
+    def terminate(self):
+        print "aborting children with SIGTERM..."
+        kill_pgrp(self.pid, signal.SIGTERM)
+
+    def kill(self):
+        print "aborting children with SIGKILL..."
+        kill_pgrp(self.pid, signal.SIGKILL)
+
     def wait(self):
         """Wait for child process to terminate.
 
@@ -71,7 +79,12 @@ class Call(subprocess.Popen):
         last_log_time = 0
         wall_clock_start_time = time.time()
         while True:
-            time.sleep(self.check_interval)
+            try:
+                time.sleep(self.check_interval)
+            except KeyboardInterrupt:
+                print 'Keyboard interrupt received'
+                self.terminate()
+
             real_time += self.check_interval
 
             group = ProcessGroup(self.pid)
@@ -103,14 +116,10 @@ class Call(subprocess.Popen):
                         total_vsize > 1.5 * self.mem_limit)
 
             if try_term and not term_attempted:
-                print "aborting children with SIGTERM..."
-                print "children found: %s" % group.pids()
-                kill_pgrp(self.pid, signal.SIGTERM)
+                self.terminate()
                 term_attempted = True
             elif term_attempted and try_kill:
-                print "aborting children with SIGKILL..."
-                print "children found: %s" % group.pids()
-                kill_pgrp(self.pid, signal.SIGKILL)
+                self.kill()
 
         # Even if we got here, there may be orphaned children or something
         # we may have missed due to a race condition. Check for that and kill.
@@ -119,9 +128,8 @@ class Call(subprocess.Popen):
         if group:
             # If we have reason to suspect someone still lives, first try to
             # kill them nicely and wait a bit.
-            print "aborting orphaned children with SIGTERM..."
-            print "children found: %s" % group.pids()
-            kill_pgrp(self.pid, signal.SIGTERM)
+            print "Orphaned children found: %s" % group.pids()
+            self.terminate()
             time.sleep(1)
 
         # Either way, kill properly for good measure. Note that it's not clear
