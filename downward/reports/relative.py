@@ -1,3 +1,5 @@
+from __future__ import division
+
 import logging
 import sys
 
@@ -5,13 +7,6 @@ from downward.reports.absolute import AbsoluteReport
 
 
 class RelativeReport(AbsoluteReport):
-    """
-    Write a relative report about the focus attribute, e.g.
-
-    || expanded        | fF               | yY               |
-    | **gripper     ** | 1.0              | 0.6102           |
-    | **zenotravel  ** | 1.0              | 0.8095           |
-    """
     def __init__(self, resolution, rel_change=0, abs_change=0.0, **kwargs):
         """
         rel_change = Percentage that the value must have changed between two
