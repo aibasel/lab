@@ -1,2 +1,12 @@
-This directory contains scripts for conducting Fast Downward experiments.
-You can find usage instructions at http://www.fast-downward.org/ScriptUsage .
+=== lab ===
+This project contains a python package for conducting and analyzing
+experiments that run on single machines or on computer clusters.
+The lab package can be found in the "lab" directory.
+The directory "examples/simple" contains a very basic usage example.
+
+=== downward ===
+A second package that makes use of the lab package is located in "downward".
+It can be used to run experiments and create custom reports for the
+Fast Downward planning system (www.fast-downward.org).
+The script "examples/initial-opt-config.py" is an example Fast Downward
+experiment.
