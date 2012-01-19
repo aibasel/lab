@@ -3,8 +3,6 @@
 Main module for experiment creation
 """
 
-from __future__ import with_statement
-
 import os
 import sys
 import logging
@@ -238,7 +236,7 @@ class Experiment(_Buildable):
 
 class Run(_Buildable):
     """
-    A Task can consist of one or multiple Runs
+    An experiment consists of one or multiple runs
     """
     def __init__(self, experiment):
         _Buildable.__init__(self)

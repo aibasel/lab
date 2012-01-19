@@ -10,3 +10,9 @@ It can be used to run experiments and create custom reports for the
 Fast Downward planning system (www.fast-downward.org).
 The script "examples/initial-opt-config.py" is an example Fast Downward
 experiment.
+
+
+=== Requirements ===
+- Python 2.6 or 2.7
+- Only tested on Linux
+- The base directory (containing "lab" and "downward") must be on the PYTHONPATH

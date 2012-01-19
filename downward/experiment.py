@@ -222,7 +222,13 @@ class DownwardExperiment(Experiment):
 
     def add_suite(self, suite):
         """
-        suite can either be a string or a list of strings.
+        suite can either be a string or a list of strings. The strings can be
+        tasks, domains or suites:
+
+        >>> exp.add_suite("gripper")
+        >>> exp.add_suite("gripper:prob01.pddl")
+        >>> exp.add_suite("STRIPS")
+        >>> exp.add_suite(["miconic", "trucks", "grid"])
         """
         if isinstance(suite, basestring):
             parts = [part.strip() for part in suite.split(',')]
@@ -231,9 +237,18 @@ class DownwardExperiment(Experiment):
             self.suites.extend(suite)
 
     def add_config(self, nick, config):
+        """
+        nick is the name the config will get in the reports.
+        config must be a list of arguments that can be passed to the planner.
+
+        >>> exp.add_config("lmcut", ["--search", "astar(lmcut())"])
+        """
         self.configs.append((nick, config))
 
     def add_portfolio(self, portfolio_file):
+        """
+        portfolio_file must be the path to a Fast Downward portfolio file.
+        """
         self.portfolios.append(portfolio_file)
 
     def run(self, stage):

@@ -3,13 +3,6 @@ import re
 
 from lab import tools
 
-HELP = """\
-Comma separated list of tasks, domains or suites. They can have the following \
-forms: gripper, gripper:prob01.pddl, \
-TEST, mysuitefile.py:myTEST, TEST_FIRST5, mysuitefile.py:myTEST_FIRST5
-The python modules have to live in the scripts dir.
-"""
-
 
 class Repository(object):
     def __init__(self, benchmarks_dir):
