@@ -36,7 +36,8 @@ class _Buildable(object):
         """
         self.properties[name] = value
 
-    def add_resource(self, resource_name, source, dest, required=True, symlink=False):
+    def add_resource(self, resource_name, source, dest, required=True,
+                     symlink=False):
         """
         Example:
         >>> experiment.add_resource('PLANNER', 'path/to/planner', 'dest-name')
@@ -44,15 +45,14 @@ class _Buildable(object):
         Includes a "global" file, i.e., one needed for all runs, into the
         experiment archive. In case of GkiGridExperiment, copies it to the
         main directory of the experiment. The name "PLANNER" is an ID for
-        this resource that can also be used to refer to it in shell scripts.
+        this resource that can also be used to refer to it in the run script.
 
         Example:
         >>> run.add_resource('DOMAIN', '../benchmarks/gripper/domain.pddl',
                              'domain.pddl')
 
-        Copy "../benchmarks/gripper/domain.pddl" into the run
-        directory under name "domain.pddl" and make it available as
-        resource "DOMAIN" (usable as environment variable $DOMAIN).
+        Copy "../benchmarks/gripper/domain.pddl" into the run directory under
+        the name "domain.pddl" and make it available as resource "DOMAIN".
         """
         if not (source, dest) in self.resources:
             self.resources.append((source, dest, required, symlink))
