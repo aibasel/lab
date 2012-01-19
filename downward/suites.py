@@ -22,9 +22,10 @@ class Domain(object):
         problems = os.listdir(self.directory)
         problems = tools.natural_sort([p for p in problems
                                        if "domain" not in p and
-                                          not p.startswith(".")])
+                                       not p.startswith(".")])
         tools.natural_sort(problems)
-        self.problems = [Problem(benchmarks_dir, domain, problem) for problem in problems]
+        self.problems = [Problem(benchmarks_dir, domain, problem)
+                         for problem in problems]
 
     def __str__(self):
         return self.domain
@@ -269,14 +270,6 @@ def suite_pdb_tests():
         "parcprinter-08-strips",
         "pipesworld-notankage",
         "woodworking-opt08-strips",
-        ]
-
-def suite_ipdb():
-    return [
-        "logistics00",
-        "psr-small",
-        "satellite",
-        "tpp",
         ]
 
 def suite_interesting():
