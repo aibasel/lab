@@ -6,8 +6,6 @@ domains.
 
 import os
 import platform
-import shutil
-from subprocess import call
 
 from downward.experiment import DownwardExperiment
 from downward.checkouts import Translator, Preprocessor, Planner

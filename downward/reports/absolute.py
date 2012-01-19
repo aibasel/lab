@@ -1,5 +1,4 @@
 from collections import defaultdict
-import logging
 
 from lab.reports import avg, gm
 
