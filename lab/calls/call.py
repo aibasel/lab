@@ -139,10 +139,3 @@ class Call(subprocess.Popen):
         kill_pgrp(self.pid, signal.SIGKILL, show_error=False)
 
         return self.returncode
-
-
-if __name__ == "__main__":
-    call = Call(['gnome-calculator'], time_limit=6, wall_clock_time_limit=7)
-    print 'PID', call.pid
-    call.wait()
-    print 'RETCODE', call.returncode

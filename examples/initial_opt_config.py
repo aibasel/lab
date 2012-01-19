@@ -27,7 +27,7 @@ if platform.node() == 'habakuk':
 else:
     EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
-    SUITE = 'gripper:prob10.pddl'
+    SUITE = 'gripper:prob01.pddl'
     ENV = LocalEnvironment()
 
 ATTRIBUTES = None  # Include all attributes
