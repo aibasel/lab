@@ -4,6 +4,7 @@ import re
 from collections import defaultdict
 import logging
 
+print 'SYSPATH PARSER', sys.path
 from lab import tools
 
 
