@@ -6,6 +6,7 @@ import logging
 
 print 'SYSPATH PARSER', sys.path
 from lab import tools
+print 'TOOLS FILE', tools.__file__
 
 
 class _MultiPattern(object):
