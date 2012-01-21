@@ -28,18 +28,16 @@ class _Buildable(object):
         self.properties = tools.Properties()
 
     def set_property(self, name, value):
-        """
-        Add a key-value property. These can be used later for evaluation.
+        """Add a key-value property. These can be used later for evaluation.
 
-        Example:
         >>> exp.set_property('translator', '4321')
         """
         self.properties[name] = value
 
     def add_resource(self, resource_name, source, dest, required=True,
                      symlink=False):
-        """
-        Example:
+        """Include a file or directory in the experiment or run.
+
         >>> experiment.add_resource('PLANNER', 'path/to/planner', 'dest-name')
 
         Includes a "global" file, i.e., one needed for all runs, into the
@@ -47,11 +45,10 @@ class _Buildable(object):
         main directory of the experiment. The name "PLANNER" is an ID for
         this resource that can also be used to refer to it in the run script.
 
-        Example:
         >>> run.add_resource('DOMAIN', '../benchmarks/gripper/domain.pddl',
                              'domain.pddl')
 
-        Copy "../benchmarks/gripper/domain.pddl" into the run directory under
+        copies "../benchmarks/gripper/domain.pddl" into the run directory under
         the name "domain.pddl" and make it available as resource "DOMAIN".
         """
         if not (source, dest) in self.resources:
@@ -62,7 +59,6 @@ class _Buildable(object):
         """
         Return absolute path by applying rel_path to the base dir
 
-        Example:
         >>> _get_abs_path('mytest.q')
         /home/user/mytestjob/mytest.q
         """
@@ -147,8 +143,8 @@ class Experiment(_Buildable):
         self.steps.append(step)
 
     def add_run(self, run=None):
-        """
-        Factory for Runs
+        """Factory for Runs.
+
         Schedule this run to be part of the experiment.
         """
         run = run or Run(self)
@@ -168,9 +164,7 @@ class Experiment(_Buildable):
         self.environment.start_exp()
 
     def build(self, overwrite=False, only_main_script=False, no_main_script=False):
-        """
-        Apply all the actions to the filesystem
-        """
+        """Apply all the actions to the filesystem."""
         logging.info('Exp Dir: "%s"' % self.path)
 
         # Make the variables absolute
@@ -194,7 +188,7 @@ class Experiment(_Buildable):
 
     def _set_run_dirs(self):
         """
-        Sets the relative run directories as instance variables for all runs
+        Sets the relative run directories as instance variables for all runs.
         """
         def run_number(number):
             return str(number).zfill(5)
@@ -216,14 +210,12 @@ class Experiment(_Buildable):
                 run.set_property('run_dir', os.path.relpath(run.path, self.path))
 
     def _build_main_script(self):
-        """
-        Generates the main script
-        """
+        """Generates the main script."""
         self.environment.write_main_script()
 
     def _build_runs(self):
         """
-        Uses the relative directory information and writes all runs to disc
+        Uses the relative directory information and writes all runs to disc.
         """
         num_runs = len(self.runs)
         self.set_property('runs', num_runs)
@@ -257,10 +249,9 @@ class Run(_Buildable):
         In the argo cluster however, requiring a resource implies copying it
         into the task directory.
 
-        Example:
         >>> run.require_resource('PLANNER')
 
-        Make the planner resource available for this run
+        Make the planner resource available for this run.
         In environments like the argo cluster, this implies
         copying the planner into each task. For the gkigrid, we merely
         need to set up the PLANNER environment variable.
@@ -284,22 +275,22 @@ class Run(_Buildable):
         http://docs.python.org/library/subprocess.html
 
         Examples:
+
         >>> run.add_command('translate', [run.translator.shell_name,
                                           'domain.pddl', 'problem.pddl'])
         >>> run.add_command('preprocess', [run.preprocessor.shell_name],
                             {'stdin': 'output.sas'})
         >>> run.add_command('validate', ['VALIDATE', 'DOMAIN', 'PROBLEM',
                                          'sas_plan'])
-
         """
-        assert type(name) is str, 'The command name must be a string'
-        assert type(command) in (tuple, list), 'The command must be a list'
+        assert isinstance(name, basestring), 'name %s is not a string' % name
+        assert isinstance(command, (list, tuple)), '%s is not a list' % command
+        assert command, 'Command "%s" cannot be empty' % name
         name = name.replace(' ', '_')
         self.commands[name] = (command, kwargs)
 
     def declare_optional_output(self, file_glob):
         """
-        Example:
         >>> run.declare_optional_output('plan.soln*')
 
         Specifies that all files names "plan.soln*" (using
@@ -345,11 +336,6 @@ class Run(_Buildable):
         def make_call(name, cmd, kwargs):
             abort_on_failure = kwargs.pop('abort_on_failure',
                                           DEFAULT_ABORT_ON_FAILURE)
-            if not type(cmd) is list:
-                logging.critical('Commands have to be lists of strings. '
-                                 'The command <%s> is not a list.' % cmd)
-            if not cmd:
-                logging.critical('Command "%s" cannot be empty' % name)
 
             # Support running globally installed binaries
             def format_arg(arg):
@@ -402,7 +388,7 @@ class Run(_Buildable):
         run_id = self.properties.get('id')
         if run_id is None:
             logging.critical('Each run must have an id')
-        if not isinstance(run_id, list):
+        if not isinstance(run_id, (list, tuple)):
             logging.critical('id must be a list, but %s is not' % run_id)
         self.properties['id'] = [str(item) for item in run_id]
         _Buildable._build_properties_file(self)
