@@ -50,13 +50,15 @@ class Fetcher(object):
         # Get all run_dirs. None will be found if we fetch from an eval dir.
         run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
         total_dirs = len(run_dirs)
-        for index, run_dir in enumerate(run_dirs, 1):
-            logging.info('Fetching: %6d/%d' % (index, total_dirs))
+        for index, run_dir in enumerate(run_dirs, start=1):
+            loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
+            logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
             run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all)
 
             if write_combined_props:
                 combined_props['-'.join(run_id)] = props
 
+        logging.info('Fetching finished')
         tools.makedirs(eval_dir)
         if write_combined_props:
             combined_props.write()
