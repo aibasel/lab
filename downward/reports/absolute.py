@@ -25,7 +25,8 @@ class AbsoluteReport(PlanningReport):
         The domain-wise sum of the values for coverage and *_error even makes
         sense if not all configs have values for those attributes.
         """
-        return attribute == 'coverage' or attribute.endswith('_error')
+        return (attribute in ['coverage', 'quality', 'single_solver'] or
+                attribute.endswith('_error'))
 
     def _get_group_func(self, attribute):
         """Decide on a group function for this attribute."""
