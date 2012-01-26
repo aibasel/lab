@@ -34,6 +34,9 @@ class Fetcher(object):
 
         write_combined_props: Write the combined properties file.
         """
+        if not os.path.isdir(src_dir):
+            logging.critical('%s is not a valid directory' % src_dir)
+
         src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
         fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
 
