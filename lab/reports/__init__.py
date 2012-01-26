@@ -253,14 +253,9 @@ class Table(collections.defaultdict):
         if row is None:
             row = self[row_name]
 
-        values = []
-        for col in self.cols:
-            values.append(row.get(col))
-
+        values = [row.get(col) for col in self.cols]
         only_one_value = len(set(values)) == 1
-
-        # Filter out None values
-        real_values = filter(bool, values)
+        real_values = [val for val in values if val is not None]
 
         if real_values:
             min_value = min(real_values)
@@ -268,16 +263,12 @@ class Table(collections.defaultdict):
         else:
             min_value = max_value = 'undefined'
 
-        min_wins = self.min_wins
-
         parts = ['| %-30s' % (row_name)]
         for value in values:
-            is_min = (value == min_value)
-            is_max = (value == max_value)
             if self.highlight and only_one_value:
                 value_text = '{{%s|color:Gray}}' % value
-            elif self.highlight and (min_wins and is_min or
-                                     not min_wins and is_max):
+            elif self.highlight and (value == min_value and self.min_wins or
+                                     value == max_value and not self.min_wins):
                 value_text = '**%s**' % value
             else:
                 value_text = str(value)
