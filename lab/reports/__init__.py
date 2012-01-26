@@ -66,6 +66,7 @@ class Report(object):
         self.outfile = outfile
 
         self.load_data()
+        self._apply_filters()
         self.scan_data()
         logging.info('Available attributes: %s' % self.all_attributes)
 
@@ -79,8 +80,6 @@ class Report(object):
                                  'the dataset: %s' % sorted(not_found))
         self.attributes.sort()
         logging.info('Selected Attributes: %s' % self.attributes)
-
-        self._apply_filters()
 
         self.infos = []
         self.write()
