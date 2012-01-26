@@ -320,4 +320,4 @@ class Table(collections.defaultdict):
                 else:
                     summary_row[col] = None
             table_rows.append(self.get_row_markup(name, summary_row))
-        return '\n'.join(table_rows) + ' '.join(self.info)
+        return '%s\n%s' % ('\n'.join(table_rows), ' '.join(self.info))
