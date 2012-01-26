@@ -53,6 +53,7 @@ class Fetcher(object):
         # Get all run_dirs. None will be found if we fetch from an eval dir.
         run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
         total_dirs = len(run_dirs)
+        logging.info('Fetching properties from %d run directories' % total_dirs)
         for index, run_dir in enumerate(run_dirs, start=1):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
