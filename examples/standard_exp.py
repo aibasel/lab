@@ -2,6 +2,7 @@
 
 import os
 import platform
+import sys
 
 from downward.experiment import DownwardExperiment
 from downward.checkouts import Translator, Preprocessor, Planner
@@ -12,16 +13,14 @@ from lab.steps import Step
 from lab import tools
 
 
-EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
+EXPNAME = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]
 if platform.node() == 'habakuk':
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
     REPO = '/home/downward/jendrik/downward'
-    SUITE = 'IPC11_OPT'
     ENV = GkiGridEnvironment()
 else:
     EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
-    SUITE = 'gripper:prob01.pddl'
     ENV = LocalEnvironment()
 
 ATTRIBUTES = ['coverage', 'cost', 'total_time', 'single_solver']
@@ -47,6 +46,10 @@ exp.add_step(Step.remove_exp_dir(exp))
 
 
 def get_exp(suite, configs):
+    # Test configs on local machine
+    if platform.node() != 'habakuk':
+        suite = 'gripper:prob01.pddl'
+
     exp.add_suite(suite)
     for nick, config in configs:
         exp.add_config(nick, config)
