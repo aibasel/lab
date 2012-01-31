@@ -14,6 +14,15 @@ class Fetcher(object):
         if not run_id:
             logging.critical('id is not set in %s.' % prop_file)
 
+        # Somehow '../..' gets inserted into sys.path and more strangely the
+        # system lab.tools module gets called.
+        # This HACK should be removed once the source of the error is clear.
+        if props.get('domain') is not None and props.get("coverage") is None:
+            logging.warning('search_parser.py exited abnormally for %s' % run_dir)
+            import subprocess
+            subprocess.call(['../../search_parser.py'], cwd=run_dir)
+            self.fetch_dir(run_dir, eval_dir, copy_all)
+
         dest_dir = os.path.join(eval_dir, *run_id)
         if copy_all:
             tools.makedirs(dest_dir)
