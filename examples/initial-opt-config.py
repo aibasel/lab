@@ -70,10 +70,9 @@ exp.add_step(Step.zip_exp_dir(exp))
 exp.add_step(Step.remove_exp_dir(exp))
 
 
-if __name__ == '__main__':
-    # This method parses the commandline. We assume this file is called exp.py.
-    # Supported styles:
-    # ./exp.py 1
-    # ./exp.py 4 5 6
-    # ./exp.py all
-    exp()
+# This method parses the commandline. We assume this file is called exp.py.
+# Supported styles:
+# ./exp.py 1
+# ./exp.py 4 5 6
+# ./exp.py all
+exp()
