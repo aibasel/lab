@@ -80,6 +80,12 @@ class DownwardRun(Run):
         for name, limit in self.experiment.limits.items():
             self.set_property('limit_' + name, limit)
 
+    def _save_id(self, ext_config):
+        self.set_property('config', ext_config)
+        run_id = [ext_config, self.domain_name, self.problem_name]
+        self.set_property('id', run_id)
+        self.set_property('id_string', ':'.join(run_id))
+
 
 class PreprocessRun(DownwardRun):
     def __init__(self, exp, translator, preprocessor, planner, problem):
@@ -100,8 +106,7 @@ class PreprocessRun(DownwardRun):
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
         ext_config = '-'.join([self.translator.name, self.preprocessor.name])
-        self.set_property('config', ext_config)
-        self.set_property('id', [ext_config, self.domain_name, self.problem_name])
+        self._save_id(ext_config)
 
         for output_file in PREPROCESS_OUTPUT_FILES:
             self.declare_optional_output(output_file)
@@ -146,9 +151,7 @@ class SearchRun(DownwardRun):
         if len(set(names)) == 1:
             names = [names[0]]
         ext_config = '-'.join(names + [config_nick])
-
-        self.set_property('config', ext_config)
-        self.set_property('id', [ext_config, self.domain_name, self.problem_name])
+        self._save_id(ext_config)
 
 
 class DownwardExperiment(Experiment):
