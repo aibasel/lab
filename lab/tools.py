@@ -150,10 +150,13 @@ def find_file(basenames, dir='.'):
     raise IOError('none found in %r: %r' % (dir, basenames))
 
 
-def import_python_file(filename):
+def import_python_file(filename, dirs=None):
+    dirs = dirs or []
     parent_dir = os.path.dirname(filename)
-    if parent_dir not in sys.path:
-        sys.path.insert(0, parent_dir)
+    dirs.append(parent_dir)
+    for dir in dirs:
+        if dir not in sys.path:
+            sys.path.insert(0, dir)
     filename = os.path.normpath(filename)
     filename = os.path.basename(filename)
     if filename.endswith('.py'):
@@ -201,6 +204,9 @@ class Properties(dict):
         self.filename = filename
         self.load(filename)
         dict.__init__(self)
+
+    def __str__(self):
+        return json.dumps(self, indent=4)
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
