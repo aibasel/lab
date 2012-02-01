@@ -5,7 +5,7 @@ from lab.parser import Parser
 
 
 def wordcount(content, props):
-    props['lines'] = len(content.splitlines())
+    props['number_of_files'] = len(content.splitlines())
 
 class SimpleParser(Parser):
     def __init__(self):

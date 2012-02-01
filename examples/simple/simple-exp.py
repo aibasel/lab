@@ -3,6 +3,10 @@
 """
 Basic example for the use of the lab package.
 
+This only run of the experiment just prints all files contained in the
+run's directory. A simple parser parses the output and counts the number of
+files.
+
 This experiment shows how you
 - add a command to a run
 - add a run to an experiment
@@ -36,7 +40,7 @@ run.require_resource('SIMPLE_PARSER')
 run.add_command('parse', ['SIMPLE_PARSER'])
 
 # Make a default report.
-exp.add_step(Step('report', Report(), exp.eval_dir, reportfile))
+exp.add_step(Step('report', Report(attributes=['number_of_files']), exp.eval_dir, reportfile))
 
 # Compress the experiment directory.
 exp.add_step(Step.zip_exp_dir(exp))

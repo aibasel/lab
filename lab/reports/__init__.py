@@ -114,11 +114,14 @@ class Report(object):
         """
         table = Table(highlight=False)
         for run_id, run in self.props.items():
-            del run['id']
+            row = {}
             for key, value in run.items():
-                if type(value) is list:
-                    run[key] = '-'.join([str(item) for item in value])
-            table.add_row(run_id, run)
+                if not key in self.attributes:
+                    continue
+                if isinstance(value, (list, tuple)):
+                    key = '-'.join([str(item) for item in value])
+                row[key] = value
+            table.add_row(run_id, row)
         return str(table)
 
     def get_text(self):
