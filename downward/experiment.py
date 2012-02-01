@@ -40,11 +40,7 @@ PLANNER_BINARIES = ['downward', 'downward-debug', 'downward-profile',
 PREPROCESS_OUTPUT_FILES = ["*.groups", "output.sas", "output"]
 
 
-def shell_escape(s):
-    return s.upper().replace('-', '_').replace(' ', '_').replace('.', '_')
-
-
-def require_src_dirs(exp, combinations):
+def _require_src_dirs(exp, combinations):
     for checkout in set(itertools.chain(*combinations)):
         exp.add_resource('SRC_%s' % checkout.name, checkout.src_dir,
                          'code-%s' % checkout.name)
@@ -60,10 +56,10 @@ class DownwardRun(Run):
 
         self.problem = problem
 
-        self.set_properties()
-        self.save_limits()
+        self._set_properties()
+        self._save_limits()
 
-    def set_properties(self):
+    def _set_properties(self):
         self.domain_name = self.problem.domain
         self.problem_name = self.problem.problem
 
@@ -80,7 +76,7 @@ class DownwardRun(Run):
 
         self.set_property('experiment_name', self.experiment.name)
 
-    def save_limits(self):
+    def _save_limits(self):
         for name, limit in self.experiment.limits.items():
             self.set_property('limit_' + name, limit)
 
@@ -195,7 +191,7 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
 
-        require_src_dirs(self, self.combinations)
+        _require_src_dirs(self, self.combinations)
         self.add_resource('PREPROCESS_PARSER',
                           os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
                           'preprocess_parser.py')
@@ -216,13 +212,13 @@ class DownwardExperiment(Experiment):
         self.add_step(Step('fetch-search-results', self.fetcher, self.search_exp_path))
 
     @property
-    def problems(self):
+    def _problems(self):
         benchmark_dir = os.path.join(self.repo, 'benchmarks')
         return suites.build_suite(benchmark_dir, self.suites)
 
     def add_suite(self, suite):
         """
-        suite can either be a string or a list of strings. The strings can be
+        *suite* can either be a string or a list of strings. The strings can be
         tasks, domains or suites:
 
         >>> exp.add_suite("gripper")
@@ -238,8 +234,8 @@ class DownwardExperiment(Experiment):
 
     def add_config(self, nick, config):
         """
-        nick is the name the config will get in the reports.
-        config must be a list of arguments that can be passed to the planner.
+        *nick* is the name the config will get in the reports.
+        *config* must be a list of arguments that can be passed to the planner.
 
         >>> exp.add_config("lmcut", ["--search", "astar(lmcut())"])
         """
@@ -247,11 +243,16 @@ class DownwardExperiment(Experiment):
 
     def add_portfolio(self, portfolio_file):
         """
-        portfolio_file must be the path to a Fast Downward portfolio file.
+        *portfolio_file* must be the path to a Fast Downward portfolio file.
         """
         self.portfolios.append(portfolio_file)
 
     def run(self, stage):
+        """Run the specified experiment stage.
+
+        *stage* can be "preprocess" or "search".
+
+        """
         if stage == 'preprocess':
             self.path = self.preprocess_exp_path
         elif stage == 'search':
@@ -262,6 +263,12 @@ class DownwardExperiment(Experiment):
         Experiment.run(self)
 
     def build(self, stage, overwrite=False):
+        """Write the experiment to the disk.
+
+        If *overwrite* is False and the experiment directory exists, it is
+        overwritten without prior confirmation.
+
+        """
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         checkouts.checkout(self.combinations)
@@ -314,7 +321,7 @@ class DownwardExperiment(Experiment):
             if not os.access(portfolio, os.X_OK):
                 os.chmod(portfolio, 0755)
             name = os.path.basename(portfolio)
-            self.add_resource(shell_escape(name), portfolio,
+            self.add_resource(tools.shell_escape(name), portfolio,
                               planner.get_path_dest('search', name))
 
         # The tip changeset has the newest validator version so we use this one
@@ -332,7 +339,7 @@ class DownwardExperiment(Experiment):
         for translator, preprocessor, planner in self.combinations:
             self._prepare_translator_and_preprocessor(translator, preprocessor)
 
-            for prob in self.problems:
+            for prob in self._problems:
                 self.add_run(PreprocessRun(self, translator, preprocessor, planner, prob))
 
     def _make_search_runs(self):
@@ -340,7 +347,7 @@ class DownwardExperiment(Experiment):
             self._prepare_planner(planner)
 
             for config_nick, config in self.configs + [(path, '') for path in self.portfolios]:
-                for prob in self.problems:
+                for prob in self._problems:
                     self._make_search_run(translator, preprocessor, planner,
                                           config_nick, config, prob)
 

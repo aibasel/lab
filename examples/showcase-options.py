@@ -7,6 +7,10 @@ import os
 import platform
 import shutil
 
+from lab.environments import LocalEnvironment, GkiGridEnvironment
+from lab.steps import Step
+from lab import tools
+
 from downward.experiment import DownwardExperiment
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward.reports.absolute import AbsoluteReport
@@ -14,9 +18,6 @@ from downward.reports.suite import SuiteReport
 from downward.reports.scatter import ScatterPlotReport
 from downward.reports.ipc import IpcReport
 from downward.reports.relative import RelativeReport
-from lab.environments import LocalEnvironment, GkiGridEnvironment
-from lab.steps import Step
-from lab import tools
 
 
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]

@@ -4,11 +4,12 @@ import os
 import platform
 import sys
 
-from downward.experiment import DownwardExperiment
-from downward.reports.absolute import AbsoluteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.steps import Step
 from lab import tools
+
+from downward.experiment import DownwardExperiment
+from downward.reports.absolute import AbsoluteReport
 
 
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]

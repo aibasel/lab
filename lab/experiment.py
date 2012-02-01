@@ -30,7 +30,8 @@ class _Buildable(object):
     def set_property(self, name, value):
         """Add a key-value property. These can be used later for evaluation.
 
-        >>> exp.set_property('translator', '4321')
+        >>> exp.set_property('compact', True)
+        >>> run.set_property('domain', 'gripper')
         """
         self.properties[name] = value
 
@@ -104,15 +105,26 @@ class _Buildable(object):
             tools.copy(source, dest, required, self.ignores)
 
     def add_new_file(self, resource_name, dest, content):
+        """
+        Write *content* to *dest* and make the file available to the commands as
+        *resource_name*.
+
+        >>> run.add_new_file('LEARN', 'learn.txt', learning_instances)
+
+        """
         self.new_files.append((dest, content))
         self.env_vars[resource_name] = dest
 
 
 class Experiment(_Buildable):
-    def __init__(self, path, env):
+    """
+    Create a new experiment that will be built at *path* using the methods
+    provided by *environment*.
+    """
+    def __init__(self, path, environment):
         _Buildable.__init__(self)
         self.path = os.path.abspath(path)
-        self.environment = env
+        self.environment = environment
         self.environment.exp = self
         self.fetcher = Fetcher()
         self.shard_size = SHARD_SIZE
@@ -132,20 +144,29 @@ class Experiment(_Buildable):
 
     @property
     def name(self):
+        """Return the directory name of the experiment's path."""
         # Derive the experiment name from the path
         return os.path.basename(self.path)
 
     @property
     def eval_dir(self):
+        """Return the name of the default evaluation directory."""
         return self.path + '-eval'
 
     def add_step(self, step):
+        """Add *step* to the list of experiment steps.
+
+        >>> exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
+
+        """
         self.steps.append(step)
 
     def add_run(self, run=None):
-        """Factory for Runs.
+        """Schedule *run* to be part of the experiment.
 
-        Schedule this run to be part of the experiment.
+        If *run* is None, create a new run, add it to the experiment and return
+        it.
+
         """
         run = run or Run(self)
         self.runs.append(run)
@@ -161,6 +182,10 @@ class Experiment(_Buildable):
         self.steps.process_step_names(self.args.steps)
 
     def run(self):
+        """Start the experiment by running all runs that were added to it.
+
+        Depending on the selected environment this may start the runs locally
+        or on a computer cluster."""
         self.environment.start_exp()
 
     def build(self, overwrite=False, only_main_script=False, no_main_script=False):
@@ -228,7 +253,8 @@ class Experiment(_Buildable):
 
 class Run(_Buildable):
     """
-    An experiment consists of one or multiple runs
+    An experiment consists of one or multiple runs. Each run consists of one
+    or more commands.
     """
     def __init__(self, experiment):
         _Buildable.__init__(self)
@@ -261,16 +287,17 @@ class Run(_Buildable):
     def add_command(self, name, command, **kwargs):
         """Adds a command to the run.
 
-        "name" is the command's name.
-        "command" has to be a list of strings.
+        *name* is the command's name.
 
-        The items in kwargs are passed to the calls.call.Call() class. You can
+        *command* has to be a list of strings.
+
+        The items in *kwargs* are passed to the calls.call.Call() class. You can
         find the valid keys there.
 
-        kwargs can also contain a value for "abort_on_failure" which makes the
-        run abort if the command does not return 0.
+        If *kwargs["abort_on_failure"]* is True and the command does not return
+        0, subsequent commands of this run are not executed.
 
-        The remaining items in kwargs are passed to subprocess.Popen()
+        The remaining items in *kwargs* are passed to subprocess.Popen()
         The allowed parameters can be found at
         http://docs.python.org/library/subprocess.html
 

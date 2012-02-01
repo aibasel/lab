@@ -57,6 +57,10 @@ def setup_logging(level):
     root_logger.setLevel(level)
 
 
+def shell_escape(s):
+    return s.upper().replace('-', '_').replace(' ', '_').replace('.', '_')
+
+
 def prod(values):
     """Computes the product of a list of numbers.
 
