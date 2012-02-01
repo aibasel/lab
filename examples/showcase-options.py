@@ -72,11 +72,16 @@ exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
                   exp.eval_dir, abs_problem_report_file))
 
-exp.add_step(Step('report-scatter', ScatterPlotReport(attributes=['expansions']),
+def only_two_configs(run):
+    return run['config_nick'] in ['many-plans', 'iter-search']
+
+exp.add_step(Step('report-scatter', ScatterPlotReport(attributes=['expansions'], filters=[only_two_configs]),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'scatter.png')))
 exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
-exp.add_step(Step('report-relative', RelativeReport('problem', attributes=['quality', 'coverage', 'expansions']),
+exp.add_step(Step('report-relative',
+                  RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
+                                 filters=[only_two_configs]),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
 
 # Write suite with solved problems
