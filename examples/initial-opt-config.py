@@ -40,7 +40,7 @@ CONFIG = ["--landmarks", "lmg=lm_rhw(only_causal_landmarks=false,"
           "--heuristic", "hCombinedMax=max([hLM,hLMCut])",
           "--search", "astar(hCombinedMax,mpd=true,pathmax=false,cost_type=0)"]
 
-exp = DownwardExperiment(path=EXPPATH, env=ENV, repo=REPO,
+exp = DownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO,
                          combinations=COMBINATIONS, limits=LIMITS)
 
 exp.add_suite(SUITE)

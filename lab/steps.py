@@ -6,11 +6,15 @@ from subprocess import call
 
 
 class Step(object):
+    """
+    When the step is executed *args* and *kwargs* will be passed to the
+    callable *func*.
+
+    >>> exp.add_step(Step('show-disk-usage', subprocess.call, ['df']))
+    >>> exp.add_step(Step('combine-results', Fetcher(), 'path/to/eval-dir',
+                          'path/to/new-eval-dir'))
+    """
     def __init__(self, name, func, *args, **kwargs):
-        """
-        When the step is executed args and kwargs will be passed to the
-        callable func.
-        """
         self.name = name
         self.func = func
         self.args = args
@@ -33,6 +37,11 @@ class Step(object):
 
     @classmethod
     def publish_reports(cls, *report_files):
+        """Return a step that copies all *report_files* to $HOME/.public_html.
+
+        >>> exp.add_step(Step.publish_reports(file1, file2)
+
+        """
         user = getpass.getuser()
 
         def publish_reports():
@@ -47,15 +56,28 @@ class Step(object):
 
     @classmethod
     def zip_exp_dir(cls, exp):
+        """
+        Return a Step that creates a compressed tarball containing the experiment
+        directory.
+
+        >>> exp.add_step(Step.zip_exp_dir(exp))
+
+        """
         return cls('zip-exp-dir', call, ['tar', '-czf', exp.name + '.tar.gz', exp.name],
                    cwd=os.path.dirname(exp.path))
 
     @classmethod
     def remove_exp_dir(cls, exp):
+        """Return a Step that removes the experiment directory.
+
+        >>> exp.add_step(Step.remove_exp_dir(exp))
+
+        """
         return cls('remove-exp-dir', shutil.rmtree, exp.path)
 
 
 class Sequence(list):
+    """This class holds all steps of an experiment."""
     def process_step_names(self, names):
         for step_name in names:
             self.process_step_name(step_name)

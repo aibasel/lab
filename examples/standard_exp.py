@@ -24,7 +24,7 @@ else:
 
 ATTRIBUTES = ['coverage', 'cost', 'total_time', 'single_solver']
 
-exp = DownwardExperiment(path=EXPPATH, env=ENV, repo=REPO)
+exp = DownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO)
 
 # Add report steps
 abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)

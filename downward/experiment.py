@@ -1,6 +1,6 @@
 """
-A module that has methods for checking out different revisions of the three
-components of fast-downward (translate, preprocess, search) and performing
+A module for cloning different revisions of the three
+components of Fast Downward (translate, preprocess, search) and performing
 experiments with them.
 """
 import os
@@ -152,23 +152,33 @@ class SearchRun(DownwardRun):
 
 
 class DownwardExperiment(Experiment):
-    def __init__(self, path, env, repo, combinations=None, compact=True, limits=None):
-        """
-        The preprocess fetcher creates the following directory structure:
+    """
+    *repo* must be the path to a Fast Downward repository. This repository is
+    used to search for problem files and if *combinations* is None.
 
-        - PREPROCESSED_TASKS_DIR
-            - TRANSLATOR_REV-PREPROCESSOR_REV
-                - DOMAIN
-                    - PROBLEM
-                        - output, etc.
+    *combinations* is a list of Checkout tuples of the form
+    (Translator, Preprocessor, Planner). If no combinations are given, perform
+    an experiment with the working copy in *repo*.
 
-        compact: Link to preprocessing files instead of copying them. Only use
-                 this option if the preprocessed files will NOT be changed
-                 during the experiment.
-        limits: Dictionary of limits that can be used to overwrite the default
-                limits.
-        """
-        Experiment.__init__(self, path, env)
+    If *compact* is True, link to preprocessing files instead of copying them.
+    Only use this option if the preprocessed files will **not** be changed
+    during the experiment.
+
+    If *limits* is given, it must be a dictionary and it will be used to
+    overwrite the default limits.
+
+    >>> repo = '/path/to/downward-repo'
+    >>> combos = [(Translator(repo, rev=123),
+                   Preprocessor(repo, rev='e2a018c865f7'),
+                   Planner(repo, rev='tip', dest='myplanner-version')]
+    >>> exp = DownwardExperiment('/tmp/path', LocalEnvironment(), repo,
+                                 combinations=combos, compact=False,
+                                 limits={'search_time': 30})
+
+    """
+    def __init__(self, path, environment, repo, combinations=None, compact=True,
+                 limits=None):
+        Experiment.__init__(self, path, environment)
 
         self.repo = repo
         self.search_exp_path = self.path
