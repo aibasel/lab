@@ -12,22 +12,16 @@ This experiment shows how you
 """
 
 import os
-import platform
 
 from lab.experiment import Experiment
-from lab.environments import LocalEnvironment, GkiGridEnvironment
+from lab.environments import LocalEnvironment
 from lab.experiment import Step
 from lab.reports import Report
-from lab import tools
 
 
 EXPNAME = 'simple-exp'
-if platform.node() == 'habakuk':
-    EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
-    ENV = GkiGridEnvironment()
-else:
-    EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
-    ENV = LocalEnvironment()
+EXPPATH = os.path.join('/tmp', EXPNAME)
+ENV = LocalEnvironment()
 
 # Create a new experiment.
 exp = Experiment(path=EXPPATH, environment=ENV)
