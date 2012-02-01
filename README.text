@@ -1,16 +1,14 @@
 lab
 ===
-This project contains a python package for conducting and analyzing
-experiments that run on single machines or on computer clusters.
-The lab package can be found in the "lab" directory.
-The directory "examples/simple" contains a very basic usage example.
+*lab* is a python package for conducting and analyzing experiments that run on
+single machines or on computer clusters. It is useful if you want to run your
+code on a large set of benchmarks.
 
 downward
 ========
 A second package that makes use of the lab package is located in "downward".
 It can be used to run experiments and create custom reports for the
 [Fast Downward planning system](http://www.fast-downward.org).
-In "examples" you find several example Fast Downward experiments.
 
 
 Requirements
@@ -34,6 +32,6 @@ experiment steps:
     ./simple-exp.py report
 
 If you want to run a Fast Downward experiment, the best way to start is
-looking at examples/initial-opt-config.py and adapting it to your needs.
+looking at `examples/initial-opt-config.py` and adapting it to your needs.
 Most of the available methods and options can be found in the
-showcase-options.py example.
+`showcase-options.py` example.
