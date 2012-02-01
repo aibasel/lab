@@ -5,9 +5,7 @@ import platform
 import sys
 
 from downward.experiment import DownwardExperiment
-from downward.checkouts import Translator, Preprocessor, Planner
 from downward.reports.absolute import AbsoluteReport
-from downward.reports.suite import SuiteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.steps import Step
 from lab import tools

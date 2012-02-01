@@ -9,7 +9,6 @@ import shutil
 
 from downward.experiment import DownwardExperiment
 from downward.checkouts import Translator, Preprocessor, Planner
-from downward import configs
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.suite import SuiteReport
 from downward.reports.scatter import ScatterPlotReport
@@ -37,10 +36,24 @@ COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=RE
 exp = DownwardExperiment(path=EXPPATH, env=ENV, repo=REPO,
                          combinations=COMBINATIONS, limits=LIMITS)
 
+multiple_plans = [
+    "--heuristic", "hlm,hff=lm_ff_syn(lm_rhw(reasonable_orders=false,lm_cost_type=2,cost_type=2))",
+    "--heuristic", "hadd=add()",
+    "--search", "iterated([lazy_greedy([hadd]),lazy_wastar([hff,hlm],preferred=[hff,hlm],w=2)],"
+    "repeat_last=false)"]
+
+iterated_search = [
+    "--heuristic", "hadd=add()",
+    "--search", "iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=false)"]
+
+def ipdbi(imp):
+    return ("ipdbi%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
+
 exp.add_suite('gripper:prob01.pddl')
 exp.add_suite('zenotravel:pfile1')
-exp.add_config('many-plans', configs.multiple_plans)
-exp.add_config('iter-search', configs.iterated_search)
+exp.add_config('many-plans', multiple_plans)
+exp.add_config('iter-search', iterated_search)
+exp.add_config(*ipdbi(10))
 
 # Before we fetch the new results, delete the old ones
 exp.steps.insert(5, Step('delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
