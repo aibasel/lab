@@ -41,9 +41,6 @@ exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_fil
 # Compress the experiment directory
 exp.add_step(Step.zip_exp_dir(exp))
 
-# Remove the experiment directory
-exp.add_step(Step.remove_exp_dir(exp))
-
 
 def get_exp(suite, configs):
     # Test configs on local machine
