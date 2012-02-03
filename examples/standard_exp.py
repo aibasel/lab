@@ -24,27 +24,27 @@ else:
 
 ATTRIBUTES = ['coverage', 'cost', 'total_time', 'single_solver']
 
-exp = DownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO)
 
-# Add report steps
-abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
-abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
-exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
-                                                 exp.eval_dir, abs_domain_report_file))
-exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
-                                                 exp.eval_dir, abs_problem_report_file))
-
-# Copy the results
-exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
-
-# Compress the experiment directory
-exp.add_step(Step.zip_exp_dir(exp))
-
-
-def get_exp(suite, configs):
+def get_exp(suite, configs, combinations=None):
     # Test configs on local machine
     if platform.node() != 'habakuk':
         suite = 'gripper:prob01.pddl'
+
+    exp = DownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO, combinations=combinations)
+
+    # Add report steps
+    abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
+    abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
+    exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
+                                                     exp.eval_dir, abs_domain_report_file))
+    exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
+                                                     exp.eval_dir, abs_problem_report_file))
+
+    # Copy the results
+    exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
+
+    # Compress the experiment directory
+    exp.add_step(Step.zip_exp_dir(exp))
 
     exp.add_suite(suite)
     for nick, config in configs:
