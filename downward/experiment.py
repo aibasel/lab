@@ -42,6 +42,7 @@ PREPROCESS_OUTPUT_FILES = ["*.groups", "output.sas", "output"]
 
 def _require_src_dirs(exp, combinations):
     for checkout in set(itertools.chain(*combinations)):
+        logging.info('Requiring %s' % checkout.src_dir)
         exp.add_resource('SRC_%s' % checkout.name, checkout.src_dir,
                          'code-%s' % checkout.name)
 
@@ -204,7 +205,6 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
 
-        _require_src_dirs(self, self.combinations)
         self.add_resource('PREPROCESS_PARSER',
                           os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
                           'preprocess_parser.py')
@@ -286,6 +286,7 @@ class DownwardExperiment(Experiment):
         self.set_property('stage', stage)
         checkouts.checkout(self.combinations)
         checkouts.compile(self.combinations)
+        _require_src_dirs(self, self.combinations)
         self.runs = []
         if stage == 'preprocess':
             self.path = self.preprocess_exp_path

@@ -134,7 +134,7 @@ class HgCheckout(Checkout):
         cmd_string = ' '.join(cmd)
         if cmd_string in ABS_REV_CACHE:
             return ABS_REV_CACHE[cmd_string]
-        abs_rev = get_command_output(cmd)
+        abs_rev = get_command_output(cmd, quiet=True)
         if not abs_rev:
             logging.error('Revision %s not present in repo %s' % (rev, repo))
             sys.exit(1)
