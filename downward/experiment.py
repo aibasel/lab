@@ -48,12 +48,11 @@ def _require_src_dirs(exp, combinations):
 
 
 class DownwardRun(Run):
-    def __init__(self, exp, translator, preprocessor, planner, problem):
+    def __init__(self, exp, translator, preprocessor, problem):
         Run.__init__(self, exp)
 
         self.translator = translator
         self.preprocessor = preprocessor
-        self.planner = planner
 
         self.problem = problem
 
@@ -66,11 +65,9 @@ class DownwardRun(Run):
 
         self.set_property('translator', self.translator.rev)
         self.set_property('preprocessor', self.preprocessor.rev)
-        self.set_property('planner', self.planner.rev)
 
         self.set_property('translator_parent', self.translator.parent_rev)
         self.set_property('preprocessor_parent', self.preprocessor.parent_rev)
-        self.set_property('planner_parent', self.planner.parent_rev)
 
         self.set_property('domain', self.domain_name)
         self.set_property('problem', self.problem_name)
@@ -89,8 +86,8 @@ class DownwardRun(Run):
 
 
 class PreprocessRun(DownwardRun):
-    def __init__(self, exp, translator, preprocessor, planner, problem):
-        DownwardRun.__init__(self, exp, translator, preprocessor, planner, problem)
+    def __init__(self, exp, translator, preprocessor, problem):
+        DownwardRun.__init__(self, exp, translator, preprocessor, problem)
 
         self.require_resource(self.preprocessor.shell_name)
 
@@ -115,7 +112,11 @@ class PreprocessRun(DownwardRun):
 
 class SearchRun(DownwardRun):
     def __init__(self, exp, translator, preprocessor, planner, problem, config_nick, config):
-        DownwardRun.__init__(self, exp, translator, preprocessor, planner, problem)
+        DownwardRun.__init__(self, exp, translator, preprocessor, problem)
+
+        self.planner = planner
+        self.set_property('planner', self.planner.rev)
+        self.set_property('planner_parent', self.planner.parent_rev)
 
         self.require_resource(self.planner.shell_name)
         if config:
@@ -350,11 +351,15 @@ class DownwardExperiment(Experiment):
         self.add_resource('DOWNWARD_VALIDATE', downward_validate, 'downward-validate')
 
     def _make_preprocess_runs(self):
+        unique_preprocessing = set()
         for translator, preprocessor, planner in self.combinations:
+            unique_preprocessing.add((translator, preprocessor))
+
+        for translator, preprocessor in sorted(unique_preprocessing):
             self._prepare_translator_and_preprocessor(translator, preprocessor)
 
             for prob in self._problems:
-                self.add_run(PreprocessRun(self, translator, preprocessor, planner, prob))
+                self.add_run(PreprocessRun(self, translator, preprocessor, prob))
 
     def _make_search_runs(self):
         for translator, preprocessor, planner in self.combinations:
