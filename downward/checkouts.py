@@ -99,10 +99,12 @@ class Checkout(object):
 class HgCheckout(Checkout):
     """
     Base class for the three checkout types (translate, preprocess, search).
-    """
-    DEFAULT_REV = 'WORK'
 
-    def __init__(self, part, repo, rev=DEFAULT_REV, dest=''):
+    You can use any repo from your filesystem and only if you specify the *dest*
+    parameter or use a revision other than "WORK", the code will be copied to
+    the revision cache.
+    """
+    def __init__(self, part, repo, rev='WORK', dest=None):
         """
         part: One of translate, preprocess, search
         repo: Path to the hg repository. Can be either local or remote.
