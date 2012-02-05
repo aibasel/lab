@@ -42,16 +42,16 @@ class Report(object):
     """
     Base class for all reports
     """
-    def __init__(self, attributes=None, format='html', filters=None):
+    def __init__(self, attributes=None, format='html', filter=None):
         """
         attributes: the analyzed attributes (e.g. coverage). If omitted, use
                     all found numerical attributes
-        filters:    list of functions that are given a run and return True or False
+        filter:     function that is given a run and returns True or False
         """
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
-        self.filters = filters or []
+        self.filter = filter
 
     def __call__(self, eval_dir, outfile):
         """
@@ -66,7 +66,7 @@ class Report(object):
         self.outfile = outfile
 
         self.load_data()
-        self._apply_filters()
+        self._apply_filter()
         self.scan_data()
         logging.info('Available attributes: %s' % self.all_attributes)
 
@@ -176,12 +176,22 @@ class Report(object):
         self.props = tools.Properties(filename=combined_props_file)
         logging.info('Reading properties file finished')
 
-    def _apply_filters(self):
-        if not self.filters:
+    def _apply_filter(self):
+        if not self.filter:
             return
         new_props = tools.Properties()
         for run_id, run in self.props.items():
-            if all(filter(run) for filter in self.filters):
+            result = self.filter(run)
+            if not isinstance(result, (dict, bool)):
+                logging.critical('Filters must return a dictionary or boolean')
+            if not result:
+                # Discard runs that returned False or an empty dictionary.
+                continue
+            # If a dict is returned, use it as the new run,
+            # else take the old one.
+            if isinstance(result, dict):
+                new_props[run_id] = result
+            else:
                 new_props[run_id] = run
         new_props.filename = self.props.filename
         self.props = new_props

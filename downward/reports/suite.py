@@ -20,7 +20,7 @@ class SuiteReport(PlanningReport):
 
     def get_text(self):
         if not self.props:
-            sys.exit('No problems match those filters')
+            sys.exit('No problems match this filter')
         problems = [domain + ':' + problem for domain, problem in self.problems]
         problems = ['        "%s",\n' % problem for problem in problems]
         output = ('def suite():\n    return [\n%s    ]\n' % ''.join(problems))

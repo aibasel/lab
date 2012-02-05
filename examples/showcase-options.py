@@ -64,6 +64,24 @@ exp.steps.insert(0, Step('delete-exp-dir', shutil.rmtree, exp.path, ignore_error
 exp.steps.insert(0, Step('delete-preprocess-dir', shutil.rmtree, exp.preprocess_exp_path,
                          ignore_errors=True))
 
+
+# Define some filters
+
+def solved(run):
+    """Only include solved problems."""
+    return run['coverage'] == 1
+
+def only_two_configs(run):
+    return run['config_nick'] in ['many-plans', 'iter-search']
+
+def filter_and_transform(run):
+    """Remove "WORK" from the configs and only include certain configurations"""
+    if not only_two_configs(run):
+        return False
+    config = run['config']
+    run['config'] = config[5:] if config.startswith('WORK-') else config
+    return run
+
 # Add report steps
 abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
 abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
@@ -72,23 +90,21 @@ exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
                   exp.eval_dir, abs_problem_report_file))
 
-def only_two_configs(run):
-    return run['config_nick'] in ['many-plans', 'iter-search']
+exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES,
+                  filter=filter_and_transform), exp.eval_dir, abs_problem_report_file))
 
-exp.add_step(Step('report-scatter', ScatterPlotReport(attributes=['expansions'], filters=[only_two_configs]),
+exp.add_step(Step('report-scatter', ScatterPlotReport(attributes=['expansions'], filter=only_two_configs),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'scatter.png')))
 exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
 exp.add_step(Step('report-relative',
                   RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
-                                 filters=[only_two_configs]),
+                                 filter=only_two_configs),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
 
-# Write suite with solved problems
-def solved(run):
-    return run['coverage'] == 1
+# Write suite of solved problems
 suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
-exp.add_step(Step('report-suite', SuiteReport(filters=[solved]), exp.eval_dir, suite_file))
+exp.add_step(Step('report-suite', SuiteReport(filter=solved), exp.eval_dir, suite_file))
 
 # Copy the results
 exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
@@ -105,5 +121,4 @@ if __name__ == '__main__':
     # Supported styles:
     # ./exp.py 1
     # ./exp.py 4 5 6
-    # ./exp.py all
     exp()

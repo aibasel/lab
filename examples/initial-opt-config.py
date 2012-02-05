@@ -58,7 +58,7 @@ exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTE
 def solved(run):
     return run['coverage'] == 1
 suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
-exp.add_step(Step('report-suite', SuiteReport(filters=[solved]), exp.eval_dir, suite_file))
+exp.add_step(Step('report-suite', SuiteReport(filter=solved), exp.eval_dir, suite_file))
 
 # Copy the results
 exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
