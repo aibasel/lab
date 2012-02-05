@@ -296,7 +296,7 @@ class Table(collections.defaultdict):
             # Allow custom sorting of the column names
             if '-SORT:' in col:
                 sorting, col = col.split('-SORT:')
-            # Escape config names to prevent unvoluntary markup
+            # Escape config names to prevent involuntary markup
             return '%-16s' % ('""%s""' % col)
 
         header = ('|| %-29s | ' % self.title +
