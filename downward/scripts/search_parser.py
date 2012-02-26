@@ -138,20 +138,15 @@ def set_search_time(content, props):
         props['search_time'] = math.fsum(search_time_all)
 
 
-def completely_explored(content, props):
-    props['completely_explored'] = ('Completely explored state space -- '
-                                    'no solution!' in content)
+def unsolvable(content, props):
+    props['unsolvable'] = ('Completely explored state space -- no solution!'
+                           in content)
 
+def parse_error(content, props):
+    props['parse_error'] = 'Parse Error:' in content
 
-def get_status(content, props):
-    if 'plan_length' in props or 'cost' in props:
-        props['status'] = 'ok'
-    elif props.get('completely_explored', False):
-        props['status'] = 'failure'
-    elif 'does not support' in content:
-        props['status'] = 'unsupported'
-    else:
-        props['status'] = 'unsolved'
+def unsupported(content, props):
+    props['unsupported'] = 'does not support' in content
 
 
 def coverage(content, props):
@@ -411,13 +406,14 @@ class SearchParser(Parser):
                          required=False)
 
     def add_search_functions(self):
-        #self.add_function(completely_explored)
+        self.add_function(parse_error)  # TODO: search run.err once parse errors are printed there
+        self.add_function(unsolvable)
+        self.add_function(unsupported, 'run.err')
         self.add_function(get_iterative_results)
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
         self.add_function(set_search_time)
         self.add_function(coverage)
-        self.add_function(get_status)
         self.add_function(scores)
         #self.add_function(get_bisimulation_results)
         self.add_function(get_error, "run.err")
