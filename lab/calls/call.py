@@ -5,6 +5,7 @@ import subprocess
 import resource
 
 from lab.calls.processgroup import ProcessGroup
+from lab.calls.log import set_property
 
 
 def kill_pgrp(pgrp, sig, show_error=True):
@@ -102,8 +103,8 @@ class Call(subprocess.Popen):
 
             if real_time >= last_log_time + self.log_interval:
                 print "wall-clock time: %.2f" % (time.time() - wall_clock_start_time)
-                print "[real-time %d] total_time: %.2f" % (real_time, total_time)
-                print "[real-time %d] total_vsize: %.2f" % (real_time, total_vsize)
+                print "[real-time %d] total_time: %.2fs" % (real_time, total_time)
+                print "[real-time %d] total_vsize: %.2f MB" % (real_time, total_vsize)
                 print
                 last_log_time = real_time
 
