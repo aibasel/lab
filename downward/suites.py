@@ -279,15 +279,6 @@ def suite_interesting():
     boring = set(["gripper", "miconic", "miconic-simpleadl", "movie"])
     return [domain for domain in suite_all() if domain not in boring]
 
-def suite_first_tasks():
-    suite = []
-    for domain in suite_all():
-        tasks = list(Domain(domain))
-        suite.append(tasks[0])
-    suite = build_suite(suite)
-    unsolvable = set(build_suite(suite_unsolvable()))
-    return [p for p in suite if p not in unsolvable]
-
 def suite_unsolvable():
     # TODO: Add other unsolvable problems (Miconic-FullADL).
     return ["mystery:prob%02d.pddl" % index
