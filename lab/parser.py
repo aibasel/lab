@@ -186,6 +186,6 @@ class Parser(object):
                 msg = 'Parsed properties not valid in %s: %s'
                 logging.error(msg % (prop_file, e))
                 print '*' * 60
-                props.write(sys.stdout)
+                print props
                 print '*' * 60
         props.write()
