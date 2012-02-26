@@ -1,4 +1,5 @@
 from collections import defaultdict
+import logging
 
 from lab.reports import avg, gm
 
@@ -19,6 +20,19 @@ class AbsoluteReport(PlanningReport):
         """
         self.resolution = resolution
         PlanningReport.__init__(self, *args, **kwargs)
+
+    def get_markup(self):
+        # list of (attribute, table) pairs
+        tables = []
+        for attribute in self.attributes:
+            logging.info('Creating table for %s' % attribute)
+            table = self._get_table(attribute)
+            # We return None for a table if we don't want to add it
+            if table:
+                tables.append((attribute, str(table)))
+
+        return ''.join(['+ %s +\n%s\n' % (attr, table)
+                        for (attr, table) in tables])
 
     def _attribute_is_absolute(self, attribute):
         """

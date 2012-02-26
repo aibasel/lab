@@ -95,19 +95,6 @@ class PlanningReport(Report):
                     run_id = '-'.join((run['config'], run['domain'], run['problem']))
                     self.props[run_id] = run
 
-    def get_markup(self):
-        # list of (attribute, table) pairs
-        tables = []
-        for attribute in self.attributes:
-            logging.info('Creating table for %s' % attribute)
-            table = self._get_table(attribute)
-            # We return None for a table if we don't want to add it
-            if table:
-                tables.append((attribute, str(table)))
-
-        return ''.join(['+ %s +\n%s\n' % (attr, table)
-                        for (attr, table) in tables])
-
     def _get_empty_table(self, attribute):
         '''
         Returns an empty table. Used and filled by subclasses.
