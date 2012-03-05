@@ -308,6 +308,8 @@ class Table(collections.defaultdict):
             # Allow custom sorting of the column names
             if '-SORT:' in col:
                 sorting, col = col.split('-SORT:')
+            # Allow breaking long configs into multiple lines
+            col = col.replace('_', '-')
             # Escape config names to prevent involuntary markup
             return '%-16s' % ('""%s""' % col)
 
