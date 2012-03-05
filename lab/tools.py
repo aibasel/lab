@@ -173,7 +173,7 @@ def import_python_file(filename, dirs=None):
     try:
         module = __import__(module_name)
         return module
-    except ImportError, err:
+    except ImportError as err:
         print traceback.format_exc()
         logging.critical('File "%s" could not be imported: %s' % (filename, err))
 
