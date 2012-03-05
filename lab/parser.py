@@ -6,6 +6,7 @@ import logging
 
 # TODO: Remove debug code
 print 'SYSPATH PARSER', sys.path
+print 'CWD:', os.getcwd()
 from lab import tools
 print 'TOOLS FILE', tools.__file__
 
