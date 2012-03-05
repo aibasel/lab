@@ -71,6 +71,10 @@ class PlanningReport(Report):
         domain_runs = defaultdict(list)
         runs = {}
         for run_name, run in self.props.items():
+            # Sanity checks
+            assert 'coverage' in run, ('The run in %s has no coverage value' %
+                                       run.get('run_dir'))
+
             configs.add(run['config'])
             domain, problem, config = run['domain'], run['problem'], run['config']
             problems.add((domain, problem))
