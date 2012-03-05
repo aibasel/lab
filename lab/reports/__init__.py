@@ -277,6 +277,8 @@ class Table(collections.defaultdict):
 
         parts = ['| %-30s' % (row_name)]
         for value in values:
+            if isinstance(value, float):
+                value = round(value, 4)
             if self.highlight and only_one_value:
                 value_text = '{{%s|color:Gray}}' % value
             elif self.highlight and (value == min_value and self.min_wins or
