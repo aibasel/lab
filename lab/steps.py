@@ -13,6 +13,7 @@ class Step(object):
     >>> exp.add_step(Step('show-disk-usage', subprocess.call, ['df']))
     >>> exp.add_step(Step('combine-results', Fetcher(), 'path/to/eval-dir',
                           'path/to/new-eval-dir'))
+
     """
     def __init__(self, name, func, *args, **kwargs):
         self.name = name
@@ -21,9 +22,11 @@ class Step(object):
         self.kwargs = kwargs
 
     def __call__(self):
+        if self.func is None:
+            logging.critical('You cannot run the same step more than once')
         try:
             retval = self.func(*self.args, **self.kwargs)
-            # free memory
+            # Free memory
             self.func = None
             return retval
         except (ValueError, TypeError):
