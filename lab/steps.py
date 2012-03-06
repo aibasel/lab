@@ -22,7 +22,10 @@ class Step(object):
 
     def __call__(self):
         try:
-            return self.func(*self.args, **self.kwargs)
+            retval = self.func(*self.args, **self.kwargs)
+            # free memory
+            self.func = None
+            return retval
         except (ValueError, TypeError):
             import traceback
             traceback.print_exc()
