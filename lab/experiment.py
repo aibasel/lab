@@ -11,6 +11,7 @@ from lab import tools
 from lab.external.ordereddict import OrderedDict
 from lab.fetcher import Fetcher
 from lab.steps import Step, Sequence
+from lab.environments import LocalEnvironment
 
 
 DEFAULT_ABORT_ON_FAILURE = True
@@ -119,12 +120,13 @@ class _Buildable(object):
 class Experiment(_Buildable):
     """
     Create a new experiment that will be built at *path* using the methods
-    provided by *environment*.
+    provided by *environment*. If *environment* is not provided,
+    *LocalEnvironment* is used.
     """
-    def __init__(self, path, environment):
+    def __init__(self, path, environment=None):
         _Buildable.__init__(self)
         self.path = os.path.abspath(path)
-        self.environment = environment
+        self.environment = environment or LocalEnvironment()
         self.environment.exp = self
         self.fetcher = Fetcher()
         self.shard_size = SHARD_SIZE

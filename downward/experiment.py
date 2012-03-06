@@ -176,12 +176,12 @@ class DownwardExperiment(Experiment):
     >>> combos = [(Translator(repo, rev=123),
                    Preprocessor(repo, rev='e2a018c865f7'),
                    Planner(repo, rev='tip', dest='myplanner-version')]
-    >>> exp = DownwardExperiment('/tmp/path', LocalEnvironment(), repo,
+    >>> exp = DownwardExperiment('/tmp/path', repo,
                                  combinations=combos, compact=False,
                                  limits={'search_time': 30})
 
     """
-    def __init__(self, path, environment, repo, combinations=None, compact=True,
+    def __init__(self, path, repo, environment=None, combinations=None, compact=True,
                  limits=None):
         Experiment.__init__(self, path, environment)
 
