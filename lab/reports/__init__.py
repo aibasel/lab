@@ -42,7 +42,7 @@ class Report(object):
     """
     Base class for all reports
     """
-    def __init__(self, attributes=None, format='html', filter=None):
+    def __init__(self, attributes=None, format='html', filter=None, **kwargs):
         """
         attributes: the analyzed attributes (e.g. coverage). If omitted, use
                     all found numerical attributes
