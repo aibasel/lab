@@ -170,6 +170,10 @@ def import_python_file(filename, dirs=None):
     else:
         module_name = filename
 
+    # Reload already loaded modules to actually get the changes.
+    if module_name in sys.modules:
+        return reload(sys.modules[module_name])
+
     try:
         module = __import__(module_name)
         return module
