@@ -90,6 +90,16 @@ class PlanningReport(Report):
         self.domain_runs = domain_runs
         self.runs = runs
 
+        # Sanity checks
+        assert len(self.problems) * len(self.configs) == len(self.runs)
+        assert sum(len(probs) for probs in domains.values()) == len(self.problems)
+        assert len(self.problem_runs) == len(self.problems)
+        assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
+        for (domain, problem), runs in self.problem_runs.items():
+            assert len(runs) == len(self.configs)
+        assert len(self.domains) * len(self.configs) == len(self.domain_runs)
+        assert sum(len(runs) for runs in self.domain_runs.values()) == len(self.runs)
+
     def compute_derived_properties(self):
         for func in self.derived_properties:
             for (domain, problem), runs in self.problem_runs.items():
