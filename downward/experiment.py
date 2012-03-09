@@ -206,13 +206,6 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
 
-        self.add_resource('PREPROCESS_PARSER',
-                          os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
-                          'preprocess_parser.py')
-        self.add_resource('SEARCH_PARSER',
-                          os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'),
-                          'search_parser.py')
-
         # Remove the default experiment steps
         self.steps = Sequence()
 
@@ -287,13 +280,24 @@ class DownwardExperiment(Experiment):
         self.set_property('stage', stage)
         checkouts.checkout(self.combinations)
         checkouts.compile(self.combinations)
-        _require_src_dirs(self, self.combinations)
         self.runs = []
+        self.new_files = []
+        self.resources = []
+        self.env_vars = {}
+        # Include the experiment code again.
+        self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
+        _require_src_dirs(self, self.combinations)
         if stage == 'preprocess':
             self.path = self.preprocess_exp_path
+            self.add_resource('PREPROCESS_PARSER',
+                    os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
+                    'preprocess_parser.py')
             self._make_preprocess_runs()
         elif stage == 'search':
             self.path = self.search_exp_path
+            self.add_resource('SEARCH_PARSER',
+                        os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'),
+                        'search_parser.py')
             self._make_search_runs()
         else:
             logging.error('There is no stage "%s"' % stage)
