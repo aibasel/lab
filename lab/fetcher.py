@@ -17,7 +17,7 @@ class Fetcher(object):
         # Somehow '../..' gets inserted into sys.path and more strangely the
         # system lab.tools module gets called.
         # This HACK should be removed once the source of the error is clear.
-        if props.get('domain') is not None and props.get("coverage") is None:
+        if props.get('search_error') is not None and props.get("coverage") is None:
             logging.warning('search_parser.py exited abnormally for %s' % run_dir)
             import subprocess
             subprocess.call(['../../search_parser.py'], cwd=run_dir)
