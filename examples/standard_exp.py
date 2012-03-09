@@ -25,12 +25,13 @@ else:
 ATTRIBUTES = ['coverage', 'cost', 'total_time', 'single_solver']
 
 
-def get_exp(suite, configs, combinations=None):
+def get_exp(suite, configs, combinations=None, limits=None):
     # Test configs on local machine
     if platform.node() != 'habakuk':
         suite = 'gripper:prob01.pddl'
 
-    exp = DownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO, combinations=combinations)
+    exp = DownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO,
+                             combinations=combinations, limits=limits)
 
     # Add report steps
     abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
