@@ -77,6 +77,8 @@ def setup_logging(level):
 
 
 def shell_escape(s):
+    if s[0].isdigit():
+        s = 'N' + s
     return s.upper().replace('-', '_').replace(' ', '_').replace('.', '_')
 
 
