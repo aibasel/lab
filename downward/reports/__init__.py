@@ -110,12 +110,26 @@ class PlanningReport(Report):
         self.runs = runs
 
         # Sanity checks
-        assert len(self.problems) * len(self.configs) == len(self.runs)
+        assert len(self.problems) * len(self.configs) == len(self.runs), (
+            'Every problem must be run for all configs\n'
+            'Configs (%d):\n%s\nProblems: %d\nDomains (%d):\n%s\nRuns: %d' %
+            (len(self.configs), self.configs, len(self.problems), len(self.domains),
+             self.domains.keys(), len(self.runs)))
         assert sum(len(probs) for probs in domains.values()) == len(self.problems)
         assert len(self.problem_runs) == len(self.problems)
-        assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
         for (domain, problem), runs in self.problem_runs.items():
-            assert len(runs) == len(self.configs)
+            if len(runs) != len(self.configs):
+                prob_configs = [run['config'] for run in runs]
+                print 'Error:          Problem configs (%d) != Configs (%d)' % (
+                    len(prob_configs), len(self.configs))
+                times = defaultdict(int)
+                for config in prob_configs:
+                    times[config] += 1
+                print 'The problem is run more than once for the configs:',
+                print ', '.join(['%s: %dx' % (config, num_runs)
+                                 for (config, num_runs) in times.items() if num_runs > 1])
+                logging.critical('Sanity check failed')
+        assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
         assert len(self.domains) * len(self.configs) == len(self.domain_runs)
         assert sum(len(runs) for runs in self.domain_runs.values()) == len(self.runs)
 
