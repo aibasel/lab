@@ -284,6 +284,8 @@ class Table(collections.defaultdict):
             row = self[row_name]
 
         values = [row.get(col) for col in self.cols]
+        values = [(round(val, 4) if isinstance(val, float) else val)
+                  for val in values]
         only_one_value = len(set(values)) == 1
         real_values = [val for val in values if val is not None]
 
@@ -295,8 +297,6 @@ class Table(collections.defaultdict):
 
         parts = ['| %-30s' % (row_name)]
         for value in values:
-            if isinstance(value, float):
-                value = round(value, 4)
             if self.highlight and only_one_value:
                 value_text = '{{%s|color:Gray}}' % value
             elif self.highlight and (value == min_value and self.min_wins or
