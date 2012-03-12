@@ -71,7 +71,9 @@ class AbsoluteReport(PlanningReport):
         return 'sum', sum
 
     def _add_table_info(self, attribute, func_name, table):
-        # Add some information to the table for attributes where data is missing
+        """
+        Add some information to the table for attributes where data is missing.
+        """
         if self._attribute_is_absolute(attribute):
             return
 
