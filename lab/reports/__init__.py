@@ -208,7 +208,6 @@ class Table(collections.defaultdict):
         self.min_wins = min_wins
 
         self.summary_funcs = []
-        self.column_order = {}
         self.info = []
 
         self._cols = None

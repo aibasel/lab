@@ -35,12 +35,11 @@ class _MultiPattern(object):
     Parses a file for a pattern containing multiple match groups.
     Each group_number has an associated attribute name and a type.
     """
-    def __init__(self, groups, regex, file, required, flags):
+    def __init__(self, groups, regex, required, flags):
         """
         groups is a list of (group_number, attribute_name, type) tuples
         """
         self.groups = groups
-        self.file = file
         self.required = required
 
         flag = 0
@@ -164,7 +163,7 @@ class Parser(object):
         message is printed
         """
         self.file_parsers[file].add_pattern(
-                        _MultiPattern(groups, regex, file, required, flags))
+                                _MultiPattern(groups, regex, required, flags))
 
     def add_function(self, function, file='run.log'):
         """
