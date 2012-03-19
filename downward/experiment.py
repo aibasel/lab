@@ -57,8 +57,6 @@ LIMITS = {
 PLANNER_BINARIES = ['downward', 'downward-debug', 'downward-profile',
                     'release-search', 'search']
 
-PREPROCESS_OUTPUT_FILES = ["*.groups", "output.sas", "output"]
-
 
 def _require_src_dirs(exp, combinations):
     for checkout in set(itertools.chain(*combinations)):
@@ -126,9 +124,6 @@ class PreprocessRun(DownwardRun):
         ext_config = '-'.join([self.translator.name, self.preprocessor.name])
         self._save_id(ext_config)
 
-        for output_file in PREPROCESS_OUTPUT_FILES:
-            self.declare_optional_output(output_file)
-
 
 class SearchRun(DownwardRun):
     def __init__(self, exp, translator, preprocessor, planner, problem, config_nick, config):
@@ -156,7 +151,6 @@ class SearchRun(DownwardRun):
                          time_limit=exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'],
                          abort_on_failure=False)
-        self.declare_optional_output("sas_plan")
 
         # Validation
         self.require_resource('VALIDATE')

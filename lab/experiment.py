@@ -284,9 +284,6 @@ class Run(_Buildable):
         self.linked_resources = []
         self.commands = OrderedDict()
 
-        self.optional_output = []
-        self.required_output = []
-
     def require_resource(self, resource_name):
         """
         Some resources can be used by linking to the resource in the
@@ -335,25 +332,6 @@ class Run(_Buildable):
         assert command, 'Command "%s" cannot be empty' % name
         name = name.replace(' ', '_')
         self.commands[name] = (command, kwargs)
-
-    def declare_optional_output(self, file_glob):
-        """
-        >>> run.declare_optional_output('plan.soln*')
-
-        Specifies that all files names "plan.soln*" (using
-        shell-style glob patterns) are part of the experiment output.
-        """
-        self.optional_output.append(file_glob)
-
-    def declare_required_output(self, filename):
-        """
-        Declare output files that must be present at the end or we have an
-        error. A specification like this is e.g. necessary for the Argo
-        cluster. On the gkigrid, this wouldn't do anything, although
-        the declared outputs should be stored somewhere so that we
-        can later verify that all went according to plan.
-        """
-        self.required_output.append(filename)
 
     def build(self):
         """
