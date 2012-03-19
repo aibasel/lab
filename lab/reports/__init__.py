@@ -81,7 +81,7 @@ class Report(object):
             if not raw_input(msg).upper() == 'Y':
                 sys.exit()
         self.eval_dir = os.path.abspath(eval_dir)
-        self.outfile = outfile
+        self.outfile = os.path.abspath(outfile)
 
         self.load_data()
         self._apply_filter()
@@ -99,7 +99,6 @@ class Report(object):
         self.attributes.sort()
         logging.info('Selected Attributes: %s' % self.attributes)
 
-        self.infos = []
         self.write()
 
     def _get_numerical_attributes(self):
@@ -114,15 +113,6 @@ class Report(object):
             return True
 
         return [attr for attr in self.all_attributes if is_numerical(attr)]
-
-    def add_info(self, info):
-        """
-        Add strings of additional info to the report
-        """
-        self.infos.append(info)
-
-    def get_filename(self):
-        return os.path.abspath(self.outfile)
 
     def get_markup(self):
         """
@@ -149,11 +139,6 @@ class Report(object):
         """
         name, ext = os.path.splitext(os.path.basename(self.outfile))
         doc = Document(title=name)
-        for info in self.infos:
-            doc.add_text('- %s' % info)
-        if self.infos:
-            doc.add_text('\n\n====================\n')
-
         markup = self.get_markup()
 
         if not markup:
@@ -172,11 +157,10 @@ class Report(object):
 
     def write(self):
         content = self.get_text()
-        filename = self.get_filename()
-        tools.makedirs(os.path.dirname(filename))
-        with open(filename, 'w') as file:
+        tools.makedirs(os.path.dirname(self.outfile))
+        with open(self.outfile, 'w') as file:
             file.write(content)
-            logging.info('Wrote file://%s' % filename)
+            logging.info('Wrote file://%s' % self.outfile)
 
     def scan_data(self):
         attributes = set()

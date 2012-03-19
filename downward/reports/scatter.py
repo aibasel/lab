@@ -123,8 +123,7 @@ class ScatterPlotReport(AbsoluteReport):
     def write(self):
         assert len(self.configs) == 2, self.configs
 
-        filename = self.get_filename()
-        if not filename.endswith('.png'):
-            filename += '.png'
-        self.write_plot(self.attributes[0], filename)
-        logging.info('Wrote file://%s' % filename)
+        if not self.outfile.endswith('.png'):
+            self.outfile += '.png'
+        self.write_plot(self.attributes[0], self.outfile)
+        logging.info('Wrote file://%s' % self.outfile)

@@ -89,12 +89,11 @@ class IpcReport(PlanningReport):
 
         self.total_scores = self._compute_total_scores()
 
-        filename = self.get_filename()
-        with open(filename, 'w') as file:
+        with open(self.outfile, 'w') as file:
             sys.stdout = file
             self.print_report()
             sys.stdout = sys.__stdout__
-        logging.info('Wrote file://%s' % filename)
+        logging.info('Wrote file://%s' % self.outfile)
 
     def print_report(self):
         self.print_header()
