@@ -23,7 +23,6 @@ from lab.external import txt2tags
 
 
 TABLE_HEAD_BG = '#aaa'
-BLOCKQUOTE_BG = '#ccc'
 
 CSS = """\
 <style type="text/css">

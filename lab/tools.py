@@ -39,12 +39,9 @@ LOG_LEVEL = None
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SCRIPTS_DIR)
 DATA_DIR = os.path.join(BASE_DIR, 'data')
-CALLS_DIR = os.path.join(SCRIPTS_DIR, 'calls')
 USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
-REPORTS_DIR = os.path.join(USER_DIR, 'reports')
 
 DEFAULT_EXP_DIR = os.path.join(USER_DIR, 'experiments')
-DEFAULT_REPORTS_DIR = os.path.join(USER_DIR, 'reports')
 
 
 class ErrorAbortHandler(logging.StreamHandler):
@@ -311,11 +308,6 @@ def copy(src, dest, required=True, ignores=None):
         return
 
 
-def csv(string):
-    string = string.strip(', ')
-    return string.split(',')
-
-
 def get_terminal_size():
     import struct
     try:
@@ -390,11 +382,6 @@ class ArgParser(argparse.ArgumentParser):
 
         return (args, remaining)
 
-    def set_help_active(self):
-        self.add_argument(
-                '-h', '--help', action='help', default=argparse.SUPPRESS,
-                help=('show this help message and exit'))
-
     def directory(self, string):
         if not os.path.isdir(string):
             msg = '%r is not an evaluation directory' % string
@@ -404,28 +391,3 @@ class ArgParser(argparse.ArgumentParser):
 
 # Parse the log-level and set it
 ArgParser(add_help=False).parse_known_args()
-
-
-class Timer(object):
-    def __init__(self):
-        self.start_time = time.time()
-        self.start_clock = self._clock()
-
-    def _clock(self):
-        times = os.times()
-        return times[0] + times[1]
-
-    def __str__(self):
-        return "[%.3fs CPU, %.3fs wall-clock]" % (
-            self._clock() - self.start_clock,
-            time.time() - self.start_time)
-
-
-@contextlib.contextmanager
-def timing(text):
-    timer = Timer()
-    logging.info("%s..." % text)
-    sys.stdout.flush()
-    yield
-    logging.info("%s: %s" % (text, timer))
-    sys.stdout.flush()

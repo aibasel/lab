@@ -290,7 +290,7 @@ class DownwardExperiment(Experiment):
         Experiment.run(self)
 
     def build(self, stage, overwrite=False):
-        """Write the experiment to the disk.
+        """Write the experiment to disk.
 
         If *overwrite* is False and the experiment directory exists, it is
         overwritten without prior confirmation.
