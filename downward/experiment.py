@@ -42,7 +42,7 @@ tools.makedirs(PREPROCESSED_TASKS_DIR)
 DOWNWARD_SCRIPTS_DIR = os.path.join(tools.BASE_DIR, 'downward', 'scripts')
 
 
-# Limits can be overwritten in DownwardExperiment
+# Limits can be overwritten in DownwardExperiment constructor.
 LIMITS = {
     'translate_time': 7200,
     'translate_memory': 8192,
@@ -175,7 +175,7 @@ class DownwardExperiment(Experiment):
     *repo* must be the path to a Fast Downward repository. This repository is
     used to search for problem files and if *combinations* is None.
 
-    *combinations* is a list of Checkout tuples of the form
+    *combinations* is a list of :ref:`Checkout <checkouts>` tuples of the form
     (Translator, Preprocessor, Planner). If no combinations are given, perform
     an experiment with the working copy in *repo*.
 
@@ -184,7 +184,7 @@ class DownwardExperiment(Experiment):
     during the experiment.
 
     If *limits* is given, it must be a dictionary and it will be used to
-    overwrite the default limits.
+    overwrite the default limits (see source for format).
 
     >>> repo = '/path/to/downward-repo'
     >>> combos = [(Translator(repo, rev=123),
@@ -240,12 +240,17 @@ class DownwardExperiment(Experiment):
     def add_suite(self, suite):
         """
         *suite* can either be a string or a list of strings. The strings can be
-        tasks, domains or suites:
+        tasks or domains.
 
-        >>> exp.add_suite("gripper")
         >>> exp.add_suite("gripper:prob01.pddl")
-        >>> exp.add_suite("STRIPS")
-        >>> exp.add_suite(["miconic", "trucks", "grid"])
+        >>> exp.add_suite("gripper")
+        >>> exp.add_suite(["miconic", "trucks", "grid", "gripper:prob01.pddl"])
+
+        There are some predefined suites in ``suites.py``.
+
+        >>> exp.add_suite(suites.suite_strips())
+        >>> exp.add_suite(suites.suite_ipc_all())
+
         """
         if isinstance(suite, basestring):
             parts = [part.strip() for part in suite.split(',')]
@@ -256,7 +261,8 @@ class DownwardExperiment(Experiment):
     def add_config(self, nick, config):
         """
         *nick* is the name the config will get in the reports.
-        *config* must be a list of arguments that can be passed to the planner.
+        *config* must be a list of arguments that can be passed to the planner
+        (see http://www.fast-downward.org/SearchEngine for details).
 
         >>> exp.add_config("lmcut", ["--search", "astar(lmcut())"])
         """
@@ -286,7 +292,7 @@ class DownwardExperiment(Experiment):
     def build(self, stage, overwrite=False):
         """Write the experiment to disk.
 
-        If *overwrite* is False and the experiment directory exists, it is
+        If *overwrite* is True and the experiment directory exists, it is
         overwritten without prior confirmation.
 
         """

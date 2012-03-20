@@ -118,20 +118,27 @@ class Checkout(object):
 
 class HgCheckout(Checkout):
     """
-    Base class for the three checkout types (translate, preprocess, search).
-
-    You can use any repo from your filesystem and only if you specify the *dest*
-    parameter or use a revision other than "WORK", the code will be copied to
-    the revision cache.
+    Base class for the three checkout classes Translator, Preprocessor,
+    Planner.
     """
     def __init__(self, part, repo, rev='WORK', dest=None):
         """
-        part: One of translate, preprocess, search
-        repo: Path to the hg repository. Can be either local or remote.
-        rev:  Changeset. Can be any valid hg revision specifier or "WORK"
-        dest: If set this will be the checkout's name. Use this if you need to
-              checkout the same revision multiple times and want to alter each
-              checkout manually (e.g. for comparing Makefile options).
+        *part* must be one of translate, preprocess, search. It is set by the
+        child classes.
+
+        *repo* must be a path to a Fast Downward mercurial repository. The
+        path can be either local or remote.
+
+        *rev* can be any any valid hg revision specifier (e.g. 209,
+        0d748429632d, tip, issue324) or "WORK". If *rev* is "WORK" (default),
+        the working copy found at *repo* will be used.
+
+        By default all checkouts will be made to <REVISION_CACHE>/<REVISION>.
+        If *dest* is given however, the destination directory will be <dest> if
+        dest is absolute or <REVISION_CACHE>/<dest> otherwise. Use this
+        parameter if you need to checkout the same revision multiple times and
+        want to alter each checkout manually (e.g. for comparing Makefile
+        options).
         """
         if dest and rev == 'WORK':
             logging.error('You cannot have multiple copies of the working '

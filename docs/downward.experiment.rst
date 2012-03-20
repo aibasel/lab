@@ -1,6 +1,17 @@
-downward.experiment
-===================
+:mod:`downward` --- Fast Downward experiments
+=============================================
 
-.. automodule:: downward.experiment
+DownwardExperiment
+------------------
+.. autoclass:: downward.experiment.DownwardExperiment
    :members:
-   :undoc-members:
+
+
+.. _checkouts:
+
+Checkouts
+---------
+.. autoclass:: downward.checkouts.HgCheckout
+.. autoclass:: downward.checkouts.Translator
+.. autoclass:: downward.checkouts.Preprocessor
+.. autoclass:: downward.checkouts.Planner
