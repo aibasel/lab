@@ -282,16 +282,6 @@ def suite_ipc11_sat():
 def suite_ipc11_all():
     return suite_ipc11_opt() + suite_ipc11_sat()
 
-def suite_pdb_tests():
-    return [
-        "logistics00",
-        "blocks",
-        "sokoban-opt08-strips",
-        "parcprinter-08-strips",
-        "pipesworld-notankage",
-        "woodworking-opt08-strips",
-        ]
-
 def suite_interesting():
     # A domain is boring if all planners solve all tasks in < 1 sec.
     # We include logistics00 even though it has that property because
