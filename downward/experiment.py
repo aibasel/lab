@@ -173,7 +173,7 @@ class SearchRun(DownwardRun):
 class DownwardExperiment(Experiment):
     """
     *repo* must be the path to a Fast Downward repository. This repository is
-    used to search for problem files and if *combinations* is None.
+    used to search for problem files.
 
     *combinations* is a list of :ref:`Checkout <checkouts>` tuples of the form
     (Translator, Preprocessor, Planner). If no combinations are given, perform

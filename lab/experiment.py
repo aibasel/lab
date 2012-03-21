@@ -51,6 +51,14 @@ class _Buildable(object):
 
         >>> exp.set_property('compact', True)
         >>> run.set_property('domain', 'gripper')
+
+        Each run must have the property *id* which must be a *unique* list of
+        strings. They determine where the results for this run will land on
+        disk and in the combined properties file.
+
+        >>> run.set_property('id', [algorithm, benchmark])
+        >>> run.set_property('id', [config, domain, problem])
+
         """
         self.properties[name] = value
 
@@ -60,16 +68,16 @@ class _Buildable(object):
 
         >>> experiment.add_resource('PLANNER', 'path/to/planner', 'dest-name')
 
-        Includes a "global" file, i.e., one needed for all runs, into the
-        experiment archive. In case of GkiGridExperiment, copies it to the
-        main directory of the experiment. The name "PLANNER" is an ID for
-        this resource that can also be used to refer to it in the run script.
+        includes a "global" file, i.e., one needed for all runs, into the
+        main directory of the **experiment**. The name "PLANNER" is an ID for
+        this resource that can also be used to refer to it in a command.
 
-        >>> run.add_resource('DOMAIN', '../benchmarks/gripper/domain.pddl',
+        >>> run.add_resource('DOMAIN', 'benchmarks/gripper/domain.pddl',
                              'domain.pddl')
+        >>> run.add_command('print-domain', ['cat', 'DOMAIN'])
 
-        copies "../benchmarks/gripper/domain.pddl" into the run directory under
-        the name "domain.pddl" and make it available as resource "DOMAIN".
+        copies "benchmarks/gripper/domain.pddl" into the **run** directory as
+        "domain.pddl" and makes it available to commands as "DOMAIN".
         """
         if not (source, dest) in self.resources:
             self.resources.append((source, dest, required, symlink))
@@ -165,12 +173,15 @@ class Experiment(_Buildable):
     @property
     def name(self):
         """Return the directory name of the experiment's path."""
-        # Derive the experiment name from the path
         return os.path.basename(self.path)
 
     @property
     def eval_dir(self):
-        """Return the name of the default evaluation directory."""
+        """Return the name of the default evaluation directory.
+
+        This is the directory where the fetched and parsed results will land.
+
+        """
         return self.path + '-eval'
 
     def add_step(self, step):
@@ -320,6 +331,7 @@ class Run(_Buildable):
 
         Examples:
 
+        >>> run.add_command('list-directory', ['ls', '-al'])
         >>> run.add_command('translate', [run.translator.shell_name,
                                           'domain.pddl', 'problem.pddl'])
         >>> run.add_command('preprocess', [run.preprocessor.shell_name],
