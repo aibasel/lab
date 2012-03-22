@@ -237,9 +237,38 @@ class Report(object):
 class Table(collections.defaultdict):
     def __init__(self, title='', min_wins=None):
         """
+        The *Table* class is realized as a dictionary of dictionaries mapping
+        row names to colum names to cell values. To obtain the markup from a
+        table, use the ``str()`` function.
+
+        *title* will be printed in the top left cell.
+
         *min_wins* can be either None, True or False. If it is True (False),
         the cell with the lowest (highest) value in each row will be
         highlighted.
+
+        >>> t = Table(title='expansions')
+        >>> t.add_cell('prob1', 'cfg1', 10)
+        >>> t.add_cell('prob1', 'cfg2', 20)
+        >>> t.add_row('prob2', {'cfg1': 15, 'cfg2': 25})
+        >>> print t
+        | expansions | cfg1 | cfg2 |
+        | prob1      |   10 |   20 |
+        | prob2      |   15 |   25 |
+        >>> t.rows
+        ['prob1', 'prob2']
+        >>> t.cols
+        ['cfg1', 'cfg2']
+        >>> t.get_row('prob2')
+        [15, 25]
+        >>> t.get_columns()
+        {'cfg1': [10, 15], 'cfg2': [20, 25]}
+        >>> t.add_summary_function(sum)
+        >>> print t
+        | expansions | cfg1 | cfg2 |
+        | prob1      |   10 |   20 |
+        | prob2      |   15 |   25 |
+        | SUM        |   25 |   45 |
         """
         collections.defaultdict.__init__(self, dict)
 
@@ -253,27 +282,36 @@ class Table(collections.defaultdict):
         self._cols = None
 
     def add_cell(self, row, col, value):
+        """Set Table[row][col] = value."""
         self[row][col] = value
         self._cols = None
 
     def add_row(self, row_name, row):
-        """row must map column names to the value in row "row_name"."""
+        """Add a new row called *row_name* to the table.
+
+        *row* must be a mapping from column names to values.
+        """
         self[row_name] = row
         self._cols = None
 
     def add_col(self, col_name, col):
-        """col must map row names to values."""
+        """Add a new column called *col_name* to the table.
+
+        *col* must be a mapping from row names to values.
+        """
         for row_name, value in col.items():
             self[row_name][col_name] = value
         self._cols = None
 
     @property
     def rows(self):
+        """Return all row names in sorted order."""
         # Let the sum, etc. rows be the last ones
         return tools.natural_sort(self.keys())
 
     @property
     def cols(self):
+        """Return all column names in sorted order."""
         if self._cols:
             return self._cols
         col_names = set()
@@ -283,14 +321,12 @@ class Table(collections.defaultdict):
         return self._cols
 
     def get_row(self, row):
+        """Return a list of the values in *row*."""
         return [self[row].get(col, None) for col in self.cols]
-
-    def get_rows(self):
-        return [(row, self.get_row(row)) for row in self.rows]
 
     def get_columns(self):
         """
-        Returns a mapping from column name to the list of values in that column.
+        Return a mapping from column names to the list of values in that column.
         """
         values = defaultdict(list)
         for row in self.rows:
@@ -299,9 +335,11 @@ class Table(collections.defaultdict):
         return values
 
     def get_row_markup(self, row_name, row=None):
-        """
-        If given, row must be a dictionary mapping column names to the value in
-        row "row_name".
+        """Return the txt2tags table markup for *row_name*.
+
+        If given, *row* must be a dictionary mapping column names to the value
+        in row *row_name*. Otherwise row will be the row named *row_name* (This
+        if useful for obtaining markup for rows that are not in the table).
         """
         if row is None:
             row = self[row_name]
@@ -332,19 +370,13 @@ class Table(collections.defaultdict):
 
     def add_summary_function(self, name, func):
         """
-        This function adds a bottom row with the values func(column_values) for
-        each column. Func can be e.g. sum, reports.avg, reports.gm
+        Add a bottom row with the values ``func(column_values)`` for each column.
+        *func* can be e.g. ``sum``, ``reports.avg`` or ``reports.gm``.
         """
         self.summary_funcs.append((name, func))
 
     def __str__(self):
-        """
-        {'zenotravel': {'yY': 17, 'fF': 21}, 'gripper': {'yY': 72, 'fF': 118}}
-        ->
-        || expanded        | fF               | yY               |
-        | **gripper     ** | 118              | 72               |
-        | **zenotravel  ** | 21               | 17               |
-        """
+        """Return the txt2tags markup for this table."""
         def get_col_markup(col):
             # Allow custom sorting of the column names
             if '-SORT:' in col:
