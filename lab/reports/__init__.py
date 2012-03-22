@@ -101,8 +101,12 @@ class Report(object):
         self.filter = filter
 
     def __call__(self, eval_dir, outfile):
-        """
-        eval_dir: path to results directory
+        """Make the report.
+
+        *eval_dir* must be a path to an evaluation directory containing a
+        ``properties`` file.
+
+        The report will be written to *outfile*.
         """
         if not eval_dir.endswith('-eval'):
             msg = ('The source directory does not end with "-eval". '
