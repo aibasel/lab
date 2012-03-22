@@ -76,10 +76,10 @@ class PlanningReport(Report):
         self.derived_properties.append(quality)
         self.derived_properties.append(single_solver)
 
-    def scan_data(self):
+    def _scan_data(self):
         self.scan_planning_data()
         self.compute_derived_properties()
-        Report.scan_data(self)
+        Report._scan_data(self)
 
     def scan_planning_data(self):
         # Use local variables first to save lookups

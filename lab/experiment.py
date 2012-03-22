@@ -146,8 +146,9 @@ class _Buildable(object):
 class Experiment(_Buildable):
     """
     Create a new experiment that will be built at *path* using the methods
-    provided by *environment*. If *environment* is not provided,
-    *LocalEnvironment* is used.
+    provided by *environment*, which can be *LocalEnvironment*,
+    *GkiGridEnvironment* or None. If *environment* is None,
+    *LocalEnvironment* is used (default).
     """
     def __init__(self, path, environment=None):
         _Buildable.__init__(self)
@@ -185,7 +186,7 @@ class Experiment(_Buildable):
         return self.path + '-eval'
 
     def add_step(self, step):
-        """Add *step* to the list of experiment steps.
+        """Add :ref:`Step <steps>` *step* to the list of experiment steps.
 
         >>> exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
 

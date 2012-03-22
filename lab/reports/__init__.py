@@ -58,13 +58,42 @@ def gm(values):
 
 class Report(object):
     """
-    Base class for all reports
+    Base class for all reports.
     """
     def __init__(self, attributes=None, format='html', filter=None):
         """
-        attributes: the analyzed attributes (e.g. coverage). If omitted, use
-                    all found numerical attributes
-        filter:     function that is given a run and returns True or False
+        *attributes* is a list of the attributes you want to include in your
+        report. If omitted, use all found numerical attributes.
+
+        *format* can be one of e.g. html, tex, wiki (MediaWiki),
+        gwiki (Google Code Wiki), doku (DokuWiki), pmw (PmWiki),
+        moin (MoinMoin), txt (Plain text) and art (ASCII art).
+
+        If given, *filter* must be a function that is passed a dictionary of a
+        run's keys and values and returns True or False. Depending on the
+        returned value, the run is included or excluded from the report.
+        Alternatively, the function can return a dictionary that will overwrite
+        the old run's dictionary for the report.
+
+        Examples:
+
+        Include only *coverage* and *expansions* in the report and write a
+        LaTeX file at ``myreport.tex``:
+
+        >>> report = Report(attributes=['coverage', 'expansions'], format='tex')
+        >>> report(path_to_eval_dir, 'myreport.tex')
+
+        Only include successful runs in the report:
+
+        >>> def solved(run):
+        >>>     return run['coverage']
+        >>> report = Report(filter=solved)
+        >>> report(path_to_eval_dir, 'myreport.html')
+
+
+
+
+
         """
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
@@ -83,9 +112,9 @@ class Report(object):
         self.eval_dir = os.path.abspath(eval_dir)
         self.outfile = os.path.abspath(outfile)
 
-        self.load_data()
+        self._load_data()
         self._apply_filter()
-        self.scan_data()
+        self._scan_data()
         logging.info('Available attributes: %s' % self.all_attributes)
 
         if not self.attributes:
@@ -116,11 +145,12 @@ class Report(object):
 
     def get_markup(self):
         """
-        If get_text() is not overwritten this method can be overwritten in
-        subclasses that want to return markup that is converted to text in the
-        get_text() method.
+        If ``get_text()`` is not overwritten, this method can be overwritten in
+        subclasses that want to return the report as
+        `txt2tags <http://txt2tags.org/>`_ markup. The default ``get_text()``
+        method converts that markup into *format*.
         """
-        table = Table(highlight=False)
+        table = Table()
         for run_id, run in self.props.items():
             row = {}
             for key, value in run.items():
@@ -134,8 +164,9 @@ class Report(object):
 
     def get_text(self):
         """
-        This method should be overwritten in subclasses if the sublass does NOT
-        want to return markup text.
+        This method should be overwritten in subclasses that want to produce
+        e.g. HTML or LaTeX markup or programming code directly instead of
+        creating `txt2tags <http://txt2tags.org/>`_ markup.
         """
         name, ext = os.path.splitext(os.path.basename(self.outfile))
         doc = Document(title=name)
@@ -156,19 +187,23 @@ class Report(object):
         return doc.render(self.output_format, {'toc': 1})
 
     def write(self):
+        """
+        Overwrite this method if you want to write the report directly. You
+        should write the report to *outfile*.
+        """
         content = self.get_text()
         tools.makedirs(os.path.dirname(self.outfile))
         with open(self.outfile, 'w') as file:
             file.write(content)
             logging.info('Wrote file://%s' % self.outfile)
 
-    def scan_data(self):
+    def _scan_data(self):
         attributes = set()
         for run_id, run in self.props.items():
             attributes |= set(run.keys())
         self.all_attributes = list(sorted(attributes))
 
-    def load_data(self):
+    def _load_data(self):
         combined_props_file = os.path.join(self.eval_dir, 'properties')
         if not os.path.exists(combined_props_file):
             msg = 'Properties file not found at %s'

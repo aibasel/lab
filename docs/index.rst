@@ -13,7 +13,7 @@ lab
    :maxdepth: 2
 
    lab.experiment
-   lab.steps
+   lab.reports
 
 downward
 --------

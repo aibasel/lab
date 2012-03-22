@@ -51,16 +51,30 @@ class Fetcher(object):
 
     def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True):
         """
-        This method can be used to copy properties from exp-dirs or eval-dirs
-        into eval-dirs. If the destination eval-dirs already exist, the data
-        will be merged. This means src_dir can either be an exp-dir or an
-        eval-dir and eval_dir can be a new or existing directory.
+        This method can be used to copy properties from an exp-dir or eval-dir
+        into an eval-dir. If the destination eval-dir already exist, the data
+        will be merged. This means *src_dir* can either be an exp-dir or an
+        eval-dir and *eval_dir* can be a new or existing directory.
 
-        copy_all: Copy all files from run dirs to a new directory tree.
-                  Without this option only the combined properties file is
-                  written do disk.
+        If *copy_all* is True (default: False), copy all files from the run
+        dirs to a new directory tree at *eval_dir*. Without this option only
+        the combined properties file is written do disk.
 
-        write_combined_props: Write the combined properties file.
+        If *write_combined_props* is True (default), write the combined
+        properties file.
+
+        Examples:
+
+        Fetch all results and write a single combined properties file to the
+        default evaluation directory:
+
+        >>> exp.add_step(Step('fetch', Fetcher(), exp.path))
+
+        Read the combined properties file at ``<eval_dir1>/properties`` and
+        merge it into the combined properties file at
+        ``<combined_eval_dir>/properties``:
+
+        >>> exp.add_step(Step('combine', Fetcher(), eval_dir1, combined_eval_dir))
         """
         if not os.path.isdir(src_dir):
             logging.critical('%s is not a valid directory' % src_dir)
