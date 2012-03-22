@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-import sys; print 'SYSPATH SIMPLEPARSER', sys.path
 from lab.parser import Parser
 
 

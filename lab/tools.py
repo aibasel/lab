@@ -209,12 +209,14 @@ def _log_command(cmd, kwargs):
             kwargs_clean['env'] = {'PYTHONPATH': pythonpath, '...': '...'}
     logging.info('Running command: %s %s' % (' '.join(cmd), kwargs_clean))
 
+
 def run_command(cmd, **kwargs):
     """
     Runs command cmd and returns the output
     """
     _log_command(cmd, kwargs)
     return subprocess.call(cmd, **kwargs)
+
 
 def get_command_output(cmd, quiet=False, **kwargs):
     if not quiet:
