@@ -53,11 +53,13 @@ class LocalEnvironment(Environment):
         self.processes = processes
 
     def write_main_script(self):
-        dirs = [repr(os.path.relpath(run.path, self.exp.path)) for run in self.exp.runs]
+        dirs = [repr(os.path.relpath(run.path, self.exp.path))
+                for run in self.exp.runs]
         replacements = {'DIRS': ',\n'.join(dirs),
                         'PROCESSES': str(self.processes)}
 
-        script = open(os.path.join(tools.DATA_DIR, 'local-job-template.py')).read()
+        script = open(os.path.join(tools.DATA_DIR,
+                                   'local-job-template.py')).read()
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
@@ -86,20 +88,23 @@ class GkiGridEnvironment(Environment):
             'queue': self.queue,
             'priority': self.priority,
             }
-        template_file = os.path.join(tools.DATA_DIR, 'gkigrid-job-header-template')
-        script_template = open(template_file).read()
-        script = script_template % job_params + '\n'
+        template_file = os.path.join(tools.DATA_DIR,
+                                     'gkigrid-job-header-template')
+        header = open(template_file).read() % job_params + '\n'
+        lines = []
 
         run_groups = tools.divide_list(self.exp.runs, self.runs_per_task)
 
         for task_id, run_group in enumerate(run_groups, start=1):
-            script += 'if [[ $SGE_TASK_ID == %s ]]; then\n' % task_id
+            lines.append('if [[ $SGE_TASK_ID == %s ]]; then' % task_id)
             for run in run_group:
                 # Change into the run dir
-                script += '  cd %s\n' % os.path.relpath(run.path, self.exp.path)
-                script += '  ./run\n'
-            script += 'fi\n'
+                lines.append('  cd %s' % os.path.relpath(run.path,
+                                                         self.exp.path))
+                lines.append('  ./run')
+            lines.append('fi')
 
+        script = header + '\n'.join(lines)
         self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
     def start_exp(self):
