@@ -235,11 +235,16 @@ class Report(object):
 
 
 class Table(collections.defaultdict):
-    def __init__(self, title='', highlight=True, min_wins=True):
+    def __init__(self, title='', min_wins=None):
+        """
+        *min_wins* can be either None, True or False. If it is True (False),
+        the cell with the lowest (highest) value in each row will be
+        highlighted.
+        """
         collections.defaultdict.__init__(self, dict)
 
         self.title = title
-        self.highlight = highlight
+        self.highlight = min_wins is not None
         self.min_wins = min_wins
 
         self.summary_funcs = []
