@@ -125,5 +125,6 @@ class ScatterPlotReport(AbsoluteReport):
 
         if not self.outfile.endswith('.png'):
             self.outfile += '.png'
+        tools.makedirs(os.path.dirname(self.outfile))
         self.write_plot(self.attributes[0], self.outfile)
         logging.info('Wrote file://%s' % self.outfile)

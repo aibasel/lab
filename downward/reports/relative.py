@@ -75,8 +75,8 @@ class RelativeReport(AbsoluteReport):
             logging.info('No changes above for "%s"' % attribute)
             return None
 
-        table.add_col('ZZ1-SORT:Factor', quotient_col)
-        #table.add_col('ZZ2-SORT:%-Change', percent_col)
+        table.add_col('ZZ1:sort:Factor', quotient_col)
+        #table.add_col('ZZ2:sort:%-Change', percent_col)
         table.highlight = False
         table.summary_funcs = []
         return table

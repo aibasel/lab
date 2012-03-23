@@ -18,9 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
-import logging
 from collections import defaultdict
+import logging
+import os
+import sys
 
 from downward.reports import PlanningReport
 from lab import tools
@@ -89,6 +90,7 @@ class IpcReport(PlanningReport):
 
         self.total_scores = self._compute_total_scores()
 
+        tools.makedirs(os.path.dirname(self.outfile))
         with open(self.outfile, 'w') as file:
             sys.stdout = file
             self.print_report()

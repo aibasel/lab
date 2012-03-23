@@ -78,22 +78,33 @@ class Report(object):
         Examples:
 
         Include only *coverage* and *expansions* in the report and write a
-        LaTeX file at ``myreport.tex``:
+        LaTeX file at ``myreport.tex``: ::
 
-        >>> report = Report(attributes=['coverage', 'expansions'], format='tex')
-        >>> report(path_to_eval_dir, 'myreport.tex')
+            report = Report(attributes=['coverage', 'expansions'], format='tex')
+            report(path_to_eval_dir, 'myreport.tex')
 
-        Only include successful runs in the report:
+        Only include successful runs in the report: ::
 
-        >>> def solved(run):
-        >>>     return run['coverage']
-        >>> report = Report(filter=solved)
-        >>> report(path_to_eval_dir, 'myreport.html')
+            def solved(run):
+                return run['coverage']
+            report = Report(filter=solved)
+            report(path_to_eval_dir, 'myreport.html')
 
+        Filter function that filters, renames and sorts columns: ::
 
-
-
-
+            def paper_configs(run):
+                config = run['config'].replace('WORK-', '')
+                # We want lama11 to be the leftmost column.
+                configs = ['lama11', 'fdss_sat1', 'fdss_sat2']
+                paper_names = {'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1',
+                               'fdss_sat2': 'FDSS 2'}
+                if not config in configs:
+                    return False
+                pos = configs.index(config)
+                # "...:sort:" will be removed in the output and is only used
+                # for sorting.
+                run['config'] = '%d:sort:%s' % (pos, paper_names[config])
+                return run
         """
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
@@ -338,7 +349,7 @@ class Table(collections.defaultdict):
                 values[col].append(self[row].get(col))
         return values
 
-    def get_row_markup(self, row_name, row=None):
+    def _get_row_markup(self, row_name, row=None):
         """Return the txt2tags table markup for *row_name*.
 
         If given, *row* must be a dictionary mapping column names to the value
@@ -383,8 +394,8 @@ class Table(collections.defaultdict):
         """Return the txt2tags markup for this table."""
         def get_col_markup(col):
             # Allow custom sorting of the column names
-            if '-SORT:' in col:
-                sorting, col = col.split('-SORT:')
+            if ':sort:' in col:
+                sorting, col = col.split(':sort:')
             # Allow breaking long configs into multiple lines
             col = col.replace('_', '-')
             # Escape config names to prevent involuntary markup
@@ -394,7 +405,7 @@ class Table(collections.defaultdict):
                   ' | '.join(get_col_markup(col) for col in self.cols) + ' |')
         table_rows = [header]
         for row in self.rows:
-            table_rows.append(self.get_row_markup(row))
+            table_rows.append(self._get_row_markup(row))
         for name, func in self.summary_funcs:
             summary_row = {}
             for col, content in self.get_columns().items():
@@ -403,5 +414,5 @@ class Table(collections.defaultdict):
                     summary_row[col] = func(content)
                 else:
                     summary_row[col] = None
-            table_rows.append(self.get_row_markup(name, summary_row))
+            table_rows.append(self._get_row_markup(name, summary_row))
         return '%s\n%s' % ('\n'.join(table_rows), ' '.join(self.info))
