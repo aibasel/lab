@@ -100,12 +100,18 @@ def _get_config(target):
     elif target == 'tex':
         config['style'] = []
         config['style'].append('color')
+        config['style'].append('geometry')
 
         # Do not clear the title page
         config['postproc'].append([r'\\clearpage', r''])
 
+        # Make some color names available e.g. Gray (case-sensitive).
         config['postproc'].append([r'usepackage{color}',
                                    r'usepackage[usenames,dvipsnames]{color}'])
+
+        # Use landscape orientation.
+        config['postproc'].append([r'usepackage{geometry}',
+                                   r'usepackage[landscape,margin=1cm]{geometry}'])
 
         config['encoding'] = 'utf8'
         config['preproc'].append(['€', 'Euro'])
