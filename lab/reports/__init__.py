@@ -293,6 +293,7 @@ class Table(collections.defaultdict):
 
         self.summary_funcs = []
         self.info = []
+        self.num_values = None
 
         self._cols = None
 
@@ -349,18 +350,25 @@ class Table(collections.defaultdict):
                 values[col].append(self[row].get(col))
         return values
 
-    def _get_row_markup(self, row_name, row=None):
-        """Return the txt2tags table markup for *row_name*.
+    def _format_header(self):
+        return '|| %-29s | %s |' % (self.title,
+               ' | '.join(self._format_column_name(col) for col in self.cols))
 
-        If given, *row* must be a dictionary mapping column names to the value
-        in row *row_name*. Otherwise row will be the row named *row_name* (This
-        if useful for obtaining markup for rows that are not in the table).
-        """
+    def _format_column_name(self, col):
+        """Allow custom sorting of the column names."""
+        if ':sort:' in col:
+            sorting, col = col.split(':sort:')
+        # Allow breaking long configs into multiple lines for html tables.
+        col = col.replace('_', '-')
+        return ' %15s' % col
+
+    def _format_row_values(self, row_name, row=None):
+        """Return a list of formatted values."""
         if row is None:
             row = self[row_name]
 
         values = [row.get(col) for col in self.cols]
-        values = [(round(val, 4) if isinstance(val, float) else val)
+        values = [(round(val, 2) if isinstance(val, float) else val)
                   for val in values]
         only_one_value = len(set(values)) == 1
         real_values = [val for val in values if val is not None]
@@ -371,17 +379,29 @@ class Table(collections.defaultdict):
         else:
             min_value = max_value = 'undefined'
 
-        parts = ['| %-30s' % (row_name)]
+        parts = ['%-30s' % row_name]
         for value in values:
-            if self.highlight and only_one_value:
-                value_text = '{{%s|color:Gray}}' % value
-            elif self.highlight and (value == min_value and self.min_wins or
-                                     value == max_value and not self.min_wins):
-                value_text = '**%s**' % value
+            if isinstance(value, float):
+                value_text = '%.2f' % value
             else:
                 value_text = str(value)
-            parts.append('%-16s' % value_text)
-        return ' | '.join(parts) + ' |'
+
+            if self.highlight and only_one_value:
+                value_text = '{%s|color:Gray}' % value_text
+            elif self.highlight and (value == min_value and self.min_wins or
+                                     value == max_value and not self.min_wins):
+                value_text = '**%s**' % value_text
+            parts.append(' %15s' % value_text.replace('_', '-'))
+        return parts
+
+    def _get_row_markup(self, row_name, row=None):
+        """Return the txt2tags table markup for *row_name*.
+
+        If given, *row* must be a dictionary mapping column names to the value
+        in row *row_name*. Otherwise row will be the row named *row_name* (This
+        if useful for obtaining markup for rows that are not in the table).
+        """
+        return '| %s |' % ' | '.join(self._format_row_values(row_name, row))
 
     def add_summary_function(self, name, func):
         """
@@ -392,18 +412,7 @@ class Table(collections.defaultdict):
 
     def __str__(self):
         """Return the txt2tags markup for this table."""
-        def get_col_markup(col):
-            # Allow custom sorting of the column names
-            if ':sort:' in col:
-                sorting, col = col.split(':sort:')
-            # Allow breaking long configs into multiple lines
-            col = col.replace('_', '-')
-            # Escape config names to prevent involuntary markup
-            return '%-16s' % ('""%s""' % col)
-
-        header = ('|| %-29s | ' % self.title +
-                  ' | '.join(get_col_markup(col) for col in self.cols) + ' |')
-        table_rows = [header]
+        table_rows = [self._format_header()]
         for row in self.rows:
             table_rows.append(self._get_row_markup(row))
         for name, func in self.summary_funcs:
@@ -414,5 +423,8 @@ class Table(collections.defaultdict):
                     summary_row[col] = func(content)
                 else:
                     summary_row[col] = None
-            table_rows.append(self._get_row_markup(name, summary_row))
+            row_name = '**%s**' % name.capitalize()
+            if self.num_values is not None:
+                row_name += ' (%d)' % self.num_values
+            table_rows.append(self._get_row_markup(row_name, summary_row))
         return '%s\n%s' % ('\n'.join(table_rows), ' '.join(self.info))
