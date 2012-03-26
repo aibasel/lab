@@ -104,6 +104,7 @@ def _get_config(target):
         config['style'] = []
         config['style'].append('color')
         config['style'].append('geometry')
+        config['style'].append('rotating')
 
         # Do not clear the title page
         config['postproc'].append([r'\\clearpage', r''])
