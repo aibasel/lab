@@ -94,6 +94,7 @@ class AbsoluteReport(PlanningReport):
         func_name, func = self._get_group_func(attribute)
 
         if self.resolution == 'domain':
+            num_values = 0
             self._add_table_info(attribute, func_name, table)
             domain_config_values = defaultdict(list)
             for domain, problems in self.domains.items():
@@ -101,12 +102,14 @@ class AbsoluteReport(PlanningReport):
                     runs = self.problem_runs[(domain, problem)]
                     if any(run.get(attribute) is None for run in runs):
                         continue
+                    num_values += 1
                     for config in self.configs:
                         value = self.runs[(domain, problem, config)].get(attribute)
                         if value is not None:
                             domain_config_values[(domain, config)].append(value)
             for (domain, config), values in domain_config_values.items():
                 table.add_cell('%s (%s)' % (domain, len(values)), config, func(values))
+            table.num_values = num_values
         elif self.resolution == 'problem':
             for (domain, problem, config), run in self.runs.items():
                 table.add_cell(domain + ':' + problem, config, run.get(attribute))
