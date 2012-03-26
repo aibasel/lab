@@ -32,21 +32,6 @@ from lab import tools
 from lab.reports import Report, Table
 
 
-class PlanningTable(Table):
-    def __init__(self, *args, **kwargs):
-        Table.__init__(self, *args, **kwargs)
-
-        if self.title in ['search_time', 'total_time']:
-            self.add_summary_function('GEOMETRIC MEAN', reports.gm)
-        else:
-            self.add_summary_function('SUM', sum)
-
-        if 'score' in self.title:
-            # When summarising score results from multiple domains we show
-            # normalised averages so that each domain is weighed equally.
-            self.add_summary_function('AVERAGE', reports.avg)
-
-
 def quality(problem_runs):
     """IPC score."""
     min_cost = tools.minimum(run.get('cost') for run in problem_runs)
@@ -153,5 +138,17 @@ class PlanningReport(Report):
         for attr_part in max_attribute_parts:
             if attr_part in attribute:
                 min_wins = False
-        table = PlanningTable(attribute, min_wins=min_wins)
+
+        table = Table(title=attribute, min_wins=min_wins)
+
+        if attribute in ['search_time', 'total_time']:
+            table.add_summary_function('GEOMETRIC MEAN', reports.gm)
+        else:
+            table.add_summary_function('SUM', sum)
+
+        if 'score' in attribute:
+            # When summarising score results from multiple domains we show
+            # normalised averages so that each domain is weighed equally.
+            table.add_summary_function('AVERAGE', reports.avg)
+
         return table
