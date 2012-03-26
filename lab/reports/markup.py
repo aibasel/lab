@@ -81,6 +81,9 @@ def _get_config(target):
     config['postproc'] = []
     config['preproc'] = []
 
+    config['preproc'].append([r'\{(.*?)\|color:(.+?)\}',
+                              r'BEGINCOLOR\1SEP\2ENDCOLOR'])
+
     if target in ['xhtml', 'html']:
         config['encoding'] = 'UTF-8'       # document encoding
         config['toc'] = 0
@@ -94,7 +97,7 @@ def _get_config(target):
         config['postproc'].append([r'\\\\', r'<br />'])
 
         # {{red text|color:red}} -> <span style="color:red">red text</span>
-        config['postproc'].append([r'\{\{(.*?)\|color:(.+?)\}\}',
+        config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR',
                                    r'<span style="color:\2">\1</span>'])
 
     elif target == 'tex':
@@ -129,11 +132,9 @@ def _get_config(target):
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\$\\backslash\$\$\\backslash\$', r'\\\\'])
 
-        # {{red text|color:red}} -> \textcolor{red}{red text}
-        config['postproc'].append([r'\\{\\{(.*?)\$\|\$color:(.+?)\\}\\}',
-                                   #r'\\textcolor{\2}{\1}'
-                                   # Disable dimming in Latex tables.
-                                   r'\1'])
+        # BEGINCOLORred textSEPRedENDCOLOR -> r'\\textcolor{Red}{red text}'
+        config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR',
+                                   r'\\textcolor{\2}{\1}'])
 
         # {small text|size:tiny} -> {\tiny small text}
         config['postproc'].append([r'(\(\d+?\))', r'\\tiny{\1}'])
@@ -141,6 +142,9 @@ def _get_config(target):
     elif target == 'txt':
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\\\\', '\n'])
+
+    # Disable colors for all other targets.
+    config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR', r'\1'])
 
     return config
 
