@@ -115,7 +115,7 @@ def _get_config(target):
 
         # Use landscape orientation.
         config['postproc'].append([r'usepackage{geometry}',
-                                   r'usepackage[landscape,margin=1cm]{geometry}'])
+                        r'usepackage[landscape,margin=1.5cm,a4paper]{geometry}'])
 
         config['encoding'] = 'utf8'
         config['preproc'].append(['€', 'Euro'])

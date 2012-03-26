@@ -391,7 +391,7 @@ class Table(collections.defaultdict):
             elif self.highlight and (value == min_value and self.min_wins or
                                      value == max_value and not self.min_wins):
                 value_text = '**%s**' % value_text
-            parts.append(' %15s' % value_text.replace('_', '-'))
+            parts.append(' %15s' % value_text)
         return parts
 
     def _get_row_markup(self, row_name, row=None):
