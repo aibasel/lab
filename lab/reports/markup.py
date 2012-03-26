@@ -93,7 +93,7 @@ def _get_config(target):
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\\\\', r'<br />'])
 
-        # {{Roter Text|color:red}} -> <span style="color:red">Roter Text</span>
+        # {{red text|color:red}} -> <span style="color:red">red text</span>
         config['postproc'].append([r'\{\{(.*?)\|color:(.+?)\}\}',
                                    r'<span style="color:\2">\1</span>'])
 
@@ -129,9 +129,12 @@ def _get_config(target):
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\$\\backslash\$\$\\backslash\$', r'\\\\'])
 
-        # {{Roter Text|color:red}} -> \textcolor{red}{Roter Text}
+        # {{red text|color:red}} -> \textcolor{red}{red text}
         config['postproc'].append([r'\\{\\{(.*?)\$\|\$color:(.+?)\\}\\}',
                                    r'\\textcolor{\2}{\1}'])
+
+        # {small text|size:tiny} -> {\tiny small text}
+        config['postproc'].append([r'(\(\d+?\))', r'\\tiny{\1}'])
 
     elif target == 'txt':
         # Allow line breaks, r'\\\\' are 2 \ for regexes
@@ -202,7 +205,7 @@ class Document(object):
 
 if __name__ == '__main__':
     doc = Document('MyTitle', 'Max Mustermann')
-    doc.add_text('{{Roter Text|color:red}}')
+    doc.add_text('{{red text|color:red}}')
     print doc
     print
     print doc.render('tex')
