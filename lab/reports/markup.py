@@ -131,7 +131,9 @@ def _get_config(target):
 
         # {{red text|color:red}} -> \textcolor{red}{red text}
         config['postproc'].append([r'\\{\\{(.*?)\$\|\$color:(.+?)\\}\\}',
-                                   r'\\textcolor{\2}{\1}'])
+                                   #r'\\textcolor{\2}{\1}'
+                                   # Disable dimming in Latex tables.
+                                   r'\1'])
 
         # {small text|size:tiny} -> {\tiny small text}
         config['postproc'].append([r'(\(\d+?\))', r'\\tiny{\1}'])
