@@ -37,4 +37,6 @@ class FilterReport(Report):
         Report.__init__(self, *args, **kwargs)
 
     def get_text(self):
+        if not self.outfile.endswith('properties'):
+            raise ValueError('outfile must be a path to a properties file')
         return str(self.props)
