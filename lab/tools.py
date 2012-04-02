@@ -39,12 +39,10 @@ BASE_DIR = os.path.dirname(SCRIPTS_DIR)
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
 
-DEFAULT_EXP_DIR = os.path.join(USER_DIR, 'experiments')
-
 
 class ErrorAbortHandler(logging.StreamHandler):
     """
-    Custom logging Handler that exits when an error is encountered.
+    Custom logging Handler that exits when a critical error is encountered.
     """
     def emit(self, record):
         logging.StreamHandler.emit(self, record)
