@@ -20,9 +20,9 @@ Requirements
 
 Getting started
 ===============
-The base directory (containing "lab" and "downward") must be on the
-PYTHONPATH, so you might want to add "export PYTHONPATH=/path/to/base/dir"
-to your .bashrc file.
+The base directory (containing *lab* and *downward*) must be on the
+PYTHONPATH, so you might want to add ``export PYTHONPATH=/path/to/base/dir``
+to your ``.bashrc`` file.
 
 Change into examples/simple and execute ``./simple-exp.py`` This will print the
 help text for this simple experiment. There are multiple ways to run the
