@@ -1,13 +1,13 @@
 lab
 ===
-*lab* is a python package for conducting and analyzing experiments that run on
+**lab** is a python package for conducting and analyzing experiments that run on
 single machines or on computer clusters. It is useful if you want to run your
 code on a large set of benchmarks.
 
 downward
 ========
-The *downward* package uses the lab package to run experiments and create custom
-reports for the [Fast Downward planning system](http://www.fast-downward.org).
+The **downward** package uses *lab* to run experiments and create custom reports
+for the [Fast Downward planning system](http://www.fast-downward.org).
 
 
 Requirements
@@ -41,4 +41,4 @@ Most of the available methods and options can be found in the
 Documentation
 =============
 Short tutorials and API references can be found at
-http://readthedocs.org/docs/lab/.
+[readthedocs.org](http://readthedocs.org/docs/lab/).
