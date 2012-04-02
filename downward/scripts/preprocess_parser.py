@@ -50,15 +50,19 @@ def parse_translator_timestamps(content, props):
 
         Computing fact groups: [0.000s CPU, 0.004s wall-clock]
         Writing output... [0.000s CPU, 0.001s wall-clock]
+
+    The last line reads:
+
+        Done! [6.860s CPU, 6.923s wall-clock]
     """
-    pattern = re.compile(r'^(.+)(\.\.\.|:) \[(.+)s CPU, .+s wall-clock\]$')
+    pattern = re.compile(r'^(.+)(\.\.\.|:|!) \[(.+)s CPU, .+s wall-clock\]$')
     for line in content.splitlines():
-        if line.startswith('Done!'):
-            break
         match = pattern.match(line)
         if match:
             section = match.group(1).lower().replace(' ', '_')
             props['translator_time_' + section] = float(match.group(3))
+        if line.startswith('Done!'):
+            break
 
 
 def _get_var_descriptions(content):
