@@ -4,7 +4,9 @@ lab
 single machines or on computer clusters. It is useful if you want to run your
 code on a large set of benchmarks.
 
-:ref:`lab.tutorial`
+.. toctree::
+
+   lab.tutorial
 
 **API Reference**
 
@@ -14,12 +16,15 @@ code on a large set of benchmarks.
    lab.experiment
    lab.reports
 
+
 downward
 ========
 **downward** uses the lab package to run experiments and create custom reports
 for the `Fast Downward planning system <http://www.fast-downward.org>`_.
 
-:ref:`downward.tutorial`
+.. toctree::
+
+   downward.tutorial
 
 **API Reference**
 
