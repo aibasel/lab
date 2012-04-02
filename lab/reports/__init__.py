@@ -251,9 +251,10 @@ class Report(object):
 class Table(collections.defaultdict):
     def __init__(self, title='', min_wins=None):
         """
-        The *Table* class is realized as a dictionary of dictionaries mapping
-        row names to colum names to cell values. To obtain the markup from a
-        table, use the ``str()`` function.
+        The *Table* class can be useful for `Report` subclasses that want to
+        return a table as txt2tags markup. It is realized as a dictionary of
+        dictionaries mapping row names to colum names to cell values. To obtain
+        the markup from a table, use the ``str()`` function.
 
         *title* will be printed in the top left cell.
 
