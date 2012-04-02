@@ -55,18 +55,44 @@ def single_solver(problem_runs):
 
 
 class PlanningReport(Report):
+    """
+    This is the base class for all Downward reports.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        kwargs can contain the following items:
+
+        *derived_properties* must be a list of functions that take a single
+        argument. This argument is a list of problem runs i.e. it contains one
+        run-dictionary for each config in the experiment. The function is
+        called for every problem in the suite. A function that computes the
+        IPC score based on the results of the experiment is added automatically
+        to the *derived_properties* list and serves as an example here: ::
+
+            def quality(problem_runs):
+                min_cost = tools.minimum(run.get('cost') for run in problem_runs)
+                for run in problem_runs:
+                    cost = run.get('cost')
+                    if cost is None:
+                        quality = 0.0
+                    elif cost == 0:
+                        assert min_cost == 0
+                        quality = 1.0
+                    else:
+                        quality = min_cost / cost
+                    run['quality'] = round(quality, 4)
+        """
         self.derived_properties = kwargs.pop('derived_properties', [])
         Report.__init__(self, *args, **kwargs)
         self.derived_properties.append(quality)
         self.derived_properties.append(single_solver)
 
     def _scan_data(self):
-        self.scan_planning_data()
-        self.compute_derived_properties()
+        self._scan_planning_data()
+        self._compute_derived_properties()
         Report._scan_data(self)
 
-    def scan_planning_data(self):
+    def _scan_planning_data(self):
         # Use local variables first to save lookups
         problems = set()
         domains = defaultdict(list)
@@ -118,7 +144,7 @@ class PlanningReport(Report):
         assert len(self.domains) * len(self.configs) == len(self.domain_runs)
         assert sum(len(runs) for runs in self.domain_runs.values()) == len(self.runs)
 
-    def compute_derived_properties(self):
+    def _compute_derived_properties(self):
         for func in self.derived_properties:
             for (domain, problem), runs in self.problem_runs.items():
                 func(runs)

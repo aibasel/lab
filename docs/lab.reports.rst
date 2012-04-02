@@ -1,4 +1,4 @@
-:mod:`lab.reports`
+:mod:`lab.reports` -- Make reports
 ==================
 
 :class:`Report`

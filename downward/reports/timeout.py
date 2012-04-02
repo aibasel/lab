@@ -25,6 +25,16 @@ from downward.reports import PlanningReport
 
 class TimeoutReport(PlanningReport):
     def __init__(self, timeouts, *args, **kwargs):
+        """
+        For all runs in the experiment, simulate the timeouts in *timeouts* and
+        write a new properties file at *outfile*.
+
+        *timeouts* must be a list of integer timeouts in seconds. ::
+
+            exp.add_step(Step('report-timeouts',
+                              TimeoutReport([60, 180, 300, 900, 1800]),
+                         exp.eval_dir, os.path.join(TIMEOUTS, 'properties')))
+        """
         PlanningReport.__init__(self, *args, **kwargs)
         self.timeouts = timeouts
 

@@ -22,6 +22,7 @@ downward
    :maxdepth: 2
 
    downward.experiment
+   downward.reports
 
 
 

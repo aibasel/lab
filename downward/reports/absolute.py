@@ -28,15 +28,15 @@ from downward.reports import PlanningReport
 
 class AbsoluteReport(PlanningReport):
     """
-    Write an absolute report about the attribute attribute, e.g.
+    Write an absolute report about the attribute attribute, e.g. ::
 
-    || expanded        | fF               | yY               |
-    | **gripper     ** | 118              | 72               |
-    | **zenotravel  ** | 21               | 17               |
+        || expanded    | fF     | yY     |
+        | gripper      | 118    | 72     |
+        | zenotravel   | 21     | 17     |
     """
     def __init__(self, resolution, *args, **kwargs):
         """
-        resolution: One of "domain" or "problem".
+        *resolution* must be one of "domain" or "problem".
         """
         self.resolution = resolution
         PlanningReport.__init__(self, *args, **kwargs)

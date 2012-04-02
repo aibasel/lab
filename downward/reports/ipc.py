@@ -45,8 +45,11 @@ def remove_missing(iterable):
 class IpcReport(PlanningReport):
     def __init__(self, squeeze=True, page_size='a4', **kwargs):
         """
-        squeeze: Use small fonts to fit in more data
-        page_size: Set the page size for the latex report
+        Generate a report similar to the ones used for IPC 2008 and 2011.
+
+        If *squeeze* is True (default) use small fonts to fit in more data.
+
+        *page_size* sets the Latex page size.
         """
         PlanningReport.__init__(self, **kwargs)
         assert len(self.attributes) == 1, self.attributes

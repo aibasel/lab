@@ -29,10 +29,15 @@ from downward.reports.absolute import AbsoluteReport
 class RelativeReport(AbsoluteReport):
     def __init__(self, resolution, rel_change=0, abs_change=0.0, **kwargs):
         """
-        rel_change = Percentage that the value must have changed between two
-                     configs to be appended to the result table.
-        abs_change = Only add pairs of values to the result if their absolute
-                     difference is bigger than this number
+        Compare exactly two configurations.
+
+        *resolution* must be one of "domain" or "problem".
+
+        *rel_change* is the percentage that the value must have changed between
+        two configs to be appended to the result table.
+
+        Only add pairs of values to the result if their absolute difference is
+        bigger than *abs_change*.
         """
         AbsoluteReport.__init__(self, resolution, **kwargs)
         self.rel_change = rel_change

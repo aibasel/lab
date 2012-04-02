@@ -35,7 +35,13 @@ from downward.reports.absolute import AbsoluteReport
 
 
 class ScatterPlotReport(AbsoluteReport):
+    """
+    Generate a scatter plot for a specific attribute.
+    """
     def __init__(self, *args, **kwargs):
+        """
+        ``kwargs['attributes']`` must contain exactly one attribute.
+        """
         AbsoluteReport.__init__(self, 'problem', *args, **kwargs)
         assert len(self.attributes) == 1, self.attributes
 

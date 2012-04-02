@@ -1,4 +1,4 @@
-:mod:`lab.experiment`
+:mod:`lab.experiment` -- Create experiments
 =====================
 
 :class:`Experiment`
@@ -20,7 +20,7 @@
 
 .. _steps:
 
-:mod:`lab.steps`
+:mod:`lab.steps` -- Run experiments
 ================
 
 .. autoclass:: lab.steps.Step
@@ -28,7 +28,7 @@
    :undoc-members:
 
 
-:mod:`lab.fetcher`
+:mod:`lab.fetcher` -- Fetch results
 ==================
 
 .. autoclass:: lab.fetcher.Fetcher
