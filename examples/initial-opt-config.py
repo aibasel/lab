@@ -1,7 +1,9 @@
 #! /usr/bin/env python
+
 """
 This experiment runs the "initial" optimal tuning configuration on some STRIPS
-domains.
+domains. In addition to the standard absolute reports, it writes a python
+module containing the solved problems.
 """
 
 import os
@@ -16,22 +18,29 @@ from lab.steps import Step
 from lab import tools
 
 
-EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
+# On the grid it is good practice to start the job's name with your initials.
+EXPNAME = 'js-initial-opt-config'
+
 if platform.node() == 'habakuk':
+    # On the grid
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
     REPO = '/home/downward/jendrik/downward'
     SUITE = 'LMCUT_DOMAINS'
-    ENV = GkiGridEnvironment()
+    ENV = GkiGridEnvironment(priority=-2, queue='xeon_core.q')
 else:
-    EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
+    # Local testing
+    EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
     SUITE = 'gripper:prob01.pddl'
-    ENV = LocalEnvironment()
+    ENV = LocalEnvironment(processes=2)
 
-ATTRIBUTES = None  # Include all attributes
+ATTRIBUTES = ['coverage', 'expansions', 'total_time']
+# The time and memory limits can be changed for translate, preprocess and search.
 LIMITS = {'search_time': 1800}
+# Use the working copy versions of all three components.
 COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO))]
 
+# Fast Downward configuration as a list of strings.
 CONFIG = ["--landmarks", "lmg=lm_rhw(only_causal_landmarks=false,"
                          "disjunctive_landmarks=true,"
                          "conjunctive_landmarks=true,no_orders=false)",
@@ -44,9 +53,11 @@ exp = DownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO,
                          combinations=COMBINATIONS, limits=LIMITS)
 
 exp.add_suite(SUITE)
+# This method requires a nickname and the real config.
 exp.add_config('opt-initial', CONFIG)
 
-# Add report steps
+# Create two absolute reports. One has a line for each domain, and one has a
+# line for each problem.
 abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
 abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
@@ -69,10 +80,8 @@ exp.add_step(Step.zip_exp_dir(exp))
 # Remove the experiment directory
 exp.add_step(Step.remove_exp_dir(exp))
 
-
 # This method parses the commandline. We assume this file is called exp.py.
 # Supported styles:
 # ./exp.py 1
 # ./exp.py 4 5 6
-# ./exp.py all
 exp()

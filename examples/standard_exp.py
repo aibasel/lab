@@ -18,7 +18,7 @@ if platform.node() == 'habakuk':
     REPO = '/home/downward/jendrik/downward'
     ENV = GkiGridEnvironment()
 else:
-    EXPPATH = os.path.join(tools.DEFAULT_EXP_DIR, EXPNAME)
+    EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
     ENV = LocalEnvironment()
 

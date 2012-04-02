@@ -56,5 +56,4 @@ exp.add_step(Step.remove_exp_dir(exp))
 # ./simple-exp.py 1
 # ./simple-exp.py report
 # ./simple-exp.py 1 2 3
-# ./simple-exp.py all
 exp()
