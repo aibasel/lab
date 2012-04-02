@@ -6,19 +6,16 @@ code on a large set of benchmarks.
 
 downward
 ========
-A second package that makes use of the lab package is located in "downward".
-It can be used to run experiments and create custom reports for the
-[Fast Downward planning system](http://www.fast-downward.org).
+The *downward* package uses the lab package to run experiments and create custom
+reports for the [Fast Downward planning system](http://www.fast-downward.org).
 
 
 Requirements
 ============
-Python packages:
+
 - Python 2.6 or 2.7
 - Only tested on Linux
-
-Fast Downward:
-- See dependencies on the [Fast Downward wiki](http://www.fast-downward.org/ObtainingAndRunningFastDownward)
+- downward: [Fast Downward dependencies](http://www.fast-downward.org/ObtainingAndRunningFastDownward)
 
 
 Getting started
