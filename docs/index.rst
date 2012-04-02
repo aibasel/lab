@@ -1,35 +1,30 @@
-.. lab documentation master file, created by
-   sphinx-quickstart on Thu Jan 19 16:59:00 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to lab's documentation!
-===============================
-
 lab
----
+===
+**lab** is a python package for conducting and analyzing experiments that run on
+single machines or on computer clusters. It is useful if you want to run your
+code on a large set of benchmarks.
+
+:ref:`lab.tutorial`
+
+**API Reference**
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    lab.experiment
    lab.reports
 
 downward
---------
+========
+**downward** uses the lab package to run experiments and create custom reports
+for the `Fast Downward planning system <http://www.fast-downward.org>`_.
+
+:ref:`downward.tutorial`
+
+**API Reference**
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    downward.experiment
    downward.reports
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

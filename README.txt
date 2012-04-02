@@ -39,3 +39,9 @@ If you want to run a Fast Downward experiment, the best way to start is
 looking at `examples/initial-opt-config.py` and adapting it to your needs.
 Most of the available methods and options can be found in the
 `examples/showcase-options.py` example.
+
+
+Documentation
+=============
+Short tutorials and API references can be found at
+http://readthedocs.org/docs/lab/.

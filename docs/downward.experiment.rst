@@ -9,8 +9,8 @@
 
 .. _checkouts:
 
-Checkouts
----------
+:class:`Checkout`
+-----------------
 .. autoclass:: downward.checkouts.HgCheckout
 .. autoclass:: downward.checkouts.Translator
 .. autoclass:: downward.checkouts.Preprocessor

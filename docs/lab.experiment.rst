@@ -20,8 +20,8 @@
 
 .. _environments:
 
-Environments
-------------
+:class:`Environment`
+--------------------
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.GkiGridEnvironment
 
@@ -29,7 +29,7 @@ Environments
 .. _steps:
 
 :mod:`lab.steps` -- Run experiments
-===================================
+-----------------------------------
 
 .. autoclass:: lab.steps.Step
    :members:
@@ -37,7 +37,7 @@ Environments
 
 
 :mod:`lab.fetcher` -- Fetch results
-===================================
+-----------------------------------
 
 .. autoclass:: lab.fetcher.Fetcher
    :members: __call__
