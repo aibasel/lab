@@ -149,6 +149,17 @@ class Experiment(_Buildable):
         Create a new experiment that will be built at *path* using the methods
         provided by :ref:`Environment <environments>` *environment*. If
         *environment* is None, ``LocalEnvironment`` is used (default).
+
+        An experiment consists of multiple steps. Every experiment will need at
+        least the following steps:
+
+        * Build the experiment.
+        * Run it.
+        * Fetch the results.
+        * Make a report.
+
+        In the "Run it" step all runs that have been added to the experiment
+        will be executed. Each run consists of one or multiple commands.
         """
         _Buildable.__init__(self)
         self.path = os.path.abspath(path)
@@ -283,11 +294,15 @@ class Experiment(_Buildable):
 
 
 class Run(_Buildable):
-    """
-    An experiment consists of one or multiple runs. Each run consists of one
-    or more commands.
-    """
     def __init__(self, experiment):
+        """Create a new run.
+
+        An experiment consists of one or multiple runs. If you run various
+        algrithms on a set of benchmarks, there should be one run for each
+        (algorithm, benchmark) pair.
+
+        A run consists of one or more commands.
+        """
         _Buildable.__init__(self)
         self.experiment = experiment
 
