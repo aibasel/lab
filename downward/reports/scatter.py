@@ -22,13 +22,6 @@ import logging
 import os
 import sys
 
-try:
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-    from matplotlib.figure import Figure
-except ImportError, err:
-    logging.error('matplotlib could not be found: %s' % err)
-    sys.exit(1)
-
 from lab import tools
 
 from downward.reports.absolute import AbsoluteReport
@@ -46,6 +39,14 @@ class ScatterPlotReport(AbsoluteReport):
         assert len(self.attributes) == 1, self.attributes
 
     def write_plot(self, attribute, filename):
+        # Import in method to be compatible to rtfd.org
+        try:
+            from matplotlib.backends import backend_agg
+            from matplotlib import figure
+        except ImportError, err:
+            logging.error('matplotlib could not be found: %s' % err)
+            sys.exit(1)
+
         table = self._get_table(attribute)
         cfg1, cfg2 = table.cols
         columns = table.get_columns()
@@ -80,10 +81,10 @@ class ScatterPlotReport(AbsoluteReport):
         plot_size = missing_val * 1.25
 
         # Create a figure with size 6 x 6 inches
-        fig = Figure(figsize=(10, 10))
+        fig = figure.Figure(figsize=(10, 10))
 
         # Create a canvas and add the figure to it
-        canvas = FigureCanvasAgg(fig)
+        canvas = backend_agg.FigureCanvasAgg(fig)
         ax = fig.add_subplot(111)
 
         # Make a descriptive title and set axis labels
