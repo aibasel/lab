@@ -219,13 +219,12 @@ class Report(object):
         self.all_attributes = list(sorted(attributes))
 
     def _load_data(self):
-        combined_props_file = os.path.join(self.eval_dir, 'properties')
-        if not os.path.exists(combined_props_file):
-            msg = 'Properties file not found at %s'
-            logging.critical(msg % combined_props_file)
+        props_file = os.path.join(self.eval_dir, 'properties')
+        if not os.path.exists(props_file):
+            logging.critical('Properties file not found at %s' % props_file)
 
         logging.info('Reading properties file')
-        self.props = tools.Properties(filename=combined_props_file)
+        self.props = tools.Properties(filename=props_file)
         logging.info('Reading properties file finished')
 
     def _apply_filter(self):
