@@ -18,6 +18,14 @@
    :inherited-members:
 
 
+.. _environments:
+
+Environments
+------------
+.. autoclass:: lab.environments.LocalEnvironment
+.. autoclass:: lab.environments.GkiGridEnvironment
+
+
 .. _steps:
 
 :mod:`lab.steps` -- Run experiments

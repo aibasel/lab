@@ -2,7 +2,7 @@
 =============================================
 
 :class:`DownwardExperiment`
-------------------
+---------------------------
 .. autoclass:: downward.experiment.DownwardExperiment
    :members:
 

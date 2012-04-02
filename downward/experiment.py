@@ -171,32 +171,39 @@ class SearchRun(DownwardRun):
 
 
 class DownwardExperiment(Experiment):
-    """
-    *repo* must be the path to a Fast Downward repository. This repository is
-    used to search for problem files.
+    def __init__(self, path, repo, environment=None, combinations=None,
+                 compact=True, limits=None):
+        """
+        The experiment will be built at *path*.
 
-    *combinations* is a list of :ref:`Checkout <checkouts>` tuples of the form
-    (Translator, Preprocessor, Planner). If no combinations are given, perform
-    an experiment with the working copy in *repo*.
+        *repo* must be the path to a Fast Downward repository. This repository
+        is used to search for problem files.
 
-    If *compact* is True, link to preprocessing files instead of copying them.
-    Only use this option if the preprocessed files will **not** be changed
-    during the experiment.
+        *environment* must be an :ref:`Environment <environments>` instance.
 
-    If *limits* is given, it must be a dictionary and it will be used to
-    overwrite the default limits (see source for format).
+        *combinations* is a list of :ref:`Checkout <checkouts>` tuples of the
+        form (Translator, Preprocessor, Planner). If no combinations are given,
+        perform an experiment with the working copy in *repo*.
 
-    >>> repo = '/path/to/downward-repo'
-    >>> combos = [(Translator(repo, rev=123),
-                   Preprocessor(repo, rev='e2a018c865f7'),
-                   Planner(repo, rev='tip', dest='myplanner-version')]
-    >>> exp = DownwardExperiment('/tmp/path', repo,
-                                 combinations=combos, compact=False,
-                                 limits={'search_time': 30})
+        If *compact* is True, link to preprocessing files instead of copying
+        them. Only use this option if the preprocessed files will **not** be
+        changed during the experiment.
 
-    """
-    def __init__(self, path, repo, environment=None, combinations=None, compact=True,
-                 limits=None):
+        If *limits* is given, it must be a dictionary and it will be used to
+        overwrite the default limits (see source for format).
+
+        Example: ::
+
+            repo = '/path/to/downward-repo'
+            env = GkiGridEnvironment(queue='xeon_core.q', priority=-2)
+            combos = [(Translator(repo, rev=123),
+                       Preprocessor(repo, rev='e2a018c865f7'),
+                       Planner(repo, rev='tip', dest='myplanner-version')]
+            exp = DownwardExperiment('/tmp/path', repo, environment=env,
+                                     combinations=combos, compact=False,
+                                     limits={'search_time': 30})
+
+        """
         Experiment.__init__(self, path, environment)
 
         self.repo = repo

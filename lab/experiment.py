@@ -144,13 +144,12 @@ class _Buildable(object):
 
 
 class Experiment(_Buildable):
-    """
-    Create a new experiment that will be built at *path* using the methods
-    provided by *environment*, which can be *LocalEnvironment*,
-    *GkiGridEnvironment* or None. If *environment* is None,
-    *LocalEnvironment* is used (default).
-    """
     def __init__(self, path, environment=None):
+        """
+        Create a new experiment that will be built at *path* using the methods
+        provided by :ref:`Environment <environments>` *environment*. If
+        *environment* is None, ``LocalEnvironment`` is used (default).
+        """
         _Buildable.__init__(self)
         self.path = os.path.abspath(path)
         self.environment = environment or LocalEnvironment()

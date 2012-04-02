@@ -46,6 +46,9 @@ class Environment(object):
 
 class LocalEnvironment(Environment):
     def __init__(self, processes=1):
+        """
+        *processes* must be in the range [1, ..., #CPUs].
+        """
         Environment.__init__(self)
         import multiprocessing
         cores = multiprocessing.cpu_count()
@@ -72,6 +75,13 @@ class LocalEnvironment(Environment):
 
 class GkiGridEnvironment(Environment):
     def __init__(self, queue='opteron_core.q', priority=0):
+        """
+        *queue* must be a valid queue name on the GKI Grid.
+
+        *priority* must be in the range [-1023, ..., 0] where 0 is the highest
+        priority. If you're a superuser the value can be in the range
+        [-1023, ..., 1024].
+        """
         Environment.__init__(self)
         self.queue = queue
         assert priority in xrange(-1023, 1024 + 1)
