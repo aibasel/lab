@@ -41,4 +41,4 @@ Most of the available methods and options can be found in the
 Documentation
 =============
 Short tutorials and API references can be found at
-[readthedocs.org](http://readthedocs.org/docs/lab/).
+[readthedocs.org](http://readthedocs.org/docs/lab/) and `readthedocs.org <http://readthedocs.org/docs/lab/>`_.
