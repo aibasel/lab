@@ -108,6 +108,7 @@ class Sequence(list):
             self.process_step_name(step_name)
 
     def process_step_name(self, step_name):
+        """*step_name* can be a step's name or number."""
         if step_name.isdigit():
             try:
                 step = self[int(step_name) - 1]
@@ -134,7 +135,8 @@ class Sequence(list):
             logging.critical('An error occured in %s, the return value was %s' % (step, returnval))
 
     def get_steps_text(self):
+        name_width = min(max(len(step.name) for step in self), 50)
         lines = ['Available steps:', '================']
         for number, step in enumerate(self, start=1):
-            lines.append(' '.join([str(number).rjust(2), step.name.ljust(30), str(step)]))
+            lines.append(' '.join([str(number).rjust(2), step.name.ljust(name_width), str(step)]))
         return '\n'.join(lines)
