@@ -15,7 +15,6 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.suite import SuiteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.steps import Step
-from lab import tools
 
 
 # On the grid it is good practice to start the job's name with your initials.
