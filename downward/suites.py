@@ -373,21 +373,3 @@ def select_evenly_spread(seq, num_items):
     step_size = (len(seq) - 1) / float(num_items - 1)
     float_indices = [i * step_size for i in range(num_items)]
     return [seq[int(round(index))] for index in float_indices]
-
-
-def suite_ipc11():
-    return ["ipc11-barman",
-            "ipc11-elevators",
-            "ipc11-floortile",
-            "ipc11-nomystery",
-            "ipc11-openstacks",
-            "ipc11-parcprinter",
-            "ipc11-parking",
-            "ipc11-pegsol",
-            "ipc11-scanalyzer",
-            "ipc11-sokoban",
-            "ipc11-tidybot",
-            "ipc11-transport",
-            "ipc11-visitall",
-            "ipc11-woodworking",
-            ]
