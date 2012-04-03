@@ -4,7 +4,8 @@ Tutorial
 ========
 
 The script below is an example Fast Downward experiment. It is located
-at ``examples/lmcut.py``. You can see the available steps with ::
+at ``examples/lmcut.py``. After you have adapted the ``EXPPATH`` and ``REPO``
+variables to your system, you can see the available steps with ::
 
     $ ./lmcut.py
     usage: lmcut.py [-h] [-l {DEBUG,INFO,WARNING}] [steps [steps ...]]
