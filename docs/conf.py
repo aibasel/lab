@@ -263,6 +263,6 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['argparse', 'matplotlib', 'matplotlib.backends.backend_agg']
+MOCK_MODULES = ['argparse', 'matplotlib']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()

@@ -33,15 +33,6 @@ import os
 from lab.parser import Parser
 
 
-def check(props):
-    if props.get('translate_error') == 1:
-        msg = 'Translator error without preprocessor error'
-        assert props.get('preprocess_error') == 1, msg
-
-    if props.get('cost') is not None:
-        assert props.get('search_time') is not None
-
-
 # Preprocessing functions -----------------------------------------------------
 
 
