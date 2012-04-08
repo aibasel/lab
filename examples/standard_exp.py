@@ -2,6 +2,7 @@
 
 import os
 import platform
+from subprocess import call
 import sys
 
 from lab.environments import LocalEnvironment, GkiGridEnvironment
@@ -12,12 +13,15 @@ from downward.reports.absolute import AbsoluteReport
 
 
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]
+REMOTE_EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
+LOCAL_EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
+
 if platform.node() == 'habakuk':
-    EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
+    EXPPATH = REMOTE_EXPPATH
     REPO = '/home/downward/jendrik/downward'
     ENV = GkiGridEnvironment()
 else:
-    EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
+    EXPPATH = LOCAL_EXPPATH
     REPO = '/home/jendrik/projects/Downward/downward'
     ENV = LocalEnvironment()
 
@@ -47,6 +51,10 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         # Compress the experiment directory
         self.add_step(Step.zip_exp_dir(self))
+
+        # Copy the results to local directory
+        self.add_step(Step('scp', call, ['scp', '-r',
+            'downward@habakuk:%s-eval' % REMOTE_EXPPATH, '%s-eval' % LOCAL_EXPPATH]))
 
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
