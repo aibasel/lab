@@ -27,9 +27,10 @@ from downward.reports.absolute import AbsoluteReport
 
 
 class RelativeReport(AbsoluteReport):
-    def __init__(self, resolution, rel_change=0, abs_change=0.0, **kwargs):
+    def __init__(self, resolution, rel_change=0.0, abs_change=0, **kwargs):
         """
-        Compare exactly two configurations.
+        Compare exactly two configurations. For each problem and attribute
+        add a table row with the two absolute values and their quotient.
 
         *resolution* must be one of "domain" or "problem".
 
@@ -38,6 +39,9 @@ class RelativeReport(AbsoluteReport):
 
         Only add pairs of values to the result if their absolute difference is
         bigger than *abs_change*.
+
+        If neither *rel_change* nor *abs_change* are given, no problem rows are
+        filtered out.
         """
         AbsoluteReport.__init__(self, resolution, **kwargs)
         self.rel_change = rel_change
@@ -59,19 +63,23 @@ class RelativeReport(AbsoluteReport):
         for row in table.rows:
             val1, val2 = table.get_row(row)
 
-            # Handle cases where one value is not present (None) or zero
-            if not val1 or not val2:
+            if not val1 and not val2:
+                # Delete row if both values are missing (None) or 0.
+                del table[row]
+                continue
+            elif not val1 or not val2:
+                # Don't add quotient if exactly one value is None or 0.
                 quotient_col[row] = '---'
                 continue
 
             quotient = val2 / val1
-            percent_change = abs(quotient - 1.0) * 100
+            percent_change = abs(quotient - 1.0)
             abs_change = abs(val1 - val2)
 
             if (percent_change >= self.rel_change and
                 abs_change >= self.abs_change):
-                quotient_col[row] = round(quotient, 4)
-                percent_col[row] = round(percent_change, 4)
+                quotient_col[row] = quotient
+                percent_col[row] = percent_change
             else:
                 del table[row]
 
