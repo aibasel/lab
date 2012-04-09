@@ -52,6 +52,9 @@ class StandardDownwardExperiment(DownwardExperiment):
         # Compress the experiment directory
         self.add_step(Step.zip_exp_dir(self))
 
+        # Unzip the experiment directory
+        self.add_step(Step.unzip_exp_dir(self))
+
         # Copy the results to local directory
         self.add_step(Step('scp', call, ['scp', '-r',
             'downward@habakuk:%s-eval' % REMOTE_EXPPATH, '%s-eval' % LOCAL_EXPPATH]))

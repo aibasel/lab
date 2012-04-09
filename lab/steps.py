@@ -94,6 +94,19 @@ class Step(object):
                    cwd=os.path.dirname(exp.path))
 
     @classmethod
+    def unzip_exp_dir(cls, exp):
+        """
+        Return a Step that unzips a compressed tarball containing the
+        experiment directory.
+
+        >>> exp.add_step(Step.unzip_exp_dir(exp))
+
+        """
+        return cls('unzip-exp-dir', call,
+                   ['tar', '-xzf', exp.name + '.tar.gz'],
+                   cwd=os.path.dirname(exp.path))
+
+    @classmethod
     def remove_exp_dir(cls, exp):
         """Return a Step that removes the experiment directory.
 
