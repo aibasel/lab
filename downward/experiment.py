@@ -157,7 +157,11 @@ class SearchRun(DownwardRun):
         self.require_resource('DOWNWARD_VALIDATE')
         self.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
                                       'PROBLEM'])
-        self.add_command('parse-search', ['SEARCH_PARSER'])
+
+        if config:
+            self.add_command('parse-search', ['SEARCH_PARSER'])
+        else:
+            self.add_command('parse-portfolio', ['PORTFOLIO_PARSER'])
 
         self.set_property('config_nick', config_nick)
         self.set_property('commandline_config', config)
@@ -325,6 +329,9 @@ class DownwardExperiment(Experiment):
             self.add_resource('SEARCH_PARSER',
                         os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'),
                         'search_parser.py')
+            self.add_resource('PORTFOLIO_PARSER',
+                        os.path.join(DOWNWARD_SCRIPTS_DIR, 'portfolio_parser.py'),
+                        'portfolio_parser.py')
             self._make_search_runs()
         else:
             logging.error('There is no stage "%s"' % stage)
