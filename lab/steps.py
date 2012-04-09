@@ -82,13 +82,15 @@ class Step(object):
     @classmethod
     def zip_exp_dir(cls, exp):
         """
-        Return a Step that creates a compressed tarball containing the experiment
-        directory.
+        Return a Step that creates a compressed tarball containing the
+        experiment directory. For symbolic links this step stores the
+        referenced files, not the links themselves.
 
         >>> exp.add_step(Step.zip_exp_dir(exp))
 
         """
-        return cls('zip-exp-dir', call, ['tar', '-czf', exp.name + '.tar.gz', exp.name],
+        return cls('zip-exp-dir', call,
+                   ['tar', '--dereference', '-czf', exp.name + '.tar.gz', exp.name],
                    cwd=os.path.dirname(exp.path))
 
     @classmethod
