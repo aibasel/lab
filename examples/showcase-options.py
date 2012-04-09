@@ -43,7 +43,7 @@ multiple_plans = [
 
 iterated_search = [
     "--heuristic", "hadd=add()",
-    "--search", "iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=false)"]
+    "--search", "iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)"]
 
 def ipdbi(imp):
     return ("ipdbi%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
@@ -53,6 +53,9 @@ exp.add_suite('zenotravel:pfile1')
 exp.add_config('many-plans', multiple_plans)
 exp.add_config('iter-search', iterated_search)
 exp.add_config(*ipdbi(10))
+# Use original LAMA 2011 configuration
+exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
+exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py'))
 
 # Before we fetch the new results, delete the old ones
 exp.steps.insert(5, Step('delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
@@ -86,8 +89,6 @@ abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
 abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
                   exp.eval_dir, abs_domain_report_file))
-exp.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=ATTRIBUTES),
-                  exp.eval_dir, abs_problem_report_file))
 
 exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES,
                   filter=filter_and_transform), exp.eval_dir, abs_problem_report_file))
@@ -110,6 +111,10 @@ exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_fil
 
 # Compress the experiment directory
 #exp.add_step(Step.zip_exp_dir(exp))
+
+exp.add_step(Step('report-abs-p', AbsoluteReport('problem',
+                    attributes=['coverage', 'search_time', 'cost']),
+                  exp.eval_dir, abs_problem_report_file))
 
 # Remove the experiment directory
 exp.add_step(Step.remove_exp_dir(exp))
