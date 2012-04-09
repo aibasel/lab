@@ -56,8 +56,12 @@ class StandardDownwardExperiment(DownwardExperiment):
         self.add_step(Step.unzip_exp_dir(self))
 
         # Copy the results to local directory
-        self.add_step(Step('scp', call, ['scp', '-r',
+        self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
             'downward@habakuk:%s-eval' % REMOTE_EXPPATH, '%s-eval' % LOCAL_EXPPATH]))
+
+        # Copy the zipped experiment directory to local directory
+        self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
+            'downward@habakuk:%s.tar.gz' % REMOTE_EXPPATH, '%s.tar.gz' % LOCAL_EXPPATH]))
 
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
