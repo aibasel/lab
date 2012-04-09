@@ -18,12 +18,12 @@ else:
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
 
 COMBOS = [
-    (Translator(repo=REPO, rev="default", dest="default"),
-     Preprocessor(repo=REPO, rev="default", dest="default"),
-     Planner(repo=REPO, rev="default", dest="default")),
+    (Translator(repo=REPO),
+     Preprocessor(repo=REPO),
+     Planner(repo=REPO)),
     (Translator(repo=TRANSLATOR_REPO, rev="issue278", dest="issue278"),
-     Preprocessor(repo=REPO, rev="default", dest="default"),
-     Planner(repo=REPO, rev="default", dest="default")),
+     Preprocessor(repo=REPO),
+     Planner(repo=REPO)),
 ]
 
 CONFIGS = [('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])]

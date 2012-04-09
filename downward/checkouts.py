@@ -216,14 +216,20 @@ class Planner(HgCheckout):
 
 
 def checkout(combinations):
-    """Checks out the code once for each separate checkout directory."""
-    # Checkout each revision only once
+    """Check out the code once for each separate checkout directory."""
     for part in sorted(set(itertools.chain(*combinations))):
         part.checkout()
 
 
 def compile(combinations):
-    """Compiles the code."""
-    # Compile each revision only once
-    for part in sorted(set(itertools.chain(*combinations))):
+    """Compile the code.
+
+    Compile each revision only once. Do not compile revisions that only use the
+    translator.
+    """
+    compile_parts = set()
+    for translator, preprocessor, planner in combinations:
+        compile_parts.add(preprocessor)
+        compile_parts.add(planner)
+    for part in sorted(compile_parts):
         part.compile()
