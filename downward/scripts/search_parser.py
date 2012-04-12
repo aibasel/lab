@@ -23,6 +23,8 @@
 Regular expressions and functions for parsing planning experiments
 """
 
+# TODO: Remove code duplication from {search,preprocess}_parser.py
+
 from __future__ import division
 
 import re
