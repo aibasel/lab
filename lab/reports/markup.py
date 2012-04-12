@@ -134,8 +134,8 @@ def _get_config(target):
         config['postproc'].append([r'\$\\backslash\$\$\\backslash\$', r'\\\\'])
 
         # BEGINCOLORred textSEPRedENDCOLOR -> r'\\textcolor{Red}{red text}'
-        config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR',
-                                   r'\\textcolor{\2}{\1}'])
+        #config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR',
+        #                           r'\\textcolor{\2}{\1}'])
 
         # {small text|size:tiny} -> {\tiny small text}
         config['postproc'].append([r'(\(\d+?\))', r'\\tiny{\1}'])
