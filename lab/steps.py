@@ -118,6 +118,12 @@ class Step(object):
 
 class Sequence(list):
     """This class holds all steps of an experiment."""
+    def _get_step_index(self, step_name):
+        for index, step in enumerate(self):
+            if step.name == step_name:
+                return index
+        logging.critical('There is no step called %s' % step_name)
+
     def process_step_names(self, names):
         for step_name in names:
             self.process_step_name(step_name)
@@ -137,17 +143,20 @@ class Sequence(list):
             for step in self:
                 self.run_step(step)
         else:
-            for step in self:
-                if step.name == step_name:
-                    self.run_step(step)
-                    return
-            logging.critical('There is no step called %s' % step_name)
+            step_index = self._get_step_index(step_name)
+            if step_index >= 0:
+                self.run_step(self[step_index])
 
     def run_step(self, step):
         logging.info('Running %s: %s' % (step.name, step))
         returnval = step()
         if returnval:
             logging.critical('An error occured in %s, the return value was %s' % (step, returnval))
+
+    def remove_step(self, step_name):
+        """Delete the step with the name *step_name*."""
+        index = self._get_step_index(step_name)
+        del self[index]
 
     def get_steps_text(self):
         name_width = min(max(len(step.name) for step in self), 50)
