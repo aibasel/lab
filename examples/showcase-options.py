@@ -6,6 +6,7 @@ This experiment demonstrates most of the available options.
 import os
 import platform
 import shutil
+from subprocess import call
 
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.steps import Step
@@ -118,6 +119,8 @@ exp.add_step(Step('report-abs-p', AbsoluteReport('problem',
 
 # Remove the experiment directory
 exp.add_step(Step.remove_exp_dir(exp))
+
+exp.add_step(Step('finished', call, ['echo', 'Experiment', 'finished.']))
 
 
 if __name__ == '__main__':
