@@ -47,13 +47,6 @@ def quality(problem_runs):
         run['quality'] = round(quality, 4)
 
 
-def single_solver(problem_runs):
-    solvers = sum(run.get('coverage') for run in problem_runs)
-    for run in problem_runs:
-        single_solver = (solvers == 1 and run.get('coverage') == 1)
-        run['single_solver'] = int(single_solver)
-
-
 class PlanningReport(Report):
     """
     This is the base class for all Downward reports.
@@ -85,7 +78,6 @@ class PlanningReport(Report):
         self.derived_properties = kwargs.pop('derived_properties', [])
         Report.__init__(self, *args, **kwargs)
         self.derived_properties.append(quality)
-        self.derived_properties.append(single_solver)
 
     def _scan_data(self):
         self._scan_planning_data()
