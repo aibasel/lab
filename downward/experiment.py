@@ -123,6 +123,7 @@ class PreprocessRun(DownwardRun):
 
         ext_config = '-'.join([self.translator.name, self.preprocessor.name])
         self._save_id(ext_config)
+        self.set_property('stage', 'preprocess')
 
 
 class SearchRun(DownwardRun):
@@ -172,6 +173,7 @@ class SearchRun(DownwardRun):
             names = [names[0]]
         ext_config = '-'.join(names + [config_nick])
         self._save_id(ext_config)
+        self.set_property('stage', 'search')
 
 
 class DownwardExperiment(Experiment):
