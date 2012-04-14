@@ -93,7 +93,7 @@ class PlanningReport(Report):
         Report._scan_data(self)
 
     def _scan_planning_data(self):
-        # Use local variables first to save lookups
+        # Use local variables first to avoid lookups
         problems = set()
         domains = defaultdict(list)
         configs = set()
@@ -102,8 +102,9 @@ class PlanningReport(Report):
         runs = {}
         for run_name, run in self.props.items():
             # Sanity checks
-            assert 'coverage' in run, ('The run in %s has no coverage value' %
-                                       run.get('run_dir'))
+            if run.get('stage') == 'search':
+                assert 'coverage' in run, ('The run in %s has no coverage value' %
+                                           run.get('run_dir'))
 
             configs.add(run['config'])
             domain, problem, config = run['domain'], run['problem'], run['config']
