@@ -28,7 +28,7 @@ COMBOS = [
 ]
 
 CONFIGS = []
-ATTRIBUTES = []
+ATTRIBUTES = ['translator_time_*']
 
 exp = standard_exp.get_exp('ALL', CONFIGS, combinations=COMBOS, attributes=ATTRIBUTES)
 for step_name in ['fetch-preprocess-results', 'build-search-exp',

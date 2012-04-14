@@ -23,6 +23,7 @@ Module that permits generating reports by reading properties files
 
 from __future__ import with_statement, division
 
+import fnmatch
 import os
 import sys
 import logging
@@ -63,7 +64,10 @@ class Report(object):
     def __init__(self, attributes=None, format='html', filter=None):
         """
         *attributes* is a list of the attributes you want to include in your
-        report. If omitted, use all found numerical attributes.
+        report. If omitted, use all found numerical attributes. Globbing
+        characters * and ? are allowed. Example: ::
+
+            Report(attributes=['translator_time_*'])
 
         *format* can be one of e.g. html, tex, wiki (MediaWiki),
         gwiki (Google Code Wiki), doku (DokuWiki), pmw (PmWiki),
@@ -132,14 +136,28 @@ class Report(object):
         self._scan_data()
         logging.info('Available attributes: %s' % self.all_attributes)
 
-        if not self.attributes:
-            self.attributes = self._get_numerical_attributes()
-        else:
+        # Expand glob characters.
+        if self.attributes:
+            expanded_attributes = []
+            for pattern in self.attributes:
+                if '*' not in pattern and '?' not in pattern:
+                    expanded_attributes.append(pattern)
+                else:
+                    expanded_attributes.extend(
+                                fnmatch.filter(self.all_attributes, pattern))
+            if not expanded_attributes:
+                logging.critical('No attributes match your patterns')
+            self.attributes = expanded_attributes
+
+        if self.attributes:
             # Make sure that all selected attributes are present in the dataset
             not_found = set(self.attributes) - set(self.all_attributes)
             if not_found:
                 logging.critical('The following attributes are not present in '
                                  'the dataset: %s' % sorted(not_found))
+        else:
+            self.attributes = self._get_numerical_attributes()
+
         self.attributes.sort()
         logging.info('Selected Attributes: %s' % self.attributes)
 
