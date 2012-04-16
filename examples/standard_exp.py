@@ -2,6 +2,7 @@
 
 import os
 import platform
+import shutil
 from subprocess import call
 import sys
 
@@ -54,6 +55,9 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         # Unzip the experiment directory
         self.add_step(Step.unzip_exp_dir(self))
+
+        # Remove eval dir for a clean scp copy.
+        self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir))
 
         # Copy the results to local directory
         self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
