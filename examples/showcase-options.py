@@ -118,7 +118,7 @@ exp.add_step(Step('report-abs-p', AbsoluteReport('problem',
                   exp.eval_dir, abs_problem_report_file))
 
 # Remove the experiment directory
-exp.add_step(Step.remove_exp_dir(exp))
+#exp.add_step(Step.remove_exp_dir(exp))
 
 exp.add_step(Step('finished', call, ['echo', 'Experiment', 'finished.']))
 

@@ -69,7 +69,7 @@ def parse_statistics(content, props):
             part = match.group(1).lower()
             attr = match.group(2).lower().replace(' ', '_')
             props['%s_%s' % (part, attr)] = int(match.group(3))
-        if line.startswith('Done!'):
+        if line.startswith('done'):
             break
 
 
