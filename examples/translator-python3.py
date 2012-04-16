@@ -15,7 +15,7 @@ from examples import standard_exp
 if platform.node() == 'habakuk':
     REPO = '/home/downward/jendrik/downward'
     TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
-    PYTHON = '/home/downward/jendrik/Python2.7.3'
+    PYTHON = '/home/downward/jendrik/Python2.7.3/python'
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
