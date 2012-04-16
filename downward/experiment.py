@@ -342,9 +342,6 @@ class DownwardExperiment(Experiment):
         Experiment.build(self, overwrite=overwrite)
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
-        # Copy the whole translate directory
-        self.add_resource(translator.shell_name + '_DIR', translator.bin_dir,
-                          translator.get_path_dest('translate'))
         # In order to set an environment variable, overwrite the executable
         self.add_resource(translator.shell_name,
                           translator.get_bin('translate.py'),
