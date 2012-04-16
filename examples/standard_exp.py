@@ -67,12 +67,14 @@ class StandardDownwardExperiment(DownwardExperiment):
         self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
             'downward@habakuk:%s.tar.gz' % REMOTE_EXPPATH, '%s.tar.gz' % LOCAL_EXPPATH]))
 
+    def add_suite(self, suite):
+        # Use test suite on local machine
+        if platform.node() != 'habakuk':
+            suite = 'gripper:prob01.pddl'
+        DownwardExperiment.add_suite(self, suite)
+
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
-    # Test configs on local machine
-    if platform.node() != 'habakuk':
-        suite = 'gripper:prob01.pddl'
-
     exp = StandardDownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO,
                                      combinations=combinations, limits=limits,
                                      attributes=attributes)

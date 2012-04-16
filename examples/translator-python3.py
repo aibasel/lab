@@ -15,9 +15,11 @@ from examples import standard_exp
 if platform.node() == 'habakuk':
     REPO = '/home/downward/jendrik/downward'
     TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
+    PYTHON = '/home/downward/jendrik/Python2.7.3'
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
+    PYTHON = '/usr/bin/python2.7'
 
 COMBOS = [
     (Translator(repo=REPO),
@@ -29,9 +31,21 @@ COMBOS = [
 ]
 
 CONFIGS = []
-ATTRIBUTES = ['translator_time_*']
+ATTRIBUTES = ['translator_time_*', 'translator_peak_memory']
 
-exp = standard_exp.get_exp('ALL', CONFIGS, combinations=COMBOS, attributes=ATTRIBUTES)
+class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
+    def _make_preprocess_runs(self):
+        standard_exp.StandardDownwardExperiment._make_preprocess_runs(self)
+        for run in self.runs:
+            # Use different python interpreter.
+            args, kwargs = run.commands['translate']
+            args.insert(0, PYTHON)
+            run.commands['translate'] = (args, kwargs)
+
+exp = TranslatorExperiment(path=standard_exp.EXPPATH + '-2', combinations=COMBOS,
+                           attributes=ATTRIBUTES)
+exp.add_suite('ALL')
+
 for step_name in ['fetch-preprocess-results', 'build-search-exp',
                   'run-search-exp', 'fetch-search-results']:
     exp.steps.remove_step(step_name)
@@ -64,7 +78,8 @@ for attribute in [u'translator_time_building_dictionary_for_full_mutex_groups',
                   u'translator_time_translating_task',
                   u'translator_time_writing_output',
                 ]:
-    exp.add_step(Step('scatter-%s' % attribute, scatter.ScatterPlotReport(attributes=[attribute]),
-                      exp.eval_dir, os.path.join(exp.eval_dir, '%s.png' % attribute)))
+    pass
+    #exp.add_step(Step('scatter-%s' % attribute, scatter.ScatterPlotReport(attributes=[attribute]),
+    #                  exp.eval_dir, os.path.join(exp.eval_dir, '%s.png' % attribute)))
 
 exp()

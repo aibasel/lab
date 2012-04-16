@@ -336,8 +336,7 @@ class DownwardExperiment(Experiment):
                         'portfolio_parser.py')
             self._make_search_runs()
         else:
-            logging.error('There is no stage "%s"' % stage)
-            sys.exit(1)
+            logging.critical('There is no stage "%s"' % stage)
 
         Experiment.build(self, overwrite=overwrite)
 
