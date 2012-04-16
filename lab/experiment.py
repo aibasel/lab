@@ -313,7 +313,7 @@ class Run(_Buildable):
     def require_resource(self, resource_name):
         """
         Some resources can be used by linking to the resource in the
-        experiment directory without copying it into each run
+        experiment directory without copying it into each run.
 
         In the argo cluster however, requiring a resource implies copying it
         into the task directory.
