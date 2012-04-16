@@ -10,6 +10,8 @@ logging.basicConfig(level=logging.DEBUG,
 from lab.tools import copy, prod
 from lab.reports import gm
 from lab import tools
+from downward.scripts.preprocess_parser import parse_statistics
+
 
 base = os.path.join('/tmp', str(datetime.datetime.now()))
 os.mkdir(base)
@@ -68,9 +70,10 @@ def test_rounding():
     assert tools.round_to_next_power_of_ten(11) == 100
 
 
-if __name__ == '__main__':
-    test_copy_file_to_file()
-    test_copy_file_to_ex_dir()
-    test_copy_file_to_not_ex_dir()
-    test_copy_dir_to_dir()
-    test_gm1()
+def test_statistics():
+    props = {}
+    parse_statistics('Translator peak memory: 12345 KB\n'
+                      'Preprocessor facts: 123\n'
+                      'Translator facts: 543\n', props)
+    assert props == {'translator_peak_memory': 12345, 'preprocessor_facts': 123,
+                     'translator_facts': 543}

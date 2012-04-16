@@ -56,6 +56,23 @@ def parse_translator_timestamps(content, props):
             break
 
 
+def parse_statistics(content, props):
+    """Parse all output of the following forms:
+
+        Translator xxx: yyy
+        Preprocessor xxx: yyy
+    """
+    pattern = re.compile(r'^(Translator|Preprocessor) (.+): (.+?)( KB|)$')
+    for line in content.splitlines():
+        match = pattern.match(line)
+        if match:
+            part = match.group(1).lower()
+            attr = match.group(2).lower().replace(' ', '_')
+            props['%s_%s' % (part, attr)] = int(match.group(3))
+        if line.startswith('Done!'):
+            break
+
+
 def _get_var_descriptions(content):
     """Returns a list of (var_name, domain_size, axiom_layer) tuples."""
     regex = re.compile(r'begin_variables\n\d+\n(.+)end_variables', re.M | re.S)
@@ -179,33 +196,9 @@ class PreprocessParser(Parser):
             self.add_pattern(attribute, r'(.+) %s' % value, type=int,
                              required=False)
 
-        # Parse the numbers from the following lines of translator output:
-        #   Translator variables: 7
-        #   Translator derived variables: 0
-        #   Translator facts: 24
-        #   Translator mutex groups: 7
-        #   Translator total mutex groups size: 28
-        #   Translator operators: 34
-        #   Translator task size: 217
-        for value in ['variables', 'derived variables', 'facts', 'mutex groups',
-                      'total mutex groups size', 'operators', 'task size']:
-            attribute = 'translator_' + value.lower().replace(' ', '_')
-            # Those lines are not required, because they were not always printed
-            self.add_pattern(attribute, r'Translator %s: (.+)' % value, type=int,
-                             required=False)
-
-        # Parse the numbers from the following lines of preprocessor output:
-        #   Preprocessor facts: 24
-        #   Preprocessor derived variables: 0
-        #   Preprocessor task size: 217
-        for value in ['facts', 'derived variables', 'task size']:
-            attribute = 'preprocessor_' + value.lower().replace(' ', '_')
-            # Those lines are not required, because they were not always printed
-            self.add_pattern(attribute, r'Preprocessor %s: (.+)' % value, type=int,
-                             required=False)
-
     def add_preprocess_functions(self):
         self.add_function(parse_translator_timestamps)
+        self.add_function(parse_statistics)
 
         # Those functions will only parse the output files if we haven't found the
         # values in the log.

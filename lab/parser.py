@@ -64,10 +64,10 @@ class _MultiPattern(object):
         found_props = {}
         match = self.regex.search(content)
         if match:
-            for group_number, attribute_name, type in self.groups:
+            for group_number, attribute_name, typ in self.groups:
                 try:
                     value = match.group(group_number)
-                    value = type(value)
+                    value = typ(value)
                     found_props[attribute_name] = value
                 except IndexError:
                     msg = 'Atrribute %s not found for pattern %s in file %s'
