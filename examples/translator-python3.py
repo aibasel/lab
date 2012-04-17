@@ -18,7 +18,7 @@ SHORTVERSION = VERSION[:3]
 if platform.node() == 'habakuk':
     REPO = '/home/downward/jendrik/downward'
     TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
-    PYTHON = '/home/downward/jendrik/Python-%s/installed/usr/local/bin/python3' % VERSION
+    PYTHON = '/home/downward/jendrik/Python-%s/installed/usr/local/bin/python%s' % (VERSION, SHORTVERSION)
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
