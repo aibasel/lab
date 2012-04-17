@@ -79,8 +79,7 @@ class StandardDownwardExperiment(DownwardExperiment):
 
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
-    exp = StandardDownwardExperiment(environment=ENV, repo=REPO,
-                                     combinations=combinations, limits=limits,
+    exp = StandardDownwardExperiment(combinations=combinations, limits=limits,
                                      attributes=attributes)
 
     exp.add_suite(suite)

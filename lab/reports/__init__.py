@@ -25,7 +25,6 @@ from __future__ import with_statement, division
 
 import fnmatch
 import os
-import sys
 import logging
 import collections
 import math
