@@ -122,7 +122,7 @@ class GkiGridEnvironment(Environment):
         if os.path.exists(submitted_file):
             tools.confirm('The file %s exists. It seems the experiment has '
                           'already been submitted. Are you sure you want to '
-                          'submit it again?')
+                          'submit it again?' % submitted_file)
         tools.run_command(['qsub', self.main_script_file], cwd=self.exp.path,
                           env=self.get_env())
         # Touch "submitted" file.
