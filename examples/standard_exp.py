@@ -13,26 +13,30 @@ from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
-EXPNAME = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]
-REMOTE_EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
-LOCAL_EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
-
-if platform.node() == 'habakuk':
-    EXPPATH = REMOTE_EXPPATH
-    REPO = '/home/downward/jendrik/downward'
-    ENV = GkiGridEnvironment()
-else:
-    EXPPATH = LOCAL_EXPPATH
-    REPO = '/home/jendrik/projects/Downward/downward'
-    ENV = LocalEnvironment()
-
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
 
 class StandardDownwardExperiment(DownwardExperiment):
-    def __init__(self, path=EXPPATH, environment=ENV, repo=REPO,
+    def __init__(self, path=None, environment=None, repo=None,
                  combinations=None, limits=None, attributes=None):
-        DownwardExperiment.__init__(self, path=path, environment=environment,
+        if path is None:
+            path = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]
+        assert not os.path.isabs(path), path
+        expname = path
+
+        REMOTE_EXPPATH = os.path.join('/home/downward/jendrik/experiments/', path)
+        LOCAL_EXPPATH = os.path.join('/home/jendrik/lab/experiments', path)
+
+        if platform.node() == 'habakuk':
+            EXPPATH = REMOTE_EXPPATH
+            repo = repo or '/home/downward/jendrik/downward'
+            ENV = environment or GkiGridEnvironment()
+        else:
+            EXPPATH = LOCAL_EXPPATH
+            repo = repo or '/home/jendrik/projects/Downward/downward'
+            ENV = environment or LocalEnvironment()
+
+        DownwardExperiment.__init__(self, path=EXPPATH, environment=environment,
                                     repo=repo, combinations=combinations,
                                     limits=limits)
 
@@ -40,8 +44,8 @@ class StandardDownwardExperiment(DownwardExperiment):
             attributes = ATTRIBUTES
 
         # Add report steps
-        abs_domain_report_file = os.path.join(self.eval_dir, '%s-abs-d.html' % EXPNAME)
-        abs_problem_report_file = os.path.join(self.eval_dir, '%s-abs-p.html' % EXPNAME)
+        abs_domain_report_file = os.path.join(self.eval_dir, '%s-abs-d.html' % expname)
+        abs_problem_report_file = os.path.join(self.eval_dir, '%s-abs-p.html' % expname)
         self.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=attributes),
                                                           self.eval_dir, abs_domain_report_file))
         self.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=attributes),
@@ -75,7 +79,7 @@ class StandardDownwardExperiment(DownwardExperiment):
 
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
-    exp = StandardDownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO,
+    exp = StandardDownwardExperiment(environment=ENV, repo=REPO,
                                      combinations=combinations, limits=limits,
                                      attributes=attributes)
 

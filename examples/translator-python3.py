@@ -15,16 +15,16 @@ from examples import standard_exp
 if platform.node() == 'habakuk':
     REPO = '/home/downward/jendrik/downward'
     TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
-    PYTHON = '/home/downward/jendrik/Python-2.7.3/python'
+    PYTHON = '/home/downward/jendrik/Python-3.2.3/installed/usr/local/bin/python3'
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
-    PYTHON = '/usr/bin/python2.7'
+    PYTHON = '/usr/bin/python3'
 
 COMBOS = [
-    (Translator(repo=REPO),
-     Preprocessor(repo=REPO),
-     Planner(repo=REPO)),
+    #(Translator(repo=REPO),
+    # Preprocessor(repo=REPO),
+    # Planner(repo=REPO)),
     (Translator(repo=TRANSLATOR_REPO, rev="issue329", dest="issue329"),
      Preprocessor(repo=REPO),
      Planner(repo=REPO)),
@@ -42,7 +42,7 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
             args.insert(0, PYTHON)
             run.commands['translate'] = (args, kwargs)
 
-exp = TranslatorExperiment(path=standard_exp.EXPPATH + '-2', combinations=COMBOS,
+exp = TranslatorExperiment(path='js-translator-python3-3.2', combinations=COMBOS,
                            attributes=ATTRIBUTES)
 exp.add_suite('ALL')
 
@@ -53,7 +53,8 @@ for step_name in ['fetch-preprocess-results', 'build-search-exp',
 # Use normal eval-dir for preprocess results.
 exp.steps.insert(2, Step('fetch-preprocess-results', Fetcher(), exp.preprocess_exp_path, exp.eval_dir))
 
-for attribute in [u'translator_time_building_dictionary_for_full_mutex_groups',
+for attribute in [u'translator_peak_memory',
+                  u'translator_time_building_dictionary_for_full_mutex_groups',
                   u'translator_time_building_mutex_information',
                   u'translator_time_building_strips_to_sas_dictionary',
                   u'translator_time_building_translation_key',
@@ -78,8 +79,8 @@ for attribute in [u'translator_time_building_dictionary_for_full_mutex_groups',
                   u'translator_time_translating_task',
                   u'translator_time_writing_output',
                 ]:
-    pass
-    #exp.add_step(Step('scatter-%s' % attribute, scatter.ScatterPlotReport(attributes=[attribute]),
-    #                  exp.eval_dir, os.path.join(exp.eval_dir, '%s.png' % attribute)))
+    break
+    exp.add_step(Step('scatter-%s' % attribute, scatter.ScatterPlotReport(attributes=[attribute]),
+                      exp.eval_dir, os.path.join(exp.eval_dir, '%s.png' % attribute)))
 
 exp()
