@@ -12,19 +12,22 @@ from downward.reports import scatter
 
 from examples import standard_exp
 
+VERSION = "2.6.8"
+SHORTVERSION = VERSION[:3]
+
 if platform.node() == 'habakuk':
     REPO = '/home/downward/jendrik/downward'
     TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
-    PYTHON = '/home/downward/jendrik/Python-3.2.3/installed/usr/local/bin/python3'
+    PYTHON = '/home/downward/jendrik/Python-%s/installed/usr/local/bin/python3' % VERSION
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
-    PYTHON = '/usr/bin/python3'
+    PYTHON = '/usr/bin/python%s' % SHORTVERSION
 
 COMBOS = [
-    #(Translator(repo=REPO),
-    # Preprocessor(repo=REPO),
-    # Planner(repo=REPO)),
+    (Translator(repo=REPO),
+     Preprocessor(repo=REPO),
+     Planner(repo=REPO)),
     (Translator(repo=TRANSLATOR_REPO, rev="issue329", dest="issue329"),
      Preprocessor(repo=REPO),
      Planner(repo=REPO)),
@@ -42,7 +45,7 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
             args.insert(0, PYTHON)
             run.commands['translate'] = (args, kwargs)
 
-exp = TranslatorExperiment(path='js-translator-python3-3.2', combinations=COMBOS,
+exp = TranslatorExperiment(path='js-translator-python3-%s' % SHORTVERSION, combinations=COMBOS,
                            attributes=ATTRIBUTES)
 exp.add_suite('ALL')
 
