@@ -30,11 +30,11 @@ class StandardDownwardExperiment(DownwardExperiment):
         if platform.node() == 'habakuk':
             EXPPATH = REMOTE_EXPPATH
             repo = repo or '/home/downward/jendrik/downward'
-            ENV = environment or GkiGridEnvironment()
+            environment = environment or GkiGridEnvironment()
         else:
             EXPPATH = LOCAL_EXPPATH
             repo = repo or '/home/jendrik/projects/Downward/downward'
-            ENV = environment or LocalEnvironment()
+            environment = environment or LocalEnvironment()
 
         DownwardExperiment.__init__(self, path=EXPPATH, environment=environment,
                                     repo=repo, combinations=combinations,
