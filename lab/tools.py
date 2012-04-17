@@ -123,14 +123,17 @@ def makedirs(dir):
         pass
 
 
+def confirm(question):
+    answer = raw_input('%s (Y/N): ' % question).upper().strip()
+    if not answer == 'Y':
+        sys.exit('Aborted')
+
+
 def overwrite_dir(dir, overwrite=False):
     if os.path.exists(dir):
         logging.info('The directory "%s" is not empty.' % dir)
         if not overwrite:
-            msg = 'Do you want to overwrite the existing directory? (Y/N): '
-            answer = raw_input(msg).upper().strip()
-            if not answer == 'Y':
-                sys.exit('Aborted')
+            confirm('Do you want to overwrite the existing directory?')
         shutil.rmtree(dir)
     # We use the os.makedirs method instead of our own here to check if the dir
     # has really been properly deleted.
