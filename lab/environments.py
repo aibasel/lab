@@ -120,12 +120,12 @@ class GkiGridEnvironment(Environment):
     def start_exp(self):
         submitted_file = os.path.join(self.exp.path, 'submitted')
         if os.path.exists(submitted_file):
-            tools.confirm('The file %s exists. It seems the experiment has '
-                          'already been submitted. Are you sure you want to '
-                          'submit it again?' % submitted_file)
+            tools.confirm('The file "%s" already exists so it seems the '
+                          'experiment has already been submitted. Are you '
+                          'sure you want to submit it again?' % submitted_file)
         tools.run_command(['qsub', self.main_script_file], cwd=self.exp.path,
                           env=self.get_env())
-        # Touch "submitted" file.
+        # Write "submitted" file.
         with open(submitted_file, 'w') as f:
             f.write('This file is created when the experiment is submitted to '
                     'the queue.')
