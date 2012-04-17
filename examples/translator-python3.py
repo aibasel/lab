@@ -45,6 +45,10 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
             args.insert(0, PYTHON)
             run.commands['translate'] = (args, kwargs)
 
+            args, kwargs = run.commands['print-python-version']
+            args[0] = PYTHON
+            run.commands['print-python-version'] = (args, kwargs)
+
 exp = TranslatorExperiment(path='js-translator-python3-%s' % SHORTVERSION, combinations=COMBOS,
                            attributes=ATTRIBUTES)
 exp.add_suite('ALL')
