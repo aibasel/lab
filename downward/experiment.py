@@ -112,6 +112,11 @@ class PreprocessRun(DownwardRun):
         self.add_resource("DOMAIN", self.problem.domain_file(), "domain.pddl")
         self.add_resource("PROBLEM", self.problem.problem_file(), "problem.pddl")
 
+        # Print python version used for translator.
+        # python -V prints to stderr so we execute a little program.
+        self.add_command('print-python-version', ['python', '-c',
+                    "import platform; "
+                    "print 'Python version: %s' % platform.python_version()"])
         self.add_command('translate', [self.translator.shell_name, 'DOMAIN', 'PROBLEM'],
                          time_limit=exp.limits['translate_time'],
                          mem_limit=exp.limits['translate_memory'])
@@ -212,6 +217,9 @@ class DownwardExperiment(Experiment):
         """
         Experiment.__init__(self, path, environment)
 
+        if not repo or not os.path.isdir(repo):
+            logging.critical('repo must be the path to a local Fast Downward '
+                             'repository.')
         self.repo = repo
         self.search_exp_path = self.path
         self.preprocess_exp_path = self.path + '-p'
