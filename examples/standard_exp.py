@@ -13,6 +13,8 @@ from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
+NODE = platform.node()
+REMOTE = NODE.startswith('gkigrid') or NODE == 'habakuk'
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
 
@@ -27,7 +29,7 @@ class StandardDownwardExperiment(DownwardExperiment):
         REMOTE_EXPPATH = os.path.join('/home/downward/jendrik/experiments/', path)
         LOCAL_EXPPATH = os.path.join('/home/jendrik/lab/experiments', path)
 
-        if platform.node() == 'habakuk':
+        if REMOTE:
             EXPPATH = REMOTE_EXPPATH
             repo = repo or '/home/downward/jendrik/downward'
             environment = environment or GkiGridEnvironment()

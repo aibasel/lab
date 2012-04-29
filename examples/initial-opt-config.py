@@ -16,11 +16,13 @@ from downward.reports.suite import SuiteReport
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.steps import Step
 
+import standard_exp
+
 
 # On the grid it is good practice to start the job's name with your initials.
 EXPNAME = 'js-initial-opt-config'
 
-if platform.node() == 'habakuk':
+if standard_exp.REMOTE:
     # On the grid
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
     REPO = '/home/downward/jendrik/downward'
