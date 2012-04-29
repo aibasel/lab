@@ -218,8 +218,8 @@ class DownwardExperiment(Experiment):
         Experiment.__init__(self, path, environment)
 
         if not repo or not os.path.isdir(repo):
-            logging.critical('repo must be the path to a local Fast Downward '
-                             'repository.')
+            logging.critical('The path "%s" is not a local Fast Downward '
+                             'repository.' % repo)
         self.repo = repo
         self.search_exp_path = self.path
         self.preprocess_exp_path = self.path + '-p'
