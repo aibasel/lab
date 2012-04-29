@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import platform
 import sys
 import shutil
 import subprocess
@@ -38,6 +39,8 @@ SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SCRIPTS_DIR)
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
+
+RUNNING_ON_GRID = platform.node().startswith('gkigrid')
 
 
 class ErrorAbortHandler(logging.StreamHandler):
@@ -124,6 +127,10 @@ def makedirs(dir):
 
 
 def confirm(question):
+    if RUNNING_ON_GRID:
+        print question
+        print 'Running on the grid -> We better stop here.'
+        sys.exit('Aborted')
     answer = raw_input('%s (Y/N): ' % question).upper().strip()
     if not answer == 'Y':
         sys.exit('Aborted')
