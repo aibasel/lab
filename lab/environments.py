@@ -19,6 +19,7 @@
 
 import math
 import os
+import sys
 
 from lab import tools
 
@@ -42,6 +43,9 @@ class Environment(object):
         resources to the resources list.
         """
         pass
+
+    def run_all_steps(self):
+        raise NotImplementedError
 
 
 class LocalEnvironment(Environment):
@@ -129,3 +133,42 @@ class GkiGridEnvironment(Environment):
         with open(submitted_file, 'w') as f:
             f.write('This file is created when the experiment is submitted to '
                     'the queue.')
+
+    def _get_job_name(self, step):
+        return '%s:%s' % (self.exp.name, step.name)
+
+    def _get_job_header(self, step):
+        num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
+        job_name = self._get_job_name(step)
+        job_params = {
+            'name': job_name,
+            'logfile': job_name + '.log',
+            'errfile': job_name + '.err',
+            'num_tasks': 1,
+            'queue': self.queue,
+            'priority': self.priority,
+            }
+        template_file = os.path.join(tools.DATA_DIR,
+                                     'gkigrid-job-header-template')
+        return open(template_file).read() % job_params
+
+    def _get_job_file(self, step):
+        exp_script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        change_to_exp_script_dir = 'cd %s' % exp_script_dir
+        call_script = './%s %s' % (self.exp._script, step.name)
+        return '\n'.join([self._get_job_header(step), 'cd %s' % exp_script_dir, call_script])
+
+    def run_all_steps(self):
+        # TODO: Abort if one step fails (check stderr file)
+        job_dir = os.path.join('/tmp', self.exp._script)
+        tools.makedirs(job_dir)
+        prev_step = None
+        for number, step in enumerate(self.exp.steps, start=1):
+            step_file = os.path.join(job_dir, '%02d-%s' % (number, step.name))
+            with open(step_file, 'w') as f:
+                f.write(self._get_job_file(step))
+            submit_cmd = ['qsub', step_file]
+            if prev_step:
+                submit_cmd.extend(['-hold-jid', self._get_job_name(prev_step)])
+            tools.run_command(submit_cmd)
+            prev_step = step
