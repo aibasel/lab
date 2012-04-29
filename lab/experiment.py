@@ -171,7 +171,7 @@ class Experiment(_Buildable):
 
         self.runs = []
 
-        self.set_property('experiment_file', os.path.basename(sys.argv[0]))
+        self.set_property('experiment_file', self._script)
 
         # Include the experiment code
         self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
@@ -194,6 +194,11 @@ class Experiment(_Buildable):
 
         """
         return self.path + '-eval'
+
+    @property
+    def _script(self):
+        """Return the filename of the experiment script."""
+        return os.path.basename(sys.argv[0])
 
     def add_step(self, step):
         """Add :ref:`Step <steps>` *step* to the list of experiment steps.
@@ -221,7 +226,10 @@ class Experiment(_Buildable):
         if not self.args.steps:
             self.argparser.print_help()
             sys.exit()
-        self.steps.process_step_names(self.args.steps)
+        if 'all' in self.args.steps:
+            self.environment.run_all_steps()
+        else:
+            self.steps.process_step_names(self.args.steps)
 
     def run(self):
         """Start the experiment by running all runs that were added to it.
