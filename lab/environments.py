@@ -135,10 +135,11 @@ class GkiGridEnvironment(Environment):
                     'the queue.')
 
     def _get_job_name(self, step):
-        return '%s-%s' % (self.exp.name, step.name)
+        return '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1, step.name)
 
     def _get_job_header(self, step):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
+        # TODO: Directly pass job_name
         job_name = self._get_job_name(step)
         job_params = {
             'name': job_name,
@@ -152,7 +153,7 @@ class GkiGridEnvironment(Environment):
                                      'gkigrid-job-header-template')
         return open(template_file).read() % job_params
 
-    def _get_job_file(self, step):
+    def _get_job(self, step):
         exp_script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
         change_to_exp_script_dir = 'cd %s' % exp_script_dir
         call_script = './%s %s' % (self.exp._script, step.name)
@@ -164,9 +165,9 @@ class GkiGridEnvironment(Environment):
         tools.makedirs(job_dir)
         prev_step = None
         for number, step in enumerate(self.exp.steps, start=1):
-            step_file = os.path.join(job_dir, '%02d-%s' % (number, step.name))
+            step_file = os.path.join(job_dir, self._get_job_name(step))
             with open(step_file, 'w') as f:
-                f.write(self._get_job_file(step))
+                f.write(self._get_job(step))
             submit_cmd = ['qsub', step_file]
             if prev_step:
                 submit_cmd.extend(['-hold_jid', self._get_job_name(prev_step)])
