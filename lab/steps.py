@@ -53,9 +53,12 @@ class Step(object):
             traceback.print_exc()
             logging.critical('Could not run step: %s' % self)
 
+    @property
+    def _funcname(self):
+        return getattr(self.func, '__name__', None) or self.func.__class__.__name__.lower()
+
     def __str__(self):
-        funcname = getattr(self.func, '__name__', None) or self.func.__class__.__name__.lower()
-        return '%s(%s%s%s)' % (funcname,
+        return '%s(%s%s%s)' % (self._funcname,
                                ', '.join([repr(arg) for arg in self.args]),
                                ', ' if self.args and self.kwargs else '',
                                ', '.join(['%s=%s' % (k, repr(v)) for (k, v) in self.kwargs.items()]))
