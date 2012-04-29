@@ -86,7 +86,6 @@ for attribute in [u'translator_peak_memory',
                   u'translator_time_translating_task',
                   u'translator_time_writing_output',
                 ]:
-    break
     exp.add_step(Step('scatter-%s' % attribute, scatter.ScatterPlotReport(attributes=[attribute]),
                       exp.eval_dir, os.path.join(exp.eval_dir, '%s.png' % attribute)))
 
