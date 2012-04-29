@@ -135,15 +135,15 @@ class GkiGridEnvironment(Environment):
                     'the queue.')
 
     def _get_job_name(self, step):
-        return '%s:%s' % (self.exp.name, step.name)
+        return '%s-%s' % (self.exp.name, step.name)
 
     def _get_job_header(self, step):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
         job_name = self._get_job_name(step)
         job_params = {
             'name': job_name,
-            'logfile': job_name + '.log',
-            'errfile': job_name + '.err',
+            'logfile': 'driver' + '.log',
+            'errfile': 'driver' + '.err',
             'num_tasks': 1,
             'queue': self.queue,
             'priority': self.priority,
