@@ -169,9 +169,22 @@ class GkiGridEnvironment(Environment):
         return open(template_file).read() % job_params
 
     def _get_job(self, step):
-        exp_script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        call_script = './%s %s' % (self.exp._script, step.name)
-        return '\n'.join([self._get_job_header(step), 'cd %s' % exp_script_dir, call_script])
+        return """\
+%(job_header)s
+echo stderr:
+cat %(stderr)s
+if [ -s "%(stderr)s" ]; then
+    echo "There was output on stderr. Please check %(stderr)s. Aborting."
+    exit 1
+else
+    echo "There was no output on stderr."
+fi
+
+cd %(exp_script_dir)s
+./%(script)s %(step_name)s
+""" % {'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
+       'script': self.exp._script, 'step_name': step.name, 'stderr': 'driver.err',
+       'job_header': self._get_job_header(step)}
 
     def run_all_steps(self):
         # TODO: Abort if one step fails (check stderr file)
