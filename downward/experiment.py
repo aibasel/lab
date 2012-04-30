@@ -310,13 +310,8 @@ class DownwardExperiment(Experiment):
             sys.exit(1)
         Experiment.run(self)
 
-    def build(self, stage, overwrite=False):
-        """Write the experiment to disk.
-
-        If *overwrite* is True and the experiment directory exists, it is
-        overwritten without prior confirmation.
-
-        """
+    def build(self, stage, **kwargs):
+        """Write the experiment to disk."""
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         checkouts.checkout(self.combinations)
@@ -346,7 +341,7 @@ class DownwardExperiment(Experiment):
         else:
             logging.critical('There is no stage "%s"' % stage)
 
-        Experiment.build(self, overwrite=overwrite)
+        Experiment.build(self, **kwargs)
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable

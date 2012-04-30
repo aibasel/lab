@@ -239,7 +239,11 @@ class Experiment(_Buildable):
         self.environment.start_exp()
 
     def build(self, overwrite=False, only_main_script=False, no_main_script=False):
-        """Apply all the actions to the filesystem."""
+        """Apply all the actions to the filesystem.
+
+        If *overwrite* is True and the experiment directory exists, it is
+        overwritten without prior confirmation.
+        """
         logging.info('Exp Dir: "%s"' % self.path)
 
         # Make the variables absolute
