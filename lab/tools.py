@@ -138,7 +138,7 @@ def confirm(question):
 
 def overwrite_dir(dir, overwrite=False):
     if os.path.exists(dir):
-        logging.info('The directory "%s" is not empty.' % dir)
+        logging.info('The directory "%s" already exists.' % dir)
         if not overwrite:
             confirm('Do you want to overwrite the existing directory?')
         shutil.rmtree(dir)

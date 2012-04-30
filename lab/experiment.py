@@ -255,7 +255,10 @@ class Experiment(_Buildable):
         if not no_main_script:
             # This is the first part where we only write the main script.
             # We only overwrite the exp dir in the first part.
-            tools.overwrite_dir(self.path, overwrite)
+            runs_exist = any(path.startswith('runs') for path in os.listdir(self.path))
+            logging.info('The directory "%s" contains run directories: %s' % (self.path, runs_exist))
+            # Overwrite if overwrite is True or if no runs exist.
+            tools.overwrite_dir(self.path, overwrite or not runs_exist)
             self._build_main_script()
         if only_main_script:
             return
