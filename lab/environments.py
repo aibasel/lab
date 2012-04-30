@@ -33,12 +33,6 @@ class Environment(object):
         self.main_script_file = 'run'
 
     def write_main_script(self):
-        filename = self.exp._get_abs_path(self.main_script_file)
-        with open(filename, 'w') as file:
-            logging.debug('Writing file "%s"' % filename)
-            file.write(self._get_main_script())
-
-    def _get_main_script(self):
         raise NotImplementedError
 
     def get_env(self):
@@ -68,7 +62,7 @@ class LocalEnvironment(Environment):
         assert processes <= cores, cores
         self.processes = processes
 
-    def _get_main_script(self):
+    def write_main_script(self):
         dirs = [repr(os.path.relpath(run.path, self.exp.path))
                 for run in self.exp.runs]
         replacements = {'DIRS': ',\n'.join(dirs),
@@ -79,7 +73,7 @@ class LocalEnvironment(Environment):
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
-        return script
+        self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
 
     def start_exp(self):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
@@ -105,7 +99,7 @@ class GkiGridEnvironment(Environment):
         self.__wait_for_job_name = None
         self._job_name = None
 
-    def _get_main_script(self):
+    def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
         job_params = {
             'name': self.exp.name,
@@ -131,7 +125,12 @@ class GkiGridEnvironment(Environment):
                 lines.append('  ./run')
             lines.append('fi')
 
-        return header + '\n'.join(lines)
+        script = header + '\n'.join(lines)
+
+        filename = self.exp._get_abs_path(self.main_script_file)
+        with open(filename, 'w') as file:
+            logging.debug('Writing file "%s"' % filename)
+            file.write(script)
 
     def start_exp(self):
         submitted_file = os.path.join(self.exp.path, 'submitted')
