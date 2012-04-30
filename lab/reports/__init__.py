@@ -123,8 +123,8 @@ class Report(object):
         The report will be written to *outfile*.
         """
         if not eval_dir.endswith('-eval'):
-            tools.confirm('The source directory does not end with "-eval". '
-                          'Are you sure you this is an evaluation directory?')
+            logging.info('The source directory does not end with "-eval". '
+                         'Are you sure this is an evaluation directory?')
         self.eval_dir = os.path.abspath(eval_dir)
         self.outfile = os.path.abspath(outfile)
 
