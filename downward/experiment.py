@@ -405,6 +405,8 @@ class DownwardExperiment(Experiment):
                 self.add_run(PreprocessRun(self, translator, preprocessor, prob))
 
     def _make_search_runs(self):
+        if not self.configs and not self.portfolios:
+            logging.critical('You must add at least one config or portfolio.')
         for translator, preprocessor, planner in self.combinations:
             self._prepare_planner(planner)
 
