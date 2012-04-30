@@ -93,6 +93,7 @@ class GkiGridEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
 
+        # When submitting an experiment job, wait for this job name.
         self.wait_for = None
 
     def write_main_script(self):
@@ -137,7 +138,7 @@ class GkiGridEnvironment(Environment):
                           'sure you want to submit it again?' % submitted_file)
         submit = ['qsub', self.main_script_file]
         if self.wait_for:
-            submit.extend(['-hold_jid', self._get_job_name(self.wait_for)])
+            submit.extend(['-hold_jid', self.wait_for])
         tools.run_command(submit, cwd=self.exp.path, env=self.get_env())
         # Write "submitted" file.
         with open(submitted_file, 'w') as f:
@@ -186,7 +187,7 @@ class GkiGridEnvironment(Environment):
         for number, step in enumerate(self.exp.steps, start=1):
             print step.name
             if step._funcname == 'run':
-                self.wait_for = prev_step
+                self.wait_for = self._get_job_name(prev_step)
                 step()
             else:
                 job_name = self._get_job_name(step)
