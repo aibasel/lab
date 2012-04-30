@@ -193,8 +193,9 @@ class GkiGridEnvironment(Environment):
                 step_file = os.path.join(job_dir, job_name)
                 with open(step_file, 'w') as f:
                     f.write(self._get_job(step))
-                submit_cmd = ['qsub', job_name]
+                submit_cmd = ['qsub']
                 if prev_step:
                     submit_cmd.extend(['-hold_jid', self._get_job_name(prev_step)])
+                submit_cmd.append(job_name)
                 tools.run_command(submit_cmd, cwd=job_dir)
             prev_step = step
