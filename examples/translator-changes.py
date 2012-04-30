@@ -10,7 +10,7 @@ from downward.reports.relative import RelativeReport
 
 from examples import standard_exp
 
-if platform.node() == 'habakuk':
+if standard_exp.REMOTE:
     REPO = '/home/downward/jendrik/downward'
     TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
 else:

@@ -16,6 +16,7 @@ Requirements
 - Python 2.6 or 2.7
 - Only tested on Linux
 - downward: `Fast Downward dependencies <http://www.fast-downward.org/ObtainingAndRunningFastDownward>`_
+- downward: mercurial
 
 
 Getting started

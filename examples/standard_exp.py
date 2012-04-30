@@ -75,7 +75,7 @@ class StandardDownwardExperiment(DownwardExperiment):
 
     def add_suite(self, suite):
         # Use test suite on local machine
-        if platform.node() != 'habakuk':
+        if not REMOTE:
             suite = 'gripper:prob01.pddl'
         DownwardExperiment.add_suite(self, suite)
 

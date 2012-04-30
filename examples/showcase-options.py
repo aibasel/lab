@@ -19,9 +19,11 @@ from downward.reports.scatter import ScatterPlotReport
 from downward.reports.ipc import IpcReport
 from downward.reports.relative import RelativeReport
 
+import standard_exp
+
 
 EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
-if platform.node() == 'habakuk':
+if standard_exp.REMOTE:
     EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
     REPO = '/home/downward/jendrik/downward'
     ENV = GkiGridEnvironment()

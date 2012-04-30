@@ -15,7 +15,7 @@ from examples import standard_exp
 VERSION = "2.6.8"
 SHORTVERSION = VERSION[:3]
 
-if platform.node() == 'habakuk':
+if standard_exp.REMOTE:
     REPO = '/home/downward/jendrik/downward'
     TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
     PYTHON = '/home/downward/jendrik/Python-%s/installed/usr/local/bin/python%s' % (VERSION, SHORTVERSION)
