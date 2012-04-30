@@ -153,7 +153,8 @@ class GkiGridEnvironment(Environment):
                     'the queue.')
 
     def _get_job_name(self, step):
-        return '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1, step.name)
+        return '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1,
+                               step.name)
 
     def _get_job_header(self, step):
         job_params = {
@@ -169,25 +170,22 @@ class GkiGridEnvironment(Environment):
         return open(template_file).read() % job_params
 
     def _get_job(self, step):
+        # Abort if one step fails.
         return """\
 %(job_header)s
-echo stderr:
-cat %(stderr)s
 if [ -s "%(stderr)s" ]; then
     echo "There was output on stderr. Please check %(stderr)s. Aborting."
     exit 1
-else
-    echo "There was no output on stderr."
 fi
 
 cd %(exp_script_dir)s
 ./%(script)s %(step_name)s
 """ % {'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
-       'script': self.exp._script, 'step_name': step.name, 'stderr': 'driver.err',
+       'script': self.exp._script, 'step_name': step.name,
+       'stderr': 'driver.err',
        'job_header': self._get_job_header(step)}
 
     def run_all_steps(self):
-        # TODO: Abort if one step fails (check stderr file)
         job_dir = os.path.join(GRID_STEPS_DIR, self.exp.name)
         tools.overwrite_dir(job_dir)
         # Build the job files before submitting the other jobs.
