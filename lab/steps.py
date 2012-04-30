@@ -43,6 +43,7 @@ class Step(object):
     def __call__(self):
         if self.func is None:
             logging.critical('You cannot run the same step more than once')
+        logging.info('Running %s: %s' % (self.name, self))
         try:
             retval = self.func(*self.args, **self.kwargs)
             # Free memory
@@ -154,7 +155,6 @@ class Sequence(list):
                 self.run_step(self[step_index])
 
     def run_step(self, step):
-        logging.info('Running %s: %s' % (step.name, step))
         returnval = step()
         if returnval:
             logging.critical('An error occured in %s, the return value was %s' % (step, returnval))

@@ -31,6 +31,12 @@ class Environment(object):
         self.main_script_file = 'run'
 
     def write_main_script(self):
+        filename = self.exp._get_abs_path(self.main_script_file)
+        with open(filename, 'w') as file:
+            logging.debug('Writing file "%s"' % filename)
+            file.write(self._get_main_script())
+
+    def _get_main_script(self):
         raise NotImplementedError
 
     def get_env(self):
@@ -60,7 +66,7 @@ class LocalEnvironment(Environment):
         assert processes <= cores, cores
         self.processes = processes
 
-    def write_main_script(self):
+    def _get_main_script(self):
         dirs = [repr(os.path.relpath(run.path, self.exp.path))
                 for run in self.exp.runs]
         replacements = {'DIRS': ',\n'.join(dirs),
@@ -71,7 +77,7 @@ class LocalEnvironment(Environment):
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
-        self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
+        return script
 
     def start_exp(self):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
@@ -94,10 +100,10 @@ class GkiGridEnvironment(Environment):
         self.runs_per_task = 1
 
         # When submitting an experiment job, wait for this job name.
-        self.wait_for = None
+        self.__wait_for_job_name = None
         self._job_name = None
 
-    def write_main_script(self):
+    def _get_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
         job_params = {
             'name': self.exp.name,
@@ -123,13 +129,7 @@ class GkiGridEnvironment(Environment):
                 lines.append('  ./run')
             lines.append('fi')
 
-        script = header + '\n'.join(lines)
-        #self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
-        # TODO: Move into parent class
-        filename = self.exp._get_abs_path(self.main_script_file)
-        with open(filename, 'w') as file:
-            logging.debug('Writing file "%s"' % filename)
-            file.write(script)
+        return header + '\n'.join(lines)
 
     def start_exp(self):
         submitted_file = os.path.join(self.exp.path, 'submitted')
@@ -138,9 +138,10 @@ class GkiGridEnvironment(Environment):
                           'experiment has already been submitted. Are you '
                           'sure you want to submit it again?' % submitted_file)
         submit = ['qsub']
-        if self.wait_for:
-            submit.extend(['-hold_jid', self.wait_for])
+        if self.__wait_for_job_name:
+            submit.extend(['-hold_jid', self.__wait_for_job_name])
         if self._job_name:
+            # The name set in the job file will be ignored.
             submit.extend(['-N', self._job_name])
         submit.append(self.main_script_file)
         tools.run_command(submit, cwd=self.exp.path, env=self.get_env())
@@ -153,12 +154,10 @@ class GkiGridEnvironment(Environment):
         return '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1, step.name)
 
     def _get_job_header(self, step):
-        # TODO: Directly pass job_name
-        job_name = self._get_job_name(step)
         job_params = {
-            'name': job_name,
-            'logfile': 'driver' + '.log',
-            'errfile': 'driver' + '.err',
+            'name': self._get_job_name(step),
+            'logfile': 'driver.log',
+            'errfile': 'driver.err',
             'num_tasks': 1,
             'queue': self.queue,
             'priority': self.priority,
@@ -177,31 +176,29 @@ class GkiGridEnvironment(Environment):
         job_dir = os.path.join(self.exp.path, 'steps')
         tools.makedirs(job_dir)
         # Build the job files before submitting the other jobs.
+        logging.info('Building job scripts')
         for step in self.exp.steps:
-            print step.name
             if step._funcname == 'build':
                 script_step = step.copy()
                 script_step.kwargs['only_main_script'] = True
-                print 'Run', script_step
                 script_step()
-                # Later we only need to build the other files.
-                step.kwargs['no_main_script'] = True
 
         prev_job_name = None
         for number, step in enumerate(self.exp.steps, start=1):
-            print step.name
             job_name = self._get_job_name(step)
+            # We cannot submit a job from within the grid, so we submit it
+            # directly.
             if step._funcname == 'run':
-                self.wait_for = prev_job_name
+                self.__wait_for_job_name = prev_job_name
                 self._job_name = job_name
                 step()
             else:
                 step_file = os.path.join(job_dir, job_name)
                 with open(step_file, 'w') as f:
                     f.write(self._get_job(step))
-                submit_cmd = ['qsub']
+                submit = ['qsub']
                 if prev_job_name:
-                    submit_cmd.extend(['-hold_jid', prev_job_name])
-                submit_cmd.append(job_name)
-                tools.run_command(submit_cmd, cwd=job_dir)
+                    submit.extend(['-hold_jid', prev_job_name])
+                submit.append(job_name)
+                tools.run_command(submit, cwd=job_dir)
             prev_job_name = job_name
