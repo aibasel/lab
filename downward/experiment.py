@@ -221,6 +221,7 @@ class DownwardExperiment(Experiment):
             logging.critical('The path "%s" is not a local Fast Downward '
                              'repository.' % repo)
         self.repo = repo
+        self.orig_path = self.path
         self.search_exp_path = self.path
         self.preprocess_exp_path = self.path + '-p'
 
@@ -309,6 +310,7 @@ class DownwardExperiment(Experiment):
             logging.error('There is no stage "%s"' % stage)
             sys.exit(1)
         Experiment.run(self)
+        self.path = self.orig_path
 
     def build(self, stage, **kwargs):
         """Write the experiment to disk."""
@@ -342,6 +344,7 @@ class DownwardExperiment(Experiment):
             logging.critical('There is no stage "%s"' % stage)
 
         Experiment.build(self, **kwargs)
+        self.path = self.orig_path
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
