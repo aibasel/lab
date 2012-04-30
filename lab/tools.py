@@ -136,15 +136,15 @@ def confirm(question):
         sys.exit('Aborted')
 
 
-def overwrite_dir(dir, overwrite=False):
-    if os.path.exists(dir):
-        logging.info('The directory "%s" already exists.' % dir)
+def overwrite_dir(path, overwrite=False):
+    if os.path.exists(path):
+        logging.info('The directory "%s" already exists.' % path)
         if not overwrite:
             confirm('Do you want to overwrite the existing directory?')
-        shutil.rmtree(dir)
+        shutil.rmtree(path)
     # We use the os.makedirs method instead of our own here to check if the dir
     # has really been properly deleted.
-    os.makedirs(dir)
+    os.makedirs(path)
 
 
 def remove(filename):

@@ -174,7 +174,7 @@ class GkiGridEnvironment(Environment):
     def run_all_steps(self):
         # TODO: Abort if one step fails (check stderr file)
         job_dir = os.path.join(self.exp.path, 'steps')
-        tools.makedirs(job_dir)
+        tools.overwrite_dir(job_dir)
         # Build the job files before submitting the other jobs.
         logging.info('Building job scripts')
         for step in self.exp.steps:
