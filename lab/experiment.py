@@ -258,7 +258,7 @@ class Experiment(_Buildable):
             tools.overwrite_dir(self.path, overwrite)
             self._build_main_script()
         if only_main_script:
-            sys.exit()
+            return
 
         # This is the second part where we write everything else
         self._build_resources()
