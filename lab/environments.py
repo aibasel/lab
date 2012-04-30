@@ -24,6 +24,8 @@ import sys
 
 from lab import tools
 
+GRID_STEPS_DIR = os.path.join(tools.USER_DIR, 'grid-steps')
+
 
 class Environment(object):
     def __init__(self):
@@ -173,7 +175,7 @@ class GkiGridEnvironment(Environment):
 
     def run_all_steps(self):
         # TODO: Abort if one step fails (check stderr file)
-        job_dir = os.path.join(self.exp.path, 'steps')
+        job_dir = os.path.join(GRID_STEPS_DIR, self.exp.name)
         tools.overwrite_dir(job_dir)
         # Build the job files before submitting the other jobs.
         logging.info('Building job scripts')
