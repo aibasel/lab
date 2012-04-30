@@ -95,6 +95,7 @@ class GkiGridEnvironment(Environment):
 
         # When submitting an experiment job, wait for this job name.
         self.wait_for = None
+        self._job_name = None
 
     def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
@@ -136,9 +137,12 @@ class GkiGridEnvironment(Environment):
             tools.confirm('The file "%s" already exists so it seems the '
                           'experiment has already been submitted. Are you '
                           'sure you want to submit it again?' % submitted_file)
-        submit = ['qsub', self.main_script_file]
+        submit = ['qsub']
         if self.wait_for:
             submit.extend(['-hold_jid', self.wait_for])
+        if self._job_name:
+            submit.extend(['-N', self._job_name])
+        submit.append(self.main_script_file)
         tools.run_command(submit, cwd=self.exp.path, env=self.get_env())
         # Write "submitted" file.
         with open(submitted_file, 'w') as f:
@@ -183,20 +187,21 @@ class GkiGridEnvironment(Environment):
                 # Later we only need to build the other files.
                 step.kwargs['no_main_script'] = True
 
-        prev_step = None
+        prev_job_name = None
         for number, step in enumerate(self.exp.steps, start=1):
             print step.name
+            job_name = self._get_job_name(step)
             if step._funcname == 'run':
                 self.wait_for = self._get_job_name(prev_step)
+                self._job_name = job_name
                 step()
             else:
-                job_name = self._get_job_name(step)
                 step_file = os.path.join(job_dir, job_name)
                 with open(step_file, 'w') as f:
                     f.write(self._get_job(step))
                 submit_cmd = ['qsub']
                 if prev_step:
-                    submit_cmd.extend(['-hold_jid', self._get_job_name(prev_step)])
+                    submit_cmd.extend(['-hold_jid', self.prev_job_name)])
                 submit_cmd.append(job_name)
                 tools.run_command(submit_cmd, cwd=job_dir)
-            prev_step = step
+            prev_job_name = job_name
