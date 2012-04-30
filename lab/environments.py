@@ -192,7 +192,7 @@ class GkiGridEnvironment(Environment):
             print step.name
             job_name = self._get_job_name(step)
             if step._funcname == 'run':
-                self.wait_for = self._get_job_name(prev_step)
+                self.wait_for = prev_job_name
                 self._job_name = job_name
                 step()
             else:
