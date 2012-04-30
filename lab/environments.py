@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import math
 import os
 import sys
@@ -92,6 +93,8 @@ class GkiGridEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
 
+        self.wait_for = None
+
     def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
         job_params = {
@@ -119,7 +122,12 @@ class GkiGridEnvironment(Environment):
             lines.append('fi')
 
         script = header + '\n'.join(lines)
-        self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
+        #self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
+        # TODO: Move into parent class
+        filename = self.exp._get_abs_path(self.main_script_file)
+        with open(filename, 'w') as file:
+            logging.debug('Writing file "%s"' % filename)
+            file.write(script)
 
     def start_exp(self):
         submitted_file = os.path.join(self.exp.path, 'submitted')
@@ -127,8 +135,10 @@ class GkiGridEnvironment(Environment):
             tools.confirm('The file "%s" already exists so it seems the '
                           'experiment has already been submitted. Are you '
                           'sure you want to submit it again?' % submitted_file)
-        tools.run_command(['qsub', self.main_script_file], cwd=self.exp.path,
-                          env=self.get_env())
+        submit = ['qsub', self.main_script_file]
+        if self.wait_for:
+            submit.extend(['-hold_jid', self._get_job_name(self.wait_for)])
+        tools.run_command(submit, cwd=self.exp.path, env=self.get_env())
         # Write "submitted" file.
         with open(submitted_file, 'w') as f:
             f.write('This file is created when the experiment is submitted to '
@@ -138,7 +148,6 @@ class GkiGridEnvironment(Environment):
         return '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1, step.name)
 
     def _get_job_header(self, step):
-        num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
         # TODO: Directly pass job_name
         job_name = self._get_job_name(step)
         job_params = {
@@ -155,7 +164,6 @@ class GkiGridEnvironment(Environment):
 
     def _get_job(self, step):
         exp_script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        change_to_exp_script_dir = 'cd %s' % exp_script_dir
         call_script = './%s %s' % (self.exp._script, step.name)
         return '\n'.join([self._get_job_header(step), 'cd %s' % exp_script_dir, call_script])
 
@@ -163,13 +171,30 @@ class GkiGridEnvironment(Environment):
         # TODO: Abort if one step fails (check stderr file)
         job_dir = os.path.join(self.exp.path, 'steps')
         tools.makedirs(job_dir)
+        # Build the job files before submitting the other jobs.
+        for step in self.exp.steps:
+            print step.name
+            if step._funcname == 'build':
+                script_step = step.copy()
+                script_step.kwargs['only_main_script'] = True
+                print 'Run', script_step
+                script_step()
+                # Later we only need to build the other files.
+                step.kwargs['no_main_script'] = True
+
         prev_step = None
         for number, step in enumerate(self.exp.steps, start=1):
-            step_file = os.path.join(job_dir, self._get_job_name(step))
-            with open(step_file, 'w') as f:
-                f.write(self._get_job(step))
-            submit_cmd = ['qsub', step_file]
-            if prev_step:
-                submit_cmd.extend(['-hold_jid', self._get_job_name(prev_step)])
-            tools.run_command(submit_cmd, cwd=job_dir)
+            print step.name
+            if step._funcname == 'run':
+                self.wait_for = prev_step
+                step()
+            else:
+                job_name = self._get_job_name(step)
+                step_file = os.path.join(job_dir, job_name)
+                with open(step_file, 'w') as f:
+                    f.write(self._get_job(step))
+                submit_cmd = ['qsub', job_name]
+                if prev_step:
+                    submit_cmd.extend(['-hold_jid', self._get_job_name(prev_step)])
+                tools.run_command(submit_cmd, cwd=job_dir)
             prev_step = step
