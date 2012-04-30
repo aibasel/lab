@@ -296,19 +296,21 @@ class DownwardExperiment(Experiment):
         """
         self.portfolios.append(portfolio_file)
 
+    def _adapt_path(self, stage):
+        if stage == 'preprocess':
+            self.path = self.preprocess_exp_path
+        elif stage == 'search':
+            self.path = self.search_exp_path
+        else:
+            logging.critical('There is no stage "%s"' % stage)
+
     def run(self, stage):
         """Run the specified experiment stage.
 
         *stage* can be "preprocess" or "search".
 
         """
-        if stage == 'preprocess':
-            self.path = self.preprocess_exp_path
-        elif stage == 'search':
-            self.path = self.search_exp_path
-        else:
-            logging.error('There is no stage "%s"' % stage)
-            sys.exit(1)
+        self._adapt_path(stage)
         Experiment.run(self)
         self.path = self.orig_path
 
@@ -325,14 +327,13 @@ class DownwardExperiment(Experiment):
         # Include the experiment code again.
         self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
         _require_src_dirs(self, self.combinations)
+        self._adapt_path(stage)
         if stage == 'preprocess':
-            self.path = self.preprocess_exp_path
             self.add_resource('PREPROCESS_PARSER',
                     os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
                     'preprocess_parser.py')
             self._make_preprocess_runs()
         elif stage == 'search':
-            self.path = self.search_exp_path
             self.add_resource('SEARCH_PARSER',
                         os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'),
                         'search_parser.py')
