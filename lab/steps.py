@@ -57,6 +57,9 @@ class Step(object):
     def _funcname(self):
         return getattr(self.func, '__name__', None) or self.func.__class__.__name__.lower()
 
+    def copy(self):
+        return Step(self.name, self.func, *self.args[:], **self.kwargs.copy())
+
     def __str__(self):
         return '%s(%s%s%s)' % (self._funcname,
                                ', '.join([repr(arg) for arg in self.args]),
