@@ -17,7 +17,7 @@ from examples import standard_exp
 NEW_BRANCH = 'issue22'
 VERSION = '2.7.3'
 SHORTVERSION = VERSION[:3]
-SUITE = 'ALL'
+SUITE = 'IPC11_ALL'
 CONFIGS = [
     ('mas1', ['--search',
            'astar(merge_and_shrink(merge_strategy=merge_linear_reverse_level,shrink_strategy=shrink_bisimulation(max_states=infinity,threshold=1,greedy=true,group_by_h=false)))']),
@@ -66,7 +66,7 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
             run.commands['print-python-version'] = (args, kwargs)
 
 exp = TranslatorExperiment(path='js-%s' % NEW_BRANCH, combinations=COMBOS,
-                           attributes=ATTRIBUTES)
+                           attributes=ATTRIBUTES, limits=LIMITS)
 exp.add_suite(SUITE)
 for nick, config in CONFIGS:
     exp.add_config(nick, config)
