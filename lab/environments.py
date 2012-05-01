@@ -85,6 +85,7 @@ class LocalEnvironment(Environment):
 
 
 class GkiGridEnvironment(Environment):
+    MAX_TASKS = 75000
     def __init__(self, queue='opteron_core.q', priority=0):
         """
         *queue* must be a valid queue name on the GKI Grid.
@@ -105,6 +106,10 @@ class GkiGridEnvironment(Environment):
 
     def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
+        if num_tasks > self.MAX_TASKS:
+            logging.critical('You are trying to submit a job with %d tasks, '
+                             'but only %d are allowed.' %
+                             (num_tasks, self.MAX_TASKS))
         job_params = {
             'name': self.exp.name,
             'logfile': self.exp.name + '.log',
