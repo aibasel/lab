@@ -8,6 +8,7 @@ import sys
 
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.steps import Step
+from lab import tools
 
 from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
@@ -78,6 +79,27 @@ class StandardDownwardExperiment(DownwardExperiment):
         if not REMOTE:
             suite = 'gripper:prob01.pddl'
         DownwardExperiment.add_suite(self, suite)
+
+    def add_config_module(self, path):
+        """*path* must be a path to a python module containing only Fast
+        Downward configurations in the form
+
+        my_config = ["--search", "astar(lmcut())"]
+        """
+        module = tools.import_python_file(path)
+        configs = [(c, getattr(module, c)) for c in dir(module)
+                   if not c.startswith('__')]
+        for nick, config in configs:
+            self.add_config(nick, config)
+
+    def add_ipc_config(self, ipc_config_name):
+        """Example: ::
+
+            exp.add_ipc_config('seq-sat-lama-2011')
+        """
+        self.add_config(ipc_config_name, ['ipc', ipc_config_name, '--plan-file', 'sas_plan'])
+
+
 
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
