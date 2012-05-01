@@ -143,12 +143,6 @@ class Sequence(list):
             except IndexError:
                 logging.critical('There is no step number %s' % step_name)
             self.run_step(step)
-        elif step_name == 'next':
-            raise NotImplementedError
-        elif step_name == 'all':
-            # Run all steps
-            for step in self:
-                self.run_step(step)
         else:
             step_index = self._get_step_index(step_name)
             if step_index >= 0:

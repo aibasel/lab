@@ -79,6 +79,10 @@ class LocalEnvironment(Environment):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
                           env=self.get_env())
 
+    def run_all_steps(self):
+        for step in self.exp.steps:
+            self.exp.steps.run_step(step)
+
 
 class GkiGridEnvironment(Environment):
     def __init__(self, queue='opteron_core.q', priority=0):
