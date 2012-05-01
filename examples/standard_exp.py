@@ -60,19 +60,20 @@ class StandardDownwardExperiment(DownwardExperiment):
         # Compress the experiment directory
         self.add_step(Step.zip_exp_dir(self))
 
-        # Unzip the experiment directory
-        self.add_step(Step.unzip_exp_dir(self))
+        if not REMOTE:
+            # Unzip the experiment directory
+            self.add_step(Step.unzip_exp_dir(self))
 
-        # Remove eval dir for a clean scp copy.
-        self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir))
+            # Remove eval dir for a clean scp copy.
+            self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir))
 
-        # Copy the results to local directory
-        self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
-            'downward@habakuk:%s-eval' % REMOTE_EXPPATH, '%s-eval' % LOCAL_EXPPATH]))
+            # Copy the results to local directory
+            self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
+                'downward@habakuk:%s-eval' % REMOTE_EXPPATH, '%s-eval' % LOCAL_EXPPATH]))
 
-        # Copy the zipped experiment directory to local directory
-        self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
-            'downward@habakuk:%s.tar.gz' % REMOTE_EXPPATH, '%s.tar.gz' % LOCAL_EXPPATH]))
+            # Copy the zipped experiment directory to local directory
+            self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
+                'downward@habakuk:%s.tar.gz' % REMOTE_EXPPATH, '%s.tar.gz' % LOCAL_EXPPATH]))
 
     def add_suite(self, suite):
         # Use test suite on local machine
