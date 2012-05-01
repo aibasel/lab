@@ -17,7 +17,6 @@ from examples import standard_exp
 NEW_BRANCH = 'issue22'
 VERSION = '2.7.3'
 SHORTVERSION = VERSION[:3]
-CONFIG_MODULE = '/home/jendrik/projects/Downward/portotune/tuned_configs_sat.py'
 CONFIGS = [
     ('mas1', ['--search',
            'astar(merge_and_shrink(merge_strategy=merge_linear_reverse_level,shrink_strategy=shrink_bisimulation(max_states=infinity,threshold=1,greedy=true,group_by_h=false)))']),
@@ -38,10 +37,12 @@ if standard_exp.REMOTE:
     REPO = '/home/downward/jendrik/downward'
     TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
     PYTHON = '/home/downward/jendrik/Python-%s/installed/usr/local/bin/python%s' % (VERSION, SHORTVERSION)
+    CONFIG_MODULE = '/home/downward/jendrik/portotune/tuned_configs_sat.py'
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
     PYTHON = '/usr/bin/python%s' % SHORTVERSION
+    CONFIG_MODULE = '/home/jendrik/projects/Downward/portotune/tuned_configs_sat.py'
 
 COMBOS = [
     (Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO)),
