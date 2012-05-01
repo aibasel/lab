@@ -194,6 +194,9 @@ cd %(exp_script_dir)s
        'job_header': self._get_job_header(step)}
 
     def run_all_steps(self):
+        if 'xeon' in self.queue:
+            logging.critical('Experiments must be run stepwise on xeon, '
+                             'because mercurial is missing there.')
         job_dir = os.path.join(GRID_STEPS_DIR, self.exp.name)
         tools.overwrite_dir(job_dir)
         # Build the job files before submitting the other jobs.
