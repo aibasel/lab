@@ -21,7 +21,7 @@ ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, environment=None, repo=None,
-                 combinations=None, limits=None, attributes=None):
+                 combinations=None, limits=None, attributes=None, priority=0):
         if path is None:
             path = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]
         assert not os.path.isabs(path), path
@@ -33,7 +33,7 @@ class StandardDownwardExperiment(DownwardExperiment):
         if REMOTE:
             EXPPATH = REMOTE_EXPPATH
             repo = repo or '/home/downward/jendrik/downward'
-            environment = environment or GkiGridEnvironment()
+            environment = environment or GkiGridEnvironment(priority=priority)
         else:
             EXPPATH = LOCAL_EXPPATH
             repo = repo or '/home/jendrik/projects/Downward/downward'
