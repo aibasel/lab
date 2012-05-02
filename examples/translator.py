@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import os
-import platform
 
 from lab.steps import Step
 from lab.fetcher import Fetcher

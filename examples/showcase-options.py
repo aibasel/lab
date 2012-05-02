@@ -4,7 +4,6 @@ This experiment demonstrates most of the available options.
 """
 
 import os
-import platform
 import shutil
 from subprocess import call
 

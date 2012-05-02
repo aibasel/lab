@@ -7,7 +7,6 @@ module containing the solved problems.
 """
 
 import os
-import platform
 
 from downward.experiment import DownwardExperiment
 from downward.checkouts import Translator, Preprocessor, Planner
