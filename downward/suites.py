@@ -343,6 +343,14 @@ def suite_strips_ipc12345():
 def suite_optimal():
     return suite_lmcut_domains() + suite_ipc08_opt_strips()
 
+def suite_optimal_with_ipc11():
+    return suite_optimal() + suite_ipc11_opt()
+
+def suite_satisficing_with_ipc11():
+    domains = suite_ipc_one_to_five() + suite_lmcut_domains()
+    domains += suite_ipc08_sat() + suite_ipc11_sat()
+    return list(sorted(set(domains)))
+
 def suite_all():
     domains = suite_ipc_one_to_five() + suite_lmcut_domains()
     domains += suite_ipc08_all() + suite_ipc11_all()
