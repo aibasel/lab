@@ -23,6 +23,7 @@ import os
 import sys
 
 from lab import tools
+from lab.steps import Sequence
 
 GRID_STEPS_DIR = os.path.join(tools.USER_DIR, 'grid-steps')
 
@@ -47,7 +48,7 @@ class Environment(object):
         """
         pass
 
-    def run_all_steps(self):
+    def run_steps(self):
         raise NotImplementedError
 
 
@@ -79,9 +80,8 @@ class LocalEnvironment(Environment):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
                           env=self.get_env())
 
-    def run_all_steps(self):
-        for step in self.exp.steps:
-            self.exp.steps.run_step(step)
+    def run_steps(self, steps):
+        Sequence.run_steps(steps)
 
 
 class GkiGridEnvironment(Environment):
@@ -193,7 +193,7 @@ cd %(exp_script_dir)s
        'stderr': 'driver.err',
        'job_header': self._get_job_header(step)}
 
-    def run_all_steps(self):
+    def run_steps(self, steps):
         if 'xeon' in self.queue:
             logging.critical('Experiments must be run stepwise on xeon, '
                              'because mercurial is missing there.')
@@ -201,7 +201,7 @@ cd %(exp_script_dir)s
         tools.overwrite_dir(job_dir)
         # Build the job files before submitting the other jobs.
         logging.info('Building job scripts')
-        for step in self.exp.steps:
+        for step in steps:
             if step._funcname == 'build':
                 script_step = step.copy()
                 script_step.kwargs['only_main_script'] = True

@@ -48,6 +48,8 @@ class Step(object):
             retval = self.func(*self.args, **self.kwargs)
             # Free memory
             self.func = None
+            if retval:
+                logging.critical('An error occured in %s, the return value was %s' % (self.name, retval))
             return retval
         except (ValueError, TypeError):
             import traceback
@@ -131,27 +133,14 @@ class Sequence(list):
                 return index
         logging.critical('There is no step called %s' % step_name)
 
-    def process_step_names(self, names):
-        for step_name in names:
-            self.process_step_name(step_name)
-
-    def process_step_name(self, step_name):
+    def get_step(self, step_name):
         """*step_name* can be a step's name or number."""
         if step_name.isdigit():
             try:
-                step = self[int(step_name) - 1]
+                return self[int(step_name) - 1]
             except IndexError:
                 logging.critical('There is no step number %s' % step_name)
-            self.run_step(step)
-        else:
-            step_index = self._get_step_index(step_name)
-            if step_index >= 0:
-                self.run_step(self[step_index])
-
-    def run_step(self, step):
-        returnval = step()
-        if returnval:
-            logging.critical('An error occured in %s, the return value was %s' % (step, returnval))
+        return self[self._get_step_index(step_name)]
 
     def remove_step(self, step_name):
         """Delete the step with the name *step_name*."""
@@ -164,3 +153,8 @@ class Sequence(list):
         for number, step in enumerate(self, start=1):
             lines.append(' '.join([str(number).rjust(2), step.name.ljust(name_width), str(step)]))
         return '\n'.join(lines)
+
+    @staticmethod
+    def run_steps(steps):
+        for step in steps:
+            step()
