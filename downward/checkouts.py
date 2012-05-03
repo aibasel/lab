@@ -30,6 +30,7 @@ REV_CACHE_DIR = os.path.join(tools.USER_DIR, 'revision-cache')
 tools.makedirs(REV_CACHE_DIR)
 
 ABS_REV_CACHE = {}
+PARENT_REV_CACHE = {}
 
 
 class Checkout(object):
@@ -154,7 +155,6 @@ class HgCheckout(Checkout):
             checkout_dir = dest if dest else rev
 
         Checkout.__init__(self, part, repo, rev, checkout_dir)
-        self.parent = None
 
     def get_abs_rev(self, repo, rev):
         if str(rev).upper() == 'WORK':
@@ -190,12 +190,13 @@ class HgCheckout(Checkout):
 
     @property
     def parent_rev(self):
-        if self.parent:
-            return self.parent
         rev = 'tip' if self.rev == 'WORK' else self.rev
+        if rev in PARENT_REV_CACHE:
+            return PARENT_REV_CACHE[rev]
         cmd = ['hg', 'log', '-r', rev, '--template', '{node|short}']
-        self.parent = get_command_output(cmd, cwd=self.checkout_dir)
-        return self.parent
+        parent = get_command_output(cmd, cwd=self.checkout_dir)
+        PARENT_REV_CACHE[rev] = parent
+        return parent
 
 
 class Translator(HgCheckout):
