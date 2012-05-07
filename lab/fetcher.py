@@ -38,9 +38,10 @@ class Fetcher(object):
         # This HACK should be removed once the source of the error is clear.
         if props.get('search_error') is not None and props.get("coverage") is None:
             logging.warning('search_parser.py exited abnormally for %s' % run_dir)
+            logging.info('Rerunning search_parser.py')
             import subprocess
             subprocess.call(['../../search_parser.py'], cwd=run_dir)
-            self.fetch_dir(run_dir, eval_dir, copy_all)
+            return self.fetch_dir(run_dir, eval_dir, copy_all)
 
         dest_dir = os.path.join(eval_dir, *run_id)
         if copy_all:
