@@ -20,7 +20,7 @@ SHORTVERSION = VERSION[:3]
 
 PRIORITY = -3
 ATTRIBUTES = ['translator_time_*', 'translator_peak_memory', 'coverage',
-              'expansions', 'total_time', 'search_time', 'cost']
+              'expansions', 'total_time', 'search_time', 'cost', 'score_*']
 LIMITS = {'search_time': 900}
 
 if standard_exp.REMOTE:
