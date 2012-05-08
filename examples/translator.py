@@ -54,6 +54,8 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
         kwargs.setdefault('priority', PRIORITY)
         standard_exp.StandardDownwardExperiment.__init__(self, *args, **kwargs)
 
+        self.set_path_to_python(PYTHON)
+
         self.steps.insert(6, Step('rename-configs', filter.FilterReport(filter=rename), self.eval_dir,
                                   os.path.join(self.eval_dir, 'properties')))
 
@@ -93,17 +95,6 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
             self.add_step(Step('scatter-%s' % attribute, scatter.ScatterPlotReport(attributes=[attribute]),
                                self.eval_dir, os.path.join(self.eval_dir, '%s.png' % attribute)))
 
-    def _make_preprocess_runs(self):
-        standard_exp.StandardDownwardExperiment._make_preprocess_runs(self)
-        for run in self.runs:
-            # Use different python interpreter.
-            args, kwargs = run.commands['translate']
-            args.insert(0, PYTHON)
-            run.commands['translate'] = (args, kwargs)
-
-            args, kwargs = run.commands['print-python-version']
-            args[0] = PYTHON
-            run.commands['print-python-version'] = (args, kwargs)
 
 def get_exp(track, suite, configs, ipc_configs):
     exp = TranslatorExperiment(path='-'.join([INITIALS, NEW_BRANCH, track]), combinations=COMBOS,

@@ -112,12 +112,15 @@ class PreprocessRun(DownwardRun):
         self.add_resource("DOMAIN", self.problem.domain_file(), "domain.pddl")
         self.add_resource("PROBLEM", self.problem.problem_file(), "problem.pddl")
 
+        python = exp._path_to_python or 'python'
+
         # Print python version used for translator.
         # python -V prints to stderr so we execute a little program.
-        self.add_command('print-python-version', ['python', '-c',
+        self.add_command('print-python-version', [python, '-c',
                     "import platform; "
                     "print 'Python version: %s' % platform.python_version()"])
-        self.add_command('translate', [self.translator.shell_name, 'DOMAIN', 'PROBLEM'],
+        self.add_command('translate', [python, self.translator.shell_name,
+                                       'DOMAIN', 'PROBLEM'],
                          time_limit=exp.limits['translate_time'],
                          mem_limit=exp.limits['translate_memory'])
         self.add_command('preprocess', [self.preprocessor.shell_name],
@@ -224,6 +227,7 @@ class DownwardExperiment(Experiment):
         self.orig_path = self.path
         self.search_exp_path = self.path
         self.preprocess_exp_path = self.path + '-p'
+        self._path_to_python = None
 
         self.combinations = (combinations or
                     [(Translator(repo), Preprocessor(repo), Planner(repo))])
@@ -295,6 +299,16 @@ class DownwardExperiment(Experiment):
         *portfolio_file* must be the path to a Fast Downward portfolio file.
         """
         self.portfolios.append(portfolio_file)
+
+    def set_path_to_python(self, path):
+        """
+        Instead of the default python interpreter "python", let the translator
+        use a different one.
+
+        *path* must be an absolute path to a python interpreter or a name that
+        will be found on the system PATH like "python2.7".
+        """
+        self._path_to_python = path
 
     def _adapt_path(self, stage):
         if stage == 'preprocess':
