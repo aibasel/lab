@@ -61,7 +61,8 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
 
         if PREPROCESS_ONLY:
             for step_name in ['fetch-preprocess-results', 'build-search-exp',
-                  'run-search-exp', 'fetch-search-results']:
+                  'run-search-exp', 'fetch-search-results', 'zip-exp-dir',
+                  'unzip-exp-dir', 'scp-exp-dir']:
                 self.steps.remove_step(step_name)
 
             # Use normal eval-dir for preprocess results.
