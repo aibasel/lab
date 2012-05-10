@@ -60,9 +60,11 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
         self.set_path_to_python(PYTHON)
 
         if PREPROCESS_ONLY:
-            for step_name in ['fetch-preprocess-results', 'build-search-exp',
-                  'run-search-exp', 'fetch-search-results', 'zip-exp-dir',
-                  'unzip-exp-dir', 'scp-exp-dir']:
+            unneeded_steps = ['fetch-preprocess-results', 'build-search-exp',
+                              'run-search-exp', 'fetch-search-results', 'zip-exp-dir']
+            if not standard_exp.REMOTE:
+                unneeded_steps.extend(['unzip-exp-dir', 'scp-exp-dir'])
+            for step_name in unneeded_steps:
                 self.steps.remove_step(step_name)
 
             # Use normal eval-dir for preprocess results.
