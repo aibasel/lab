@@ -37,7 +37,7 @@ class Step(object):
     def __init__(self, name, func, *args, **kwargs):
         self.name = name
         self.func = func
-        self.args = args
+        self.args = list(args)
         self.kwargs = kwargs
 
     def __call__(self):
