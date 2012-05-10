@@ -17,10 +17,13 @@ INITIALS = 'js'
 NEW_BRANCH = 'issue22'
 VERSION = '2.7.3'
 SHORTVERSION = VERSION[:3]
+PREPROCESS_ONLY = True
 
 PRIORITY = -3
-ATTRIBUTES = ['translator_time_*', 'translator_peak_memory', 'coverage',
-              'expansions', 'total_time', 'search_time', 'cost', 'score_*']
+ATTRIBUTES = ['translator_time_*', 'translator_peak_memory']
+if not PREPROCESS_ONLY:
+    ATTRIBUTES.extend(['coverage', 'expansions', 'total_time', 'search_time',
+                       'cost', 'score_*'])
 LIMITS = {'search_time': 900}
 
 if standard_exp.REMOTE:
@@ -56,8 +59,18 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
 
         self.set_path_to_python(PYTHON)
 
-        self.steps.insert(6, Step('rename-configs', filter.FilterReport(filter=rename), self.eval_dir,
-                                  os.path.join(self.eval_dir, 'properties')))
+        if PREPROCESS_ONLY:
+            for step_name in ['fetch-preprocess-results', 'build-search-exp',
+                  'run-search-exp', 'fetch-search-results']:
+                self.steps.remove_step(step_name)
+
+            # Use normal eval-dir for preprocess results.
+            self.steps.insert(2, Step('fetch-preprocess-results', Fetcher(),
+                                      self.preprocess_exp_path, self.eval_dir))
+
+        else:
+            self.steps.insert(6, Step('rename-configs', filter.FilterReport(filter=rename),
+                                      self.eval_dir, os.path.join(self.eval_dir, 'properties')))
 
         try:
             import matplotlib
