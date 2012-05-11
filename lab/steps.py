@@ -63,6 +63,7 @@ class Step(object):
         return getattr(self.func, '__name__', None) or self.func.__class__.__name__.lower()
 
     def copy(self):
+        """Return a copy of this Step."""
         return Step(self.name, self.func, *self.args[:], **self.kwargs.copy())
 
     def __str__(self):
@@ -73,9 +74,12 @@ class Step(object):
 
     @classmethod
     def publish_reports(cls, *report_files):
-        """Return a step that copies all *report_files* to $HOME/.public_html. ::
+        """
+        Return a step that copies all *report_files* to $HOME/.public_html.
 
-            exp.add_step(Step.publish_reports(file1, file2)
+        ::
+
+            exp.add_step(Step.publish_reports(file1, file2))
 
         """
         user = getpass.getuser()
@@ -119,7 +123,9 @@ class Step(object):
 
     @classmethod
     def remove_exp_dir(cls, exp):
-        """Return a Step that removes the experiment directory. ::
+        """Return a Step that removes the experiment directory.
+
+        ::
 
             exp.add_step(Step.remove_exp_dir(exp))
 
