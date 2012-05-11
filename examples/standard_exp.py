@@ -75,6 +75,10 @@ class StandardDownwardExperiment(DownwardExperiment):
             self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
                 'downward@habakuk:%s.tar.gz' % REMOTE_EXPPATH, '%s.tar.gz' % LOCAL_EXPPATH]))
 
+        self.add_step(Step('sendmail', tools.sendmail, 'seipp@informatik.uni-freiburg.de',
+                           'seipp@informatik.uni-freiburg.de', 'Exp finished: %s' % self.name,
+                           'Path: %s' % self.path))
+
     def add_suite(self, suite):
         # Use test suite on local machine
         if not REMOTE:
