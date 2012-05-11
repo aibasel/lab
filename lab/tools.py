@@ -27,6 +27,8 @@ import traceback
 import logging
 import math
 import json
+import smtplib
+from email.mime.text import MIMEText
 
 from external import argparse
 
@@ -314,6 +316,31 @@ def copy(src, dest, required=True, ignores=None):
     else:
         # Do not warn if an optional file cannot be copied.
         return
+
+
+def sendmail(from_, to, subject, text, smtp_host='localhost', port=25):
+    """
+    Send an e-mail.
+
+    *from_* is the sender's email address.
+    *to* is the recipient's email address.
+
+    Example: ::
+        Step('mail', sendmail('john@xyz.com', 'jane@xyz.com', 'Hi!', 'Howdy!'))
+
+    """
+    # Create a text/plain message
+    msg = MIMEText(text)
+
+    msg['Subject'] = subject
+    msg['From'] = from_
+    msg['To'] = to
+
+    # Send the message via our own SMTP server, but don't include the
+    # envelope header.
+    s = smtplib.SMTP(smtp_host, port)
+    s.sendmail(from_, [to], msg.as_string())
+    s.quit()
 
 
 def get_terminal_size():
