@@ -23,14 +23,16 @@ import logging
 import shutil
 from subprocess import call
 
+from lab import tools
+
 
 class Step(object):
     """
     When the step is executed *args* and *kwargs* will be passed to the
-    callable *func*.
+    callable *func*. ::
 
-    >>> exp.add_step(Step('show-disk-usage', subprocess.call, ['df']))
-    >>> exp.add_step(Step('combine-results', Fetcher(), 'path/to/eval-dir',
+        exp.add_step(Step('show-disk-usage', subprocess.call, ['df']))
+        exp.add_step(Step('combine-results', Fetcher(), 'path/to/eval-dir',
                           'path/to/new-eval-dir'))
 
     """
@@ -71,9 +73,9 @@ class Step(object):
 
     @classmethod
     def publish_reports(cls, *report_files):
-        """Return a step that copies all *report_files* to $HOME/.public_html.
+        """Return a step that copies all *report_files* to $HOME/.public_html. ::
 
-        >>> exp.add_step(Step.publish_reports(file1, file2)
+            exp.add_step(Step.publish_reports(file1, file2)
 
         """
         user = getpass.getuser()
@@ -93,9 +95,9 @@ class Step(object):
         """
         Return a Step that creates a compressed tarball containing the
         experiment directory. For symbolic links this step stores the
-        referenced files, not the links themselves.
+        referenced files, not the links themselves. ::
 
-        >>> exp.add_step(Step.zip_exp_dir(exp))
+            exp.add_step(Step.zip_exp_dir(exp))
 
         """
         return cls('zip-exp-dir', call,
@@ -106,9 +108,9 @@ class Step(object):
     def unzip_exp_dir(cls, exp):
         """
         Return a Step that unzips a compressed tarball containing the
-        experiment directory.
+        experiment directory. ::
 
-        >>> exp.add_step(Step.unzip_exp_dir(exp))
+            exp.add_step(Step.unzip_exp_dir(exp))
 
         """
         return cls('unzip-exp-dir', call,
@@ -117,9 +119,9 @@ class Step(object):
 
     @classmethod
     def remove_exp_dir(cls, exp):
-        """Return a Step that removes the experiment directory.
+        """Return a Step that removes the experiment directory. ::
 
-        >>> exp.add_step(Step.remove_exp_dir(exp))
+            exp.add_step(Step.remove_exp_dir(exp))
 
         """
         return cls('remove-exp-dir', shutil.rmtree, exp.path)
