@@ -319,14 +319,12 @@ def copy(src, dest, required=True, ignores=None):
 
 
 def sendmail(from_, to, subject, text, smtp_host='localhost', port=25):
-    """
-    Send an e-mail.
+    """Send an e-mail.
 
     *from_* is the sender's email address.
-    *to* is the recipient's email address.
+    *to* is the recipient's email address. ::
 
-    Example: ::
-        Step('mail', sendmail('john@xyz.com', 'jane@xyz.com', 'Hi!', 'Howdy!'))
+        Step('mail', sendmail, 'john@xyz.com', 'jane@xyz.com', 'Hi!', 'Howdy!')
 
     """
     # Create a text/plain message

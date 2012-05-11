@@ -15,6 +15,7 @@ code on a large set of benchmarks.
 
    lab.experiment
    lab.reports
+   lab.tools
 
 
 downward
