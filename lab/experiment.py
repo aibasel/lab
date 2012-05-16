@@ -342,19 +342,17 @@ class Run(_Buildable):
         self.commands = OrderedDict()
 
     def require_resource(self, resource_name):
-        """
-        Some resources can be used by linking to the resource in the
-        experiment directory without copying it into each run.
+        """Make *resource_name* available for this run.
 
-        In the argo cluster however, requiring a resource implies copying it
-        into the task directory.
+        In environments like the argo cluster, this implies
+        copying the planner into each run. For the gkigrid, we merely
+        need to set up the PLANNER environment variable.
+
+        Currently, this method is not needed, because we always make all aliases
+        available for the commands and the argo cluster is not yet supported.
 
         >>> run.require_resource('PLANNER')
 
-        Make the planner resource available for this run.
-        In environments like the argo cluster, this implies
-        copying the planner into each task. For the gkigrid, we merely
-        need to set up the PLANNER environment variable.
         """
         self.linked_resources.append(resource_name)
 
