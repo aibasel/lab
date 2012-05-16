@@ -362,21 +362,18 @@ class Run(_Buildable):
         self.linked_resources.append(resource_name)
 
     def add_command(self, name, command, **kwargs):
-        """Adds a command to the run.
+        """Add a command to the run.
 
-        *name* is the command's name.
+        *name* is a descriptive name for the command.
 
-        *command* has to be a list of strings.
-
-        The items in *kwargs* are passed to the calls.call.Call() class. You can
-        find the valid keys there.
+        *command* has to be a list of strings where the first item is the
+        executable.
 
         If *kwargs["abort_on_failure"]* is True and the command does not return
         0, subsequent commands of this run are not executed.
 
-        The remaining items in *kwargs* are passed to subprocess.Popen()
-        The allowed parameters can be found at
-        http://docs.python.org/library/subprocess.html
+        The other items in *kwargs* are passed to the :ref:`Call <call>` class.
+        You can find the valid keys there.
 
         Examples:
 

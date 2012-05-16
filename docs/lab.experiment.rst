@@ -17,6 +17,12 @@
    :undoc-members:
    :inherited-members:
 
+.. _call:
+
+:class:`Call`
+--------------------
+.. autoclass:: lab.calls.call.Call
+
 
 .. _environments:
 
