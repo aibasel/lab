@@ -64,7 +64,11 @@ class _Buildable(object):
 
     def add_resource(self, resource_name, source, dest, required=True,
                      symlink=False):
-        """Include a file or directory in the experiment or run.
+        """Include the file or directory *source* in the experiment or run.
+
+        *source* will be copied to /path/to/exp-or-run/*dest*.
+
+        *resource_name* is an alias for the resource in commands.
 
         >>> experiment.add_resource('PLANNER', 'path/to/planner', 'dest-name')
 
@@ -190,7 +194,8 @@ class Experiment(_Buildable):
     def eval_dir(self):
         """Return the name of the default evaluation directory.
 
-        This is the directory where the fetched and parsed results will land.
+        This is the directory where the fetched and parsed results will land by
+        default.
 
         """
         return self.path + '-eval'
