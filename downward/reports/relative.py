@@ -67,14 +67,23 @@ class RelativeReport(AbsoluteReport):
                 # Delete row if both values are missing (None) or 0.
                 del table[row]
                 continue
-            elif not val1 or not val2:
-                # Don't add quotient if exactly one value is None or 0.
+            elif val1 is None or val2 is None:
+                # Don't add quotient if exactly one value is None.
                 quotient_col[row] = '---'
+                continue
+
+            abs_change = abs(val1 - val2)
+
+            if val1 == 0 or val2 == 0:
+                # If one value is 0, only add row if the change is big enough.
+                if abs_change >= self.abs_change:
+                    quotient_col[row] = '---'
+                else:
+                    del table[row]
                 continue
 
             quotient = val2 / val1
             percent_change = abs(quotient - 1.0)
-            abs_change = abs(val1 - val2)
 
             if (percent_change >= self.rel_change and
                 abs_change >= self.abs_change):
@@ -85,7 +94,7 @@ class RelativeReport(AbsoluteReport):
 
         # Add table also if there were missing cells
         if len(quotient_col) == 0:
-            logging.info('No changes above for "%s"' % attribute)
+            logging.info('No changes for "%s"' % attribute)
             return None
 
         table.add_col('ZZ1:sort:Factor', quotient_col)
