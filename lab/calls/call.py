@@ -27,6 +27,9 @@ from lab.calls.processgroup import ProcessGroup
 from lab.calls.log import set_property
 
 
+LOG_INTERVAL = 5
+
+
 def kill_pgrp(pgrp, sig, show_error=True):
     try:
         os.killpg(pgrp, sig)
@@ -48,15 +51,20 @@ def set_limit(kind, amount):
 class Call(subprocess.Popen):
     def __init__(self, args, time_limit=1800, mem_limit=2048, kill_delay=5,
                  check_interval=0.1, **kwargs):
-        """
+        """Make system calls with time and memory constraints.
+
         *args* and *kwargs* will be passed to the base
         `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_
         class.
 
-        *mem_limit* is the memory limit in MiB.
+        *time_limit* and *mem_limit* are the time and memory contraints in
+        seconds and MiB.
 
-        kill_delay =     How long we wait between SIGTERM and SIGKILL
-        check_interval = How often we query the process group status
+        *kill_delay* is the time in seconds that we wait between sending SIGTERM
+        and SIGKILL.
+
+        *check_interval* is the time in seconds between two queries to the
+        process group status.
         """
         self.time_limit = time_limit
         self.wall_clock_time_limit = time_limit * 1.5
@@ -65,15 +73,15 @@ class Call(subprocess.Popen):
         self.kill_delay = kill_delay
         self.check_interval = check_interval
 
-        self.log_interval = 5
+        self.log_interval = LOG_INTERVAL
 
         stdin = kwargs.get('stdin')
-        if type(stdin) is str:
+        if isinstance(stdin, basestring):
             kwargs['stdin'] = open(stdin)
 
         for stream_name in ['stdout', 'stderr']:
             stream = kwargs.get(stream_name)
-            if type(stream) is str:
+            if isinstance(stream, basestring):
                 kwargs[stream_name] = open(stream, 'w')
 
         def prepare_call():
