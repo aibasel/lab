@@ -30,11 +30,7 @@ import json
 import smtplib
 from email.mime.text import MIMEText
 
-try:
-    # Python 2.7, 3.2 and above.
-    import argparse
-except ImportError:
-    from external import argparse
+from external import argparse
 
 
 LOG_LEVEL = None
