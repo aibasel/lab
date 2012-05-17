@@ -31,11 +31,11 @@ def main():
     pool = multiprocessing.Pool(processes="""PROCESSES""")
     try:
         pool.map(process_dir, dirs)
-        pool.close()
     except KeyboardInterrupt:
         print 'Main script interrupted'
         pool.terminate()
     finally:
+        pool.close()
         print 'Joining pool processes'
         pool.join()
 
