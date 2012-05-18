@@ -52,6 +52,14 @@ def rename(run):
     run['config'] = config
     return run
 
+def sort_columns(run):
+    config = run['config']
+    # We want the original version on the left and the modified one on the right.
+    sort = 1 if NEW_BRANCH in config else 0
+    config = '%d-%s:sort:%s' % (sort, config, config)
+    run['config'] = config
+    return run
+
 class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('priority', PRIORITY)
@@ -70,6 +78,9 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
             # Use normal eval-dir for preprocess results.
             self.steps.insert(2, Step('fetch-preprocess-results', Fetcher(),
                                       self.preprocess_exp_path, self.eval_dir))
+
+            self.steps.insert(3, Step('sort-cols', filter.FilterReport(filter=sort_columns),
+                                      self.eval_dir, os.path.join(self.eval_dir, 'properties')))
 
         else:
             self.steps.insert(6, Step('rename-configs', filter.FilterReport(filter=rename),
