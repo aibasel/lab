@@ -23,8 +23,10 @@ import logging
 import os
 import sys
 
-from downward.reports import PlanningReport
 from lab import tools
+from lab import reports
+
+from downward.reports import PlanningReport
 
 
 SCORES = ['expansions', 'evaluations', 'search_time', 'total_time',
@@ -79,12 +81,10 @@ class IpcReport(PlanningReport):
             return ""
 
     def _compute_total_scores(self):
-        total_scores = {}
+        scores = {}
         for (domain, config), runs in self.domain_runs.items():
-            scores = [run.get(self.score) for run in runs]
-            total_score = sum(remove_missing(scores))
-            total_scores[config, domain] = total_score
-        return total_scores
+            scores[config, domain] = sum(run.get(self.score, 0) for run in runs)
+        return scores
 
     def write(self):
         logging.info('Using score attribute "%s"' % self.score)
@@ -175,8 +175,7 @@ class IpcReport(PlanningReport):
                     best = max(scores)
                 else:
                     values = [run.get(self.attribute) for run in problem_runs]
-                    values = remove_missing(values)
-                    best = tools.minimum(values)
+                    best = reports.minimum(values)
                 print r"& %s" % ("---" if best is None else best)
             print r"\\"
         print r"\hline"

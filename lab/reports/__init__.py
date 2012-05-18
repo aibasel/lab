@@ -35,25 +35,57 @@ from markup import Document
 from lab.external import txt2tags
 
 
+@tools.remove_none_values
+def prod(values):
+    """Computes the product of a list of numbers.
+
+    >>> print prod([2, 3, 7])
+    42
+    """
+    prod = 1
+    for value in values:
+        prod *= value
+    return prod
+
+
+@tools.remove_none_values
 def avg(values):
-    """Computes the arithmetic mean of a list of numbers.
+    """Compute the arithmetic mean of a list of numbers.
 
     >>> avg([20, 30, 70])
     40.0
     """
-    assert len(values) >= 1
     return round(math.fsum(values) / len(values), 4)
 
 
+@tools.remove_none_values
 def gm(values):
-    """Computes the geometric mean of a list of numbers.
+    """Compute the geometric mean of a list of numbers.
 
     >>> gm([2, 8])
     4.0
     """
-    assert len(values) >= 1
     exp = 1.0 / len(values)
-    return round(tools.prod([val ** exp for val in values]), 4)
+    return round(prod([val ** exp for val in values]), 4)
+
+
+@tools.remove_none_values
+def minimum(values):
+    """Filter out None values and return the minimum.
+
+    If there are only None values, return None.
+    """
+    return min(values)
+
+
+@tools.remove_none_values
+def maximum(values):
+    """Filter out None values and return the maximum.
+
+    If there are only None values, return None.
+    """
+    return max(values)
+
 
 
 class Report(object):

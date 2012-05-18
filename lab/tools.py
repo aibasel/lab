@@ -74,34 +74,22 @@ def setup_logging(level):
     root_logger.setLevel(level)
 
 
+def remove_none_values(func):
+    """
+    Remove all None values from the input list and call the original function.
+    """
+    def new_func(values):
+        values = [val for val in values if val is not None]
+        if not values:
+            return None
+        return func(values)
+    return new_func
+
+
 def shell_escape(s):
     if s[0].isdigit():
         s = 'N' + s
     return s.upper().replace('-', '_').replace(' ', '_').replace('.', '_')
-
-
-def prod(values):
-    """Computes the product of a list of numbers.
-
-    >>> print prod([2, 3, 7])
-    42
-    """
-    assert len(values) >= 1
-    prod = 1
-    for value in values:
-        prod *= value
-    return prod
-
-
-def minimum(values):
-    """Filter out None values and return the minimum.
-
-    If there are only None values, return None.
-    """
-    values = [v for v in values if v is not None]
-    if values:
-        return min(values)
-    return None
 
 
 def divide_list(seq, size):
@@ -110,11 +98,6 @@ def divide_list(seq, size):
     [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]
     """
     return [seq[i:i + size] for i  in range(0, len(seq), size)]
-
-
-def round_to_next_power_of_ten(i):
-    assert i > 0
-    return 10 ** math.ceil(math.log10(i))
 
 
 def makedirs(dir):
@@ -172,12 +155,12 @@ def natural_sort(alist):
     return sorted(alist, key=extract_numbers)
 
 
-def find_file(basenames, dir='.'):
-    for basename in basenames:
-        path = os.path.join(dir, basename)
+def find_file(filenames, dir='.'):
+    for filename in filenames:
+        path = os.path.join(dir, filename)
         if os.path.exists(path):
             return path
-    raise IOError('none found in %r: %r' % (dir, basenames))
+    raise IOError('none found in %r: %r' % (dir, filenames))
 
 
 def import_python_file(filename, dirs=None):

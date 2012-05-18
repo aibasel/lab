@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import math
 import os
 import sys
 
@@ -63,8 +64,9 @@ class ScatterPlotReport(AbsoluteReport):
             print table
             sys.exit()
 
-        # Make the value bigger to separate it from normal values
-        missing_val = tools.round_to_next_power_of_ten(max_value * 10)
+        # Separate the missing values by plotting them at (value * 10) rounded
+        # to the next power of 10.
+        missing_val = 10 ** math.ceil(math.log10(max_value * 10))
 
         values1 = []
         values2 = []

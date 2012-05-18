@@ -7,7 +7,9 @@ import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)-s %(levelname)-8s %(message)s',)
 
-from lab.tools import copy, prod
+from lab.tools import copy
+from lab import tools
+from lab import reports
 from lab.reports import gm
 from lab import tools
 from downward.scripts.preprocess_parser import parse_statistics
@@ -54,20 +56,13 @@ def test_copy_dir_to_dir():
 
 
 def gm_old(values):
-    return round(prod(values) ** (1 / len(values)), 2)
+    return round(reports.prod(values) ** (1 / len(values)), 2)
 
 
 def test_gm1():
     lists = [1, 2, 4, 5], [0.4, 0.8], [2, 8], [10 ** (-5), 5000]
     for l in lists:
         assert round(gm_old(l), 2) == round(gm(l), 2)
-
-
-def test_rounding():
-    assert tools.round_to_next_power_of_ten(1) == 1
-    assert tools.round_to_next_power_of_ten(2) == 10
-    assert tools.round_to_next_power_of_ten(10) == 10
-    assert tools.round_to_next_power_of_ten(11) == 100
 
 
 def test_statistics():
@@ -77,3 +72,12 @@ def test_statistics():
                       'Translator facts: 543\n', props)
     assert props == {'translator_peak_memory': 12345, 'preprocessor_facts': 123,
                      'translator_facts': 543}
+
+def test_none_removal():
+    @tools.remove_none_values
+    def minimum(values):
+        return min(values)
+
+    assert minimum([1, 2]) == 1
+    assert minimum([1, 2, None]) == 1
+    assert minimum([None, None]) == None

@@ -23,6 +23,8 @@ from __future__ import division
 import logging
 import sys
 
+from lab import reports
+
 from downward.reports.absolute import AbsoluteReport
 
 
@@ -101,4 +103,5 @@ class RelativeReport(AbsoluteReport):
         #table.add_col('ZZ2:sort:%-Change', percent_col)
         table.highlight = False
         table.summary_funcs = []
+        table.add_summary_function('AVG', reports.avg)
         return table

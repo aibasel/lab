@@ -34,7 +34,7 @@ from lab.reports import Report, Table
 
 def quality(problem_runs):
     """IPC score."""
-    min_cost = tools.minimum(run.get('cost') for run in problem_runs)
+    min_cost = reports.minimum(run.get('cost') for run in problem_runs)
     for run in problem_runs:
         cost = run.get('cost')
         if cost is None:
@@ -63,7 +63,7 @@ class PlanningReport(Report):
         to the *derived_properties* list and serves as an example here: ::
 
             def quality(problem_runs):
-                min_cost = tools.minimum(run.get('cost') for run in problem_runs)
+                min_cost = reports.minimum(run.get('cost') for run in problem_runs)
                 for run in problem_runs:
                     cost = run.get('cost')
                     if cost is None:
