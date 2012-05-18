@@ -103,5 +103,7 @@ class RelativeReport(AbsoluteReport):
         #table.add_col('ZZ2:sort:%-Change', percent_col)
         table.highlight = False
         table.summary_funcs = []
-        table.add_summary_function('AVG', reports.avg)
+        table.add_summary_function('avg', reports.avg)
+        table.add_summary_function('min', reports.minimum)
+        table.add_summary_function('max', reports.maximum)
         return table
