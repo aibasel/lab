@@ -462,11 +462,15 @@ class Table(collections.defaultdict):
         the columns."""
         if col_index == 0:
             return str(value).ljust(self.first_col_size)
-        return str(value).rjust(len(self.headers[col_index]))
+        return ' ' + str(value).rjust(len(self.headers[col_index]))
 
-    def _get_row_markup(self, cells):
+    def _get_header_markup(self):
+        """Return the txt2tags table markup for the headers."""
+        return self._get_row_markup(self.headers, template='|| %s |')
+
+    def _get_row_markup(self, cells, template=' | %s |'):
         """Return the txt2tags table markup for one row."""
-        return '| %s |' % ' | '.join(self._format_cell(col, val)
+        return template % ' | '.join(self._format_cell(col, val)
                                      for col, val in enumerate(cells))
 
     def add_summary_function(self, name, func):
@@ -481,9 +485,7 @@ class Table(collections.defaultdict):
         self.headers = self._get_headers()
         self.first_col_size = max(len(x) for x in self.rows + [self.title])
 
-        table_rows = [self.headers]
-        for row in self.rows:
-            table_rows.append(self._format_row_values(row))
+        table_rows = [self._format_row_values(row) for row in self.rows]
         for name, func in self.summary_funcs:
             summary_row = {}
             for col, content in self.get_columns().items():
@@ -497,4 +499,4 @@ class Table(collections.defaultdict):
                 row_name += ' (%d)' % self.num_values
             table_rows.append(self._format_row_values(row_name, summary_row))
         table_rows = [self._get_row_markup(row) for row in table_rows]
-        return '%s\n%s' % ('\n'.join(table_rows), ' '.join(self.info))
+        return '%s\n%s\n%s' % (self._get_header_markup(), '\n'.join(table_rows), ' '.join(self.info))
