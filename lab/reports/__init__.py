@@ -87,6 +87,17 @@ def maximum(values):
     return max(values)
 
 
+@tools.remove_none_values
+def stddev(values):
+    """Compute the standard deviation of a list of numbers.
+
+    >>> stddev([2, 4, 4, 4, 5, 5, 7, 9])
+    2.0
+    """
+    n = len(values)
+    return math.sqrt((sum(v**2 for v in values) / n) - avg(values)**2)
+
+
 
 class Report(object):
     """
@@ -314,7 +325,7 @@ class Table(collections.defaultdict):
         >>> t.add_cell('prob1', 'cfg2', 20)
         >>> t.add_row('prob2', {'cfg1': 15, 'cfg2': 25})
         >>> print t
-        | expansions | cfg1 | cfg2 |
+        || expansions | cfg1 | cfg2 |
         | prob1      |   10 |   20 |
         | prob2      |   15 |   25 |
         >>> t.rows
