@@ -82,7 +82,7 @@ def remove_none_values(func):
         values = [val for val in values if val is not None]
         if not values:
             return None
-        return func(values)
+        return round(func(values), 4)
     return new_func
 
 
