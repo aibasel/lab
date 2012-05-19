@@ -355,6 +355,10 @@ class Table(collections.defaultdict):
 
         self._cols = None
 
+        # For printing.
+        self.headers = None
+        self.first_col_size = None
+
     def add_cell(self, row, col, value):
         """Set Table[row][col] = value."""
         self[row][col] = value
@@ -408,17 +412,16 @@ class Table(collections.defaultdict):
                 values[col].append(self[row].get(col))
         return values
 
-    def _format_header(self):
-        return '|| %-29s | %s |' % (self.title,
-               ' | '.join(self._format_column_name(col) for col in self.cols))
-
-    def _format_column_name(self, col):
+    def _format_header(self, col_name):
         """Allow custom sorting of the column names."""
-        if ':sort:' in col:
-            sorting, col = col.split(':sort:')
+        if ':sort:' in col_name:
+            sorting, col_name = col_name.split(':sort:')
         # Allow breaking long configs into multiple lines for html tables.
-        col = col.replace('_', '-')
-        return ' %15s' % col
+        col_name = col_name.replace('_', '-')
+        return col_name
+
+    def _get_headers(self):
+        return [self.title] + [self._format_header(col) for col in self.cols]
 
     def _format_row_values(self, row_name, row=None):
         """Return a list of formatted values."""
@@ -437,8 +440,8 @@ class Table(collections.defaultdict):
         else:
             min_value = max_value = 'undefined'
 
-        parts = ['%-30s' % row_name]
-        for value in values:
+        parts = [row_name]
+        for col_index, value in enumerate(values):
             if isinstance(value, float):
                 value_text = '%.2f' % value
             else:
@@ -449,17 +452,22 @@ class Table(collections.defaultdict):
             elif self.highlight and (value == min_value and self.min_wins or
                                      value == max_value and not self.min_wins):
                 value_text = '**%s**' % value_text
-            parts.append(' %15s' % value_text)
+            parts.append(value_text)
         return parts
 
-    def _get_row_markup(self, row_name, row=None):
-        """Return the txt2tags table markup for *row_name*.
+    def _format_cell(self, col_index, value):
+        """Let all columns have minimal but equal width.
 
-        If given, *row* must be a dictionary mapping column names to the value
-        in row *row_name*. Otherwise row will be the row named *row_name* (This
-        if useful for obtaining markup for rows that are not in the table).
-        """
-        return '| %s |' % ' | '.join(self._format_row_values(row_name, row))
+        We assume that the contents of the cells are smaller than the widths of
+        the columns."""
+        if col_index == 0:
+            return str(value).ljust(self.first_col_size)
+        return str(value).rjust(len(self.headers[col_index]))
+
+    def _get_row_markup(self, cells):
+        """Return the txt2tags table markup for one row."""
+        return '| %s |' % ' | '.join(self._format_cell(col, val)
+                                     for col, val in enumerate(cells))
 
     def add_summary_function(self, name, func):
         """
@@ -470,9 +478,12 @@ class Table(collections.defaultdict):
 
     def __str__(self):
         """Return the txt2tags markup for this table."""
-        table_rows = [self._format_header()]
+        self.headers = self._get_headers()
+        self.first_col_size = max(len(x) for x in self.rows + [self.title])
+
+        table_rows = [self.headers]
         for row in self.rows:
-            table_rows.append(self._get_row_markup(row))
+            table_rows.append(self._format_row_values(row))
         for name, func in self.summary_funcs:
             summary_row = {}
             for col, content in self.get_columns().items():
@@ -484,5 +495,6 @@ class Table(collections.defaultdict):
             row_name = '**%s**' % name.capitalize()
             if self.num_values is not None:
                 row_name += ' (%d)' % self.num_values
-            table_rows.append(self._get_row_markup(row_name, summary_row))
+            table_rows.append(self._format_row_values(row_name, summary_row))
+        table_rows = [self._get_row_markup(row) for row in table_rows]
         return '%s\n%s' % ('\n'.join(table_rows), ' '.join(self.info))
