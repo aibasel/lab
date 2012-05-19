@@ -27,6 +27,8 @@ from lab import reports
 
 from downward.reports.absolute import AbsoluteReport
 
+NOT_AVAILABLE = None
+
 
 class RelativeReport(AbsoluteReport):
     def __init__(self, resolution, rel_change=0.0, abs_change=0, **kwargs):
@@ -71,7 +73,7 @@ class RelativeReport(AbsoluteReport):
                 continue
             elif val1 is None or val2 is None:
                 # Don't add quotient if exactly one value is None.
-                quotient_col[row] = '---'
+                quotient_col[row] = NOT_AVAILABLE
                 continue
 
             abs_change = abs(val1 - val2)
@@ -79,7 +81,7 @@ class RelativeReport(AbsoluteReport):
             if val1 == 0 or val2 == 0:
                 # If one value is 0, only add row if the change is big enough.
                 if abs_change >= self.abs_change:
-                    quotient_col[row] = '---'
+                    quotient_col[row] = NOT_AVAILABLE
                 else:
                     del table[row]
                 continue
@@ -106,4 +108,5 @@ class RelativeReport(AbsoluteReport):
         table.add_summary_function('avg', reports.avg)
         table.add_summary_function('min', reports.minimum)
         table.add_summary_function('max', reports.maximum)
+        table.add_summary_function('StdDev', reports.stddev)
         return table
