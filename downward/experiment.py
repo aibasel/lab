@@ -266,16 +266,16 @@ class DownwardExperiment(Experiment):
     def add_suite(self, suite):
         """
         *suite* can either be a string or a list of strings. The strings can be
-        tasks or domains.
+        tasks or domains. ::
 
-        >>> exp.add_suite("gripper:prob01.pddl")
-        >>> exp.add_suite("gripper")
-        >>> exp.add_suite(["miconic", "trucks", "grid", "gripper:prob01.pddl"])
+            exp.add_suite("gripper:prob01.pddl")
+            exp.add_suite("gripper")
+            exp.add_suite(["miconic", "trucks", "grid", "gripper:prob01.pddl"])
 
-        There are some predefined suites in ``suites.py``.
+        There are some predefined suites in ``suites.py``. ::
 
-        >>> exp.add_suite(suites.suite_strips())
-        >>> exp.add_suite(suites.suite_ipc_all())
+            exp.add_suite(suites.suite_strips())
+            exp.add_suite(suites.suite_ipc_all())
 
         """
         if isinstance(suite, basestring):
@@ -288,9 +288,9 @@ class DownwardExperiment(Experiment):
         """
         *nick* is the name the config will get in the reports.
         *config* must be a list of arguments that can be passed to the planner
-        (see http://www.fast-downward.org/SearchEngine for details).
+        (see http://www.fast-downward.org/SearchEngine for details). ::
 
-        >>> exp.add_config("lmcut", ["--search", "astar(lmcut())"])
+            exp.add_config("lmcut", ["--search", "astar(lmcut())"])
         """
         self.configs.append((nick, config))
 

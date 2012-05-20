@@ -370,7 +370,6 @@ def select_evenly_spread(seq, num_items):
     Otherwise, include first and last items and spread evenly in between.
     (If num_items is 1, only include first item.)
 
-    Example:
     >>> select_evenly_spread("abcdef", 3)
     ['a', 'd', 'f']
     """

@@ -52,17 +52,17 @@ class _Buildable(object):
         self.properties = tools.Properties()
 
     def set_property(self, name, value):
-        """Add a key-value property. These can be used later for evaluation.
+        """Add a key-value property. These can be used later for evaluation. ::
 
-        >>> exp.set_property('compact', True)
-        >>> run.set_property('domain', 'gripper')
+            exp.set_property('compact', True)
+            run.set_property('domain', 'gripper')
 
         Each run must have the property *id* which must be a *unique* list of
         strings. They determine where the results for this run will land on
-        disk and in the combined properties file.
+        disk and in the combined properties file. ::
 
-        >>> run.set_property('id', [algorithm, benchmark])
-        >>> run.set_property('id', [config, domain, problem])
+            run.set_property('id', [algorithm, benchmark])
+            run.set_property('id', [config, domain, problem])
 
         """
         self.properties[name] = value
@@ -73,17 +73,17 @@ class _Buildable(object):
 
         *source* will be copied to /path/to/exp-or-run/*dest*.
 
-        *resource_name* is an alias for the resource in commands.
+        *resource_name* is an alias for the resource in commands. ::
 
-        >>> experiment.add_resource('PLANNER', 'path/to/planner', 'dest-name')
+            exp.add_resource('PLANNER', 'path/to/planner', 'dest-name')
 
         includes a "global" file, i.e., one needed for all runs, into the
         main directory of the **experiment**. The name "PLANNER" is an ID for
-        this resource that can also be used to refer to it in a command.
+        this resource that can also be used to refer to it in a command. ::
 
-        >>> run.add_resource('DOMAIN', 'benchmarks/gripper/domain.pddl',
+            run.add_resource('DOMAIN', 'benchmarks/gripper/domain.pddl',
                              'domain.pddl')
-        >>> run.add_command('print-domain', ['cat', 'DOMAIN'])
+            run.add_command('print-domain', ['cat', 'DOMAIN'])
 
         copies "benchmarks/gripper/domain.pddl" into the **run** directory as
         "domain.pddl" and makes it available to commands as "DOMAIN".
@@ -93,12 +93,7 @@ class _Buildable(object):
         self.env_vars[resource_name] = dest
 
     def _get_abs_path(self, rel_path):
-        """
-        Return absolute path by applying rel_path to the base dir
-
-        >>> _get_abs_path('mytest.q')
-        /home/user/mytestjob/mytest.q
-        """
+        """Return absolute path by applying rel_path to the base dir."""
         return os.path.join(self.path, rel_path)
 
     def _get_rel_path(self, abs_path):
@@ -143,9 +138,9 @@ class _Buildable(object):
     def add_new_file(self, resource_name, dest, content):
         """
         Write *content* to *dest* and make the file available to the commands as
-        *resource_name*.
+        *resource_name*. ::
 
-        >>> run.add_new_file('LEARN', 'learn.txt', learning_instances)
+            run.add_new_file('LEARN', 'learn.txt', learning_instances)
 
         """
         self.new_files.append((dest, content))
@@ -213,6 +208,9 @@ class Experiment(_Buildable):
     def add_step(self, step):
         """Add :ref:`Step <steps>` *step* to the list of experiment steps.
 
+        >>> import shutil
+        >>> from lab.experiment import Experiment
+        >>> exp = Experiment('/tmp/myexp')
         >>> exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
 
         """
@@ -354,9 +352,9 @@ class Run(_Buildable):
         need to set up the PLANNER environment variable.
 
         Currently, this method is not needed, because we always make all aliases
-        available for the commands and the argo cluster is not yet supported.
+        available for the commands and the argo cluster is not yet supported. ::
 
-        >>> run.require_resource('PLANNER')
+            run.require_resource('PLANNER')
 
         """
         self.linked_resources.append(resource_name)
@@ -375,14 +373,14 @@ class Run(_Buildable):
         The other items in *kwargs* are passed to the :ref:`Call <call>` class.
         You can find the valid keys there.
 
-        Examples:
+        Examples::
 
-        >>> run.add_command('list-directory', ['ls', '-al'])
-        >>> run.add_command('translate', [run.translator.shell_name,
+            run.add_command('list-directory', ['ls', '-al'])
+            run.add_command('translate', [run.translator.shell_name,
                                           'domain.pddl', 'problem.pddl'])
-        >>> run.add_command('preprocess', [run.preprocessor.shell_name],
+            run.add_command('preprocess', [run.preprocessor.shell_name],
                             {'stdin': 'output.sas'})
-        >>> run.add_command('validate', ['VALIDATE', 'DOMAIN', 'PROBLEM',
+            run.add_command('validate', ['VALIDATE', 'DOMAIN', 'PROBLEM',
                                          'sas_plan'])
         """
         assert isinstance(name, basestring), 'name %s is not a string' % name

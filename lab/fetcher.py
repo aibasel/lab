@@ -67,15 +67,15 @@ class Fetcher(object):
         Examples:
 
         Fetch all results and write a single combined properties file to the
-        default evaluation directory:
+        default evaluation directory::
 
-        >>> exp.add_step(Step('fetch', Fetcher(), exp.path))
+            exp.add_step(Step('fetch', Fetcher(), exp.path))
 
         Read the combined properties file at ``<eval_dir1>/properties`` and
         merge it into the combined properties file at
-        ``<combined_eval_dir>/properties``:
+        ``<combined_eval_dir>/properties``::
 
-        >>> exp.add_step(Step('combine', Fetcher(), eval_dir1, combined_eval_dir))
+            exp.add_step(Step('combine', Fetcher(), eval_dir1, combined_eval_dir))
         """
         if not os.path.isdir(src_dir):
             logging.critical('%s is not a valid directory' % src_dir)
