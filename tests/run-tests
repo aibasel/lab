@@ -1,0 +1,26 @@
+#! /bin/bash
+
+set -e
+
+# Change into top directory.
+cd "$(dirname "$0")"
+cd ..
+
+py.test
+
+cd lab
+python -m doctest reports/__init__.py experiment.py tools.py
+cd ..
+
+cd downward
+python -m doctest downward/suites.py
+cd ..
+
+cd docs
+make html
+cd ..
+
+cd examples
+./showcase-options.py --all
+
+echo TESTS PASSED
