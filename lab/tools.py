@@ -141,7 +141,11 @@ def remove(filename):
 
 def natural_sort(alist):
     """Sort alist alphabetically, but special-case numbers to get
-    file2.txt before file10.txt."""
+    file2.txt before file10.txt.
+
+    >>> natural_sort(['file10.txt', 'file2.txt'])
+    ['file2.txt', 'file10.txt']
+    """
     def to_int_if_number(text):
         if text.isdigit():
             return int(text)
