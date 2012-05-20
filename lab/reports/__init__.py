@@ -325,23 +325,23 @@ class Table(collections.defaultdict):
         >>> t.add_cell('prob1', 'cfg2', 20)
         >>> t.add_row('prob2', {'cfg1': 15, 'cfg2': 25})
         >>> print t
-        || expansions | cfg1 | cfg2 |
-        | prob1      |   10 |   20 |
-        | prob2      |   15 |   25 |
+        || expansions |  cfg1 |  cfg2 |
+         | prob1      |    10 |    20 |
+         | prob2      |    15 |    25 |
         >>> t.rows
         ['prob1', 'prob2']
         >>> t.cols
         ['cfg1', 'cfg2']
         >>> t.get_row('prob2')
         [15, 25]
-        >>> t.get_columns()
-        {'cfg1': [10, 15], 'cfg2': [20, 25]}
-        >>> t.add_summary_function(sum)
+        >>> t.get_columns() == {'cfg1': [10, 15], 'cfg2': [20, 25]}
+        True
+        >>> t.add_summary_function('SUM', sum)
         >>> print t
-        | expansions | cfg1 | cfg2 |
-        | prob1      |   10 |   20 |
-        | prob2      |   15 |   25 |
-        | SUM        |   25 |   45 |
+        || expansions |  cfg1 |  cfg2 |
+         | prob1      |    10 |    20 |
+         | prob2      |    15 |    25 |
+         | **SUM**    |    25 |    45 |
         """
         collections.defaultdict.__init__(self, dict)
 
@@ -494,9 +494,12 @@ class Table(collections.defaultdict):
                     summary_row[col] = func(content)
                 else:
                     summary_row[col] = None
-            row_name = '**%s**' % name.capitalize()
+            row_name = '**%s**' % name
             if self.num_values is not None:
                 row_name += ' (%d)' % self.num_values
             table_rows.append(self._format_row_values(row_name, summary_row))
         table_rows = [self._get_row_markup(row) for row in table_rows]
-        return '%s\n%s\n%s' % (self._get_header_markup(), '\n'.join(table_rows), ' '.join(self.info))
+        parts = [self._get_header_markup(), '\n'.join(table_rows)]
+        if self.info:
+            parts.append(' '.join(self.info))
+        return '\n'.join(parts)
