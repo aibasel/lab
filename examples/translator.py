@@ -86,7 +86,7 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
             self.steps.insert(6, Step('rename-configs', filter.FilterReport(filter=rename),
                                       self.eval_dir, os.path.join(self.eval_dir, 'properties')))
 
-        self.add_step(Step('rel-change', RelativeReport('problem', abs_change=1, rel_change=0.10,
+        self.add_step(Step('rel-change', RelativeReport('problem', abs_change=0.1,
                                                         attributes=ATTRIBUTES),
                            self.eval_dir, os.path.join(self.eval_dir, 'rel-change.html')))
 
