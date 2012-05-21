@@ -23,6 +23,7 @@ cd ..
 cd examples
 ./showcase-options.py --all
 cd simple
+rm -rf /tmp/simple-exp
 ./simple-exp.py --all
 cd ../..
 
