@@ -33,14 +33,15 @@ exp.add_resource('SIMPLE_PARSER', 'simple-parser.py', 'simple-parser.py')
 reportfile = os.path.join(exp.eval_dir, EXPNAME + '.html')
 
 run = exp.add_run()
-run.add_command('list-dir', ['ls'])
+run.add_command('list-dir', ['ls', '-l'])
 # Every run has to have an id in the form of a list.
 run.set_property('id', ['current-dir'])
 run.require_resource('SIMPLE_PARSER')
 run.add_command('parse', ['SIMPLE_PARSER'])
 
 # Make a default report.
-exp.add_step(Step('report', Report(attributes=['number_of_files']), exp.eval_dir, reportfile))
+exp.add_step(Step('report', Report(attributes=['number_of_files', 'first_number']),
+                  exp.eval_dir, reportfile))
 
 # Compress the experiment directory.
 exp.add_step(Step.zip_exp_dir(exp))
