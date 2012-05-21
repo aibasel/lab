@@ -111,6 +111,9 @@ class Report(object):
 
             Report(attributes=['translator_time_*'])
 
+        When a report is made, both the available and the selected attributes
+        are printed on the commandline.
+
         *format* can be one of e.g. html, tex, wiki (MediaWiki),
         gwiki (Google Code Wiki), doku (DokuWiki), pmw (PmWiki),
         moin (MoinMoin), txt (Plain text) and art (ASCII art).
@@ -209,7 +212,7 @@ class Report(object):
                 val = run.get(attribute)
                 if val is None:
                     continue
-                return type(val) in [int, float]
+                return isinstance(val, (int, float))
             logging.info("Attribute %s is missing in all runs." % attribute)
             # Include the attribute nonetheless
             return True
@@ -247,11 +250,11 @@ class Report(object):
 
         if not markup:
             markup = ('No tables were generated. '
-                         'This happens when no significant changes occured or '
-                         'if for all attributes and all problems never all '
-                         'configs had a value for this attribute in a '
-                         'domain-wise report. Therefore no output file is '
-                         'created.')
+                      'This happens when no significant changes occured or '
+                      'if for all attributes and all problems never all '
+                      'configs had a value for this attribute in a '
+                      'domain-wise report. Therefore no output file is '
+                      'created.')
 
         doc.add_text(markup)
         if len(markup) < 100000:
@@ -262,7 +265,7 @@ class Report(object):
     def write(self):
         """
         Overwrite this method if you want to write the report directly. You
-        should write the report to *outfile*.
+        should write the report to *self.outfile*.
         """
         content = self.get_text()
         tools.makedirs(os.path.dirname(self.outfile))
