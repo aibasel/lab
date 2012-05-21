@@ -17,10 +17,13 @@ python -m doctest downward/suites.py
 cd ..
 
 cd docs
-make html
+make -B html
 cd ..
 
 cd examples
 ./showcase-options.py --all
+cd simple
+./simple-exp.py --all
+cd ../..
 
 echo TESTS PASSED
