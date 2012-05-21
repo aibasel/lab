@@ -332,7 +332,11 @@ class DownwardExperiment(Experiment):
         self.path = self.orig_path
 
     def build(self, stage, **kwargs):
-        """Write the experiment to disk."""
+        """Write the experiment to disk.
+
+        Overriding methods cannot add resources or new files here, because we
+        clear those lists in this method.
+        """
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         checkouts.checkout(self.combinations)
@@ -340,7 +344,7 @@ class DownwardExperiment(Experiment):
         self.runs = []
         self.new_files = []
         self.resources = []
-        self.env_vars = {}
+
         # Include the experiment code again.
         self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
         _require_src_dirs(self, self.combinations)

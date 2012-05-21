@@ -28,7 +28,6 @@ import logging
 from collections import defaultdict
 
 from lab import reports
-from lab import tools
 from lab.reports import Report, Table
 
 

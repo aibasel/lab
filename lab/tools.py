@@ -25,7 +25,6 @@ import subprocess
 import re
 import traceback
 import logging
-import math
 import json
 import smtplib
 from email.mime.text import MIMEText

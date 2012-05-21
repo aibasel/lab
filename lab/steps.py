@@ -23,8 +23,6 @@ import logging
 import shutil
 from subprocess import call
 
-from lab import tools
-
 
 class Step(object):
     """
