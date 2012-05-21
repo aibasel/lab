@@ -9,7 +9,7 @@ cd ..
 py.test
 
 cd lab
-python -m doctest reports/__init__.py experiment.py tools.py
+python -m doctest reports/__init__.py experiment.py tools.py parser.py
 cd ..
 
 cd downward
