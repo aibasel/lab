@@ -318,6 +318,8 @@ class Experiment(_Buildable):
         """
         Uses the relative directory information and writes all runs to disc.
         """
+        if not self.runs:
+            logging.critical('No runs have been added to the experiment.')
         num_runs = len(self.runs)
         self.set_property('runs', num_runs)
         logging.info('Building %d runs' % num_runs)
