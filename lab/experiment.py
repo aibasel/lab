@@ -46,7 +46,6 @@ class _Buildable(object):
     def __init__(self):
         self.resources = []
         self.new_files = []
-        self.env_vars = {}
         self.ignores = []
 
         self.properties = tools.Properties()
@@ -67,13 +66,13 @@ class _Buildable(object):
         """
         self.properties[name] = value
 
-    def add_resource(self, resource_name, source, dest, required=True,
+    def add_resource(self, name, source, dest, required=True,
                      symlink=False):
         """Include the file or directory *source* in the experiment or run.
 
         *source* will be copied to /path/to/exp-or-run/*dest*.
 
-        *resource_name* is an alias for the resource in commands. ::
+        *name* is an alias for the resource in commands. ::
 
             exp.add_resource('PLANNER', 'path/to/planner', 'dest-name')
 
@@ -88,23 +87,30 @@ class _Buildable(object):
         copies "benchmarks/gripper/domain.pddl" into the **run** directory as
         "domain.pddl" and makes it available to commands as "DOMAIN".
         """
-        resource = (source, dest, required, symlink)
+        resource = (name, source, dest, required, symlink)
         if not resource in self.resources:
             self.resources.append(resource)
-        self.env_vars[resource_name] = dest
 
-    def add_new_file(self, resource_name, dest, content):
+    def add_new_file(self, name, dest, content):
         """
         Write *content* to *dest* and make the file available to the commands as
-        *resource_name*. ::
+        *name*. ::
 
             run.add_new_file('LEARN', 'learn.txt', learning_instances)
 
         """
-        new_file = (dest, content)
+        new_file = (name, dest, content)
         if not new_file in self.new_files:
             self.new_files.append(new_file)
-        self.env_vars[resource_name] = dest
+
+    @property
+    def _env_vars(self):
+        env_vars = {}
+        for name, dest, content in self.new_files:
+            env_vars[name] = self._get_abs_path(dest)
+        for name, source, dest, required, symlink in self.resources:
+            env_vars[name] = self._get_abs_path(dest)
+        return env_vars
 
     def _get_abs_path(self, rel_path):
         """Return absolute path by applying rel_path to the base dir."""
@@ -123,7 +129,7 @@ class _Buildable(object):
         combined_props.write()
 
     def _build_resources(self):
-        for dest, content in self.new_files:
+        for name, dest, content in self.new_files:
             filename = self._get_abs_path(dest)
             with open(filename, 'w') as file:
                 logging.debug('Writing file "%s"' % filename)
@@ -132,7 +138,7 @@ class _Buildable(object):
                     # Make run script executable
                     os.chmod(filename, 0755)
 
-        for source, dest, required, symlink in self.resources:
+        for name, source, dest, required, symlink in self.resources:
             if required and not os.path.exists(source):
                 logging.critical('The required resource can not be found: %s' %
                                  source)
@@ -265,10 +271,6 @@ class Experiment(_Buildable):
         """
         logging.info('Exp Dir: "%s"' % self.path)
 
-        # Make the variables absolute
-        self.env_vars = dict([(var, self._get_abs_path(path))
-                              for (var, path) in self.env_vars.items()])
-
         self._set_run_dirs()
 
         if not no_main_script:
@@ -400,11 +402,13 @@ class Run(_Buildable):
         this method can be used to write everything to the disk.
         """
         assert self.path
-
         tools.overwrite_dir(self.path)
+
         # We need to build the linked resources before the run script.
         # Only this way we have all resources in self.resources
-        # (linked ones too)
+        # (linked ones too).
+        # We need to build the run script before the resources, because the run
+        # script is a resource.
         self._build_linked_resources()
         self._build_run_script()
         self._build_resources()
@@ -414,8 +418,9 @@ class Run(_Buildable):
         if not self.commands:
             raise SystemExit('Please add at least one command')
 
-        self.experiment.env_vars.update(self.env_vars)
-        self.env_vars = self.experiment.env_vars.copy()
+        # Copy missing env_vars from experiment.
+        env_vars = self.experiment._env_vars
+        env_vars.update(self._env_vars)
 
         run_script = open(os.path.join(tools.DATA_DIR, 'run-template.py')).read()
 
@@ -425,10 +430,10 @@ class Run(_Buildable):
 
             # Support running globally installed binaries
             def format_arg(arg):
-                return arg if arg in self.env_vars else '"%s"' % arg
+                return arg if arg in env_vars else '"%s"' % arg
 
             def format_key_value_pair(key, val):
-                return '%s=%s' % (key, val if val in self.env_vars else repr(val))
+                return '%s=%s' % (key, val if val in env_vars else repr(val))
 
             cmd_string = '[%s]' % ', '.join([format_arg(arg) for arg in cmd])
             kwargs_string = ', '.join(format_key_value_pair(key, value)
@@ -447,9 +452,9 @@ class Run(_Buildable):
         calls_text = '\n'.join(make_call(name, cmd, kwargs)
                                for name, (cmd, kwargs) in self.commands.items())
 
-        if self.env_vars:
+        if env_vars:
             env_vars_text = ''
-            for var, filename in sorted(self.env_vars.items()):
+            for var, filename in sorted(env_vars.items()):
                 abs_filename = self._get_abs_path(filename)
                 rel_filename = self._get_rel_path(abs_filename)
                 env_vars_text += ('%s = "%s"\n' % (var, rel_filename))
