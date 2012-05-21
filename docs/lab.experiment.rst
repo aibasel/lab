@@ -30,8 +30,8 @@
 
 .. _call:
 
-:class:`Call`
---------------------
+:class:`Call` -- Make system calls
+----------------------------------
 
 .. autoclass:: lab.calls.call.Call
 
