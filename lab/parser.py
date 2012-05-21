@@ -23,23 +23,14 @@ import re
 from collections import defaultdict
 import logging
 
-# TODO: Remove debug code
-print 'SYSPATH PARSER', sys.path
-print 'CWD:', os.getcwd()
 from lab import tools
-print 'TOOLS FILE', tools.__file__
 
 
-class _MultiPattern(object):
-    """
-    Parses a file for a pattern containing multiple match groups.
-    Each group_number has an associated attribute name and a type.
-    """
-    def __init__(self, groups, regex, required, flags):
-        """
-        groups is a list of (group_number, attribute_name, type) tuples
-        """
-        self.groups = groups
+class _Pattern(object):
+    def __init__(self, attribute, regex, group, required, typ, flags):
+        self.attribute = attribute
+        self.group = group
+        self.typ = typ
         self.required = required
 
         flag = 0
@@ -64,15 +55,13 @@ class _MultiPattern(object):
         found_props = {}
         match = self.regex.search(content)
         if match:
-            for group_number, attribute_name, typ in self.groups:
-                try:
-                    value = match.group(group_number)
-                    value = typ(value)
-                    found_props[attribute_name] = value
-                except IndexError:
-                    msg = 'Atrribute %s not found for pattern %s in file %s'
-                    msg %= (attribute_name, self, filename)
-                    logging.error(msg)
+            try:
+                value = match.group(self.group)
+                value = self.typ(value)
+                found_props[self.attribute] = value
+            except IndexError:
+                logging.error('Atrribute %s not found for pattern %s in '
+                              'file %s' % (self.attribute, self, filename))
         elif self.required:
             logging.error('Pattern %s not found in %s' % (self, filename))
         return found_props
@@ -126,8 +115,22 @@ class _FileParser(object):
 
 
 class Parser(object):
-    """
-    Parses files and writes found results into the run's properties file.
+    """Parses files and writes found results into the run's properties file.
+
+    Parsing is done as just another run command. After the main command has been
+    added to the run, we can add the parsing command::
+
+        myparser = 'path/to/myparser.py'
+        run.add_command('parse-output', [myparser])
+
+    This calls *myparser* in the run directory. Principally a parser can be any
+    program that analyzes any of the files in the run dir (e.g. ``run.log``) and
+    manipulates the ``properties`` file in the same directory.
+
+    To make parsing easier however, you should use the ``Parser`` class like in
+    the simple-parser.py example (``examples/simple/simple-parser.py``):
+
+    .. literalinclude:: ../examples/simple/simple-parser.py
     """
     def __init__(self):
         self.file_parsers = defaultdict(_FileParser)
@@ -142,36 +145,42 @@ class Parser(object):
 
         If *required* is True and the pattern is not found in file, an error
         message is printed.
+
+        >>> parser = Parser()
+        >>> parser.add_pattern('variables', r'Variables: (\d+)')
         """
-        groups = [(group, name, type)]
-        self.add_multipattern(groups, regex, file, required, flags)
-
-    def add_multipattern(self, groups, regex, file='run.log', required=True,
-                         flags=''):
-        """Look for multi-group *regex* in file.
-
-        This function is useful if *regex* contains multiple attributes.
-
-        *groups* is a list of (group_number, attribute_name, type) tuples. For
-        each such tuple add the results for *group_number* to the properties
-        under *attribute_name* after casting it to *type*.
-
-        If *required* is True and the pattern is not found in file, an error
-        message is printed.
-        """
-        self.file_parsers[file].add_pattern(
-                                _MultiPattern(groups, regex, required, flags))
+        self.file_parsers[file].add_pattern(_Pattern(name, regex, group,
+                                                     required, type, flags))
 
     def add_function(self, function, file='run.log'):
         """
         After all patterns have been evaluated and the found values have been
-        inserted into ``props``, call ``function(file_content, props)`` for each
-        added function. The function must directly manipulate the properties
-        dictionary *props*.
+        inserted into ``props``, call ``function(content, props)`` for each
+        added function where content is the content in *file*. The function must
+        directly manipulate the properties dictionary *props*.
+
+        >>> # Define a function and check that it works correctly.
+        >>> import re
+        >>> def find_f_values(content, props):
+        ...     props['f_values'] = re.findall(r'f: (\d+)', content)
+        ...
+        >>> properties = {}
+        >>> find_f_values('f: 14, f: 12, f: 10', properties)
+        >>> print properties
+        {'f_values': ['14', '12', '10']}
+
+        >>> # Add the function to the parser.
+        >>> parser = Parser()
+        >>> parser.add_function(find_f_values)
         """
         self.file_parsers[file].add_function(function)
 
     def parse(self, run_dir='.'):
+        """Search all patterns and apply all functions for the files in *run_dir*.
+
+        The found values are written to the properties file at
+        ``run_dir/properties``.
+        """
         prop_file = os.path.join(run_dir, 'properties')
         props = tools.Properties(filename=prop_file)
 

@@ -166,15 +166,12 @@ class PreprocessParser(Parser):
         # 19 variables of 19 necessary
         # 2384 of 2384 operators necessary.
         # 0 of 0 axiom rules necessary.
-        self.add_multipattern([(1, 'preprocessor_variables', int),
-                              (2, 'translator_variables', int)],
-                              r'(\d+) variables of (\d+) necessary')
-        self.add_multipattern([(1, 'preprocessor_operators', int),
-                               (2, 'translator_operators', int)],
-                               r'(\d+) of (\d+) operators necessary')
-        self.add_multipattern([(1, 'preprocessor_axioms', int),
-                               (2, 'translator_axioms', int)],
-                               r'(\d+) of (\d+) axiom rules necessary')
+        self.add_pattern('translator_variables', r'\d+ variables of (\d+) necessary')
+        self.add_pattern('preprocessor_variables', r'(\d+) variables of \d+ necessary')
+        self.add_pattern('translator_operators', r'\d+ of (\d+) operators necessary')
+        self.add_pattern('preprocessor_operators', r'(\d+) of \d+ operators necessary')
+        self.add_pattern('translator_axioms', r'\d+ of (\d+) axiom rules necessary')
+        self.add_pattern('preprocessor_axioms', r'(\d+) of \d+ axiom rules necessary')
 
         # Parse the numbers from the following lines of translator output:
         #    170 relevant atoms
