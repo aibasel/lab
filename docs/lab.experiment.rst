@@ -1,5 +1,5 @@
-:mod:`lab.experiment` -- Create experiments
-===========================================
+:mod:`lab` --- Create experiments
+=================================
 
 :class:`Experiment`
 -------------------
@@ -9,6 +9,7 @@
    :undoc-members:
    :inherited-members:
 
+
 :class:`Run`
 -------------------
 
@@ -17,19 +18,32 @@
    :undoc-members:
    :inherited-members:
 
-.. _call:
-
-:class:`Call`
---------------------
-.. autoclass:: lab.calls.call.Call
-
 
 .. _environments:
 
 :class:`Environment`
 --------------------
+
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.GkiGridEnvironment
+
+
+.. _call:
+
+:class:`Call`
+--------------------
+
+.. autoclass:: lab.calls.call.Call
+
+
+.. _parser:
+
+:class:`Parser` -- Parse log output
+-----------------------------------
+
+.. autoclass:: lab.parser.Parser
+   :members:
+   :undoc-members:
 
 
 .. _steps:

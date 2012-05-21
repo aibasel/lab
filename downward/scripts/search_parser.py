@@ -35,11 +35,6 @@ from collections import defaultdict
 from lab.parser import Parser
 
 
-def check(props):
-    if props.get('cost') is not None:
-        assert props.get('search_time') is not None, 'cost without search_time'
-
-
 # Search functions ------------------------------------------------------------
 
 def _get_states_pattern(attribute, name):
@@ -247,8 +242,6 @@ class SearchParser(Parser):
 
         self.add_search_parsing()
         self.add_search_functions()
-
-        self.set_check(check)
 
     def add_search_parsing(self):
         self.add_pattern('landmarks', r'Discovered (\d+?) landmarks', type=int,

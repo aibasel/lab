@@ -127,64 +127,51 @@ class _FileParser(object):
 
 class Parser(object):
     """
-    If copy-all is True, copies files from run dirs into a new tree under
-    <eval-dir> according to the value "id" in the run's properties file.
-
-    Parses files and writes found results into the run's properties file or
-    into a global properties file.
+    Parses files and writes found results into the run's properties file.
     """
     def __init__(self):
         self.file_parsers = defaultdict(_FileParser)
-        self.check = None
 
     def add_pattern(self, name, regex, group=1, file='run.log', required=True,
                     type=int, flags=''):
         """
-        During evaluate() look for pattern in file and add what is found in
-        group to the properties dictionary under "name":
+        Look for *regex* in *file* and add what is found in *group* to the
+        properties dictionary under *name*, i.e. ::
 
-        properties[name] = re.compile(regex).search(file_content).group(group)
+            properties[name] = type(re.compile(regex).search(open(file).read()).group(group))
 
-        If required is True and the pattern is not found in file, an error
-        message is printed
+        If *required* is True and the pattern is not found in file, an error
+        message is printed.
         """
         groups = [(group, name, type)]
         self.add_multipattern(groups, regex, file, required, flags)
 
     def add_multipattern(self, groups, regex, file='run.log', required=True,
                          flags=''):
-        """
-        During evaluate() look for "regex" in file. For each tuple of
-        (group_number, attribute_name, type) add the results for "group_number"
-        to the properties file under "attribute_name" after casting it to
-        "type".
+        """Look for multi-group *regex* in file.
 
-        If required is True and the pattern is not found in file, an error
-        message is printed
+        This function is useful if *regex* contains multiple attributes.
+
+        *groups* is a list of (group_number, attribute_name, type) tuples. For
+        each such tuple add the results for *group_number* to the properties
+        under *attribute_name* after casting it to *type*.
+
+        If *required* is True and the pattern is not found in file, an error
+        message is printed.
         """
         self.file_parsers[file].add_pattern(
                                 _MultiPattern(groups, regex, required, flags))
 
     def add_function(self, function, file='run.log'):
         """
-        After all the patterns have been evaluated and the found values have
-        been inserted into the properties files, call
-        function(file_content, props) for each added function.
-        The function can directly manipulate the properties dictionary "props".
-        Functions can use the fact that all patterns have been parsed before
-        any function is run on the file content. The found values are present
-        in "props".
+        After all patterns have been evaluated and the found values have been
+        inserted into ``props``, call ``function(file_content, props)`` for each
+        added function. The function must directly manipulate the properties
+        dictionary *props*.
         """
         self.file_parsers[file].add_function(function)
 
-    def set_check(self, function):
-        """
-        After all properties have been parsed or calculated, run "function"
-        on them to assert some things.
-        """
-        self.check = function
-
-    def parse(self, run_dir='.', copy_all=False):
+    def parse(self, run_dir='.'):
         prop_file = os.path.join(run_dir, 'properties')
         props = tools.Properties(filename=prop_file)
 
@@ -198,13 +185,4 @@ class Parser(object):
             else:
                 logging.error('File "%s" could not be read' % path)
 
-        if self.check:
-            try:
-                self.check(props)
-            except AssertionError, e:
-                msg = 'Parsed properties not valid in %s: %s'
-                logging.error(msg % (prop_file, e))
-                print '*' * 60
-                print props
-                print '*' * 60
         props.write()
