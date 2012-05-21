@@ -131,6 +131,8 @@ class Parser(object):
     the simple-parser.py example (``examples/simple/simple-parser.py``):
 
     .. literalinclude:: ../examples/simple/simple-parser.py
+
+    A single run can have multiple parsing commands.
     """
     def __init__(self):
         self.file_parsers = defaultdict(_FileParser)

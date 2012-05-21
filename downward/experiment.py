@@ -185,6 +185,9 @@ class SearchRun(DownwardRun):
 
 
 class DownwardExperiment(Experiment):
+    """
+    Conduct a Fast Downward experiment.
+    """
     def __init__(self, path, repo, environment=None, combinations=None,
                  compact=True, limits=None):
         """
