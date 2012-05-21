@@ -88,8 +88,22 @@ class _Buildable(object):
         copies "benchmarks/gripper/domain.pddl" into the **run** directory as
         "domain.pddl" and makes it available to commands as "DOMAIN".
         """
-        if not (source, dest) in self.resources:
-            self.resources.append((source, dest, required, symlink))
+        resource = (source, dest, required, symlink)
+        if not resource in self.resources:
+            self.resources.append(resource)
+        self.env_vars[resource_name] = dest
+
+    def add_new_file(self, resource_name, dest, content):
+        """
+        Write *content* to *dest* and make the file available to the commands as
+        *resource_name*. ::
+
+            run.add_new_file('LEARN', 'learn.txt', learning_instances)
+
+        """
+        new_file = (dest, content)
+        if not new_file in self.new_files:
+            self.new_files.append(new_file)
         self.env_vars[resource_name] = dest
 
     def _get_abs_path(self, rel_path):
@@ -134,17 +148,6 @@ class _Buildable(object):
 
             logging.debug('Copying %s to %s' % (source, dest))
             tools.copy(source, dest, required, self.ignores)
-
-    def add_new_file(self, resource_name, dest, content):
-        """
-        Write *content* to *dest* and make the file available to the commands as
-        *resource_name*. ::
-
-            run.add_new_file('LEARN', 'learn.txt', learning_instances)
-
-        """
-        self.new_files.append((dest, content))
-        self.env_vars[resource_name] = dest
 
 
 class Experiment(_Buildable):
