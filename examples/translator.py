@@ -55,8 +55,8 @@ def rename(run):
 def sort_columns(run):
     config = run['config']
     # We want the original version on the left and the modified one on the right.
-    sort = 1 if NEW_BRANCH in config else 0
-    config = '%d-%s:sort:%s' % (sort, config, config)
+    for before, after in [('WORK-WORK', 'WORK'), ('%s-WORK' % NEW_BRANCH, NEW_BRANCH)]:
+        config = config.replace(before, after)
     run['config'] = config
     return run
 
