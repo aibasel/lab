@@ -14,12 +14,12 @@ from downward.reports import scatter
 from examples import standard_exp
 
 INITIALS = 'js'
-NEW_BRANCH = 'issue22'
+NEW_BRANCH = 'issue278'
 VERSION = '2.7.3'
 SHORTVERSION = VERSION[:3]
 PREPROCESS_ONLY = True
 
-PRIORITY = -3
+PRIORITY = 0
 ATTRIBUTES = ['translator_time_*', 'translator_peak_memory']
 if not PREPROCESS_ONLY:
     ATTRIBUTES.extend(['coverage', 'expansions', 'total_time', 'search_time',
