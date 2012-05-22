@@ -184,9 +184,10 @@ class HgCheckout(Checkout):
 
         retcode = run_command(['hg', 'update', '-r', self.rev], cwd=path)
         if not retcode == 0:
-            # Unknown revision
-            logging.critical('Repo at %s has no revision %s. Please delete the '
-                             'cached repo and try again.' % (path, self.rev))
+            # Unknown revision or update crossing branches.
+            logging.critical('Repo at %s could not be updated to revision %s. '
+                             'Please delete the cached repo and try again.' %
+                             (path, self.rev))
 
     @property
     def parent_rev(self):
