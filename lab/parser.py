@@ -193,6 +193,7 @@ class Parser(object):
                 # Subclasses directly modify the properties during parsing
                 file_parser.parse(props)
             else:
-                logging.error('File "%s" could not be read' % path)
+                logging.error('File "%s" could not be read' %
+                              os.path.abspath(path))
 
         props.write()
