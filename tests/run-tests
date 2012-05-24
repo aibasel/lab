@@ -1,5 +1,10 @@
 #! /bin/bash
 
+# Test setup:
+#
+# $ sudo apt-get install pip
+# $ sudo pip install -U pytest pep8 pyflakes sphinx
+
 set -e
 
 # Change into top directory.
