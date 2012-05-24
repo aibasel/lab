@@ -40,6 +40,7 @@ def get_date_and_time():
 def escape(text):
     return text.replace('_', r'\_')
 
+
 def remove_missing(iterable):
     return [value for value in iterable if value is not None]
 

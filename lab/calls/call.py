@@ -24,7 +24,6 @@ import subprocess
 import time
 
 from lab.calls.processgroup import ProcessGroup
-from lab.calls.log import set_property
 
 
 LOG_INTERVAL = 5

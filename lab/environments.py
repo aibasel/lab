@@ -86,6 +86,7 @@ class LocalEnvironment(Environment):
 
 class GkiGridEnvironment(Environment):
     MAX_TASKS = 75000
+
     def __init__(self, queue='opteron_core.q', priority=0):
         """
         *queue* must be a valid queue name on the GKI Grid.

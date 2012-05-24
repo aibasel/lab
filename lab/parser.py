@@ -35,7 +35,7 @@ class _Pattern(object):
         flag = 0
 
         for char in flags:
-            if   char == 'M':
+            if char == 'M':
                 flag |= re.M
             elif char == 'L':
                 flag |= re.L

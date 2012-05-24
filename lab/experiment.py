@@ -33,6 +33,7 @@ from lab.environments import LocalEnvironment
 try:
     # Python 2.7, 3.1 and above.
     from collections import OrderedDict
+    OrderedDict  # Silence pyflakes
 except ImportError:
     from lab.external.ordereddict import OrderedDict
 

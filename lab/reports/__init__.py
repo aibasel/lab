@@ -95,8 +95,7 @@ def stddev(values):
     2.0
     """
     n = len(values)
-    return math.sqrt((sum(v**2 for v in values) / n) - avg(values)**2)
-
+    return math.sqrt((sum(v ** 2 for v in values) / n) - avg(values) ** 2)
 
 
 class Report(object):

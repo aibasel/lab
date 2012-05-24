@@ -8,23 +8,37 @@ cd ..
 
 py.test
 
+# Run doctests.
 cd lab
 python -m doctest reports/__init__.py experiment.py tools.py parser.py
 cd ..
-
 cd downward
 python -m doctest downward/suites.py
 cd ..
 
+# Check imports and unused/missing variables.
+pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
+pyflakes downward
+
+# Check code formatting.
+pep8 --exclude=*external* --ignore=E501 lab
+pep8 --ignore=E501 --exclude=suites.py downward
+pep8 --ignore=E501,E302 downward/suites.py
+
+# Check if documentation builds.
 cd docs
 make -B html
 cd ..
 
-cd examples
-./showcase-options.py --all
-cd simple
+# Run demo lab experiment.
+cd examples/simple
 rm -rf /tmp/simple-exp
 ./simple-exp.py --all
 cd ../..
+
+# Run demo downward experiment.
+cd examples
+./showcase-options.py --all
+cd ..
 
 echo TESTS PASSED

@@ -155,8 +155,10 @@ def unsolvable(content, props):
     props['unsolvable'] = ('Completely explored state space -- no solution!'
                            in content)
 
+
 def parse_error(content, props):
     props['parse_error'] = 'Parse Error:' in content
+
 
 def unsupported(content, props):
     props['unsupported'] = 'does not support' in content
