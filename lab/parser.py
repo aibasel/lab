@@ -142,7 +142,9 @@ class Parser(object):
         Look for *regex* in *file* and add what is found in *group* to the
         properties dictionary under *name*, i.e. ::
 
-            properties[name] = type(re.compile(regex).search(open(file).read()).group(group))
+            contents = open(file).read()
+            match = re.compile(regex).search(contents)
+            properties[name] = type(match.group(group))
 
         If *required* is True and the pattern is not found in file, an error
         message is printed.

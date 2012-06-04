@@ -49,7 +49,8 @@ class Step(object):
             # Free memory
             self.func = None
             if retval:
-                logging.critical('An error occured in %s, the return value was %s' % (self.name, retval))
+                logging.critical('An error occured in %s, the return value was %s' %
+                                 (self.name, retval))
             return retval
         except (ValueError, TypeError):
             import traceback
@@ -58,7 +59,8 @@ class Step(object):
 
     @property
     def _funcname(self):
-        return getattr(self.func, '__name__', None) or self.func.__class__.__name__.lower()
+        return (getattr(self.func, '__name__', None) or
+                self.func.__class__.__name__.lower())
 
     def copy(self):
         """Return a copy of this Step."""
@@ -68,7 +70,8 @@ class Step(object):
         return '%s(%s%s%s)' % (self._funcname,
                                ', '.join([repr(arg) for arg in self.args]),
                                ', ' if self.args and self.kwargs else '',
-                               ', '.join(['%s=%s' % (k, repr(v)) for (k, v) in self.kwargs.items()]))
+                               ', '.join(['%s=%s' % (k, repr(v))
+                                          for (k, v) in self.kwargs.items()]))
 
     @classmethod
     def publish_reports(cls, *report_files):
@@ -157,7 +160,8 @@ class Sequence(list):
         name_width = min(max(len(step.name) for step in self), 50)
         lines = ['Available steps:', '================']
         for number, step in enumerate(self, start=1):
-            lines.append(' '.join([str(number).rjust(2), step.name.ljust(name_width), str(step)]))
+            lines.append(' '.join([str(number).rjust(2),
+                                   step.name.ljust(name_width), str(step)]))
         return '\n'.join(lines)
 
     @staticmethod

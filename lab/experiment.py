@@ -240,12 +240,12 @@ class Experiment(_Buildable):
     def __call__(self):
         self.argparser.epilog = self.steps.get_steps_text()
         self.argparser.add_argument('steps', metavar='step', nargs='*', default=[],
-                    help='Name or number of a step below. If none is given, print help.')
+                help='Name or number of a step below. If none is given, print help.')
         self.argparser.add_argument('--all', dest='run_all_steps', action='store_true',
-                    help='Run all supplied steps. If none are given, run all steps '
-                    'in the experiment. For local experiments this option has no '
-                    'effect if any steps are given on the commandline. Use this '
-                    'option to run unattended experiments on computer grids.')
+                help='Run all supplied steps. If none are given, run all steps '
+                'in the experiment. For local experiments this option has no '
+                'effect if any steps are given on the commandline. Use this '
+                'option to run unattended experiments on computer grids.')
         self.args = self.argparser.parse_args()
         if not self.args.steps and not self.args.run_all_steps:
             self.argparser.print_help()
@@ -278,8 +278,10 @@ class Experiment(_Buildable):
             # This is the first part where we only write the main script.
             # We only overwrite the exp dir in the first part.
             if os.path.exists(self.path):
-                runs_exist = any(path.startswith('runs') for path in os.listdir(self.path))
-                logging.info('The directory "%s" contains run directories: %s' % (self.path, runs_exist))
+                runs_exist = any(path.startswith('runs')
+                                 for path in os.listdir(self.path))
+                logging.info('The directory "%s" contains run directories: %s' %
+                             (self.path, runs_exist))
                 # Overwrite if overwrite is True or if no runs exist.
                 tools.overwrite_dir(self.path, overwrite or not runs_exist)
             else:

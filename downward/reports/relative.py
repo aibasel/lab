@@ -90,7 +90,7 @@ class RelativeReport(AbsoluteReport):
             percent_change = abs(quotient - 1.0)
 
             if (percent_change >= self.rel_change and
-                abs_change >= self.abs_change):
+                    abs_change >= self.abs_change):
                 quotient_col[row] = quotient
                 percent_col[row] = percent_change
             else:

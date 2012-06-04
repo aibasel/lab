@@ -172,14 +172,14 @@ def suite_ipc_one_to_five():
         "philosophers", "pipesworld-notankage", "pipesworld-tankage",
         "psr-large", "psr-middle", "psr-small", "rovers", "satellite",
         "schedule", "storage", "tpp", "trucks", "zenotravel",
-        ]
+    ]
 
 def suite_ipc08_common():
     return [
         "parcprinter-08-strips",
         "pegsol-08-strips",
         "scanalyzer-08-strips",
-        ]
+    ]
 
 def suite_ipc08_opt_only():
     return [
@@ -189,7 +189,7 @@ def suite_ipc08_opt_only():
         'sokoban-opt08-strips',
         'transport-opt08-strips',
         'woodworking-opt08-strips',
-        ]
+    ]
 
 def suite_ipc08_opt_only_strips():
     return [
@@ -198,7 +198,7 @@ def suite_ipc08_opt_only_strips():
         'sokoban-opt08-strips',
         'transport-opt08-strips',
         'woodworking-opt08-strips',
-        ]
+    ]
 
 def suite_ipc08_sat_only():
     return [
@@ -209,7 +209,7 @@ def suite_ipc08_sat_only():
         'transport-sat08-strips',
         'woodworking-sat08-strips',
         # TODO: cyber-security is missing
-        ]
+    ]
 
 def suite_ipc08_sat_only_strips():
     return [
@@ -219,7 +219,7 @@ def suite_ipc08_sat_only_strips():
         'transport-sat08-strips',
         'woodworking-sat08-strips',
         # TODO: cyber-security is missing
-        ]
+    ]
 
 def suite_ipc08_opt():
     return suite_ipc08_common() + suite_ipc08_opt_only()
@@ -259,7 +259,7 @@ def suite_ipc11_opt():
         "transport-opt11-strips",
         "visitall-opt11-strips",
         "woodworking-opt11-strips",
-        ]
+    ]
 
 def suite_ipc11_sat():
     return [
@@ -277,7 +277,7 @@ def suite_ipc11_sat():
         "transport-sat11-strips",
         "visitall-sat11-strips",
         "woodworking-sat11-strips",
-        ]
+    ]
 
 def suite_ipc11_all():
     return suite_ipc11_opt() + suite_ipc11_sat()
@@ -309,29 +309,30 @@ def suite_tinytest():
 
 
 def suite_lmcut_domains():
-    return ["airport",
-            "blocks",
-            "depot",
-            "driverlog",
-            "freecell",
-            "grid",
-            "gripper",
-            "logistics00",
-            "logistics98",
-            "miconic",
-            "mprime",
-            "mystery",
-            "openstacks-strips",
-            "pathways-noneg",
-            "pipesworld-notankage",
-            "pipesworld-tankage",
-            "psr-small",
-            "rovers",
-            "satellite",
-            "tpp",
-            "trucks-strips",
-            "zenotravel",
-            ]
+    return [
+        "airport",
+        "blocks",
+        "depot",
+        "driverlog",
+        "freecell",
+        "grid",
+        "gripper",
+        "logistics00",
+        "logistics98",
+        "miconic",
+        "mprime",
+        "mystery",
+        "openstacks-strips",
+        "pathways-noneg",
+        "pipesworld-notankage",
+        "pipesworld-tankage",
+        "psr-small",
+        "rovers",
+        "satellite",
+        "tpp",
+        "trucks-strips",
+        "zenotravel",
+    ]
 
 def suite_strips():
     return suite_lmcut_domains() + suite_ipc08_all_strips()

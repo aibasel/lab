@@ -180,16 +180,16 @@ class Report(object):
 
         # Expand glob characters.
         if self.attributes:
-            expanded_attributes = []
+            expanded_attrs = []
             for pattern in self.attributes:
                 if '*' not in pattern and '?' not in pattern:
-                    expanded_attributes.append(pattern)
+                    expanded_attrs.append(pattern)
                 else:
-                    expanded_attributes.extend(
-                                fnmatch.filter(self.all_attributes, pattern))
-            if not expanded_attributes:
+                    expanded_attrs.extend(fnmatch.filter(self.all_attributes,
+                                                         pattern))
+            if not expanded_attrs:
                 logging.critical('No attributes match your patterns')
-            self.attributes = expanded_attributes
+            self.attributes = expanded_attrs
 
         if self.attributes:
             # Make sure that all selected attributes are present in the dataset

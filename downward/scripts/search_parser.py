@@ -54,7 +54,7 @@ ITERATIVE_PATTERNS = [
     # We cannot include " \[t=.+s\]" in the regex, because older versions don't
     # have this information in the log.
     ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
-    ]
+]
 
 
 CUMULATIVE_PATTERNS = [
@@ -70,7 +70,7 @@ CUMULATIVE_PATTERNS = [
     # anything before the "cumulative" line and stop the search. For single
     # searches we will find the h value if it isn't a multi-heuristic search.
     ('initial_h_value', re.compile(r'Initial state h value: (\d+)\.'), int),
-    ]
+]
 
 
 def get_iterative_results(content, props):
@@ -212,8 +212,7 @@ def scores(content, props):
             'score_total_time': log_score(props.get('total_time'),
                     min_bound=1.0, max_bound=1800.0, min_score=0.0),
             'score_search_time': log_score(props.get('search_time'),
-                    min_bound=1.0, max_bound=1800.0, min_score=0.0),
-           })
+                    min_bound=1.0, max_bound=1800.0, min_score=0.0)})
 
 
 def check_min_values(content, props):
@@ -253,7 +252,8 @@ class SearchParser(Parser):
                          required=False)
 
     def add_search_functions(self):
-        self.add_function(parse_error)  # TODO: search run.err once parse errors are printed there
+        # TODO: search run.err once parse errors are printed there
+        self.add_function(parse_error)
         self.add_function(unsolvable)
         self.add_function(unsupported, 'run.err')
         self.add_function(get_iterative_results)

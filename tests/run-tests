@@ -26,9 +26,12 @@ pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
 pyflakes downward
 
 # Check code formatting.
-pep8 --exclude=*external* --ignore=E501 lab
-pep8 --ignore=E501 --exclude=suites.py downward
-pep8 --ignore=E501,E302 downward/suites.py
+# Ignore under-indented continuation lines (E128) and allow longer lines.
+PEP8_OPTS="--ignore=E128 --max-line-length=90"
+pep8 $PEP8_OPTS --exclude=*external* lab
+pep8 $PEP8_OPTS --exclude=suites.py downward
+# Don't require two blank lines between each suite (E302).
+pep8 $PEP8_OPTS --ignore=E302 downward/suites.py
 
 # Check if documentation builds.
 cd docs

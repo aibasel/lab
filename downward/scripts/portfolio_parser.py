@@ -48,7 +48,7 @@ ITERATIVE_PATTERNS = [
     #('memory', re.compile(r'Peak memory: (.+) KB'), int),
     ('cost', re.compile(r'Plan cost: (.+)'), int),
     ('plan_length', re.compile(r'Plan length: (\d+)'), int),
-    ]
+]
 
 
 def get_iterative_results(content, props):
@@ -112,7 +112,8 @@ class PortfolioParser(Parser):
         self.add_search_functions()
 
     def add_search_functions(self):
-        self.add_function(parse_error)  # TODO: search run.err once parse errors are printed there
+        # TODO: search run.err once parse errors are printed there
+        self.add_function(parse_error)
         self.add_function(unsupported, 'run.err')
         self.add_function(get_iterative_results)
         self.add_function(coverage)

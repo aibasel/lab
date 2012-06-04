@@ -50,7 +50,7 @@ LIMITS = {
     'preprocess_memory': 8192,
     'search_time': 1800,
     'search_memory': 2048,
-    }
+}
 
 
 # At least one of those must be found (First is taken if many are present)
@@ -135,7 +135,8 @@ class PreprocessRun(DownwardRun):
 
 
 class SearchRun(DownwardRun):
-    def __init__(self, exp, translator, preprocessor, planner, problem, config_nick, config):
+    def __init__(self, exp, translator, preprocessor, planner, problem,
+                 config_nick, config):
         DownwardRun.__init__(self, exp, translator, preprocessor, problem)
 
         self.planner = planner
@@ -431,7 +432,8 @@ class DownwardExperiment(Experiment):
         for translator, preprocessor, planner in self.combinations:
             self._prepare_planner(planner)
 
-            for config_nick, config in self.configs + [(path, '') for path in self.portfolios]:
+            portfolios = [(path, '') for path in self.portfolios]
+            for config_nick, config in self.configs + portfolios:
                 for prob in self._problems:
                     self._make_search_run(translator, preprocessor, planner,
                                           config_nick, config, prob)
@@ -445,7 +447,8 @@ class DownwardExperiment(Experiment):
         def path(filename):
             return os.path.join(preprocess_dir, filename)
 
-        run = SearchRun(self, translator, preprocessor, planner, prob, config_nick, config)
+        run = SearchRun(self, translator, preprocessor, planner, prob,
+                        config_nick, config)
         self.add_run(run)
 
         run.set_property('preprocess_dir', preprocess_dir)
@@ -455,12 +458,19 @@ class DownwardExperiment(Experiment):
 
         # Add the preprocess files for later parsing
         run.add_resource('OUTPUT', path('output'), 'output', symlink=sym)
-        run.add_resource('ALL_GROUPS', path('all.groups'), 'all.groups', symlink=sym, required=False)
-        run.add_resource('TEST_GROUPS', path('test.groups'), 'test.groups', symlink=sym, required=False)
-        run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas', symlink=sym)
-        run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl', symlink=sym)
-        run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl', symlink=sym)
-        run.add_resource('PREPROCESS_PROPERTIES', path('properties'), 'properties')
+        run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas',
+                         symlink=sym)
+        run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl',
+                         symlink=sym)
+        run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl',
+                         symlink=sym)
+        run.add_resource('PROPERTIES', path('properties'), 'properties')
+
+        # {all,test}.groups were created by old versions of the planner.
+        run.add_resource('ALL_GROUPS', path('all.groups'), 'all.groups',
+                         symlink=sym, required=False)
+        run.add_resource('TEST_GROUPS', path('test.groups'), 'test.groups',
+                         symlink=sym, required=False)
 
         # The logs have to be copied, not linked
         run.add_resource('RUN_LOG', path('run.log'), 'run.log')

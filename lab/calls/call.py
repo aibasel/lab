@@ -147,7 +147,7 @@ class Call(subprocess.Popen):
                         total_vsize > self.mem_limit)
             try_kill = (total_time >= self.time_limit + self.kill_delay or
                         real_time >= 1.5 * self.wall_clock_time_limit +
-                                     self.kill_delay or
+                        self.kill_delay or
                         total_vsize > 1.5 * self.mem_limit)
 
             if try_term and not term_attempted:

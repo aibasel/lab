@@ -35,6 +35,8 @@ else:
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
     PYTHON = '/usr/bin/python%s' % SHORTVERSION
 
+assert os.path.exists(PYTHON), PYTHON
+
 COMBOS = [
     (Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO)),
     (Translator(repo=TRANSLATOR_REPO, rev=NEW_BRANCH, dest=NEW_BRANCH),

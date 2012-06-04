@@ -118,7 +118,7 @@ class GkiGridEnvironment(Environment):
             'num_tasks': num_tasks,
             'queue': self.queue,
             'priority': self.priority,
-            }
+        }
         template_file = os.path.join(tools.DATA_DIR,
                                      'gkigrid-job-header-template')
         header = open(template_file).read() % job_params + '\n'
@@ -173,7 +173,7 @@ class GkiGridEnvironment(Environment):
             'num_tasks': 1,
             'queue': self.queue,
             'priority': self.priority,
-            }
+        }
         template_file = os.path.join(tools.DATA_DIR,
                                      'gkigrid-job-header-template')
         return open(template_file).read() % job_params
