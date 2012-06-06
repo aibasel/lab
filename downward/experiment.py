@@ -27,6 +27,7 @@ import os
 import sys
 import logging
 import itertools
+import subprocess
 
 from lab.experiment import Run, Experiment
 from downward import checkouts
@@ -112,7 +113,7 @@ class PreprocessRun(DownwardRun):
         self.add_resource("DOMAIN", self.problem.domain_file(), "domain.pddl")
         self.add_resource("PROBLEM", self.problem.problem_file(), "problem.pddl")
 
-        python = exp._path_to_python or 'python'
+        python = exp._get_path_to_python()
 
         # Print python version used for translator.
         # python -V prints to stderr so we execute a little program.
@@ -310,9 +311,27 @@ class DownwardExperiment(Experiment):
         use a different one.
 
         *path* must be an absolute path to a python interpreter or a name that
-        will be found on the system PATH like "python2.7".
+        will be found on the system PATH like "python2.7". ::
+
+            exp.set_path_to_python('/home/john/bin/Python-2.7.3/python')
+            exp.set_path_to_python('/usr/bin/python3.2')
+            exp.set_path_to_python('python2.7')
         """
         self._path_to_python = path
+
+    def _get_path_to_python(self):
+        return self._path_to_python or 'python'
+
+    def _check_python_version(self):
+        """Abort if the Python version smaller than 2.7."""
+        p = subprocess.Popen([self._get_path_to_python(), '-V'],
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+        name, version = stderr.strip().split()
+        logging.info('Python version: %s' % version)
+        version = [int(part) for part in version.split('.')]
+        if version < [2, 7, 0]:
+            logging.critical('The translator requires at least Python 2.7.')
 
     def _adapt_path(self, stage):
         if stage == 'preprocess':
@@ -351,6 +370,7 @@ class DownwardExperiment(Experiment):
         _require_src_dirs(self, self.combinations)
         self._adapt_path(stage)
         if stage == 'preprocess':
+            self._check_python_version()
             self.add_resource('PREPROCESS_PARSER',
                     os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
                     'preprocess_parser.py')
