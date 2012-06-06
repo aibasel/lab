@@ -19,17 +19,15 @@ import standard_exp
 
 
 EXPNAME = 'initial-opt-config'
+EXPPATH = os.path.join(standard_exp.EXPS, EXPNAME)
+REPO = standard_exp.REPO
 
 if standard_exp.REMOTE:
     # On the grid
-    EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
-    REPO = standard_exp.REMOTE_REPO
     SUITE = 'gripper' #'LMCUT_DOMAINS'
     ENV = GkiGridEnvironment(priority=-1, queue='athlon_core.q')
 else:
     # Local testing
-    EXPPATH = os.path.join(standard_exp.LOCAL_EXPS, EXPNAME)
-    REPO = standard_exp.LOCAL_REPO
     SUITE = 'gripper:prob01.pddl'
     ENV = LocalEnvironment(processes=2)
 

@@ -24,12 +24,16 @@ LOCAL_EXPS = '/home/jendrik/lab/experiments'
 REMOTE_REPO = '/home/seipp/projects/downward'
 LOCAL_REPO = '/home/jendrik/projects/Downward/downward'
 
-REMOTE_PYTHON = '/home/seipp/bin/Python/Python-2.7.3/python'
+REMOTE_PYTHON = '/home/seipp/bin/Python/Python-2.7.3/installed/usr/local/bin/python'
 LOCAL_PYTHON = 'python2.7'
 
 if REMOTE:
+    EXPS = REMOTE_EXPS
+    REPO = REMOTE_REPO
     PYTHON = REMOTE_PYTHON
 else:
+    EXPS = LOCAL_EXPS
+    REPO = LOCAL_REPO
     PYTHON = LOCAL_PYTHON
 
 
