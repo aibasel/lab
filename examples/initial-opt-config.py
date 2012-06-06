@@ -24,8 +24,8 @@ if standard_exp.REMOTE:
     # On the grid
     EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
     REPO = standard_exp.REMOTE_REPO
-    SUITE = 'LMCUT_DOMAINS'
-    ENV = GkiGridEnvironment(priority=-2, queue='xeon_core.q')
+    SUITE = 'gripper' #'LMCUT_DOMAINS'
+    ENV = GkiGridEnvironment(priority=-1, queue='athlon_core.q')
 else:
     # Local testing
     EXPPATH = os.path.join(standard_exp.LOCAL_EXPS, EXPNAME)
