@@ -24,6 +24,14 @@ LOCAL_EXPS = '/home/jendrik/lab/experiments'
 REMOTE_REPO = '/home/seipp/projects/downward'
 LOCAL_REPO = '/home/jendrik/projects/Downward/downward'
 
+REMOTE_PYTHON = '/home/seipp/bin/Python/Python-2.7.3/python'
+LOCAL_PYTHON = 'python2.7'
+
+if REMOTE:
+    PYTHON = REMOTE_PYTHON
+else:
+    PYTHON = LOCAL_PYTHON
+
 
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, environment=None, repo=None,

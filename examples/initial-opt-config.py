@@ -50,7 +50,7 @@ CONFIG = ["--landmarks", "lmg=lm_rhw(only_causal_landmarks=false,"
 
 exp = DownwardExperiment(path=EXPPATH, environment=ENV, repo=REPO,
                          combinations=COMBINATIONS, limits=LIMITS)
-
+exp.set_path_to_python(standard_exp.PYTHON)
 exp.add_suite(SUITE)
 # This method requires a nickname and the real config.
 exp.add_config('opt-initial', CONFIG)
