@@ -18,19 +18,18 @@ from lab.steps import Step
 import standard_exp
 
 
-# On the grid it is good practice to start the job's name with your initials.
-EXPNAME = 'js-initial-opt-config'
+EXPNAME = 'initial-opt-config'
 
 if standard_exp.REMOTE:
     # On the grid
-    EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
-    REPO = '/home/downward/jendrik/downward'
+    EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
+    REPO = standard_exp.REMOTE_REPO
     SUITE = 'LMCUT_DOMAINS'
     ENV = GkiGridEnvironment(priority=-2, queue='xeon_core.q')
 else:
     # Local testing
-    EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
-    REPO = '/home/jendrik/projects/Downward/downward'
+    EXPPATH = os.path.join(standard_exp.LOCAL_EXPS, EXPNAME)
+    REPO = standard_exp.LOCAL_REPO
     SUITE = 'gripper:prob01.pddl'
     ENV = LocalEnvironment(processes=2)
 

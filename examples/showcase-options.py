@@ -21,10 +21,10 @@ from downward.reports.relative import RelativeReport
 import standard_exp
 
 
-EXPNAME = 'js-' + os.path.splitext(os.path.basename(__file__))[0]
+EXPNAME = 'showcase-options'
 if standard_exp.REMOTE:
-    EXPPATH = os.path.join('/home/downward/jendrik/experiments/', EXPNAME)
-    REPO = '/home/downward/jendrik/downward'
+    EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
+    REPO = standard_exp.REMOTE_REPO
     ENV = GkiGridEnvironment()
 else:
     EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)

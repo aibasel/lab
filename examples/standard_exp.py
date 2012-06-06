@@ -18,6 +18,12 @@ NODE = platform.node()
 REMOTE = NODE.startswith('gkigrid') or NODE == 'habakuk'
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
+REMOTE_EXPS = '/users/seipp/experiments/'
+LOCAL_EXPS = '/home/jendrik/lab/experiments'
+
+REMOTE_REPO = '/home/seipp/projects/downward'
+LOCAL_REPO = '/home/jendrik/projects/Downward/downward'
+
 
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, environment=None, repo=None,
@@ -27,19 +33,16 @@ class StandardDownwardExperiment(DownwardExperiment):
         assert not os.path.isabs(path), path
         expname = path
 
-        REMOTE_EXPPATH = os.path.join('/home/downward/jendrik/experiments/', path)
-        LOCAL_EXPPATH = os.path.join('/home/jendrik/lab/experiments', path)
-
         if REMOTE:
-            EXPPATH = REMOTE_EXPPATH
-            repo = repo or '/home/downward/jendrik/downward'
+            exppath = os.path.join(REMOTE_EXPS, path)
+            repo = repo or REMOTE_REPO
             environment = environment or GkiGridEnvironment(priority=priority)
         else:
-            EXPPATH = LOCAL_EXPPATH
-            repo = repo or '/home/jendrik/projects/Downward/downward'
+            exppath = os.path.join(LOCAL_EXPS, path)
+            repo = repo or LOCAL_REPO
             environment = environment or LocalEnvironment()
 
-        DownwardExperiment.__init__(self, path=EXPPATH, environment=environment,
+        DownwardExperiment.__init__(self, path=exppath, environment=environment,
                                     repo=repo, combinations=combinations,
                                     limits=limits)
 

@@ -9,7 +9,7 @@ CONFIGS = [('blind', ['--search', 'astar(blind())'])]
 IPC_CONFIGS = ['seq-sat-fd-autotune-1', 'seq-sat-fd-autotune-2', 'seq-sat-lama-2011']
 
 if standard_exp.REMOTE:
-    CONFIG_MODULE = '/home/downward/jendrik/portotune/tuned_configs_sat.py'
+    CONFIG_MODULE = '/home/seipp/projects/portotune/tuned_configs_sat.py'
 else:
     CONFIG_MODULE = '/home/jendrik/projects/Downward/portotune/tuned_configs_sat.py'
 

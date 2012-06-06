@@ -27,9 +27,9 @@ if not PREPROCESS_ONLY:
 LIMITS = {'search_time': 900}
 
 if standard_exp.REMOTE:
-    REPO = '/home/downward/jendrik/downward'
-    TRANSLATOR_REPO = '/home/downward/jendrik/jendrik-downward'
-    PYTHON = '/home/downward/jendrik/Python-%s/installed/usr/local/bin/python%s' % (VERSION, SHORTVERSION)
+    REPO = standard_exp.REMOTE_REPO
+    TRANSLATOR_REPO = 'https://bitbucket.org/jendrikseipp/downward'
+    PYTHON = '/home/seipp/bin/Python/Python-%s/installed/usr/local/bin/python%s' % (VERSION, SHORTVERSION)
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     TRANSLATOR_REPO = '/home/jendrik/projects/Downward/jendrik-downward'
