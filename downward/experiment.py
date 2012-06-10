@@ -59,6 +59,16 @@ PLANNER_BINARIES = ['downward', 'downward-debug', 'downward-profile',
                     'release-search', 'search']
 
 
+# Make the same check as in src/translate/translate.py.
+VERSION_STMT = '''\
+import platform
+import sys
+sys.stdout.write('Translator Python version: %s\\n' % platform.python_version())
+if sys.version_info[0] == 2 and sys.version_info[1] != 7:
+    sys.exit(1)
+'''
+
+
 def _require_src_dirs(exp, combinations):
     for checkout in set(itertools.chain(*combinations)):
         logging.info('Requiring %s' % checkout.src_dir)
@@ -323,14 +333,10 @@ class DownwardExperiment(Experiment):
         return self._path_to_python or 'python'
 
     def _check_python_version(self):
-        """Abort if the Python version smaller than 2.7."""
-        p = subprocess.Popen([self._get_path_to_python(), '-V'],
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-        name, version = stderr.strip().split()
-        logging.info('Python version: %s' % version)
-        version = [int(part) for part in version.split('.')]
-        if version < [2, 7, 0]:
+        """Abort if the Python version is smaller than 2.7."""
+        p = subprocess.Popen([self._get_path_to_python(), '-c', VERSION_STMT])
+        p.wait()
+        if p.returncode != 0:
             logging.critical('The translator requires at least Python 2.7.')
 
     def _adapt_path(self, stage):
