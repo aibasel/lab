@@ -1,0 +1,29 @@
+#! /bin/bash
+### Set name.
+#$ -N %(name)s
+### Set shell.
+#$ -S /bin/bash
+### Don't send emails.
+#$ -m n
+### Execute job from current working directory.
+#$ -cwd
+### Redirect stdout and stderr.
+#$ -e %(errfile)s
+#$ -o %(logfile)s
+### Set queue.
+#$ -q %(queue)s
+### Number of tasks.
+#$ -t 1-%(num_tasks)d
+### Priority ([-1023,1024], default: 0).
+#$ -p %(priority)d
+### Restrict to certain machines.
+%(host_spec)s
+
+if [ -z $PYTHONPATH ]; then
+    export PYTHONPATH=$(pwd)
+else
+    export PYTHONPATH=$(pwd):$PYTHONPATH
+fi
+
+export PATH=~/bin:$PATH
+
