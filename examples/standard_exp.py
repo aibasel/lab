@@ -38,19 +38,22 @@ else:
 
 
 class StandardDownwardExperiment(DownwardExperiment):
-    def __init__(self, path=None, environment=None, repo=None,
+    def __init__(self, path=None, repo=None, environment=None,
                  combinations=None, limits=None, attributes=None, priority=0):
         if path is None:
             path = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]
         assert not os.path.isabs(path), path
         expname = path
 
+        remote_exppath = os.path.join(REMOTE_EXPS, path)
+        local_exppath = os.path.join(LOCAL_EXPS, path)
+
         if REMOTE:
-            exppath = os.path.join(REMOTE_EXPS, path)
+            exppath = remote_exppath
             repo = repo or REMOTE_REPO
             environment = environment or GkiGridEnvironment(priority=priority)
         else:
-            exppath = os.path.join(LOCAL_EXPS, path)
+            exppath = local_exppath
             repo = repo or LOCAL_REPO
             environment = environment or LocalEnvironment()
 
@@ -84,11 +87,11 @@ class StandardDownwardExperiment(DownwardExperiment):
 
             # Copy the results to local directory
             self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
-                'downward@habakuk:%s-eval' % REMOTE_EXPPATH, '%s-eval' % LOCAL_EXPPATH]))
+                'downward@habakuk:%s-eval' % remote_exppath, '%s-eval' % local_exppath]))
 
             # Copy the zipped experiment directory to local directory
             self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
-                'downward@habakuk:%s.tar.gz' % REMOTE_EXPPATH, '%s.tar.gz' % LOCAL_EXPPATH]))
+                'downward@habakuk:%s.tar.gz' % remote_exppath, '%s.tar.gz' % local_exppath]))
 
         self.add_step(Step('sendmail', tools.sendmail, 'seipp@informatik.uni-freiburg.de',
                            'seipp@informatik.uni-freiburg.de', 'Exp finished: %s' % self.name,
