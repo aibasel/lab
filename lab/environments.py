@@ -85,8 +85,8 @@ class LocalEnvironment(Environment):
 
 
 class OracleGridEngineEnvironment(Environment):
-    DEFAULT_QUEUE = None      # must be overridden in derived classes
-    TEMPLATE_FILE = 'grid-job-header-template' # can be overridden in derived classes
+    DEFAULT_QUEUE = None             # must be overridden in derived classes
+    TEMPLATE_FILE = 'grid-job-header-template'  # can be overridden in derived classes
     MAX_TASKS = float('inf')         # can be overridden in derived classes
     DEFAULT_PRIORITY = 0             # can be overridden in derived classes
     HOST_RESTRICTIONS = {}           # can be overridden in derived classes
@@ -260,6 +260,7 @@ class GkiGridEnvironment(OracleGridEngineEnvironment):
 def _host_range(prefix, from_num, to_num):
     return ['%s%02d*' % (prefix, num) for num in xrange(from_num, to_num + 1)]
 
+
 class MaiaEnvironment(OracleGridEngineEnvironment):
     DEFAULT_QUEUE = 'all.q'
     DEFAULT_HOST_RESTRICTION = "maia-quad"
@@ -267,4 +268,4 @@ class MaiaEnvironment(OracleGridEngineEnvironment):
     HOST_RESTRICTIONS = {
         'maia-quad': _host_range('uni', 1, 32) + _host_range('ugi', 1, 8),
         'maia-six': _host_range('uni', 33, 72),
-        }
+    }
