@@ -113,6 +113,14 @@ class _FileParser(object):
             function(self.content, props)
 
 
+def parse_key_value_patterns(content, props):
+    regex = re.compile(r'^(.+): (\d+)$')
+    for line in content.splitlines():
+        match = regex.match(line)
+        if match:
+            props[match.group(1).replace(' ', '_').lower()] = int(match.group(2))
+
+
 class Parser(object):
     """Parses files and writes found results into the run's properties file.
 
@@ -133,8 +141,10 @@ class Parser(object):
 
     A single run can have multiple parsing commands.
     """
-    def __init__(self):
+    def __init__(self, key_value_patterns=False):
         self.file_parsers = defaultdict(_FileParser)
+        if key_value_patterns:
+            self.add_function(parse_key_value_patterns)
 
     def add_pattern(self, name, regex, group=1, file='run.log', required=True,
                     type=int, flags=''):
