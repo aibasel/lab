@@ -200,13 +200,9 @@ if [ -s "%(stderr)s" ]; then
     exit 1
 fi
 
-# Use the system lab installation, because the experiment's one is not yet copied.
-export PYTHONPATH=%(pythonpath)s
-
 cd %(exp_script_dir)s
 ./%(script)s %(step_name)s
-""" % {'pythonpath': os.path.dirname(tools.BASE_DIR),
-       'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
+""" % {'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
        'script': self.exp._script, 'step_name': step.name,
        'stderr': 'driver.err',
        'job_header': self._get_job_header(step)}
@@ -221,6 +217,9 @@ cd %(exp_script_dir)s
     def run_steps(self, steps):
         job_dir = os.path.join(GRID_STEPS_DIR, self.exp.name)
         tools.overwrite_dir(job_dir)
+        # Copy the lab package to the helper dir to make it available for the
+        # steps, because the experiment's one is not yet copied.
+        tools.copy(tools.SCRIPTS_DIR, os.path.join(job_dir, 'lab'))
         # Build the job files before submitting the other jobs.
         logging.info('Building job scripts')
         for step in steps:
