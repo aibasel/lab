@@ -217,9 +217,11 @@ cd %(exp_script_dir)s
     def run_steps(self, steps):
         job_dir = os.path.join(GRID_STEPS_DIR, self.exp.name)
         tools.overwrite_dir(job_dir)
-        # Copy the lab package to the helper dir to make it available for the
-        # steps, because the experiment's one is not yet copied.
-        tools.copy(tools.SCRIPTS_DIR, os.path.join(job_dir, 'lab'))
+        # Copy the lab and downward packages to the helper dir to make them
+        # available for the steps.
+        for folder in ['data', 'downward', 'examples', 'lab']:
+            tools.copy(os.path.join(tools.BASE_DIR, folder),
+                       os.path.join(job_dir, folder))
         # Build the job files before submitting the other jobs.
         logging.info('Building job scripts')
         for step in steps:
