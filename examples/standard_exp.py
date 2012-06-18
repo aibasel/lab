@@ -97,12 +97,6 @@ class StandardDownwardExperiment(DownwardExperiment):
                            'seipp@informatik.uni-freiburg.de', 'Exp finished: %s' % self.name,
                            'Path: %s' % self.path))
 
-    def add_suite(self, suite):
-        # Use test suite on local machine
-        if not REMOTE:
-            suite = 'gripper:prob01.pddl'
-        DownwardExperiment.add_suite(self, suite)
-
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast
         Downward configurations in the form
