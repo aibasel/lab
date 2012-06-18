@@ -18,7 +18,7 @@ NODE = platform.node()
 REMOTE = NODE.startswith('gkigrid') or NODE == 'habakuk'
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
-REMOTE_EXPS = '/users/seipp/experiments/'
+REMOTE_EXPS = '/home/seipp/experiments'  #'/users/seipp/experiments/'
 LOCAL_EXPS = '/home/jendrik/lab/experiments'
 
 REMOTE_REPO = '/home/seipp/projects/downward'
