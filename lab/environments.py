@@ -200,12 +200,12 @@ if [ -s "%(stderr)s" ]; then
     exit 1
 fi
 
-# Reset the PYTHONPATH, because this job file does not reside in the exp dir.
-export PYTHONPATH=%(exp_path)s
+# Use the system lab installation, because the experiment's one is not yet copied.
+export PYTHONPATH=%(pythonpath)s
 
 cd %(exp_script_dir)s
 ./%(script)s %(step_name)s
-""" % {'exp_path': self.exp.path,
+""" % {'pythonpath': os.path.dirname(tools.BASE_DIR),
        'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
        'script': self.exp._script, 'step_name': step.name,
        'stderr': 'driver.err',
