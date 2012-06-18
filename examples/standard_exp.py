@@ -41,7 +41,7 @@ class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, repo=None, environment=None,
                  combinations=None, limits=None, attributes=None, priority=0):
         if path is None:
-            path = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]
+            path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
         assert not os.path.isabs(path), path
         expname = path
 
