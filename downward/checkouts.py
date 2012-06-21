@@ -62,15 +62,16 @@ class Checkout(object):
     def checkout(self):
         raise Exception('Not implemented')
 
-    def compile(self):
+    def compile(self, cmd=None):
         """
         We issue the build_all command unconditionally and let "make" take care
         of checking if something has to be recompiled.
         """
+        cmd = cmd or ['./build_all']
         try:
-            retcode = run_command(['./build_all'], cwd=self.src_dir)
+            retcode = run_command(cmd, cwd=self.src_dir)
         except OSError:
-            logging.error('Changeset %s does not have the build_all script. '
+            logging.error('Could not call build_all script with changeset %s. '
                           'Revision cannot be used by the scripts.' % self.rev)
             sys.exit(1)
         if not retcode == 0:
@@ -223,7 +224,7 @@ def checkout(combinations):
         part.checkout()
 
 
-def compile(combinations):
+def compile(combinations, cmd=None):
     """Compile the code.
 
     Compile each revision only once. Do not compile revisions that only use the
@@ -234,4 +235,4 @@ def compile(combinations):
         compile_parts.add(preprocessor)
         compile_parts.add(planner)
     for part in sorted(compile_parts):
-        part.compile()
+        part.compile(cmd=cmd)

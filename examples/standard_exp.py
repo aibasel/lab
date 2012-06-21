@@ -18,7 +18,7 @@ NODE = platform.node()
 REMOTE = NODE.startswith('gkigrid') or NODE == 'habakuk'
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
-REMOTE_EXPS = '/users/seipp/experiments/'
+REMOTE_EXPS = '/home/seipp/experiments' #'/users/seipp/experiments/'
 LOCAL_EXPS = '/home/jendrik/lab/experiments'
 
 REMOTE_REPO = '/home/seipp/projects/downward'
@@ -38,19 +38,24 @@ else:
 
 
 class StandardDownwardExperiment(DownwardExperiment):
-    def __init__(self, path=None, environment=None, repo=None,
-                 combinations=None, limits=None, attributes=None, priority=0):
+    def __init__(self, path=None, repo=None, environment=None,
+                 combinations=None, limits=None, attributes=None, priority=0,
+                 queue='opteron_core.q'):
         if path is None:
-            path = 'js-' + os.path.splitext(os.path.basename(sys.argv[0]))[0]
+            path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
         assert not os.path.isabs(path), path
         expname = path
 
+        remote_exppath = os.path.join(REMOTE_EXPS, path)
+        local_exppath = os.path.join(LOCAL_EXPS, path)
+
         if REMOTE:
-            exppath = os.path.join(REMOTE_EXPS, path)
+            exppath = remote_exppath
             repo = repo or REMOTE_REPO
-            environment = environment or GkiGridEnvironment(priority=priority)
+            environment = environment or GkiGridEnvironment(priority=priority,
+                                                            queue=queue)
         else:
-            exppath = os.path.join(LOCAL_EXPS, path)
+            exppath = local_exppath
             repo = repo or LOCAL_REPO
             environment = environment or LocalEnvironment()
 
@@ -84,21 +89,15 @@ class StandardDownwardExperiment(DownwardExperiment):
 
             # Copy the results to local directory
             self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
-                'downward@habakuk:%s-eval' % REMOTE_EXPPATH, '%s-eval' % LOCAL_EXPPATH]))
+                'downward@habakuk:%s-eval' % remote_exppath, '%s-eval' % local_exppath]))
 
             # Copy the zipped experiment directory to local directory
             self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
-                'downward@habakuk:%s.tar.gz' % REMOTE_EXPPATH, '%s.tar.gz' % LOCAL_EXPPATH]))
+                'downward@habakuk:%s.tar.gz' % remote_exppath, '%s.tar.gz' % local_exppath]))
 
         self.add_step(Step('sendmail', tools.sendmail, 'seipp@informatik.uni-freiburg.de',
                            'seipp@informatik.uni-freiburg.de', 'Exp finished: %s' % self.name,
                            'Path: %s' % self.path))
-
-    def add_suite(self, suite):
-        # Use test suite on local machine
-        if not REMOTE:
-            suite = 'gripper:prob01.pddl'
-        DownwardExperiment.add_suite(self, suite)
 
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast

@@ -13,7 +13,6 @@ from downward.reports import scatter
 
 from examples import standard_exp
 
-INITIALS = 'js'
 NEW_BRANCH = 'issue278'
 VERSION = '2.7.3'
 SHORTVERSION = VERSION[:3]
@@ -130,7 +129,7 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
 
 
 def get_exp(track, suite, configs, ipc_configs):
-    exp = TranslatorExperiment(path='-'.join([INITIALS, NEW_BRANCH, track]), combinations=COMBOS,
+    exp = TranslatorExperiment(path='-'.join([NEW_BRANCH, track]), combinations=COMBOS,
                                attributes=ATTRIBUTES, limits=LIMITS)
     exp.add_suite(suite)
     for nick, config in configs:

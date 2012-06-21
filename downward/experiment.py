@@ -366,7 +366,9 @@ class DownwardExperiment(Experiment):
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         checkouts.checkout(self.combinations)
-        checkouts.compile(self.combinations)
+        jobs = getattr(self.environment, 'processes', 1)
+        compile_cmd = ['./build_all', '-j%d' % jobs]
+        checkouts.compile(self.combinations, cmd=compile_cmd)
         self.runs = []
         self.new_files = []
         self.resources = []

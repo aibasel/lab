@@ -101,6 +101,9 @@ def generate_problems(benchmarks_dir, description):
     gripper
     TEST
     """
+    # Allow writing SUITE_NAME_FIRST
+    if description.endswith('_FIRST'):
+        description = description.replace('_FIRST', '_1TO1')
     range_expr = re.compile(r'.+_([-]?\d+)TO([-]?\d+)', re.IGNORECASE)
     range_result = range_expr.search(description)
 

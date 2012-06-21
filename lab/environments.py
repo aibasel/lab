@@ -84,19 +84,32 @@ class LocalEnvironment(Environment):
         Sequence.run_steps(steps)
 
 
-class GkiGridEnvironment(Environment):
-    MAX_TASKS = 75000
+class OracleGridEngineEnvironment(Environment):
+    DEFAULT_QUEUE = None             # must be overridden in derived classes
+    TEMPLATE_FILE = 'grid-job-header-template'  # can be overridden in derived classes
+    MAX_TASKS = float('inf')         # can be overridden in derived classes
+    DEFAULT_PRIORITY = 0             # can be overridden in derived classes
+    HOST_RESTRICTIONS = {}           # can be overridden in derived classes
+    DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
-    def __init__(self, queue='opteron_core.q', priority=0):
+    def __init__(self, queue=None, priority=None, host_restriction=None):
         """
-        *queue* must be a valid queue name on the GKI Grid.
+        *queue* must be a valid queue name on the grid.
 
         *priority* must be in the range [-1023, ..., 0] where 0 is the highest
         priority. If you're a superuser the value can be in the range
         [-1023, ..., 1024].
         """
         Environment.__init__(self)
+        if queue is None:
+            queue = self.DEFAULT_QUEUE
+        if priority is None:
+            priority = self.DEFAULT_PRIORITY
+        if host_restriction is None:
+            host_restriction = self.DEFAULT_HOST_RESTRICTION
+
         self.queue = queue
+        self.host_spec = self._get_host_spec(host_restriction)
         assert priority in xrange(-1023, 1024 + 1)
         self.priority = priority
         self.runs_per_task = 1
@@ -118,9 +131,9 @@ class GkiGridEnvironment(Environment):
             'num_tasks': num_tasks,
             'queue': self.queue,
             'priority': self.priority,
+            'host_spec': self.host_spec,
         }
-        template_file = os.path.join(tools.DATA_DIR,
-                                     'gkigrid-job-header-template')
+        template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         header = open(template_file).read() % job_params + '\n'
         lines = []
 
@@ -173,9 +186,9 @@ class GkiGridEnvironment(Environment):
             'num_tasks': 1,
             'queue': self.queue,
             'priority': self.priority,
+            'host_spec': self.host_spec,
         }
-        template_file = os.path.join(tools.DATA_DIR,
-                                     'gkigrid-job-header-template')
+        template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         return open(template_file).read() % job_params
 
     def _get_job(self, step):
@@ -194,12 +207,21 @@ cd %(exp_script_dir)s
        'stderr': 'driver.err',
        'job_header': self._get_job_header(step)}
 
+    def _get_host_spec(self, host_restriction):
+        if not host_restriction:
+            return '## (not used)'
+        else:
+            hosts = self.HOST_RESTRICTIONS[host_restriction]
+            return '#$ -l hostname="%s"' % '|'.join(hosts)
+
     def run_steps(self, steps):
-        if 'xeon' in self.queue:
-            logging.critical('Experiments must be run stepwise on xeon, '
-                             'because mercurial is missing there.')
         job_dir = os.path.join(GRID_STEPS_DIR, self.exp.name)
         tools.overwrite_dir(job_dir)
+        # Copy the lab and downward packages to the helper dir to make them
+        # available for the steps.
+        for folder in ['data', 'downward', 'examples', 'lab']:
+            tools.copy(os.path.join(tools.BASE_DIR, folder),
+                       os.path.join(job_dir, folder))
         # Build the job files before submitting the other jobs.
         logging.info('Building job scripts')
         for step in steps:
@@ -209,7 +231,7 @@ cd %(exp_script_dir)s
                 script_step()
 
         prev_job_name = None
-        for number, step in enumerate(self.exp.steps, start=1):
+        for number, step in enumerate(steps, start=1):
             job_name = self._get_job_name(step)
             # We cannot submit a job from within the grid, so we submit it
             # directly.
@@ -227,3 +249,28 @@ cd %(exp_script_dir)s
                 submit.append(job_name)
                 tools.run_command(submit, cwd=job_dir)
             prev_job_name = job_name
+
+
+class GkiGridEnvironment(OracleGridEngineEnvironment):
+    DEFAULT_QUEUE = 'opteron_core.q'
+    MAX_TASKS = 75000
+
+    def run_steps(self, steps):
+        if 'xeon' in self.queue:
+            logging.critical('Experiments must be run stepwise on xeon, '
+                             'because mercurial is missing there.')
+        OracleGridEngineEnvironment.run_steps(self, steps)
+
+
+def _host_range(prefix, from_num, to_num):
+    return ['%s%02d*' % (prefix, num) for num in xrange(from_num, to_num + 1)]
+
+
+class MaiaEnvironment(OracleGridEngineEnvironment):
+    DEFAULT_QUEUE = 'all.q'
+    DEFAULT_HOST_RESTRICTION = "maia-quad"
+
+    HOST_RESTRICTIONS = {
+        'maia-quad': _host_range('uni', 1, 32) + _host_range('ugi', 1, 8),
+        'maia-six': _host_range('uni', 33, 72),
+    }
