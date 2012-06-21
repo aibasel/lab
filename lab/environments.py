@@ -231,7 +231,7 @@ cd %(exp_script_dir)s
                 script_step()
 
         prev_job_name = None
-        for number, step in enumerate(self.exp.steps, start=1):
+        for number, step in enumerate(steps, start=1):
             job_name = self._get_job_name(step)
             # We cannot submit a job from within the grid, so we submit it
             # directly.
