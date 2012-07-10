@@ -74,8 +74,26 @@ class StandardDownwardExperiment(DownwardExperiment):
         self.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=attributes),
                                                           self.eval_dir, abs_problem_report_file))
 
+        def get_public_location(path):
+            name = os.path.basename(path)
+            user_home = os.path.expanduser('~')
+            user_name = os.path.basename(user_home)
+            local = os.path.join(user_home, '.public_html/', name)
+            public = 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user_name, name)
+            return local, public
+
+        dom_local, dom_pub = get_public_location(abs_domain_report_file)
+        prob_local, prob_pub = get_public_location(abs_problem_report_file)
+
+        def publish():
+            for src, local, public in [(abs_domain_report_file, dom_local, dom_pub),
+                                       (abs_problem_report_file, prob_local, prob_pub)]:
+                shutil.copy2(src, local)
+                print 'Copied report to file://%s' % local
+                print '-> %s' % public
+
         # Copy the results
-        self.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
+        self.add_step(Step('publish', publish))
 
         # Compress the experiment directory
         self.add_step(Step.zip_exp_dir(self))
@@ -97,7 +115,7 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         self.add_step(Step('sendmail', tools.sendmail, 'seipp@informatik.uni-freiburg.de',
                            'seipp@informatik.uni-freiburg.de', 'Exp finished: %s' % self.name,
-                           'Path: %s' % self.path))
+                           'Path: %s\n%s\n%s' % (self.path, dom_pub, prob_pub)))
 
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast
