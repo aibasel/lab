@@ -114,7 +114,7 @@ class _FileParser(object):
 
 
 def parse_key_value_patterns(content, props):
-    regex = re.compile(r'^(.+): (\d+)$')
+    regex = re.compile(r'^(\D+): (\d+)$')
     for line in content.splitlines():
         match = regex.match(line)
         if match:
