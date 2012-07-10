@@ -98,6 +98,9 @@ class StandardDownwardExperiment(DownwardExperiment):
         # Compress the experiment directory
         self.add_step(Step.zip_exp_dir(self))
 
+        if REMOTE:
+            self.add_step(Step.remove_exp_dir(self))
+
         if not REMOTE:
             # Unzip the experiment directory
             self.add_step(Step.unzip_exp_dir(self))
