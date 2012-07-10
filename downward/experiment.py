@@ -356,6 +356,11 @@ class DownwardExperiment(Experiment):
         Experiment.run(self)
         self.path = self.orig_path
 
+    @property
+    def _jobs(self):
+        """Return the number of jobs to use when building binaries."""
+        return getattr(self.environment, 'processes', 1)
+
     def build(self, stage, **kwargs):
         """Write the experiment to disk.
 
@@ -365,8 +370,7 @@ class DownwardExperiment(Experiment):
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         checkouts.checkout(self.combinations)
-        jobs = getattr(self.environment, 'processes', 1)
-        compile_cmd = ['./build_all', '-j%d' % jobs]
+        compile_cmd = ['./build_all', '-j%d' % self._jobs]
         checkouts.compile(self.combinations, cmd=compile_cmd)
         self.runs = []
         self.new_files = []
@@ -432,11 +436,12 @@ class DownwardExperiment(Experiment):
                               planner.get_path_dest('search', name))
 
         # The tip changeset has the newest validator version so we use this one
-        validate = os.path.join(self.repo, 'src', 'validate')
+        validate = os.path.join(self.repo, 'src', 'VAL', 'validate')
         if not os.path.exists(validate):
-            logging.error('Please run ./build_all in the src directory first '
-                          'to compile the validator')
-            sys.exit(1)
+            logging.info('Building the validator in the experiment repository.')
+            tools.run_command(['make', '-j%d' % self._jobs],
+                              cwd=os.path.dirname(validate))
+        assert os.path.exists(validate)
         self.add_resource('VALIDATE', validate, 'validate')
 
         downward_validate = os.path.join(DOWNWARD_SCRIPTS_DIR, 'validate.py')
