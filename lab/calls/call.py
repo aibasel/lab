@@ -160,7 +160,7 @@ class Call(subprocess.Popen):
                 self._set_property('wall_clock_timeout', 1)
                 try_term = True
             elif total_vsize > self.mem_limit:
-                self._set_propert('mem_limit_exceeded', 1)
+                self._set_property('mem_limit_exceeded', 1)
                 try_term = True
 
             try_kill = (total_time >= self.time_limit + self.kill_delay or
