@@ -126,8 +126,8 @@ class OracleGridEngineEnvironment(Environment):
                              (num_tasks, self.MAX_TASKS))
         job_params = {
             'name': self.exp.name,
-            'logfile': self.exp.name + '.log',
-            'errfile': self.exp.name + '.err',
+            'logfile': 'driver.log',
+            'errfile': 'driver.err',
             'num_tasks': num_tasks,
             'queue': self.queue,
             'priority': self.priority,
