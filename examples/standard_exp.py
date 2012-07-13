@@ -37,6 +37,28 @@ else:
     PYTHON = LOCAL_PYTHON
 
 
+def create_publish_and_mail_step(exp, *reports):
+    user_home = os.path.expanduser('~')
+    user_name = os.path.basename(user_home)
+
+    def publish_and_mail():
+        public_reports = []
+        for report in reports:
+            report_name = os.path.basename(report)
+            local = os.path.join(user_home, '.public_html/', report_name)
+            public = 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user_name, report_name)
+            shutil.copy2(report, local)
+            print 'Copied report to file://%s' % local
+            print '-> %s' % public
+            public_reports.append(public)
+        tools.sendmail('seipp@informatik.uni-freiburg.de',
+                       'seipp@informatik.uni-freiburg.de',
+                       'Exp finished: %s' % exp.name,
+                       'Path: %s\n' % exp.path + '\n'.join(public_reports))
+
+    return Step('publish-and-mail', publish_and_mail)
+
+
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, repo=None, environment=None,
                  combinations=None, limits=None, attributes=None, priority=0,
@@ -74,27 +96,6 @@ class StandardDownwardExperiment(DownwardExperiment):
         self.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=attributes),
                                                           self.eval_dir, abs_problem_report_file))
 
-        def get_public_location(path):
-            name = os.path.basename(path)
-            user_home = os.path.expanduser('~')
-            user_name = os.path.basename(user_home)
-            local = os.path.join(user_home, '.public_html/', name)
-            public = 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user_name, name)
-            return local, public
-
-        dom_local, dom_pub = get_public_location(abs_domain_report_file)
-        prob_local, prob_pub = get_public_location(abs_problem_report_file)
-
-        def publish():
-            for src, local, public in [(abs_domain_report_file, dom_local, dom_pub),
-                                       (abs_problem_report_file, prob_local, prob_pub)]:
-                shutil.copy2(src, local)
-                print 'Copied report to file://%s' % local
-                print '-> %s' % public
-
-        # Copy the results
-        self.add_step(Step('publish', publish))
-
         # Compress the experiment directory
         self.add_step(Step.zip_exp_dir(self))
 
@@ -116,9 +117,9 @@ class StandardDownwardExperiment(DownwardExperiment):
             self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
                 'downward@habakuk:%s.tar.gz' % remote_exppath, '%s.tar.gz' % local_exppath]))
 
-        self.add_step(Step('sendmail', tools.sendmail, 'seipp@informatik.uni-freiburg.de',
-                           'seipp@informatik.uni-freiburg.de', 'Exp finished: %s' % self.name,
-                           'Path: %s\n%s\n%s' % (self.path, dom_pub, prob_pub)))
+        # Copy the results and send mail.
+        self.add_step(create_publish_and_mail_step(self, abs_domain_report_file,
+                                                   abs_problem_report_file))
 
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast
