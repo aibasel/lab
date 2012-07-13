@@ -118,6 +118,11 @@ class OracleGridEngineEnvironment(Environment):
         self.__wait_for_job_name = None
         self._job_name = None
 
+        # Pass this string when calling the experiment script. Setting this is
+        # only needed for experiment subclasses that have added their own
+        # commandline arguments.
+        self._exp_script_args = ""
+
     def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
         if num_tasks > self.MAX_TASKS:
@@ -205,9 +210,11 @@ if [ -s "%(stderr)s" ]; then
 fi
 
 cd %(exp_script_dir)s
-./%(script)s %(step_name)s
+./%(script)s %(args)s %(step_name)s
 """ % {'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
-       'script': self.exp._script, 'step_name': step.name,
+       'script': self.exp._script,
+       'args': self._exp_script_args,
+       'step_name': step.name,
        'stderr': 'driver.err',
        'job_header': self._get_job_header(step)}
 
