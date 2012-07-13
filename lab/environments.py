@@ -146,6 +146,10 @@ class OracleGridEngineEnvironment(Environment):
                 lines.append('  cd %s' % os.path.relpath(run.path,
                                                          self.exp.path))
                 lines.append('  ./run')
+                lines.append('  RETCODE=$?')
+                lines.append('  if [[ $RETCODE != 0 ]]; then')
+                lines.append('    echo Run %s returned $RETCODE >> driver.err' % task_id)
+                lines.append('  fi')
             lines.append('fi')
 
         script = header + '\n'.join(lines)
