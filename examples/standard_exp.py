@@ -68,6 +68,8 @@ class StandardDownwardExperiment(DownwardExperiment):
         assert not os.path.isabs(path), path
         expname = path
 
+        self.set_path_to_python(PYTHON)
+
         remote_exppath = os.path.join(REMOTE_EXPS, path)
         local_exppath = os.path.join(LOCAL_EXPS, path)
 
