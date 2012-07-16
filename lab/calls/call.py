@@ -22,6 +22,8 @@ import resource
 import signal
 import subprocess
 import time
+import traceback
+
 
 from lab.calls.processgroup import ProcessGroup
 from lab.calls.log import set_property
@@ -92,7 +94,9 @@ class Call(subprocess.Popen):
             set_limit(resource.RLIMIT_AS, self.mem_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
 
+        self.wall_clock_start_time = time.time()
         subprocess.Popen.__init__(self, args, preexec_fn=prepare_call, **kwargs)
+        self.wait_called = False
 
     def terminate(self):
         print "aborting children with SIGTERM..."
@@ -110,10 +114,14 @@ class Call(subprocess.Popen):
         set_property("%s_%s" % (self.name, prop), value)
 
     def log(self, real_time, total_time, total_vsize):
-        print "wall-clock time: %.2f" % (time.time() - self.wall_clock_start_time)
+        wall_clock_time = time.time() - self.wall_clock_start_time
+        print "wall-clock time: %.2f" % (wall_clock_time)
         print "[real-time %d] total_time: %.2fs" % (real_time, total_time)
         print "[real-time %d] total_vsize: %.2f MB" % (real_time, total_vsize)
         print
+        set_property('last_logged_time', total_time)
+        set_property('last_logged_memory', total_vsize)
+        set_property('last_logged_wall_clock_time', wall_clock_time)
 
     def wait(self):
         """Wait for child process to terminate.
@@ -121,10 +129,21 @@ class Call(subprocess.Popen):
         If the process' processgroup exceeds any limit it is killed.
         Returns returncode attribute.
         """
-        term_attempted = False
+        if self.wait_called:
+            # wait was called before. This should not happen, but does on 
+            # rare occasions (not sure why yet). For now we just log this
+            # and return
+            print "Call.wait() called a second time for call", self.name
+            # try to print call stack so we might learn where the second
+            # call is coming from
+            for line in traceback.format_stack():
+                print line.strip()
+            return
+
+        self.wait_called = True
         real_time = 0
         last_log_time = 0
-        self.wall_clock_start_time = time.time()
+
         while True:
             try:
                 time.sleep(self.check_interval)
@@ -151,29 +170,13 @@ class Call(subprocess.Popen):
                 self.log(real_time, total_time, total_vsize)
                 last_log_time = real_time
 
-            try_term = False
             # Log why program was terminated.
             if total_time >= self.time_limit:
                 self._set_property('timeout', 1)
-                try_term = True
             elif real_time >= self.wall_clock_time_limit:
                 self._set_property('wall_clock_timeout', 1)
-                try_term = True
             elif total_vsize > self.mem_limit:
                 self._set_property('mem_limit_exceeded', 1)
-                try_term = True
-
-            try_kill = (total_time >= self.time_limit + self.kill_delay or
-                        real_time >= 1.5 * self.wall_clock_time_limit +
-                        self.kill_delay or
-                        total_vsize > 1.5 * self.mem_limit)
-
-            if try_term and not term_attempted:
-                self.log(real_time, total_time, total_vsize)
-                self.terminate()
-                term_attempted = True
-            elif term_attempted and try_kill:
-                self.kill()
 
         # Even if we got here, there may be orphaned children or something
         # we may have missed due to a race condition. Check for that and kill.

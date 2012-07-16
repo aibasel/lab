@@ -233,6 +233,21 @@ def get_error(content, props):
         props["error"] = "none"
     elif "bad_alloc" in content:
         props["error"] = "memory"
+    # if the run was killed we can assume it was because it hit its resource limits
+    elif (props.has_key("search_error") and 
+            (not props.has_key("search_return_code") or
+             props["search_return_code"] == "137")
+          ):
+        remaining_time = props['limit_search_time'] - props['last_logged_time']
+        remaining_memory = props['limit_search_memory'] - props['last_logged_memory']
+        remaining_time_rel = remaining_time / float(props['limit_search_time'])
+        remaining_memory_rel = remaining_memory / float(props['limit_search_memory'])
+        if remaining_time_rel < 0.01 and remaining_memory_rel > 0.05:
+            props["error"] = "probably timeout"
+        elif remaining_memory_rel < 0.01 and remaining_time_rel > 0.05:
+            props["error"] = "probably memory out"
+        else:
+            props["error"] = "unknown"
     else:
         props["error"] = "unknown"
 
