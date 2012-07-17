@@ -20,7 +20,6 @@
 from glob import glob
 import logging
 import os
-from lab.tools import Properties
 
 from lab import tools
 
