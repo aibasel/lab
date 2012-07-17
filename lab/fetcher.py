@@ -25,9 +25,11 @@ from lab import tools
 
 
 class Fetcher(object):
-    def fetch_dir(self, run_dir, eval_dir, copy_all=False):
+    def fetch_dir(self, run_dir, eval_dir, copy_all=False, filter=None):
         prop_file = os.path.join(run_dir, 'properties')
         props = tools.Properties(filename=prop_file)
+        if filter is not None and not filter(props):
+            return None, None
         run_id = props.get('id')
         # Abort if an id cannot be read.
         if not run_id:
@@ -50,7 +52,8 @@ class Fetcher(object):
 
         return run_id, props
 
-    def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True):
+    def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True,
+                 filter=None):
         """
         This method can be used to copy properties from an exp-dir or eval-dir
         into an eval-dir. If the destination eval-dir already exist, the data
@@ -64,6 +67,10 @@ class Fetcher(object):
         If *write_combined_props* is True (default), write the combined
         properties file.
 
+        If given, *filter* must be a function that is passed a dictionary of a
+        run's keys and values and returns True or False. If it returns True,
+        this run will be fetched, otherwise it will be skipped.
+
         Examples:
 
         Fetch all results and write a single combined properties file to the
@@ -76,6 +83,13 @@ class Fetcher(object):
         ``<combined_eval_dir>/properties``::
 
             exp.add_step(Step('combine', Fetcher(), eval_dir1, combined_eval_dir))
+
+        Fetch only the runs for certain configuration from an older experiment::
+
+            def configuration_needed(props):
+                return props['config_nick'] in ['config_1', 'config_5']
+
+            exp.add_step(Step('fetch', Fetcher(), src_dir, filter=configuration_needed))
         """
         if not os.path.isdir(src_dir):
             logging.critical('%s is not a valid directory' % src_dir)
@@ -100,9 +114,10 @@ class Fetcher(object):
         for index, run_dir in enumerate(run_dirs, start=1):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
-            run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all)
+            run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all,
+                                           filter=filter)
 
-            if write_combined_props:
+            if write_combined_props and run_id:
                 combined_props['-'.join(run_id)] = props
 
         logging.info('Fetching finished')
