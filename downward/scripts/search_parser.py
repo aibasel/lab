@@ -229,21 +229,18 @@ def check_min_values(content, props):
 
 
 def get_error(content, props):
-    # First see if we already know the type of error
-    if props.has_key('search_mem_limit_exceeded') and props['search_mem_limit_exceeded']:
+    # First see if we already know the type of error.
+    if props.get('search_mem_limit_exceeded', None) == 1:
         props['error'] = 'memory'
-    elif props.has_key('search_timeout') and props['search_timeout']:
+    elif props.get('search_timeout', None) == 1:
         props['error'] = 'timeout'
-    # next look at the error log
+    # If we don't know the error type already, look at the error log.
     elif not content.strip():
         props['error'] = 'none'
     elif 'bad_alloc' in content:
         props['error'] = 'memory'
-    # if the run was killed we can assume it was because it hit its resource limits
-    elif (props.has_key('search_error') and 
-            (not props.has_key('search_return_code') or
-             props['search_return_code'] == '137')
-          ):
+    # If the run was killed, we can assume it was because it hit its resource limits.
+    elif ('search_error' in props and props.get('search_return_code', '137') == '137'):
         remaining_time = props['limit_search_time'] - props.get('last_logged_time', 0)
         remaining_memory = props['limit_search_memory'] - props.get('last_logged_memory', 0)
         remaining_time_rel = remaining_time / float(props['limit_search_time'])
