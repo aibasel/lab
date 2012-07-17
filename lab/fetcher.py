@@ -20,14 +20,17 @@
 from glob import glob
 import logging
 import os
+from lab.tools import Properties
 
 from lab import tools
 
 
 class Fetcher(object):
-    def fetch_dir(self, run_dir, eval_dir, copy_all=False):
+    def fetch_dir(self, run_dir, eval_dir, copy_all=False, filter=None):
         prop_file = os.path.join(run_dir, 'properties')
         props = tools.Properties(filename=prop_file)
+        if filter is not None and not filter(props):
+            return None, None
         run_id = props.get('id')
         # Abort if an id cannot be read.
         if not run_id:
@@ -50,7 +53,7 @@ class Fetcher(object):
 
         return run_id, props
 
-    def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True):
+    def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True, filter=None):
         """
         This method can be used to copy properties from an exp-dir or eval-dir
         into an eval-dir. If the destination eval-dir already exist, the data
@@ -100,9 +103,9 @@ class Fetcher(object):
         for index, run_dir in enumerate(run_dirs, start=1):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
-            run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all)
+            run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all, filter=filter)
 
-            if write_combined_props:
+            if write_combined_props and run_id:
                 combined_props['-'.join(run_id)] = props
 
         logging.info('Fetching finished')
