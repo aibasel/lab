@@ -92,7 +92,7 @@ abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
                   exp.eval_dir, abs_domain_report_file))
 
-exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES + ['error'],
+exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES,
                   filter=filter_and_transform), exp.eval_dir, abs_problem_report_file))
 
 exp.add_step(Step('report-scatter', ScatterPlotReport(attributes=['expansions'], filter=only_two_configs),
@@ -115,7 +115,7 @@ exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_fil
 #exp.add_step(Step.zip_exp_dir(exp))
 
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem',
-                    attributes=['coverage', 'search_time', 'cost']),
+                    attributes=['coverage', 'search_time', 'cost', 'error']),
                   exp.eval_dir, abs_problem_report_file))
 
 # Remove the experiment directory
