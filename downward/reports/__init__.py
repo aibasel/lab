@@ -149,6 +149,10 @@ class PlanningReport(Report):
         '''
         Returns an empty table. Used and filled by subclasses.
         '''
+        # Only add a highlighting and summary functions for numeric attributes.
+        if self._all_attributes[attribute] not in [int, float]:
+            return Table(title=attribute, min_wins=None)
+
         # Decide whether we want to highlight minima or maxima
         max_attribute_parts = ['score', 'initial_h_value', 'coverage',
                                'quality', 'single_solver']
