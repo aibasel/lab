@@ -129,7 +129,7 @@ class Call(subprocess.Popen):
         Returns returncode attribute.
         """
         if self.wait_called:
-            # wait was called before. This should not happen, but does on 
+            # wait was called before. This should not happen, but does on
             # rare occasions (not sure why yet).
             assert False
 
