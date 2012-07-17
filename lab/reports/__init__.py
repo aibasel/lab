@@ -174,6 +174,8 @@ class Report(object):
         self.eval_dir = os.path.abspath(eval_dir)
         self.outfile = os.path.abspath(outfile)
 
+        # Map from attribute to type.
+        self._all_attributes = {}
         self._load_data()
         self._apply_filter()
         self._scan_data()
@@ -206,18 +208,13 @@ class Report(object):
 
         self.write()
 
-    def _get_numerical_attributes(self):
-        def is_numerical(attribute):
-            for run_id, run in self.props.items():
-                val = run.get(attribute)
-                if val is None:
-                    continue
-                return isinstance(val, (int, float))
-            logging.info("Attribute %s is missing in all runs." % attribute)
-            # Include the attribute nonetheless
-            return True
+    @property
+    def all_attributes(self):
+        return sorted(self._all_attributes.keys())
 
-        return [attr for attr in self.all_attributes if is_numerical(attr)]
+    def _get_numerical_attributes(self):
+        return [attr for (attr, typ) in self._all_attributes.items()
+                if typ in (int, float)]
 
     def get_markup(self):
         """
@@ -277,7 +274,18 @@ class Report(object):
         attributes = set()
         for run_id, run in self.props.items():
             attributes |= set(run.keys())
-        self.all_attributes = list(sorted(attributes))
+        self._all_attributes = self._get_type_map(attributes)
+
+    def _get_type(self, attribute):
+        for run_id, run in self.props.items():
+            val = run.get(attribute)
+            if val is None:
+                continue
+            return type(val)
+        assert False, 'Looking for a missing attribute'
+
+    def _get_type_map(self, attributes):
+        return dict(((attr, self._get_type(attr)) for attr in attributes))
 
     def _load_data(self):
         props_file = os.path.join(self.eval_dir, 'properties')
