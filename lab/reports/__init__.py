@@ -288,16 +288,6 @@ class Report(object):
     def _get_type_map(self, attributes):
         return dict(((attr, self._get_type(attr)) for attr in attributes))
 
-    def get_type(self, attribute):
-        """Look up the attribute's type. ::
-
-            report.get_type('expansions')  # int
-            report.get_type('error')       # unicode
-
-        """
-        assert attribute in self._all_attributes
-        return self._all_attributes[attribute]
-
     def _load_data(self):
         props_file = os.path.join(self.eval_dir, 'properties')
         if not os.path.exists(props_file):
