@@ -92,7 +92,7 @@ abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
 exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES),
                   exp.eval_dir, abs_domain_report_file))
 
-exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES,
+exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES + ['error'],
                   filter=filter_and_transform), exp.eval_dir, abs_problem_report_file))
 
 exp.add_step(Step('report-scatter', ScatterPlotReport(attributes=['expansions'], filter=only_two_configs),
