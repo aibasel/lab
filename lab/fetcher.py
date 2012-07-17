@@ -65,6 +65,10 @@ class Fetcher(object):
 
         If *write_combined_props* is True (default), write the combined
         properties file.
+        
+        If given, *filter* must be a function that is passed a dictionary of a
+        run's keys and values and returns True or False. If it returns True,
+        this run will be fetched, otherwise it will be skipped.
 
         Examples:
 
@@ -78,6 +82,13 @@ class Fetcher(object):
         ``<combined_eval_dir>/properties``::
 
             exp.add_step(Step('combine', Fetcher(), eval_dir1, combined_eval_dir))
+        
+        Fetch only the runs for certain configuration from an older experiment
+        
+            def configuration_needed(props):
+                return props['config_nick'] in ['config_1', 'config_5']
+
+            exp.add_step(Step('fetch', Fetcher(), src_dir, filter=configuration_needed))
         """
         if not os.path.isdir(src_dir):
             logging.critical('%s is not a valid directory' % src_dir)
