@@ -22,7 +22,6 @@ import resource
 import signal
 import subprocess
 import time
-import traceback
 
 
 from lab.calls.processgroup import ProcessGroup
@@ -131,16 +130,11 @@ class Call(subprocess.Popen):
         """
         if self.wait_called:
             # wait was called before. This should not happen, but does on 
-            # rare occasions (not sure why yet). For now we just log this
-            # and return
-            print "Call.wait() called a second time for call", self.name
-            # try to print call stack so we might learn where the second
-            # call is coming from
-            for line in traceback.format_stack():
-                print line.strip()
-            return
+            # rare occasions (not sure why yet).
+            assert False
 
         self.wait_called = True
+        term_attempted = False
         real_time = 0
         last_log_time = 0
 
@@ -170,13 +164,29 @@ class Call(subprocess.Popen):
                 self.log(real_time, total_time, total_vsize)
                 last_log_time = real_time
 
+            try_term = False
             # Log why program was terminated.
             if total_time >= self.time_limit:
                 self._set_property('timeout', 1)
+                try_term = True
             elif real_time >= self.wall_clock_time_limit:
                 self._set_property('wall_clock_timeout', 1)
+                try_term = True
             elif total_vsize > self.mem_limit:
                 self._set_property('mem_limit_exceeded', 1)
+                try_term = True
+
+            try_kill = (total_time >= self.time_limit + self.kill_delay or
+                        real_time >= 1.5 * self.wall_clock_time_limit +
+                        self.kill_delay or
+                        total_vsize > 1.5 * self.mem_limit)
+
+            if try_term and not term_attempted:
+                self.log(real_time, total_time, total_vsize)
+                self.terminate()
+                term_attempted = True
+            elif term_attempted and try_kill:
+                self.kill()
 
         # Even if we got here, there may be orphaned children or something
         # we may have missed due to a race condition. Check for that and kill.
