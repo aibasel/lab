@@ -95,7 +95,7 @@ class StandardDownwardExperiment(DownwardExperiment):
         abs_problem_report_file = os.path.join(self.eval_dir, '%s-abs-p.html' % expname)
         self.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=attributes),
                                                           self.eval_dir, abs_domain_report_file))
-        self.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=attributes),
+        self.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=attributes + ['error']),
                                                           self.eval_dir, abs_problem_report_file))
 
         # Compress the experiment directory
