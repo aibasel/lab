@@ -234,13 +234,17 @@ def get_error(content, props):
         props['error'] = 'memory'
     elif props.get('search_timeout', None) == 1:
         props['error'] = 'timeout'
+    elif props.get('search_wall_clock_timeout', None) == 1:
+        props['error'] = 'wall-clock-timeout'
     # If we don't know the error type already, look at the error log.
     elif not content.strip():
         props['error'] = 'none'
     elif 'bad_alloc' in content:
         props['error'] = 'memory'
-    # If the run was killed, we can assume it was because it hit its resource limits.
-    elif ('search_error' in props and props.get('search_return_code', '137') == '137'):
+    # If the run was killed (return code: 128 + 9 (SIGKILL) = 137), 
+    # we can assume it was because it hit its resource limits.
+    # For other or unknown return values we don't want to hide potential problems
+    elif ('search_error' in props and props.get('search_return_code', None) == '137'):
         remaining_time = props['limit_search_time'] - props.get('last_logged_time', 0)
         remaining_memory = props['limit_search_memory'] - props.get('last_logged_memory', 0)
         remaining_time_rel = remaining_time / float(props['limit_search_time'])
