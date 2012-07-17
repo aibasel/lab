@@ -44,9 +44,9 @@ rm -rf /tmp/simple-exp
 ./simple-exp.py --all
 cd ../..
 
-# Run demo downward experiment.
+# Run demo downward experiment if the necessary directories exists.
 cd examples
-./showcase-options.py --all
+./showcase-options.py --help && ./showcase-options.py --all
 cd ..
 
 echo TESTS PASSED
