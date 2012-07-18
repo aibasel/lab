@@ -22,6 +22,7 @@ import logging
 import math
 import os
 import sys
+from collections import defaultdict
 
 from lab import tools
 
@@ -32,10 +33,26 @@ class ScatterPlotReport(AbsoluteReport):
     """
     Generate a scatter plot for a specific attribute.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, tuple_category=None, category_styles={}, *args, **kwargs):
         """
         ``kwargs['attributes']`` must contain exactly one attribute.
+
+        **tuple_category** can contain a function taking two dictionaries of run
+        properties and returning a string that will be used to group the values.
+        For example, to group by domain use::
+
+        def domain_tuple_category(run1, run2):
+          return run1['domain'] # run2['domain'] will have the same value
+
+        **category_styles** can be a dictionary that maps category names to tuples
+        (marker, color) where marker and color are valid values for pyplot
+        (see http://matplotlib.sourceforge.net/api/pyplot_api.html)
+        For example to change the default style to blue stars use::
+
+        ScatterPlotReport(attributes=['time'], category_styles={'DEFAULT': ('*','b')})
         """
+        self.tuple_category = tuple_category
+        self.category_styles = category_styles
         AbsoluteReport.__init__(self, 'problem', *args, **kwargs)
         assert len(self.attributes) == 1, self.attributes
 
@@ -68,17 +85,33 @@ class ScatterPlotReport(AbsoluteReport):
         # to the next power of 10.
         missing_val = 10 ** math.ceil(math.log10(max_value * 10))
 
-        values1 = []
-        values2 = []
-        for val1, val2 in zip(columns[cfg1], columns[cfg2]):
+        # Map category names to tuples of 2 lists (values1, values2).
+        # The lists contain the values for axis 1 and 2 respectively.
+        value_groups = defaultdict(lambda: ([], []))
+        for row, val1, val2 in zip(table.rows, columns[cfg1], columns[cfg2]):
             if val1 is None and val2 is None:
                 continue
             if val1 is None:
                 val1 = missing_val
             if val2 is None:
                 val2 = missing_val
-            values1.append(val1)
-            values2.append(val2)
+            if self.tuple_category is None:
+                category = 'DEFAULT'
+            else:
+                domain, problem = row.split(':')
+                run1 = self.runs[(domain, problem, cfg1)]
+                run2 = self.runs[(domain, problem, cfg2)]
+                category = self.tuple_category(run1, run2)
+            value_groups[category][0].append(val1)
+            value_groups[category][1].append(val2)
+
+        # Pick any style for categories for which no style is defined.
+        # TODO add more possible styles
+        possible_styles = [(m, c) for m in 'ox*+' for c in 'rgby']
+        missing_category_styles = (set(value_groups.keys()) -
+                                   set(self.category_styles.keys()))
+        for i, missing in enumerate(missing_category_styles):
+            self.category_styles[missing] = possible_styles[i % len(possible_styles)]
 
         plot_size = missing_val * 1.25
 
@@ -98,8 +131,14 @@ class ScatterPlotReport(AbsoluteReport):
         # Display grid
         ax.grid(b=True, linestyle='-', color='0.75')
 
-        # Generate the scatter plot
-        ax.scatter(values1, values2, s=20, marker='o', c='r')
+        # Generate the scatter plots
+        for category, (values1, values2) in sorted(value_groups.items()):
+            marker, c = self.category_styles[category]
+            ax.scatter(values1, values2, s=20, marker=marker, c=c, label=category)
+
+        # Generate a legend if there is at least one non-default category
+        if value_groups.keys() != ['DEFAULT']:
+            ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         ax.plot([0.001, plot_size], [0.001, plot_size], 'k')
