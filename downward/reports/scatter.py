@@ -154,6 +154,7 @@ class ScatterPlotReport(PlanningReport):
             ax.scatter(*zip(*coordinates), s=20, marker=marker, c=c, label=category)
 
         # Only print a legend if there is at least one non-default category
+        legend = None
         if any(key is not None for key in categories.keys()):
             legend = ax.legend(scatterpoints=1,
                                loc='center left',
@@ -188,9 +189,12 @@ class ScatterPlotReport(PlanningReport):
         # Save the generated scatter plot to a PNG file
         # Legend is still bugged in mathplotlib, but there is a patch see:
         # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
+        extra_artists = []
+        if legend:
+            extra_artists.append(legend.legendPatch)
         canvas.print_figure(filename, dpi=100,
                             bbox_inches='tight',
-                            bbox_extra_artists=[legend.legendPatch])
+                            bbox_extra_artists=extra_artists)
 
     def write(self):
         assert len(self.configs) == 2, self.configs
