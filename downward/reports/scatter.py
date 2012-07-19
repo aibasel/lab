@@ -44,9 +44,9 @@ class ScatterPlotReport(PlanningReport):
         For example, to group by domain use::
 
             def domain_as_category(run1, run2):
-                return run1['domain']
                 # run2['domain'] has the same value, because we always
                 # compare two runs of the same problem
+                return run1['domain']
 
         *category_styles* can be a dictionary that maps category names to tuples
         (marker, color) where marker and color are valid values for pyplot
