@@ -37,14 +37,16 @@ class ScatterPlotReport(PlanningReport):
         """
         ``kwargs['attributes']`` must contain exactly one attribute.
 
-        *get_category* can contain a function taking two dictionaries of run
+        *get_category* can be a function taking two dictionaries of run
         properties and returning a string that will be used to group the values.
-        Values where this function does not return a value (or returns None)
-        are shown in a default category and not contained in the legend.
+        Runs for which this function returns None are shown in a default category 
+        and are not contained in the legend.
         For example, to group by domain use::
 
             def domain_as_category(run1, run2):
-                return run1['domain'] # run2['domain'] will have the same value
+                return run1['domain']
+                # run2['domain'] has the same value, because we always
+                # compare two runs of the same problem
 
         *category_styles* can be a dictionary that maps category names to tuples
         (marker, color) where marker and color are valid values for pyplot
@@ -86,20 +88,12 @@ class ScatterPlotReport(PlanningReport):
             logging.error('matplotlib could not be found: %s' % err)
             sys.exit(1)
 
+        assert len(self.configs) == 2
         attribute = self.attributes[0]
-        all_values = []
-        configs = set()
-        for runs in self.problem_runs.values():
-            for run in runs:
-                all_values.append(run.get(attribute))
-                configs.add(run['config'])
-        # Fix an order of configs
-        configs = list(configs)
-        assert len(configs) == 2
 
         # It may be the case that no values are found
         try:
-            max_value = max(all_values)
+            max_value = max(run.get(attribute) for run in self.runs.values())
         except ValueError:
             pass
 
@@ -114,10 +108,8 @@ class ScatterPlotReport(PlanningReport):
 
         # Map category names to value tuples
         categories = defaultdict(list)
-        for (domain, problem), (run1, run2) in self.problem_runs.items():
-            # Runs can occur in the wrong order
-            if run2['config'] == configs[0]:
-                run1, run2 = run2, run1
+        for (domain, problem), runs in self.problem_runs.items():
+            run1, run2 = sorted(runs, key=lambda run: run['config'])
             val1 = run1.get(attribute)
             val2 = run2.get(attribute)
             if val1 is None and val2 is None:
@@ -150,10 +142,9 @@ class ScatterPlotReport(PlanningReport):
         ax = fig.add_subplot(111)
 
         # Make a descriptive title and set axis labels
-        title = attribute
-        ax.set_title(title, fontsize=14)
-        ax.set_xlabel(configs[0], fontsize=12)
-        ax.set_ylabel(configs[1], fontsize=12)
+        ax.set_title(attribute, fontsize=14)
+        ax.set_xlabel(self.configs[0], fontsize=12)
+        ax.set_ylabel(self.configs[1], fontsize=12)
 
         # Display grid
         ax.grid(b=True, linestyle='-', color='0.75')
@@ -163,9 +154,11 @@ class ScatterPlotReport(PlanningReport):
             marker, c = self.category_styles[category]
             ax.scatter(*zip(*coordinates), s=20, marker=marker, c=c, label=category)
 
-        # Generate a legend if there is at least one non-default category
-        if categories.keys() != [None]:
-            ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        # Only print a legend if there is at least one non-default category
+        if any(key is not None for key in categories.keys()):
+            legend = ax.legend(scatterpoints=1,
+                               loc='center left',
+                               bbox_to_anchor=(1, 0.5))
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         ax.plot([0.001, plot_size], [0.001, plot_size], 'k')
@@ -194,7 +187,11 @@ class ScatterPlotReport(PlanningReport):
             formatter.__call__ = new_format_call
 
         # Save the generated scatter plot to a PNG file
-        canvas.print_figure(filename, dpi=100)
+        # Legend is still bugged in mathplotlib, but there is a patch
+        # see: http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
+        canvas.print_figure(filename, dpi=100,
+                            bbox_inches='tight',
+                            bbox_extra_artists=[legend.legendPatch])
 
     def write(self):
         assert len(self.configs) == 2, self.configs
