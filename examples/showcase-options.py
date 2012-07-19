@@ -95,7 +95,12 @@ exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES
 exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES,
                   filter=filter_and_transform), exp.eval_dir, abs_problem_report_file))
 
-exp.add_step(Step('report-scatter', ScatterPlotReport(attributes=['expansions'], filter=only_two_configs),
+def get_domain(run1, run2):
+    return run1['domain']
+
+exp.add_step(Step('report-scatter',
+                  ScatterPlotReport(attributes=['expansions'], filter=only_two_configs,
+                                    get_category=get_domain),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'scatter.png')))
 exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
