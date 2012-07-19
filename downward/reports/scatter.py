@@ -39,7 +39,7 @@ class ScatterPlotReport(PlanningReport):
 
         *get_category* can be a function taking two dictionaries of run
         properties and returning a string that will be used to group the values.
-        Runs for which this function returns None are shown in a default category 
+        Runs for which this function returns None are shown in a default category
         and are not contained in the legend.
         For example, to group by domain use::
 
@@ -55,9 +55,9 @@ class ScatterPlotReport(PlanningReport):
 
             ScatterPlotReport(attributes=['time'], category_styles={None: ('*','b')})
 
-        *get_category* and *category_styles* are best used together, e.g. to 
+        *get_category* and *category_styles* are best used together, e.g. to
         highlight a domain or interesting values::
- 
+
             def my_categories(run1, run2):
                 if run1['search_time'] > 10 * run2['search_time']:
                     return 'strong improvement'
@@ -99,7 +99,6 @@ class ScatterPlotReport(PlanningReport):
 
         if max_value is None or max_value <= 0:
             logging.info('Found no valid datapoints for the plot.')
-            print all_values
             sys.exit()
 
         # Separate the missing values by plotting them at (value * 10) rounded
@@ -187,8 +186,8 @@ class ScatterPlotReport(PlanningReport):
             formatter.__call__ = new_format_call
 
         # Save the generated scatter plot to a PNG file
-        # Legend is still bugged in mathplotlib, but there is a patch
-        # see: http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
+        # Legend is still bugged in mathplotlib, but there is a patch see:
+        # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
         canvas.print_figure(filename, dpi=100,
                             bbox_inches='tight',
                             bbox_extra_artists=[legend.legendPatch])
