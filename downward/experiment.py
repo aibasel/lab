@@ -172,6 +172,9 @@ class SearchRun(DownwardRun):
                          time_limit=exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
 
+        # Remove temporary files
+        self.add_command('rm-tmp-files', ['rm', '-f', 'downward.tmp.*'])
+
         # Validation
         self.require_resource('VALIDATE')
         self.require_resource('DOWNWARD_VALIDATE')
