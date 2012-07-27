@@ -50,7 +50,7 @@ class PlanningReport(Report):
     """
     This is the base class for all Downward reports.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, filter_configs=None, *args, **kwargs):
         """
         kwargs can contain the following items:
 
@@ -73,8 +73,35 @@ class PlanningReport(Report):
                     else:
                         quality = min_cost / cost
                     run['quality'] = round(quality, 4)
+
+        *filter_configs* can be a list of configuration names. This is a
+        shortcut to show only some configurations and also determines the
+        order in which the configurations are shown in the report.
+        The following three reports all filter the same runs but only the
+        last one shows the configurations in the order [c2, c1]::
+
+            def filter_c1_and_c2(run):
+                return run['config'] in ['c2', 'c1']
+            PlanningReport(filter=filter_c1_and_c2, attributes=['coverage'])
+
+            PlanningReport(filter_configs=['c1', 'c2'], attributes=['coverage'])
+
+            PlanningReport(filter_configs=['c2', 'c1'], attributes=['coverage'])
         """
         self.derived_properties = kwargs.pop('derived_properties', [])
+        if filter_configs is not None:
+            # Get the filter argument and ensure its a list
+            filter = kwargs.get('filter', [])
+            if type(filter) != list:
+                filter = [filter]
+            # Add a filter for the specified configs
+            def config_filter(run):
+                return run['config'] in filter_configs
+            kwargs['filter'] = [config_filter] + filter
+            # Rember the order of the configs
+            self.configs = filter_configs
+        else:
+            self.configs = None
         Report.__init__(self, *args, **kwargs)
         self.derived_properties.append(quality)
 
@@ -105,9 +132,20 @@ class PlanningReport(Report):
             runs[(domain, problem, config)] = run
         for domain, problem in problems:
             domains[domain].append(problem)
-        self.configs = list(sorted(configs))
+        if self.configs is None:
+            self.configs = list(sorted(configs))
+        else:
+            assert len(configs - set(self.configs)) == 0, (
+                'Filtered data contains configurations that should have been filtered')
+            # Maintain the original order of configs
+            self.configs = [c for c in self.configs if c in configs]
         self.problems = list(sorted(problems))
         self.domains = domains
+        # Sort each entry in problem_runs by their config values
+        for key, run_list in problem_runs.items():
+            run_list_by_config = {run['config']:run for run in run_list}
+            run_list = [run_list_by_config[c] for c in self.configs]
+            problem_runs[key] = run_list
         self.problem_runs = problem_runs
         self.domain_runs = domain_runs
         self.runs = runs
