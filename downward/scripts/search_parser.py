@@ -63,6 +63,7 @@ CUMULATIVE_PATTERNS = [
     _get_states_pattern('evaluations', 'Evaluated'),
     _get_states_pattern('expansions', 'Expanded'),
     _get_states_pattern('generated', 'Generated'),
+    _get_states_pattern('reopened', 'Reopened'),
     ('search_time', re.compile(r'^Search time: (.+)s$'), float),
     ('total_time', re.compile(r'^Total time: (.+)s$'), float),
     ('memory', re.compile(r'Peak memory: (.+) KB'), int),
