@@ -20,32 +20,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Regular expressions and functions for parsing planning experiments
+Parse portfolio experiments.
 """
-
-from __future__ import division
 
 import re
 from collections import defaultdict
 
-# The lab directory is added automatically in the Experiment constructor
+# The lab directory is added automatically in the Experiment constructor.
 from lab.parser import Parser
 
 
-# Search functions ------------------------------------------------------------
-
-def _get_states_pattern(attribute, name):
-    return (attribute, re.compile(r'%s (\d+) state\(s\)\.' % name), int)
-
 ITERATIVE_PATTERNS = [
-    # This time we parse the cumulative values
-    #_get_states_pattern('dead_ends', 'Dead ends:'),
-    #_get_states_pattern('evaluations', 'Evaluated'),
-    #_get_states_pattern('expansions', 'Expanded'),
-    #_get_states_pattern('generated', 'Generated'),
-    #('search_time', re.compile(r'^Search time: (.+)s$'), float),
-    #('total_time', re.compile(r'^Total time: (.+)s$'), float),
-    #('memory', re.compile(r'Peak memory: (.+) KB'), int),
     ('cost', re.compile(r'Plan cost: (.+)'), int),
     ('plan_length', re.compile(r'Plan length: (\d+)'), int),
 ]
@@ -83,27 +68,8 @@ def get_iterative_results(content, props):
             props[attr] = min(values[attr])
 
 
-def parse_error(content, props):
-    props['parse_error'] = 'Parse Error:' in content
-
-
-def unsupported(content, props):
-    props['unsupported'] = 'does not support' in content
-
-
 def coverage(content, props):
     props['coverage'] = int('plan_length' in props or 'cost' in props)
-
-# -----------------------------------------------------------------------------
-
-
-def get_error(content, props):
-    if not content.strip():
-        props["error"] = "none"
-    elif "bad_alloc" in content:
-        props["error"] = "memory"
-    else:
-        props["error"] = "unknown"
 
 
 class PortfolioParser(Parser):
@@ -112,12 +78,8 @@ class PortfolioParser(Parser):
         self.add_search_functions()
 
     def add_search_functions(self):
-        # TODO: search run.err once parse errors are printed there
-        self.add_function(parse_error)
-        self.add_function(unsupported, 'run.err')
         self.add_function(get_iterative_results)
         self.add_function(coverage)
-        self.add_function(get_error, "run.err")
 
 
 if __name__ == '__main__':
