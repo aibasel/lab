@@ -112,11 +112,11 @@ class Call(subprocess.Popen):
         self._log("%s = %s" % (prop, value))
         set_property("%s_%s" % (self.name, prop), value)
 
-    def log(self, real_time, total_time, total_vsize):
+    def log(self, total_time, total_vsize):
         wall_clock_time = time.time() - self.wall_clock_start_time
-        print "wall-clock time: %.2f" % (wall_clock_time)
-        print "[real-time %d] total_time: %.2fs" % (real_time, total_time)
-        print "[real-time %d] total_vsize: %.2f MB" % (real_time, total_vsize)
+        print "wall-clock time: %.2f" % wall_clock_time
+        print "total_time: %.2fs" % total_time
+        print "total_vsize: %.2f MB" % total_vsize
         print
         set_property('last_logged_time', total_time)
         set_property('last_logged_memory', total_vsize)
@@ -161,7 +161,7 @@ class Call(subprocess.Popen):
             total_vsize = group.total_vsize()
 
             if real_time >= last_log_time + self.log_interval:
-                self.log(real_time, total_time, total_vsize)
+                self.log(total_time, total_vsize)
                 last_log_time = real_time
 
             try_term = False
@@ -182,7 +182,7 @@ class Call(subprocess.Popen):
                         total_vsize > 1.5 * self.mem_limit)
 
             if try_term and not term_attempted:
-                self.log(real_time, total_time, total_vsize)
+                self.log(total_time, total_vsize)
                 self.terminate()
                 term_attempted = True
             elif term_attempted and try_kill:
