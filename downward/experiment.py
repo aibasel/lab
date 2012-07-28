@@ -260,6 +260,9 @@ class DownwardExperiment(Experiment):
         # Do not copy the .obj directory into the experiment directory.
         self.ignores.append('*.obj')
 
+        # We don't need VAL's sources.
+        self.ignores.append('VAL')
+
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
 
