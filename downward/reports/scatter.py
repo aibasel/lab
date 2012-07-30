@@ -109,8 +109,7 @@ class ScatterPlotReport(PlanningReport):
         categories = defaultdict(list)
         for (domain, problem), (run1, run2) in self.problem_runs.items():
             assert (run1['config'] == self.configs[0] and
-                     run2['config'] == self.configs[1]), (
-                     'Runs are not sorted by config.', domain, problem, self.configs)
+                    run2['config'] == self.configs[1])
             val1 = run1.get(attribute)
             val2 = run2.get(attribute)
             if val1 is None and val2 is None:
