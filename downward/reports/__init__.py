@@ -24,7 +24,6 @@ Module that permits generating downward reports by reading properties files
 
 from __future__ import with_statement, division
 
-import collections
 from collections import defaultdict
 import logging
 
@@ -149,7 +148,6 @@ class PlanningReport(Report):
             return self.configs.index(run['config'])
         for key, run_list in problem_runs.items():
             problem_runs[key] = sorted(run_list, key=run_key)
-                                       key=lambda run: self.configs.index(run['config']))
         self.problem_runs = problem_runs
         self.domain_runs = domain_runs
         self.runs = runs
