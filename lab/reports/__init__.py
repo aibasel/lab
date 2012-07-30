@@ -118,9 +118,10 @@ class Report(object):
         gwiki (Google Code Wiki), doku (DokuWiki), pmw (PmWiki),
         moin (MoinMoin), txt (Plain text) and art (ASCII art).
 
-        If given, *filter* must be a function that is passed a dictionary of a
-        run's keys and values and returns True or False. Depending on the
-        returned value, the run is included or excluded from the report.
+        If given, *filter* must be a function or a list of functions that
+        are passed a dictionary of a run's keys and values and return 
+        True or False. Depending on the returned value, the run is included
+        or excluded from the report.
         Alternatively, the function can return a dictionary that will overwrite
         the old run's dictionary for the report.
 
@@ -158,7 +159,10 @@ class Report(object):
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
-        self.filter = filter
+        if isinstance(filter, collections.Iterable):
+            self.filters = filter
+        else:
+            self.filters = [filter]
 
     def __call__(self, eval_dir, outfile):
         """Make the report.
@@ -298,22 +302,26 @@ class Report(object):
         logging.info('Reading properties file finished')
 
     def _apply_filter(self):
-        if not self.filter:
+        if not self.filters:
             return
         new_props = tools.Properties()
         for run_id, run in self.props.items():
-            result = self.filter(run)
-            if not isinstance(result, (dict, bool)):
-                logging.critical('Filters must return a dictionary or boolean')
-            if not result:
-                # Discard runs that returned False or an empty dictionary.
-                continue
-            # If a dict is returned, use it as the new run,
-            # else take the old one.
-            if isinstance(result, dict):
-                new_props[run_id] = result
+            # No need to copy the run as the original run is only needed if all
+            # filters return True. In this case modified_run is never changed.
+            modified_run = run
+            for filter in self.filters:
+                result = filter(modified_run)
+                if not isinstance(result, (dict, bool)):
+                    logging.critical('Filters must return a dictionary or boolean')
+                # If a dict is returned, use it as the new run,
+                # else take the old one.
+                if isinstance(result, dict):
+                    modified_run = result
+                if not result:
+                    # Discard runs that returned False or an empty dictionary.
+                    break
             else:
-                new_props[run_id] = run
+                new_props[run_id] = modified_run
         new_props.filename = self.props.filename
         self.props = new_props
 

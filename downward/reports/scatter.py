@@ -107,8 +107,9 @@ class ScatterPlotReport(PlanningReport):
 
         # Map category names to value tuples
         categories = defaultdict(list)
-        for (domain, problem), runs in self.problem_runs.items():
-            run1, run2 = sorted(runs, key=lambda run: run['config'])
+        for (domain, problem), (run1, run2) in self.problem_runs.items():
+            assert run1['config'] == self.configs[0] and run2['config'] == self.configs[1], (
+                'Runs are not sorted by config.', domain, problem, self.configs)
             val1 = run1.get(attribute)
             val2 = run2.get(attribute)
             if val1 is None and val2 is None:
