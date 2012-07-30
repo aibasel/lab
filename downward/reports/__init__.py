@@ -196,7 +196,9 @@ class PlanningReport(Report):
         '''
         # Only add a highlighting and summary functions for numeric attributes.
         if self._all_attributes[attribute] not in [int, float]:
-            return Table(title=attribute, min_wins=None)
+            table = Table(title=attribute, min_wins=None)
+            table.set_column_order(self._get_config_order())
+            return table
 
         # Decide whether we want to highlight minima or maxima
         max_attribute_parts = ['score', 'initial_h_value', 'coverage',
@@ -219,5 +221,4 @@ class PlanningReport(Report):
             table.add_summary_function('AVERAGE', reports.avg)
 
         table.set_column_order(self._get_config_order())
-
         return table
