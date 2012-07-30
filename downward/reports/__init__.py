@@ -50,7 +50,7 @@ class PlanningReport(Report):
     """
     This is the base class for all Downward reports.
     """
-    def __init__(self, filter_configs=None, *args, **kwargs):
+    def __init__(self, configs=None, *args, **kwargs):
         """
         kwargs can contain the following items:
 
@@ -74,7 +74,7 @@ class PlanningReport(Report):
                         quality = min_cost / cost
                     run['quality'] = round(quality, 4)
 
-        *filter_configs* can be a list of configuration names. This is a
+        *configs* can be a list of configuration names. This is a
         shortcut to show only some configurations and also determines the
         order in which the configurations are shown in the report.
         The following three reports all filter the same runs but only the
@@ -84,24 +84,22 @@ class PlanningReport(Report):
                 return run['config'] in ['c2', 'c1']
             PlanningReport(filter=filter_c1_and_c2, attributes=['coverage'])
 
-            PlanningReport(filter_configs=['c1', 'c2'], attributes=['coverage'])
+            PlanningReport(configs=['c1', 'c2'], attributes=['coverage'])
 
-            PlanningReport(filter_configs=['c2', 'c1'], attributes=['coverage'])
+            PlanningReport(configs=['c2', 'c1'], attributes=['coverage'])
         """
         self.derived_properties = kwargs.pop('derived_properties', [])
-        if filter_configs is not None:
+        # Remember the order of the configs
+        self.configs = configs
+        if configs:
             # Get the filter argument and ensure its a list
             filter = kwargs.get('filter', [])
-            if type(filter) != list:
+            if isinstance(filter, list):
                 filter = [filter]
             # Add a filter for the specified configs
             def config_filter(run):
-                return run['config'] in filter_configs
+                return run['config'] in configs
             kwargs['filter'] = [config_filter] + filter
-            # Rember the order of the configs
-            self.configs = filter_configs
-        else:
-            self.configs = None
         Report.__init__(self, *args, **kwargs)
         self.derived_properties.append(quality)
 
@@ -143,9 +141,7 @@ class PlanningReport(Report):
         self.domains = domains
         # Sort each entry in problem_runs by their config values
         for key, run_list in problem_runs.items():
-            run_list_by_config = {run['config']:run for run in run_list}
-            run_list = [run_list_by_config[c] for c in self.configs]
-            problem_runs[key] = run_list
+            problem_runs[key] = sorted(run_list, key=lambda run: self.configs.index(run['config']))
         self.problem_runs = problem_runs
         self.domain_runs = domain_runs
         self.runs = runs

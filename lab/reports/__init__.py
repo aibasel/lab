@@ -119,7 +119,7 @@ class Report(object):
         moin (MoinMoin), txt (Plain text) and art (ASCII art).
 
         If given, *filter* must be a function or a list of functions that
-        are passed a dictionary of a run's keys and values and returns 
+        are passed a dictionary of a run's keys and values and return 
         True or False. Depending on the returned value, the run is included
         or excluded from the report.
         Alternatively, the function can return a dictionary that will overwrite
@@ -159,7 +159,7 @@ class Report(object):
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
-        if type(filter) is list:
+        if isinstance(filter, list):
             self.filters = filter
         else:
             self.filters = [filter]
