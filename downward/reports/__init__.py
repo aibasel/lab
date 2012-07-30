@@ -24,8 +24,9 @@ Module that permits generating downward reports by reading properties files
 
 from __future__ import with_statement, division
 
-import logging
+import collections
 from collections import defaultdict
+import logging
 
 from lab import reports
 from lab.reports import Report, Table
@@ -96,6 +97,7 @@ class PlanningReport(Report):
             filter = kwargs.get('filter', [])
             if isinstance(filter, collections.Iterable):
                 filter = [filter]
+
             # Add a filter for the specified configs
             def config_filter(run):
                 return run['config'] in configs
@@ -143,9 +145,12 @@ class PlanningReport(Report):
             self.configs = [c for c in self.configs if c in configs]
         self.problems = list(sorted(problems))
         self.domains = domains
+
         # Sort each entry in problem_runs by their config values
+        def run_key(run):
+            return self.configs.index(run['config'])
         for key, run_list in problem_runs.items():
-            problem_runs[key] = sorted(run_list, key=lambda run: self.configs.index(run['config']))
+            problem_runs[key] = sorted(run_list, key=run_key)
         self.problem_runs = problem_runs
         self.domain_runs = domain_runs
         self.runs = runs
