@@ -119,7 +119,7 @@ class Report(object):
         moin (MoinMoin), txt (Plain text) and art (ASCII art).
 
         If given, *filter* must be a function or a list of functions that
-        are passed a dictionary of a run's keys and values and return 
+        are passed a dictionary of a run's keys and values and return
         True or False. Depending on the returned value, the run is included
         or excluded from the report.
         Alternatively, the function can return a dictionary that will overwrite
@@ -161,8 +161,10 @@ class Report(object):
         self.output_format = format
         if isinstance(filter, collections.Iterable):
             self.filters = filter
-        else:
+        elif filter is not None:
             self.filters = [filter]
+        else:
+            self.filters = []
 
     def __call__(self, eval_dir, outfile):
         """Make the report.
