@@ -74,7 +74,7 @@ class PlanningReport(Report):
                         quality = min_cost / cost
                     run['quality'] = round(quality, 4)
 
-        *configs* can be a list of configuration names. This is a
+        *filter_config* can be a list of configuration names. This is a
         shortcut to show only some configurations and also determines the
         order in which the configurations are shown in the report.
         The following three reports all filter the same runs but only the
@@ -84,22 +84,14 @@ class PlanningReport(Report):
                 return run['config'] in ['c2', 'c1']
             PlanningReport(filter=filter_c1_and_c2, attributes=['coverage'])
 
-            PlanningReport(configs=['c1', 'c2'], attributes=['coverage'])
+            PlanningReport(filter_config=['c1', 'c2'], attributes=['coverage'])
 
-            PlanningReport(configs=['c2', 'c1'], attributes=['coverage'])
+            PlanningReport(filter_config=['c2', 'c1'], attributes=['coverage'])
         """
         self.derived_properties = kwargs.pop('derived_properties', [])
-        # Remember the order of the configs
-        self.configs = configs
-        if configs:
-            # Get the filter argument and ensure its a list
-            filter = kwargs.get('filter', [])
-            if isinstance(filter, collections.Iterable):
-                filter = [filter]
-            # Add a filter for the specified configs
-            def config_filter(run):
-                return run['config'] in configs
-            kwargs['filter'] = [config_filter] + filter
+        # Remember the order of the configs if it is given as a key word argument filter
+        self.configs = kwargs.get('filter_config', None)
+        self.config_nicks = kwargs.get('filter_config_nick', None)
         Report.__init__(self, *args, **kwargs)
         self.derived_properties.append(quality)
 
@@ -113,6 +105,7 @@ class PlanningReport(Report):
         problems = set()
         domains = defaultdict(list)
         configs = set()
+        config_nicks_to_config = defaultdict(set)
         problem_runs = defaultdict(list)
         domain_runs = defaultdict(list)
         runs = {}
@@ -123,6 +116,7 @@ class PlanningReport(Report):
                                            run.get('run_dir'))
 
             configs.add(run['config'])
+            config_nicks_to_config[run['config_nick']].add(run['config'])
             domain, problem, config = run['domain'], run['problem'], run['config']
             problems.add((domain, problem))
             problem_runs[(domain, problem)].append(run)
@@ -130,9 +124,11 @@ class PlanningReport(Report):
             runs[(domain, problem, config)] = run
         for domain, problem in problems:
             domains[domain].append(problem)
-        if self.configs is None:
-            self.configs = list(sorted(configs))
-        else:
+        if not self.configs and self.config_nicks:
+            self.configs = []
+            for nick in self.config_nicks:
+                self.configs += sorted(config_nicks_to_config[nick])
+        if self.configs:
             # Other filters may have changed the set of available configs by either
             # removing all runs from one config or changing the run['config'] for a run
             # The second case is not supported at the moment.
@@ -141,11 +137,14 @@ class PlanningReport(Report):
             # Maintain the original order of configs and only keep configs that still
             # have available runs after filtering.
             self.configs = [c for c in self.configs if c in configs]
+        else:
+            self.configs = list(sorted(configs))
         self.problems = list(sorted(problems))
         self.domains = domains
         # Sort each entry in problem_runs by their config values
         for key, run_list in problem_runs.items():
-            problem_runs[key] = sorted(run_list, key=lambda run: self.configs.index(run['config']))
+            problem_runs[key] = sorted(run_list,
+                                       key=lambda run: self.configs.index(run['config']))
         self.problem_runs = problem_runs
         self.domain_runs = domain_runs
         self.runs = runs

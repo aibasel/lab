@@ -103,7 +103,7 @@ class Report(object):
     """
     Base class for all reports.
     """
-    def __init__(self, attributes=None, format='html', filter=None):
+    def __init__(self, attributes=None, format='html', filter=None, **kwargs):
         """
         *attributes* is a list of the attributes you want to include in your
         report. If omitted, use all found numerical attributes. Globbing
@@ -119,11 +119,16 @@ class Report(object):
         moin (MoinMoin), txt (Plain text) and art (ASCII art).
 
         If given, *filter* must be a function or a list of functions that
-        are passed a dictionary of a run's keys and values and return 
+        are passed a dictionary of a run's keys and values and return
         True or False. Depending on the returned value, the run is included
         or excluded from the report.
         Alternatively, the function can return a dictionary that will overwrite
         the old run's dictionary for the report.
+
+        Filters for properties can be given in shorter form without defining a function
+        To include only runs where property p has value v, use *filter_p=v*.
+        To include only runs where property p has value v1, v2 or v3, use
+        *filter_p=[v1, v2, v3]*.
 
         Examples:
 
@@ -155,14 +160,28 @@ class Report(object):
                 # for sorting.
                 run['config'] = '%d:sort:%s' % (pos, paper_names[config])
                 return run
+
+        Filter function that only allows runs with a timeout in one of two domains::
+
+            report = Report(attributes=['coverage'],
+                            filter_domain=['blocks', 'barman'],
+                            filter_search_timeout=1)
         """
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
-        if isinstance(filter, collections.Iterable):
+        if not filter:
+            self.filters = []
+        elif isinstance(filter, collections.Iterable):
             self.filters = filter
         else:
             self.filters = [filter]
+        for arg_name, arg_value in kwargs.items():
+            assert arg_name.startswith('filter_'), (
+                'Did not recognize key word argument \'%s\'' % arg_name)
+            filter_for = arg_name[len('filter_'):]
+            # Add a filter for the specified property
+            self.filters.append(self._build_filter(filter_for, arg_value))
 
     def __call__(self, eval_dir, outfile):
         """Make the report.
@@ -324,6 +343,16 @@ class Report(object):
                 new_props[run_id] = modified_run
         new_props.filename = self.props.filename
         self.props = new_props
+
+    def _build_filter(self, prop, value):
+        # Do not define this function inplace to force early binding. See:
+        # stackoverflow.com/questions/3107231/currying-functions-in-python-in-a-loop
+        def property_filter(run):
+            if isinstance(value, collections.Iterable):
+                return run.get(prop) in value
+            else:
+                return run.get(prop) == value
+        return property_filter
 
 
 class Table(collections.defaultdict):
