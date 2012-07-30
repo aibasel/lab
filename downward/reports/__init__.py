@@ -28,6 +28,7 @@ from collections import defaultdict
 import logging
 
 from lab import reports
+from lab import tools
 from lab.reports import Report, Table
 
 
@@ -105,8 +106,6 @@ class PlanningReport(Report):
         # Use local variables first to avoid lookups
         problems = set()
         domains = defaultdict(list)
-        configs = set()
-        config_nicks_to_config = defaultdict(set)
         problem_runs = defaultdict(list)
         domain_runs = defaultdict(list)
         runs = {}
@@ -116,8 +115,6 @@ class PlanningReport(Report):
                 assert 'coverage' in run, ('The run in %s has no coverage value' %
                                            run.get('run_dir'))
 
-            configs.add(run['config'])
-            config_nicks_to_config[run['config_nick']].add(run['config'])
             domain, problem, config = run['domain'], run['problem'], run['config']
             problems.add((domain, problem))
             problem_runs[(domain, problem)].append(run)
@@ -125,21 +122,7 @@ class PlanningReport(Report):
             runs[(domain, problem, config)] = run
         for domain, problem in problems:
             domains[domain].append(problem)
-        if not self.configs and self.config_nicks:
-            self.configs = []
-            for nick in self.config_nicks:
-                self.configs += sorted(config_nicks_to_config[nick])
-        if self.configs:
-            # Other filters may have changed the set of available configs by either
-            # removing all runs from one config or changing the run['config'] for a run
-            # The second case is not supported at the moment.
-            assert len(configs - set(self.configs)) == 0, (
-                'Filtered data contains configurations that should have been filtered')
-            # Maintain the original order of configs and only keep configs that still
-            # have available runs after filtering.
-            self.configs = [c for c in self.configs if c in configs]
-        else:
-            self.configs = list(sorted(configs))
+        self.configs = self._get_config_order()
         self.problems = list(sorted(problems))
         self.domains = domains
 
@@ -185,6 +168,28 @@ class PlanningReport(Report):
                     run_id = '-'.join((run['config'], run['domain'], run['problem']))
                     self.props[run_id] = run
 
+    def _get_config_order(self):
+        configs = set()
+        config_nicks_to_config = defaultdict(set)
+        for run in self.props.values():
+            configs.add(run['config'])
+            config_nicks_to_config[run['config_nick']].add(run['config'])
+        if self.config_nicks and not self.configs:
+            self.configs = []
+            for nick in self.config_nicks:
+                self.configs += sorted(config_nicks_to_config[nick])
+        if self.configs:
+            # Other filters may have changed the set of available configs by either
+            # removing all runs from one config or changing the run['config'] for a run.
+            # Maintain the original order of configs and only keep configs that still
+            # have available runs after filtering. Then add all new configs sorted
+            # naturally at the end
+            config_order = [c for c in self.configs if c in configs]
+            config_order += list(tools.natural_sort(configs - set(self.configs)))
+        else:
+            config_order = list(tools.natural_sort(configs))
+        return config_order
+
     def _get_empty_table(self, attribute):
         '''
         Returns an empty table. Used and filled by subclasses.
@@ -212,5 +217,7 @@ class PlanningReport(Report):
             # When summarising score results from multiple domains we show
             # normalised averages so that each domain is weighed equally.
             table.add_summary_function('AVERAGE', reports.avg)
+
+        table.set_column_order(self._get_config_order())
 
         return table

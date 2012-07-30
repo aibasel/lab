@@ -391,6 +391,12 @@ class Table(collections.defaultdict):
          | prob1      |    10 |    20 |
          | prob2      |    15 |    25 |
          | **SUM**    |    25 |    45 |
+        >>> t.set_column_order(['cfg2', 'cfg1'])
+        >>> print t
+        || expansions |  cfg2 |  cfg1 |
+         | prob1      |    20 |    10 |
+         | prob2      |    25 |    15 |
+         | **SUM**    |    45 |    25 |
         """
         collections.defaultdict.__init__(self, dict)
 
@@ -407,6 +413,7 @@ class Table(collections.defaultdict):
         # For printing.
         self.headers = None
         self.first_col_size = None
+        self.column_order = None
 
     def add_cell(self, row, col, value):
         """Set Table[row][col] = value."""
@@ -444,7 +451,13 @@ class Table(collections.defaultdict):
         col_names = set()
         for row in self.values():
             col_names |= set(row.keys())
-        self._cols = tools.natural_sort(col_names)
+        self._cols = []
+        if self.column_order:
+            # First use all elements for which we know an order.
+            # All remaining elements will be sorted alphabetically
+            self._cols = [c for c in self.column_order if c in col_names]
+            col_names -= set(self._cols)
+        self._cols += tools.natural_sort(col_names)
         return self._cols
 
     def get_row(self, row):
@@ -528,6 +541,10 @@ class Table(collections.defaultdict):
         *func* can be e.g. ``sum``, ``reports.avg`` or ``reports.gm``.
         """
         self.summary_funcs.append((name, func))
+
+    def set_column_order(self, order):
+        self.column_order = order
+        self._cols = None
 
     def __str__(self):
         """Return the txt2tags markup for this table."""
