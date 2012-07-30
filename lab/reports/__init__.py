@@ -159,7 +159,7 @@ class Report(object):
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
-        if isinstance(filter, list):
+        if isinstance(filter, collections.Iterable):
             self.filters = filter
         else:
             self.filters = [filter]
@@ -306,6 +306,8 @@ class Report(object):
             return
         new_props = tools.Properties()
         for run_id, run in self.props.items():
+            # No need to copy the run as the original run is only needed if all
+            # filters return True. In this case modified_run is never changed.
             modified_run = run
             for filter in self.filters:
                 result = filter(modified_run)

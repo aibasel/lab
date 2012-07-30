@@ -94,7 +94,7 @@ class PlanningReport(Report):
         if configs:
             # Get the filter argument and ensure its a list
             filter = kwargs.get('filter', [])
-            if isinstance(filter, list):
+            if isinstance(filter, collections.Iterable):
                 filter = [filter]
             # Add a filter for the specified configs
             def config_filter(run):
@@ -133,9 +133,13 @@ class PlanningReport(Report):
         if self.configs is None:
             self.configs = list(sorted(configs))
         else:
+            # Other filters may have changed the set of available configs by either
+            # removing all runs from one config or changing the run['config'] for a run
+            # The second case is not supported at the moment.
             assert len(configs - set(self.configs)) == 0, (
                 'Filtered data contains configurations that should have been filtered')
-            # Maintain the original order of configs
+            # Maintain the original order of configs and only keep configs that still
+            # have available runs after filtering.
             self.configs = [c for c in self.configs if c in configs]
         self.problems = list(sorted(problems))
         self.domains = domains
