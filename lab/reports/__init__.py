@@ -180,7 +180,7 @@ class Report(object):
             assert arg_name.startswith('filter_'), (
                 'Did not recognize key word argument \'%s\'' % arg_name)
             filter_for = arg_name[len('filter_'):]
-            # Add a filter for the specified property
+            # Add a filter for the specified property.
             self.filters.append(self._build_filter(filter_for, arg_value))
 
     def __call__(self, eval_dir, outfile):
@@ -218,7 +218,7 @@ class Report(object):
             self.attributes = expanded_attrs
 
         if self.attributes:
-            # Make sure that all selected attributes are present in the dataset
+            # Make sure that all selected attributes are present in the dataset.
             not_found = set(self.attributes) - set(self.all_attributes)
             if not_found:
                 logging.critical('The following attributes are not present in '
@@ -348,7 +348,7 @@ class Report(object):
         # Do not define this function inplace to force early binding. See:
         # stackoverflow.com/questions/3107231/currying-functions-in-python-in-a-loop
         def property_filter(run):
-            if isinstance(value, collections.Iterable):
+            if isinstance(value, (list, tuple)):
                 return run.get(prop) in value
             else:
                 return run.get(prop) == value
@@ -440,7 +440,7 @@ class Table(collections.defaultdict):
     @property
     def rows(self):
         """Return all row names in sorted order."""
-        # Let the sum, etc. rows be the last ones
+        # Let the sum, etc. rows be the last ones.
         return tools.natural_sort(self.keys())
 
     @property
@@ -454,7 +454,7 @@ class Table(collections.defaultdict):
         self._cols = []
         if self.column_order:
             # First use all elements for which we know an order.
-            # All remaining elements will be sorted alphabetically
+            # All remaining elements will be sorted alphabetically.
             self._cols = [c for c in self.column_order if c in col_names]
             col_names -= set(self._cols)
         self._cols += tools.natural_sort(col_names)
