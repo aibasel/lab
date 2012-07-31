@@ -172,11 +172,11 @@ class PlanningReport(Report):
         """
         Returns a list of configs in the order that was determined by the user.
         In order of decreasing priority these are the three ways to determine the order:
-        1) A filter for 'config' is given with filter_config.
-        2) A filter for 'config_nick' is given with filter_config_nick.
+        1. A filter for 'config' is given with filter_config.
+        2. A filter for 'config_nick' is given with filter_config_nick.
            In this case all configs that are represented by the same nick are sorted
            alphabetically.
-        3) If no explicit order is given, the configs will be sorted alphabetically.
+        3. If no explicit order is given, the configs will be sorted alphabetically.
         """
         configs = set()
         config_nicks_to_config = defaultdict(set)
