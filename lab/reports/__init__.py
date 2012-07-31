@@ -103,7 +103,7 @@ class Report(object):
     """
     Base class for all reports.
     """
-    def __init__(self, attributes=None, format='html', filter=None):
+    def __init__(self, attributes=None, format='html', filter=None, **kwargs):
         """
         *attributes* is a list of the attributes you want to include in your
         report. If omitted, use all found numerical attributes. Globbing
@@ -124,6 +124,11 @@ class Report(object):
         or excluded from the report.
         Alternatively, the function can return a dictionary that will overwrite
         the old run's dictionary for the report.
+
+        Filters for properties can be given in shorter form without defining a function
+        To include only runs where property p has value v, use *filter_p=v*.
+        To include only runs where property p has value v1, v2 or v3, use
+        *filter_p=[v1, v2, v3]*.
 
         Examples:
 
@@ -155,16 +160,28 @@ class Report(object):
                 # for sorting.
                 run['config'] = '%d:sort:%s' % (pos, paper_names[config])
                 return run
+
+        Filter function that only allows runs with a timeout in one of two domains::
+
+            report = Report(attributes=['coverage'],
+                            filter_domain=['blocks', 'barman'],
+                            filter_search_timeout=1)
         """
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
-        if isinstance(filter, collections.Iterable):
-            self.filters = filter
-        elif filter is not None:
-            self.filters = [filter]
-        else:
+        if not filter:
             self.filters = []
+        elif isinstance(filter, collections.Iterable):
+            self.filters = filter
+        else:
+            self.filters = [filter]
+        for arg_name, arg_value in kwargs.items():
+            assert arg_name.startswith('filter_'), (
+                'Did not recognize key word argument \'%s\'' % arg_name)
+            filter_for = arg_name[len('filter_'):]
+            # Add a filter for the specified property.
+            self.filters.append(self._build_filter(filter_for, arg_value))
 
     def __call__(self, eval_dir, outfile):
         """Make the report.
@@ -201,7 +218,7 @@ class Report(object):
             self.attributes = expanded_attrs
 
         if self.attributes:
-            # Make sure that all selected attributes are present in the dataset
+            # Make sure that all selected attributes are present in the dataset.
             not_found = set(self.attributes) - set(self.all_attributes)
             if not_found:
                 logging.critical('The following attributes are not present in '
@@ -327,6 +344,16 @@ class Report(object):
         new_props.filename = self.props.filename
         self.props = new_props
 
+    def _build_filter(self, prop, value):
+        # Do not define this function inplace to force early binding. See:
+        # stackoverflow.com/questions/3107231/currying-functions-in-python-in-a-loop
+        def property_filter(run):
+            if isinstance(value, (list, tuple)):
+                return run.get(prop) in value
+            else:
+                return run.get(prop) == value
+        return property_filter
+
 
 class Table(collections.defaultdict):
     def __init__(self, title='', min_wins=None):
@@ -364,6 +391,12 @@ class Table(collections.defaultdict):
          | prob1      |    10 |    20 |
          | prob2      |    15 |    25 |
          | **SUM**    |    25 |    45 |
+        >>> t.set_column_order(['cfg2', 'cfg1'])
+        >>> print t
+        || expansions |  cfg2 |  cfg1 |
+         | prob1      |    20 |    10 |
+         | prob2      |    25 |    15 |
+         | **SUM**    |    45 |    25 |
         """
         collections.defaultdict.__init__(self, dict)
 
@@ -380,6 +413,7 @@ class Table(collections.defaultdict):
         # For printing.
         self.headers = None
         self.first_col_size = None
+        self.column_order = None
 
     def add_cell(self, row, col, value):
         """Set Table[row][col] = value."""
@@ -406,7 +440,7 @@ class Table(collections.defaultdict):
     @property
     def rows(self):
         """Return all row names in sorted order."""
-        # Let the sum, etc. rows be the last ones
+        # Let the sum, etc. rows be the last ones.
         return tools.natural_sort(self.keys())
 
     @property
@@ -417,7 +451,13 @@ class Table(collections.defaultdict):
         col_names = set()
         for row in self.values():
             col_names |= set(row.keys())
-        self._cols = tools.natural_sort(col_names)
+        self._cols = []
+        if self.column_order:
+            # First use all elements for which we know an order.
+            # All remaining elements will be sorted alphabetically.
+            self._cols = [c for c in self.column_order if c in col_names]
+            col_names -= set(self._cols)
+        self._cols += tools.natural_sort(col_names)
         return self._cols
 
     def get_row(self, row):
@@ -501,6 +541,10 @@ class Table(collections.defaultdict):
         *func* can be e.g. ``sum``, ``reports.avg`` or ``reports.gm``.
         """
         self.summary_funcs.append((name, func))
+
+    def set_column_order(self, order):
+        self.column_order = order
+        self._cols = None
 
     def __str__(self):
         """Return the txt2tags markup for this table."""

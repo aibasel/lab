@@ -24,11 +24,11 @@ Module that permits generating downward reports by reading properties files
 
 from __future__ import with_statement, division
 
-import collections
 from collections import defaultdict
 import logging
 
 from lab import reports
+from lab import tools
 from lab.reports import Report, Table
 
 
@@ -75,7 +75,7 @@ class PlanningReport(Report):
                         quality = min_cost / cost
                     run['quality'] = round(quality, 4)
 
-        *configs* can be a list of configuration names. This is a
+        *filter_config* can be a list of configuration names. This is a
         shortcut to show only some configurations and also determines the
         order in which the configurations are shown in the report.
         The following three reports all filter the same runs but only the
@@ -85,23 +85,15 @@ class PlanningReport(Report):
                 return run['config'] in ['c2', 'c1']
             PlanningReport(filter=filter_c1_and_c2, attributes=['coverage'])
 
-            PlanningReport(configs=['c1', 'c2'], attributes=['coverage'])
+            PlanningReport(filter_config=['c1', 'c2'], attributes=['coverage'])
 
-            PlanningReport(configs=['c2', 'c1'], attributes=['coverage'])
+            PlanningReport(filter_config=['c2', 'c1'], attributes=['coverage'])
         """
         self.derived_properties = kwargs.pop('derived_properties', [])
-        # Remember the order of the configs
-        self.configs = configs
-        if configs:
-            # Get the filter argument and ensure its a list
-            filter = kwargs.get('filter', [])
-            if isinstance(filter, collections.Iterable):
-                filter = [filter]
+        # Remember the order of the configs if it is given as a key word argument filter.
+        self.configs = kwargs.get('filter_config', None)
+        self.config_nicks = kwargs.get('filter_config_nick', None)
 
-            # Add a filter for the specified configs
-            def config_filter(run):
-                return run['config'] in configs
-            kwargs['filter'] = [config_filter] + filter
         Report.__init__(self, *args, **kwargs)
         self.derived_properties.append(quality)
 
@@ -111,10 +103,9 @@ class PlanningReport(Report):
         Report._scan_data(self)
 
     def _scan_planning_data(self):
-        # Use local variables first to avoid lookups
+        # Use local variables first to avoid lookups.
         problems = set()
         domains = defaultdict(list)
-        configs = set()
         problem_runs = defaultdict(list)
         domain_runs = defaultdict(list)
         runs = {}
@@ -124,7 +115,6 @@ class PlanningReport(Report):
                 assert 'coverage' in run, ('The run in %s has no coverage value' %
                                            run.get('run_dir'))
 
-            configs.add(run['config'])
             domain, problem, config = run['domain'], run['problem'], run['config']
             problems.add((domain, problem))
             problem_runs[(domain, problem)].append(run)
@@ -132,21 +122,11 @@ class PlanningReport(Report):
             runs[(domain, problem, config)] = run
         for domain, problem in problems:
             domains[domain].append(problem)
-        if self.configs is None:
-            self.configs = list(sorted(configs))
-        else:
-            # Other filters may have changed the set of available configs by either
-            # removing all runs from one config or changing the run['config'] for a run
-            # The second case is not supported at the moment.
-            assert len(configs - set(self.configs)) == 0, (
-                'Filtered data contains configurations that should have been filtered')
-            # Maintain the original order of configs and only keep configs that still
-            # have available runs after filtering.
-            self.configs = [c for c in self.configs if c in configs]
+        self.configs = self._get_config_order()
         self.problems = list(sorted(problems))
         self.domains = domains
 
-        # Sort each entry in problem_runs by their config values
+        # Sort each entry in problem_runs by their config values.
         def run_key(run):
             return self.configs.index(run['config'])
         for key, run_list in problem_runs.items():
@@ -183,10 +163,42 @@ class PlanningReport(Report):
         for func in self.derived_properties:
             for (domain, problem), runs in self.problem_runs.items():
                 func(runs)
-                # update the data with the new properties
+                # Update the data with the new properties.
                 for run in runs:
                     run_id = '-'.join((run['config'], run['domain'], run['problem']))
                     self.props[run_id] = run
+
+    def _get_config_order(self):
+        """
+        Returns a list of configs in the order that was determined by the user.
+        In order of decreasing priority these are the three ways to determine the order:
+        1. A filter for 'config' is given with filter_config.
+        2. A filter for 'config_nick' is given with filter_config_nick.
+           In this case all configs that are represented by the same nick are sorted
+           alphabetically.
+        3. If no explicit order is given, the configs will be sorted alphabetically.
+        """
+        configs = set()
+        config_nicks_to_config = defaultdict(set)
+        for run in self.props.values():
+            config = run['config']
+            configs.add(config)
+            config_nicks_to_config[run['config_nick']].add(config)
+        if self.config_nicks and not self.configs:
+            self.configs = []
+            for nick in self.config_nicks:
+                self.configs += sorted(config_nicks_to_config[nick])
+        if self.configs:
+            # Other filters may have changed the set of available configs by either
+            # removing all runs from one config or changing the run['config'] for a run.
+            # Maintain the original order of configs and only keep configs that still
+            # have available runs after filtering. Then add all new configs sorted
+            # naturally at the end.
+            config_order = [c for c in self.configs if c in configs]
+            config_order += list(tools.natural_sort(configs - set(self.configs)))
+        else:
+            config_order = list(tools.natural_sort(configs))
+        return config_order
 
     def _get_empty_table(self, attribute):
         '''
@@ -194,9 +206,11 @@ class PlanningReport(Report):
         '''
         # Only add a highlighting and summary functions for numeric attributes.
         if self._all_attributes[attribute] not in [int, float]:
-            return Table(title=attribute, min_wins=None)
+            table = Table(title=attribute, min_wins=None)
+            table.set_column_order(self._get_config_order())
+            return table
 
-        # Decide whether we want to highlight minima or maxima
+        # Decide whether we want to highlight minima or maxima.
         max_attribute_parts = ['score', 'initial_h_value', 'coverage',
                                'quality', 'single_solver']
         min_wins = True
@@ -216,4 +230,5 @@ class PlanningReport(Report):
             # normalised averages so that each domain is weighed equally.
             table.add_summary_function('AVERAGE', reports.avg)
 
+        table.set_column_order(self._get_config_order())
         return table
