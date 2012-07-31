@@ -33,11 +33,8 @@ class SuiteReport(PlanningReport):
 
     Write a suite with solved problems: ::
 
-        def solved(run):
-            return run['coverage'] == 1
-
         suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
-        exp.add_step(Step('report-suite', SuiteReport(filter=solved),
+        exp.add_step(Step('report-suite', SuiteReport(filter_coverage=1),
                           exp.eval_dir, suite_file))
     """
     def __init__(self, *args, **kwargs):
