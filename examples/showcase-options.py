@@ -106,7 +106,7 @@ exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
 exp.add_step(Step('report-relative',
                   RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
-                                 filter=only_two_configs),
+                                 filter_config_nick=['many-plans', 'iter-search']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
 
 # Write suite of solved problems
