@@ -11,6 +11,18 @@ set -e
 cd "$(dirname "$0")"
 cd ..
 
+# Make lab available on the PYTHONPATH.
+LAB=`realpath .`
+echo Checking lab at $LAB
+if [ -z "$PYTHONPATH" ]; then
+    # PYTHONPATH is empty.
+    export PYTHONPATH=${LAB}
+elif [[ "$PYTHONPATH" != *"$LAB"* ]]; then
+    # LAB is NOT on the PYTHONPATH.
+    export PYTHONPATH=${LAB}:${PYTHONPATH}
+fi
+echo PYTHONPATH: $PYTHONPATH
+
 py.test
 
 # Run doctests.
