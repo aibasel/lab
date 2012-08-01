@@ -51,7 +51,7 @@ class PlanningReport(Report):
     """
     This is the base class for all Downward reports.
     """
-    def __init__(self, configs=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         kwargs can contain the following items:
 
@@ -75,19 +75,19 @@ class PlanningReport(Report):
                         quality = min_cost / cost
                     run['quality'] = round(quality, 4)
 
-        *filter_config* can be a list of configuration names. This is a
-        shortcut to show only some configurations and also determines the
-        order in which the configurations are shown in the report.
-        The following three reports all filter the same runs but only the
-        last one shows the configurations in the order [c2, c1]::
+        You can include only specific domains or configurations by using
+        :py:class:`filters <.Report>`.
+        If you provide a list for *filter_config* or *filter_config_nick*, it
+        will be used to determine the order of configurations in the report. ::
 
-            def filter_c1_and_c2(run):
-                return run['config'] in ['c2', 'c1']
-            PlanningReport(filter=filter_c1_and_c2, attributes=['coverage'])
+            # Use a filter function.
+            def only_blind_and_lmcut(run):
+                return run['config'] in ['WORK-blind', 'WORK-lmcut']
+            PlanningReport(filter=only_blind_and_lmcut)
 
-            PlanningReport(filter_config=['c1', 'c2'], attributes=['coverage'])
-
-            PlanningReport(filter_config=['c2', 'c1'], attributes=['coverage'])
+            # Filter with a list and set the order of the configs.
+            PlanningReport(filter_config=['WORK-lmcut', 'WORK-blind'])
+            PlanningReport(filter_config_nick=['lmcut', 'blind'])
         """
         self.derived_properties = kwargs.pop('derived_properties', [])
         # Remember the order of the configs if it is given as a key word argument filter.

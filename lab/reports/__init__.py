@@ -133,25 +133,25 @@ class Report(object):
         Examples:
 
         Include only *coverage* and *expansions* in the report and write a
-        LaTeX file at ``myreport.tex``: ::
+        LaTeX file at ``myreport.tex``::
 
             report = Report(attributes=['coverage', 'expansions'], format='tex')
             report(path_to_eval_dir, 'myreport.tex')
 
-        Only include successful runs in the report: ::
+        Only include successful runs in the report::
 
             report = Report(filter_coverage=1)
             report(path_to_eval_dir, 'myreport.html')
 
         Only include runs in the report where the time score is better than the
-        memory score: ::
+        memory score::
 
             def better_time_than_memory_score(run):
                 return run['score_search_time'] > run['score_memory']
             report = Report(filter=better_time_than_memory_score)
             report(path_to_eval_dir, 'myreport.html')
 
-        Filter function that filters, renames and sorts columns: ::
+        Filter function that filters and renames configs with additional sorting::
 
             def rename_configs(run):
                 config = run['config'].replace('WORK-', '')
