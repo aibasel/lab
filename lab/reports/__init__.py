@@ -140,26 +140,31 @@ class Report(object):
 
         Only include successful runs in the report: ::
 
-            def solved(run):
-                return run['coverage']
-            report = Report(filter=solved)
+            report = Report(filter_coverage=1)
+            report(path_to_eval_dir, 'myreport.html')
+
+        Only include runs in the report where the time score is better than the
+        memory score: ::
+
+            def better_time_than_memory_score(run):
+                return run['score_search_time'] > run['score_memory']
+            report = Report(filter=better_time_than_memory_score)
             report(path_to_eval_dir, 'myreport.html')
 
         Filter function that filters, renames and sorts columns: ::
 
-            def paper_configs(run):
+            def rename_configs(run):
                 config = run['config'].replace('WORK-', '')
-                # We want lama11 to be the leftmost column.
-                configs = ['lama11', 'fdss_sat1', 'fdss_sat2']
                 paper_names = {'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1',
                                'fdss_sat2': 'FDSS 2'}
-                if not config in configs:
-                    return False
-                pos = configs.index(config)
-                # "...:sort:" will be removed in the output and is only used
-                # for sorting.
-                run['config'] = '%d:sort:%s' % (pos, paper_names[config])
+                run['config'] = paper_names.get(config, 'unknown')
                 return run
+
+            # We want LAMA 2011 to be the leftmost column.
+            # Filters defined with key word arguments are evaluated last,
+            # so we use the updated config names here.
+            configs = ['LAMA 2011', 'FDSS 1', 'FDSS 2']
+            Report(filter=rename_configs, filter_config=configs)
 
         Filter function that only allows runs with a timeout in one of two domains::
 
