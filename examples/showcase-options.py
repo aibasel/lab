@@ -104,7 +104,12 @@ exp.add_step(Step('report-scatter',
                   exp.eval_dir, os.path.join(exp.eval_dir, 'scatter.png')))
 exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
-exp.add_step(Step('report-relative',
+exp.add_step(Step('report-relative-d',
+                  RelativeReport('domain', attributes=['expansions'],
+                                 filter_config=['WORK-many-plans', 'WORK-iter-search'],
+                                 rel_change=0.1, abs_change=20),
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
+exp.add_step(Step('report-relative-p',
                   RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
                                  filter_config_nick=['many-plans', 'iter-search']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
