@@ -38,21 +38,33 @@ class AbsoluteReport(PlanningReport):
         """
         *resolution* must be one of "domain" or "problem".
         """
+        assert resolution in ['domain', 'problem']
         self.resolution = resolution
         PlanningReport.__init__(self, *args, **kwargs)
 
     def get_markup(self):
-        # list of (attribute, table) pairs
-        tables = []
+        sections = []
         for attribute in self.attributes:
-            logging.info('Creating table for %s' % attribute)
-            table = self._get_table(attribute)
-            # We return None for a table if we don't want to add it
-            if table:
-                tables.append((attribute, str(table)))
+            logging.info('Creating table(s) for %s' % attribute)
+            if self.resolution == 'domain':
+                table = self._get_table(attribute)
+                # We return None for a table if we don't want to add it
+                if table:
+                    sections.append((attribute, str(table)))
+            else:
+                tables = []
+                for domain in sorted(self.domains.keys()):
+                    table = self._get_table(attribute, domain)
+                    # We return None for a table if we don't want to add it
+                    if table:
+                        tables.append((domain, str(table)))
+                if tables:
+                    section = '\n'.join(['**%s**\n%s\n' % (domain, table)
+                                         for (domain, table) in tables])
+                    sections.append((attribute, section))
 
-        return ''.join(['+ %s +\n%s\n' % (attr, table)
-                        for (attr, table) in tables])
+        return '\n'.join(['+ %s +\n\n%s' % (attr, section)
+                          for (attr, section) in sections])
 
     def _attribute_is_absolute(self, attribute):
         """
@@ -89,28 +101,36 @@ class AbsoluteReport(PlanningReport):
             table.info.append('The last rows give the %s across all domains.' %
                               ' and '.join(summary_names))
 
-    def _get_table(self, attribute):
+    def _get_suite_table(self, attribute):
         table = PlanningReport._get_empty_table(self, attribute)
         func_name, func = self._get_group_func(attribute)
-
-        if self.resolution == 'domain':
-            num_values = 0
-            self._add_table_info(attribute, func_name, table)
-            domain_config_values = defaultdict(list)
-            for domain, problems in self.domains.items():
-                for problem in problems:
-                    runs = self.problem_runs[(domain, problem)]
-                    if any(run.get(attribute) is None for run in runs):
-                        continue
-                    num_values += 1
-                    for config in self.configs:
-                        value = self.runs[(domain, problem, config)].get(attribute)
-                        if value is not None:
-                            domain_config_values[(domain, config)].append(value)
-            for (domain, config), values in domain_config_values.items():
-                table.add_cell('%s (%s)' % (domain, len(values)), config, func(values))
-            table.num_values = num_values
-        elif self.resolution == 'problem':
-            for (domain, problem, config), run in self.runs.items():
-                table.add_cell(domain + ':' + problem, config, run.get(attribute))
+        num_values = 0
+        self._add_table_info(attribute, func_name, table)
+        domain_config_values = defaultdict(list)
+        for domain, problems in self.domains.items():
+            for problem in problems:
+                runs = self.problem_runs[(domain, problem)]
+                if any(run.get(attribute) is None for run in runs):
+                    continue
+                num_values += 1
+                for config in self.configs:
+                    value = self.runs[(domain, problem, config)].get(attribute)
+                    if value is not None:
+                        domain_config_values[(domain, config)].append(value)
+        for (domain, config), values in domain_config_values.items():
+            table.add_cell('%s (%s)' % (domain, len(values)), config, func(values))
+        table.num_values = num_values
         return table
+
+    def _get_domain_table(self, attribute, domain):
+        table = PlanningReport._get_empty_table(self, attribute)
+
+        for config in self.configs:
+            for run in self.domain_config_runs[domain, config]:
+                table.add_cell(run['problem'], config, run.get(attribute))
+        return table
+
+    def _get_table(self, attribute, domain=None):
+        if domain:
+            return self._get_domain_table(attribute, domain)
+        return self._get_suite_table(attribute)

@@ -58,8 +58,8 @@ class RelativeReport(AbsoluteReport):
             sys.exit(1)
         AbsoluteReport.write(self)
 
-    def _get_table(self, attribute):
-        table = AbsoluteReport._get_table(self, attribute)
+    def _get_table(self, attribute, domain=None):
+        table = AbsoluteReport._get_table(self, attribute, domain)
         quotient_col = {}
         percent_col = {}
 
