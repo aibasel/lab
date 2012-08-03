@@ -107,7 +107,7 @@ class PlanningReport(Report):
         problems = set()
         domains = defaultdict(list)
         problem_runs = defaultdict(list)
-        domain_runs = defaultdict(list)
+        domain_config_runs = defaultdict(list)
         runs = {}
         for run_name, run in self.props.items():
             # Sanity checks
@@ -118,7 +118,7 @@ class PlanningReport(Report):
             domain, problem, config = run['domain'], run['problem'], run['config']
             problems.add((domain, problem))
             problem_runs[(domain, problem)].append(run)
-            domain_runs[(domain, config)].append(run)
+            domain_config_runs[(domain, config)].append(run)
             runs[(domain, problem, config)] = run
         for domain, problem in problems:
             domains[domain].append(problem)
@@ -131,8 +131,9 @@ class PlanningReport(Report):
             return self.configs.index(run['config'])
         for key, run_list in problem_runs.items():
             problem_runs[key] = sorted(run_list, key=run_key)
+
         self.problem_runs = problem_runs
-        self.domain_runs = domain_runs
+        self.domain_config_runs = domain_config_runs
         self.runs = runs
 
         # Sanity checks
@@ -156,8 +157,9 @@ class PlanningReport(Report):
                                  for (config, num_runs) in times.items() if num_runs > 1])
                 logging.critical('Sanity check failed')
         assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
-        assert len(self.domains) * len(self.configs) == len(self.domain_runs)
-        assert sum(len(runs) for runs in self.domain_runs.values()) == len(self.runs)
+        assert len(self.domains) * len(self.configs) == len(self.domain_config_runs)
+        assert (sum(len(runs) for runs in self.domain_config_runs.values()) ==
+                len(self.runs))
 
     def _compute_derived_properties(self):
         for func in self.derived_properties:

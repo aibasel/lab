@@ -83,7 +83,7 @@ class IpcReport(PlanningReport):
 
     def _compute_total_scores(self):
         scores = {}
-        for (domain, config), runs in self.domain_runs.items():
+        for (domain, config), runs in self.domain_config_runs.items():
             scores[config, domain] = sum(run.get(self.score, 0) for run in runs)
         return scores
 
