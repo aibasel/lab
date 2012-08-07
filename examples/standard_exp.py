@@ -66,7 +66,7 @@ class StandardDownwardExperiment(DownwardExperiment):
         if path is None:
             path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
         assert not os.path.isabs(path), path
-        expname = path
+        expname = os.path.basename(path)
 
         remote_exppath = os.path.join(REMOTE_EXPS, path)
         local_exppath = os.path.join(LOCAL_EXPS, path)
