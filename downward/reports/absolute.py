@@ -102,6 +102,8 @@ class AbsoluteReport(PlanningReport):
                               ' and '.join(summary_names))
 
     def _get_suite_table(self, attribute):
+        if not self.attribute_is_numeric(attribute):
+            logging.critical('Domain-wise reports only support numeric attributes.')
         table = PlanningReport._get_empty_table(self, attribute)
         func_name, func = self._get_group_func(attribute)
         num_values = 0
