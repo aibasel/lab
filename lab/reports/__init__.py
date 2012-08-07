@@ -241,8 +241,12 @@ class Report(object):
         return sorted(self._all_attributes.keys())
 
     def _get_numerical_attributes(self):
-        return [attr for (attr, typ) in self._all_attributes.items()
-                if typ in (int, float)]
+        return [attr for attr in self._all_attributes.keys()
+                if self.attribute_is_numeric(attr)]
+
+    def attribute_is_numeric(self, attribute):
+        """Return true if the values for *attribute* are ints or floats."""
+        return self._all_attributes[attribute] in [int, float]
 
     def get_markup(self):
         """

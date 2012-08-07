@@ -207,7 +207,7 @@ class PlanningReport(Report):
         Returns an empty table. Used and filled by subclasses.
         '''
         # Only add a highlighting and summary functions for numeric attributes.
-        if self._all_attributes[attribute] not in [int, float]:
+        if not self.attribute_is_numeric(attribute):
             table = Table(title=attribute, min_wins=None)
             table.set_column_order(self._get_config_order())
             return table
