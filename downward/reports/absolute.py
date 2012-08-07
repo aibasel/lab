@@ -59,11 +59,11 @@ class AbsoluteReport(PlanningReport):
                     if table:
                         tables.append((domain, str(table)))
                 if tables:
-                    section = '\n'.join(['**%s**\n%s\n' % (domain, table)
+                    section = '\n'.join(['== %s ==\n%s\n' % (domain, table)
                                          for (domain, table) in tables])
                     sections.append((attribute, section))
 
-        return '\n'.join(['+ %s +\n\n%s' % (attr, section)
+        return '\n'.join(['= %s =\n\n%s' % (attr, section)
                           for (attr, section) in sections])
 
     def _attribute_is_absolute(self, attribute):
