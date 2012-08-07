@@ -375,6 +375,12 @@ class DownwardExperiment(Experiment):
         """
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
+        self.set_property('suite', self.suites)
+        self.set_property('configs', [nick for nick, config in self.configs])
+        self.set_property('repo', self.repo)
+        self.set_property('limits', self.limits)
+        self.set_property('combinations', ['-'.join(part.name for part in combo)
+                                           for combo in self.combinations])
         checkouts.checkout(self.combinations)
         compile_cmd = ['./build_all', '-j%d' % self._jobs]
         checkouts.compile(self.combinations, cmd=compile_cmd)
