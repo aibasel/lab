@@ -19,17 +19,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import math
 import os
-import sys
 from collections import defaultdict
 
 from lab import tools
 
-from downward.reports import PlanningReport
+from downward.reports.plot import PlotReport
 
 
-class ScatterPlotReport(PlanningReport):
+class ScatterPlotReport(PlotReport):
     """
     Generate a scatter plot for a specific attribute.
     """
@@ -76,75 +74,32 @@ class ScatterPlotReport(PlanningReport):
         """
         self.get_category = get_category
         self.category_styles = category_styles
-        PlanningReport.__init__(self, *args, **kwargs)
-        assert len(self.attributes) == 1, self.attributes
+        PlotReport.__init__(self, *args, **kwargs)
 
-    def write_plot(self, attribute, filename):
-        # Import in method to be compatible to rtfd.org
-        try:
-            from matplotlib.backends import backend_agg
-            from matplotlib import figure
-        except ImportError, err:
-            logging.error('matplotlib could not be found: %s' % err)
-            sys.exit(1)
-
+    def _fill_categories(self):
         assert len(self.configs) == 2
-        attribute = self.attributes[0]
-
-        # It may be the case that no values are found
-        try:
-            max_value = max(run.get(attribute) for run in self.runs.values())
-        except ValueError:
-            pass
-
-        if max_value is None or max_value <= 0:
-            logging.info('Found no valid datapoints for the plot.')
-            sys.exit()
-
-        # Separate the missing values by plotting them at (value * 10) rounded
-        # to the next power of 10.
-        missing_val = 10 ** math.ceil(math.log10(max_value * 10))
-
         # Map category names to value tuples
         categories = defaultdict(list)
         for (domain, problem), (run1, run2) in self.problem_runs.items():
             assert (run1['config'] == self.configs[0] and
                     run2['config'] == self.configs[1])
-            val1 = run1.get(attribute)
-            val2 = run2.get(attribute)
+            val1 = run1.get(self.attribute)
+            val2 = run2.get(self.attribute)
             if val1 is None and val2 is None:
                 continue
             if val1 is None:
-                val1 = missing_val
+                val1 = self.missing_val
             if val2 is None:
-                val2 = missing_val
+                val2 = self.missing_val
             if self.get_category is None:
                 category = None
             else:
                 category = self.get_category(run1, run2)
             categories[category].append((val1, val2))
+        return categories
 
-        # Pick any style for categories for which no style is defined.
-        # TODO add more possible styles
-        possible_styles = [(m, c) for m in 'ox+^v<>' for c in 'rgby']
-        missing_category_styles = (set(categories.keys()) -
-                                   set(self.category_styles.keys()))
-        for i, missing in enumerate(missing_category_styles):
-            self.category_styles[missing] = possible_styles[i % len(possible_styles)]
-
-        plot_size = missing_val * 1.25
-
-        # Create a figure with size 6 x 6 inches
-        fig = figure.Figure(figsize=(10, 10))
-
-        # Create a canvas and add the figure to it
-        canvas = backend_agg.FigureCanvasAgg(fig)
-        ax = fig.add_subplot(111)
-
-        # Make a descriptive title and set axis labels
-        ax.set_title(attribute, fontsize=14)
-        ax.set_xlabel(self.configs[0], fontsize=12)
-        ax.set_ylabel(self.configs[1], fontsize=12)
+    def _plot(self, categories):
+        ax = self.axes
 
         # Display grid
         ax.grid(b=True, linestyle='-', color='0.75')
@@ -154,54 +109,40 @@ class ScatterPlotReport(PlanningReport):
             marker, c = self.category_styles[category]
             ax.scatter(*zip(*coordinates), s=20, marker=marker, c=c, label=category)
 
-        # Only print a legend if there is at least one non-default category
-        legend = None
-        if any(key is not None for key in categories.keys()):
-            legend = ax.legend(scatterpoints=1,
-                               loc='center left',
-                               bbox_to_anchor=(1, 0.5))
+        plot_size = self.missing_val * 1.25
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         ax.plot([0.001, plot_size], [0.001, plot_size], 'k')
 
-        linear_attributes = ['cost', 'coverage', 'plan_length']
-        if attribute not in linear_attributes:
-            logging.info('Using logarithmic scaling')
+        if self.attribute not in self.LINEAR:
             ax.set_xscale('symlog')
             ax.set_yscale('symlog')
 
         ax.set_xlim(0, plot_size)
         ax.set_ylim(0, plot_size)
 
-        # We do not want the default formatting that gives zeros a special font
-        for axis in (ax.xaxis, ax.yaxis):
-            formatter = axis.get_major_formatter()
-            old_format_call = formatter.__call__
+        self._change_axis_formatter(ax.xaxis)
+        self._change_axis_formatter(ax.yaxis)
 
-            def new_format_call(x, pos):
-                if x == 0:
-                    return 0
-                if x == missing_val:
-                    return 'Missing'  # '$\mathdefault{None^{\/}}$' no effect
-                return old_format_call(x, pos)
+        # Make a descriptive title and set axis labels
+        self.axes.set_title(self.attribute, fontsize=14)
+        self.axes.set_xlabel(self.configs[0], fontsize=12)
+        self.axes.set_ylabel(self.configs[1], fontsize=12)
 
-            formatter.__call__ = new_format_call
+    def write_plot(self, filename):
+        self._reset()
+        self._calc_max_val(self.runs.values())
+        if self.max_value is None or self.max_value <= 0:
+            logging.critical('Found no valid datapoints for the plot.')
 
-        # Save the generated scatter plot to a PNG file
-        # Legend is still bugged in mathplotlib, but there is a patch see:
-        # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
-        extra_artists = []
-        if legend:
-            extra_artists.append(legend.legendPatch)
-        canvas.print_figure(filename, dpi=100,
-                            bbox_inches='tight',
-                            bbox_extra_artists=extra_artists)
+        categories = self._fill_categories()
+        self._fill_category_styles(categories)
+        self._plot(categories)
+        self._create_legend(categories)
+        self._print_figure(filename)
 
     def write(self):
-        assert len(self.configs) == 2, self.configs
-
         if not self.outfile.endswith('.png'):
             self.outfile += '.png'
         tools.makedirs(os.path.dirname(self.outfile))
-        self.write_plot(self.attributes[0], self.outfile)
-        logging.info('Wrote file://%s' % self.outfile)
+        self.write_plot(self.outfile)
