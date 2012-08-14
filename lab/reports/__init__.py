@@ -502,7 +502,7 @@ class Table(collections.defaultdict):
         values = [row.get(col) for col in self.cols]
         values = [(round(val, 2) if isinstance(val, float) else val)
                   for val in values]
-        only_one_value = len(set(values)) == 1
+        only_one_value = len(set(values)) == 1 if self.highlight else False
         real_values = [val for val in values if val is not None]
 
         if real_values:
