@@ -502,7 +502,11 @@ class Table(collections.defaultdict):
         values = [row.get(col) for col in self.cols]
         values = [(round(val, 2) if isinstance(val, float) else val)
                   for val in values]
-        only_one_value = len(set(values)) == 1 if self.highlight else False
+        try:
+            only_one_value = len(set(values)) == 1
+        except TypeError:
+            # values may e.g. contain the unhashable type list.
+            only_one_value = False
         real_values = [val for val in values if val is not None]
 
         if real_values:
