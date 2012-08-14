@@ -125,7 +125,7 @@ exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_fil
 #exp.add_step(Step.zip_exp_dir(exp))
 
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem',
-                    attributes=['coverage', 'search_time', 'cost', 'error']),
+                    attributes=['coverage', 'search_time', 'cost', 'error', 'cost_all']),
                   exp.eval_dir, abs_problem_report_file))
 
 # Remove the experiment directory
