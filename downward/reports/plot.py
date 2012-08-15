@@ -181,9 +181,9 @@ class PlotReport(PlanningReport):
             self.axes.plot(xticks, y, marker=marker, c=c, label=category)
         self.axes.set_xlim(left=0, right=max_x + 1)
         self.axes.set_ylim(bottom=0, top=self.missing_val * 1.25)
-        self._change_axis_formatter(self.axes.yaxis)
         if self.attribute not in self.LINEAR:
             self.axes.set_yscale('symlog')
+        self._change_axis_formatter(self.axes.yaxis)
 
         # Make a descriptive title and set axis labels.
         self.axes.set_title(self.attribute, fontsize=14)
