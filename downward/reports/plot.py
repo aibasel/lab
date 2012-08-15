@@ -204,16 +204,28 @@ class ProblemPlotReport(PlotReport):
         return categories
 
     def _plot(self, categories):
-        max_x = 1
-        for category, coordinates in sorted(categories.items()):
+        # Find all x-values.
+        all_x = set()
+        for coordinates in categories.values():
+            x, y = zip(*coordinates)
+            all_x |= set(x)
+        all_x = sorted(all_x)
+
+        # Map all x-values to positions on the x-axis.
+        indices = dict((val, i) for i, val in enumerate(all_x, start=1))
+
+        # Reserve space on the x-axis for all x-values and the labels.
+        self.axes.set_xticks(range(1, len(all_x) + 1))
+        self.axes.set_xticklabels(all_x)
+
+        # Plot all categories.
+        for category, coordinates in categories.items():
             marker, c = self.category_styles[category]
             x, y = zip(*coordinates)
-            xticks = range(1, len(x) + 1)
-            max_x = max(len(x), max_x)
-            self.axes.set_xticks(xticks)
-            self.axes.set_xticklabels(x)
-            self.axes.plot(xticks, y, marker=marker, c=c, label=category)
-        self.axes.set_xlim(left=0, right=max_x + 1)
+            xticks = [indices[val] for val in x]
+            self.axes.scatter(xticks, y, marker=marker, c=c, label=category)
+
+        self.axes.set_xlim(left=0, right=len(all_x) + 1)
         self.axes.set_ylim(bottom=0, top=self.missing_val * 1.25)
         if self.attribute not in self.LINEAR:
             self.axes.set_yscale('symlog')
