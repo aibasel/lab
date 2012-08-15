@@ -76,7 +76,8 @@ class ScatterPlotReport(PlotReport):
         self.category_styles = category_styles
         PlotReport.__init__(self, *args, **kwargs)
 
-    def _fill_categories(self):
+    def _fill_categories(self, runs):
+        # We discard the *runs* parameter.
         assert len(self.configs) == 2
         # Map category names to value tuples
         categories = defaultdict(list)
@@ -129,20 +130,8 @@ class ScatterPlotReport(PlotReport):
         self.axes.set_xlabel(self.configs[0], fontsize=12)
         self.axes.set_ylabel(self.configs[1], fontsize=12)
 
-    def write_plot(self, filename):
-        self._reset()
-        self._calc_max_val(self.runs.values())
-        if self.max_value is None or self.max_value <= 0:
-            logging.critical('Found no valid datapoints for the plot.')
-
-        categories = self._fill_categories()
-        self._fill_category_styles(categories)
-        self._plot(categories)
-        self._create_legend(categories)
-        self._print_figure(filename)
-
     def write(self):
         if not self.outfile.endswith('.png'):
             self.outfile += '.png'
         tools.makedirs(os.path.dirname(self.outfile))
-        self.write_plot(self.outfile)
+        self._write_plot(self.runs.values(), self.outfile)

@@ -32,7 +32,7 @@ class PlotReport(PlanningReport):
     """
     Generate a scatter plot for a specific attribute.
     """
-    LINEAR = ['cost', 'coverage', 'plan_length']
+    LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
 
     def __init__(self, get_x_and_category=None, category_styles={}, *args, **kwargs):
         """
@@ -83,7 +83,7 @@ class PlotReport(PlanningReport):
 
     def _default_get_x_and_category(self, run):
         """
-        All points are in the same category and we just number them ascendingly.
+        Plot the configs on the x-axis. All values are in the same category.
         """
         return (run['config'], None)
 
@@ -127,16 +127,6 @@ class PlotReport(PlanningReport):
             self.legend = self.axes.legend(scatterpoints=1, loc='center left',
                                       bbox_to_anchor=(1, 0.5))
 
-    def _fill_categories(self, runs):
-        categories = defaultdict(list)
-        for run in runs:
-            x, category = self.get_x_and_category(run)
-            y = run.get(self.attribute)
-            if y is None:
-                y = self.missing_val
-            categories[category].append((x, y))
-        return categories
-
     def _fill_category_styles(self, categories):
         # Pick any style for categories for which no style is defined.
         # TODO: add more possible styles.
@@ -158,13 +148,33 @@ class PlotReport(PlanningReport):
         if self.max_value:
             self.missing_val = 10 ** math.ceil(math.log10(self.max_value * 10))
 
+    def _print_figure(self, filename):
+        # Save the generated scatter plot to a PNG file.
+        # Legend is still bugged in mathplotlib, but there is a patch see:
+        # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
+        extra_artists = []
+        if self.legend:
+            extra_artists.append(self.legend.legendPatch)
+        self.canvas.print_figure(filename, dpi=100, bbox_inches='tight',
+                                 bbox_extra_artists=extra_artists)
+        logging.info('Wrote file://%s' % filename)
+
+    def _fill_categories(self, runs):
+        categories = defaultdict(list)
+        for run in runs:
+            x, category = self.get_x_and_category(run)
+            y = run.get(self.attribute)
+            if y is None:
+                y = self.missing_val
+            categories[category].append((x, y))
+        return categories
+
     def _plot(self, categories):
         max_x = 1
         for category, coordinates in sorted(categories.items()):
             marker, c = self.category_styles[category]
             x, y = zip(*coordinates)
             xticks = range(1, len(x) + 1)
-            print category, x, xticks, y
             max_x = max(len(x), max_x)
             self.axes.set_xticks(xticks)
             self.axes.set_xticklabels(x)
@@ -178,18 +188,7 @@ class PlotReport(PlanningReport):
         # Make a descriptive title and set axis labels.
         self.axes.set_title(self.attribute, fontsize=14)
 
-    def _print_figure(self, filename):
-        # Save the generated scatter plot to a PNG file.
-        # Legend is still bugged in mathplotlib, but there is a patch see:
-        # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
-        extra_artists = []
-        if self.legend:
-            extra_artists.append(self.legend.legendPatch)
-        self.canvas.print_figure(filename, dpi=100, bbox_inches='tight',
-                                 bbox_extra_artists=extra_artists)
-        logging.info('Wrote file://%s' % filename)
-
-    def write_plot(self, domain, problem, runs, filename):
+    def _write_plot(self, runs, filename):
         self._reset()
 
         self._calc_max_val(runs)
@@ -205,14 +204,14 @@ class PlotReport(PlanningReport):
         self._create_legend(categories)
         self._print_figure(filename)
 
-    def write_plots(self, directory):
+    def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):
             filename = os.path.join(directory, '-'.join([self.attribute, domain,
                                                          problem]) + '.png')
-            self.write_plot(domain, problem, runs, filename)
+            self._write_plot(runs, filename)
 
     def write(self):
         if os.path.isfile(self.outfile):
             logging.critical('outfile must be a directory for this report.')
         tools.makedirs(self.outfile)
-        self.write_plots(self.outfile)
+        self._write_plots(self.outfile)
