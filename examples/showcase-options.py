@@ -15,6 +15,7 @@ from downward.checkouts import Translator, Preprocessor, Planner
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.suite import SuiteReport
 from downward.reports.scatter import ScatterPlotReport
+from downward.reports.plot import PlotReport, ProblemPlotReport
 from downward.reports.ipc import IpcReport
 from downward.reports.relative import RelativeReport
 
@@ -47,14 +48,14 @@ iterated_search = [
     "--heuristic", "hadd=add()",
     "--search", "iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)"]
 
-def ipdbi(imp):
-    return ("ipdbi%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
+def ipdb(imp):
+    return ("ipdb%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
 
 exp.add_suite('gripper:prob01.pddl')
 exp.add_suite('zenotravel:pfile1')
 exp.add_config('many-plans', multiple_plans)
 exp.add_config('iter-search', iterated_search)
-exp.add_config(*ipdbi(10))
+exp.add_config(*ipdb(10))
 # Use original LAMA 2011 configuration
 exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
 exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py'))
@@ -78,13 +79,23 @@ def solved(run):
 def only_two_configs(run):
     return run['config_nick'] in ['many-plans', 'iter-search']
 
+def remove_work_tag(run):
+    """Remove "WORK-" from the configs."""
+    config = run['config']
+    config = config[5:] if config.startswith('WORK-') else config
+    # Shorten long config name.
+    config = config.replace('downward-', '')
+    run['config'] = config
+    return run
+
 def filter_and_transform(run):
-    """Remove "WORK" from the configs and only include certain configurations"""
+    """Remove "WORK-" from the configs and only include certain configurations.
+
+    This also demonstrates a nested filter (one that calls another filter)."""
     if not only_two_configs(run):
         return False
-    config = run['config']
-    run['config'] = config[5:] if config.startswith('WORK-') else config
-    return run
+    return remove_work_tag(run)
+
 
 # Add report steps
 abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
@@ -98,10 +109,27 @@ exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=AT
 def get_domain(run1, run2):
     return run1['domain']
 
+def get_config_category(run):
+    category = {'many-plans': 'sat', 'iter-search': 'sat', 'ipdb': 'opt',
+                'lama11': 'sat', 'fdss': 'opt'}
+    for nick, cat in category.items():
+        if nick in run['config_nick']:
+            return cat
+
 exp.add_step(Step('report-scatter',
+                  ScatterPlotReport(attributes=['expansions'], filter=only_two_configs),
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter.png')))
+exp.add_step(Step('report-scatter-domain',
                   ScatterPlotReport(attributes=['expansions'], filter=only_two_configs,
                                     get_category=get_domain),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'scatter.png')))
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
+exp.add_step(Step('report-plot-prob',
+                  ProblemPlotReport(attributes=['generated'], filter=remove_work_tag),
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
+exp.add_step(Step('report-plot-cat',
+                  ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag,
+                                    get_category=get_config_category),
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
 exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
 exp.add_step(Step('report-relative-d',
