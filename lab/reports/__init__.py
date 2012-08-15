@@ -183,7 +183,7 @@ class Report(object):
             self.filters = [filter]
         for arg_name, arg_value in kwargs.items():
             assert arg_name.startswith('filter_'), (
-                'Did not recognize key word argument \'%s\'' % arg_name)
+                'Did not recognize key word argument "%s"' % arg_name)
             filter_for = arg_name[len('filter_'):]
             # Add a filter for the specified property.
             self.filters.append(self._build_filter(filter_for, arg_value))
