@@ -207,7 +207,7 @@ class Report(object):
         self._load_data()
         self._apply_filter()
         self._scan_data()
-        logging.info('Available attributes: %s' % self.all_attributes)
+        logging.info('Available attributes: %s' % ', '.join(self.all_attributes))
 
         # Expand glob characters.
         if self.attributes:
@@ -507,8 +507,8 @@ class Table(collections.defaultdict):
         except TypeError:
             # values may e.g. contain the unhashable type list.
             only_one_value = False
-        real_values = [val for val in values if val is not None]
 
+        real_values = [val for val in values if val is not None]
         if real_values:
             min_value = min(real_values)
             max_value = max(real_values)
