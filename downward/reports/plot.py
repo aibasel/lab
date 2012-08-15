@@ -30,62 +30,29 @@ from downward.reports import PlanningReport
 
 class PlotReport(PlanningReport):
     """
-    Generate a scatter plot for a specific attribute.
+    Abstract base class for Plot classes.
     """
     LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
 
-    def __init__(self, get_x_and_category=None, category_styles={}, *args, **kwargs):
+    def __init__(self, category_styles=None, **kwargs):
         """
         ``kwargs['attributes']`` must contain exactly one attribute.
 
-        *get_category* can be a function taking two dictionaries of run
-        properties and returning a string that will be used to group the values.
-        Runs for which this function returns None are shown in a default category
-        and are not contained in the legend.
-        For example, to group by domain use::
-
-            def domain_as_category(run1, run2):
-                # run2['domain'] has the same value, because we always
-                # compare two runs of the same problem
-                return run1['domain']
-
-        *category_styles* can be a dictionary that maps category names to tuples
-        (marker, color) where marker and color are valid values for pyplot
-        (see http://matplotlib.sourceforge.net/api/pyplot_api.html)
+        Subclasses may define a *get_category* function that returns a category
+        name for points in the plot. These categories are separated visually
+        by drawing them with different styles. You can set the styles manually
+        by providing a dictionary *category_styles* that maps category names to
+        tuples (marker, color) where marker and color are valid values for
+        pyplot (see http://matplotlib.sourceforge.net/api/pyplot_api.html).
         For example to change the default style to blue stars use::
 
-            ScatterPlotReport(attributes=['time'], category_styles={None: ('*','b')})
-
-        *get_category* and *category_styles* are best used together, e.g. to
-        highlight a domain or interesting values::
-
-            def my_categories(run1, run2):
-                if run1['search_time'] > 10 * run2['search_time']:
-                    return 'strong improvement'
-                if run1['domain'] == 'gripper':
-                    return 'gripper'
-
-            my_styles = {
-                'strong improvement': ('x','r'),
-                'gripper': ('*','b'),
-                None: ('o','y'),
-            }
-
-            ScatterPlotReport(attributes=['time'],
-                              get_category=my_categories,
-                              category_styles=my_styles)
+            ScatterPlotReport(attributes=['expansions'],
+                              category_styles={None: ('*','b')})
         """
-        self.get_x_and_category = get_x_and_category or self._default_get_x_and_category
-        self.category_styles = category_styles
-        PlanningReport.__init__(self, *args, **kwargs)
+        PlanningReport.__init__(self, **kwargs)
+        self.category_styles = category_styles or {}
         assert len(self.attributes) == 1, self.attributes
         self.attribute = self.attributes[0]
-
-    def _default_get_x_and_category(self, run):
-        """
-        Plot the configs on the x-axis. All values are in the same category.
-        """
-        return (run['config'], None)
 
     def _reset(self):
         self.max_value = self.missing_val = None
@@ -160,9 +127,76 @@ class PlotReport(PlanningReport):
         logging.info('Wrote file://%s' % filename)
 
     def _fill_categories(self, runs):
+        raise NotImplementedError
+
+    def _plot(self, categories):
+        raise NotImplementedError
+
+    def _write_plot(self, runs, filename):
+        self._reset()
+
+        self._calc_max_val(runs)
+        if self.max_value is None or self.max_value <= 0:
+            logging.info('Found no valid datapoints for the plot.')
+            return
+
+        # Map category names to value tuples
+        categories = self._fill_categories(runs)
+        self._fill_category_styles(categories)
+
+        self._plot(categories)
+        self._create_legend(categories)
+        self._print_figure(filename)
+
+    def write(self):
+        raise NotImplementedError
+
+
+class ProblemPlotReport(PlotReport):
+    """
+    For each problem generate a plot for a specific attribute.
+    """
+    def __init__(self, get_category=None, get_x=None, **kwargs):
+        """
+        *get_category* can be a function that takes a **single** run (dictionary
+        of properties) and returns a category name which is used to group the
+        values. Grouped values are drawn with the same style, e.g. red stars.
+        Runs for which this function returns None are shown in a default
+        category and are not contained in the legend.
+        If *get_category* is None, all runs are shown in the default category.
+
+        *get_x* can be a function that takes a **single** run and returns a
+        numeric value or string that should be used as the x-ccordinate for this
+        point (the y-coordinate is predetermined by the value for the plotted
+        attribute). If *get_x* is None, the config name is used as the
+        x-coordinate.
+
+        For example, to compare different ipdb and m&s configurations use::
+
+            # Configs: 'ipdb-1000', 'ipdb-2000', 'mas-1000', 'mas-2000'
+            def get_states(run):
+                nick, states = run['config_nick'].split('-')
+                return states
+            def get_nick(run):
+                nick, states = run['config_nick'].split('-')
+                return nick
+
+            PlotReport(attributes=['expansions'],
+                       get_x=get_states,
+                       get_category=get_nick)
+
+        """
+        PlotReport.__init__(self, **kwargs)
+        # By default plot the configs on the x-axis.
+        self.get_x = get_x or (lambda run: run['config'])
+        # By default all values are in the same category.
+        self.get_category = get_category or (lambda run: None)
+
+    def _fill_categories(self, runs):
         categories = defaultdict(list)
         for run in runs:
-            x, category = self.get_x_and_category(run)
+            x = self.get_x(run)
+            category = self.get_category(run)
             y = run.get(self.attribute)
             if y is None:
                 y = self.missing_val
@@ -187,22 +221,6 @@ class PlotReport(PlanningReport):
 
         # Make a descriptive title and set axis labels.
         self.axes.set_title(self.attribute, fontsize=14)
-
-    def _write_plot(self, runs, filename):
-        self._reset()
-
-        self._calc_max_val(runs)
-        if self.max_value is None or self.max_value <= 0:
-            logging.info('Found no valid datapoints for the plot.')
-            return
-
-        # Map category names to value tuples
-        categories = self._fill_categories(runs)
-        self._fill_category_styles(categories)
-
-        self._plot(categories)
-        self._create_legend(categories)
-        self._print_figure(filename)
 
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):

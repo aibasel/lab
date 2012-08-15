@@ -51,16 +51,18 @@ class PlanningReport(Report):
     """
     This is the base class for all Downward reports.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """
-        kwargs can contain the following items:
+        In addition to the parameters for the base class
+        :py:class:`Report <lab.reports.Report>`, *kwargs* can contain the following
+        items:
 
         *derived_properties* must be a list of functions that take a single
         argument. This argument is a list of problem runs i.e. it contains one
         run-dictionary for each config in the experiment. The function is
         called for every problem in the suite. A function that computes the
         IPC score based on the results of the experiment is added automatically
-        to the *derived_properties* list and serves as an example here: ::
+        to the *derived_properties* list and serves as an example here::
 
             def quality(problem_runs):
                 min_cost = reports.minimum(run.get('cost') for run in problem_runs)
@@ -94,7 +96,7 @@ class PlanningReport(Report):
         self.configs = kwargs.get('filter_config', None)
         self.config_nicks = kwargs.get('filter_config_nick', None)
 
-        Report.__init__(self, *args, **kwargs)
+        Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
 
     def _scan_data(self):

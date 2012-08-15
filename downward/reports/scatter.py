@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 import os
 from collections import defaultdict
 
@@ -31,12 +30,11 @@ class ScatterPlotReport(PlotReport):
     """
     Generate a scatter plot for a specific attribute.
     """
-    def __init__(self, get_category=None, category_styles={}, *args, **kwargs):
+    def __init__(self, get_category=None, **kwargs):
         """
-        ``kwargs['attributes']`` must contain exactly one attribute.
-
-        *get_category* can be a function taking two dictionaries of run
-        properties and returning a string that will be used to group the values.
+        *get_category* can be a function that takes **two** runs (dictionaries of
+        properties) and returns a category name. This name is used to group the
+        points in the plot.
         Runs for which this function returns None are shown in a default category
         and are not contained in the legend.
         For example, to group by domain use::
@@ -46,35 +44,33 @@ class ScatterPlotReport(PlotReport):
                 # compare two runs of the same problem
                 return run1['domain']
 
-        *category_styles* can be a dictionary that maps category names to tuples
-        (marker, color) where marker and color are valid values for pyplot
-        (see http://matplotlib.sourceforge.net/api/pyplot_api.html)
-        For example to change the default style to blue stars use::
+        *get_category* and *category_styles*
+        (see :py:class:`PlotReport <downward.reports.plot.PlotReport>`) are best
+        used together, e.g. to distinguish between different levels of difficulty::
 
-            ScatterPlotReport(attributes=['time'], category_styles={None: ('*','b')})
+            def improvement(run1, run2):
+                time1 = run1.get('search_time', 1800)
+                time2 = run2.get('search_time', 1800)
+                if time1 > 10 * time2:
+                    return 'strong'
+                if time1 >= time2:
+                    return 'small'
+                return 'worse'
 
-        *get_category* and *category_styles* are best used together, e.g. to
-        highlight a domain or interesting values::
-
-            def my_categories(run1, run2):
-                if run1['search_time'] > 10 * run2['search_time']:
-                    return 'strong improvement'
-                if run1['domain'] == 'gripper':
-                    return 'gripper'
-
-            my_styles = {
-                'strong improvement': ('x','r'),
-                'gripper': ('*','b'),
-                None: ('o','y'),
+            styles = {
+                'strong': ('x','r'),
+                'small':  ('*','b'),
+                'worse':  ('o','y'),
             }
 
-            ScatterPlotReport(attributes=['time'],
-                              get_category=my_categories,
-                              category_styles=my_styles)
+            PlotReport(attributes=['search_time'],
+                       get_category=improvement,
+                       category_styles=styles)
+
         """
-        self.get_category = get_category
-        self.category_styles = category_styles
-        PlotReport.__init__(self, *args, **kwargs)
+        PlotReport.__init__(self, **kwargs)
+        # By default all values are in the same category.
+        self.get_category = get_category or (lambda run1, run2: None)
 
     def _fill_categories(self, runs):
         # We discard the *runs* parameter.
