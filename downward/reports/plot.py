@@ -28,6 +28,59 @@ from lab import tools
 from downward.reports import PlanningReport
 
 
+class Plot(object):
+    def __init__(self):
+        self.legend = None
+        self.create_canvas_and_axes()
+
+    def create_canvas_and_axes(self):
+        # Import in method to be compatible to rtfd.org
+        try:
+            from matplotlib.backends import backend_agg
+            from matplotlib import figure
+        except ImportError, err:
+            logging.critical('matplotlib could not be found: %s' % err)
+
+        # Create a figure with size 6 x 6 inches
+        fig = figure.Figure(figsize=(10, 10))
+
+        # Create a canvas and add the figure to it
+        self.canvas = backend_agg.FigureCanvasAgg(fig)
+        self.axes = fig.add_subplot(111)
+
+    @staticmethod
+    def change_axis_formatter(axis, missing_val):
+        # We do not want the default formatting that gives zeros a special font
+        formatter = axis.get_major_formatter()
+        old_format_call = formatter.__call__
+
+        def new_format_call(x, pos):
+            if x == 0:
+                return 0
+            if x == missing_val:
+                return 'Missing'  # '$\mathdefault{None^{\/}}$' no effect
+            return old_format_call(x, pos)
+
+        formatter.__call__ = new_format_call
+
+    def create_legend(self, categories):
+        # Only print a legend if there is at least one non-default category.
+        if any(key is not None for key in categories.keys()):
+            self.legend = self.axes.legend(scatterpoints=1, loc='center left',
+                                      bbox_to_anchor=(1, 0.5))
+
+    def print_figure(self, filename):
+        # Save the generated scatter plot to a PNG file.
+        # Legend is still bugged in mathplotlib, but there is a patch see:
+        # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
+        extra_artists = []
+        if self.legend:
+            extra_artists.append(self.legend.legendPatch)
+        self.canvas.print_figure(filename, dpi=100, bbox_inches='tight',
+                                 bbox_extra_artists=extra_artists)
+        logging.info('Wrote file://%s' % filename)
+
+
 class PlotReport(PlanningReport):
     """
     Abstract base class for Plot classes.
@@ -54,99 +107,55 @@ class PlotReport(PlanningReport):
         assert len(self.attributes) == 1, self.attributes
         self.attribute = self.attributes[0]
 
-    def _reset(self):
-        self.max_value = self.missing_val = None
-        self.axes = self.canvas = self.legend = None
-        self._create_canvas_and_axes()
-
-    def _create_canvas_and_axes(self):
-        # Import in method to be compatible to rtfd.org
-        try:
-            from matplotlib.backends import backend_agg
-            from matplotlib import figure
-        except ImportError, err:
-            logging.critical('matplotlib could not be found: %s' % err)
-
-        # Create a figure with size 6 x 6 inches
-        fig = figure.Figure(figsize=(10, 10))
-
-        # Create a canvas and add the figure to it
-        self.canvas = backend_agg.FigureCanvasAgg(fig)
-        self.axes = fig.add_subplot(111)
-
-    def _change_axis_formatter(self, axis):
-        # We do not want the default formatting that gives zeros a special font
-        formatter = axis.get_major_formatter()
-        old_format_call = formatter.__call__
-
-        def new_format_call(x, pos):
-            if x == 0:
-                return 0
-            if x == self.missing_val:
-                return 'Missing'  # '$\mathdefault{None^{\/}}$' no effect
-            return old_format_call(x, pos)
-
-        formatter.__call__ = new_format_call
-
-    def _create_legend(self, categories):
-        # Only print a legend if there is at least one non-default category.
-        if any(key is not None for key in categories.keys()):
-            self.legend = self.axes.legend(scatterpoints=1, loc='center left',
-                                      bbox_to_anchor=(1, 0.5))
-
-    def _fill_category_styles(self, categories):
-        # Pick any style for categories for which no style is defined.
-        # TODO: add more possible styles.
-        possible_styles = [(m, c) for m in 'ox+^v<>' for c in 'rgby']
-        missing_category_styles = (set(categories.keys()) -
-                                   set(self.category_styles.keys()))
-        for i, missing in enumerate(missing_category_styles):
-            self.category_styles[missing] = possible_styles[i % len(possible_styles)]
-
     def _calc_max_val(self, runs):
         # It may be the case that no values are found.
         try:
-            self.max_value = max(run.get(self.attribute) for run in runs)
+            return max(run.get(self.attribute) for run in runs)
         except ValueError:
-            self.max_value = None
+            return None
 
-        # Separate the missing values by plotting them at (value * 10) rounded
-        # to the next power of 10.
-        if self.max_value:
-            self.missing_val = 10 ** math.ceil(math.log10(self.max_value * 10))
+    def _get_missing_val(self, max_value):
+        """
+        Separate the missing values by plotting them at (max_value * 10) rounded
+        to the next power of 10.
+        """
+        assert max_value is not None
+        return 10 ** math.ceil(math.log10(max_value * 10))
 
-    def _print_figure(self, filename):
-        # Save the generated scatter plot to a PNG file.
-        # Legend is still bugged in mathplotlib, but there is a patch see:
-        # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
-        extra_artists = []
-        if self.legend:
-            extra_artists.append(self.legend.legendPatch)
-        self.canvas.print_figure(filename, dpi=100, bbox_inches='tight',
-                                 bbox_extra_artists=extra_artists)
-        logging.info('Wrote file://%s' % filename)
+    def _get_category_styles(self, categories):
+        # Pick any style for categories for which no style is defined.
+        # TODO: add more possible styles.
+        styles = self.category_styles.copy()
+        possible_styles = [(m, c) for m in 'ox+^v<>' for c in 'rgby']
+        missing_category_styles = (set(categories.keys()) - set(styles.keys()))
+        for i, missing in enumerate(missing_category_styles):
+            styles[missing] = possible_styles[i % len(possible_styles)]
+        return styles
 
-    def _fill_categories(self, runs):
+    def _fill_categories(self, runs, missing_val):
         raise NotImplementedError
 
-    def _plot(self, categories):
+    def _plot(self, axes, categories, missing_val):
         raise NotImplementedError
 
     def _write_plot(self, runs, filename):
-        self._reset()
+        plot = Plot()
 
-        self._calc_max_val(runs)
-        if self.max_value is None or self.max_value <= 0:
+        max_value = self._calc_max_val(runs)
+        if max_value is None or max_value <= 0:
             logging.info('Found no valid datapoints for the plot.')
             return
 
-        # Map category names to value tuples
-        categories = self._fill_categories(runs)
-        self._fill_category_styles(categories)
+        missing_val = self._get_missing_val(max_value)
 
-        self._plot(categories)
-        self._create_legend(categories)
-        self._print_figure(filename)
+        # Map category names to value tuples
+        categories = self._fill_categories(runs, missing_val)
+        styles = self._get_category_styles(categories)
+
+        self._plot(plot.axes, categories, styles, missing_val)
+
+        plot.create_legend(categories)
+        plot.print_figure(filename)
 
     def write(self):
         raise NotImplementedError
@@ -192,18 +201,18 @@ class ProblemPlotReport(PlotReport):
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run: None)
 
-    def _fill_categories(self, runs):
+    def _fill_categories(self, runs, missing_val):
         categories = defaultdict(list)
         for run in runs:
             x = self.get_x(run)
             category = self.get_category(run)
             y = run.get(self.attribute)
             if y is None:
-                y = self.missing_val
+                y = missing_val
             categories[category].append((x, y))
         return categories
 
-    def _plot(self, categories):
+    def _plot(self, axes, categories, styles, missing_val):
         # Find all x-values.
         all_x = set()
         for coordinates in categories.values():
@@ -215,24 +224,24 @@ class ProblemPlotReport(PlotReport):
         indices = dict((val, i) for i, val in enumerate(all_x, start=1))
 
         # Reserve space on the x-axis for all x-values and the labels.
-        self.axes.set_xticks(range(1, len(all_x) + 1))
-        self.axes.set_xticklabels(all_x)
+        axes.set_xticks(range(1, len(all_x) + 1))
+        axes.set_xticklabels(all_x)
 
         # Plot all categories.
         for category, coordinates in categories.items():
-            marker, c = self.category_styles[category]
+            marker, c = styles[category]
             x, y = zip(*coordinates)
             xticks = [indices[val] for val in x]
-            self.axes.scatter(xticks, y, marker=marker, c=c, label=category)
+            axes.scatter(xticks, y, marker=marker, c=c, label=category)
 
-        self.axes.set_xlim(left=0, right=len(all_x) + 1)
-        self.axes.set_ylim(bottom=0, top=self.missing_val * 1.25)
+        axes.set_xlim(left=0, right=len(all_x) + 1)
+        axes.set_ylim(bottom=0, top=missing_val * 1.25)
         if self.attribute not in self.LINEAR:
-            self.axes.set_yscale('symlog')
-        self._change_axis_formatter(self.axes.yaxis)
+            axes.set_yscale('symlog')
+        Plot.change_axis_formatter(axes.yaxis, missing_val)
 
         # Make a descriptive title and set axis labels.
-        self.axes.set_title(self.attribute, fontsize=14)
+        axes.set_title(self.attribute, fontsize=14)
 
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):

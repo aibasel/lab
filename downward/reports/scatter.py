@@ -23,7 +23,7 @@ from collections import defaultdict
 
 from lab import tools
 
-from downward.reports.plot import PlotReport
+from downward.reports.plot import Plot, PlotReport
 
 
 class ScatterPlotReport(PlotReport):
@@ -72,7 +72,7 @@ class ScatterPlotReport(PlotReport):
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
 
-    def _fill_categories(self, runs):
+    def _fill_categories(self, runs, missing_val):
         # We discard the *runs* parameter.
         assert len(self.configs) == 2
         # Map category names to value tuples
@@ -85,9 +85,9 @@ class ScatterPlotReport(PlotReport):
             if val1 is None and val2 is None:
                 continue
             if val1 is None:
-                val1 = self.missing_val
+                val1 = missing_val
             if val2 is None:
-                val2 = self.missing_val
+                val2 = missing_val
             if self.get_category is None:
                 category = None
             else:
@@ -95,36 +95,34 @@ class ScatterPlotReport(PlotReport):
             categories[category].append((val1, val2))
         return categories
 
-    def _plot(self, categories):
-        ax = self.axes
-
+    def _plot(self, axes, categories, styles, missing_val):
         # Display grid
-        ax.grid(b=True, linestyle='-', color='0.75')
+        axes.grid(b=True, linestyle='-', color='0.75')
 
         # Generate the scatter plots
         for category, coordinates in sorted(categories.items()):
-            marker, c = self.category_styles[category]
-            ax.scatter(*zip(*coordinates), s=20, marker=marker, c=c, label=category)
+            marker, c = styles[category]
+            axes.scatter(*zip(*coordinates), s=20, marker=marker, c=c, label=category)
 
-        plot_size = self.missing_val * 1.25
+        plot_size = missing_val * 1.25
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
-        ax.plot([0.001, plot_size], [0.001, plot_size], 'k')
+        axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
 
         if self.attribute not in self.LINEAR:
-            ax.set_xscale('symlog')
-            ax.set_yscale('symlog')
+            axes.set_xscale('symlog')
+            axes.set_yscale('symlog')
 
-        ax.set_xlim(0, plot_size)
-        ax.set_ylim(0, plot_size)
+        axes.set_xlim(0, plot_size)
+        axes.set_ylim(0, plot_size)
 
-        self._change_axis_formatter(ax.xaxis)
-        self._change_axis_formatter(ax.yaxis)
+        for axis in [axes.xaxis, axes.yaxis]:
+            Plot.change_axis_formatter(axis, missing_val)
 
         # Make a descriptive title and set axis labels
-        self.axes.set_title(self.attribute, fontsize=14)
-        self.axes.set_xlabel(self.configs[0], fontsize=12)
-        self.axes.set_ylabel(self.configs[1], fontsize=12)
+        axes.set_title(self.attribute, fontsize=14)
+        axes.set_xlabel(self.configs[0], fontsize=12)
+        axes.set_ylabel(self.configs[1], fontsize=12)
 
     def write(self):
         if not self.outfile.endswith('.png'):
