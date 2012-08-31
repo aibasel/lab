@@ -29,7 +29,7 @@ import logging
 
 from lab import reports
 from lab import tools
-from lab.reports import Report, Table
+from lab.reports import Report
 
 
 def quality(problem_runs):
@@ -191,36 +191,3 @@ class PlanningReport(Report):
         else:
             config_order = list(tools.natural_sort(configs))
         return config_order
-
-    def _get_empty_table(self, attribute):
-        '''
-        Returns an empty table. Used and filled by subclasses.
-        '''
-        # Only add a highlighting and summary functions for numeric attributes.
-        if not self.attribute_is_numeric(attribute):
-            table = Table(title=attribute, min_wins=None)
-            table.set_column_order(self._get_config_order())
-            return table
-
-        # Decide whether we want to highlight minima or maxima.
-        max_attribute_parts = ['score', 'initial_h_value', 'coverage',
-                               'quality', 'single_solver']
-        min_wins = True
-        for attr_part in max_attribute_parts:
-            if attr_part in attribute:
-                min_wins = False
-
-        table = Table(title=attribute, min_wins=min_wins)
-
-        if attribute in ['search_time', 'total_time']:
-            table.add_summary_function('GEOMETRIC MEAN', reports.gm)
-        else:
-            table.add_summary_function('SUM', sum)
-
-        if 'score' in attribute:
-            # When summarising score results from multiple domains we show
-            # normalised averages so that each domain is weighed equally.
-            table.add_summary_function('AVERAGE', reports.avg)
-
-        table.set_column_order(self._get_config_order())
-        return table

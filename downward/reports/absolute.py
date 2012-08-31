@@ -21,7 +21,7 @@
 from collections import defaultdict
 import logging
 
-from lab.reports import avg, gm
+from lab import reports
 
 from downward.reports import PlanningReport
 
@@ -77,9 +77,9 @@ class AbsoluteReport(PlanningReport):
     def _get_group_func(self, attribute):
         """Decide on a group function for this attribute."""
         if 'score' in attribute:
-            return 'average', avg
+            return 'average', reports.avg
         elif attribute in ['search_time', 'total_time']:
-            return 'geometric mean', gm
+            return 'geometric mean', reports.gm
         return 'sum', sum
 
     def _add_table_info(self, attribute, func_name, table):
@@ -104,7 +104,8 @@ class AbsoluteReport(PlanningReport):
     def _get_suite_table(self, attribute):
         if not self.attribute_is_numeric(attribute):
             logging.critical('Domain-wise reports only support numeric attributes.')
-        table = PlanningReport._get_empty_table(self, attribute)
+        table = self._get_empty_table(attribute)
+        self._add_summary_functions(table, attribute)
         func_name, func = self._get_group_func(attribute)
         num_values = 0
         self._add_table_info(attribute, func_name, table)
@@ -125,7 +126,7 @@ class AbsoluteReport(PlanningReport):
         return table
 
     def _get_domain_table(self, attribute, domain):
-        table = PlanningReport._get_empty_table(self, attribute)
+        table = self._get_empty_table(attribute)
 
         for config in self.configs:
             for run in self.domain_config_runs[domain, config]:
@@ -136,3 +137,32 @@ class AbsoluteReport(PlanningReport):
         if domain:
             return self._get_domain_table(attribute, domain)
         return self._get_suite_table(attribute)
+
+    def _get_empty_table(self, attribute):
+        """Return an empty table."""
+        if self.attribute_is_numeric(attribute):
+            # Decide whether we want to highlight minima or maxima.
+            max_attribute_parts = ['score', 'initial_h_value', 'coverage',
+                                   'quality', 'single_solver']
+            min_wins = True
+            for attr_part in max_attribute_parts:
+                if attr_part in attribute:
+                    min_wins = False
+        else:
+            # Do not highlight anything.
+            min_wins = None
+
+        table = reports.Table(title=attribute, min_wins=min_wins)
+        table.set_column_order(self._get_config_order())
+        return table
+
+    def _add_summary_functions(self, table, attribute):
+        if attribute in ['search_time', 'total_time']:
+            table.add_summary_function('GEOMETRIC MEAN', reports.gm)
+        else:
+            table.add_summary_function('SUM', sum)
+
+        if 'score' in attribute:
+            # When summarising score results from multiple domains we show
+            # normalised averages so that each domain is weighed equally.
+            table.add_summary_function('AVERAGE', reports.avg)
