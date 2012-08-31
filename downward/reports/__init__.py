@@ -51,7 +51,7 @@ class PlanningReport(Report):
     """
     This is the base class for all Downward reports.
     """
-    def __init__(self, **kwargs):
+    def __init__(self, derived_properties=None, **kwargs):
         """
         In addition to the parameters for the base class
         :py:class:`Report <lab.reports.Report>`, *kwargs* can contain the following
@@ -91,7 +91,7 @@ class PlanningReport(Report):
             PlanningReport(filter_config=['WORK-lmcut', 'WORK-blind'])
             PlanningReport(filter_config_nick=['lmcut', 'blind'])
         """
-        self.derived_properties = kwargs.pop('derived_properties', [])
+        self.derived_properties = derived_properties or []
         # Remember the order of the configs if it is given as a key word argument filter.
         self.configs = kwargs.get('filter_config', None)
         self.config_nicks = kwargs.get('filter_config_nick', None)
