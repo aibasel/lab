@@ -53,29 +53,17 @@ class PlanningReport(Report):
     """
     def __init__(self, derived_properties=None, **kwargs):
         """
-        In addition to the parameters for the base class
-        :py:class:`Report <lab.reports.Report>`, *kwargs* can contain the following
-        items:
+        See :py:class:`Report <lab.reports.Report>` for inherited parameters.
 
         *derived_properties* must be a list of functions that take a single
         argument. This argument is a list of problem runs i.e. it contains one
         run-dictionary for each config in the experiment. The function is
         called for every problem in the suite. A function that computes the
         IPC score based on the results of the experiment is added automatically
-        to the *derived_properties* list and serves as an example here::
+        to the *derived_properties* list and serves as an example here:
 
-            def quality(problem_runs):
-                min_cost = reports.minimum(run.get('cost') for run in problem_runs)
-                for run in problem_runs:
-                    cost = run.get('cost')
-                    if cost is None:
-                        quality = 0.0
-                    elif cost == 0:
-                        assert min_cost == 0
-                        quality = 1.0
-                    else:
-                        quality = min_cost / cost
-                    run['quality'] = round(quality, 4)
+        .. literalinclude:: ../downward/reports/__init__.py
+           :pyobject: quality
 
         You can include only specific domains or configurations by using
         :py:class:`filters <.Report>`.
