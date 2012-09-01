@@ -524,6 +524,9 @@ class Table(collections.defaultdict):
         for col, value in enumerate(values):
             if isinstance(value, float):
                 value_text = '%.2f' % value
+            elif isinstance(value, list):
+                # Avoid involuntary link markup due to the list brackets.
+                value_text = "''%s''" % value
             else:
                 value_text = str(value)
 
