@@ -365,7 +365,7 @@ class Report(object):
 
 
 class Table(collections.defaultdict):
-    def __init__(self, title='', min_wins=None):
+    def __init__(self, title='', min_wins=None, colored=False):
         """
         The *Table* class can be useful for `Report` subclasses that want to
         return a table as txt2tags markup. It is realized as a dictionary of
@@ -377,6 +377,9 @@ class Table(collections.defaultdict):
         *min_wins* can be either None, True or False. If it is True (False),
         the cell with the lowest (highest) value in each row will be
         highlighted.
+
+        If *colored* is True, the values of each row will be given colors from a
+        colormap.
 
         >>> t = Table(title='expansions')
         >>> t.add_cell('prob1', 'cfg1', 10)
@@ -410,8 +413,8 @@ class Table(collections.defaultdict):
         collections.defaultdict.__init__(self, dict)
 
         self.title = title
-        self.highlight = min_wins is not None
         self.min_wins = min_wins
+        self.colored = colored
 
         self.summary_funcs = []
         self.info = []
@@ -515,17 +518,22 @@ class Table(collections.defaultdict):
         else:
             min_value = max_value = 'undefined'
 
+        highlight = self.min_wins is not None
+        colors = tools.get_colors(values, self.min_wins) if self.colored else None
         parts = [row_name]
-        for col_index, value in enumerate(values):
+        for col, value in enumerate(values):
             if isinstance(value, float):
                 value_text = '%.2f' % value
             else:
                 value_text = str(value)
 
-            if self.highlight and only_one_value:
+            if self.colored:
+                color = tools.rgb_fractions_to_html_color(*colors[col])
+                value_text = '{%s|color:%s}' % (value_text, color)
+            elif highlight and only_one_value:
                 value_text = '{%s|color:Gray}' % value_text
-            elif self.highlight and (value == min_value and self.min_wins or
-                                     value == max_value and not self.min_wins):
+            elif highlight and (value == min_value and self.min_wins or
+                                value == max_value and not self.min_wins):
                 value_text = '**%s**' % value_text
             parts.append(value_text)
         return parts

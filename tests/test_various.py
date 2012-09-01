@@ -81,3 +81,9 @@ def test_none_removal():
     assert minimum([1, 2]) == 1
     assert minimum([1, 2, None]) == 1
     assert minimum([None, None]) == None
+
+
+def test_colors():
+    assert tools.get_colors([0, 0.5, 1], True) == [(0.0, 0.7, 0.0), (0.0, 0.7, 0.7), (0.0, 0.0, 0.7)]
+    assert tools.get_colors([0, 0.5, 1], False) == [(0.0, 0.0, 0.7), (0.0, 0.7, 0.7), (0.0, 0.7, 0.0)]
+    assert tools.rgb_fractions_to_html_color(1, 0, 0.5) == 'rgb(255,0,127)'

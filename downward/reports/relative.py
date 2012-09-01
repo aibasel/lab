@@ -103,7 +103,8 @@ class RelativeReport(AbsoluteReport):
 
         table.add_col('ZZ1:sort:Factor', quotient_col)
         #table.add_col('ZZ2:sort:%-Change', percent_col)
-        table.highlight = False
+        table.min_wins = None
+        table.colored = False
         table.summary_funcs = []
         table.add_summary_function('avg', reports.avg)
         table.add_summary_function('min', reports.minimum)

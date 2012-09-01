@@ -17,17 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import colorsys
+import email.mime.text
+import json
+import logging
 import os
 import platform
-import sys
-import shutil
-import subprocess
 import re
-import traceback
-import logging
-import json
+import shutil
 import smtplib
-from email.mime.text import MIMEText
+import subprocess
+import sys
+import traceback
 
 from external import argparse
 
@@ -314,7 +315,7 @@ def sendmail(from_, to, subject, text, smtp_host='localhost', port=25):
 
     """
     # Create a text/plain message
-    msg = MIMEText(text)
+    msg = email.mime.text.MIMEText(text)
 
     msg['Subject'] = subject
     msg['From'] = from_
@@ -325,6 +326,42 @@ def sendmail(from_, to, subject, text, smtp_host='localhost', port=25):
     s = smtplib.SMTP(smtp_host, port)
     s.sendmail(from_, [to], msg.as_string())
     s.quit()
+
+
+def get_color(fraction, min_wins):
+    assert 0 <= fraction <= 1
+    if min_wins:
+        fraction = 1 - fraction
+
+    # Calculate hues.
+    start = colorsys.rgb_to_hsv(0, 0, 0.8)[0]
+    end = colorsys.rgb_to_hsv(0, 0.8, 0)[0]
+
+    return colorsys.hsv_to_rgb(start + fraction * (end - start), 1, 0.7)
+
+
+def get_colors(values, min_wins):
+    default = (0.5,) * 3
+    real_values = [val for val in values if val is not None]
+    if not real_values:
+        return [default for val in values]
+    min_value = min(real_values)
+    max_value = max(real_values)
+    diff = float(max_value - min_value)
+    if diff == 0:
+        return [default for val in values]
+    colors = []
+    for val in values:
+        if val is None:
+            colors.append(default)
+        else:
+            fraction = (val - min_value) / diff
+            colors.append(get_color(fraction, min_wins))
+    return colors
+
+
+def rgb_fractions_to_html_color(r, g, b):
+    return 'rgb(%d,%d,%d)' % (r * 255, g * 255, b * 255)
 
 
 def get_terminal_size():

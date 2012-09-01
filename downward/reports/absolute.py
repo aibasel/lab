@@ -34,13 +34,17 @@ class AbsoluteReport(PlanningReport):
         | gripper      | 118    | 72     |
         | zenotravel   | 21     | 17     |
     """
-    def __init__(self, resolution, *args, **kwargs):
+    def __init__(self, resolution, colored=False, **kwargs):
         """
         *resolution* must be one of "domain" or "problem".
+
+        If *colored* is True, the values of each row will be given colors from a
+        colormap.
         """
         assert resolution in ['domain', 'problem']
         self.resolution = resolution
-        PlanningReport.__init__(self, *args, **kwargs)
+        self.colored = colored
+        PlanningReport.__init__(self, **kwargs)
 
     def get_markup(self):
         sections = []
@@ -140,19 +144,18 @@ class AbsoluteReport(PlanningReport):
 
     def _get_empty_table(self, attribute):
         """Return an empty table."""
+        colored = self.colored
         if self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
             max_attribute_parts = ['score', 'initial_h_value', 'coverage',
                                    'quality', 'single_solver']
-            min_wins = True
-            for attr_part in max_attribute_parts:
-                if attr_part in attribute:
-                    min_wins = False
+            min_wins = not any(part in attribute for part in max_attribute_parts)
         else:
             # Do not highlight anything.
             min_wins = None
+            colored = False
 
-        table = reports.Table(title=attribute, min_wins=min_wins)
+        table = reports.Table(title=attribute, min_wins=min_wins, colored=colored)
         table.set_column_order(self._get_config_order())
         return table
 
