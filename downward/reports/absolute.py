@@ -39,12 +39,14 @@ class AbsoluteReport(PlanningReport):
         *resolution* must be one of "domain" or "problem".
 
         If *colored* is True, the values of each row will be given colors from a
-        colormap.
+        colormap. Only HTML reports can be colored currently.
         """
+        PlanningReport.__init__(self, **kwargs)
         assert resolution in ['domain', 'problem']
         self.resolution = resolution
+        if colored and not 'html' in self.output_format:
+            logging.critical('Only HTML reports can be colored.')
         self.colored = colored
-        PlanningReport.__init__(self, **kwargs)
 
     def get_markup(self):
         sections = []

@@ -152,7 +152,7 @@ exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_fil
 # Compress the experiment directory
 #exp.add_step(Step.zip_exp_dir(exp))
 
-exp.add_step(Step('report-abs-p', AbsoluteReport('problem',
+exp.add_step(Step('report-abs-p', AbsoluteReport('problem', colored=True,
                     attributes=['coverage', 'search_time', 'cost', 'error', 'cost_all']),
                   exp.eval_dir, abs_problem_report_file))
 
