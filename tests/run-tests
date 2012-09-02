@@ -7,6 +7,8 @@
 
 set -e
 
+REPO='/home/jendrik/projects/Downward/downward'
+
 # Change into top directory.
 cd "$(dirname "$0")"
 cd ..
@@ -56,9 +58,24 @@ rm -rf /tmp/simple-exp
 ./simple-exp.py --all
 cd ../..
 
-# Run demo downward experiment if the necessary directories exists.
-cd examples
-./showcase-options.py --help && ./showcase-options.py --all
-cd ..
+# Only check downward code if $REPO exists.
+if [ -d "$REPO" ]; then
+    cd examples
+
+    # Check that the examples use the correct API.
+    ./custom-attributes.py
+    ./lmcut.py
+    ./initial-opt-config.py
+    ./translator-opt.py
+    ./translator-sat.py
+
+    # Run demo downward experiment.
+    ./showcase-options.py --help && ./showcase-options.py --all
+
+    cd ..
+else
+    echo
+    echo "Repo $REPO is missing. Could not run downward tests."
+fi
 
 echo TESTS PASSED
