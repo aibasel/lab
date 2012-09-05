@@ -175,6 +175,7 @@ class Report(object):
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
+        self.toc = True
         if not filter:
             self.filters = []
         elif isinstance(filter, collections.Iterable):
@@ -289,7 +290,7 @@ class Report(object):
         if len(markup) < 100000:
             print 'REPORT MARKUP:\n'
             print doc
-        return doc.render(self.output_format, {'toc': 1})
+        return doc.render(self.output_format, {'toc': self.toc})
 
     def write(self):
         """

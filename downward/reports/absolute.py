@@ -47,9 +47,11 @@ class AbsoluteReport(PlanningReport):
         if colored and not 'html' in self.output_format:
             logging.critical('Only HTML reports can be colored.')
         self.colored = colored
+        self.toc = False
 
     def get_markup(self):
         sections = []
+        toc_lines = []
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
             if self.resolution == 'domain':
@@ -69,9 +71,19 @@ class AbsoluteReport(PlanningReport):
                                          (domain, attribute, domain, table)
                                          for (domain, table) in tables])
                     sections.append((attribute, section))
+                    toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
+                    toc_lines.append('  - ' + ' '.join('[""%s"" #%s-%s]' %
+                            (domain, attribute, domain) for domain, table in tables))
 
-        return '\n'.join(['= %s =[%s]\n\n%s' % (attr, attr, section)
-                          for (attr, section) in sections])
+        if self.resolution == 'domain':
+            toc = '- ' + ' '.join('[""%s"" #%s]' % (attr, attr)
+                                  for (attr, section) in sections)
+        else:
+            toc = '\n'.join(toc_lines)
+
+        content = '\n'.join('= %s =[%s]\n\n%s' % (attr, attr, section)
+                            for (attr, section) in sections)
+        return '%s\n\n\n%s' % (toc, content)
 
     def _attribute_is_absolute(self, attribute):
         """
