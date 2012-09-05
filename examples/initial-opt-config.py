@@ -24,16 +24,16 @@ REPO = standard_exp.REPO
 
 if standard_exp.REMOTE:
     # On the grid
-    SUITE = 'IPC08_OPT_STRIPS'
+    SUITE = 'OPTIMAL'
     ENV = GkiGridEnvironment(priority=0, queue='opteron_core.q')
 else:
     # Local testing
     SUITE = 'gripper:prob01.pddl'
-    ENV = LocalEnvironment(processes=2)
+    ENV = LocalEnvironment(processes=1)
 
 ATTRIBUTES = ['coverage', 'expansions', 'total_time']
 # The time and memory limits can be changed for translate, preprocess and search.
-LIMITS = {'search_time': 900}
+LIMITS = {'search_time': 300}
 # Use the working copy versions of all three components.
 COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO))]
 
