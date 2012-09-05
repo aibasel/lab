@@ -24,7 +24,7 @@ REPO = standard_exp.REPO
 
 if standard_exp.REMOTE:
     # On the grid
-    SUITE = 'OPTIMAL'
+    SUITE = 'OPTIMAL_1TO20'
     ENV = GkiGridEnvironment(priority=0, queue='opteron_core.q')
 else:
     # Local testing
