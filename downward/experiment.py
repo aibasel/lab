@@ -504,11 +504,11 @@ class DownwardExperiment(Experiment):
         # Add the preprocess files for later parsing
         run.add_resource('OUTPUT', path('output'), 'output', symlink=sym)
         run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas',
-                         symlink=sym)
+                         symlink=sym, required=False)
         run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl',
-                         symlink=sym)
+                         symlink=sym, required=False)
         run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl',
-                         symlink=sym)
+                         symlink=sym, required=False)
         run.add_resource('PROPERTIES', path('properties'), 'properties')
 
         # {all,test}.groups were created by old versions of the planner.
