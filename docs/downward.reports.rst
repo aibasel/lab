@@ -9,7 +9,7 @@
 .. autoclass:: downward.reports.timeout.TimeoutReport
 
 Plots
-=====
+-----
 
 .. autoclass:: downward.reports.plot.PlotReport
 
