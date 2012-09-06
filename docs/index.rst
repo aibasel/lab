@@ -8,6 +8,7 @@ code on a large set of benchmarks.
    :maxdepth: 1
 
    lab.tutorial
+   news
 
 **API Reference**
 
@@ -29,6 +30,7 @@ for the `Fast Downward planning system <http://www.fast-downward.org>`_.
 
    downward.tutorial
    downward.faq
+   news
 
 **API Reference**
 
