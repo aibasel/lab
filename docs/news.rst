@@ -13,7 +13,7 @@ lab
 * Try to guess error reason when run was killed because of resource limits (Florian)
 * Do not abort after failed commands by default
 * Grid: When --all is passed only run all steps if none are supplied
-* Environments: Support Uni Basel maia cluster
+* Environments: Support Uni Basel maia cluster (Malte)
 * Add "pi" example
 * Add example showing how to parse custom attributes
 * Do not add resources and files again if they are already added to the experiment
