@@ -257,12 +257,6 @@ class DownwardExperiment(Experiment):
         if limits:
             self.limits.update(limits)
 
-        # Do not copy the .obj directory into the experiment directory.
-        self.ignores.append('*.obj')
-
-        # We don't need VAL's sources.
-        self.ignores.append('VAL')
-
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
 
@@ -393,6 +387,7 @@ class DownwardExperiment(Experiment):
         self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
         _require_src_dirs(self, self.combinations)
         self._adapt_path(stage)
+        self._setup_ignores(stage)
         if stage == 'preprocess':
             self._check_python_version()
             self.add_resource('PREPROCESS_PARSER',
@@ -412,6 +407,19 @@ class DownwardExperiment(Experiment):
 
         Experiment.build(self, **kwargs)
         self.path = self.orig_path
+
+    def _setup_ignores(self, stage):
+        self.ignores = []
+
+        # Do not copy the .obj directory into the experiment directory.
+        self.ignores.append('*.obj')
+
+        # We don't need VAL's sources.
+        self.ignores.append('VAL')
+
+        if stage == 'preprocess':
+            # We don't need the search dir for preprocess experiments.
+            self.ignores.append('search')
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
