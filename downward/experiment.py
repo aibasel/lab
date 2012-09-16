@@ -142,6 +142,13 @@ class PreprocessRun(DownwardRun):
                          mem_limit=exp.limits['preprocess_memory'])
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
+        if exp.compact:
+            # Compress and afterwards delete output.sas.
+            self.add_command('compress-output-sas',
+                             ['tar', '-czf', 'output.sas.tar.gz', 'output.sas'])
+            self.add_command('remove-output-sas',
+                             ['rm', 'output.sas'])
+
         ext_config = '-'.join([self.translator.name, self.preprocessor.name])
         self._save_id(ext_config)
         self.set_property('stage', 'preprocess')
