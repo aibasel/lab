@@ -120,8 +120,10 @@ class PreprocessRun(DownwardRun):
 
         self.require_resource(self.preprocessor.shell_name)
 
-        self.add_resource("DOMAIN", self.problem.domain_file(), "domain.pddl")
-        self.add_resource("PROBLEM", self.problem.problem_file(), "problem.pddl")
+        self.add_resource("DOMAIN", self.problem.domain_file(), "domain.pddl",
+                          symlink=exp.compact)
+        self.add_resource("PROBLEM", self.problem.problem_file(), "problem.pddl",
+                          symlink=exp.compact)
 
         python = exp._get_path_to_python()
 
@@ -216,9 +218,9 @@ class DownwardExperiment(Experiment):
         form (Translator, Preprocessor, Planner). If no combinations are given,
         perform an experiment with the working copy in *repo*.
 
-        If *compact* is True, link to preprocessing files instead of copying
-        them. Only use this option if the preprocessed files will **not** be
-        changed during the experiment.
+        If *compact* is True, link to benchmarks and preprocessed files instead
+        of copying them. Only use this option if the linked files will **not**
+        be changed during the experiment.
 
         If *limits* is given, it must be a dictionary and it will be used to
         overwrite the default limits (see source for format).
