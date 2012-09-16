@@ -244,12 +244,12 @@ class Properties(dict):
             json.dump(self, f, indent=4)
 
 
-def fast_updatetree(src, dst, ignore=None):
+def fast_updatetree(src, dst, symlinks=False, ignore=None):
     """
     Copies the contents from src onto the tree at dst, overwrites files with
-    the same name
+    the same name.
 
-    Code taken and expanded from python docs
+    Code taken and expanded from python docs.
     """
     names = os.listdir(src)
     if ignore is not None:
@@ -266,8 +266,18 @@ def fast_updatetree(src, dst, ignore=None):
         srcname = os.path.join(src, name)
         dstname = os.path.join(dst, name)
         try:
-            if os.path.isdir(srcname):
-                fast_updatetree(srcname, dstname, ignore)
+            if symlinks and os.path.islink(srcname):
+                linkto = os.readlink(srcname)
+                if not os.path.isabs(linkto):
+                    # Calculate new relative link path.
+                    abs_link = os.path.abspath(os.path.join(os.path.dirname(srcname),
+                                                            linkto))
+                    linkto = os.path.relpath(abs_link, os.path.dirname(dstname))
+                if os.path.exists(dstname):
+                    remove(dstname)
+                os.symlink(linkto, dstname)
+            elif os.path.isdir(srcname):
+                fast_updatetree(srcname, dstname, symlinks, ignore)
             else:
                 shutil.copy2(srcname, dstname)
             # XXX What about devices, sockets etc.?

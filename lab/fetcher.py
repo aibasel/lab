@@ -48,7 +48,7 @@ class Fetcher(object):
         dest_dir = os.path.join(eval_dir, *run_id)
         if copy_all:
             tools.makedirs(dest_dir)
-            tools.fast_updatetree(run_dir, dest_dir)
+            tools.fast_updatetree(run_dir, dest_dir, symlinks=True)
 
         return run_id, props
 
