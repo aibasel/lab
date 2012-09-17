@@ -30,7 +30,6 @@ REV_CACHE_DIR = os.path.join(tools.USER_DIR, 'revision-cache')
 tools.makedirs(REV_CACHE_DIR)
 
 ABS_REV_CACHE = {}
-PARENT_REV_CACHE = {}
 
 
 class Checkout(object):
@@ -91,10 +90,6 @@ class Checkout(object):
     @property
     def bin_dir(self):
         return os.path.join(self.src_dir, self.part)
-
-    @property
-    def parent_rev(self):
-        raise NotImplementedError
 
     @property
     def shell_name(self):
@@ -176,16 +171,6 @@ class HgCheckout(Checkout):
                              (path, self.rev))
         # Save space by deleting the benchmarks.
         shutil.rmtree(os.path.join(path, 'benchmarks'), ignore_errors=True)
-
-    @property
-    def parent_rev(self):
-        rev = 'tip' if self.rev == 'WORK' else self.rev
-        if rev in PARENT_REV_CACHE:
-            return PARENT_REV_CACHE[rev]
-        cmd = ['hg', 'log', '-r', rev, '--template', '{node|short}']
-        parent = get_command_output(cmd, cwd=self.checkout_dir)
-        PARENT_REV_CACHE[rev] = parent
-        return parent
 
 
 class Translator(HgCheckout):

@@ -81,9 +81,6 @@ class DownwardRun(Run):
         self.set_property('translator', self.translator.rev)
         self.set_property('preprocessor', self.preprocessor.rev)
 
-        self.set_property('translator_parent', self.translator.parent_rev)
-        self.set_property('preprocessor_parent', self.preprocessor.parent_rev)
-
         self.set_property('domain', self.domain_name)
         self.set_property('problem', self.problem_name)
 
@@ -147,7 +144,6 @@ class SearchRun(DownwardRun):
 
         self.planner = planner
         self.set_property('planner', self.planner.rev)
-        self.set_property('planner_parent', self.planner.parent_rev)
 
         self.require_resource(self.planner.shell_name)
         if config:
