@@ -404,10 +404,6 @@ class DownwardExperiment(Experiment):
         self.add_resource('SRC_%s' % part.name, part.src_dir, 'code-%s' % part.name)
 
     def _checkout_and_compile(self, stage, **kwargs):
-        if kwargs.get('only_main_script', False):
-            # No need to fetch and compile the code if we only need the script.
-            return
-
         translators = set()
         preprocessors = set()
         planners = set()
