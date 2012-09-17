@@ -52,11 +52,6 @@ LIMITS = {
 }
 
 
-# At least one of those must be found (First is taken if many are present)
-PLANNER_BINARIES = ['downward', 'downward-debug', 'downward-profile',
-                    'release-search', 'search']
-
-
 # Make the same check as in src/translate/translate.py.
 VERSION_STMT = '''\
 import platform
@@ -462,18 +457,8 @@ class DownwardExperiment(Experiment):
                           preprocessor.get_bin_dest())
 
     def _prepare_planner(self, planner):
-        # Get the planner binary
-        bin = None
-        for name in PLANNER_BINARIES:
-            path = planner.get_bin(name)
-            if os.path.isfile(path):
-                bin = path
-                break
-        if not bin:
-            logging.error('None of the binaries %s could be found in %s' %
-                          (PLANNER_BINARIES, planner.bin_dir))
-            sys.exit(1)
-        self.add_resource(planner.shell_name, bin, planner.get_bin_dest())
+        self.add_resource(planner.shell_name, planner.get_bin('downward'),
+                          planner.get_bin_dest())
 
         # Find all portfolios and copy them into the experiment directory
         for portfolio in self.portfolios:
