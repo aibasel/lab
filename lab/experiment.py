@@ -274,6 +274,7 @@ class Experiment(_Buildable):
 
         self._set_run_dirs()
 
+        # TODO: Currently no_main_script is always False.
         if not no_main_script:
             # This is the first part where we only write the main script.
             # We only overwrite the exp dir in the first part.

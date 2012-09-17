@@ -21,7 +21,6 @@
 import os
 import sys
 import logging
-import itertools
 
 from lab import tools
 from lab.tools import run_command, get_command_output
@@ -217,23 +216,3 @@ class Planner(HgCheckout):
                 logging.critical('Build failed in: %s' % self.bin_dir)
 
 # -----------------------------------------------------------------------------
-
-
-def checkout(combinations):
-    """Check out the code once for each separate checkout directory."""
-    for part in sorted(set(itertools.chain(*combinations))):
-        part.checkout()
-
-
-def compile(combinations, options=None):
-    """Compile the code.
-
-    Compile each revision only once. Do not try to compile the translator.
-    """
-    preprocessors = set()
-    planners = set()
-    for translator, preprocessor, planner in combinations:
-        preprocessors.add(preprocessor)
-        planners.add(planner)
-    for part in sorted(list(preprocessors) + list(planners)):
-        part.compile(options)

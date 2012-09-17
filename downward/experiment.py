@@ -26,11 +26,9 @@ experiments with them.
 import os
 import sys
 import logging
-import itertools
 import subprocess
 
 from lab.experiment import Run, Experiment
-from downward import checkouts
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward import suites
 from lab import tools
@@ -67,13 +65,6 @@ sys.stdout.write('Translator Python version: %s\\n' % platform.python_version())
 if sys.version_info[0] == 2 and sys.version_info[1] != 7:
     sys.exit(1)
 '''
-
-
-def _require_src_dirs(exp, combinations):
-    for checkout in set(itertools.chain(*combinations)):
-        logging.info('Requiring %s' % checkout.src_dir)
-        exp.add_resource('SRC_%s' % checkout.name, checkout.src_dir,
-                         'code-%s' % checkout.name)
 
 
 class DownwardRun(Run):
@@ -385,17 +376,18 @@ class DownwardExperiment(Experiment):
         self.set_property('limits', self.limits)
         self.set_property('combinations', ['-'.join(part.name for part in combo)
                                            for combo in self.combinations])
-        checkouts.checkout(self.combinations)
-        checkouts.compile(self.combinations, options=['-j%d' % self._jobs])
+
         self.runs = []
         self.new_files = []
         self.resources = []
 
         # Include the experiment code again.
         self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
-        _require_src_dirs(self, self.combinations)
+
         self._adapt_path(stage)
         self._setup_ignores(stage)
+        self._checkout_and_compile(stage, **kwargs)
+
         if stage == 'preprocess':
             self._check_python_version()
             self.add_resource('PREPROCESS_PARSER',
@@ -416,6 +408,37 @@ class DownwardExperiment(Experiment):
         Experiment.build(self, **kwargs)
         self.path = self.orig_path
 
+    def _require_part(self, part):
+        logging.info('Requiring %s' % part.src_dir)
+        self.add_resource('SRC_%s' % part.name, part.src_dir, 'code-%s' % part.name)
+
+    def _checkout_and_compile(self, stage, **kwargs):
+        if kwargs.get('only_main_script', False):
+            # No need to fetch and compile the code if we only need the script.
+            return
+
+        translators = set()
+        preprocessors = set()
+        planners = set()
+        for translator, preprocessor, planner in self.combinations:
+            translators.add(translator)
+            preprocessors.add(preprocessor)
+            planners.add(planner)
+
+        if stage == 'preprocess':
+            for part in sorted(translators | preprocessors):
+                part.checkout()
+                self._require_part(part)
+            for preprocessor in sorted(preprocessors):
+                preprocessor.compile(options=['-j%d' % self._jobs])
+        elif stage == 'search':
+            for planner in sorted(planners):
+                planner.checkout()
+                planner.compile(options=['-j%d' % self._jobs])
+                self._require_part(planner)
+        else:
+            logging.critical('There is no stage "%s"' % stage)
+
     def _setup_ignores(self, stage):
         self.ignores = []
 
@@ -424,10 +447,6 @@ class DownwardExperiment(Experiment):
 
         # We don't need VAL's sources.
         self.ignores.append('VAL')
-
-        if stage == 'preprocess':
-            # We don't need the search dir for preprocess experiments.
-            self.ignores.append('search')
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
