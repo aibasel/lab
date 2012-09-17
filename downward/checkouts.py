@@ -82,13 +82,11 @@ class Checkout(object):
     def src_dir(self):
         """Return the path to the global Fast Downward source directory.
 
-        The directory "downward" dir has been renamed to "src", but we still
-        want to support older changesets."""
-        assert os.path.exists(self.checkout_dir), self.checkout_dir
-        src_dir = self.get_path('src')
-        if not os.path.exists(src_dir):
-            src_dir = self.get_path('downward')
-        return src_dir
+        The directory "downward" dir has been renamed to "src", so this code
+        doesn't work for older changesets. We can't check for the dir's
+        existence here though, because the directory might not have been created
+        yet."""
+        return self.get_path('src')
 
     @property
     def bin_dir(self):
