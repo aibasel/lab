@@ -79,7 +79,7 @@ class StandardDownwardExperiment(DownwardExperiment):
         else:
             exppath = local_exppath
             repo = repo or LOCAL_REPO
-            environment = environment or LocalEnvironment()
+            environment = environment or LocalEnvironment(processes=2)
 
         DownwardExperiment.__init__(self, path=exppath, environment=environment,
                                     repo=repo, combinations=combinations,
