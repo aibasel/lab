@@ -208,9 +208,7 @@ def _log_command(cmd, kwargs):
 
 
 def run_command(cmd, **kwargs):
-    """
-    Runs command cmd and returns the output
-    """
+    """Run command cmd and return the output."""
     _log_command(cmd, kwargs)
     return subprocess.call(cmd, **kwargs)
 

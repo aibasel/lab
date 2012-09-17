@@ -386,8 +386,7 @@ class DownwardExperiment(Experiment):
         self.set_property('combinations', ['-'.join(part.name for part in combo)
                                            for combo in self.combinations])
         checkouts.checkout(self.combinations)
-        compile_cmd = ['./build_all', '-j%d' % self._jobs]
-        checkouts.compile(self.combinations, cmd=compile_cmd)
+        checkouts.compile(self.combinations, options=['-j%d' % self._jobs])
         self.runs = []
         self.new_files = []
         self.resources = []

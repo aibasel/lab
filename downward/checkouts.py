@@ -60,23 +60,10 @@ class Checkout(object):
         return os.path.basename(self.checkout_dir)
 
     def checkout(self):
-        raise Exception('Not implemented')
+        raise NotImplementedError
 
-    def compile(self, cmd=None):
-        """
-        We issue the build_all command unconditionally and let "make" take care
-        of checking if something has to be recompiled.
-        """
-        cmd = cmd or ['./build_all']
-        try:
-            retcode = run_command(cmd, cwd=self.src_dir)
-        except OSError:
-            logging.error('Could not call build_all script with changeset %s. '
-                          'Revision cannot be used by the scripts.' % self.rev)
-            sys.exit(1)
-        if not retcode == 0:
-            logging.error('Build script failed in: %s' % self.src_dir)
-            sys.exit(1)
+    def compile(self, options=None):
+        raise NotImplementedError
 
     def get_path(self, *rel_path):
         return os.path.join(self.checkout_dir, *rel_path)
@@ -93,14 +80,14 @@ class Checkout(object):
 
     @property
     def src_dir(self):
-        """Returns the path to the global Fast Downward source directory.
+        """Return the path to the global Fast Downward source directory.
 
         The directory "downward" dir has been renamed to "src", but we still
         want to support older changesets."""
         assert os.path.exists(self.checkout_dir), self.checkout_dir
-        src_dir = self.get_path('downward')
+        src_dir = self.get_path('src')
         if not os.path.exists(src_dir):
-            src_dir = self.get_path('src')
+            src_dir = self.get_path('downward')
         return src_dir
 
     @property
@@ -109,7 +96,7 @@ class Checkout(object):
 
     @property
     def parent_rev(self):
-        raise Exception('Not implemented')
+        raise NotImplementedError
 
     @property
     def shell_name(self):
@@ -210,10 +197,24 @@ class Preprocessor(HgCheckout):
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'preprocess', *args, **kwargs)
 
+    def compile(self, options=None):
+        options = options or []
+        retcode = run_command(['make'] + options, cwd=self.bin_dir)
+        if not retcode == 0:
+            logging.critical('Build failed in: %s' % self.bin_dir)
+
 
 class Planner(HgCheckout):
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'search', *args, **kwargs)
+
+    def compile(self, options=None):
+        options = options or []
+        for size in [1, 2, 4]:
+            retcode = run_command(['make', 'STATE_VAR_BYTES=%d' % size] + options,
+                                  cwd=self.bin_dir)
+            if not retcode == 0:
+                logging.critical('Build failed in: %s' % self.bin_dir)
 
 # -----------------------------------------------------------------------------
 
@@ -224,15 +225,15 @@ def checkout(combinations):
         part.checkout()
 
 
-def compile(combinations, cmd=None):
+def compile(combinations, options=None):
     """Compile the code.
 
-    Compile each revision only once. Do not compile revisions that only use the
-    translator.
+    Compile each revision only once. Do not try to compile the translator.
     """
-    compile_parts = set()
+    preprocessors = set()
+    planners = set()
     for translator, preprocessor, planner in combinations:
-        compile_parts.add(preprocessor)
-        compile_parts.add(planner)
-    for part in sorted(compile_parts):
-        part.compile(cmd=cmd)
+        preprocessors.add(preprocessor)
+        planners.add(planner)
+    for part in sorted(list(preprocessors) + list(planners)):
+        part.compile(options)
