@@ -448,6 +448,10 @@ class DownwardExperiment(Experiment):
         # We don't need VAL's sources.
         self.ignores.append('VAL')
 
+        if stage == 'preprocess':
+            # We don't need the search dir and validator for preprocessing.
+            self.ignores.extend(['search', 'validate'])
+
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
         self.add_resource(translator.shell_name,

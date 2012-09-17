@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shutil
 import sys
 import logging
 
@@ -175,6 +176,8 @@ class HgCheckout(Checkout):
             logging.critical('Repo at %s could not be updated to revision %s. '
                              'Please delete the cached repo and try again.' %
                              (path, self.rev))
+        # Save space by deleting the benchmarks.
+        shutil.rmtree(os.path.join(path, 'benchmarks'), ignore_errors=True)
 
     @property
     def parent_rev(self):
