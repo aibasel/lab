@@ -93,7 +93,7 @@ class Checkout(object):
 
     @property
     def shell_name(self):
-        return '%s_%s' % (self.part.upper(), self.name)
+        return '%s_%s' % (self.part.upper(), tools.shell_escape(self.name))
 
 
 # ---------- Mercurial --------------------------------------------------------

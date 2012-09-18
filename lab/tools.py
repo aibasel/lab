@@ -87,7 +87,7 @@ def remove_none_values(func):
 
 
 def shell_escape(s):
-    if s[0].isdigit():
+    if s and s[0].isdigit():
         s = 'N' + s
     return s.upper().replace('-', '_').replace(' ', '_').replace('.', '_')
 

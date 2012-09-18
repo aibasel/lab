@@ -401,7 +401,8 @@ class DownwardExperiment(Experiment):
 
     def _require_part(self, part):
         logging.info('Requiring %s' % part.src_dir)
-        self.add_resource('SRC_%s' % part.name, part.src_dir, 'code-%s' % part.name)
+        self.add_resource('SRC_%s' % tools.shell_escape(part.name), part.src_dir,
+                          'code-%s' % part.name)
 
     def _checkout_and_compile(self, stage, **kwargs):
         translators = set()
