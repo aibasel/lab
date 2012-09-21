@@ -18,10 +18,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import shutil
-import sys
 import logging
+import os
+import sys
 
 from lab import tools
 from lab.tools import run_command, get_command_output
@@ -169,8 +168,6 @@ class HgCheckout(Checkout):
             logging.critical('Repo at %s could not be updated to revision %s. '
                              'Please delete the cached repo and try again.' %
                              (path, self.rev))
-        # Save space by deleting the benchmarks.
-        shutil.rmtree(os.path.join(path, 'benchmarks'), ignore_errors=True)
 
 
 class Translator(HgCheckout):

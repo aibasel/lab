@@ -26,6 +26,7 @@ experiments with them.
 import os
 import sys
 import logging
+import shutil
 import subprocess
 
 from lab.experiment import Run, Experiment
@@ -426,6 +427,14 @@ class DownwardExperiment(Experiment):
                 self._require_part(planner)
         else:
             logging.critical('There is no stage "%s"' % stage)
+
+        # Save space by deleting the benchmarks.
+        if not kwargs.get('only_main_script', False):
+            for part in sorted(translators | preprocessors | planners):
+                if part.rev != 'WORK':
+                    benchmarks = part.get_path('benchmarks')
+                    logging.info('Removing %s to save space.' % benchmarks)
+                    shutil.rmtree(benchmarks, ignore_errors=True)
 
     def _setup_ignores(self, stage):
         self.ignores = []
