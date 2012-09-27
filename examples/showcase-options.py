@@ -121,14 +121,14 @@ exp.add_step(Step('report-scatter',
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter.png')))
 exp.add_step(Step('report-scatter-domain',
                   ScatterPlotReport(attributes=['expansions'], filter=only_two_configs,
-                                    get_category=get_domain),
+                                    get_category=get_domain, xscale='linear', yscale='linear'),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
 exp.add_step(Step('report-plot-prob',
-                  ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots1')))
+                  ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag, yscale='symlog'),
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
 exp.add_step(Step('report-plot-cat',
                   ProblemPlotReport(filter=remove_work_tag, get_points=sat_vs_opt),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots2')))
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
 exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
 exp.add_step(Step('report-relative-d',

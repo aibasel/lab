@@ -18,8 +18,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 from collections import defaultdict
+import os
+import math
 
 from lab import tools
 
@@ -82,6 +83,19 @@ class ScatterPlotReport(PlotReport):
             default_xscale = 'linear'
         PlotReport._set_scales(self, xscale or default_xscale, yscale)
 
+    def _get_missing_val(self, max_value):
+        """
+        Separate the missing values by plotting them at (max_value * 10) rounded
+        to the next power of 10.
+        """
+        assert max_value is not None
+        if self.yscale == 'linear':
+            return max_value * 1.25
+        return 10 ** math.ceil(math.log10(max_value * 10))
+
+    def _replace_none_values(self, values, replacement):
+        return [replacement if val is None else val for val in values]
+
     def _fill_categories(self, runs):
         # We discard the *runs* parameter.
         assert len(self.configs) == 2
@@ -110,9 +124,9 @@ class ScatterPlotReport(PlotReport):
         missing_val = self._get_missing_val(max_value)
 
         # Generate the scatter plots
-        for category, coordinates in sorted(categories.items()):
+        for category, coords in sorted(categories.items()):
             marker, c = styles[category]
-            X, Y = zip(*coordinates)
+            X, Y = zip(*coords)
             X = self._replace_none_values(X, missing_val)
             Y = self._replace_none_values(Y, missing_val)
             axes.scatter(X, Y, s=20, marker=marker, c=c, label=category)

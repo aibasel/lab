@@ -19,7 +19,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import math
 import os
 from collections import defaultdict
 
@@ -49,14 +48,12 @@ class Plot(object):
         self.axes = fig.add_subplot(111)
 
     @staticmethod
-    def change_axis_formatter(axis, missing_val):
+    def change_axis_formatter(axis, missing_val=None):
         # We do not want the default formatting that gives zeros a special font
         formatter = axis.get_major_formatter()
         old_format_call = formatter.__call__
 
         def new_format_call(x, pos):
-            if x == 0:
-                return 0
             if x == missing_val:
                 return 'Missing'  # '$\mathdefault{None^{\/}}$' no effect
             return old_format_call(x, pos)
@@ -67,7 +64,7 @@ class Plot(object):
         # Only print a legend if there is at least one non-default category.
         if any(key is not None for key in categories.keys()):
             self.legend = self.axes.legend(scatterpoints=1, loc='center left',
-                                      bbox_to_anchor=(1, 0.5))
+                                           bbox_to_anchor=(1, 0.5))
 
     def print_figure(self, filename):
         # Save the generated scatter plot to a PNG file.
@@ -125,22 +122,9 @@ class PlotReport(PlanningReport):
             self.yscale = 'linear'
         else:
             self.yscale = 'symlog'
-        scales = ['linear', 'log', 'symlog']
+        scales = ['linear', 'symlog']
         assert self.yscale in scales, self.yscale
         assert self.yscale in scales, self.yscale
-
-    def _get_missing_val(self, max_value):
-        """
-        Separate the missing values by plotting them at (max_value * 10) rounded
-        to the next power of 10.
-        """
-        assert max_value is not None
-        if self.yscale == 'linear':
-            return max_value * 1.25
-        return 10 ** math.ceil(math.log10(max_value * 10))
-
-    def _replace_none_values(self, values, replacement):
-        return [replacement if val is None else val for val in values]
 
     def _get_category_styles(self, categories):
         # Pick any style for categories for which no style is defined.
@@ -152,16 +136,14 @@ class PlotReport(PlanningReport):
             styles[missing] = possible_styles[i % len(possible_styles)]
         return styles
 
-    def _fill_categories(self, runs, missing_val):
+    def _fill_categories(self, runs):
         raise NotImplementedError
 
-    def _plot(self, axes, categories, missing_val):
+    def _plot(self, axes, categories):
         raise NotImplementedError
 
     def _write_plot(self, runs, filename):
         plot = Plot()
-        plot.axes.set_xscale(self.xscale)
-        plot.axes.set_yscale(self.yscale)
         if self.title:
             plot.axes.set_title(self.title, fontsize=14)
 
@@ -170,6 +152,8 @@ class PlotReport(PlanningReport):
         styles = self._get_category_styles(categories)
 
         self._plot(plot.axes, categories, styles)
+        plot.axes.set_xscale(self.xscale)
+        plot.axes.set_yscale(self.yscale)
 
         plot.create_legend(categories)
         plot.print_figure(filename)
@@ -260,25 +244,24 @@ class ProblemPlotReport(PlotReport):
         # Map all x-values to positions on the x-axis.
         indices = dict((val, i) for i, val in enumerate(all_x, start=1))
 
-        # Only use ticks for non-numeric values.
+        # Only use xticks for non-numeric values.
         if any(isinstance(x, basestring) for x in all_x):
             # Reserve space on the x-axis for all x-values and the labels.
             axes.set_xticks(range(1, len(all_x) + 1))
             axes.set_xticklabels(all_x)
 
-        missing_val = self._get_missing_val(max_y)
-
         # Plot all categories.
-        for category, coordinates in categories.items():
+        for category, coords in categories.items():
             marker, c = styles[category]
-            X, Y = zip(*coordinates)
+            # Do not include missing values in plot, but reserve spot on x-axis.
+            coords = [(x, y) for (x, y) in coords if y is not None]
+            X, Y = zip(*coords)
             xticks = [indices[val] for val in X]
-            Y = self._replace_none_values(Y, missing_val)
             axes.scatter(xticks, Y, marker=marker, c=c, label=category)
 
         axes.set_xlim(left=0, right=len(all_x) + 1)
-        axes.set_ylim(bottom=0, top=missing_val * 1.25)
-        Plot.change_axis_formatter(axes.yaxis, missing_val)
+        axes.set_ylim(bottom=0, top=max_y * 1.25)
+        Plot.change_axis_formatter(axes.yaxis)
 
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):
