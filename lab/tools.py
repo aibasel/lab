@@ -228,7 +228,7 @@ class Properties(dict):
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, indent=4)
+        return json.dumps(self, indent=2)
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
@@ -239,7 +239,7 @@ class Properties(dict):
     def write(self):
         assert self.filename
         with open(self.filename, 'w') as f:
-            json.dump(self, f, indent=4)
+            json.dump(self, f, indent=2)
 
 
 def fast_updatetree(src, dst, symlinks=False, ignore=None):
