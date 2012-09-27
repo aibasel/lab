@@ -237,6 +237,13 @@ class Properties(dict):
             self.update(json.load(f))
 
     def write(self):
+        """Write the properties to disk.
+
+        The default implementation writes each item of a list on its own line
+        making the file very long. Unfortunately this cannot be fixed by
+        subclassing JSONEncoder, because the encode() method is only called once
+        for the properties dict.
+        """
         assert self.filename
         with open(self.filename, 'w') as f:
             json.dump(self, f, indent=2)
