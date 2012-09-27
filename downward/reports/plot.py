@@ -89,14 +89,12 @@ class PlotReport(PlanningReport):
 
     def __init__(self, category_styles=None, **kwargs):
         """
-        ``kwargs['attributes']`` must contain exactly one attribute.
-
-        Subclasses may define a *get_category* function that returns a category
-        name for points in the plot. These categories are separated visually
-        by drawing them with different styles. You can set the styles manually
-        by providing a dictionary *category_styles* that maps category names to
-        tuples (marker, color) where marker and color are valid values for
-        pyplot (see http://matplotlib.sourceforge.net/api/pyplot_api.html).
+        Subclasses may group the data points into categories. These categories
+        are separated visually by drawing them with different styles. You can
+        set the styles manually by providing a dictionary *category_styles* that
+        maps category names to tuples (marker, color) where marker and color are
+        valid values for pyplot
+        (see http://matplotlib.sourceforge.net/api/pyplot_api.html).
         For example to change the default style to blue stars use::
 
             ScatterPlotReport(attributes=['expansions'],
@@ -104,15 +102,6 @@ class PlotReport(PlanningReport):
         """
         PlanningReport.__init__(self, **kwargs)
         self.category_styles = category_styles or {}
-        assert len(self.attributes) == 1, self.attributes
-        self.attribute = self.attributes[0]
-
-    def _calc_max_val(self, runs):
-        # It may be the case that no values are found.
-        try:
-            return max(run.get(self.attribute) for run in runs)
-        except ValueError:
-            return None
 
     def _get_missing_val(self, max_value):
         """
@@ -120,6 +109,8 @@ class PlotReport(PlanningReport):
         to the next power of 10.
         """
         assert max_value is not None
+        if self.attribute and self.attribute in self.LINEAR:
+            return max_value * 1.5
         return 10 ** math.ceil(math.log10(max_value * 10))
 
     def _get_category_styles(self, categories):
@@ -141,18 +132,11 @@ class PlotReport(PlanningReport):
     def _write_plot(self, runs, filename):
         plot = Plot()
 
-        max_value = self._calc_max_val(runs)
-        if max_value is None or max_value <= 0:
-            logging.info('Found no valid datapoints for the plot.')
-            return
-
-        missing_val = self._get_missing_val(max_value)
-
         # Map category names to value tuples
-        categories = self._fill_categories(runs, missing_val)
+        categories = self._fill_categories(runs)
         styles = self._get_category_styles(categories)
 
-        self._plot(plot.axes, categories, styles, missing_val)
+        self._plot(plot.axes, categories, styles)
 
         plot.create_legend(categories)
         plot.print_figure(filename)
@@ -165,59 +149,81 @@ class ProblemPlotReport(PlotReport):
     """
     For each problem generate a plot for a specific attribute.
     """
-    def __init__(self, get_category=None, get_x=None, **kwargs):
+    def __init__(self, get_points=None, **kwargs):
         """
-        *get_category* can be a function that takes a **single** run (dictionary
-        of properties) and returns a category name which is used to group the
-        values. Grouped values are drawn with the same style, e.g. red stars.
-        Runs for which this function returns None are shown in a default
-        category and are not contained in the legend.
-        If *get_category* is None, all runs are shown in the default category.
+        *get_points* can be a function that takes a **single** run (dictionary
+        of properties) and returns the points that should be drawn for this run.
+        The return value can be a list of (x,y) coordinates or a dictionary
+        mapping category names to lists of (x,y) coordinates, i.e.::
 
-        *get_x* can be a function that takes a **single** run and returns a
-        numeric value or string that should be used as the x-ccordinate for this
-        point (the y-coordinate is predetermined by the value for the plotted
-        attribute). If *get_x* is None, the config name is used as the
-        x-coordinate.
+            get_points(run) == [(1, 1), (2, 4), (3, 9)]
+            or
+            get_points(run) == {'x^2': [(1, 1), (2, 4), (3, 9)],
+                                'x^3': [(1, 1), (2, 8), (3, 27)]}
 
-        For example, to compare different ipdb and m&s configurations use::
+        Internally all coordinates of a category are combined and drawn in the
+        same style (e.g. red circles). Returned lists without a category are
+        assigned to a default category that does not appear in the legend.
 
-            # Configs: 'ipdb-1000', 'ipdb-2000', 'mas-1000', 'mas-2000'
-            def get_states(run):
+        If get_points is None **attributes** must contain exactly one attribute.
+        Then we will plot the config names on the x-axis and the corresponding
+        values for **attribute** on the y-axis. Otherwise **attributes** will be
+        ignored and it's up to you to retrieve the y-values from the runs.
+
+        Examples::
+
+            # Plot number of node expansions for all configs.
+            ProblemPlotReport(attributes=['expansions'])
+
+            # Compare different ipdb and m&s configurations.
+            # configs: 'ipdb-1000', 'ipdb-2000', 'mas-1000', 'mas-2000'
+            def config_and_states(run):
                 nick, states = run['config_nick'].split('-')
-                return states
-            def get_nick(run):
-                nick, states = run['config_nick'].split('-')
-                return nick
+                return {'nick': [(states, run.get('expansions'))]}
 
-            PlotReport(attributes=['expansions'],
-                       get_x=get_states,
-                       get_category=get_nick)
+            PlotReport(attributes=['expansions'], get_points=config_and_states)
 
         """
         PlotReport.__init__(self, **kwargs)
-        # By default plot the configs on the x-axis.
-        self.get_x = get_x or (lambda run: run['config'])
-        # By default all values are in the same category.
-        self.get_category = get_category or (lambda run: None)
+        if get_points:
+            assert not self.attributes, self.attributes
+            self.attribute = None
+            self.get_points = get_points
+        else:
+            assert len(self.attributes) == 1, self.attributes
+            self.attribute = self.attributes[0]
 
-    def _fill_categories(self, runs, missing_val):
+    def get_points(self, run):
+        """
+        By default plot the configs on the x-axis and the attribute values on
+        the y-axis. All values are in the same category.
+        """
+        return [(run.get('config'), run.get(self.attribute, -1))]
+
+    def _fill_categories(self, runs):
+        #TODO: Handle missing values.
         categories = defaultdict(list)
         for run in runs:
-            x = self.get_x(run)
-            category = self.get_category(run)
-            y = run.get(self.attribute)
-            if y is None:
-                y = missing_val
-            categories[category].append((x, y))
+            new_categories = self.get_points(run)
+            if isinstance(new_categories, dict):
+                for category, points in new_categories.items():
+                    categories[category].extend(points)
+            elif isinstance(new_categories, (list, tuple)):
+                # Implicitly check that this is a list of pairs.
+                for x, y in new_categories:
+                    categories[None].append((x, y))
+            else:
+                logging.critical('get_points() returned the wrong format.')
         return categories
 
-    def _plot(self, axes, categories, styles, missing_val):
+    def _plot(self, axes, categories, styles):
         # Find all x-values.
         all_x = set()
+        max_y = -1
         for coordinates in categories.values():
-            x, y = zip(*coordinates)
-            all_x |= set(x)
+            X, Y = zip(*coordinates)
+            all_x |= set(X)
+            max_y = max(list(Y) + [max_y])
         all_x = sorted(all_x)
 
         # Map all x-values to positions on the x-axis.
@@ -227,27 +233,29 @@ class ProblemPlotReport(PlotReport):
         axes.set_xticks(range(1, len(all_x) + 1))
         axes.set_xticklabels(all_x)
 
+        missing_val = self._get_missing_val(max_y)
+
         # Plot all categories.
         for category, coordinates in categories.items():
             marker, c = styles[category]
-            x, y = zip(*coordinates)
-            xticks = [indices[val] for val in x]
-            axes.scatter(xticks, y, marker=marker, c=c, label=category)
+            X, Y = zip(*coordinates)
+            xticks = [indices[val] for val in X]
+            Y = [missing_val if y is None else y for y in Y]
+            axes.scatter(xticks, Y, marker=marker, c=c, label=category)
 
         axes.set_xlim(left=0, right=len(all_x) + 1)
         axes.set_ylim(bottom=0, top=missing_val * 1.25)
-        if self.attribute not in self.LINEAR:
+        if not self.attribute or self.attribute not in self.LINEAR:
             axes.set_yscale('symlog')
         Plot.change_axis_formatter(axes.yaxis, missing_val)
 
-        # Make a descriptive title and set axis labels.
-        axes.set_title(self.attribute, fontsize=14)
+        if self.attribute:
+            axes.set_title(self.attribute, fontsize=14)
 
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):
-            filename = os.path.join(directory, '-'.join([self.attribute, domain,
-                                                         problem]) + '.png')
-            self._write_plot(runs, filename)
+            path = os.path.join(directory, '-'.join([domain, problem]) + '.png')
+            self._write_plot(runs, path)
 
     def write(self):
         if os.path.isfile(self.outfile):

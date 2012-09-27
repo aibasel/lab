@@ -32,6 +32,8 @@ class ScatterPlotReport(PlotReport):
     """
     def __init__(self, get_category=None, **kwargs):
         """
+        ``kwargs['attributes']`` must contain exactly one attribute.
+
         *get_category* can be a function that takes **two** runs (dictionaries of
         properties) and returns a category name. This name is used to group the
         points in the plot.
@@ -69,6 +71,8 @@ class ScatterPlotReport(PlotReport):
 
         """
         PlotReport.__init__(self, **kwargs)
+        assert len(self.attributes) == 1, self.attributes
+        self.attribute = self.attributes[0]
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
 
