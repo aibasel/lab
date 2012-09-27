@@ -87,9 +87,16 @@ class PlotReport(PlanningReport):
     """
     LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
 
-    def __init__(self, title='', xscale=None, yscale=None, category_styles=None,
+    def __init__(self, title=None, xscale=None, yscale=None, category_styles=None,
                  **kwargs):
         """
+        If **title** is given it will be used for the name of the plot.
+        Otherwise, the only given attribute will be the title. If none is given,
+        there will be no title.
+
+        **xscale** and **yscale** can have the values ``linear`` or ``symlog``.
+        If omitted sensible defaults will be used.
+
         Subclasses may group the data points into categories. These categories
         are separated visually by drawing them with different styles. You can
         set the styles manually by providing a dictionary *category_styles* that
