@@ -17,9 +17,9 @@ EXPPATH = os.path.join(WORKSHOP, EXPNAME)
 REPO = '/home/jendrik/projects/Downward/downward'
 
 combos = [
-    (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=56734, 'mypreprocessor'),
+    (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=56734, dest='mypreprocessor'),
      Planner(REPO)),
-     (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=56734, 'mypreprocessor'),
+     (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=56734, dest='mypreprocessor'),
      Planner(MYOTHER_REPO)),
 ]
 
