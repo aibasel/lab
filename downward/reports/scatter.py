@@ -71,10 +71,16 @@ class ScatterPlotReport(PlotReport):
 
         """
         PlotReport.__init__(self, **kwargs)
-        assert len(self.attributes) == 1, self.attributes
-        self.attribute = self.attributes[0]
+        assert self.attribute, 'ScatterPlotReport needs exactly one attribute'
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
+
+    def _set_scales(self, xscale, yscale):
+        # ScatterPlots use symlog scaling on the x-axis by default.
+        default_xscale = 'symlog'
+        if self.attribute and self.attribute in self.LINEAR:
+            default_xscale = 'linear'
+        PlotReport._set_scales(self, xscale or default_xscale, yscale)
 
     def _fill_categories(self, runs):
         # We discard the *runs* parameter.
@@ -116,18 +122,12 @@ class ScatterPlotReport(PlotReport):
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
 
-        if self.attribute not in self.LINEAR:
-            axes.set_xscale('symlog')
-            axes.set_yscale('symlog')
-
         axes.set_xlim(0, plot_size)
         axes.set_ylim(0, plot_size)
 
         for axis in [axes.xaxis, axes.yaxis]:
             Plot.change_axis_formatter(axis, missing_val)
 
-        # Make a descriptive title and set axis labels
-        axes.set_title(self.attribute, fontsize=14)
         axes.set_xlabel(self.configs[0], fontsize=12)
         axes.set_ylabel(self.configs[1], fontsize=12)
 

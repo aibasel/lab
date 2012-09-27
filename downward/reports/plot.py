@@ -87,7 +87,8 @@ class PlotReport(PlanningReport):
     """
     LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
 
-    def __init__(self, category_styles=None, **kwargs):
+    def __init__(self, title='', xscale=None, yscale=None, category_styles=None,
+                 **kwargs):
         """
         Subclasses may group the data points into categories. These categories
         are separated visually by drawing them with different styles. You can
@@ -101,7 +102,25 @@ class PlotReport(PlanningReport):
                               category_styles={None: ('*','b')})
         """
         PlanningReport.__init__(self, **kwargs)
+        assert len(self.attributes) <= 1, self.attributes
+        self.attribute = None
+        if self.attributes:
+            self.attribute = self.attributes[0]
+        self.title = title or self.attribute or ''
         self.category_styles = category_styles or {}
+        self._set_scales(xscale, yscale)
+
+    def _set_scales(self, xscale, yscale):
+        self.xscale = xscale or 'linear'
+        if yscale:
+            self.yscale = yscale
+        elif self.attribute and self.attribute in self.LINEAR:
+            self.yscale = 'linear'
+        else:
+            self.yscale = 'symlog'
+        scales = ['linear', 'log', 'symlog']
+        assert self.yscale in scales, self.yscale
+        assert self.yscale in scales, self.yscale
 
     def _get_missing_val(self, max_value):
         """
@@ -109,7 +128,7 @@ class PlotReport(PlanningReport):
         to the next power of 10.
         """
         assert max_value is not None
-        if self.attribute and self.attribute in self.LINEAR:
+        if self.yscale == 'linear':
             return max_value * 1.5
         return 10 ** math.ceil(math.log10(max_value * 10))
 
@@ -134,6 +153,10 @@ class PlotReport(PlanningReport):
 
     def _write_plot(self, runs, filename):
         plot = Plot()
+        plot.axes.set_xscale(self.xscale)
+        plot.axes.set_yscale(self.yscale)
+        if self.title:
+            plot.axes.set_title(self.title, fontsize=14)
 
         # Map category names to value tuples
         categories = self._fill_categories(runs)
@@ -189,12 +212,11 @@ class ProblemPlotReport(PlotReport):
         """
         PlotReport.__init__(self, **kwargs)
         if get_points:
-            assert not self.attributes, self.attributes
-            self.attribute = None
+            if self.attribute:
+                logging.critical('If get_points() is given, attributes are ignored.')
             self.get_points = get_points
-        else:
-            assert len(self.attributes) == 1, self.attributes
-            self.attribute = self.attributes[0]
+        elif not self.attribute:
+            logging.critical('Need exactly one attribute without get_points().')
 
     def get_points(self, run):
         """
@@ -249,16 +271,13 @@ class ProblemPlotReport(PlotReport):
 
         axes.set_xlim(left=0, right=len(all_x) + 1)
         axes.set_ylim(bottom=0, top=missing_val * 1.25)
-        if not self.attribute or self.attribute not in self.LINEAR:
-            axes.set_yscale('symlog')
         Plot.change_axis_formatter(axes.yaxis, missing_val)
-
-        if self.attribute:
-            axes.set_title(self.attribute, fontsize=14)
 
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):
-            path = os.path.join(directory, '-'.join([domain, problem]) + '.png')
+            parts = [self.title] if self.title else []
+            parts += [domain, problem]
+            path = os.path.join(directory, '-'.join(parts) + '.png')
             self._write_plot(runs, path)
 
     def write(self):
