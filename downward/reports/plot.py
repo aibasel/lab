@@ -136,7 +136,7 @@ class PlotReport(PlanningReport):
         """
         assert max_value is not None
         if self.yscale == 'linear':
-            return max_value * 1.5
+            return max_value * 1.25
         return 10 ** math.ceil(math.log10(max_value * 10))
 
     def _replace_none_values(self, values, replacement):
@@ -230,7 +230,7 @@ class ProblemPlotReport(PlotReport):
         By default plot the configs on the x-axis and the attribute values on
         the y-axis. All values are in the same category.
         """
-        return [(run.get('config'), run.get(self.attribute, -1))]
+        return [(run.get('config'), run.get(self.attribute))]
 
     def _fill_categories(self, runs):
         categories = defaultdict(list)
