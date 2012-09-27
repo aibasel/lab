@@ -109,12 +109,12 @@ exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=AT
 def get_domain(run1, run2):
     return run1['domain']
 
-def get_config_category(run):
+def sat_vs_opt(run):
     category = {'many-plans': 'sat', 'iter-search': 'sat', 'ipdb': 'opt',
                 'lama11': 'sat', 'fdss': 'opt'}
     for nick, cat in category.items():
         if nick in run['config_nick']:
-            return cat
+            return {cat: [(run['config'], run.get('expansions'))]}
 
 exp.add_step(Step('report-scatter',
                   ScatterPlotReport(attributes=['expansions'], filter=only_two_configs),
@@ -124,12 +124,11 @@ exp.add_step(Step('report-scatter-domain',
                                     get_category=get_domain),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
 exp.add_step(Step('report-plot-prob',
-                  ProblemPlotReport(attributes=['generated'], filter=remove_work_tag),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
+                  ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag),
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots1')))
 exp.add_step(Step('report-plot-cat',
-                  ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag,
-                                    get_category=get_config_category),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
+                  ProblemPlotReport(filter=remove_work_tag, get_points=sat_vs_opt),
+                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots2')))
 exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
 exp.add_step(Step('report-relative-d',
