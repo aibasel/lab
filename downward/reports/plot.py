@@ -113,6 +113,9 @@ class PlotReport(PlanningReport):
             return max_value * 1.5
         return 10 ** math.ceil(math.log10(max_value * 10))
 
+    def _replace_none_values(self, values, replacement):
+        return [replacement if val is None else val for val in values]
+
     def _get_category_styles(self, categories):
         # Pick any style for categories for which no style is defined.
         # TODO: add more possible styles.
@@ -241,7 +244,7 @@ class ProblemPlotReport(PlotReport):
             marker, c = styles[category]
             X, Y = zip(*coordinates)
             xticks = [indices[val] for val in X]
-            Y = [missing_val if y is None else y for y in Y]
+            Y = self._replace_none_values(Y, missing_val)
             axes.scatter(xticks, Y, marker=marker, c=c, label=category)
 
         axes.set_xlim(left=0, right=len(all_x) + 1)

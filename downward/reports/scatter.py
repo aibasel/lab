@@ -76,7 +76,7 @@ class ScatterPlotReport(PlotReport):
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
 
-    def _fill_categories(self, runs, missing_val):
+    def _fill_categories(self, runs):
         # We discard the *runs* parameter.
         assert len(self.configs) == 2
         # Map category names to value tuples
@@ -88,25 +88,28 @@ class ScatterPlotReport(PlotReport):
             val2 = run2.get(self.attribute)
             if val1 is None and val2 is None:
                 continue
-            if val1 is None:
-                val1 = missing_val
-            if val2 is None:
-                val2 = missing_val
-            if self.get_category is None:
-                category = None
-            else:
-                category = self.get_category(run1, run2)
+            category = self.get_category(run1, run2)
             categories[category].append((val1, val2))
         return categories
 
-    def _plot(self, axes, categories, styles, missing_val):
+    def _plot(self, axes, categories, styles):
         # Display grid
         axes.grid(b=True, linestyle='-', color='0.75')
+
+        # Find max-value to fit plot and to draw missing values.
+        max_value = -1
+        for category, coordinates in sorted(categories.items()):
+            for x, y in coordinates:
+                max_value = max(max_value, x, y)
+        missing_val = self._get_missing_val(max_value)
 
         # Generate the scatter plots
         for category, coordinates in sorted(categories.items()):
             marker, c = styles[category]
-            axes.scatter(*zip(*coordinates), s=20, marker=marker, c=c, label=category)
+            X, Y = zip(*coordinates)
+            X = self._replace_none_values(X, missing_val)
+            Y = self._replace_none_values(Y, missing_val)
+            axes.scatter(X, Y, s=20, marker=marker, c=c, label=category)
 
         plot_size = missing_val * 1.25
 

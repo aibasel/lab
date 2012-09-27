@@ -117,7 +117,7 @@ def sat_vs_opt(run):
             return {cat: [(run['config'], run.get('expansions'))]}
 
 exp.add_step(Step('report-scatter',
-                  ScatterPlotReport(attributes=['expansions'], filter=only_two_configs),
+                  ScatterPlotReport(attributes=['expansions'], filter_config_nick=['downward-seq-opt-fdss-1.py', 'lama11']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter.png')))
 exp.add_step(Step('report-scatter-domain',
                   ScatterPlotReport(attributes=['expansions'], filter=only_two_configs,
