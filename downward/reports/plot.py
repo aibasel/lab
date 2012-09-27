@@ -201,7 +201,6 @@ class ProblemPlotReport(PlotReport):
         return [(run.get('config'), run.get(self.attribute, -1))]
 
     def _fill_categories(self, runs):
-        #TODO: Handle missing values.
         categories = defaultdict(list)
         for run in runs:
             new_categories = self.get_points(run)
@@ -229,9 +228,11 @@ class ProblemPlotReport(PlotReport):
         # Map all x-values to positions on the x-axis.
         indices = dict((val, i) for i, val in enumerate(all_x, start=1))
 
-        # Reserve space on the x-axis for all x-values and the labels.
-        axes.set_xticks(range(1, len(all_x) + 1))
-        axes.set_xticklabels(all_x)
+        # Only use ticks for non-numeric values.
+        if any(isinstance(x, basestring) for x in all_x):
+            # Reserve space on the x-axis for all x-values and the labels.
+            axes.set_xticks(range(1, len(all_x) + 1))
+            axes.set_xticklabels(all_x)
 
         missing_val = self._get_missing_val(max_y)
 
