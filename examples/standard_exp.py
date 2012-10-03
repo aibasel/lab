@@ -113,11 +113,11 @@ class StandardDownwardExperiment(DownwardExperiment):
 
             # Copy the results to local directory
             self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
-                'downward@habakuk:%s-eval' % remote_exppath, '%s-eval' % local_exppath]))
+                'seipp@habakuk:%s-eval' % remote_exppath, '%s-eval' % local_exppath]))
 
             # Copy the zipped experiment directory to local directory
             self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
-                'downward@habakuk:%s.tar.gz' % remote_exppath, '%s.tar.gz' % local_exppath]))
+                'seipp@habakuk:%s.tar.gz' % remote_exppath, '%s.tar.gz' % local_exppath]))
 
         # Copy the results and send mail.
         self.add_step(create_publish_and_mail_step(self, abs_domain_report_file,
