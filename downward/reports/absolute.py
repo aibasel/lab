@@ -34,6 +34,9 @@ class AbsoluteReport(PlanningReport):
         | gripper      | 118    | 72     |
         | zenotravel   | 21     | 17     |
     """
+    MAX_ATTRIBUTE_PARTS = ['score', 'initial_h_value', 'coverage',
+                           'quality', 'single_solver', 'avg_h',
+                           'offline_abstraction_done']
     def __init__(self, resolution, colored=False, **kwargs):
         """
         *resolution* must be one of "domain" or "problem".
@@ -162,9 +165,7 @@ class AbsoluteReport(PlanningReport):
         colored = self.colored
         if self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
-            max_attribute_parts = ['score', 'initial_h_value', 'coverage',
-                                   'quality', 'single_solver']
-            min_wins = not any(part in attribute for part in max_attribute_parts)
+            min_wins = not any(part in attribute for part in MAX_ATTRIBUTE_PARTS)
         else:
             # Do not highlight anything.
             min_wins = None
