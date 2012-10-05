@@ -18,10 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import getpass
-import os
 import logging
+import os
 import shutil
 from subprocess import call
+
+import tools
 
 
 class Step(object):
@@ -158,10 +160,16 @@ class Sequence(list):
 
     def get_steps_text(self):
         name_width = min(max(len(step.name) for step in self), 50)
+        terminal_width, terminal_height = tools.get_terminal_size()
+        terminal_width = terminal_width or 80
         lines = ['Available steps:', '================']
         for number, step in enumerate(self, start=1):
-            lines.append(' '.join([str(number).rjust(2),
-                                   step.name.ljust(name_width), str(step)]))
+            line = ' '.join([str(number).rjust(2), step.name.ljust(name_width)])
+            step_text = str(step)
+            if len(line) + len(step_text) < terminal_width:
+                lines.append(line + ' ' + step_text)
+            else:
+                lines.extend(['', line, step_text, ''])
         return '\n'.join(lines)
 
     @staticmethod

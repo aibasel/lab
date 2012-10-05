@@ -390,7 +390,7 @@ def get_terminal_size():
     try:
         data = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, 4 * '00')
         height, width = struct.unpack('4H', data)[:2]
-        return (height, width)
+        return (width, height)
     except Exception:
         return (None, None)
 
@@ -402,7 +402,7 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
     """
     def __init__(self, prog, **kwargs):
         # Use the whole terminal width
-        height, width = get_terminal_size()
+        width, height = get_terminal_size()
         argparse.HelpFormatter.__init__(self, prog, width=width, **kwargs)
 
     def _fill_text(self, text, width, indent):
