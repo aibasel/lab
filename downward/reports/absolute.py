@@ -165,7 +165,7 @@ class AbsoluteReport(PlanningReport):
         colored = self.colored
         if self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
-            min_wins = not any(part in attribute for part in MAX_ATTRIBUTE_PARTS)
+            min_wins = not any(part in attribute for part in self.MAX_ATTRIBUTE_PARTS)
         else:
             # Do not highlight anything.
             min_wins = None
