@@ -84,8 +84,8 @@ class PlotReport(PlanningReport):
     """
     LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
 
-    def __init__(self, title=None, xscale=None, yscale=None, category_styles=None,
-                 **kwargs):
+    def __init__(self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
+                 category_styles=None, **kwargs):
         """
         If **title** is given it will be used for the name of the plot.
         Otherwise, the only given attribute will be the title. If none is given,
@@ -113,6 +113,8 @@ class PlotReport(PlanningReport):
         self.title = title or self.attribute or ''
         self.category_styles = category_styles or {}
         self._set_scales(xscale, yscale)
+        self.xlabel = xlabel
+        self.ylabel = ylabel
 
     def _set_scales(self, xscale, yscale):
         self.xscale = xscale or 'linear'
@@ -146,6 +148,9 @@ class PlotReport(PlanningReport):
         plot = Plot()
         if self.title:
             plot.axes.set_title(self.title, fontsize=14)
+        if self.xlabel:
+            plot.axes.set_xlabel(self.xlabel)
+            plot.axes.set_ylabel(self.ylabel)
 
         # Map category names to value tuples
         categories = self._fill_categories(runs)
@@ -265,7 +270,7 @@ class ProblemPlotReport(PlotReport):
 
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):
-            parts = [self.title] if self.title else []
+            parts = [self.title.lower().replace(' ', '-')] if self.title else []
             parts += [domain, problem]
             path = os.path.join(directory, '-'.join(parts) + '.png')
             self._write_plot(runs, path)
