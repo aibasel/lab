@@ -156,9 +156,9 @@ class PlotReport(PlanningReport):
         categories = self._fill_categories(runs)
         styles = self._get_category_styles(categories)
 
-        self._plot(plot.axes, categories, styles)
         plot.axes.set_xscale(self.xscale)
         plot.axes.set_yscale(self.yscale)
+        self._plot(plot.axes, categories, styles)
 
         plot.create_legend(categories)
         plot.print_figure(filename)
@@ -250,7 +250,8 @@ class ProblemPlotReport(PlotReport):
         indices = dict((val, i) for i, val in enumerate(all_x, start=1))
 
         # Only use xticks for non-numeric values.
-        if any(isinstance(x, basestring) for x in all_x):
+        all_x_numeric = all(isinstance(x, (int, float)) for x in all_x)
+        if not all_x_numeric:
             # Reserve space on the x-axis for all x-values and the labels.
             axes.set_xticks(range(1, len(all_x) + 1))
             axes.set_xticklabels(all_x)
@@ -261,10 +262,14 @@ class ProblemPlotReport(PlotReport):
             # Do not include missing values in plot, but reserve spot on x-axis.
             coords = [(x, y) for (x, y) in coords if y is not None]
             X, Y = zip(*coords)
-            xticks = [indices[val] for val in X]
-            axes.scatter(xticks, Y, marker=marker, c=c, label=category)
+            if not all_x_numeric:
+                X = [indices[val] for val in X]
+            axes.scatter(X, Y, marker=marker, c=c, label=category)
 
-        axes.set_xlim(left=0, right=len(all_x) + 1)
+        limits = {'left': 0}
+        if not all_x_numeric:
+            limits['right'] = len(all_x) + 1
+        axes.set_xlim(**limits)
         axes.set_ylim(bottom=0, top=max_y * 1.25)
         Plot.change_axis_formatter(axes.yaxis)
 
