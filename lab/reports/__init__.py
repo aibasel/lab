@@ -208,7 +208,6 @@ class Report(object):
         self._load_data()
         self._apply_filter()
         self._scan_data()
-        logging.info('Available attributes: %s' % ', '.join(self.all_attributes))
 
         # Expand glob characters.
         if self.attributes:
@@ -222,6 +221,8 @@ class Report(object):
             if not expanded_attrs:
                 logging.critical('No attributes match your patterns')
             self.attributes = expanded_attrs
+        else:
+            logging.info('Available attributes: %s' % ', '.join(self.all_attributes))
 
         if self.attributes:
             # Make sure that all selected attributes are present in the dataset.
@@ -233,8 +234,6 @@ class Report(object):
             self.attributes = self._get_numerical_attributes()
 
         self.attributes.sort()
-        logging.info('Selected Attributes: %s' % self.attributes)
-
         self.write()
 
     @property
