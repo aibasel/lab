@@ -26,6 +26,7 @@ experiments with them.
 import os
 import sys
 import logging
+import multiprocessing
 import shutil
 import subprocess
 
@@ -351,7 +352,8 @@ class DownwardExperiment(Experiment):
     @property
     def _jobs(self):
         """Return the number of jobs to use when building binaries."""
-        return getattr(self.environment, 'processes', 1)
+        jobs = getattr(self.environment, 'processes', None)
+        return jobs or multiprocessing.cpu_count()
 
     def build(self, stage, **kwargs):
         """Write the experiment to disk.
