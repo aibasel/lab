@@ -37,6 +37,7 @@ class AbsoluteReport(PlanningReport):
     MAX_ATTRIBUTE_PARTS = ['score', 'initial_h_value', 'coverage',
                            'quality', 'single_solver', 'avg_h',
                            'offline_abstraction_done']
+
     def __init__(self, resolution, colored=False, **kwargs):
         """
         *resolution* must be one of "domain" or "problem".

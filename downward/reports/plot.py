@@ -261,10 +261,12 @@ class ProblemPlotReport(PlotReport):
             marker, c = styles[category]
             # Do not include missing values in plot, but reserve spot on x-axis.
             coords = [(x, y) for (x, y) in coords if y is not None]
+            if not coords:
+                continue
             X, Y = zip(*coords)
             if not all_x_numeric:
                 X = [indices[val] for val in X]
-            axes.scatter(X, Y, marker=marker, c=c, label=category)
+            axes.plot(X, Y, marker=marker, c=c, label=category)
 
         limits = {'left': 0}
         if not all_x_numeric:
