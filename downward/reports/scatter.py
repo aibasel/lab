@@ -142,10 +142,10 @@ class ScatterPlotReport(PlotReport):
         for axis in [axes.xaxis, axes.yaxis]:
             Plot.change_axis_formatter(axis, missing_val)
 
-        axes.set_xlabel(self.configs[0], fontsize=12)
-        axes.set_ylabel(self.configs[1], fontsize=12)
-
     def write(self):
+        self.xlabel = self.xlabel or self.configs[0]
+        self.ylabel = self.ylabel or self.configs[1]
+
         if not self.outfile.endswith('.png'):
             self.outfile += '.png'
         tools.makedirs(os.path.dirname(self.outfile))
