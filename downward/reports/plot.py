@@ -271,7 +271,9 @@ class ProblemPlotReport(PlotReport):
             axes.plot(X, Y, marker=marker, c=c, label=category)
 
         limits = {'left': 0}
-        if not all_x_numeric:
+        if all_x_numeric:
+            limits['right'] = max(all_x) * 1.25 if all_x else None
+        else:
             limits['right'] = len(all_x) + 1
         axes.set_xlim(**limits)
         axes.set_ylim(bottom=0, top=max_y * 1.25)
