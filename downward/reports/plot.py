@@ -233,7 +233,8 @@ class ProblemPlotReport(PlotReport):
                 # Implicitly check that this is a list of pairs.
                 for x, y in new_categories:
                     categories[None].append((x, y))
-            else:
+            elif new_categories is not None:
+                # Allow returning None.
                 logging.critical('get_points() returned the wrong format.')
         return categories
 
