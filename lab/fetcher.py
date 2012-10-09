@@ -20,14 +20,37 @@
 from glob import glob
 import logging
 import os
+import subprocess
 
 from lab import tools
 
 
 class Fetcher(object):
-    def fetch_dir(self, run_dir, eval_dir, copy_all=False, filter=None):
+    def fetch_dir(self, run_dir, eval_dir, copy_all=False, filter=None, parsers=None):
+        parsers = parsers or []
+        # Allow specyfing a list multiple parsers or a single parser.
+        if not isinstance(parsers, (tuple, list)):
+            parsers = [parsers]
+        # Make sure parsers is a list.
+        parsers = list(parsers)
+
         prop_file = os.path.join(run_dir, 'properties')
+
+        # Somehow '../..' gets inserted into sys.path and more strangely the
+        # system lab.tools module gets called.
+        # This HACK should be removed once the source of the error is clear.
         props = tools.Properties(filename=prop_file)
+        if props.get('search_error') is not None and props.get("coverage") is None:
+            logging.warning('search_parser.py exited abnormally for %s' % run_dir)
+            logging.info('Rerunning search_parser.py')
+            parsers.append('../../search_parser.py')
+
+        for parser in parsers:
+            rel_parser = os.path.relpath(parser, start=run_dir)
+            subprocess.call([rel_parser], cwd=run_dir)
+
+        props = tools.Properties(filename=prop_file)
+
         if filter is not None and not filter(props):
             return None, None
         run_id = props.get('id')
@@ -35,25 +58,15 @@ class Fetcher(object):
         if not run_id:
             logging.critical('id is not set in %s.' % prop_file)
 
-        # Somehow '../..' gets inserted into sys.path and more strangely the
-        # system lab.tools module gets called.
-        # This HACK should be removed once the source of the error is clear.
-        if props.get('search_error') is not None and props.get("coverage") is None:
-            logging.warning('search_parser.py exited abnormally for %s' % run_dir)
-            logging.info('Rerunning search_parser.py')
-            import subprocess
-            subprocess.call(['../../search_parser.py'], cwd=run_dir)
-            return self.fetch_dir(run_dir, eval_dir, copy_all)
-
-        dest_dir = os.path.join(eval_dir, *run_id)
         if copy_all:
+            dest_dir = os.path.join(eval_dir, *run_id)
             tools.makedirs(dest_dir)
             tools.fast_updatetree(run_dir, dest_dir, symlinks=True)
 
         return run_id, props
 
     def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True,
-                 filter=None):
+                 filter=None, parsers=None):
         """
         This method can be used to copy properties from an exp-dir or eval-dir
         into an eval-dir. If the destination eval-dir already exist, the data
@@ -70,6 +83,12 @@ class Fetcher(object):
         If given, *filter* must be a function that is passed a dictionary of a
         run's keys and values and returns True or False. If it returns True,
         this run will be fetched, otherwise it will be skipped.
+
+        *parsers* can be a (list of) paths to parser scripts. If given, each
+        parser is called in each run directory and the results are added to
+        the properties file which is fetched afterwards. This option is
+        useful if you haven't parsed all or some values already during the
+        experiment.
 
         Examples:
 
@@ -115,7 +134,7 @@ class Fetcher(object):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
             run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all,
-                                           filter=filter)
+                                           filter=filter, parsers=parsers)
 
             if write_combined_props and run_id:
                 combined_props['-'.join(run_id)] = props
