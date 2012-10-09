@@ -132,10 +132,11 @@ class PlotReport(PlanningReport):
         # Pick any style for categories for which no style is defined.
         # TODO: add more possible styles.
         styles = self.category_styles.copy()
-        possible_styles = [(m, c) for m in 'ox+^v<>' for c in 'rgby']
+        unused_styles = [(m, c) for m in 'ox+^v<>' for c in 'rgbcmyk'
+                         if (m, c) not in styles.values()]
         missing_category_styles = (set(categories.keys()) - set(styles.keys()))
         for i, missing in enumerate(missing_category_styles):
-            styles[missing] = possible_styles[i % len(possible_styles)]
+            styles[missing] = unused_styles[i % len(unused_styles)]
         return styles
 
     def _fill_categories(self, runs):
