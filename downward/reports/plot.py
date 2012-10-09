@@ -147,6 +147,7 @@ class PlotReport(PlanningReport):
 
     def _write_plot(self, runs, filename):
         plot = Plot()
+        self.has_points = False
         if self.title:
             plot.axes.set_title(self.title, fontsize=14)
         if self.xlabel:
@@ -160,6 +161,10 @@ class PlotReport(PlanningReport):
         plot.axes.set_xscale(self.xscale)
         plot.axes.set_yscale(self.yscale)
         self._plot(plot.axes, categories, styles)
+
+        if not self.has_points:
+            logging.info('Found no valid points for plot %s' % filename)
+            return
 
         plot.create_legend(categories)
         plot.print_figure(filename)
@@ -269,6 +274,8 @@ class ProblemPlotReport(PlotReport):
             if not all_x_numeric:
                 X = [indices[val] for val in X]
             axes.plot(X, Y, marker=marker, c=c, label=category)
+            if X and Y:
+                self.has_points = True
 
         limits = {'left': 0}
         if all_x_numeric:

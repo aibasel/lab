@@ -130,6 +130,8 @@ class ScatterPlotReport(PlotReport):
             X = self._replace_none_values(X, missing_val)
             Y = self._replace_none_values(Y, missing_val)
             axes.scatter(X, Y, s=20, marker=marker, c=c, label=category)
+            if X and Y:
+                self.has_points = True
 
         plot_size = missing_val * 1.25
 
