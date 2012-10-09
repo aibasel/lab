@@ -100,8 +100,11 @@ class AbsoluteReport(PlanningReport):
     def _get_group_func(self, attribute):
         """Decide on a group function for this attribute."""
         if 'score' in attribute:
+            # When summarising score results from multiple domains we show
+            # normalised averages so that each domain is weighed equally.
             return 'average', reports.avg
-        elif attribute in ['search_time', 'total_time']:
+        elif attribute in ['search_time', 'total_time', 'evaluations',
+                           'expansions', 'generated'] or attribute.endswith('_rel'):
             return 'geometric mean', reports.gm
         return 'sum', sum
 
@@ -177,12 +180,7 @@ class AbsoluteReport(PlanningReport):
         return table
 
     def _add_summary_functions(self, table, attribute):
-        if attribute in ['search_time', 'total_time']:
-            table.add_summary_function('GEOMETRIC MEAN', reports.gm)
-        else:
-            table.add_summary_function('SUM', sum)
-
+        funcname, func = self._get_group_func(attribute)
+        table.add_summary_function(funcname.upper(), func)
         if 'score' in attribute:
-            # When summarising score results from multiple domains we show
-            # normalised averages so that each domain is weighed equally.
-            table.add_summary_function('AVERAGE', reports.avg)
+            table.add_summary_function('SUM', sum)
