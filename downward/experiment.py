@@ -253,6 +253,8 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
 
+        self.include_preprocess_results_in_search_runs = True
+
         # Remove the default experiment steps
         self.steps = Sequence()
 
@@ -529,22 +531,27 @@ class DownwardExperiment(Experiment):
         run.set_property('compact', self.compact)
         sym = self.compact
 
-        # Add the preprocess files for later parsing
+        # We definitely need the output file.
         run.add_resource('OUTPUT', path('output'), 'output', symlink=sym)
-        run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas',
-                         symlink=sym, required=False)
+
+        # Needed for validation.
         run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl',
                          symlink=sym, required=False)
         run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl',
                          symlink=sym, required=False)
-        run.add_resource('PROPERTIES', path('properties'), 'properties')
 
-        # {all,test}.groups were created by old versions of the planner.
-        run.add_resource('ALL_GROUPS', path('all.groups'), 'all.groups',
-                         symlink=sym, required=False)
-        run.add_resource('TEST_GROUPS', path('test.groups'), 'test.groups',
-                         symlink=sym, required=False)
+        # The other files are optional.
+        if self.include_preprocess_results_in_search_runs:
+            # Properties files and logs have to be copied, not linked.
+            run.add_resource('PROPERTIES', path('properties'), 'properties')
+            run.add_resource('RUN_LOG', path('run.log'), 'run.log')
+            run.add_resource('RUN_ERR', path('run.err'), 'run.err')
 
-        # The logs have to be copied, not linked
-        run.add_resource('RUN_LOG', path('run.log'), 'run.log')
-        run.add_resource('RUN_ERR', path('run.err'), 'run.err')
+            run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas',
+                             symlink=sym, required=False)
+
+            # {all,test}.groups were created by old versions of the planner.
+            run.add_resource('ALL_GROUPS', path('all.groups'), 'all.groups',
+                             symlink=sym, required=False)
+            run.add_resource('TEST_GROUPS', path('test.groups'), 'test.groups',
+                             symlink=sym, required=False)
