@@ -364,7 +364,12 @@ def get_colors(values, min_wins):
     max_value = max(real_values)
     diff = float(max_value - min_value)
     if diff == 0:
-        return [default for val in values]
+        if len(real_values) == len(values):
+            # No value is None and they are all equal.
+            return [default for val in values]
+        else:
+            # Some values are None, the rest are all equal.
+            return [default if val is None else get_color(0, True) for val in values]
     colors = []
     for val in values:
         if val is None:
