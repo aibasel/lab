@@ -252,9 +252,10 @@ def get_error(content, props):
                             props.get('last_logged_memory', 0))
         remaining_time_rel = remaining_time / float(props['limit_search_time'])
         remaining_memory_rel = remaining_memory / float(props['limit_search_memory'])
-        if remaining_time_rel < 0.01 and remaining_memory_rel > 0.05:
+        fraction = 0.05
+        if remaining_time_rel < fraction and remaining_memory_rel > fraction:
             props['error'] = 'probably-timeout'
-        elif remaining_memory_rel < 0.01 and remaining_time_rel > 0.05:
+        elif remaining_memory_rel < fraction and remaining_time_rel > fraction:
             props['error'] = 'probably-memory-out'
         else:
             props['error'] = 'unknown-killed'
