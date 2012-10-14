@@ -226,11 +226,15 @@ class Report(object):
             logging.info('Available attributes: %s' % ', '.join(self.all_attributes))
 
         if self.attributes:
-            # Make sure that all selected attributes are present in the dataset.
+            # Make sure that at least some selected attributes are found.
             not_found = set(self.attributes) - set(self.all_attributes)
+            self.attributes = list(set(self.attributes) & set(self.all_attributes))
+            if not self.attributes:
+                logging.critical('None of the selected attributes are present in '
+                                 'the dataset: %s' % sorted(self.attributes))
             if not_found:
-                logging.critical('The following attributes are not present in '
-                                 'the dataset: %s' % sorted(not_found))
+                logging.warning('The following attributes were not found in the '
+                                'dataset: %s' % sorted(not_found))
         else:
             self.attributes = self._get_numerical_attributes()
 
