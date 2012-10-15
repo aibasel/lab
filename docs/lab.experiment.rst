@@ -26,6 +26,7 @@
 
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.GkiGridEnvironment
+.. autoclass:: lab.environments.MaiaEnvironment
 
 
 .. _call:
