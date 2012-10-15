@@ -245,7 +245,10 @@ class Experiment(_Buildable):
                 help='Run all supplied steps. If none are given, run all steps '
                 'in the experiment. For local experiments this option has no '
                 'effect if any steps are given on the commandline. Use this '
-                'option to run unattended experiments on computer grids.')
+                'option to run unattended experiments on computer grids. '
+                'If this option is used, make sure that the experiment script '
+                'doesn\'t change while the experiment is running, because it '
+                'will be called for each step.')
         self.args = self.argparser.parse_args()
         if not self.args.steps and not self.args.run_all_steps:
             self.argparser.print_help()
