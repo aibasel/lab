@@ -238,7 +238,7 @@ def get_error(content, props):
     elif props.get('search_wall_clock_timeout', None) == 1:
         props['error'] = 'wall-clock-timeout'
     # If we don't know the error type already, look at the error log.
-    elif not content.strip():
+    elif not content.strip() and not props.get('search_error', 0):
         props['error'] = 'none'
     elif 'bad_alloc' in content:
         props['error'] = 'memory'
