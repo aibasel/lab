@@ -250,8 +250,12 @@ class Report(object):
                 if self.attribute_is_numeric(attr)]
 
     def attribute_is_numeric(self, attribute):
-        """Return true if the values for *attribute* are ints or floats."""
-        return self._all_attributes[attribute] in [int, float]
+        """Return true if the values for *attribute* are ints or floats.
+
+        If the attribute is None in all runs it may be numeric.
+
+        """
+        return self._all_attributes[attribute] in [int, float, None]
 
     def get_markup(self):
         """
