@@ -60,11 +60,18 @@ class Plot(object):
 
         formatter.__call__ = new_format_call
 
-    def create_legend(self, categories):
+    def create_legend(self, categories, location):
         # Only print a legend if there is at least one non-default category.
         if any(key is not None for key in categories.keys()):
-            self.legend = self.axes.legend(scatterpoints=1, loc='center left',
-                                           bbox_to_anchor=(1, 0.5))
+            kwargs = {}
+            if isinstance(location, (int, basestring)):
+                kwargs['loc'] = location
+            else:
+                if not isinstance(location, (tuple, list)):
+                    logging.critical('location must be a string or a (x, y) pair')
+                kwargs['bbox_to_anchor'] = location
+                kwargs['loc'] = 'center'
+            self.legend = self.axes.legend(scatterpoints=1, **kwargs)
 
     def print_figure(self, filename):
         # Save the generated scatter plot to a PNG file.
@@ -83,9 +90,12 @@ class PlotReport(PlanningReport):
     Abstract base class for Plot classes.
     """
     LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
+    LEGEND_POSITIONS = ['upper right', 'upper left', 'lower left', 'lower right',
+                        'right', 'center left', 'center right', 'lower center',
+                        'upper center', 'center']
 
     def __init__(self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
-                 category_styles=None, **kwargs):
+                 legend_location='upper right', category_styles=None, **kwargs):
         """
         If **title** is given it will be used for the name of the plot.
         Otherwise, the only given attribute will be the title. If none is given,
@@ -93,6 +103,16 @@ class PlotReport(PlanningReport):
 
         **xscale** and **yscale** can have the values ``linear`` or ``symlog``.
         If omitted sensible defaults will be used.
+
+        **legend_location** must be a (x, y) pair or one of the following strings:
+        'upper right', 'upper left', 'lower left', 'lower right', 'right',
+        'center left', 'center right', 'lower center', 'upper center', 'center'. ::
+
+            # Some example positions.
+            legend_location='lower_left'  # Lower left corner *inside* the plot
+            legend_location=(1.1, 0.5)    # Right of the plot
+            legend_location=(0.5, 1.1)    # Above the plot
+            legend_location=(0.5, -0.1)   # Below the plot
 
         Subclasses may group the data points into categories. These categories
         are separated visually by drawing them with different styles. You can
@@ -111,6 +131,7 @@ class PlotReport(PlanningReport):
         if self.attributes:
             self.attribute = self.attributes[0]
         self.title = title or self.attribute or ''
+        self.legend_location = legend_location
         self.category_styles = category_styles or {}
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
@@ -166,7 +187,7 @@ class PlotReport(PlanningReport):
             logging.info('Found no valid points for plot %s' % filename)
             return
 
-        plot.create_legend(categories)
+        plot.create_legend(categories, self.legend_location)
         plot.print_figure(filename)
 
     def write(self):
