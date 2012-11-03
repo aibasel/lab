@@ -177,6 +177,8 @@ class Experiment(_Buildable):
         """
         _Buildable.__init__(self)
         self.path = os.path.abspath(path)
+        if ':' in self.path:
+            logging.critical('Path may not contain colons: %s' % self.path)
         self.environment = environment or LocalEnvironment()
         self.environment.exp = self
         self.fetcher = Fetcher()
