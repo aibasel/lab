@@ -289,6 +289,9 @@ class ProblemPlotReport(PlotReport):
             marker, c = styles[category]
             # Do not include missing values in plot, but reserve spot on x-axis.
             coords = [(x, y) for (x, y) in coords if y is not None]
+            # Make sure that values are sorted by x, otherwise the wrong points
+            # may be conected.
+            coords.sort(key=lambda (x, y): x)
             if not coords:
                 continue
             X, Y = zip(*coords)
@@ -304,7 +307,7 @@ class ProblemPlotReport(PlotReport):
         else:
             limits['right'] = len(all_x) + 1
         axes.set_xlim(**limits)
-        axes.set_ylim(bottom=0, top=max_y * 1.25)
+        axes.set_ylim(bottom=0, top=max_y * 1.1)
         Plot.change_axis_formatter(axes.yaxis)
 
     def _write_plots(self, directory):
