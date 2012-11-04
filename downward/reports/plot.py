@@ -287,13 +287,18 @@ class ProblemPlotReport(PlotReport):
         # Plot all categories.
         for category, coords in categories.items():
             marker, c = styles[category]
+            # The same coordinate may have been added multiple times. To avoid
+            # drawing it more than once which results in a bolder spot, we
+            # filter duplicate items.
+            coords = tools.uniq(coords)
             # Do not include missing values in plot, but reserve spot on x-axis.
             coords = [(x, y) for (x, y) in coords if y is not None]
+            if not coords:
+                continue
             # Make sure that values are sorted by x, otherwise the wrong points
             # may be conected.
             coords.sort(key=lambda (x, y): x)
-            if not coords:
-                continue
+
             X, Y = zip(*coords)
             if not all_x_numeric:
                 X = [indices[val] for val in X]

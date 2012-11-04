@@ -92,6 +92,14 @@ def shell_escape(s):
     return s.upper().replace('-', '_').replace(' ', '_').replace('.', '_')
 
 
+def uniq(iterable):
+    result = []
+    for x in iterable:
+        if x not in result:
+            result.append(x)
+    return result
+
+
 def divide_list(seq, size):
     """
     >>> divide_list(range(10), 4)
