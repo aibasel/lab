@@ -173,6 +173,8 @@ class Report(object):
                             filter_domain=['blocks', 'barman'],
                             filter_search_timeout=1)
         """
+        if isinstance(attributes, basestring):
+            attributes = [attributes]
         self.attributes = attributes or []
         assert format in txt2tags.TARGETS
         self.output_format = format
