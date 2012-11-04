@@ -231,7 +231,7 @@ class Report(object):
             self.attributes = list(set(self.attributes) & set(self.all_attributes))
             if not self.attributes:
                 logging.critical('None of the selected attributes are present in '
-                                 'the dataset: %s' % sorted(self.attributes))
+                                 'the dataset: %s' % sorted(not_found))
             if not_found:
                 logging.warning('The following attributes were not found in the '
                                 'dataset: %s' % sorted(not_found))
@@ -337,6 +337,8 @@ class Report(object):
         logging.info('Reading properties file')
         self.props = tools.Properties(filename=props_file)
         logging.info('Reading properties file finished')
+        if not self.props:
+            logging.critical('properties file in evaluation dir is empty.')
 
     def _apply_filter(self):
         if not self.filters:
@@ -359,6 +361,8 @@ class Report(object):
                     break
             else:
                 new_props[run_id] = modified_run
+        if not new_props:
+            logging.critical('All runs have been filtered -> Nothing to report.')
         new_props.filename = self.props.filename
         self.props = new_props
 
