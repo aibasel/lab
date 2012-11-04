@@ -19,8 +19,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
-import os
+import logging
 import math
+import os
 
 from lab import tools
 
@@ -90,7 +91,7 @@ class ScatterPlotReport(PlotReport):
         """
         assert max_value is not None
         if self.yscale == 'linear':
-            return max_value * 1.25
+            return max_value * 1.1
         return 10 ** math.ceil(math.log10(max_value * 10))
 
     def _replace_none_values(self, values, replacement):
@@ -98,7 +99,6 @@ class ScatterPlotReport(PlotReport):
 
     def _fill_categories(self, runs):
         # We discard the *runs* parameter.
-        assert len(self.configs) == 2
         # Map category names to value tuples
         categories = defaultdict(list)
         for (domain, problem), (run1, run2) in self.problem_runs.items():
@@ -133,7 +133,7 @@ class ScatterPlotReport(PlotReport):
             if X and Y:
                 self.has_points = True
 
-        plot_size = missing_val * 1.25
+        plot_size = missing_val * 1.1
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
@@ -145,6 +145,8 @@ class ScatterPlotReport(PlotReport):
             Plot.change_axis_formatter(axis, missing_val)
 
     def write(self):
+        if not len(self.configs) == 2:
+            logging.critical('Scatterplots need exactly 2 configs: %s' % self.configs)
         self.xlabel = self.xlabel or self.configs[0]
         self.ylabel = self.ylabel or self.configs[1]
 
