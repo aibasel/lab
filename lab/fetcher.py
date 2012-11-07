@@ -26,6 +26,13 @@ from lab import tools
 
 
 class Fetcher(object):
+    """
+    Collect data from the runs of an experiment and store it in an evaluation
+    directory.
+
+    Use this class to combine data from multiple experiment or evaluation
+    directories into a (new) evaluation directory.
+    """
     def fetch_dir(self, run_dir, eval_dir, copy_all=False, filter=None, parsers=None):
         parsers = parsers or []
         # Allow specyfing a list multiple parsers or a single parser.

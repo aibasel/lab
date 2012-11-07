@@ -480,7 +480,7 @@ class Run(_Buildable):
     def _build_linked_resources(self):
         """
         If we are building an argo experiment, add all linked resources to
-        the resources list
+        the resources list.
         """
         self.experiment.environment.build_linked_resources(self)
 

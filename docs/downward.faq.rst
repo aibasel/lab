@@ -10,3 +10,20 @@ each run. Here are the relevant bits from the example script
 
 .. literalinclude:: ../examples/custom-attributes.py
    :pyobject: CustomDownwardExperiment
+
+
+How can I combine the results from multiple experiments?
+--------------------------------------------------------
+
+The best way to do this is to use the :py:class:`Fetcher <lab.fetcher.Fetcher>`
+class.
+
+
+How can I run multiple steps sequentially on a computer grid?
+-------------------------------------------------------------
+
+If your experiment is named ``exp.py``, you can use the command
+``./exp.py --all build-search-exp run-search-exp fetch-search-results`` or
+``./exp.py --all 4 5 6`` to let the grid run each of those three steps when the
+previous one is finished. ``./exp.py --help`` has more infos about the ``--all``
+parameter.
