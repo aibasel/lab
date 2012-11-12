@@ -72,6 +72,7 @@ class ScatterPlotReport(PlotReport):
                        category_styles=styles)
 
         """
+        kwargs.setdefault('legend_location', 'upper left')
         PlotReport.__init__(self, **kwargs)
         assert self.attribute, 'ScatterPlotReport needs exactly one attribute'
         # By default all values are in the same category.
@@ -129,11 +130,11 @@ class ScatterPlotReport(PlotReport):
             X, Y = zip(*coords)
             X = self._replace_none_values(X, missing_val)
             Y = self._replace_none_values(Y, missing_val)
-            axes.scatter(X, Y, s=20, marker=marker, c=c, label=category)
+            axes.scatter(X, Y, s=42, marker=marker, c=c, label=category)
             if X and Y:
                 self.has_points = True
 
-        plot_size = missing_val * 1.1
+        plot_size = missing_val * 1.01
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
