@@ -103,8 +103,10 @@ class AbsoluteReport(PlanningReport):
             # When summarising score results from multiple domains we show
             # normalised averages so that each domain is weighed equally.
             return 'average', reports.avg
-        elif attribute in ['search_time', 'total_time', 'evaluations',
-                           'expansions', 'generated'] or attribute.endswith('_rel'):
+        elif (attribute in ['search_time', 'total_time', 'evaluations',
+                           'expansions', 'generated'] or
+              attribute.endswith('_rel') or
+              attribute.endswith('_relative_to_first')):
             return 'geometric mean', reports.gm
         return 'sum', sum
 
