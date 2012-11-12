@@ -37,8 +37,15 @@ class Plot(object):
         try:
             from matplotlib.backends import backend_agg
             from matplotlib import figure
+            import matplotlib
         except ImportError, err:
             logging.critical('matplotlib could not be found: %s' % err)
+
+        # Explicitly set default font family, weight and size.
+        font = {'family' : 'sans',
+                'weight' : 'normal',
+                'size'   : 12}
+        matplotlib.rc('font', **font)
 
         # Create a figure with size 6 x 6 inches
         fig = figure.Figure(figsize=(10, 10))
@@ -49,7 +56,6 @@ class Plot(object):
 
     @staticmethod
     def change_axis_formatter(axis, missing_val=None):
-        # We do not want the default formatting that gives zeros a special font
         formatter = axis.get_major_formatter()
         old_format_call = formatter.__call__
 
@@ -93,6 +99,10 @@ class PlotReport(PlanningReport):
     LEGEND_POSITIONS = ['upper right', 'upper left', 'lower left', 'lower right',
                         'right', 'center left', 'center right', 'lower center',
                         'upper center', 'center']
+    TITLE_FONTSIZE = 20
+    AXIS_LABEL_FONTSIZE = 20
+    XAXIS_LABEL_PADDING = 5
+    YAXIS_LABEL_PADDING = 5
 
     def __init__(self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
                  legend_location='upper right', category_styles=None, **kwargs):
@@ -130,7 +140,7 @@ class PlotReport(PlanningReport):
         self.attribute = None
         if self.attributes:
             self.attribute = self.attributes[0]
-        self.title = title or self.attribute or ''
+        self.title = title if title is not None else (self.attribute or '')
         self.legend_location = legend_location
         self.category_styles = category_styles or {}
         self._set_scales(xscale, yscale)
@@ -170,10 +180,14 @@ class PlotReport(PlanningReport):
         plot = Plot()
         self.has_points = False
         if self.title:
-            plot.axes.set_title(self.title, fontsize=14)
+            plot.axes.set_title(self.title, fontsize=self.TITLE_FONTSIZE)
+        label_kwargs = dict(size=self.AXIS_LABEL_FONTSIZE)
         if self.xlabel:
-            plot.axes.set_xlabel(self.xlabel)
-            plot.axes.set_ylabel(self.ylabel)
+            plot.axes.set_xlabel(self.xlabel, labelpad=self.XAXIS_LABEL_PADDING,
+                                 **label_kwargs)
+        if self.ylabel:
+            plot.axes.set_ylabel(self.ylabel, labelpad=self.YAXIS_LABEL_PADDING,
+                                 **label_kwargs)
 
         # Map category names to value tuples
         categories = self._fill_categories(runs)
