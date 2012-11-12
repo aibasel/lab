@@ -84,6 +84,8 @@ class ScatterPlotReport(PlotReport):
         if self.attribute and self.attribute in self.LINEAR:
             default_xscale = 'linear'
         PlotReport._set_scales(self, xscale or default_xscale, yscale)
+        if self.xscale != self.yscale:
+            logging.critical('Scatterplots must use the same scale on both axes.')
 
     def _get_missing_val(self, max_value):
         """
@@ -93,7 +95,7 @@ class ScatterPlotReport(PlotReport):
         assert max_value is not None
         if self.yscale == 'linear':
             return max_value * 1.1
-        return 10 ** math.ceil(math.log10(max_value * 10))
+        return 10 ** math.ceil(math.log10(max_value))
 
     def _replace_none_values(self, values, replacement):
         return [replacement if val is None else val for val in values]
@@ -134,7 +136,10 @@ class ScatterPlotReport(PlotReport):
             if X and Y:
                 self.has_points = True
 
-        plot_size = missing_val * 1.01
+        if self.xscale == 'linear' or self.yscale == 'linear':
+            plot_size = missing_val * 1.01
+        else:
+            plot_size = missing_val * 1.25
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
