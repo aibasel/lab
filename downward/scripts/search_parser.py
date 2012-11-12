@@ -153,8 +153,8 @@ def set_search_time(content, props):
 
 
 def unsolvable(content, props):
-    props['unsolvable'] = ('Completely explored state space -- no solution!'
-                           in content)
+    props['unsolvable'] = int('unsolvable' in content or
+            'Completely explored state space -- no solution!' in content)
 
 
 def parse_error(content, props):
