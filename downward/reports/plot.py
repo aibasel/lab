@@ -44,9 +44,9 @@ class Plot(object):
             logging.critical('matplotlib could not be found: %s' % err)
 
         # Explicitly set default font family, weight and size.
-        font = {'family' : 'sans',
-                'weight' : 'normal',
-                'size'   : 12}
+        font = {'family': 'sans',
+                'weight': 'normal',
+                'size': 12}
         matplotlib.rc('font', **font)
 
         # Create a figure with size 6 x 6 inches

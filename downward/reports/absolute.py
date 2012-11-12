@@ -95,7 +95,8 @@ class AbsoluteReport(PlanningReport):
         sense if not all configs have values for those attributes.
         """
         return (attribute in ['coverage', 'quality', 'single_solver'] or
-                attribute.endswith('_error'))
+                attribute.endswith('_error') or
+                attribute.endswith('_relative_to_first'))
 
     def _get_group_func(self, attribute):
         """Decide on a group function for this attribute."""
