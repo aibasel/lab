@@ -32,9 +32,12 @@ class ScatterPlotReport(PlotReport):
     """
     Generate a scatter plot for a specific attribute.
     """
-    def __init__(self, get_category=None, **kwargs):
+    def __init__(self, show_missing=True, get_category=None, **kwargs):
         """
         ``kwargs['attributes']`` must contain exactly one attribute.
+
+        If only one of the two configurations has a value for a run, only
+        add a coordinate if *show_missing* is True.
 
         *get_category* can be a function that takes **two** runs (dictionaries of
         properties) and returns a category name. This name is used to group the
@@ -77,6 +80,7 @@ class ScatterPlotReport(PlotReport):
         assert self.attribute, 'ScatterPlotReport needs exactly one attribute'
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
+        self.show_missing = show_missing
 
     def _set_scales(self, xscale, yscale):
         # ScatterPlots use symlog scaling on the x-axis by default.
@@ -97,8 +101,12 @@ class ScatterPlotReport(PlotReport):
             return max_value * 1.1
         return 10 ** math.ceil(math.log10(max_value))
 
-    def _replace_none_values(self, values, replacement):
-        return [replacement if val is None else val for val in values]
+    def _handle_none_values(self, X, Y, replacement):
+        assert len(X) == len(Y), (X, Y)
+        if self.show_missing:
+            return ([x if x is not None else replacement for x in X],
+                    [y if y is not None else replacement for y in Y])
+        return zip(*[(x, y) for x, y in zip(X, Y) if x is not None and y is not None])
 
     def _fill_categories(self, runs):
         # We discard the *runs* parameter.
@@ -130,8 +138,7 @@ class ScatterPlotReport(PlotReport):
         for category, coords in sorted(categories.items()):
             marker, c = styles[category]
             X, Y = zip(*coords)
-            X = self._replace_none_values(X, missing_val)
-            Y = self._replace_none_values(Y, missing_val)
+            X, Y = self._handle_none_values(X, Y, missing_val)
             axes.scatter(X, Y, s=42, marker=marker, c=c, label=category)
             if X and Y:
                 self.has_points = True
@@ -148,7 +155,8 @@ class ScatterPlotReport(PlotReport):
         axes.set_ylim(0, plot_size)
 
         for axis in [axes.xaxis, axes.yaxis]:
-            Plot.change_axis_formatter(axis, missing_val)
+            Plot.change_axis_formatter(axis,
+                                       missing_val if self.show_missing else None)
 
     def write(self):
         if not len(self.configs) == 2:
