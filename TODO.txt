@@ -3,3 +3,5 @@ Roadmap
 
 * Custom attributes with aggregation function and information about whether "max_wins".
 * Move Plot class into lab.reports
+* Unify domain and problem report
+* Allow using kwargs for category styles
