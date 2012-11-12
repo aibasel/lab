@@ -28,6 +28,8 @@ from downward.reports import PlanningReport
 
 
 class Plot(object):
+    LEGEND_FONTSIZE = 16
+
     def __init__(self):
         self.legend = None
         self.create_canvas_and_axes()
@@ -69,7 +71,7 @@ class Plot(object):
     def create_legend(self, categories, location):
         # Only print a legend if there is at least one non-default category.
         if any(key is not None for key in categories.keys()):
-            kwargs = {}
+            kwargs = dict(prop={'size': self.LEGEND_FONTSIZE})
             if isinstance(location, (int, basestring)):
                 kwargs['loc'] = location
             else:
