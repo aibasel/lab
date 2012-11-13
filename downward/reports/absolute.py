@@ -38,8 +38,8 @@ class AbsoluteReport(PlanningReport):
     MAX_ATTRIBUTE_PARTS = ['score', 'initial_h_value', 'coverage',
                            'quality', 'single_solver', 'avg_h',
                            'offline_abstraction_done']
-    ABSOLUTE_ATTRIBUTES = ['coverage', 'quality', 'single_solver', '*_error',
-                           '*_relative_to_first']
+    ABSOLUTE_ATTRIBUTES = ['coverage', 'quality', 'single_solver', 'unsolvable',
+                           '*_error', '*_relative_to_first']
 
     def __init__(self, resolution, colored=False, **kwargs):
         """
