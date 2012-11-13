@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
+import fnmatch
 import logging
 
 from lab import reports
@@ -37,6 +38,8 @@ class AbsoluteReport(PlanningReport):
     MAX_ATTRIBUTE_PARTS = ['score', 'initial_h_value', 'coverage',
                            'quality', 'single_solver', 'avg_h',
                            'offline_abstraction_done']
+    ABSOLUTE_ATTRIBUTES = ['coverage', 'quality', 'single_solver', '*_error',
+                           '*_relative_to_first']
 
     def __init__(self, resolution, colored=False, **kwargs):
         """
@@ -91,12 +94,12 @@ class AbsoluteReport(PlanningReport):
 
     def _attribute_is_absolute(self, attribute):
         """
-        The domain-wise sum of the values for coverage and *_error even makes
-        sense if not all configs have values for those attributes.
+        The domain-wise aggregation of the values make sense for some attributes
+        like coverage, unsolvable and search_error even if not all configs have
+        values for those attributes.
         """
-        return (attribute in ['coverage', 'quality', 'single_solver'] or
-                attribute.endswith('_error') or
-                attribute.endswith('_relative_to_first'))
+        return any(fnmatch.fnmatch(attribute, abs_attr)
+                   for abs_attr in self.ABSOLUTE_ATTRIBUTES)
 
     def _get_group_func(self, attribute):
         """Decide on a group function for this attribute."""
