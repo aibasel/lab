@@ -136,22 +136,44 @@ class AbsoluteReport(PlanningReport):
         table = self._get_empty_table(attribute)
         self._add_summary_functions(table, attribute)
         func_name, func = self._get_group_func(attribute)
-        num_values = 0
+        num_probs= 0
         self._add_table_info(attribute, func_name, table)
         domain_config_values = defaultdict(list)
         for domain, problems in self.domains.items():
             for problem in problems:
                 runs = self.problem_runs[(domain, problem)]
-                if any(run.get(attribute) is None for run in runs):
+                if (not self._attribute_is_absolute(attribute) and
+                    any(run.get(attribute) is None for run in runs)):
                     continue
-                num_values += 1
-                for config in self.configs:
-                    value = self.runs[(domain, problem, config)].get(attribute)
+                num_probs += 1
+                for run in runs:
+                    value = run.get(attribute)
                     if value is not None:
-                        domain_config_values[(domain, config)].append(value)
+                        domain_config_values[(domain, run['config'])].append(value)
+
+        # If the attribute is absolute (e.g. coverage, search_error) we may have
+        # added problems for which not all configs have a value. Therefore, we
+        # can only print the number of instances (in brackets after the domain
+        # name) if that number is the same for all configs. If not all configs
+        # have values for the same number of problems, we write the full list of
+        # different problem numbers.
+        num_values_lists = defaultdict(list)
+        for domain in self.domains:
+            for config in self.configs:
+                values = domain_config_values.get((domain, config), [])
+                num_values_lists[domain].append(str(len(values)))
+        num_values_text = {}
+        for domain, num_values_list in num_values_lists.items():
+            if len(set(num_values_list)) == 1:
+                text = num_values_list[0]
+            else:
+                text = ','.join(num_values_list)
+            num_values_text[domain] = text
+
         for (domain, config), values in domain_config_values.items():
-            table.add_cell('%s (%s)' % (domain, len(values)), config, func(values))
-        table.num_values = num_values
+            table.add_cell('%s (%s)' % (domain, num_values_text[domain]), config,
+                                        func(values))
+        table.num_values = num_probs
         return table
 
     def _get_domain_table(self, attribute, domain):
