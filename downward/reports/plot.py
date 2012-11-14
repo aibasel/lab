@@ -82,7 +82,7 @@ class Plot(object):
             self.legend = self.axes.legend(scatterpoints=1, **kwargs)
 
     def print_figure(self, filename):
-        # Save the generated scatter plot to a PNG file.
+        # Save the generated scatter plot to a file.
         # Legend is still bugged in mathplotlib, but there is a patch see:
         # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
         extra_artists = []
@@ -137,6 +137,7 @@ class PlotReport(PlanningReport):
             ScatterPlotReport(attributes=['expansions'],
                               category_styles={None: ('*','b')})
         """
+        kwargs.setdefault('format', 'png')
         PlanningReport.__init__(self, **kwargs)
         assert len(self.attributes) <= 1, self.attributes
         self.attribute = None
@@ -335,7 +336,7 @@ class ProblemPlotReport(PlotReport):
         for (domain, problem), runs in sorted(self.problem_runs.items()):
             parts = [self.title.lower().replace(' ', '-')] if self.title else []
             parts += [domain, problem]
-            path = os.path.join(directory, '-'.join(parts) + '.png')
+            path = os.path.join(directory, '-'.join(parts) + '.' + self.output_format)
             self._write_plot(runs, path)
 
     def write(self):

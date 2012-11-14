@@ -164,7 +164,8 @@ class ScatterPlotReport(PlotReport):
         self.xlabel = self.xlabel or self.configs[0]
         self.ylabel = self.ylabel or self.configs[1]
 
-        if not self.outfile.endswith('.png'):
-            self.outfile += '.png'
+        suffix = '.' + self.output_format
+        if not self.outfile.endswith(suffix):
+            self.outfile += suffix
         tools.makedirs(os.path.dirname(self.outfile))
         self._write_plot(self.runs.values(), self.outfile)
