@@ -141,14 +141,14 @@ class AbsoluteReport(PlanningReport):
         table = self._get_empty_table(attribute)
         self._add_summary_functions(table, attribute)
         func_name, func = self._get_group_func(attribute)
-        num_probs= 0
+        num_probs = 0
         self._add_table_info(attribute, func_name, table)
         domain_config_values = defaultdict(list)
         for domain, problems in self.domains.items():
             for problem in problems:
                 runs = self.problem_runs[(domain, problem)]
                 if (not self._attribute_is_absolute(attribute) and
-                    any(run.get(attribute) is None for run in runs)):
+                        any(run.get(attribute) is None for run in runs)):
                     continue
                 num_probs += 1
                 for run in runs:
@@ -177,7 +177,7 @@ class AbsoluteReport(PlanningReport):
 
         for (domain, config), values in domain_config_values.items():
             table.add_cell('%s (%s)' % (domain, num_values_text[domain]), config,
-                                        func(values))
+                           func(values))
         table.num_values = num_probs
         return table
 
