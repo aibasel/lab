@@ -44,7 +44,7 @@ class Plot(object):
             logging.critical('matplotlib could not be found: %s' % err)
 
         # Explicitly set default font family, weight and size.
-        font = {'family': 'sans',
+        font = {'family': 'serif',
                 'weight': 'normal',
                 'size': 12}
         matplotlib.rc('font', **font)
@@ -88,8 +88,11 @@ class Plot(object):
         extra_artists = []
         if self.legend:
             extra_artists.append(self.legend.legendPatch)
-        self.canvas.print_figure(filename, dpi=100, bbox_inches='tight',
-                                 bbox_extra_artists=extra_artists)
+        kwargs = dict(dpi=100, bbox_extra_artists=extra_artists)
+        # Note: Setting bbox_inches keyword breaks pgf export.
+        if not filename.endswith('pgf'):
+            kwargs['bbox_inches'] = 'tight'
+        self.canvas.print_figure(filename, **kwargs)
         logging.info('Wrote file://%s' % filename)
 
 
@@ -329,7 +332,7 @@ class ProblemPlotReport(PlotReport):
         else:
             limits['right'] = len(all_x) + 1
         axes.set_xlim(**limits)
-        axes.set_ylim(bottom=0, top=max_y * 1.1)
+        axes.set_ylim(bottom=-10, top=max_y * 1.1)
         Plot.change_axis_formatter(axes.yaxis)
 
     def _write_plots(self, directory):
