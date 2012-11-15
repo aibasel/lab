@@ -55,9 +55,9 @@ class PlanningReport(Report):
         """
         See :py:class:`Report <lab.reports.Report>` for inherited parameters.
 
-        *derived_properties* must be a list of functions that take a single
-        argument. This argument is a list of problem runs i.e. it contains one
-        run-dictionary for each config in the experiment. The function is
+        *derived_properties* must be a function or a list of functions taking a
+        single argument. This argument is a list of problem runs i.e. it contains
+        one run-dictionary for each config in the experiment. The function is
         called for every problem in the suite. A function that computes the
         IPC score based on the results of the experiment is added automatically
         to the *derived_properties* list and serves as an example here:
@@ -79,6 +79,9 @@ class PlanningReport(Report):
             PlanningReport(filter_config=['WORK-lmcut', 'WORK-blind'])
             PlanningReport(filter_config_nick=['lmcut', 'blind'])
         """
+        # Allow specifying a single property or a list of properties.
+        if hasattr(derived_properties, '__call__'):
+            derived_properties = [derived_properties]
         self.derived_properties = derived_properties or []
         # Remember the order of the configs if it is given as a key word argument filter.
         self.configs = kwargs.get('filter_config', None)
