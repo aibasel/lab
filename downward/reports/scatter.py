@@ -164,6 +164,12 @@ class ScatterPlotReport(PlotReport):
         self.xlabel = self.xlabel or self.configs[0]
         self.ylabel = self.ylabel or self.configs[1]
 
+        import matplotlib
+        figsize = matplotlib.rcParams.get('figure.figsize')
+        if figsize == [8, 6]:
+            # Probably size has not been set explicitly. Make it a square.
+            matplotlib.rcParams['figure.figsize'] = [8, 8]
+
         suffix = '.' + self.output_format
         if not self.outfile.endswith(suffix):
             self.outfile += suffix
