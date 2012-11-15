@@ -176,7 +176,7 @@ class Report(object):
         if isinstance(attributes, basestring):
             attributes = [attributes]
         self.attributes = attributes or []
-        assert format in txt2tags.TARGETS + ['eps', 'pgf', 'png']
+        assert format in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png']
         self.output_format = format
         self.toc = True
         if not filter:
