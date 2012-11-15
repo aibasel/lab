@@ -302,7 +302,7 @@ class ProblemPlotReport(PlotReport):
             if not coords:
                 continue
             # Make sure that values are sorted by x, otherwise the wrong points
-            # may be conected.
+            # may be connected.
             coords.sort(key=lambda (x, y): x)
 
             X, Y = zip(*coords)
