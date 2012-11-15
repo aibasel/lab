@@ -28,8 +28,6 @@ from downward.reports import PlanningReport
 
 
 class Plot(object):
-    LEGEND_FONTSIZE = 16
-
     def __init__(self):
         self.legend = None
         self.create_canvas_and_axes()
@@ -39,18 +37,11 @@ class Plot(object):
         try:
             from matplotlib.backends import backend_agg
             from matplotlib import figure
-            import matplotlib
         except ImportError, err:
             logging.critical('matplotlib could not be found: %s' % err)
 
-        # Explicitly set default font family, weight and size.
-        font = {'family': 'serif',
-                'weight': 'normal',
-                'size': 12}
-        matplotlib.rc('font', **font)
-
-        # Create a figure with size 6 x 6 inches
-        fig = figure.Figure(figsize=(10, 10))
+        # Create a figure.
+        fig = figure.Figure()
 
         # Create a canvas and add the figure to it
         self.canvas = backend_agg.FigureCanvasAgg(fig)
@@ -63,7 +54,7 @@ class Plot(object):
 
         def new_format_call(x, pos):
             if x == missing_val:
-                return 'Missing'  # '$\mathdefault{None^{\/}}$' no effect
+                return 'Missing'
             return old_format_call(x, pos)
 
         formatter.__call__ = new_format_call
@@ -71,7 +62,7 @@ class Plot(object):
     def create_legend(self, categories, location):
         # Only print a legend if there is at least one non-default category.
         if any(key is not None for key in categories.keys()):
-            kwargs = dict(prop={'size': self.LEGEND_FONTSIZE})
+            kwargs = {}
             if isinstance(location, (int, basestring)):
                 kwargs['loc'] = location
             else:
@@ -88,7 +79,7 @@ class Plot(object):
         extra_artists = []
         if self.legend:
             extra_artists.append(self.legend.legendPatch)
-        kwargs = dict(dpi=100, bbox_extra_artists=extra_artists)
+        kwargs = dict(bbox_extra_artists=extra_artists)
         # Note: Setting bbox_inches keyword breaks pgf export.
         if not filename.endswith('pgf'):
             kwargs['bbox_inches'] = 'tight'
@@ -104,8 +95,6 @@ class PlotReport(PlanningReport):
     LEGEND_POSITIONS = ['upper right', 'upper left', 'lower left', 'lower right',
                         'right', 'center left', 'center right', 'lower center',
                         'upper center', 'center']
-    TITLE_FONTSIZE = 20
-    AXIS_LABEL_FONTSIZE = 20
     XAXIS_LABEL_PADDING = 5
     YAXIS_LABEL_PADDING = 5
 
@@ -186,14 +175,11 @@ class PlotReport(PlanningReport):
         plot = Plot()
         self.has_points = False
         if self.title:
-            plot.axes.set_title(self.title, fontsize=self.TITLE_FONTSIZE)
-        label_kwargs = dict(size=self.AXIS_LABEL_FONTSIZE)
+            plot.axes.set_title(self.title)
         if self.xlabel:
-            plot.axes.set_xlabel(self.xlabel, labelpad=self.XAXIS_LABEL_PADDING,
-                                 **label_kwargs)
+            plot.axes.set_xlabel(self.xlabel, labelpad=self.XAXIS_LABEL_PADDING)
         if self.ylabel:
-            plot.axes.set_ylabel(self.ylabel, labelpad=self.YAXIS_LABEL_PADDING,
-                                 **label_kwargs)
+            plot.axes.set_ylabel(self.ylabel, labelpad=self.YAXIS_LABEL_PADDING)
 
         # Map category names to value tuples
         categories = self._fill_categories(runs)
@@ -305,7 +291,7 @@ class ProblemPlotReport(PlotReport):
             axes.set_xticklabels(all_x)
 
         # Plot all categories.
-        for category, coords in categories.items():
+        for category, coords in sorted(categories.items()):
             marker, c = styles[category]
             # The same coordinate may have been added multiple times. To avoid
             # drawing it more than once which results in a bolder spot, we
@@ -332,7 +318,7 @@ class ProblemPlotReport(PlotReport):
         else:
             limits['right'] = len(all_x) + 1
         axes.set_xlim(**limits)
-        axes.set_ylim(bottom=-10, top=max_y * 1.1)
+        axes.set_ylim(bottom=0, top=max_y * 1.1)
         Plot.change_axis_formatter(axes.yaxis)
 
     def _write_plots(self, directory):
