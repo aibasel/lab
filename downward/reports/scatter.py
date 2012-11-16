@@ -151,8 +151,8 @@ class ScatterPlotReport(PlotReport):
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
 
-        axes.set_xlim(-1, plot_size)
-        axes.set_ylim(-1, plot_size)
+        axes.set_xlim(self.xlim_left or -1, self.xlim_right or plot_size)
+        axes.set_ylim(self.ylim_bottom or -1, self.ylim_top or plot_size)
 
         for axis in [axes.xaxis, axes.yaxis]:
             Plot.change_axis_formatter(axis,

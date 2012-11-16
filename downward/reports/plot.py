@@ -99,6 +99,7 @@ class PlotReport(PlanningReport):
     YAXIS_LABEL_PADDING = 5
 
     def __init__(self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
+                 xlim_left=None, xlim_right=None, ylim_bottom=None, ylim_top=None,
                  legend_location='upper right', category_styles=None, **kwargs):
         """
         If **title** is given it will be used for the name of the plot.
@@ -141,6 +142,10 @@ class PlotReport(PlanningReport):
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
         self.ylabel = ylabel
+        self.xlim_left = xlim_left
+        self.xlim_right = xlim_right
+        self.ylim_bottom = ylim_bottom
+        self.ylim_top = ylim_top
 
     def _set_scales(self, xscale, yscale):
         self.xscale = xscale or 'linear'
@@ -312,13 +317,14 @@ class ProblemPlotReport(PlotReport):
             if X and Y:
                 self.has_points = True
 
-        limits = {'left': 0}
-        if all_x_numeric:
-            limits['right'] = max(all_x) * 1.25 if all_x else None
+        if self.xlim_right:
+            xlim_right = self.xlim_right
+        elif all_x_numeric:
+            xlim_right = max(all_x) * 1.25 if all_x else None
         else:
-            limits['right'] = len(all_x) + 1
-        axes.set_xlim(**limits)
-        axes.set_ylim(bottom=0, top=max_y * 1.1)
+            xlim_right = len(all_x) + 1
+        axes.set_xlim(self.xlim_left or 0, xlim_right)
+        axes.set_ylim(self.ylim_bottom or 0, self.ylim_top or max_y * 1.1)
         Plot.change_axis_formatter(axes.yaxis)
 
     def _write_plots(self, directory):
