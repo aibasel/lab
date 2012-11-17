@@ -121,7 +121,8 @@ exp.add_step(Step('report-scatter',
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter.png')))
 exp.add_step(Step('report-scatter-domain',
                   ScatterPlotReport(attributes=['expansions'], filter=only_two_configs,
-                                    get_category=get_domain, xscale='linear', yscale='linear'),
+                                    get_category=get_domain, xscale='linear', yscale='linear',
+                                    category_styles={'gripper': {'c': 'b', 'marker': '+'}}),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
 exp.add_step(Step('report-plot-prob',
                   ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag, yscale='symlog'),

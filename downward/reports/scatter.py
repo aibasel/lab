@@ -136,10 +136,9 @@ class ScatterPlotReport(PlotReport):
 
         # Generate the scatter plots
         for category, coords in sorted(categories.items()):
-            marker, c = styles[category]
             X, Y = zip(*coords)
             X, Y = self._handle_none_values(X, Y, missing_val)
-            axes.scatter(X, Y, s=42, marker=marker, c=c, label=category)
+            axes.scatter(X, Y, s=42, label=category, **styles[category])
             if X and Y:
                 self.has_points = True
 

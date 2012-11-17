@@ -122,13 +122,12 @@ class PlotReport(PlanningReport):
         Subclasses may group the data points into categories. These categories
         are separated visually by drawing them with different styles. You can
         set the styles manually by providing a dictionary *category_styles* that
-        maps category names to tuples (marker, color) where marker and color are
-        valid values for pyplot
-        (see http://matplotlib.sourceforge.net/api/pyplot_api.html).
+        maps category names to dictionaries of matplotlib drawing parameters
+        (see http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot).
         For example to change the default style to blue stars use::
 
             ScatterPlotReport(attributes=['expansions'],
-                              category_styles={None: ('*','b')})
+                              category_styles={None: {'marker': '*', 'c': 'b'}})
         """
         kwargs.setdefault('format', 'png')
         PlanningReport.__init__(self, **kwargs)
@@ -138,7 +137,24 @@ class PlotReport(PlanningReport):
             self.attribute = self.attributes[0]
         self.title = title if title is not None else (self.attribute or '')
         self.legend_location = legend_location
-        self.category_styles = category_styles or {}
+
+        # Convert the old (marker, color) tuples to the new dict format.
+        category_styles = category_styles or {}
+        used_old_format = False
+        for cat, style in category_styles.items():
+            if not isinstance(style, dict):
+                assert isinstance(style, (tuple, list)), style
+                used_old_format = True
+                marker, color = style
+                category_styles[cat] = {'marker': marker, 'c': color}
+                logging.info('Converted %s to %s' % (style, category_styles[cat]))
+        if used_old_format:
+            logging.warning('The old category_styles tuple format has been '
+                            'deprecated. You should use a dictionary mapping '
+                            'category names to dictionaries of matplotlib params '
+                            'instead: %s' % category_styles[cat])
+
+        self.category_styles = category_styles
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
         self.ylabel = ylabel
@@ -161,10 +177,10 @@ class PlotReport(PlanningReport):
 
     def _get_category_styles(self, categories):
         # Pick any style for categories for which no style is defined.
-        # TODO: add more possible styles.
         styles = self.category_styles.copy()
-        unused_styles = [(m, c) for m in 'ox+^v<>' for c in 'rgbcmyk'
-                         if (m, c) not in styles.values()]
+        unused_styles = [{'marker': m, 'c': c} for m in 'ox+^v<>' for c in 'rgbcmyk'
+                         if not any(s.get('marker') == m and
+                                    s.get('c') == c for s in styles.values())]
         missing_category_styles = (set(categories.keys()) - set(styles.keys()))
         for i, missing in enumerate(missing_category_styles):
             styles[missing] = unused_styles[i % len(unused_styles)]
@@ -297,7 +313,6 @@ class ProblemPlotReport(PlotReport):
 
         # Plot all categories.
         for category, coords in sorted(categories.items()):
-            marker, c = styles[category]
             # The same coordinate may have been added multiple times. To avoid
             # drawing it more than once which results in a bolder spot, we
             # filter duplicate items.
@@ -313,7 +328,7 @@ class ProblemPlotReport(PlotReport):
             X, Y = zip(*coords)
             if not all_x_numeric:
                 X = [indices[val] for val in X]
-            axes.plot(X, Y, marker=marker, c=c, label=category)
+            axes.plot(X, Y, label=category, **styles[category])
             if X and Y:
                 self.has_points = True
 
