@@ -63,7 +63,12 @@ class AbsoluteReport(PlanningReport):
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
             if self.resolution in ['domain', 'combined']:
-                tables.append(('', self._get_table(attribute)))
+                if self.attribute_is_numeric(attribute):
+                    tables.append(('', self._get_table(attribute)))
+                else:
+                    tables.append(('', 'Domain-wise reports only support numeric '
+                        'attributes, but %s has type %s.' %
+                        (attribute, self._all_attributes[attribute].__name__)))
             if self.resolution in ['problem', 'combined']:
                 for domain in sorted(self.domains.keys()):
                     tables.append((domain, self._get_table(attribute, domain)))
@@ -82,7 +87,7 @@ class AbsoluteReport(PlanningReport):
                         parts.append('%(table)s\n' % locals())
                     else:
                         parts.append('No task was found where all configurations '
-                                     'have a value for "%s".' % attribute)
+                                     'have a value for "%s".\n' % attribute)
 
             toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
             toc_lines.append('  - ' + ' '.join(toc_line))
@@ -140,10 +145,7 @@ class AbsoluteReport(PlanningReport):
                               ' and '.join(summary_names))
 
     def _get_suite_table(self, attribute):
-        if not self.attribute_is_numeric(attribute):
-            logging.critical('Domain-wise reports only support numeric attributes, '
-                             'but %s is of %s' %
-                             (attribute, self._all_attributes[attribute]))
+        assert self.attribute_is_numeric(attribute), attribute
         table = self._get_empty_table(attribute)
         self._add_summary_functions(table, attribute)
         func_name, func = self._get_group_func(attribute)
