@@ -91,12 +91,9 @@ class StandardDownwardExperiment(DownwardExperiment):
             attributes = ATTRIBUTES
 
         # Add report steps
-        abs_domain_report_file = os.path.join(self.eval_dir, '%s-abs-d.html' % expname)
-        abs_problem_report_file = os.path.join(self.eval_dir, '%s-abs-p.html' % expname)
-        self.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=attributes, colored=True),
-                                                          self.eval_dir, abs_domain_report_file))
-        self.add_step(Step('report-abs-p', AbsoluteReport('problem', attributes=attributes + ['error'], colored=True),
-                                                          self.eval_dir, abs_problem_report_file))
+        abs_report_file = os.path.join(self.eval_dir, '%s-abs.html' % expname)
+        self.add_step(Step('report-abs', AbsoluteReport(attributes=attributes + ['error'], colored=True),
+                                                        self.eval_dir, abs_report_file))
 
         # Compress the experiment directory
         self.add_step(Step.zip_exp_dir(self))
@@ -120,8 +117,7 @@ class StandardDownwardExperiment(DownwardExperiment):
                 'seipp@habakuk:%s.tar.gz' % remote_exppath, '%s.tar.gz' % local_exppath]))
 
         # Copy the results and send mail.
-        self.add_step(create_publish_and_mail_step(self, abs_domain_report_file,
-                                                   abs_problem_report_file))
+        self.add_step(create_publish_and_mail_step(self, abs_report_file))
 
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast
