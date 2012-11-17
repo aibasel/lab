@@ -72,12 +72,17 @@ class AbsoluteReport(PlanningReport):
             toc_line = []
             for (domain, table) in tables:
                 if domain:
+                    assert table
                     toc_line.append('[""%(domain)s"" #%(attribute)s-%(domain)s]' %
                                     locals())
                     parts.append('== %(domain)s ==[%(attribute)s-%(domain)s]\n'
                                  '%(table)s\n' % locals())
                 else:
-                    parts.append('%(table)s\n' % locals())
+                    if table:
+                        parts.append('%(table)s\n' % locals())
+                    else:
+                        parts.append('No task was found where all configurations '
+                                     'have a value for "%s".' % attribute)
 
             toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
             toc_lines.append('  - ' + ' '.join(toc_line))
