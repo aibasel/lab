@@ -43,13 +43,13 @@ class AbsoluteReport(PlanningReport):
 
     def __init__(self, resolution, colored=False, **kwargs):
         """
-        *resolution* must be one of "domain" or "problem".
+        *resolution* must be one of "domain" or "problem" or "combined" (default).
 
         If *colored* is True, the values of each row will be given colors from a
         colormap. Only HTML reports can be colored currently.
         """
         PlanningReport.__init__(self, **kwargs)
-        assert resolution in ['domain', 'problem']
+        assert resolution in ['domain', 'problem', 'combined']
         self.resolution = resolution
         if colored and not 'html' in self.output_format:
             logging.critical('Only HTML reports can be colored.')
@@ -61,26 +61,27 @@ class AbsoluteReport(PlanningReport):
         toc_lines = []
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
-            if self.resolution == 'domain':
-                table = self._get_table(attribute)
-                # We return None for a table if we don't want to add it
-                if table:
-                    sections.append((attribute, str(table)))
-            else:
-                tables = []
+            tables = []
+            if self.resolution in ['domain', 'combined']:
+                tables.append(('', self._get_table(attribute)))
+            if self.resolution in ['problem', 'combined']:
                 for domain in sorted(self.domains.keys()):
-                    table = self._get_table(attribute, domain)
-                    # We return None for a table if we don't want to add it
-                    if table:
-                        tables.append((domain, str(table)))
-                if tables:
-                    section = '\n'.join(['== %s ==[%s-%s]\n%s\n' %
-                                         (domain, attribute, domain, table)
-                                         for (domain, table) in tables])
-                    sections.append((attribute, section))
-                    toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
-                    toc_lines.append('  - ' + ' '.join('[""%s"" #%s-%s]' %
-                            (domain, attribute, domain) for domain, table in tables))
+                    tables.append((domain, self._get_table(attribute, domain)))
+
+            parts = []
+            toc_line = []
+            for (domain, table) in tables:
+                if domain:
+                    toc_line.append('[""%(domain)s"" #%(attribute)s-%(domain)s]' %
+                                    locals())
+                    parts.append('== %(domain)s ==[%(attribute)s-%(domain)s]\n'
+                                 '%(table)s\n' % locals())
+                else:
+                    parts.append('%(table)s\n' % locals())
+
+            toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
+            toc_lines.append('  - ' + ' '.join(toc_line))
+            sections.append((attribute, '\n'.join(parts)))
 
         if self.resolution == 'domain':
             toc = '- ' + ' '.join('[""%s"" #%s]' % (attr, attr)
