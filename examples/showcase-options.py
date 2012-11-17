@@ -123,13 +123,32 @@ def sat_vs_opt(run):
 exp.add_step(Step('report-scatter',
                   ScatterPlotReport(attributes=['expansions'], filter_config_nick=['downward-seq-opt-fdss-1.py', 'lama11']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter.png')))
+
+params = {
+    'font.family': 'serif',
+    'font.weight': 'normal',
+    'font.size': 20,  # Only used if the more specific sizes are not set.
+    'axes.labelsize': 20,
+    'axes.titlesize': 30,
+    'legend.fontsize': 22,
+    'xtick.labelsize': 10,
+    'ytick.labelsize': 10,
+    'lines.markersize': 10,
+    'lines.markeredgewidth': 0.25,
+    'lines.linewidth': 1,
+    'figure.figsize': [8, 8],  # Width and height in inches.
+    'savefig.dpi': 100,
+}
+
 exp.add_step(Step('report-scatter-domain',
                   ScatterPlotReport(attributes=['expansions'], filter=only_two_configs,
                                     get_category=get_domain, xscale='linear', yscale='linear',
-                                    category_styles={'gripper': {'c': 'b', 'marker': '+'}}),
+                                    category_styles={'gripper': {'c': 'b', 'marker': '+'}},
+                                    params=params),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
 exp.add_step(Step('report-plot-prob',
-                  ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag, yscale='symlog'),
+                  ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag, yscale='symlog',
+                  params=params),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
 exp.add_step(Step('report-plot-cat',
                   ProblemPlotReport(filter=remove_work_tag, get_points=sat_vs_opt),

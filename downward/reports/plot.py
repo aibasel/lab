@@ -22,6 +22,13 @@ import logging
 import os
 from collections import defaultdict
 
+try:
+    import matplotlib
+    from matplotlib import figure
+    from matplotlib.backends import backend_agg
+except ImportError, err:
+    logging.critical('matplotlib could not be found: %s' % err)
+
 from lab import tools
 
 from downward.reports import PlanningReport
@@ -33,19 +40,19 @@ class Plot(object):
         self.create_canvas_and_axes()
 
     def create_canvas_and_axes(self):
-        # Import in method to be compatible to rtfd.org
-        try:
-            from matplotlib.backends import backend_agg
-            from matplotlib import figure
-        except ImportError, err:
-            logging.critical('matplotlib could not be found: %s' % err)
-
         # Create a figure.
         fig = figure.Figure()
 
         # Create a canvas and add the figure to it
         self.canvas = backend_agg.FigureCanvasAgg(fig)
         self.axes = fig.add_subplot(111)
+
+    @staticmethod
+    def set_rc_params(params):
+        # Reset params from rc file.
+        matplotlib.rc_file_defaults()
+        if params:
+            matplotlib.rcParams.update(params)
 
     @staticmethod
     def change_axis_formatter(axis, missing_val=None):
@@ -100,7 +107,8 @@ class PlotReport(PlanningReport):
 
     def __init__(self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
                  xlim_left=None, xlim_right=None, ylim_bottom=None, ylim_top=None,
-                 legend_location='upper right', category_styles=None, **kwargs):
+                 legend_location='upper right', category_styles=None, params=None,
+                 **kwargs):
         """
         If **title** is given it will be used for the name of the plot.
         Otherwise, the only given attribute will be the title. If none is given,
@@ -128,6 +136,26 @@ class PlotReport(PlanningReport):
 
             ScatterPlotReport(attributes=['expansions'],
                               category_styles={None: {'marker': '*', 'c': 'b'}})
+
+        **params** may be a dictionary of matplotlib rc parameters
+        (see http://matplotlib.org/users/customizing.html)::
+
+            params = {
+                'font.family': 'serif',
+                'font.weight': 'normal',
+                'font.size': 20,  # Used if the more specific sizes are not set.
+                'axes.labelsize': 20,
+                'axes.titlesize': 30,
+                'legend.fontsize': 22,
+                'xtick.labelsize': 10,
+                'ytick.labelsize': 10,
+                'lines.markersize': 10,
+                'lines.markeredgewidth': 0.25,
+                'lines.linewidth': 1,
+                'figure.figsize': [8, 8],  # Width and height in inches.
+                'savefig.dpi': 100,
+            }
+            ScatterPlotReport(attributes=['initial_h_value'], params=params)
         """
         kwargs.setdefault('format', 'png')
         PlanningReport.__init__(self, **kwargs)
@@ -162,6 +190,7 @@ class PlotReport(PlanningReport):
         self.xlim_right = xlim_right
         self.ylim_bottom = ylim_bottom
         self.ylim_top = ylim_top
+        self.params = params
 
     def _set_scales(self, xscale, yscale):
         self.xscale = xscale or 'linear'
@@ -193,6 +222,7 @@ class PlotReport(PlanningReport):
         raise NotImplementedError
 
     def _write_plot(self, runs, filename):
+        Plot.set_rc_params(self.params)
         plot = Plot()
         self.has_points = False
         if self.title:
