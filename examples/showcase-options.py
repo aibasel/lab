@@ -107,7 +107,7 @@ exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES
 exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES,
                   filter=filter_and_transform), exp.eval_dir, abs_problem_report_file))
 
-exp.add_step(Step('report-abs-combined', AbsoluteReport('combined', attributes=ATTRIBUTES + ['expansions', 'cost']),
+exp.add_step(Step('report-abs-combined', AbsoluteReport(attributes=ATTRIBUTES + ['expansions', 'cost']),
                   exp.eval_dir, abs_combined_report_file))
 
 def get_domain(run1, run2):

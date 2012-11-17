@@ -41,7 +41,7 @@ class AbsoluteReport(PlanningReport):
     ABSOLUTE_ATTRIBUTES = ['coverage', 'quality', 'single_solver', 'unsolvable',
                            '*_error', '*_relative_to_first']
 
-    def __init__(self, resolution, colored=False, **kwargs):
+    def __init__(self, resolution='combined', colored=False, **kwargs):
         """
         *resolution* must be one of "domain" or "problem" or "combined" (default).
 
