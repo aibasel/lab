@@ -110,14 +110,14 @@ class PlotReport(PlanningReport):
                  legend_location='upper right', category_styles=None, params=None,
                  **kwargs):
         """
-        If **title** is given it will be used for the name of the plot.
+        If *title* is given it will be used for the name of the plot.
         Otherwise, the only given attribute will be the title. If none is given,
         there will be no title.
 
-        **xscale** and **yscale** can have the values ``linear`` or ``symlog``.
+        *xscale* and *yscale* can have the values ``linear`` or ``symlog``.
         If omitted sensible defaults will be used.
 
-        **legend_location** must be a (x, y) pair or one of the following strings:
+        *legend_location* must be a (x, y) pair or one of the following strings:
         'upper right', 'upper left', 'lower left', 'lower right', 'right',
         'center left', 'center right', 'lower center', 'upper center', 'center'. ::
 
@@ -137,7 +137,7 @@ class PlotReport(PlanningReport):
             ScatterPlotReport(attributes=['expansions'],
                               category_styles={None: {'marker': '*', 'c': 'b'}})
 
-        **params** may be a dictionary of matplotlib rc parameters
+        *params* may be a dictionary of matplotlib rc parameters
         (see http://matplotlib.org/users/customizing.html)::
 
             params = {
@@ -271,9 +271,9 @@ class ProblemPlotReport(PlotReport):
         same style (e.g. red circles). Returned lists without a category are
         assigned to a default category that does not appear in the legend.
 
-        If get_points is None **attributes** must contain exactly one attribute.
+        If get_points is None, *attributes* must contain exactly one attribute.
         Then we will plot the config names on the x-axis and the corresponding
-        values for **attribute** on the y-axis. Otherwise **attributes** will be
+        values for *attribute* on the y-axis. Otherwise *attributes* will be
         ignored and it's up to you to retrieve the y-values from the runs.
 
         Examples::
