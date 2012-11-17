@@ -1,7 +1,10 @@
 Roadmap
 =======
 
-* Custom attributes with aggregation function and information about whether "max_wins".
+* Custom attributes with aggregation function, information about whether "max_wins" and whether the attribute is absolute.
 * Move Plot class into lab.reports
 * Unify domain and problem report
 * Allow using kwargs for category styles
+* Count as solved if problem is found unsolvable. Check if problem is really unsolvable (suites.py).
+* If no data is found for a table include the header and an explanation.
+* Add PlotReport(plot_options) parameter (http://matplotlib.org/users/customizing.html).
