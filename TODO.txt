@@ -1,5 +1,4 @@
 Roadmap
 =======
 
-* Custom attributes with aggregation function, information about whether "max_wins" and whether the attribute is absolute.
 * Move Plot class into lab.reports
