@@ -102,6 +102,8 @@ class PlanningReport(Report):
 
         # Set non-default options for some attributes.
         attributes = kwargs.get('attributes', [])
+        if isinstance(attributes, basestring):
+            attributes = [attributes]
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
 
         # Remember the order of the configs if it is given as a key word argument filter.
