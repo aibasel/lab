@@ -110,6 +110,9 @@ class PlotReport(PlanningReport):
                  legend_location='upper right', category_styles=None, params=None,
                  **kwargs):
         """
+        The inherited *format* parameter can be set to png (default), eps, pdf
+        or pgf (the latter needs matplotlib 1.2).
+
         If *title* is given it will be used for the name of the plot.
         Otherwise, the only given attribute will be the title. If none is given,
         there will be no title.
