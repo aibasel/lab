@@ -106,19 +106,18 @@ class AbsoluteReport(PlanningReport):
         """
         Add some information to the table for attributes where data is missing.
         """
-        if attribute.absolute:
-            return
+        if not attribute.absolute:
+            table.info.append('Only instances where all configurations have a '
+                              'value for "%s" are considered.' % attribute)
+            table.info.append('Each table entry gives the %s of "%s" for that '
+                              'domain.' % (func_name, attribute))
 
-        table.info.append('Only instances where all configurations have a '
-                          'value for "%s" are considered.' % attribute)
-        table.info.append('Each table entry gives the %s of "%s" for that '
-                          'domain.' % (func_name, attribute))
         summary_names = [name.lower() for name, sum_func in table.summary_funcs]
-        if len(summary_names) == 1:
-            table.info.append('The last row gives the %s across all domains.' %
+        if len(summary_names) == 1 and summary_names[0] != 'sum':
+            table.info.append('The last row reports the %s across all domains.' %
                               summary_names[0])
         elif len(summary_names) > 1:
-            table.info.append('The last rows give the %s across all domains.' %
+            table.info.append('The last rows report the %s across all domains.' %
                               ' and '.join(summary_names))
 
     def _get_suite_table(self, attribute):
