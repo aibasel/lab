@@ -19,7 +19,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
-import fnmatch
 import logging
 
 from lab import reports
@@ -35,12 +34,6 @@ class AbsoluteReport(PlanningReport):
         | gripper      | 118    | 72     |
         | zenotravel   | 21     | 17     |
     """
-    MAX_ATTRIBUTE_PARTS = ['score', 'initial_h_value', 'coverage',
-                           'quality', 'single_solver', 'avg_h',
-                           'offline_abstraction_done']
-    ABSOLUTE_ATTRIBUTES = ['coverage', 'quality', 'single_solver', 'unsolvable',
-                           '*_error', '*_relative_to_first']
-
     def __init__(self, resolution='combined', colored=False, **kwargs):
         """
         *resolution* must be one of "domain" or "problem" or "combined" (default).
@@ -103,33 +96,17 @@ class AbsoluteReport(PlanningReport):
                             for (attr, section) in sections)
         return '%s\n\n\n%s' % (toc, content)
 
-    def _attribute_is_absolute(self, attribute):
-        """
-        The domain-wise aggregation of the values make sense for some attributes
-        like coverage, unsolvable and search_error even if not all configs have
-        values for those attributes.
-        """
-        return any(fnmatch.fnmatch(attribute, abs_attr)
-                   for abs_attr in self.ABSOLUTE_ATTRIBUTES)
-
     def _get_group_func(self, attribute):
         """Decide on a group function for this attribute."""
-        if 'score' in attribute:
-            # When summarising score results from multiple domains we show
-            # normalised averages so that each domain is weighed equally.
-            return 'average', reports.avg
-        elif (attribute in ['search_time', 'total_time', 'evaluations',
-                           'expansions', 'generated'] or
-              attribute.endswith('_rel') or
-              attribute.endswith('_relative_to_first')):
-            return 'geometric mean', reports.gm
-        return 'sum', sum
+        names = {'avg': 'average', 'gm': 'geometric mean'}
+        funcname = attribute.function.__name__
+        return (names.get(funcname) or funcname, attribute.function)
 
     def _add_table_info(self, attribute, func_name, table):
         """
         Add some information to the table for attributes where data is missing.
         """
-        if self._attribute_is_absolute(attribute):
+        if attribute.absolute:
             return
 
         table.info.append('Only instances where all configurations have a '
@@ -155,7 +132,7 @@ class AbsoluteReport(PlanningReport):
         for domain, problems in self.domains.items():
             for problem in problems:
                 runs = self.problem_runs[(domain, problem)]
-                if (not self._attribute_is_absolute(attribute) and
+                if (not attribute.absolute and
                         any(run.get(attribute) is None for run in runs)):
                     continue
                 num_probs += 1
@@ -204,10 +181,10 @@ class AbsoluteReport(PlanningReport):
 
     def _get_empty_table(self, attribute):
         """Return an empty table."""
-        colored = self.colored
         if self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
-            min_wins = not any(part in attribute for part in self.MAX_ATTRIBUTE_PARTS)
+            min_wins = attribute.min_wins
+            colored = self.colored
         else:
             # Do not highlight anything.
             min_wins = None

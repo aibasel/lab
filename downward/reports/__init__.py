@@ -25,11 +25,12 @@ Module that permits generating downward reports by reading properties files
 from __future__ import with_statement, division
 
 from collections import defaultdict
+import fnmatch
 import logging
 
 from lab import reports
 from lab import tools
-from lab.reports import Report
+from lab.reports import Attribute, Report
 
 
 def quality(problem_runs):
@@ -51,6 +52,20 @@ class PlanningReport(Report):
     """
     This is the base class for all Downward reports.
     """
+    ATTRIBUTES = dict((str(attr), attr) for attr in [
+        Attribute('coverage', absolute=True, min_wins=False),
+        Attribute('initial_h_value', min_wins=False),
+        Attribute('quality', absolute=True, min_wins=False),
+        Attribute('unsolvable', absolute=True, min_wins=False),
+        Attribute('search_time', function=reports.gm),
+        Attribute('total_time', function=reports.gm),
+        Attribute('evaluations', function=reports.gm),
+        Attribute('expansions', function=reports.gm),
+        Attribute('generated', function=reports.gm),
+        Attribute('score_*', min_wins=False, function=reports.avg),
+        Attribute('*_error', absolute=True),
+    ])
+
     def __init__(self, derived_properties=None, **kwargs):
         """
         See :py:class:`Report <lab.reports.Report>` for inherited parameters.
@@ -78,17 +93,33 @@ class PlanningReport(Report):
             # Filter with a list and set the order of the configs.
             PlanningReport(filter_config=['WORK-lmcut', 'WORK-blind'])
             PlanningReport(filter_config_nick=['lmcut', 'blind'])
+
         """
         # Allow specifying a single property or a list of properties.
         if hasattr(derived_properties, '__call__'):
             derived_properties = [derived_properties]
         self.derived_properties = derived_properties or []
+
+        # Set non-default options for some attributes.
+        attributes = kwargs.get('attributes', [])
+        kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
+
         # Remember the order of the configs if it is given as a key word argument filter.
         self.configs = kwargs.get('filter_config', None)
         self.config_nicks = kwargs.get('filter_config_nick', None)
 
         Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
+
+    def _prepare_attribute(self, attr):
+        if isinstance(attr, Attribute):
+            return attr
+        elif attr in self.ATTRIBUTES:
+            return self.ATTRIBUTES[attr]
+        for pattern in self.ATTRIBUTES.values():
+            if fnmatch.fnmatch(attr, pattern):
+                return pattern.copy(attr)
+        return Attribute(attr)
 
     def _scan_data(self):
         self._scan_planning_data()

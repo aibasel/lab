@@ -40,7 +40,7 @@ def prod(values):
     """Computes the product of a list of numbers.
 
     >>> print prod([2, 3, 7])
-    42
+    42.0
     """
     prod = 1
     for value in values:
@@ -100,6 +100,35 @@ def stddev(values):
     return math.sqrt((sum((v - mu) ** 2 for v in values) / n))
 
 
+class Attribute(str):
+    """A string subclass for attributes in reports."""
+    def __new__(cls, name, **kwargs):
+        return str.__new__(cls, name)
+
+    def __init__(self, name, absolute=False, min_wins=True, function=sum):
+        """Use this class if your **own** attribute needs a non-default value for:
+
+        * *absolute*: If False, only include tasks for which all task runs have
+          values in a domain-wise table (e.g. ``coverage`` is absolute, whereas
+          ``expansions`` is not, because we can't compare configurations A and B
+          for task X if B has no value for ``expansions``).
+        * *min_wins*: Set to True if a smaller value for this attribute is
+          better and to False otherwise (e.g. for ``coverage`` *min_wins* is
+          False, whereas it is True for ``expansions``).
+        * *function*: Set the function that aggregates the values for this
+          attribute over multiple runs (e.g. for ``coverage`` this is
+          :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`).
+
+        """
+        self.absolute = absolute
+        self.min_wins = min_wins
+        self.function = function
+
+    def copy(self, name):
+        return Attribute(name, absolute=self.absolute, min_wins=self.min_wins,
+                         function=self.function)
+
+
 class Report(object):
     """
     Base class for all reports.
@@ -117,7 +146,8 @@ class Report(object):
 
         *format* can be one of e.g. html, tex, wiki (MediaWiki),
         gwiki (Google Code Wiki), doku (DokuWiki), pmw (PmWiki),
-        moin (MoinMoin), txt (Plain text) and art (ASCII art).
+        moin (MoinMoin), txt (Plain text) and art (ASCII art). Subclasses may
+        allow additional formats.
 
         If given, *filter* must be a function or a list of functions that
         are passed a dictionary of a run's keys and values and return
@@ -212,20 +242,12 @@ class Report(object):
         self._apply_filter()
         self._scan_data()
 
+        # Turn string attributes into instances of Attribute.
+        self.attributes = [attr if isinstance(attr, Attribute) else Attribute(attr)
+                           for attr in self.attributes]
+
         # Expand glob characters.
-        if self.attributes:
-            expanded_attrs = []
-            for pattern in self.attributes:
-                if '*' not in pattern and '?' not in pattern:
-                    expanded_attrs.append(pattern)
-                else:
-                    expanded_attrs.extend(fnmatch.filter(self.all_attributes,
-                                                         pattern))
-            if not expanded_attrs:
-                logging.critical('No attributes match your patterns')
-            self.attributes = expanded_attrs
-        else:
-            logging.info('Available attributes: %s' % ', '.join(self.all_attributes))
+        self.attributes = self._glob_attributes(self.attributes)
 
         if self.attributes:
             # Make sure that at least some selected attributes are found.
@@ -238,10 +260,22 @@ class Report(object):
                 logging.warning('The following attributes were not found in the '
                                 'dataset: %s' % sorted(not_found))
         else:
+            logging.info('Available attributes: %s' % ', '.join(self.all_attributes))
+            logging.info('Using all numerical attributes.')
             self.attributes = self._get_numerical_attributes()
 
         self.attributes.sort()
         self.write()
+
+    def _glob_attributes(self, attributes):
+        expanded_attrs = []
+        for attr in attributes:
+            matches = fnmatch.filter(self.all_attributes, attr)
+            # Use the attribute options from the pattern for all matches.
+            expanded_attrs.extend([attr.copy(match) for match in matches])
+        if attributes and not expanded_attrs:
+            logging.critical('No attributes match your patterns')
+        return expanded_attrs
 
     @property
     def all_attributes(self):
