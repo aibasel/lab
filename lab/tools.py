@@ -19,6 +19,7 @@
 
 import colorsys
 import email.mime.text
+import functools
 import json
 import logging
 import os
@@ -78,6 +79,7 @@ def remove_none_values(func):
     """
     Remove all None values from the input list and call the original function.
     """
+    @functools.wraps(func)
     def new_func(values):
         values = [val for val in values if val is not None]
         if not values:
