@@ -27,7 +27,8 @@ try:
     from matplotlib import figure
     from matplotlib.backends import backend_agg
 except ImportError, err:
-    logging.critical('matplotlib could not be found: %s' % err)
+    logging.warning('matplotlib could not be found: %s' % err)
+    logging.warning('You can\'t create any plots on this machine.')
 
 from lab import tools
 
