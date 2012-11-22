@@ -30,7 +30,7 @@ class AbsoluteReport(PlanningReport):
     """
     Write an absolute report about the attribute attribute, e.g. ::
 
-        || expanded    | fF     | yY     |
+        || expansions  | hFF    | hCEA   |
         | gripper      | 118    | 72     |
         | zenotravel   | 21     | 17     |
     """
