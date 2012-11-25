@@ -183,7 +183,7 @@ class AbsoluteReport(PlanningReport):
         if self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
             min_wins = attribute.min_wins
-            colored = self.colored
+            colored = self.colored and min_wins is not None
         else:
             # Do not highlight anything.
             min_wins = None
@@ -195,6 +195,6 @@ class AbsoluteReport(PlanningReport):
 
     def _add_summary_functions(self, table, attribute):
         funcname, func = self._get_group_func(attribute)
-        table.add_summary_function(funcname.upper(), func)
+        table.add_summary_function(funcname.capitalize(), func)
         if 'score' in attribute:
-            table.add_summary_function('SUM', sum)
+            table.add_summary_function('Sum', sum)
