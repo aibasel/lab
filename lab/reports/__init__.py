@@ -249,17 +249,7 @@ class Report(object):
         # Expand glob characters.
         self.attributes = self._glob_attributes(self.attributes)
 
-        if self.attributes:
-            # Make sure that at least some selected attributes are found.
-            not_found = set(self.attributes) - set(self.all_attributes)
-            self.attributes = list(set(self.attributes) & set(self.all_attributes))
-            if not self.attributes:
-                logging.critical('None of the selected attributes are present in '
-                                 'the dataset: %s' % sorted(not_found))
-            if not_found:
-                logging.warning('The following attributes were not found in the '
-                                'dataset: %s' % sorted(not_found))
-        else:
+        if not self.attributes:
             logging.info('Available attributes: %s' % ', '.join(self.all_attributes))
             logging.info('Using all numerical attributes.')
             self.attributes = self._get_numerical_attributes()
@@ -271,10 +261,13 @@ class Report(object):
         expanded_attrs = []
         for attr in attributes:
             matches = fnmatch.filter(self.all_attributes, attr)
+            if not matches:
+                logging.warning('Attribute %s is not present in the dataset.' %
+                                attr)
             # Use the attribute options from the pattern for all matches.
             expanded_attrs.extend([attr.copy(match) for match in matches])
         if attributes and not expanded_attrs:
-            logging.critical('No attributes match your patterns')
+            logging.critical('No attributes match your patterns.')
         return expanded_attrs
 
     @property
