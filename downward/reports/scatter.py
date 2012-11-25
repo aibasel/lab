@@ -76,6 +76,8 @@ class ScatterPlotReport(PlotReport):
 
         """
         kwargs.setdefault('legend_location', 'upper left')
+        # If the size has not been set explicitly, make it a square.
+        kwargs.get('params', {}).setdefault('figure.figsize',  [8, 8])
         PlotReport.__init__(self, **kwargs)
         assert self.attribute, 'ScatterPlotReport needs exactly one attribute'
         # By default all values are in the same category.
@@ -162,12 +164,6 @@ class ScatterPlotReport(PlotReport):
             logging.critical('Scatterplots need exactly 2 configs: %s' % self.configs)
         self.xlabel = self.xlabel or self.configs[0]
         self.ylabel = self.ylabel or self.configs[1]
-
-        import matplotlib
-        figsize = matplotlib.rcParams.get('figure.figsize')
-        if figsize == [8, 6]:
-            # Probably size has not been set explicitly. Make it a square.
-            matplotlib.rcParams['figure.figsize'] = [8, 8]
 
         suffix = '.' + self.output_format
         if not self.outfile.endswith(suffix):
