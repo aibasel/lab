@@ -101,6 +101,7 @@ def _get_config(target):
                                    r'<span style="color:\2">\1</span>'])
 
     elif target == 'tex':
+        # AUtomatically add \usepackage directives.
         config['style'] = []
         config['style'].append('color')
         config['style'].append('geometry')
@@ -138,8 +139,11 @@ def _get_config(target):
         #config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR',
         #                           r'\\textcolor{\2}{\1}'])
 
-        # {small text|size:tiny} -> {\tiny small text}
-        config['postproc'].append([r'(\(\d+?\))', r'\\tiny{\1}'])
+        # Add default \numtasks command.
+        config['postproc'].append([r'\\title', r'\\newcommand{\\numtasks}[1]{\\small{(#1)}}\n\n\\title'])
+
+        # (35) --> \numtasks{35}
+        config['postproc'].append([r'\((\d+?)\)', r'\\numtasks{\1}'])
 
     elif target == 'txt':
         # Allow line breaks, r'\\\\' are 2 \ for regexes
