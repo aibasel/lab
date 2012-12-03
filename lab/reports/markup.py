@@ -213,6 +213,30 @@ class Document(object):
             result = txt2tags.getUnknownErrorMessage()
             logging.error(result)
 
+        if target == 'tex':
+            # Omit hlines for latex. Only keep the first two and last two hlines.
+            hline = '\\hline '
+            lines = result.splitlines()
+            new_lines = []
+            table_row = 0
+            for line in lines:
+                if line.startswith(hline):
+                    table_row += 1
+                    if table_row in [1, 2]:
+                        new_lines.append(line)
+                    else:
+                        new_lines.append(line[len(hline):])
+                else:
+                    # Reinsert the last hline (or two if the last row is a
+                    # summary row).
+                    if table_row >= 3:
+                        new_lines.insert(-1, hline)
+                        if new_lines[-3].startswith('\\textbf'):
+                            new_lines.insert(-3, hline)
+                    table_row = 0
+                    new_lines.append(line)
+            result = '\n'.join(new_lines)
+
         return result
 
 if __name__ == '__main__':
