@@ -379,6 +379,8 @@ class ProblemPlotReport(PlotReport):
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):
             parts = [self.title.lower().replace(' ', '-')] if self.title else []
+            if problem.endswith('.pddl'):
+                problem = problem[:-len('.pddl')]
             parts += [domain, problem]
             path = os.path.join(directory, '-'.join(parts) + '.' + self.output_format)
             self._write_plot(runs, path)
