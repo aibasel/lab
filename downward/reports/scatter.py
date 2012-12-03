@@ -77,7 +77,7 @@ class ScatterPlotReport(PlotReport):
         """
         kwargs.setdefault('legend_location', 'upper left')
         # If the size has not been set explicitly, make it a square.
-        kwargs.get('params', {}).setdefault('figure.figsize',  [8, 8])
+        kwargs.get('params', {}).setdefault('figure.figsize', [8, 8])
         PlotReport.__init__(self, **kwargs)
         assert self.attribute, 'ScatterPlotReport needs exactly one attribute'
         # By default all values are in the same category.

@@ -140,7 +140,8 @@ def _get_config(target):
         #                           r'\\textcolor{\2}{\1}'])
 
         # Add default \numtasks command.
-        config['postproc'].append([r'\\title', r'\\newcommand{\\numtasks}[1]{\\small{(#1)}}\n\n\\title'])
+        config['postproc'].append([r'\\title',
+                    r'\\newcommand{\\numtasks}[1]{\\small{(#1)}}\n\n\\title'])
 
         # (35) --> \numtasks{35}
         config['postproc'].append([r'\((\d+?)\)', r'\\numtasks{\1}'])
