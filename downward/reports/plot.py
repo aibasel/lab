@@ -95,6 +95,23 @@ class Plot(object):
         logging.info('Wrote file://%s' % filename)
 
 
+class PgfPlots(object):
+    @classmethod
+    def write(cls, report, filename):
+        lines = []
+        lines.append('\\begin{tikzpicture}')
+        lines.append('\\begin{axes}\n')
+        for category, coords in report.categories.items():
+            lines.append('\\addplot coordinates {%s};' % ' '.join(str(c) for c in coords))
+            lines.append('\\addlegendentry{%s}\n' % category)
+        lines.append('\\end{axes}')
+        lines.append('\\end{tikzpicture}')
+        tools.makedirs(os.path.dirname(filename))
+        with open(filename, 'w') as f:
+            f.write('\n'.join(lines))
+        logging.info('Wrote file://%s' % filename)
+
+
 class PlotReport(PlanningReport):
     """
     Abstract base class for Plot classes.
@@ -226,6 +243,14 @@ class PlotReport(PlanningReport):
         raise NotImplementedError
 
     def _write_plot(self, runs, filename):
+        # Map category names to value tuples
+        self.categories = self._fill_categories(runs)
+        self.styles = self._get_category_styles(self.categories)
+
+        if self.output_format == 'tex':
+            PgfPlots.write(self, filename)
+            return
+
         Plot.set_rc_params(self.params)
         plot = Plot()
         self.has_points = False
@@ -236,19 +261,15 @@ class PlotReport(PlanningReport):
         if self.ylabel:
             plot.axes.set_ylabel(self.ylabel, labelpad=self.YAXIS_LABEL_PADDING)
 
-        # Map category names to value tuples
-        categories = self._fill_categories(runs)
-        styles = self._get_category_styles(categories)
-
         plot.axes.set_xscale(self.xscale)
         plot.axes.set_yscale(self.yscale)
-        self._plot(plot.axes, categories, styles)
+        self._plot(plot.axes, self.categories, self.styles)
 
         if not self.has_points:
             logging.info('Found no valid points for plot %s' % filename)
             return
 
-        plot.create_legend(categories, self.legend_location)
+        plot.create_legend(self.categories, self.legend_location)
         plot.print_figure(filename)
 
     def write(self):
