@@ -35,7 +35,7 @@ from lab import tools
 from downward.reports import PlanningReport
 
 
-class Plot(object):
+class MatplotlibPlot(object):
     def __init__(self):
         self.legend = None
         self.create_canvas_and_axes()
@@ -100,16 +100,63 @@ class PgfPlots(object):
     def write(cls, report, filename):
         lines = []
         lines.append('\\begin{tikzpicture}')
-        lines.append('\\begin{axes}\n')
-        for category, coords in report.categories.items():
+        lines.append('\\begin{axis}[%s]' % cls.get_axis_options(report))
+        for category, coords in sorted(report.categories.items()):
             lines.append('\\addplot coordinates {%s};' % ' '.join(str(c) for c in coords))
-            lines.append('\\addlegendentry{%s}\n' % category)
-        lines.append('\\end{axes}')
+            lines.append('\\addlegendentry{%s}' % category)
+        lines.append('\\end{axis}')
         lines.append('\\end{tikzpicture}')
         tools.makedirs(os.path.dirname(filename))
         with open(filename, 'w') as f:
             f.write('\n'.join(lines))
         logging.info('Wrote file://%s' % filename)
+
+    @classmethod
+    def get_axis_options(cls, report):
+        axis = {}
+        axis['xmin'] = report.xlim_left
+        axis['xmax'] = report.xlim_right
+        axis['ymin'] = report.ylim_bottom
+        axis['ymax'] = report.ylim_top
+        axis['xlabel'] = report.xlabel
+        axis['ylabel'] = report.ylabel
+        axis['title'] = report.title
+        axis['legend cell align'] = 'left'
+
+        convert_scale = {'log': 'log', 'symlog': 'log', 'linear': 'normal'}
+        axis['xmode'] = convert_scale[report.xscale]
+        axis['ymode'] = convert_scale[report.yscale]
+
+        # Height is set in inches.
+        figsize = report.params.get('figure.figsize')
+        if figsize:
+            width, height = figsize
+            axis['width'] = '%fin' % width
+            axis['height'] = '%fin' % height
+
+        legend_options = {}
+        #legend_options['cells'] = 'anchor=east'
+        legend_options['legend pos'] = 'outer north east'
+        axis['legend style'] = cls.format_options(legend_options)
+
+        return cls.format_options(axis)
+
+    @classmethod
+    def format_options(cls, options):
+        opts = []
+        for key, value in sorted(options.items()):
+            if not value:
+                continue
+            if isinstance(value, bool) or value is None:
+                opts.append(key)
+            elif isinstance(value, basestring):
+                if ' ' in value:
+                    value = '{%s}' % value
+                opts.append("%s=%s" % (key, value.replace("_", "-")))
+            else:
+                opts.append("%s=%s" % (key, value))
+        return ", ".join(opts)
+
 
 
 class PlotReport(PlanningReport):
@@ -211,7 +258,7 @@ class PlotReport(PlanningReport):
         self.xlim_right = xlim_right
         self.ylim_bottom = ylim_bottom
         self.ylim_top = ylim_top
-        self.params = params
+        self.params = params or {}
 
     def _set_scales(self, xscale, yscale):
         self.xscale = xscale or 'linear'
@@ -244,15 +291,16 @@ class PlotReport(PlanningReport):
 
     def _write_plot(self, runs, filename):
         # Map category names to value tuples
-        self.categories = self._fill_categories(runs)
+        categories = self._fill_categories(runs)
+        self.categories = self._prepare_categories(categories)
         self.styles = self._get_category_styles(self.categories)
 
         if self.output_format == 'tex':
             PgfPlots.write(self, filename)
             return
 
-        Plot.set_rc_params(self.params)
-        plot = Plot()
+        MatplotlibPlot.set_rc_params(self.params)
+        plot = MatplotlibPlot()
         self.has_points = False
         if self.title:
             plot.axes.set_title(self.title)
@@ -346,6 +394,22 @@ class ProblemPlotReport(PlotReport):
                 logging.critical('get_points() returned the wrong format.')
         return categories
 
+    @staticmethod
+    def _prepare_categories(categories):
+        new_categories = {}
+        for category, coords in categories.items():
+            # The same coordinate may have been added multiple times. To avoid
+            # drawing it more than once which results in a bolder spot, we
+            # filter duplicate items.
+            coords = tools.uniq(coords)
+            # Do not include missing values in plot, but reserve spot on x-axis.
+            coords = [(x, y) for (x, y) in coords if y is not None]
+            # Make sure that values are sorted by x, otherwise the wrong points
+            # may be connected.
+            coords.sort(key=lambda (x, y): x)
+            new_categories[category] = coords
+        return new_categories
+
     def _plot(self, axes, categories, styles):
         # Find all x-values.
         all_x = set()
@@ -368,17 +432,8 @@ class ProblemPlotReport(PlotReport):
 
         # Plot all categories.
         for category, coords in sorted(categories.items()):
-            # The same coordinate may have been added multiple times. To avoid
-            # drawing it more than once which results in a bolder spot, we
-            # filter duplicate items.
-            coords = tools.uniq(coords)
-            # Do not include missing values in plot, but reserve spot on x-axis.
-            coords = [(x, y) for (x, y) in coords if y is not None]
             if not coords:
                 continue
-            # Make sure that values are sorted by x, otherwise the wrong points
-            # may be connected.
-            coords.sort(key=lambda (x, y): x)
 
             X, Y = zip(*coords)
             if not all_x_numeric:
@@ -395,7 +450,7 @@ class ProblemPlotReport(PlotReport):
             xlim_right = len(all_x) + 1
         axes.set_xlim(self.xlim_left or 0, xlim_right)
         axes.set_ylim(self.ylim_bottom or 0, self.ylim_top or max_y * 1.1)
-        Plot.change_axis_formatter(axes.yaxis)
+        MatplotlibPlot.change_axis_formatter(axes.yaxis)
 
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):

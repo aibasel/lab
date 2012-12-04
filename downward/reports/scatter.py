@@ -25,7 +25,7 @@ import os
 
 from lab import tools
 
-from downward.reports.plot import Plot, PlotReport
+from downward.reports.plot import MatplotlibPlot, PlotReport
 
 
 class ScatterPlotReport(PlotReport):
