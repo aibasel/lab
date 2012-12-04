@@ -88,6 +88,8 @@ class ScatterPgfPlots(PgfPlots):
             end = max(end, report.xlim_right)
         if report.ylim_top:
             end = max(end, report.ylim_top)
+        if report.show_missing:
+            end = max(end, report.missing_val)
         lines.append('\\addplot[color=black] coordinates {(%f, %f) (%d, %d)};' %
                      (start, start, end, end))
         lines.append('\\end{axis}')
