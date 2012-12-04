@@ -96,6 +96,76 @@ class MatplotlibPlot(object):
         logging.info('Wrote file://%s' % filename)
 
 
+class Matplotlib(object):
+    XAXIS_LABEL_PADDING = 5
+    YAXIS_LABEL_PADDING = 5
+
+    @classmethod
+    def _plot(cls, report, axes, categories, styles):
+        # Find all x-values.
+        all_x = set()
+        for coordinates in categories.values():
+            X, Y = zip(*coordinates)
+            all_x |= set(X)
+        all_x = sorted(all_x)
+
+        # Map all x-values to positions on the x-axis.
+        indices = dict((val, i) for i, val in enumerate(all_x, start=1))
+
+        # Only use xticks for non-numeric values.
+        all_x_numeric = all(isinstance(x, (int, float)) for x in all_x)
+        if not all_x_numeric:
+            # Reserve space on the x-axis for all x-values and the labels.
+            axes.set_xticks(range(1, len(all_x) + 1))
+            axes.set_xticklabels(all_x)
+
+        has_points = False
+        # Plot all categories.
+        for category, coords in sorted(categories.items()):
+            if not coords:
+                continue
+
+            X, Y = zip(*coords)
+            if not all_x_numeric:
+                X = [indices[val] for val in X]
+            axes.plot(X, Y, label=category, **styles[category])
+            if X and Y:
+                has_points = True
+
+        if report.xlim_right:
+            xlim_right = report.xlim_right
+        elif all_x_numeric:
+            xlim_right = max(all_x) * 1.25 if all_x else None
+        else:
+            xlim_right = len(all_x) + 1
+        axes.set_xlim(report.xlim_left or 0, xlim_right)
+        axes.set_ylim(report.ylim_bottom or 0, report.ylim_top or report.max_y * 1.1)
+        MatplotlibPlot.change_axis_formatter(axes.yaxis)
+        return has_points
+
+    @classmethod
+    def write(cls, report, filename, scatter=False):
+        MatplotlibPlot.set_rc_params(report.params)
+        plot = MatplotlibPlot()
+        if report.title:
+            plot.axes.set_title(report.title)
+        if report.xlabel:
+            plot.axes.set_xlabel(report.xlabel, labelpad=cls.XAXIS_LABEL_PADDING)
+        if report.ylabel:
+            plot.axes.set_ylabel(report.ylabel, labelpad=cls.YAXIS_LABEL_PADDING)
+
+        plot.axes.set_xscale(report.xscale)
+        plot.axes.set_yscale(report.yscale)
+        has_points = cls._plot(report, plot.axes, report.categories, report.styles)
+
+        if not has_points:
+            logging.info('Found no valid points for plot %s' % filename)
+            return
+
+        plot.create_legend(report.categories, report.legend_location)
+        plot.print_figure(filename)
+
+
 class PgfPlots(object):
     COLORS = dict((color[0], color) for color in
                   ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow'])
@@ -105,9 +175,9 @@ class PgfPlots(object):
                  'right': 'outer north east'}
 
     @classmethod
-    def get_plot(cls, report, filename):
+    def _get_plot(cls, report):
         lines = []
-        opts = cls.format_options(cls.get_common_axis_options(report))
+        opts = cls._format_options(cls._get_common_axis_options(report))
         lines.append('\\begin{axis}[%s]' % opts)
         for category, coords in sorted(report.categories.items()):
             lines.append('\\addplot coordinates {%s};' % ' '.join(str(c) for c in coords))
@@ -116,46 +186,10 @@ class PgfPlots(object):
         return lines
 
     @classmethod
-    def get_scatterplot(cls, report):
-        lines = []
-        options = cls.get_common_axis_options(report)
-        lines.append('\\begin{axis}[%s]' % cls.format_options(options))
-        for category, coords in sorted(report.categories.items()):
-            category_style = report.styles[category]
-            plot = {}
-            plot['only marks'] = True
-            plot['mark'] = category_style.get('marker')
-            c = category_style.get('c')
-            plot['color'] = cls.COLORS[c] if len(c) == 1 else c
-            plot['mark options'] = '{draw=black}'
-            lines.append('\\addplot[%s] coordinates {%s};' % (cls.format_options(plot),
-                                ' '.join(str(c) for c in coords)))
-            lines.append('\\addlegendentry{%s}' % category)
-        # Add black line.
-        start = min(report.min_x, report.min_y)
-        if report.xlim_left is not None:
-            start = min(start, report.xlim_left)
-        if report.ylim_bottom is not None:
-            start = min(start, report.ylim_bottom)
-        end = max(report.max_x, report.max_y)
-        if report.xlim_right:
-            end = max(end, report.xlim_right)
-        if report.ylim_top:
-            end = max(end, report.ylim_top)
-        lines.append('\\addplot[color=black] coordinates {(%d, %d) (%d, %d)};' %
-                     (start, start, end, end))
-        lines.append('\\end{axis}')
-        return lines
-
-    @classmethod
     def write(cls, report, filename, scatter=False):
         lines = []
         lines.append('\\begin{tikzpicture}')
-        if scatter:
-            plot = cls.get_scatterplot(report)
-        else:
-            plot = cls.get_plot(report)
-        lines.extend(plot)
+        lines.extend(cls._get_plot(report))
         lines.append('\\end{tikzpicture}')
         tools.makedirs(os.path.dirname(filename))
         with open(filename, 'w') as f:
@@ -163,7 +197,7 @@ class PgfPlots(object):
         logging.info('Wrote file://%s' % filename)
 
     @classmethod
-    def get_common_axis_options(cls, report):
+    def _get_common_axis_options(cls, report):
         axis = {}
         axis['xmin'] = report.xlim_left
         axis['xmax'] = report.xlim_right
@@ -196,12 +230,12 @@ class PgfPlots(object):
             logging.critical('Legend location "%s" is unavailable in pgfplots' %
                              report.legend_location)
         legend_options['legend pos'] = pos
-        axis['legend style'] = cls.format_options(legend_options)
+        axis['legend style'] = cls._format_options(legend_options)
 
         return axis
 
     @classmethod
-    def format_options(cls, options):
+    def _format_options(cls, options):
         opts = []
         for key, value in sorted(options.items()):
             if value is None or value is False:
@@ -225,8 +259,6 @@ class PlotReport(PlanningReport):
     LOCATIONS = ['upper right', 'upper left', 'lower left', 'lower right',
                  'right', 'center left', 'center right', 'lower center',
                  'upper center', 'center']
-    XAXIS_LABEL_PADDING = 5
-    YAXIS_LABEL_PADDING = 5
 
     def __init__(self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
                  xlim_left=None, xlim_right=None, ylim_bottom=None, ylim_top=None,
@@ -316,7 +348,10 @@ class PlotReport(PlanningReport):
         self.ylim_bottom = ylim_bottom
         self.ylim_top = ylim_top
         self.params = params or {}
-        self.scatter = True
+        if self.output_format == 'tex':
+            self.writer = PgfPlots
+        else:
+            self.writer = Matplotlib
 
     def _set_scales(self, xscale, yscale):
         self.xscale = xscale or 'linear'
@@ -363,36 +398,12 @@ class PlotReport(PlanningReport):
         self.min_x, self.min_y, self.max_x, self.max_y = min_x, min_y, max_x, max_y
 
     def _write_plot(self, runs, filename):
-        # Map category names to value tuples
+        # Map category names to coord tuples
         categories = self._fill_categories(runs)
         self.set_min_max_values(categories)
         self.categories = self._prepare_categories(categories)
         self.styles = self._get_category_styles(self.categories)
-
-        if self.output_format == 'tex':
-            PgfPlots.write(self, filename, scatter=self.scatter)
-            return
-
-        MatplotlibPlot.set_rc_params(self.params)
-        plot = MatplotlibPlot()
-        self.has_points = False
-        if self.title:
-            plot.axes.set_title(self.title)
-        if self.xlabel:
-            plot.axes.set_xlabel(self.xlabel, labelpad=self.XAXIS_LABEL_PADDING)
-        if self.ylabel:
-            plot.axes.set_ylabel(self.ylabel, labelpad=self.YAXIS_LABEL_PADDING)
-
-        plot.axes.set_xscale(self.xscale)
-        plot.axes.set_yscale(self.yscale)
-        self._plot(plot.axes, self.categories, self.styles)
-
-        if not self.has_points:
-            logging.info('Found no valid points for plot %s' % filename)
-            return
-
-        plot.create_legend(self.categories, self.legend_location)
-        plot.print_figure(filename)
+        self.writer.write(self, filename)
 
     def write(self):
         raise NotImplementedError
@@ -482,48 +493,6 @@ class ProblemPlotReport(PlotReport):
             coords.sort(key=lambda (x, y): x)
             new_categories[category] = coords
         return new_categories
-
-    def _plot(self, axes, categories, styles):
-        # Find all x-values.
-        all_x = set()
-        max_y = -1
-        for coordinates in categories.values():
-            X, Y = zip(*coordinates)
-            all_x |= set(X)
-            max_y = max(list(Y) + [max_y])
-        all_x = sorted(all_x)
-
-        # Map all x-values to positions on the x-axis.
-        indices = dict((val, i) for i, val in enumerate(all_x, start=1))
-
-        # Only use xticks for non-numeric values.
-        all_x_numeric = all(isinstance(x, (int, float)) for x in all_x)
-        if not all_x_numeric:
-            # Reserve space on the x-axis for all x-values and the labels.
-            axes.set_xticks(range(1, len(all_x) + 1))
-            axes.set_xticklabels(all_x)
-
-        # Plot all categories.
-        for category, coords in sorted(categories.items()):
-            if not coords:
-                continue
-
-            X, Y = zip(*coords)
-            if not all_x_numeric:
-                X = [indices[val] for val in X]
-            axes.plot(X, Y, label=category, **styles[category])
-            if X and Y:
-                self.has_points = True
-
-        if self.xlim_right:
-            xlim_right = self.xlim_right
-        elif all_x_numeric:
-            xlim_right = max(all_x) * 1.25 if all_x else None
-        else:
-            xlim_right = len(all_x) + 1
-        axes.set_xlim(self.xlim_left or 0, xlim_right)
-        axes.set_ylim(self.ylim_bottom or 0, self.ylim_top or max_y * 1.1)
-        MatplotlibPlot.change_axis_formatter(axes.yaxis)
 
     def _write_plots(self, directory):
         for (domain, problem), runs in sorted(self.problem_runs.items()):

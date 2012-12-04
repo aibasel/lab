@@ -25,7 +25,72 @@ import os
 
 from lab import tools
 
-from downward.reports.plot import MatplotlibPlot, PlotReport
+from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, PlotReport
+
+
+class ScatterMatplotlib(Matplotlib):
+    @classmethod
+    def _plot(cls, report, axes, categories, styles):
+        # Display grid
+        axes.grid(b=True, linestyle='-', color='0.75')
+
+        has_points = False
+        # Generate the scatter plots
+        for category, coords in sorted(categories.items()):
+            X, Y = zip(*coords)
+            axes.scatter(X, Y, s=42, label=category, **styles[category])
+            if X and Y:
+                has_points = True
+
+        if report.xscale == 'linear' or report.yscale == 'linear':
+            plot_size = report.missing_val * 1.01
+        else:
+            plot_size = report.missing_val * 1.25
+
+        # Plot a diagonal black line. Starting at (0,0) often raises errors.
+        axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
+
+        axes.set_xlim(report.xlim_left or -1, report.xlim_right or plot_size)
+        axes.set_ylim(report.ylim_bottom or -1, report.ylim_top or plot_size)
+
+        for axis in [axes.xaxis, axes.yaxis]:
+            MatplotlibPlot.change_axis_formatter(axis,
+                                report.missing_val if report.show_missing else None)
+        return has_points
+
+
+class ScatterPgfPlots(PgfPlots):
+    @classmethod
+    def _get_plot(cls, report):
+        lines = []
+        options = cls._get_common_axis_options(report)
+        lines.append('\\begin{axis}[%s]' % cls._format_options(options))
+        for category, coords in sorted(report.categories.items()):
+            category_style = report.styles[category]
+            plot = {}
+            plot['only marks'] = True
+            plot['mark'] = category_style.get('marker')
+            c = category_style.get('c')
+            plot['color'] = cls.COLORS[c] if len(c) == 1 else c
+            plot['mark options'] = '{draw=black}'
+            lines.append('\\addplot[%s] coordinates {%s};' % (cls._format_options(plot),
+                                ' '.join(str(c) for c in coords)))
+            lines.append('\\addlegendentry{%s}' % category)
+        # Add black line.
+        start = min(report.min_x, report.min_y)
+        if report.xlim_left is not None:
+            start = min(start, report.xlim_left)
+        if report.ylim_bottom is not None:
+            start = min(start, report.ylim_bottom)
+        end = max(report.max_x, report.max_y)
+        if report.xlim_right:
+            end = max(end, report.xlim_right)
+        if report.ylim_top:
+            end = max(end, report.ylim_top)
+        lines.append('\\addplot[color=black] coordinates {(%d, %d) (%d, %d)};' %
+                     (start, start, end, end))
+        lines.append('\\end{axis}')
+        return lines
 
 
 class ScatterPlotReport(PlotReport):
@@ -83,6 +148,10 @@ class ScatterPlotReport(PlotReport):
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
+        if self.output_format == 'tex':
+            self.writer = ScatterPgfPlots
+        else:
+            self.writer = ScatterMatplotlib
 
     def _set_scales(self, xscale, yscale):
         # ScatterPlots use symlog scaling on the x-axis by default.
@@ -140,32 +209,6 @@ class ScatterPlotReport(PlotReport):
             coords = tools.uniq(coords)
             new_categories[category] = coords
         return new_categories
-
-    def _plot(self, axes, categories, styles):
-        # Display grid
-        axes.grid(b=True, linestyle='-', color='0.75')
-
-        # Generate the scatter plots
-        for category, coords in sorted(categories.items()):
-            X, Y = zip(*coords)
-            axes.scatter(X, Y, s=42, label=category, **styles[category])
-            if X and Y:
-                self.has_points = True
-
-        if self.xscale == 'linear' or self.yscale == 'linear':
-            plot_size = self.missing_val * 1.01
-        else:
-            plot_size = self.missing_val * 1.25
-
-        # Plot a diagonal black line. Starting at (0,0) often raises errors.
-        axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
-
-        axes.set_xlim(self.xlim_left or -1, self.xlim_right or plot_size)
-        axes.set_ylim(self.ylim_bottom or -1, self.ylim_top or plot_size)
-
-        for axis in [axes.xaxis, axes.yaxis]:
-            MatplotlibPlot.change_axis_formatter(axis,
-                                    self.missing_val if self.show_missing else None)
 
     def write(self):
         if not len(self.configs) == 2:
