@@ -125,29 +125,37 @@ class ScatterPlotReport(PlotReport):
             categories[category].append((val1, val2))
         return categories
 
+    def _prepare_categories(self, categories):
+        # Find max-value to fit plot and to draw missing values.
+        self.missing_val = self._get_missing_val(max(self.max_x, self.max_y))
+
+        new_categories = {}
+        for category, coords in categories.items():
+            X, Y = zip(*coords)
+            X, Y = self._handle_none_values(X, Y, self.missing_val)
+            coords = zip(X, Y)
+            # The same coordinate may have been added multiple times. To avoid
+            # drawing it more than once which results in a bolder spot, we
+            # filter duplicate items.
+            coords = tools.uniq(coords)
+            new_categories[category] = coords
+        return new_categories
+
     def _plot(self, axes, categories, styles):
         # Display grid
         axes.grid(b=True, linestyle='-', color='0.75')
 
-        # Find max-value to fit plot and to draw missing values.
-        max_value = -1
-        for category, coordinates in sorted(categories.items()):
-            for x, y in coordinates:
-                max_value = max(max_value, x, y)
-        missing_val = self._get_missing_val(max_value)
-
         # Generate the scatter plots
         for category, coords in sorted(categories.items()):
             X, Y = zip(*coords)
-            X, Y = self._handle_none_values(X, Y, missing_val)
             axes.scatter(X, Y, s=42, label=category, **styles[category])
             if X and Y:
                 self.has_points = True
 
         if self.xscale == 'linear' or self.yscale == 'linear':
-            plot_size = missing_val * 1.01
+            plot_size = self.missing_val * 1.01
         else:
-            plot_size = missing_val * 1.25
+            plot_size = self.missing_val * 1.25
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
@@ -156,8 +164,8 @@ class ScatterPlotReport(PlotReport):
         axes.set_ylim(self.ylim_bottom or -1, self.ylim_top or plot_size)
 
         for axis in [axes.xaxis, axes.yaxis]:
-            Plot.change_axis_formatter(axis,
-                                       missing_val if self.show_missing else None)
+            MatplotlibPlot.change_axis_formatter(axis,
+                                    self.missing_val if self.show_missing else None)
 
     def write(self):
         if not len(self.configs) == 2:

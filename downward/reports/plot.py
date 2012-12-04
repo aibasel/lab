@@ -20,6 +20,7 @@
 
 import logging
 import os
+import sys
 from collections import defaultdict
 
 try:
@@ -96,15 +97,65 @@ class MatplotlibPlot(object):
 
 
 class PgfPlots(object):
+    COLORS = dict((color[0], color) for color in
+                  ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow'])
+    COLORS['k'] = 'black'
+    LOCATIONS = {'upper left': 'north west', 'upper right': 'north east',
+                 'lower left': 'south west', 'lower right': 'south east',
+                 'right': 'outer north east'}
+
     @classmethod
-    def write(cls, report, filename):
+    def get_plot(cls, report, filename):
         lines = []
-        lines.append('\\begin{tikzpicture}')
-        lines.append('\\begin{axis}[%s]' % cls.get_axis_options(report))
+        opts = cls.format_options(cls.get_common_axis_options(report))
+        lines.append('\\begin{axis}[%s]' % opts)
         for category, coords in sorted(report.categories.items()):
             lines.append('\\addplot coordinates {%s};' % ' '.join(str(c) for c in coords))
             lines.append('\\addlegendentry{%s}' % category)
         lines.append('\\end{axis}')
+        return lines
+
+    @classmethod
+    def get_scatterplot(cls, report):
+        lines = []
+        options = cls.get_common_axis_options(report)
+        lines.append('\\begin{axis}[%s]' % cls.format_options(options))
+        for category, coords in sorted(report.categories.items()):
+            category_style = report.styles[category]
+            plot = {}
+            plot['only marks'] = True
+            plot['mark'] = category_style.get('marker')
+            c = category_style.get('c')
+            plot['color'] = cls.COLORS[c] if len(c) == 1 else c
+            plot['mark options'] = '{draw=black}'
+            lines.append('\\addplot[%s] coordinates {%s};' % (cls.format_options(plot),
+                                ' '.join(str(c) for c in coords)))
+            lines.append('\\addlegendentry{%s}' % category)
+        # Add black line.
+        start = min(report.min_x, report.min_y)
+        if report.xlim_left is not None:
+            start = min(start, report.xlim_left)
+        if report.ylim_bottom is not None:
+            start = min(start, report.ylim_bottom)
+        end = max(report.max_x, report.max_y)
+        if report.xlim_right:
+            end = max(end, report.xlim_right)
+        if report.ylim_top:
+            end = max(end, report.ylim_top)
+        lines.append('\\addplot[color=black] coordinates {(%d, %d) (%d, %d)};' %
+                     (start, start, end, end))
+        lines.append('\\end{axis}')
+        return lines
+
+    @classmethod
+    def write(cls, report, filename, scatter=False):
+        lines = []
+        lines.append('\\begin{tikzpicture}')
+        if scatter:
+            plot = cls.get_scatterplot(report)
+        else:
+            plot = cls.get_plot(report)
+        lines.extend(plot)
         lines.append('\\end{tikzpicture}')
         tools.makedirs(os.path.dirname(filename))
         with open(filename, 'w') as f:
@@ -112,7 +163,7 @@ class PgfPlots(object):
         logging.info('Wrote file://%s' % filename)
 
     @classmethod
-    def get_axis_options(cls, report):
+    def get_common_axis_options(cls, report):
         axis = {}
         axis['xmin'] = report.xlim_left
         axis['xmax'] = report.xlim_right
@@ -135,22 +186,30 @@ class PgfPlots(object):
             axis['height'] = '%fin' % height
 
         legend_options = {}
-        #legend_options['cells'] = 'anchor=east'
-        legend_options['legend pos'] = 'outer north east'
+        if report.legend_location in cls.LOCATIONS.values():
+            # Found valid pgfplots location.
+            pos = report.legend_location
+        elif report.legend_location in cls.LOCATIONS:
+            # Convert matplotlib location to pgfplots location.
+            pos = cls.LOCATIONS[report.legend_location]
+        else:
+            logging.critical('Legend location "%s" is unavailable in pgfplots' %
+                             report.legend_location)
+        legend_options['legend pos'] = pos
         axis['legend style'] = cls.format_options(legend_options)
 
-        return cls.format_options(axis)
+        return axis
 
     @classmethod
     def format_options(cls, options):
         opts = []
         for key, value in sorted(options.items()):
-            if not value:
+            if value is None or value is False:
                 continue
             if isinstance(value, bool) or value is None:
                 opts.append(key)
             elif isinstance(value, basestring):
-                if ' ' in value:
+                if ' ' in value or '=' in value:
                     value = '{%s}' % value
                 opts.append("%s=%s" % (key, value.replace("_", "-")))
             else:
@@ -158,15 +217,14 @@ class PgfPlots(object):
         return ", ".join(opts)
 
 
-
 class PlotReport(PlanningReport):
     """
     Abstract base class for Plot classes.
     """
     LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
-    LEGEND_POSITIONS = ['upper right', 'upper left', 'lower left', 'lower right',
-                        'right', 'center left', 'center right', 'lower center',
-                        'upper center', 'center']
+    LOCATIONS = ['upper right', 'upper left', 'lower left', 'lower right',
+                 'right', 'center left', 'center right', 'lower center',
+                 'upper center', 'center']
     XAXIS_LABEL_PADDING = 5
     YAXIS_LABEL_PADDING = 5
 
@@ -186,11 +244,10 @@ class PlotReport(PlanningReport):
         If omitted sensible defaults will be used.
 
         *legend_location* must be a (x, y) pair or one of the following strings:
-        'upper right', 'upper left', 'lower left', 'lower right', 'right',
-        'center left', 'center right', 'lower center', 'upper center', 'center'. ::
+        'upper right', 'upper left', 'lower left', 'lower right', 'right'. ::
 
             # Some example positions.
-            legend_location='lower_left'  # Lower left corner *inside* the plot
+            legend_location='lower left'  # Lower left corner *inside* the plot
             legend_location=(1.1, 0.5)    # Right of the plot
             legend_location=(0.5, 1.1)    # Above the plot
             legend_location=(0.5, -0.1)   # Below the plot
@@ -259,6 +316,7 @@ class PlotReport(PlanningReport):
         self.ylim_bottom = ylim_bottom
         self.ylim_top = ylim_top
         self.params = params or {}
+        self.scatter = True
 
     def _set_scales(self, xscale, yscale):
         self.xscale = xscale or 'linear'
@@ -289,14 +347,30 @@ class PlotReport(PlanningReport):
     def _plot(self, axes, categories):
         raise NotImplementedError
 
+    def set_min_max_values(self, categories):
+        min_x = sys.maxint
+        min_y = sys.maxint
+        max_x = 0
+        max_y = 0
+        for coordinates in categories.values():
+            for x, y in coordinates:
+                if x is not None:
+                    min_x = min(min_x, x)
+                    max_x = max(max_x, x)
+                if y is not None:
+                    min_y = min(min_y, y)
+                    max_y = max(max_y, y)
+        self.min_x, self.min_y, self.max_x, self.max_y = min_x, min_y, max_x, max_y
+
     def _write_plot(self, runs, filename):
         # Map category names to value tuples
         categories = self._fill_categories(runs)
+        self.set_min_max_values(categories)
         self.categories = self._prepare_categories(categories)
         self.styles = self._get_category_styles(self.categories)
 
         if self.output_format == 'tex':
-            PgfPlots.write(self, filename)
+            PgfPlots.write(self, filename, scatter=self.scatter)
             return
 
         MatplotlibPlot.set_rc_params(self.params)
@@ -394,8 +468,7 @@ class ProblemPlotReport(PlotReport):
                 logging.critical('get_points() returned the wrong format.')
         return categories
 
-    @staticmethod
-    def _prepare_categories(categories):
+    def _prepare_categories(self, categories):
         new_categories = {}
         for category, coords in categories.items():
             # The same coordinate may have been added multiple times. To avoid
