@@ -36,6 +36,9 @@ from lab import tools
 from downward.reports import PlanningReport
 
 
+EPSILON = 0.01
+
+
 class MatplotlibPlot(object):
     def __init__(self):
         self.legend = None
@@ -177,7 +180,7 @@ class PgfPlots(object):
     @classmethod
     def _get_plot(cls, report):
         lines = []
-        opts = cls._format_options(cls._get_common_axis_options(report))
+        opts = cls._format_options(cls._get_axis_options(report))
         lines.append('\\begin{axis}[%s]' % opts)
         for category, coords in sorted(report.categories.items()):
             lines.append('\\addplot coordinates {%s};' % ' '.join(str(c) for c in coords))
@@ -197,7 +200,7 @@ class PgfPlots(object):
         logging.info('Wrote file://%s' % filename)
 
     @classmethod
-    def _get_common_axis_options(cls, report):
+    def _get_axis_options(cls, report):
         axis = {}
         axis['xmin'] = report.xlim_left
         axis['xmax'] = report.xlim_right
@@ -385,8 +388,8 @@ class PlotReport(PlanningReport):
     def set_min_max_values(self, categories):
         min_x = sys.maxint
         min_y = sys.maxint
-        max_x = 0
-        max_y = 0
+        max_x = EPSILON
+        max_y = EPSILON
         for coordinates in categories.values():
             for x, y in coordinates:
                 if x is not None:

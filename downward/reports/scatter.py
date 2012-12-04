@@ -63,7 +63,7 @@ class ScatterPgfPlots(PgfPlots):
     @classmethod
     def _get_plot(cls, report):
         lines = []
-        options = cls._get_common_axis_options(report)
+        options = cls._get_axis_options(report)
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
             category_style = report.styles[category]
@@ -91,6 +91,16 @@ class ScatterPgfPlots(PgfPlots):
                      (start, start, end, end))
         lines.append('\\end{axis}')
         return lines
+
+    @classmethod
+    def _get_axis_options(cls, report):
+        opts = PgfPlots._get_axis_options(report)
+        # Add line for missing values.
+        for axis in ['x', 'y']:
+            opts['extra %s ticks' % axis] = report.missing_val
+            opts['extra %s tick style' % axis] = 'grid=major'
+            #opts['extra %s tick labels' % axis] = 'missing'
+        return opts
 
 
 class ScatterPlotReport(PlotReport):
@@ -148,6 +158,8 @@ class ScatterPlotReport(PlotReport):
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
+        self.xlim_left = self.xlim_left or plot.EPSILON
+        self.ylim_bottom = self.ylim_bottom or plot.EPSILON
         if self.output_format == 'tex':
             self.writer = ScatterPgfPlots
         else:
