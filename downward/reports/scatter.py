@@ -26,6 +26,7 @@ import os
 from lab import tools
 
 from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, PlotReport
+from downward.reports import plot
 
 
 class ScatterMatplotlib(Matplotlib):
@@ -87,7 +88,7 @@ class ScatterPgfPlots(PgfPlots):
             end = max(end, report.xlim_right)
         if report.ylim_top:
             end = max(end, report.ylim_top)
-        lines.append('\\addplot[color=black] coordinates {(%d, %d) (%d, %d)};' %
+        lines.append('\\addplot[color=black] coordinates {(%f, %f) (%d, %d)};' %
                      (start, start, end, end))
         lines.append('\\end{axis}')
         return lines
@@ -207,6 +208,8 @@ class ScatterPlotReport(PlotReport):
         return categories
 
     def _prepare_categories(self, categories):
+        categories = PlotReport._prepare_categories(self, categories)
+
         # Find max-value to fit plot and to draw missing values.
         self.missing_val = self._get_missing_val(max(self.max_x, self.max_y))
 
@@ -215,10 +218,6 @@ class ScatterPlotReport(PlotReport):
             X, Y = zip(*coords)
             X, Y = self._handle_none_values(X, Y, self.missing_val)
             coords = zip(X, Y)
-            # The same coordinate may have been added multiple times. To avoid
-            # drawing it more than once which results in a bolder spot, we
-            # filter duplicate items.
-            coords = tools.uniq(coords)
             new_categories[category] = coords
         return new_categories
 

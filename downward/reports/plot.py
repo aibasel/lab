@@ -39,6 +39,12 @@ from downward.reports import PlanningReport
 EPSILON = 0.01
 
 
+def handle_zero(number):
+    if number == 0:
+        return number + EPSILON
+    return number
+
+
 class MatplotlibPlot(object):
     def __init__(self):
         self.legend = None
@@ -382,8 +388,20 @@ class PlotReport(PlanningReport):
     def _fill_categories(self, runs):
         raise NotImplementedError
 
-    def _plot(self, axes, categories):
-        raise NotImplementedError
+    def _prepare_categories(self, categories):
+        new_categories = {}
+        for category, coords in categories.items():
+            # The same coordinate may have been added multiple times. To avoid
+            # drawing it more than once which results in a bolder spot, we
+            # filter duplicate items.
+            coords = tools.uniq(coords)
+            # Logarithmic axes cannot handle values <= 0.
+            if not self.xscale == 'linear':
+                coords = [(handle_zero(x), y) for x, y in coords]
+            if not self.yscale == 'linear':
+                coords = [(x, handle_zero(y)) for x, y in coords]
+            new_categories[category] = coords
+        return new_categories
 
     def set_min_max_values(self, categories):
         min_x = sys.maxint
@@ -398,6 +416,9 @@ class PlotReport(PlanningReport):
                 if y is not None:
                     min_y = min(min_y, y)
                     max_y = max(max_y, y)
+        # Make sure we don't get too low for log plots.
+        min_x = max(min_x, EPSILON)
+        min_y = max(min_y, EPSILON)
         self.min_x, self.min_y, self.max_x, self.max_y = min_x, min_y, max_x, max_y
 
     def _write_plot(self, runs, filename):
@@ -483,12 +504,9 @@ class ProblemPlotReport(PlotReport):
         return categories
 
     def _prepare_categories(self, categories):
+        categories = PlotReport._prepare_categories(self, categories)
         new_categories = {}
         for category, coords in categories.items():
-            # The same coordinate may have been added multiple times. To avoid
-            # drawing it more than once which results in a bolder spot, we
-            # filter duplicate items.
-            coords = tools.uniq(coords)
             # Do not include missing values in plot, but reserve spot on x-axis.
             coords = [(x, y) for (x, y) in coords if y is not None]
             # Make sure that values are sorted by x, otherwise the wrong points
