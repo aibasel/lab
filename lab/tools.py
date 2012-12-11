@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import colorsys
+import collections
 import email.mime.text
 import functools
 import json
@@ -257,6 +258,60 @@ class Properties(dict):
         assert self.filename
         with open(self.filename, 'w') as f:
             json.dump(self, f, indent=2)
+
+
+class RunFilter(object):
+    def __init__(self, filter, **kwargs):
+        if not filter:
+            self.filters = []
+        elif isinstance(filter, collections.Iterable):
+            self.filters = filter
+        else:
+            self.filters = [filter]
+        for arg_name, arg_value in kwargs.items():
+            assert arg_name.startswith('filter_'), (
+                'Did not recognize key word argument "%s"' % arg_name)
+            filter_for = arg_name[len('filter_'):]
+            # Add a filter for the specified property.
+            self.filters.append(self._build_filter(filter_for, arg_value))
+
+    def _build_filter(self, prop, value):
+        # Do not define this function inplace to force early binding. See:
+        # stackoverflow.com/questions/3107231/currying-functions-in-python-in-a-loop
+        def property_filter(run):
+            if isinstance(value, (list, tuple)):
+                return run.get(prop) in value
+            else:
+                return run.get(prop) == value
+        return property_filter
+
+    def apply_to_run(self, run):
+        # No need to copy the run as the original run is only needed if all
+        # filters return True. In this case modified_run is never changed.
+        modified_run = run
+        for filter in self.filters:
+            result = filter(modified_run)
+            if not isinstance(result, (dict, bool)):
+                logging.critical('Filters must return a dictionary or boolean')
+            # If a dict is returned, use it as the new run,
+            # else take the old one.
+            if isinstance(result, dict):
+                modified_run = result
+            if not result:
+                # Discard runs that returned False or an empty dictionary.
+                return False
+        return modified_run
+
+    def apply(self, props):
+        if not self.filters:
+            return props
+        new_props = Properties()
+        for run_id, run in props.items():
+            modified_run = self.apply_to_run(run)
+            if modified_run:
+                new_props[run_id] = modified_run
+        new_props.filename = props.filename
+        return new_props
 
 
 def fast_updatetree(src, dst, symlinks=False, ignore=None):

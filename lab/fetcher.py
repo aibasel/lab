@@ -33,7 +33,8 @@ class Fetcher(object):
     Use this class to combine data from multiple experiment or evaluation
     directories into a (new) evaluation directory.
     """
-    def fetch_dir(self, run_dir, eval_dir, copy_all=False, filter=None, parsers=None):
+    def fetch_dir(self, run_dir, eval_dir, copy_all=False, run_filter=None, parsers=None):
+        run_filter = run_filter or tools.RunFilter()
         parsers = parsers or []
         # Allow specyfing a list multiple parsers or a single parser.
         if not isinstance(parsers, (tuple, list)):
@@ -57,8 +58,8 @@ class Fetcher(object):
             subprocess.call([rel_parser], cwd=run_dir)
 
         props = tools.Properties(filename=prop_file)
-
-        if filter is not None and not filter(props):
+        props = run_filter.apply_to_run(props)
+        if not props:
             return None, None
         run_id = props.get('id')
         # Abort if an id cannot be read.
@@ -73,7 +74,7 @@ class Fetcher(object):
         return run_id, props
 
     def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True,
-                 filter=None, parsers=None):
+                 filter=None, parsers=None, **kwargs):
         """
         This method can be used to copy properties from an exp-dir or eval-dir
         into an eval-dir. If the destination eval-dir already exist, the data
@@ -87,9 +88,8 @@ class Fetcher(object):
         If *write_combined_props* is True (default), write the combined
         properties file.
 
-        If given, *filter* must be a function that is passed a dictionary of a
-        run's keys and values and returns True or False. If it returns True,
-        this run will be fetched, otherwise it will be skipped.
+        You can include only specific domains or configurations by using
+        :py:class:`filters <.Report>`.
 
         *parsers* can be a (list of) paths to parser scripts. If given, each
         parser is called in each run directory and the results are added to
@@ -112,16 +112,17 @@ class Fetcher(object):
 
         Fetch only the runs for certain configuration from an older experiment::
 
-            def configuration_needed(props):
-                return props['config_nick'] in ['config_1', 'config_5']
-
-            exp.add_step(Step('fetch', Fetcher(), src_dir, filter=configuration_needed))
+            exp.add_step(Step('fetch', Fetcher(), src_dir,
+                              filter_config_nick=['config_1', 'config_5']))
         """
         if not os.path.isdir(src_dir):
             logging.critical('%s is not a valid directory' % src_dir)
+        run_filter = tools.RunFilter(filter, **kwargs)
 
         src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
         fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
+        if fetch_from_eval_dir:
+            src_props = run_filter.apply(src_props)
 
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching files from %s -> %s' % (src_dir, eval_dir))
@@ -141,7 +142,7 @@ class Fetcher(object):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
             run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all,
-                                           filter=filter, parsers=parsers)
+                                           run_filter=run_filter, parsers=parsers)
 
             if write_combined_props and run_id:
                 combined_props['-'.join(run_id)] = props
