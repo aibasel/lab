@@ -179,10 +179,9 @@ class PgfPlots(object):
     COLORS = dict((color[0], color) for color in
                   ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow'])
     COLORS['k'] = 'black'
-    MARKERS = { 'o':'*', 'x':'x', '+':'+', 's':'square*',
-                '^':'triangle*', 'v':'halfsquare*', '<':'halfsquare left*',
-                '>':'halfsquare right*', 'D':'diamond*'
-              }
+    MARKERS = {'o': '*', 'x': 'x', '+': '+', 's': 'square*',
+               '^': 'triangle*', 'v': 'halfsquare*', '<': 'halfsquare left*',
+               '>': 'halfsquare right*', 'D': 'diamond*'}
     LOCATIONS = {'upper left': 'north west', 'upper right': 'north east',
                  'lower left': 'south west', 'lower right': 'south east',
                  'right': 'outer north east'}
