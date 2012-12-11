@@ -244,7 +244,10 @@ class Properties(dict):
         if not filename or not os.path.exists(filename):
             return
         with open(filename) as f:
-            self.update(json.load(f))
+            try:
+                self.update(json.load(f))
+            except ValueError as e:
+                logging.critical("JSON parse error in file '%s': %s" % (filename, e))
 
     def write(self):
         """Write the properties to disk.
