@@ -22,6 +22,7 @@ import resource
 import signal
 import subprocess
 import time
+import signal
 
 
 from lab.calls.processgroup import ProcessGroup
@@ -41,12 +42,13 @@ def kill_pgrp(pgrp, sig, show_error=True):
                (pgrp, sig))
 
 
-def set_limit(kind, amount):
+def set_limit(kind, soft_limit, hard_limit=None):
+    hard_limit = hard_limit or soft_limit
     try:
-        resource.setrlimit(kind, (amount, amount))
+        resource.setrlimit(kind, (soft_limit, hard_limit))
     except (OSError, ValueError), err:
         print ("Resource limit for %s could not be set to %s (%s)" %
-               (kind, amount, err))
+               (kind, (soft_limit, hard_limit), err))
 
 
 class Call(subprocess.Popen):
@@ -69,6 +71,7 @@ class Call(subprocess.Popen):
         """
         self.name = name
         self.time_limit = time_limit
+        self.hard_time_limit = time_limit * 1.25
         self.wall_clock_time_limit = time_limit * 1.5
         self.mem_limit = mem_limit
 
@@ -88,7 +91,7 @@ class Call(subprocess.Popen):
 
         def prepare_call():
             os.setpgrp()
-            set_limit(resource.RLIMIT_CPU, self.time_limit)
+            set_limit(resource.RLIMIT_CPU, self.time_limit, self.hard_time_limit)
             # Memory in Bytes
             set_limit(resource.RLIMIT_AS, self.mem_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
@@ -155,6 +158,8 @@ class Call(subprocess.Popen):
             pid, status = os.waitpid(self.pid, os.WNOHANG)
             if (pid, status) != (0, 0):
                 self._handle_exitstatus(status)
+                if status == 128 + signal.SIGXCPU:
+                self._set_property('timeout', 1)
                 break
 
             total_time = group.total_time()
