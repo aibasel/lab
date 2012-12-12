@@ -179,6 +179,9 @@ class PgfPlots(object):
     COLORS = dict((color[0], color) for color in
                   ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow'])
     COLORS['k'] = 'black'
+    MARKERS = {'o': '*', 'x': 'x', '+': '+', 's': 'square*',
+               '^': 'triangle*', 'v': 'halfsquare*', '<': 'halfsquare left*',
+               '>': 'halfsquare right*', 'D': 'diamond*'}
     LOCATIONS = {'upper left': 'north west', 'upper right': 'north east',
                  'lower left': 'south west', 'lower right': 'south east',
                  'right': 'outer north east'}
@@ -237,7 +240,7 @@ class PgfPlots(object):
             pos = cls.LOCATIONS[report.legend_location]
         else:
             logging.critical('Legend location "%s" is unavailable in pgfplots' %
-                             report.legend_location)
+                             str(report.legend_location))
         legend_options['legend pos'] = pos
         axis['legend style'] = cls._format_options(legend_options)
 
@@ -378,7 +381,7 @@ class PlotReport(PlanningReport):
     def _get_category_styles(self, categories):
         # Pick any style for categories for which no style is defined.
         styles = self.category_styles.copy()
-        unused_styles = [{'marker': m, 'c': c} for m in 'ox+^v<>' for c in 'rgbcmyk'
+        unused_styles = [{'marker': m, 'c': c} for m in 'ox+s^v<>D' for c in 'rgbcmyk'
                          if not any(s.get('marker') == m and
                                     s.get('c') == c for s in styles.values())]
         missing_category_styles = (set(categories.keys()) - set(styles.keys()))
