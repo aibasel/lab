@@ -209,18 +209,7 @@ class Report(object):
         assert format in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png']
         self.output_format = format
         self.toc = True
-        if not filter:
-            self.filters = []
-        elif isinstance(filter, collections.Iterable):
-            self.filters = filter
-        else:
-            self.filters = [filter]
-        for arg_name, arg_value in kwargs.items():
-            assert arg_name.startswith('filter_'), (
-                'Did not recognize key word argument "%s"' % arg_name)
-            filter_for = arg_name[len('filter_'):]
-            # Add a filter for the specified property.
-            self.filters.append(self._build_filter(filter_for, arg_value))
+        self.run_filter = tools.RunFilter(filter, **kwargs)
 
     def __call__(self, eval_dir, outfile):
         """Make the report.
@@ -370,40 +359,9 @@ class Report(object):
             logging.critical('properties file in evaluation dir is empty.')
 
     def _apply_filter(self):
-        if not self.filters:
-            return
-        new_props = tools.Properties()
-        for run_id, run in self.props.items():
-            # No need to copy the run as the original run is only needed if all
-            # filters return True. In this case modified_run is never changed.
-            modified_run = run
-            for filter in self.filters:
-                result = filter(modified_run)
-                if not isinstance(result, (dict, bool)):
-                    logging.critical('Filters must return a dictionary or boolean')
-                # If a dict is returned, use it as the new run,
-                # else take the old one.
-                if isinstance(result, dict):
-                    modified_run = result
-                if not result:
-                    # Discard runs that returned False or an empty dictionary.
-                    break
-            else:
-                new_props[run_id] = modified_run
-        if not new_props:
+        self.props = self.run_filter.apply(self.props)
+        if not self.props:
             logging.critical('All runs have been filtered -> Nothing to report.')
-        new_props.filename = self.props.filename
-        self.props = new_props
-
-    def _build_filter(self, prop, value):
-        # Do not define this function inplace to force early binding. See:
-        # stackoverflow.com/questions/3107231/currying-functions-in-python-in-a-loop
-        def property_filter(run):
-            if isinstance(value, (list, tuple)):
-                return run.get(prop) in value
-            else:
-                return run.get(prop) == value
-        return property_filter
 
 
 class Table(collections.defaultdict):
