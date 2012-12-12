@@ -15,7 +15,7 @@ from downward.reports.absolute import AbsoluteReport
 
 
 NODE = platform.node()
-REMOTE = NODE.startswith('gkigrid') or NODE == 'habakuk'
+REMOTE = NODE.startswith('gkigrid') or NODE in ['habakuk', 'turtur']
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
 REMOTE_EXPS = '/home/seipp/experiments' #'/users/seipp/experiments/'
