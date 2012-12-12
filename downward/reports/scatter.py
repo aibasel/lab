@@ -70,9 +70,10 @@ class ScatterPgfPlots(PgfPlots):
             category_style = report.styles[category]
             plot = {}
             plot['only marks'] = True
-            plot['mark'] = category_style.get('marker')
+            m = category_style.get('marker')
+            plot['mark'] = cls.MARKERS.get(m, m)
             c = category_style.get('c')
-            plot['color'] = cls.COLORS[c] if len(c) == 1 else c
+            plot['color'] = cls.COLORS.get(c, c)
             plot['mark options'] = '{draw=black}'
             lines.append('\\addplot[%s] coordinates {%s};' % (cls._format_options(plot),
                                 ' '.join(str(c) for c in coords)))
