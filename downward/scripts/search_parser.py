@@ -243,6 +243,7 @@ def get_error(content, props):
         props['error'] = 'none'
     elif 'bad_alloc' in content:
         props['error'] = 'memory'
+        props['search_mem_limit_exceeded'] = 1
     # If the run was killed with SIGXCPU (return code: 128 + 24 (SIGXCPU) = 152),
     # we know it hit its CPU limit.
     elif ('search_error' in props and props.get('search_returncode', None) == '152'):
