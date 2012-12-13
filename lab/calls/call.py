@@ -22,7 +22,6 @@ import resource
 import signal
 import subprocess
 import time
-import signal
 
 
 from lab.calls.processgroup import ProcessGroup
@@ -156,7 +155,7 @@ class Call(subprocess.Popen):
             if (pid, status) != (0, 0):
                 self._handle_exitstatus(status)
                 if status == 128 + signal.SIGXCPU:
-                self._set_property('timeout', 1)
+                    self._set_property('timeout', 1)
                 break
 
             total_time = group.total_time()
