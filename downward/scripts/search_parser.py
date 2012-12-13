@@ -269,6 +269,28 @@ def get_error(content, props):
     else:
         props['error'] = 'unknown'
 
+    # Set all errors that did not occur to '0', so it is possible to sum over
+    # all errors of one type.
+    for attribute in ['unsolvable', 'search_error', 'search_mem_limit_exceeded',
+                       'search_timeout', 'search_wall_clock_timeout']:
+        if props.get(attribute) is None:
+            props[attribute] = 0
+
+    explained = props.get('coverage') 
+    for error in ['unsolvable', 'search_mem_limit_exceeded', 'search_timeout', 'search_wall_clock_timeout']:
+        explained |= bool(props.get(error, False))
+    if explained:
+        props['unexplained_error'] = 0
+    else:
+        props['unexplained_error'] = 1
+        props['coverage'] = 0
+        run_id = int(run['run_dir'].split('/')[1])
+        print 'Unexplained error in run:', run_id
+
+    # Check that all errors that occured are handled in exactly one of the categories.
+    assert (props['search_error'] == 0 or 
+             (props['unsolvable'] + props['search_timeout'] + props['search_mem_limit_exceeded'] +
+              props['search_wall_clock_timeout'] + props['unexplained_error']) == 1)
 
 class SearchParser(Parser):
     def __init__(self):
