@@ -154,7 +154,7 @@ class Call(subprocess.Popen):
             pid, status = os.waitpid(self.pid, os.WNOHANG)
             if (pid, status) != (0, 0):
                 self._handle_exitstatus(status)
-                if status == 128 + signal.SIGXCPU:
+                if self.returncode == 128 + signal.SIGXCPU:
                     self._set_property('timeout', 1)
                 break
 

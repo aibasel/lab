@@ -247,6 +247,7 @@ def get_error(content, props):
     # we know it hit its CPU limit.
     elif ('search_error' in props and props.get('search_returncode', None) == '152'):
         props['error'] = 'timeout'
+        props['search_timeout'] = 1
     # If the run was killed with SIGKILL (return code: 128 + 9 (SIGKILL) = 137),
     # we can assume it was because it hit its resource limits.
     # For other or unknown return values we don't want to hide potential problems.
