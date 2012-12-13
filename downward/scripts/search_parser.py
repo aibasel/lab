@@ -243,9 +243,13 @@ def get_error(content, props):
         props['error'] = 'none'
     elif 'bad_alloc' in content:
         props['error'] = 'memory'
-    # If the run was killed (return code: 128 + 9 (SIGKILL) = 137),
+    # If the run was killed with SIGXCPU (return code: 128 + 24 (SIGXCPU) = 152),
+    # we know it hit its CPU limit.
+    elif ('search_error' in props and props.get('search_returncode', None) == '152'):
+        props['error'] = 'timeout'
+    # If the run was killed with SIGKILL (return code: 128 + 9 (SIGKILL) = 137),
     # we can assume it was because it hit its resource limits.
-    # For other or unknown return values we don't want to hide potential problems
+    # For other or unknown return values we don't want to hide potential problems.
     elif ('search_error' in props and props.get('search_returncode', None) == '137'):
         remaining_time = (props['limit_search_time'] -
                           props.get('last_logged_time', 0))
@@ -276,6 +280,15 @@ class SearchParser(Parser):
                          required=False)
         self.add_pattern('landmarks_generation_time',
                          r'Landmarks generation time: (.+)s', type=float,
+                         required=False)
+        self.add_pattern('last_logged_time',
+                         r'total_time: (.+)s', type=float, file='driver.log',
+                         required=False)
+        self.add_pattern('last_logged_wall_clock_time',
+                         r'wall-clock time: (.+)', type=float, file='driver.log',
+                         required=False)
+        self.add_pattern('last_logged_memory',
+                         r'total_vsize: (.+) MB', type=float, file='driver.log',
                          required=False)
 
     def add_search_functions(self):

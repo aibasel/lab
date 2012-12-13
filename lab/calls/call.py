@@ -121,9 +121,6 @@ class Call(subprocess.Popen):
         print "total_time: %.2fs" % total_time
         print "total_vsize: %.2f MB" % total_vsize
         print
-        set_property('last_logged_time', total_time)
-        set_property('last_logged_memory', total_vsize)
-        set_property('last_logged_wall_clock_time', wall_clock_time)
 
     def wait(self):
         """Wait for child process to terminate.
