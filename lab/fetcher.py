@@ -65,7 +65,7 @@ class Fetcher(object):
         # Abort if an id cannot be read.
         if not run_id:
             logging.critical('id is not set in %s.' % prop_file)
-        if prop.get('unexplained_error'):
+        if props.get('unexplained_error'):
             logging.warning("Unexplained error in: '%s'" % props.get('run_dir'))
 
 
@@ -126,6 +126,10 @@ class Fetcher(object):
         fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
         if fetch_from_eval_dir:
             src_props = run_filter.apply(src_props)
+            for prop in src_props.values():
+                if prop.get('unexplained_error'):
+                    logging.warning("Unexplained error in: '%s'" % prop.get('run_dir'))
+
 
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching files from %s -> %s' % (src_dir, eval_dir))
