@@ -170,13 +170,17 @@ class Call(subprocess.Popen):
             # will be treated as an unexplained error.
             # Do NOT set search_timeout (or respective values) here,
             # because this will look like a regular timeout to lab.
-            if total_time >= self.time_limit:
+            # We allow some extra time and space to avoid race conditions
+            # of lab and the started task.
+            if total_time >= self.time_limit + 10:
                 self._set_error('error', 'unexplained-timeout')
                 try_term = True
             elif real_time >= self.wall_clock_time_limit:
                 self._set_error('error', 'unexplained-wall-clock-timeout')
                 try_term = True
-            elif total_vsize > self.mem_limit:
+            # The downward script and the portfolio script together take
+            # up around 18MB of memory. We use 50MB to be on the safe side.
+            elif total_vsize > self.mem_limit + 50:
                 self._set_error('error', 'unexplained-mem-limit-exceeded')
                 try_term = True
 
