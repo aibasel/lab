@@ -70,7 +70,6 @@ class Call(subprocess.Popen):
         """
         self.name = name
         self.time_limit = time_limit
-        self.hard_time_limit = time_limit * 1.1
         self.wall_clock_time_limit = time_limit * 1.5
         self.mem_limit = mem_limit
 
@@ -90,7 +89,7 @@ class Call(subprocess.Popen):
 
         def prepare_call():
             os.setpgrp()
-            set_limit(resource.RLIMIT_CPU, self.time_limit, self.hard_time_limit)
+            set_limit(resource.RLIMIT_CPU, self.time_limit, self.time_limit + 5)
             # Memory in Bytes
             set_limit(resource.RLIMIT_AS, self.mem_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
