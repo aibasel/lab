@@ -50,7 +50,7 @@ def create_publish_and_mail_step(exp, *reports):
             public = 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user_name, report_name)
             shutil.copy2(report, local)
             # Set permission to -rw-r--r--
-            os.chmod(local, stat.S_RUSR | stat.S_WUSR | stat.S_RGRP | stat.S_ROTH)
+            os.chmod(local, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
             print 'Copied report to file://%s' % local
             print '-> %s' % public
             public_reports.append(public)
