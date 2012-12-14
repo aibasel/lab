@@ -113,6 +113,17 @@ class PlanningReport(Report):
         Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
 
+    def get_text(self):
+        markup = Report.get_text(self)
+        unxeplained_errors = 0
+        for run in self.runs.values():
+            if run.get('unexplained_error'):
+                logging.warning('Unexplained error in: \'%s\'' % run.get('run_dir'))
+                unxeplained_errors += 1
+        if unxeplained_errors:
+            logging.warning('There were %s runs with unexplained errors.' % unxeplained_errors)
+        return markup
+
     def _prepare_attribute(self, attr):
         if isinstance(attr, Attribute):
             return attr

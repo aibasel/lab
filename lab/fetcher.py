@@ -65,9 +65,6 @@ class Fetcher(object):
         # Abort if an id cannot be read.
         if not run_id:
             logging.critical('id is not set in %s.' % prop_file)
-        if props.get('unexplained_error'):
-            logging.warning("Unexplained error in: '%s'" % props.get('run_dir'))
-
 
         if copy_all:
             dest_dir = os.path.join(eval_dir, *run_id)
@@ -145,6 +142,7 @@ class Fetcher(object):
         run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
         total_dirs = len(run_dirs)
         logging.info('Fetching properties from %d run directories' % total_dirs)
+        unxeplained_errors = 0
         for index, run_dir in enumerate(run_dirs, start=1):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
@@ -153,8 +151,13 @@ class Fetcher(object):
 
             if write_combined_props and run_id:
                 combined_props['-'.join(run_id)] = props
+            if props.get('unexplained_error'):
+                logging.warning('Unexplained error in: \'%s\'' % props.get('run_dir'))
+                unxeplained_errors += 1
 
         logging.info('Fetching finished')
+        if unxeplained_errors:
+            logging.warning('There were %s runs with unexplained errors.' % unxeplained_errors)
         tools.makedirs(eval_dir)
         if write_combined_props:
             combined_props.write()

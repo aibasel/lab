@@ -109,9 +109,9 @@ class Call(subprocess.Popen):
     def _log(self, msg):
         print "%s: %s" % (self.name, msg)
 
-    def _set_property(self, prop, value):
-        self._log("%s = %s" % (prop, value))
-        set_property("%s_%s" % (self.name, prop), value)
+    def _set_error(self, value):
+        self._log('error = %s' % value)
+        set_property('error', value)
 
     def log(self, total_time, total_vsize):
         wall_clock_time = time.time() - self.wall_clock_start_time
@@ -153,8 +153,6 @@ class Call(subprocess.Popen):
             pid, status = os.waitpid(self.pid, os.WNOHANG)
             if (pid, status) != (0, 0):
                 self._handle_exitstatus(status)
-                if self.returncode == 128 + signal.SIGXCPU:
-                    self._set_property('timeout', 1)
                 break
 
             total_time = group.total_time()
@@ -166,14 +164,20 @@ class Call(subprocess.Popen):
 
             try_term = False
             # Log why program was terminated.
+            # The following checks should never be true. Instead, the 
+            # resource limit should have stopped the task. If we ever
+            # reach a positive check here, this is a serious error, which
+            # will be treated as an unexplained error.
+            # Do NOT set search_timeout (or respective values) here, 
+            # because this will look like a regular timeout to lab.
             if total_time >= self.time_limit:
-                self._set_property('timeout', 1)
+                self._set_error('error', 'unexplained-timeout')
                 try_term = True
             elif real_time >= self.wall_clock_time_limit:
-                self._set_property('wall_clock_timeout', 1)
+                self._set_error('error', 'unexplained-wall-clock-timeout')
                 try_term = True
             elif total_vsize > self.mem_limit:
-                self._set_property('mem_limit_exceeded', 1)
+                self._set_error('error', 'unexplained-mem-limit-exceeded')
                 try_term = True
 
             try_kill = (total_time >= self.time_limit + self.kill_delay or
