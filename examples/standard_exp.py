@@ -3,6 +3,7 @@
 import os
 import platform
 import shutil
+import stat
 from subprocess import call
 import sys
 
@@ -48,6 +49,8 @@ def create_publish_and_mail_step(exp, *reports):
             local = os.path.join(user_home, '.public_html/', report_name)
             public = 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user_name, report_name)
             shutil.copy2(report, local)
+            # Set permission to -rw-r--r--
+            os.chmod(local, stat.S_RUSR | stat.S_WUSR | stat.S_RGRP | stat.S_ROTH)
             print 'Copied report to file://%s' % local
             print '-> %s' % public
             public_reports.append(public)
