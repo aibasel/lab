@@ -65,6 +65,9 @@ class Fetcher(object):
         # Abort if an id cannot be read.
         if not run_id:
             logging.critical('id is not set in %s.' % prop_file)
+        if prop.get('unexplained_error'):
+            logging.warning("Unexplained error in: '%s'" % props.get('run_dir'))
+
 
         if copy_all:
             dest_dir = os.path.join(eval_dir, *run_id)

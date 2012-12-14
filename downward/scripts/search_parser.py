@@ -29,7 +29,6 @@ from __future__ import division
 
 import re
 import math
-import logging
 from collections import defaultdict
 
 # The lab directory is added automatically in the Experiment constructor
@@ -277,7 +276,7 @@ def get_error(content, props):
         if props.get(attribute) is None:
             props[attribute] = 0
 
-    explained = props.get('coverage')
+    explained = bool(props.get('coverage'))
     for error in ['unsolvable', 'search_mem_limit_exceeded',
                   'search_timeout', 'search_wall_clock_timeout']:
         explained |= bool(props.get(error, False))
@@ -286,7 +285,6 @@ def get_error(content, props):
     else:
         props['unexplained_error'] = 1
         props['coverage'] = 0
-        logging.warning("Unexplained error in: '%s'" % props['run_dir'])
 
     # Check that all errors that occured are handled in exactly one of the categories.
     assert (props['search_error'] == 0 or

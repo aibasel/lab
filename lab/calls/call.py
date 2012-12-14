@@ -70,7 +70,7 @@ class Call(subprocess.Popen):
         """
         self.name = name
         self.time_limit = time_limit
-        self.hard_time_limit = time_limit * 1.25
+        self.hard_time_limit = time_limit * 1.1
         self.wall_clock_time_limit = time_limit * 1.5
         self.mem_limit = mem_limit
 
