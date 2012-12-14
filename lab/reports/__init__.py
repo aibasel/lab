@@ -119,6 +119,14 @@ class Attribute(str):
           attribute over multiple runs (e.g. for ``coverage`` this is
           :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`).
 
+        The ``downward`` package automatically uses appropriate settings for
+        most attributes.
+
+            avg_h = Attribute('average_h', min_wins=False)
+            abstraction_done = Attribute('abstraction_done', absolute=True)
+
+            Report(attributes=[avg_g, abstraction_done, 'coverage', 'expansions'])
+
         """
         self.absolute = absolute
         self.min_wins = min_wins
