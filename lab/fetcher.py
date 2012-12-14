@@ -127,7 +127,6 @@ class Fetcher(object):
                 if prop.get('unexplained_error'):
                     logging.warning("Unexplained error in: '%s'" % prop.get('run_dir'))
 
-
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching files from %s -> %s' % (src_dir, eval_dir))
         logging.info('Fetching from evaluation dir: %s' % fetch_from_eval_dir)
@@ -157,7 +156,8 @@ class Fetcher(object):
 
         logging.info('Fetching finished')
         if unxeplained_errors:
-            logging.warning('There were %s runs with unexplained errors.' % unxeplained_errors)
+            logging.warning('There were %s runs with unexplained errors.'
+                            % unxeplained_errors)
         tools.makedirs(eval_dir)
         if write_combined_props:
             combined_props.write()

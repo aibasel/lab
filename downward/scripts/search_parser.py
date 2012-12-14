@@ -237,7 +237,7 @@ def get_error(content, props):
         props['search_error'] = 1
 
     # If coverage is 0, try to explain this
-    if props.get('coverage') = 0:
+    if props.get('coverage') == 0:
         # First see if we already know the type of error.
         if props.get('unsolvable', None) == 1:
             props['error'] = 'unsolvable'
@@ -256,8 +256,8 @@ def get_error(content, props):
             props['search_timeout'] = 1
         # Maybe the run was stopped by lab
         elif props.get('error') in ['unexplained-timeout',
-                                     'unexplained-wall-clock-timeout',
-                                     'unexplained-mem-limit-exceeded']:
+                                    'unexplained-wall-clock-timeout',
+                                    'unexplained-mem-limit-exceeded']:
             # Error reason is already set by lab.
             pass
         # If the run was killed with SIGKILL (return code: 128 + 9 (SIGKILL) = 137),
@@ -288,7 +288,8 @@ def get_error(content, props):
             props[attribute] = 0
 
     props['unexplained_error'] = 1
-    for reason in ['coverage', 'unsolvable', 'search_mem_limit_exceeded', 'search_timeout']:
+    for reason in ['coverage', 'unsolvable', 'search_mem_limit_exceeded',
+                   'search_timeout']:
         if props.get(reason, False):
             props['unexplained_error'] = 0
 

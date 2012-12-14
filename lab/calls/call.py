@@ -164,11 +164,11 @@ class Call(subprocess.Popen):
 
             try_term = False
             # Log why program was terminated.
-            # The following checks should never be true. Instead, the 
+            # The following checks should never be true. Instead, the
             # resource limit should have stopped the task. If we ever
             # reach a positive check here, this is a serious error, which
             # will be treated as an unexplained error.
-            # Do NOT set search_timeout (or respective values) here, 
+            # Do NOT set search_timeout (or respective values) here,
             # because this will look like a regular timeout to lab.
             if total_time >= self.time_limit:
                 self._set_error('error', 'unexplained-timeout')
