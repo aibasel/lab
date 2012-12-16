@@ -120,7 +120,7 @@ class Attribute(str):
           :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`).
 
         The ``downward`` package automatically uses appropriate settings for
-        most attributes.
+        most attributes. ::
 
             avg_h = Attribute('average_h', min_wins=False)
             abstraction_done = Attribute('abstraction_done', absolute=True)
