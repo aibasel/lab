@@ -7,7 +7,7 @@ def calculate_pi(rounds):
     s = 0
     i = 1
     for _ in xrange(rounds):
-        time.sleep(10**-4)
+        time.sleep(10**-3)
         s += 1./i - 1./(i+2)
         i += 4
     return 4 * s
