@@ -3,7 +3,7 @@
 # downward uses the lab package to conduct experiments with the
 # Fast Downward planning system.
 #
-# Copyright (C) 2012  Jendrik Seipp (jendrikseipp@web.de)
+# Copyright (C) 2012  Florian Pommerening (florian.pommerening@unibas.ch)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc
 from lab.steps import Step
 
 
-class EvaluateBranchExperiment(DownwardExperiment):
+class CompareRevisionsExperiment(DownwardExperiment):
     """
     Convenience class that runs test comparing the latest revision on a
     branch to the base revision the branch is based on.
     Both revisions are tested with all the most important configurations.
-    Reports are automaticaly added, that allow a before-after comparison.
+    Reports that allow a before-after comparison are automaticaly added.
     """
     def __init__(self, path, repo, opt_or_sat, branch, base_revision=None, 
                  use_core_configs=True, use_ipc_configs=True, use_extended_configs=False,

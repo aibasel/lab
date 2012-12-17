@@ -52,6 +52,11 @@ class AbsoluteReport(PlanningReport):
     def get_markup(self):
         sections = []
         toc_lines = []
+        warnings = self._get_warnings_table()
+        if warnings:
+            toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
+            sections.append(('unexplained-errors', warnings))
+
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
