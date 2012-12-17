@@ -76,8 +76,8 @@ class CompareRevisionsExperiment(DownwardExperiment):
         if base_revision is None:
             base_revision = greatest_common_ancestor(repo, branch, 'default')
         if not base_revision:
-            logging.critical("Base revision for branch '%s' could not be determined. " +
-                             "Please provide it manually." % branch)
+            logging.critical('Base revision for branch \'%s\' could not be determined. ' +
+                             'Please provide it manually.' % branch)
 
         combinations=[(Translator(repo, rev=r), Preprocessor(repo, rev=r), Planner(repo, rev=r))
                       for r in (branch, base_revision)]
@@ -90,7 +90,7 @@ class CompareRevisionsExperiment(DownwardExperiment):
         elif opt_or_sat == 'sat':
             self.add_suite(suite_satisficing_with_ipc11())
         else:
-            logging.critical("Select to test either 'opt' or 'sat' configurations")
+            logging.critical('Select to test either \'opt\' or \'sat\' configurations')
 
         # ------ configs -----------------------------------------------
 
@@ -133,7 +133,7 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
 def greatest_common_ancestor(repo, rev1, rev2):
     pipe = subprocess.Popen(
-        ["hg", "id", "--cwd", repo, "-r", "ancestor('%s', '%s')" % (rev1, rev2)],
+        ['hg', 'id', '--cwd', repo, '-r', 'ancestor(\'%s\', \'%s\')' % (rev1, rev2)],
         stdout=subprocess.PIPE
         )
     return pipe.stdout.read().strip()
