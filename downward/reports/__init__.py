@@ -113,6 +113,10 @@ class PlanningReport(Report):
         Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
 
+    def _get_numerical_attributes(self):
+        return [self._prepare_attribute(attr)
+                 for attr in Report._get_numerical_attributes(self)]
+
     def _prepare_attribute(self, attr):
         if isinstance(attr, Attribute):
             return attr
