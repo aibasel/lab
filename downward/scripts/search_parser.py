@@ -231,6 +231,29 @@ def check_min_values(content, props):
 
 
 def get_error(content, props):
+    """
+    If there was an error, its source will be stored in props['error'].
+    Possible values are
+      * none: No error, coverage = 1
+      * unsolvable: No error, planner reported that problem is unsolvable
+      * timeout: planner exceeded time limit (recognized by signal SIGXCPU)
+      * mem-limit-exceeded: planner exceeded memory limit (recognized by bad_alloc exception)
+
+    The following reasons should never occur. If they do, this is an indication that something
+    went completely wrong, either in the lab framework or on the executing computer.
+    Check the files run.log, run.err, driver.log and driver.err for further details.
+
+      * unexplained-timeout: lab stopped the planner due to a timeout.
+      * unexplained-wall-clock-timeout: lab stopped the planner due to a wall clock timeout.
+      * unexplained-mem-limit-exceeded: lab stopped the planner due to exceeded memory.
+      * unexplained-probably-timeout: The planner was stopped with return code 128+9 (SIGKILL).
+        The last logged entries for time and memory point to an unrecognized timeout.
+      * unexplained-probably-mem-limit-exceeded: The planner was stopped with return code 128+9 (SIGKILL).
+        The last logged entries for time and memory point to an unrecognized memory out.
+      * unexplained-sigkill: The planner was stopped with return code 128+9 (SIGKILL) before
+        reaching its time or memory limits or reaching both roughly at the same time.
+      * unexplained: The planner did not produce a plan but was not killed with SIGKILL.
+    """
     # If there is any error, do no count this task as solved.
     if props.get('error', 'none') != 'none' or props.get('search_error'):
         props['coverage'] = 0
