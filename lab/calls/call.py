@@ -179,8 +179,8 @@ class Call(subprocess.Popen):
                 self._set_error('error', 'unexplained-wall-clock-timeout')
                 try_term = True
             # The downward script and the portfolio script together take
-            # up around 18MB of memory. We use 50MB to be on the safe side.
-            elif total_vsize > self.mem_limit + 50:
+            # up around 58MB of memory. We use 128MB to be on the safe side.
+            elif total_vsize > self.mem_limit + 128:
                 self._set_error('error', 'unexplained-mem-limit-exceeded')
                 try_term = True
 
