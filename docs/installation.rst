@@ -8,7 +8,7 @@ lab + downward
 --------------
 ::
 
-    sudo apt-get install mercurial python2.7
+    sudo apt-get install mercurial python2.7 python-matplotlib
     mkdir ~/workshop
     cd ~/workshop
     hg clone https://bitbucket.org/jendrikseipp/lab
