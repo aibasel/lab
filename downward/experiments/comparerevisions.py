@@ -106,15 +106,15 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         # ------ reports -----------------------------------------------
 
-        self.add_step(Step('report-abs-all-d', 
-                           AbsoluteReport('domain'),
-                           exp.eval_dir,
-                           os.path.join(exp.eval_dir, 'report-abs-all-d.html')))
-
-        self.add_step(Step('report-abs-all-p', 
-                           AbsoluteReport('problem'),
-                           exp.eval_dir,
-                           os.path.join(exp.eval_dir, 'report-abs-all-p.html')))
+        compare_report = CompareRevisionsReport(
+                            revisions=[base_revision, branch],
+                            resolution='combined',
+                            # TODO add more scores
+                            attributes=['coverage', 'score_expansions', 'score_total_time'])
+        exp.add_step(Step('report-compare-scores',
+                          compare_report,
+                          exp.eval_dir,
+                          os.path.join(exp.eval_dir, 'report-compare-scores.html')))
 
         for nick in configs.keys():
             config_before = '%s-%s-%s-%s' % (base_revision, base_revision, base_revision, nick)
