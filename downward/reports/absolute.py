@@ -22,7 +22,7 @@ from collections import defaultdict
 import logging
 
 from lab import reports
-
+from lab.reports import TableRow
 from downward.reports import PlanningReport
 
 
@@ -64,7 +64,7 @@ class AbsoluteReport(PlanningReport):
         # Build a table containing summary functions of all other tables.
         # The actual section is added at poistion summary_index after creating
         # all other tables.
-        summary = reports.Table(title='Summary')
+        summary = self._get_empty_table(title='summary')
         toc_lines.append('- **[""Summary"" #summary]**')
 
         for attribute in self.attributes:
@@ -76,8 +76,10 @@ class AbsoluteReport(PlanningReport):
                     tables.append(('', domain_table))
                     for name, row in domain_table.get_summary_rows():
                         for column, value in row.items():
-                            summary.add_cell('**[""%s"" #%s]** - %s' % (attribute, attribute, name),
-                                             column, value)
+                            row = TableRow('**[""%s"" #%s]** - %s'
+                                           % (attribute, attribute, name),
+                                           min_wins=domain_table.min_wins)
+                            summary.add_cell(row, column, value)
                 else:
                     tables.append(('', 'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
@@ -206,9 +208,13 @@ class AbsoluteReport(PlanningReport):
             return self._get_domain_table(attribute, domain)
         return self._get_suite_table(attribute)
 
-    def _get_empty_table(self, attribute):
+    def _get_empty_table(self, attribute=None, title=None, columns=None):
         """Return an empty table."""
-        if self.attribute_is_numeric(attribute):
+        if title is None:
+            title = attribute
+        if columns is None:
+            columns = self._get_config_order()
+        if attribute is not None and self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
             min_wins = attribute.min_wins
             colored = self.colored and min_wins is not None
@@ -217,11 +223,10 @@ class AbsoluteReport(PlanningReport):
             min_wins = None
             colored = False
 
-        title = attribute
         if self.resolution == 'combined':
-            title = '[""%s"" #%s]' % (attribute, attribute)
+            title = '[""%s"" #%s]' % (title, title)
         table = reports.Table(title=title, min_wins=min_wins, colored=colored)
-        table.set_column_order(self._get_config_order())
+        table.set_column_order(columns)
         return table
 
     def _add_summary_functions(self, table, attribute):

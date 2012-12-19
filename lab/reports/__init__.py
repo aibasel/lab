@@ -363,6 +363,28 @@ class Report(object):
         if not self.props:
             logging.critical('All runs have been filtered -> Nothing to report.')
 
+class TableColumn(str):
+    """A string subclass for special columns in tables."""
+    def __new__(cls, name, **kwargs):
+        return str.__new__(cls, name)
+
+    def __init__(self, name, format_function=None):
+        self.format_function = format_function
+
+    def copy(self, name):
+        return TableColumn(name, format_function=self.format_function)
+
+class TableRow(str):
+    """A string subclass for special rows in tables."""
+    def __new__(cls, name, **kwargs):
+        return str.__new__(cls, name)
+
+    def __init__(self, name, min_wins=None):
+        self.min_wins = min_wins
+
+    def copy(self, name):
+        return TableColumn(name, min_wins=self.min_wins)
+
 
 class Table(collections.defaultdict):
     def __init__(self, title='', min_wins=None, colored=False):
@@ -511,34 +533,43 @@ class Table(collections.defaultdict):
             # values may e.g. contain the unhashable type list.
             only_one_value = False
 
-        real_values = [val for val in values if val is not None]
+        real_values = [val for (col, val) in zip(self.cols, values)
+                       if val is not None and not col.format_function]
         if real_values:
             min_value = min(real_values)
             max_value = max(real_values)
         else:
             min_value = max_value = 'undefined'
 
-        highlight = self.min_wins is not None
-        colors = tools.get_colors(values, self.min_wins) if self.colored else None
+        min_wins = self.min_wins
+        if isinstance(row_name, TableRow):
+            min_wins = row_name.min_wins
+        highlight = min_wins is not None
+        colors = tools.get_colors(real_values, min_wins) if self.colored else None
         parts = [row_name]
-        for col, value in enumerate(values):
-            if isinstance(value, float):
-                value_text = '%.2f' % value
-            elif isinstance(value, list):
-                # Avoid involuntary link markup due to the list brackets.
-                value_text = "''%s''" % value
+        color_index = 0
+        for column, value in zip(self.cols, values):
+            if column.format_function:
+                parts.append(column.format_function(value, real_values, min_wins))
             else:
-                value_text = str(value)
+                if isinstance(value, float):
+                    value_text = '%.2f' % value
+                elif isinstance(value, list):
+                    # Avoid involuntary link markup due to the list brackets.
+                    value_text = "''%s''" % value
+                else:
+                    value_text = str(value)
 
-            if self.colored:
-                color = tools.rgb_fractions_to_html_color(*colors[col])
-                value_text = '{%s|color:%s}' % (value_text, color)
-            elif highlight and only_one_value:
-                value_text = '{%s|color:Gray}' % value_text
-            elif highlight and (value == min_value and self.min_wins or
-                                value == max_value and not self.min_wins):
-                value_text = '**%s**' % value_text
-            parts.append(value_text)
+                if self.colored:
+                    color = tools.rgb_fractions_to_html_color(*colors[color_index])
+                    value_text = '{%s|color:%s}' % (value_text, color)
+                elif highlight and only_one_value:
+                    value_text = '{%s|color:Gray}' % value_text
+                elif highlight and (value == min_value and min_wins or
+                                    value == max_value and not min_wins):
+                    value_text = '**%s**' % value_text
+                parts.append(value_text)
+                color_index += 1
         return parts
 
     def _format_cell(self, col_index, value):
@@ -587,7 +618,8 @@ class Table(collections.defaultdict):
         return summary_rows
 
     def set_column_order(self, order):
-        self.column_order = order
+        self.column_order = [(c if isinstance(c, TableColumn) else TableColumn(c))
+                             for c in order]
         self._cols = None
 
     def __str__(self):
