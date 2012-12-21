@@ -7,6 +7,7 @@ code on a large set of benchmarks.
 .. toctree::
    :maxdepth: 1
 
+   installation
    lab.tutorial
    news
 
@@ -28,6 +29,7 @@ for the `Fast Downward planning system <http://www.fast-downward.org>`_.
 .. toctree::
    :maxdepth: 1
 
+   installation
    downward.tutorial
    downward.faq
    news

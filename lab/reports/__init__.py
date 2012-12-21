@@ -119,6 +119,14 @@ class Attribute(str):
           attribute over multiple runs (e.g. for ``coverage`` this is
           :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`).
 
+        The ``downward`` package automatically uses appropriate settings for
+        most attributes. ::
+
+            avg_h = Attribute('average_h', min_wins=False)
+            abstraction_done = Attribute('abstraction_done', absolute=True)
+
+            Report(attributes=[avg_g, abstraction_done, 'coverage', 'expansions'])
+
         """
         self.absolute = absolute
         self.min_wins = min_wins
@@ -329,12 +337,6 @@ class Report(object):
             file.write(content)
             logging.info('Wrote file://%s' % self.outfile)
 
-    def _scan_data(self):
-        attributes = set()
-        for run_id, run in self.props.items():
-            attributes |= set(run.keys())
-        self._all_attributes = self._get_type_map(attributes)
-
     def _get_type(self, attribute):
         for run_id, run in self.props.items():
             val = run.get(attribute)
@@ -345,7 +347,13 @@ class Report(object):
         return None
 
     def _get_type_map(self, attributes):
-        return dict(((attr, self._get_type(attr)) for attr in attributes))
+        return dict(((Attribute(attr), self._get_type(attr)) for attr in attributes))
+
+    def _scan_data(self):
+        attributes = set()
+        for run_id, run in self.props.items():
+            attributes |= set(run.keys())
+        self._all_attributes = self._get_type_map(attributes)
 
     def _load_data(self):
         props_file = os.path.join(self.eval_dir, 'properties')
