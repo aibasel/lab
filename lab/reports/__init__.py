@@ -597,26 +597,6 @@ class Table(collections.defaultdict):
         """
         self.summary_funcs.append((name, func))
 
-    def get_summary_rows(self):
-        """
-        Returns a list of (name, summary_row) tuples, where summary_row
-        is a dictionary mapping column names to values.
-        """
-        summary_rows = []
-        for name, func in self.summary_funcs:
-            summary_row = {}
-            for col, content in self.get_columns().items():
-                content = [val for val in content if val is not None]
-                if content:
-                    summary_row[col] = func(content)
-                else:
-                    summary_row[col] = None
-            row_name = '**%s**' % name
-            if self.num_values is not None:
-                row_name += ' (%d)' % self.num_values
-            summary_rows.append((row_name, summary_row))
-        return summary_rows
-
     def set_column_order(self, order):
         self.column_order = [(c if isinstance(c, TableColumn) else TableColumn(c))
                              for c in order]
@@ -628,10 +608,22 @@ class Table(collections.defaultdict):
         self.first_col_size = max(len(x) for x in self.rows + [self.title])
 
         table_rows = [self._format_row_values(row) for row in self.rows]
-        for row_name, summary_row in self.get_summary_rows():
+        for name, func in self.summary_funcs:
+            summary_row = {}
+            for col, content in self.get_columns().items():
+                content = [val for val in content if val is not None]
+                if content:
+                    summary_row[col] = func(content)
+                else:
+                    summary_row[col] = None
+            row_name = '**%s**' % name
+            if self.num_values is not None:
+                row_name += ' (%d)' % self.num_values
+                row_name += ' (%d)' % self.num_values
             table_rows.append(self._format_row_values(row_name, summary_row))
         table_rows = [self._get_row_markup(row) for row in table_rows]
         parts = [self._get_header_markup(), '\n'.join(table_rows)]
         if self.info:
             parts.append(' '.join(self.info))
         return '\n'.join(parts)
+

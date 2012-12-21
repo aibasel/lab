@@ -22,7 +22,7 @@ from collections import defaultdict
 import logging
 
 from lab import reports
-from lab.reports import TableRow
+
 from downward.reports import PlanningReport
 
 
@@ -52,30 +52,13 @@ class AbsoluteReport(PlanningReport):
     def get_markup(self):
         sections = []
         toc_lines = []
-
-        # Index of summary section (first section after 'warnings')
-        # TODO remember to increase when merging with branch warnings-table
-        summary_index = 0
-
-        # Build a table containing summary functions of all other tables.
-        # The actual section is added at poistion summary_index after creating
-        # all other tables.
-        summary = self._get_empty_table(title='summary')
-        toc_lines.append('- **[""Summary"" #summary]**')
-
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
             if self.resolution in ['domain', 'combined']:
                 if self.attribute_is_numeric(attribute):
-                    domain_table = self._get_table(attribute)
-                    tables.append(('', domain_table))
-                    for name, row in domain_table.get_summary_rows():
-                        for column, value in row.items():
-                            row = TableRow('**[""%s"" #%s]** - %s'
-                                           % (attribute, attribute, name),
-                                           min_wins=domain_table.min_wins)
-                            summary.add_cell(row, column, value)
+                    # TODO use tablerow in summary table here to prevent loss of information of min_wins
+                    tables.append(('', self._get_table(attribute)))
                 else:
                     tables.append(('', 'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
@@ -104,18 +87,13 @@ class AbsoluteReport(PlanningReport):
             toc_lines.append('  - ' + ' '.join(toc_line))
             sections.append((attribute, '\n'.join(parts)))
 
-        # Add summary before main content. This is done after creating the main content
-        # because the summary table is extracted from all other tables.
-        if self.resolution in ['domain', 'combined']:
-            sections.insert(summary_index, ('summary', summary))
-
         if self.resolution == 'domain':
             toc = '- ' + ' '.join('[""%s"" #%s]' % (attr, attr)
                                   for (attr, section) in sections)
         else:
             toc = '\n'.join(toc_lines)
 
-        content = '\n'.join('= %s =[%s]\n%s' % (attr, attr, section)
+        content = '\n'.join('= %s =[%s]\n\n%s' % (attr, attr, section)
                             for (attr, section) in sections)
         return '%s\n\n\n%s' % (toc, content)
 
@@ -183,10 +161,7 @@ class AbsoluteReport(PlanningReport):
             num_values_text[domain] = text
 
         for (domain, config), values in domain_config_values.items():
-            row_name = domain
-            if self.resolution == 'combined':
-                row_name = '[""%s"" #%s-%s]' % (domain, attribute, domain)
-            table.add_cell('%s (%s)' % (row_name, num_values_text[domain]), config,
+            table.add_cell('%s (%s)' % (domain, num_values_text[domain]), config,
                            func(values))
         table.num_values = num_probs
         return table
@@ -204,14 +179,9 @@ class AbsoluteReport(PlanningReport):
             return self._get_domain_table(attribute, domain)
         return self._get_suite_table(attribute)
 
-    def _get_empty_table(self, attribute=None, title=None, columns=None):
+    def _get_empty_table(self, attribute):
         """Return an empty table."""
-        if title is None:
-            assert attribute is not None
-            title = attribute
-        if columns is None:
-            columns = self._get_config_order()
-        if attribute is not None and self.attribute_is_numeric(attribute):
+        if self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
             min_wins = attribute.min_wins
             colored = self.colored and min_wins is not None
@@ -220,10 +190,8 @@ class AbsoluteReport(PlanningReport):
             min_wins = None
             colored = False
 
-        if self.resolution == 'combined':
-            title = '[""%s"" #%s]' % (title, title)
-        table = reports.Table(title=title, min_wins=min_wins, colored=colored)
-        table.set_column_order(columns)
+        table = reports.Table(title=attribute, min_wins=min_wins, colored=colored)
+        table.set_column_order(self._get_config_order())
         return table
 
     def _add_summary_functions(self, table, attribute):
