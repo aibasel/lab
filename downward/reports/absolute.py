@@ -54,8 +54,13 @@ class AbsoluteReport(PlanningReport):
         toc_lines = []
 
         # Index of summary section (first section after 'warnings')
-        # TODO remember to increase when merging with branch warnings-table
         summary_index = 0
+
+        warnings = self._get_warnings_table()
+        if warnings:
+            toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
+            sections.append(('unexplained-errors', warnings))
+            summary_index += 1
 
         # Build a table containing summary functions of all other tables.
         # The actual section is added at poistion summary_index after creating
