@@ -91,7 +91,7 @@ class AbsoluteReport(PlanningReport):
                     assert table
                     toc_line.append('[""%(domain)s"" #%(attribute)s-%(domain)s]' %
                                     locals())
-                    parts.append('== %(domain)s ==[%(attribute)s-%(domain)s]\n[""(back)"" #top]\n'
+                    parts.append('== %(domain)s ==[%(attribute)s-%(domain)s]\n'
                                  '%(table)s\n' % locals())
                 else:
                     if table:
@@ -115,7 +115,7 @@ class AbsoluteReport(PlanningReport):
         else:
             toc = '\n'.join(toc_lines)
 
-        content = '\n'.join('= %s =[%s]\n[""(back)"" #top]\n%s' % (attr, attr, section)
+        content = '\n'.join('= %s =[%s]\n%s' % (attr, attr, section)
                             for (attr, section) in sections)
         return '%s\n\n\n%s' % (toc, content)
 
