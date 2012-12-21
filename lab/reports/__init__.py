@@ -570,12 +570,12 @@ class Table(collections.defaultdict):
         self.column_order = order
         self._cols = None
 
-    def __str__(self):
-        """Return the txt2tags markup for this table."""
-        self.headers = self._get_headers()
-        self.first_col_size = max(len(x) for x in self.rows + [self.title])
-
-        table_rows = [self._format_row_values(row) for row in self.rows]
+    def get_summary_rows(self):
+        """
+        Returns a list of (name, summary_row) tuples, where summary_row
+        is a dictionary mapping column names to values.
+        """
+        summary_rows = []
         for name, func in self.summary_funcs:
             summary_row = {}
             for col, content in self.get_columns().items():
@@ -587,6 +587,16 @@ class Table(collections.defaultdict):
             row_name = '**%s**' % name
             if self.num_values is not None:
                 row_name += ' (%d)' % self.num_values
+            summary_rows.append((row_name, summary_row))
+        return summary_rows
+
+    def __str__(self):
+        """Return the txt2tags markup for this table."""
+        self.headers = self._get_headers()
+        self.first_col_size = max(len(x) for x in self.rows + [self.title])
+
+        table_rows = [self._format_row_values(row) for row in self.rows]
+        for row_name, summary_row in self.get_summary_rows():
             table_rows.append(self._format_row_values(row_name, summary_row))
         table_rows = [self._get_row_markup(row) for row in table_rows]
         parts = [self._get_header_markup(), '\n'.join(table_rows)]

@@ -52,12 +52,28 @@ class AbsoluteReport(PlanningReport):
     def get_markup(self):
         sections = []
         toc_lines = []
+
+        # Index of summary section (first section after 'warnings')
+        # TODO remember to increase when merging with branch warnings-table
+        summary_index = 0
+
+        # Build a table containing summary functions of all other tables.
+        # The actual section is added at poistion summary_index after creating
+        # all other tables.
+        summary = self._get_empty_table(title='summary')
+        toc_lines.append('- **[""Summary"" #summary]**')
+
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
             if self.resolution in ['domain', 'combined']:
                 if self.attribute_is_numeric(attribute):
-                    tables.append(('', self._get_table(attribute)))
+                    domain_table = self._get_table(attribute)
+                    tables.append(('', domain_table))
+                    for name, row in domain_table.get_summary_rows():
+                        row = '**[""%s"" #%s]** - %s' % (attribute, attribute, name)
+                        for column, value in row.items():
+                            summary.add_cell(row, column, value)
                 else:
                     tables.append(('', 'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
@@ -85,6 +101,11 @@ class AbsoluteReport(PlanningReport):
             toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
             toc_lines.append('  - ' + ' '.join(toc_line))
             sections.append((attribute, '\n'.join(parts)))
+
+        # Add summary before main content. This is done after creating the main content
+        # because the summary table is extracted from all other tables.
+        if self.resolution in ['domain', 'combined']:
+            sections.insert(summary_index, ('summary', summary))
 
         if self.resolution == 'domain':
             toc = '- ' + ' '.join('[""%s"" #%s]' % (attr, attr)
@@ -160,8 +181,12 @@ class AbsoluteReport(PlanningReport):
             num_values_text[domain] = text
 
         for (domain, config), values in domain_config_values.items():
-            table.add_cell('%s (%s)' % (domain, num_values_text[domain]), config,
+            row_name = domain
+            if self.resolution == 'combined':
+                row_name = '[""%s"" #%s-%s]' % (domain, attribute, domain)
+            table.add_cell('%s (%s)' % (row_name, num_values_text[domain]), config,
                            func(values))
+
         table.num_values = num_probs
         return table
 
@@ -178,9 +203,14 @@ class AbsoluteReport(PlanningReport):
             return self._get_domain_table(attribute, domain)
         return self._get_suite_table(attribute)
 
-    def _get_empty_table(self, attribute):
+    def _get_empty_table(self, attribute=None, title=None, columns=None):
         """Return an empty table."""
-        if self.attribute_is_numeric(attribute):
+        if title is None:
+            assert attribute is not None
+            title = attribute
+        if columns is None:
+            columns = self._get_config_order()
+        if attribute is not None and self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
             min_wins = attribute.min_wins
             colored = self.colored and min_wins is not None
@@ -189,8 +219,10 @@ class AbsoluteReport(PlanningReport):
             min_wins = None
             colored = False
 
-        table = reports.Table(title=attribute, min_wins=min_wins, colored=colored)
-        table.set_column_order(self._get_config_order())
+        if self.resolution == 'combined':
+            title = '[""%s"" #%s]' % (title, title)
+        table = reports.Table(title=title, min_wins=min_wins, colored=colored)
+        table.set_column_order(columns)
         return table
 
     def _add_summary_functions(self, table, attribute):
