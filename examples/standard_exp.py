@@ -3,6 +3,7 @@
 import os
 import platform
 import shutil
+import stat
 from subprocess import call
 import sys
 
@@ -16,6 +17,7 @@ from downward.reports.absolute import AbsoluteReport
 
 NODE = platform.node()
 REMOTE = NODE.startswith('gkigrid') or NODE in ['habakuk', 'turtur']
+SCP_LOGIN = 'seipp@turtur'
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
 REMOTE_EXPS = '/home/seipp/experiments' #'/users/seipp/experiments/'
@@ -48,6 +50,8 @@ def create_publish_and_mail_step(exp, *reports):
             local = os.path.join(user_home, '.public_html/', report_name)
             public = 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user_name, report_name)
             shutil.copy2(report, local)
+            # Set permission to -rw-r--r--
+            os.chmod(local, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
             print 'Copied report to file://%s' % local
             print '-> %s' % public
             public_reports.append(public)
@@ -110,11 +114,11 @@ class StandardDownwardExperiment(DownwardExperiment):
 
             # Copy the results to local directory
             self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
-                'seipp@habakuk:%s-eval' % remote_exppath, '%s-eval' % local_exppath]))
+                '%s:%s-eval' % (SCP_LOGIN, remote_exppath), '%s-eval' % local_exppath]))
 
             # Copy the zipped experiment directory to local directory
             self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
-                'seipp@habakuk:%s.tar.gz' % remote_exppath, '%s.tar.gz' % local_exppath]))
+                '%s:%s.tar.gz' % (SCP_LOGIN, remote_exppath), '%s.tar.gz' % local_exppath]))
 
         # Copy the results and send mail.
         self.add_step(create_publish_and_mail_step(self, abs_report_file))

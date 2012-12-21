@@ -15,7 +15,7 @@ REPO = os.path.join(WORKSHOP, 'fast-downward')
 exp = DownwardExperiment(EXPPATH, REPO)
 
 exp.add_suite('gripper:prob01.pddl')
-exp.add_config('ff', ["--search", "lazy(single(ff()))"])
+exp.add_config('ff', ['--search', 'lazy(single(ff()))'])
 
 exp.add_step(Step('report-abs-p', AbsoluteReport('problem'),
                   exp.eval_dir,
