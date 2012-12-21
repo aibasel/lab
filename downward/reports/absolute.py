@@ -211,6 +211,7 @@ class AbsoluteReport(PlanningReport):
     def _get_empty_table(self, attribute=None, title=None, columns=None):
         """Return an empty table."""
         if title is None:
+            assert attribute is not None
             title = attribute
         if columns is None:
             columns = self._get_config_order()
