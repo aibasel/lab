@@ -245,7 +245,7 @@ class Report(object):
         self._scan_data()
 
         # Turn string attributes into instances of Attribute.
-        self.attributes = [attr if isinstance(attr, Attribute) else Attribute(attr)
+        self.attributes = [self._prepare_attribute(attr)
                            for attr in self.attributes]
 
         # Expand glob characters.
@@ -258,6 +258,11 @@ class Report(object):
 
         self.attributes.sort()
         self.write()
+
+    def _prepare_attribute(self, attr):
+        if isinstance(attr, Attribute):
+            return attr
+        return Attribute(attr)
 
     def _glob_attributes(self, attributes):
         expanded_attrs = []
@@ -352,7 +357,7 @@ class Report(object):
         return None
 
     def _get_type_map(self, attributes):
-        return dict(((Attribute(attr), self._get_type(attr)) for attr in attributes))
+        return dict(((self._prepare_attribute(attr), self._get_type(attr)) for attr in attributes))
 
     def _scan_data(self):
         attributes = set()
