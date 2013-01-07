@@ -105,7 +105,7 @@ class Attribute(str):
     def __new__(cls, name, **kwargs):
         return str.__new__(cls, name)
 
-    def __init__(self, name, absolute=False, min_wins=True, function=sum):
+    def __init__(self, name, absolute=False, min_wins=True, functions=sum):
         """Use this class if your **own** attribute needs a non-default value for:
 
         * *absolute*: If False, only include tasks for which all task runs have
@@ -115,14 +115,17 @@ class Attribute(str):
         * *min_wins*: Set to True if a smaller value for this attribute is
           better and to False otherwise (e.g. for ``coverage`` *min_wins* is
           False, whereas it is True for ``expansions``).
-        * *function*: Set the function that aggregates the values for this
-          attribute over multiple runs (e.g. for ``coverage`` this is
-          :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`).
+        * *functions*: Set the function or functions that are used to group values
+          of multiple runs for this attribute. The first entry is used to aggregate
+          values for domain-wise reports (e.g. for ``coverage`` this is
+          :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`). This can be a
+          single function or a list of functions and defaults to :py:func:`sum`.
 
         The ``downward`` package automatically uses appropriate settings for
         most attributes. ::
 
-            avg_h = Attribute('average_h', min_wins=False)
+            avg_h = Attribute('average_h', min_wins=False,
+                              functions=[sum, minimum, maximum])
             abstraction_done = Attribute('abstraction_done', absolute=True)
 
             Report(attributes=[avg_g, abstraction_done, 'coverage', 'expansions'])
@@ -130,11 +133,13 @@ class Attribute(str):
         """
         self.absolute = absolute
         self.min_wins = min_wins
-        self.function = function
+        if not isinstance(functions, collections.Iterable):
+            functions = [functions]
+        self.functions = functions
 
     def copy(self, name):
         return Attribute(name, absolute=self.absolute, min_wins=self.min_wins,
-                         function=self.function)
+                         functions=self.functions)
 
 
 class Report(object):
