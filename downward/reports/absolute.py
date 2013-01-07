@@ -76,9 +76,9 @@ class AbsoluteReport(PlanningReport):
                     domain_table = self._get_table(attribute)
                     tables.append(('', domain_table))
                     for name, row in domain_table.get_summary_rows():
-                        row = '**[""%s"" #%s]** - %s' % (attribute, attribute, name)
+                        row_name = '**[""%s"" #%s]** - %s' % (attribute, attribute, name)
                         for column, value in row.items():
-                            summary.add_cell(row, column, value)
+                            summary.add_cell(row_name, column, value)
                 else:
                     tables.append(('', 'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
