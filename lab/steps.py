@@ -89,8 +89,10 @@ class Step(object):
 
         def publish_reports():
             for path in report_files:
+                pub_html_dir = os.path.join(os.path.expanduser('~'), '.public_html/')
+                tools.makedirs(pub_html_dir)
                 name = os.path.basename(path)
-                dest = os.path.join(os.path.expanduser('~'), '.public_html/', name)
+                dest = os.path.join(pub_html_dir, name)
                 shutil.copy2(path, dest)
                 print 'Copied report to file://%s' % dest
                 print '-> http://www.informatik.uni-freiburg.de/~%s/%s' % (user, name)
