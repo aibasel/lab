@@ -101,7 +101,7 @@ class PlanningReport(Report):
         self.derived_properties = derived_properties or []
 
         # Set non-default options for some attributes.
-        attributes = kwargs.get('attributes', [])
+        attributes = kwargs.get('attributes') or []
         if isinstance(attributes, basestring):
             attributes = [attributes]
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
