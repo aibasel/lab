@@ -214,7 +214,16 @@ class DownwardExperiment(Experiment):
         be changed during the experiment.
 
         If *limits* is given, it must be a dictionary and it will be used to
-        overwrite the default limits (see source for format).
+        overwrite the default limits. ::
+
+            default_limits = {
+                'translate_time': 7200,
+                'translate_memory': 8192,
+                'preprocess_time': 7200,
+                'preprocess_memory': 8192,
+                'search_time': 1800,
+                'search_memory': 2048,
+            }
 
         Example: ::
 
@@ -225,7 +234,8 @@ class DownwardExperiment(Experiment):
                        Planner(repo, rev='tip', dest='myplanner-version')]
             exp = DownwardExperiment('/tmp/path', repo, environment=env,
                                      combinations=combos, compact=False,
-                                     limits={'search_time': 30})
+                                     limits={'search_time': 30,
+                                             'search_memory': 1024})
 
         """
         Experiment.__init__(self, path, environment)
