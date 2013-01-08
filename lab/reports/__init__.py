@@ -124,6 +124,7 @@ class Attribute(str):
         The ``downward`` package automatically uses appropriate settings for
         most attributes. ::
 
+            from lab.reports import minimum, maximum
             avg_h = Attribute('average_h', min_wins=False,
                               functions=[sum, minimum, maximum])
             abstraction_done = Attribute('abstraction_done', absolute=True)
