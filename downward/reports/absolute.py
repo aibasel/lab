@@ -122,11 +122,14 @@ class AbsoluteReport(PlanningReport):
                             for (attr, section) in sections)
         return '%s\n\n\n%s' % (toc, content)
 
-    def _get_group_func(self, attribute):
-        """Decide on a group function for this attribute."""
+    def _get_group_functions(self, attribute):
+        """Decide on a list of group functions for this attribute."""
         names = {'avg': 'average', 'gm': 'geometric mean'}
-        funcname = attribute.function.__name__
-        return (names.get(funcname) or funcname, attribute.function)
+        named_functions = []
+        for f in attribute.functions:
+            funcname = names.get(f.__name__, f.__name__)
+            named_functions.append((funcname, f))
+        return named_functions
 
     def _add_table_info(self, attribute, func_name, table):
         """
@@ -150,7 +153,8 @@ class AbsoluteReport(PlanningReport):
         assert self.attribute_is_numeric(attribute), attribute
         table = self._get_empty_table(attribute)
         self._add_summary_functions(table, attribute)
-        func_name, func = self._get_group_func(attribute)
+        # The first group function is used for aggregation.
+        func_name, func = self._get_group_functions(attribute)[0]
         num_probs = 0
         self._add_table_info(attribute, func_name, table)
         domain_config_values = defaultdict(list)
@@ -231,7 +235,5 @@ class AbsoluteReport(PlanningReport):
         return table
 
     def _add_summary_functions(self, table, attribute):
-        funcname, func = self._get_group_func(attribute)
-        table.add_summary_function(funcname.capitalize(), func)
-        if 'score' in attribute:
-            table.add_summary_function('Sum', sum)
+        for funcname, func in self._get_group_functions(attribute):
+            table.add_summary_function(funcname.capitalize(), func)

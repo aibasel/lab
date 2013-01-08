@@ -57,12 +57,12 @@ class PlanningReport(Report):
         Attribute('initial_h_value', min_wins=False),
         Attribute('quality', absolute=True, min_wins=False),
         Attribute('unsolvable', absolute=True, min_wins=False),
-        Attribute('search_time', function=reports.gm),
-        Attribute('total_time', function=reports.gm),
-        Attribute('evaluations', function=reports.gm),
-        Attribute('expansions', function=reports.gm),
-        Attribute('generated', function=reports.gm),
-        Attribute('score_*', min_wins=False, function=reports.avg),
+        Attribute('search_time', functions=reports.gm),
+        Attribute('total_time', functions=reports.gm),
+        Attribute('evaluations', functions=reports.gm),
+        Attribute('expansions', functions=reports.gm),
+        Attribute('generated', functions=reports.gm),
+        Attribute('score_*', min_wins=False, functions=[reports.avg, sum]),
         Attribute('*_error', absolute=True),
     ])
 
@@ -126,14 +126,13 @@ class PlanningReport(Report):
         return markup
 
     def _prepare_attribute(self, attr):
-        if isinstance(attr, Attribute):
-            return attr
-        elif attr in self.ATTRIBUTES:
-            return self.ATTRIBUTES[attr]
-        for pattern in self.ATTRIBUTES.values():
-            if fnmatch.fnmatch(attr, pattern):
-                return pattern.copy(attr)
-        return Attribute(attr)
+        if not isinstance(attr, Attribute):
+            if attr in self.ATTRIBUTES:
+                return self.ATTRIBUTES[attr]
+            for pattern in self.ATTRIBUTES.values():
+                if fnmatch.fnmatch(attr, pattern):
+                    return pattern.copy(attr)
+        return Report._prepare_attribute(self, attr)
 
     def _scan_data(self):
         self._scan_planning_data()
