@@ -358,7 +358,8 @@ class Report(object):
         return None
 
     def _get_type_map(self, attributes):
-        return dict(((self._prepare_attribute(attr), self._get_type(attr)) for attr in attributes))
+        return dict((self._prepare_attribute(attr), self._get_type(attr))
+                    for attr in attributes)
 
     def _scan_data(self):
         attributes = set()
