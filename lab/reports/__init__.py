@@ -99,6 +99,9 @@ def stddev(values):
     mu = avg(values)
     return math.sqrt((sum((v - mu) ** 2 for v in values) / n))
 
+def function_name(f):
+    names = {'avg': 'average', 'gm': 'geometric mean'}
+    return names.get(f.__name__, f.__name__)
 
 class Attribute(str):
     """A string subclass for attributes in reports."""
@@ -383,6 +386,57 @@ class Report(object):
             logging.critical('All runs have been filtered -> Nothing to report.')
 
 
+class AutoCalculatedColumn:
+    """Columns in tables which calculate their value automatically from the table data.
+    Such calculated values are not stored within the table and are not considered part
+    of the table data."""
+    def __init__(self, name, function, format=None, summary_functions=None):
+        """Use this class if your table should contain a column whose values
+        are calculated from the table data automatically.
+
+        * *name*: Set the name shown in the column header.
+        * *function*: Set the function that is used to calculate the value
+          for each cell. This function should take the row name and table data
+          as parameters.
+        * *format*: If this is not None, all values are passed through this
+        function along with their row and column name. The return value is used
+        as the formated data value. Without a format function no value is formated.
+        * *summary_functions*: Set the function(s) that aggregates the values
+          for this column over multiple runs. This will be displayed in a summary row.
+        """
+        self.name = name
+        self.function = function
+        self.format = format
+        if summary_functions is None:
+            self.summary_functions = []
+        elif not isinstance(summary_functions, collections.Iterable):
+            self.summary_functions = [summary_functions]
+        else:
+            self.summary_functions = summary_functions
+        self.values = {}
+
+    def get_formated_value(self, row_name, table_data):
+        """Calculate and format the value for one row in this column."""
+        if row_name in self.values:
+            value = self.values[row_name]
+        else:
+            value = self.function(row_name, table_data)
+            self.values[row_name] = value
+        if self.format:
+            value = self.format(value, row_name)
+        return value
+    
+    def get_summary_values(self):
+        """Iterator that yields tuples of summary function name and the
+        calculated value for all values calculated in this column so far."""
+        values = self.values.values()
+        for f in self.summary_functions:
+            yield function_name(f), f(values)
+
+    def __str__(self):
+        return self.name
+
+
 class Table(collections.defaultdict):
     def __init__(self, title='', min_wins=None, colored=False):
         """
@@ -440,6 +494,11 @@ class Table(collections.defaultdict):
         self.num_values = None
 
         self._cols = None
+        # Automatically calculated columns are not considered part of the
+        # data. They bring their own methods to calculate and format values.
+        # self.auto_calculated_cols maps names of data columns to a list of
+        # AutoCalculatedColumns that should follow them.
+        self.auto_calculated_cols = {}
 
         # For printing.
         self.headers = None
@@ -468,6 +527,16 @@ class Table(collections.defaultdict):
             self[row_name][col_name] = value
         self._cols = None
 
+    def add_auto_calculated_column(self, col, after=None):
+        """
+        Add an automatically calculated column after some data column.
+
+        *col* must be of type AutoCalculatedColumn.
+        """
+        if after not in self.auto_calculated_cols:
+            self.auto_calculated_cols[after] = []
+        self.auto_calculated_cols[after].append(col)
+
     @property
     def rows(self):
         """Return all row names in sorted order."""
@@ -490,6 +559,21 @@ class Table(collections.defaultdict):
             col_names -= set(self._cols)
         self._cols += tools.natural_sort(col_names)
         return self._cols
+
+    @property
+    def all_cols(self):
+        """Return all column names (including the automatically calculated
+        columns) in sorted order."""
+        all_cols = []
+        for col in self.cols:
+            all_cols.append(col)
+            # Add all automatically calculated columns that should appear
+            # after this one.
+            all_cols.extend(self.auto_calculated_cols.get(col, []))
+        unused_keys = set(self.auto_calculated_cols.keys()) - set(self.cols)
+        for key in unused_keys:
+            all_cols.extend(self.auto_calculated_cols[key])
+        return all_cols
 
     def get_row(self, row):
         """Return a list of the values in *row*."""
@@ -514,7 +598,8 @@ class Table(collections.defaultdict):
         return col_name
 
     def _get_headers(self):
-        return [self.title] + [self._format_header(col) for col in self.cols]
+        return [self.title] + [self._format_header(str(col))
+                                for col in self.all_cols]
 
     def _format_row_values(self, row_name, row=None):
         """Return a list of formatted values."""
@@ -609,14 +694,53 @@ class Table(collections.defaultdict):
             summary_rows.append((row_name, summary_row))
         return summary_rows
 
+    def add_auto_calculated_values(self, formated_row, row_name=None):
+        """Add cells for autocalculated columns into the row. If a row_name
+        is given, the cells values are calculated by the AutoCalculatedColumn,
+        otherwise an empty cell is added for each column."""
+        # The first entry is the row title.
+        modified_row = [formated_row.pop(0)]
+        for col in self.all_cols:
+            if isinstance(col, AutoCalculatedColumn):
+                if row_name is None:
+                    modified_row.append('')
+                else:
+                    modified_row.append(col.get_formated_value(row_name, dict(self)))
+            else:
+                modified_row.append(formated_row.pop(0))
+        return modified_row
+    
+    def get_calculated_columns_summary_rows(self):
+        """Combine the summary rows of all automatically calculated columns,
+        i.e. if multiple columns use `sum` as their summary row, only use one
+        row containing all values."""
+        summary_values = defaultdict(dict)
+        for cols in self.auto_calculated_cols.values():
+            for col in cols:
+                for row, value in col.get_summary_values():
+                    summary_values[row][col] = value
+        for row_name, row_summary_values in summary_values.items():
+            row_name = '**%s**' % row_name
+            yield [row_name] + [row_summary_values.get(col, '')
+                                 for col in self.all_cols]
+
     def __str__(self):
         """Return the txt2tags markup for this table."""
         self.headers = self._get_headers()
         self.first_col_size = max(len(x) for x in self.rows + [self.title])
 
-        table_rows = [self._format_row_values(row) for row in self.rows]
+        table_rows = []
+        for row_name in self.rows:
+            formated_row = self._format_row_values(row_name)
+            formated_row = self.add_auto_calculated_values(formated_row, row_name)
+            table_rows.append(formated_row)
         for row_name, summary_row in self.get_summary_rows():
-            table_rows.append(self._format_row_values(row_name, summary_row))
+            formated_row = self._format_row_values(row_name, summary_row)
+            # Add empty cells for autocalculated values
+            formated_row = self.add_auto_calculated_values(formated_row)
+            table_rows.append(formated_row)
+        for formated_summary_row in self.get_calculated_columns_summary_rows():
+            table_rows.append(formated_summary_row)
         table_rows = [self._get_row_markup(row) for row in table_rows]
         parts = [self._get_header_markup(), '\n'.join(table_rows)]
         if self.info:

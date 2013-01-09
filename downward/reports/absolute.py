@@ -124,12 +124,7 @@ class AbsoluteReport(PlanningReport):
 
     def _get_group_functions(self, attribute):
         """Decide on a list of group functions for this attribute."""
-        names = {'avg': 'average', 'gm': 'geometric mean'}
-        named_functions = []
-        for f in attribute.functions:
-            funcname = names.get(f.__name__, f.__name__)
-            named_functions.append((funcname, f))
-        return named_functions
+        return [(reports.function_name(f), f) for f in attribute.functions]
 
     def _add_table_info(self, attribute, func_name, table):
         """
