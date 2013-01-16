@@ -75,7 +75,7 @@ class AbsoluteReport(PlanningReport):
                 if self.attribute_is_numeric(attribute):
                     domain_table = self._get_table(attribute)
                     tables.append(('', domain_table))
-                    for name, row in domain_table.get_summary_rows():
+                    for name, row in domain_table.get_summary_rows().items():
                         row_name = '**[""%s"" #%s]** - %s' % (attribute, attribute, name)
                         for column, value in row.items():
                             summary.add_cell(row_name, column, value)
@@ -136,8 +136,8 @@ class AbsoluteReport(PlanningReport):
             table.info.append('Each table entry gives the %s of "%s" for that '
                               'domain.' % (func_name, attribute))
 
-        summary_names = [name.lower() for name, sum_func in table.summary_funcs]
-        if len(summary_names) == 1 and summary_names[0] != 'sum':
+        summary_names = [name.lower() for name, sum_func in table.summary_funcs.items()]
+        if len(summary_names) == 1:
             table.info.append('The last row reports the %s across all domains.' %
                               summary_names[0])
         elif len(summary_names) > 1:
