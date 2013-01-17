@@ -55,17 +55,19 @@ class AbsoluteReport(PlanningReport):
 
         # Index of summary section (first section after 'warnings')
         summary_index = 0
-
-        warnings = self._get_warnings_table()
-        if warnings:
-            toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
-            sections.append(('unexplained-errors', warnings))
-            summary_index += 1
+# HACK
+#        warnings = self._get_warnings_table()
+#        if warnings:
+#            toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
+#            sections.append(('unexplained-errors', warnings))
+#            summary_index += 1
 
         # Build a table containing summary functions of all other tables.
         # The actual section is added at poistion summary_index after creating
         # all other tables.
         summary = self._get_empty_table(title='summary')
+# HACK
+        summary.dynamic_data_modules.append(reports.DiffColumnsModule(['astar_blind'], ['473abcdaa340', '9972c711f3c8']))
         toc_lines.append('- **[""Summary"" #summary]**')
 
         for attribute in self.attributes:
@@ -75,10 +77,7 @@ class AbsoluteReport(PlanningReport):
                 if self.attribute_is_numeric(attribute):
                     domain_table = self._get_table(attribute)
                     tables.append(('', domain_table))
-                    for name, row in domain_table.get_summary_rows().items():
-                        row_name = '**[""%s"" #%s]** - %s' % (attribute, attribute, name)
-                        for column, value in row.items():
-                            summary.add_cell(row_name, column, value)
+                    reports.extract_summary_lines(domain_table, summary, link='#' + attribute)
                 else:
                     tables.append(('', 'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
@@ -176,20 +175,20 @@ class AbsoluteReport(PlanningReport):
             for config in self.configs:
                 values = domain_config_values.get((domain, config), [])
                 num_values_lists[domain].append(str(len(values)))
-        num_values_text = {}
         for domain, num_values_list in num_values_lists.items():
             if len(set(num_values_list)) == 1:
-                text = num_values_list[0]
+                count = num_values_list[0]
             else:
-                text = ','.join(num_values_list)
-            num_values_text[domain] = text
+                count = ','.join(num_values_list)
+            link = None
+            if self.resolution == 'combined':
+                link = '#%s-%s' % (attribute, domain)
+            formater = reports.CellFormater(link=link, count=count) 
+            table.add_cell_formater(domain, table.row_name_column, formater)
+
 
         for (domain, config), values in domain_config_values.items():
-            row_name = domain
-            if self.resolution == 'combined':
-                row_name = '[""%s"" #%s-%s]' % (domain, attribute, domain)
-            table.add_cell('%s (%s)' % (row_name, num_values_text[domain]), config,
-                           func(values))
+            table.add_cell(domain, config, func(values))
 
         table.num_values = num_probs
         return table
@@ -222,11 +221,12 @@ class AbsoluteReport(PlanningReport):
             # Do not highlight anything.
             min_wins = None
             colored = False
-
-        if self.resolution == 'combined':
-            title = '[""%s"" #%s]' % (title, title)
         table = reports.Table(title=title, min_wins=min_wins, colored=colored)
         table.set_column_order(columns)
+        if self.resolution == 'combined':
+            link = '#%s' % title
+            formater = reports.CellFormater(link=link)
+            table.add_cell_formater(table.header_row, table.row_name_column, formater)
         return table
 
     def _add_summary_functions(self, table, attribute):

@@ -386,55 +386,22 @@ class Report(object):
             logging.critical('All runs have been filtered -> Nothing to report.')
 
 
-class AutoCalculatedColumn:
-    """Columns in tables which calculate their value automatically from the table data.
-    Such calculated values are not stored within the table and are not considered part
-    of the table data."""
-    def __init__(self, name, function, format=None, summary_functions=None):
-        """Use this class if your table should contain a column whose values
-        are calculated from the table data automatically.
+class CellFormater:
+    """Formating information for one cell in a table."""
+    def __init__(self, bold=False, count=None, link=None):
+        self.bold = bold
+        self.count = count
+        self.link = link
 
-        * *name*: Set the name shown in the column header.
-        * *function*: Set the function that is used to calculate the value
-          for each cell. This function should take the row name and table data
-          as parameters.
-        * *format*: If this is not None, all values are passed through this
-        function along with their row and column name. The return value is used
-        as the formated data value. Without a format function no value is formated.
-        * *summary_functions*: Set the function(s) that aggregates the values
-          for this column over multiple runs. This will be displayed in a summary row.
-        """
-        self.name = name
-        self.function = function
-        self.format = format
-        if summary_functions is None:
-            self.summary_functions = []
-        elif not isinstance(summary_functions, collections.Iterable):
-            self.summary_functions = [summary_functions]
-        else:
-            self.summary_functions = summary_functions
-        self.values = {}
-
-    def get_formated_value(self, row_name, table_data):
-        """Calculate and format the value for one row in this column."""
-        if row_name in self.values:
-            value = self.values[row_name]
-        else:
-            value = self.function(row_name, table_data)
-            self.values[row_name] = value
-        if self.format:
-            value = self.format(value, row_name)
-        return value
-    
-    def get_summary_values(self):
-        """Iterator that yields tuples of summary function name and the
-        calculated value for all values calculated in this column so far."""
-        values = self.values.values()
-        for f in self.summary_functions:
-            yield function_name(f), f(values)
-
-    def __str__(self):
-        return self.name
+    def format_value(self, value):
+        result = str(value)
+        if self.link:
+            result = '[""%s"" %s]' % (result, self.link)
+        if self.count:
+            result = '%s (%s)' % (result, self.count)
+        if self.bold:
+            result = '**%s**' % result
+        return result
 
 
 class Table(collections.defaultdict):
@@ -487,20 +454,22 @@ class Table(collections.defaultdict):
 
         self.title = title
         self.min_wins = min_wins
+        self.row_min_wins = {}
         self.colored = colored
 
         self.summary_funcs = {}
         self.info = []
         self.num_values = None
+        self.dynamic_data_modules = []
 
         self._cols = None
 
         # For printing.
         # Row for the title of the table and the column headers.
-        # TODO use TableRow
         self.header_row = self.title
         # Column for the row descriptions.
         self.row_name_column = "row names"
+        self.cell_formaters = collections.defaultdict(dict)
         self.col_size = None
         self.column_order = None
         self.summary_row_order = []
@@ -563,6 +532,9 @@ class Table(collections.defaultdict):
                 values[col_name].append(self[row_name].get(col_name))
         return values
 
+    def add_cell_formater(self, row_name, col_name, formater):
+        self.cell_formaters[row_name][col_name] = formater
+
     def add_summary_function(self, name, func):
         """
         Add a bottom row with the values ``func(column_values)`` for each column.
@@ -574,6 +546,9 @@ class Table(collections.defaultdict):
     def set_column_order(self, order):
         self.column_order = order
         self._cols = None
+
+    def get_min_wins(self, row_name=None):
+        return self.row_min_wins.get(row_name, self.min_wins)
 
     def get_summary_rows(self):
         """
@@ -590,28 +565,32 @@ class Table(collections.defaultdict):
                     summary_row[col_name] = func(values)
                 else:
                     summary_row[col_name] = None
-            # TODO defer formating to TableRow
-            display_row_name = '**%s**' % row_name
-            if self.num_values is not None:
-                display_row_name += ' (%d)' % self.num_values
-            summary_row[self.row_name_column] = display_row_name
+            summary_row[self.row_name_column] = row_name
             summary_rows[row_name] = summary_row
+            formater = CellFormater(bold=True, count=self.num_values)
+            self.add_cell_formater(row_name, self.row_name_column, formater)
         return summary_rows
 
     def _get_row_order(self):
-        yield self.header_row
+        row_order = [self.header_row]
         for row_name in self.row_names + self.summary_row_order:
-            yield row_name
+            row_order.append(row_name)
+        for dynamic_data_module in self.dynamic_data_modules:
+             row_order = dynamic_data_module.modify_row_order(self, row_order) or row_order
+        return row_order
 
     def _get_column_order(self):
-        yield self.row_name_column
+        column_order = [self.row_name_column]
         for col_name in self.col_names:
-            yield col_name
+            column_order.append(col_name)
+        for dynamic_data_module in self.dynamic_data_modules:
+             column_order = dynamic_data_module.modify_column_order(self, column_order) or column_order
+        return column_order
 
     def _collect_cells(self):
         """Collect all cells that should be printed including table headers,
-        row names, summary rows, etc. Returns a dictionary mapping TableRows
-        to dictionaries mapping TableColumns to values"""
+        row names, summary rows, etc. Returns a dictionary mapping row names
+        to dictionaries mapping column names to values"""
         cells = collections.defaultdict(dict)
         cells[self.header_row][self.row_name_column] = self.title
         for col_name in self.col_names:
@@ -621,13 +600,17 @@ class Table(collections.defaultdict):
             cells[row_name][self.row_name_column] = str(row_name)
             for col_name in self.col_names:
                 cells[row_name][col_name] = row.get(col_name)
+        for dynamic_data_module in self.dynamic_data_modules:
+             dynamic_data_module.collect(self, cells)
         return cells
 
-    def _format_cells(self, cells):
+    def _format(self, cells):
         # Shallow copy of cells so all rows that are not formated remain.
         formated_cells = dict(cells)
         for row_name, row in cells.items():
             formated_cells[row_name] = self._format_row(row_name, row)
+        for dynamic_data_module in self.dynamic_data_modules:
+             dynamic_data_module.format(self, formated_cells)
         return formated_cells
     
     def _format_row(self, row_name, row):
@@ -650,38 +633,51 @@ class Table(collections.defaultdict):
             # row_slice may e.g. contain the unhashable type list.
             only_one_value = False
 
-        highlight = self.min_wins is not None
-        colors = tools.get_colors(row, self.min_wins) if self.colored else None
+        min_wins = self.get_min_wins(row_name)
+        highlight = min_wins is not None
+        colors = tools.get_colors(row, min_wins) if self.colored else None
         
-        # Copy the input, so all rows that are not explicitly formated remain.
-        formated_row = dict(row)
-        # TODO formating by TableRow class
-
-        for col_name, value in row_slice.items():
-            if isinstance(value, float):
-                value_text = '%.2f' % value
-            elif isinstance(value, list):
-                # Avoid involuntary link markup due to the list brackets.
-                value_text = "''%s''" % value
-            else:
-                value_text = str(value)
-
-            if self.colored:
-                color = tools.rgb_fractions_to_html_color(*colors[col_name])
-                value_text = '{%s|color:%s}' % (value_text, color)
-            elif highlight and only_one_value:
-                value_text = '{%s|color:Gray}' % value_text
-            elif highlight and (value == min_value and self.min_wins or
-                                value == max_value and not self.min_wins):
-                value_text = '**%s**' % value_text
-            formated_row[col_name] = value_text
+        formated_row = {}
+        for col_name, value in row.items():
+            color = None
+            bold = False
+            # Format data columns
+            if col_name in row_slice:
+                rounded_value = round(value, 2) if isinstance(value, float) else value
+                if self.colored:
+                    color = tools.rgb_fractions_to_html_color(*colors[col_name])
+                elif highlight and only_one_value:
+                    color = 'Grey'
+                elif highlight and (rounded_value == min_value and min_wins or
+                                     rounded_value == max_value and not min_wins):
+                    bold = True
+            formated_row[col_name] = self._format_cell(row_name, col_name, value,
+                                                       color=color, bold=bold)
         return formated_row
+
+    def _format_cell(self, row_name, col_name, value, color=None, bold=False):
+        formater = self.cell_formaters.get(row_name, {}).get(col_name)
+        if formater:
+            return formater.format_value(value)
+        if isinstance(value, float):
+            value_text = '%.2f' % value
+        elif isinstance(value, list):
+            # Avoid involuntary link markup due to the list brackets.
+            value_text = "''%s''" % value
+        else:
+            value_text = str(value)
+
+        if color is not None:
+            value_text = '{%s|color:%s}' % (value_text, color)
+        if bold:
+            value_text = '**%s**' % value_text
+        return value_text
 
     def _get_markup(self, cells):
         # Remember the maximal length of each column
         self.col_size = {}
         for col_name in self._get_column_order():
-            self.col_size[col_name] = max((len(cells[row_name][col_name])
+            self.col_size[col_name] = max((len(cells[row_name].get(col_name, ''))
                                       for row_name in self._get_row_order()))
         parts = []
         for row_name in self._get_row_order():
@@ -699,7 +695,7 @@ class Table(collections.defaultdict):
 
     def _get_row_markup(self, row_name, row, template=' | %s |'):
         """Return the txt2tags table markup for one row."""
-        return template % ' | '.join(self._get_cell_markup(row_name, col_name, row[col_name])
+        return template % ' | '.join(self._get_cell_markup(row_name, col_name, row.get(col_name, ''))
                                      for col_name in self._get_column_order())
 
     def _get_cell_markup(self, row_name, col_name, value):
@@ -711,8 +707,159 @@ class Table(collections.defaultdict):
     def __str__(self):
         """Return the txt2tags markup for this table."""
         cells = self._collect_cells()
-        formated_cells = self._format_cells(cells)
+        formated_cells = self._format(cells)
         return self._get_markup(formated_cells)
+
+def extract_summary_lines(from_table, to_table, link=None):
+    for name, row in from_table.get_summary_rows().items():
+        row_name = '%s - %s' % (from_table.title, name)
+        if link is not None:
+            formater = CellFormater(link=link)
+            to_table.add_cell_formater(row_name, to_table.row_name_column, formater)
+        to_table.row_min_wins[row_name] = from_table.min_wins
+        for col_name, value in row.items():
+            if col_name == from_table.row_name_column:
+                continue
+            to_table.add_cell(row_name, col_name, value)
+
+# TODO
+# ----------- unfinished stuff for AutoCalculatedColumns ---------------
+
+class DynamicDataModule:
+    def collect(self, table, cells):
+        pass
+
+    def format(self, table, formated_cells):
+        pass
+
+    def modify_row_order(self, table, row_order):
+        return row_order
+
+    def modify_column_order(self, table, column_order):
+        return column_order
+
+
+class DiffColumnsModule(DynamicDataModule):
+    def __init__(self, configs, revisions):
+        self.configs = configs
+        assert len(revisions) == 2, revisions
+        self.revisions = revisions
+
+    def collect(self, table, cells):
+        for config in self.configs:
+            col_names = ['%s-%s' % (r, config) for r in self.revisions]
+            diff_col_name = 'Diff - %s' % config
+            cells[table.header_row][diff_col_name] = diff_col_name
+            dummy_col_name = 'DiffDummy - %s' % config
+            cells[table.header_row][dummy_col_name] = ''
+            for row_name in table.row_names:
+                values = [table[row_name].get(col_name, None) for col_name in col_names]
+                if any(value is None for value in values):
+                    diff = '-'
+                else:
+                    diff = values[1] - values[0]
+                cells[row_name][diff_col_name] = diff
+        # TODO: summary cells
+
+    def format(self, table, formated_cells):
+        for config in self.configs:
+            diff_col_name = 'Diff - %s' % config
+            for row_name in table.row_names:
+                formated_value = formated_cells[row_name][diff_col_name]
+                try:
+                    value = float(formated_value)
+                except:
+                    value = 0
+                if value == 0:
+                    color = 'grey'
+                elif ((value < 0 and table.get_min_wins(row_name)) or
+                      (value > 0 and not table.get_min_wins(row_name))):
+                    color = 'green'
+                else:
+                    color = 'red'
+                formated_value = '{%s|color:%s}' % (value, color)
+                formated_cells[row_name][diff_col_name] = formated_value
+        # TODO: summary cells
+
+    def modify_column_order(self, table, column_order):
+        """
+        Reorder configs such that it contains only those that for
+        self.revisions and the configs that only differ in their revisions
+        are next to each other.
+        """
+        new_column_order = [table.row_name_column]
+        for config in self.configs:
+            if len(new_column_order) > 1:
+                new_column_order.append('DiffDummy - %s' % config)
+            for rev in self.revisions:
+                new_column_order.append('%s-%s' % (rev, config))
+            new_column_order.append('Diff - %s' % config)
+        # keep all other columns at the end in the order they were before
+        for col_name in column_order:
+            if col_name not in new_column_order:
+                new_column_order.append(col_name)
+        return new_column_order
+
+    def modify_row_order(self, table, row_order):
+        return row_order
+        # TODO append summary function if not already there
+
+
+
+
+
+
+
+
+class AutoCalculatedColumn:
+    """Columns in tables which calculate their value automatically from the table data.
+    Such calculated values are not stored within the table and are not considered part
+    of the table data."""
+    def __init__(self, name, function, format=None, summary_functions=None):
+        """Use this class if your table should contain a column whose values
+        are calculated from the table data automatically.
+
+        * *name*: Set the name shown in the column header.
+        * *function*: Set the function that is used to calculate the value
+          for each cell. This function should take the row name and table data
+          as parameters.
+        * *format*: If this is not None, all values are passed through this
+        function along with their row and column name. The return value is used
+        as the formated data value. Without a format function no value is formated.
+        * *summary_functions*: Set the function(s) that aggregates the values
+          for this column over multiple runs. This will be displayed in a summary row.
+        """
+        self.name = name
+        self.function = function
+        self.format = format
+        if summary_functions is None:
+            self.summary_functions = []
+        elif not isinstance(summary_functions, collections.Iterable):
+            self.summary_functions = [summary_functions]
+        else:
+            self.summary_functions = summary_functions
+        self.values = {}
+
+    def get_formated_value(self, row_name, table_data):
+        """Calculate and format the value for one row in this column."""
+        if row_name in self.values:
+            value = self.values[row_name]
+        else:
+            value = self.function(row_name, table_data)
+            self.values[row_name] = value
+        if self.format:
+            value = self.format(value, row_name)
+        return value
+    
+    def get_summary_values(self):
+        """Iterator that yields tuples of summary function name and the
+        calculated value for all values calculated in this column so far."""
+        values = self.values.values()
+        for f in self.summary_functions:
+            yield function_name(f), f(values)
+
+    def __str__(self):
+        return self.name
 
 
 class AugmentedTable(Table):
