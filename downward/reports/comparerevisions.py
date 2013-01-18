@@ -64,7 +64,7 @@ class DiffColumnsModule(DynamicDataModule):
                 cells[row_name][diff_col_name] = diff
             for func in self.summary_functions:
                 func_name = reports.function_name(func)
-                cells[func_name][table.row_name_column] = func_name.capitalize()
+                cells[func_name][table.header_column] = func_name.capitalize()
                 cells[func_name][diff_col_name] = func(non_none_values)
         return cells
 
@@ -93,7 +93,7 @@ class DiffColumnsModule(DynamicDataModule):
         self.revisions and the configs that only differ in their revisions
         are next to each other.
         """
-        new_column_order = [table.row_name_column]
+        new_column_order = [table.header_column]
         for config_nick in self.config_nicks:
             if len(new_column_order) > 1:
                 new_column_order.append('DiffDummy - %s' % config_nick)

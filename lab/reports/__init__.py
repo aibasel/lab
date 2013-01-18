@@ -465,12 +465,8 @@ class Table(collections.defaultdict):
         self._cols = None
 
         # For printing.
-        # Row for the title of the table and the column headers.
-        # The name of the row is used in the first column, so we use title here.
-        self.header_row = self.title
-        # Column for the row descriptions. The name is used to uniquely identify
-        # the column, but is never printed.
-        self.row_name_column = "row names"
+        self.header_row = 'column names (never printed)'
+        self.header_column = 'row names (never printed)'
         self.cell_formatters = collections.defaultdict(dict)
         self.col_size = None
         self.column_order = None
@@ -564,10 +560,10 @@ class Table(collections.defaultdict):
                     summary_row[col_name] = func(values)
                 else:
                     summary_row[col_name] = None
-            summary_row[self.row_name_column] = row_name
+            summary_row[self.header_column] = row_name
             summary_rows[row_name] = summary_row
             formatter = CellFormatter(bold=True, count=self.num_values)
-            self.cell_formatters[row_name][self.row_name_column] = formatter
+            self.cell_formatters[row_name][self.header_column] = formatter
         return summary_rows
 
     def _get_printable_row_order(self):
@@ -581,7 +577,7 @@ class Table(collections.defaultdict):
 
     def _get_printable_column_order(self):
         """Return a list of all columns (including non-data columns) in the order they should be printed."""
-        column_order = [self.row_name_column]
+        column_order = [self.header_column]
         for col_name in self.col_names:
             column_order.append(col_name)
         for dynamic_data_module in self.dynamic_data_modules:
@@ -593,12 +589,12 @@ class Table(collections.defaultdict):
         row names, summary rows, etc. Returns a dictionary mapping row names
         to dictionaries mapping column names to values"""
         cells = collections.defaultdict(dict)
-        cells[self.header_row][self.row_name_column] = self.title
+        cells[self.header_row][self.header_column] = self.title
         for col_name in self.col_names:
             cells[self.header_row][col_name] = str(col_name)
         # Add data rows and summary rows.
         for row_name, row in self.items() + self.get_summary_rows().items():
-            cells[row_name][self.row_name_column] = str(row_name)
+            cells[row_name][self.header_column] = str(row_name)
             for col_name in self.col_names:
                 cells[row_name][col_name] = row.get(col_name)
         for dynamic_data_module in self.dynamic_data_modules:
@@ -702,7 +698,7 @@ class Table(collections.defaultdict):
 
     def _get_cell_markup(self, row_name, col_name, value):
         """Let all columns have minimal but equal width."""
-        if col_name == self.row_name_column:
+        if col_name == self.header_column:
             return str(value).ljust(self.col_size[col_name])
         return ' ' + str(value).rjust(self.col_size[col_name])
 
@@ -720,10 +716,10 @@ def extract_summary_rows(from_table, to_table, link=None):
         row_name = '%s - %s' % (from_table.title, name)
         if link is not None:
             formatter = CellFormatter(link=link)
-            to_table.cell_formatters[row_name][to_table.row_name_column] = formatter
+            to_table.cell_formatters[row_name][to_table.header_column] = formatter
         to_table.row_min_wins[row_name] = from_table.min_wins
         for col_name, value in row.items():
-            if col_name == from_table.row_name_column:
+            if col_name == from_table.header_column:
                 continue
             to_table.add_cell(row_name, col_name, value)
 

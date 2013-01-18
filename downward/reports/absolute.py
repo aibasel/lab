@@ -181,7 +181,7 @@ class AbsoluteReport(PlanningReport):
             if self.resolution == 'combined':
                 link = '#%s-%s' % (attribute, domain)
             formatter = reports.CellFormatter(link=link, count=count) 
-            table.cell_formatters[domain][table.row_name_column] = formatter
+            table.cell_formatters[domain][table.header_column] = formatter
 
         for (domain, config), values in domain_config_values.items():
             table.add_cell(domain, config, func(values))
@@ -222,7 +222,7 @@ class AbsoluteReport(PlanningReport):
         if self.resolution == 'combined':
             link = '#%s' % title
             formatter = reports.CellFormatter(link=link)
-            table.cell_formatters[table.header_row][table.row_name_column] = formatter
+            table.cell_formatters[table.header_row][table.header_column] = formatter
         return table
 
     def _add_summary_functions(self, table, attribute):
