@@ -86,9 +86,8 @@ class DiffColumnsModule(DynamicDataModule):
                     color = 'red'
                 formated_value = '{%s|color:%s}' % (value, color)
                 formated_cells[row_name][diff_col_name] = formated_value
-        return formated_cells
 
-    def modify_column_order(self, table, column_order):
+    def modify_printable_column_order(self, table, column_order):
         """
         Reorder configs such that it contains only those that for
         self.revisions and the configs that only differ in their revisions
@@ -103,7 +102,7 @@ class DiffColumnsModule(DynamicDataModule):
             new_column_order.append('Diff - %s' % config_nick)
         return new_column_order
 
-    def modify_row_order(self, table, row_order):
+    def modify_printable_row_order(self, table, row_order):
         for func in self.summary_functions:
             func_name = reports.function_name(func)
             if func_name not in row_order:

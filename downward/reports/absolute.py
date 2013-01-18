@@ -55,12 +55,11 @@ class AbsoluteReport(PlanningReport):
 
         # Index of summary section (first section after 'warnings')
         summary_index = 0
-# HACK
-#        warnings = self._get_warnings_table()
-#        if warnings:
-#            toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
-#            sections.append(('unexplained-errors', warnings))
-#            summary_index += 1
+        warnings = self._get_warnings_table()
+        if warnings:
+            toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
+            sections.append(('unexplained-errors', warnings))
+            summary_index += 1
 
         # Build a table containing summary functions of all other tables.
         # The actual section is added at poistion summary_index after creating
@@ -75,7 +74,7 @@ class AbsoluteReport(PlanningReport):
                 if self.attribute_is_numeric(attribute):
                     domain_table = self._get_table(attribute)
                     tables.append(('', domain_table))
-                    reports.extract_summary_lines(domain_table, summary, link='#' + attribute)
+                    reports.extract_summary_rows(domain_table, summary, link='#' + attribute)
                 else:
                     tables.append(('', 'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
@@ -181,9 +180,8 @@ class AbsoluteReport(PlanningReport):
             link = None
             if self.resolution == 'combined':
                 link = '#%s-%s' % (attribute, domain)
-            formater = reports.CellFormater(link=link, count=count) 
-            table.add_cell_formater(domain, table.row_name_column, formater)
-
+            formatter = reports.CellFormatter(link=link, count=count) 
+            table.cell_formatters[domain][table.row_name_column] = formatter
 
         for (domain, config), values in domain_config_values.items():
             table.add_cell(domain, config, func(values))
@@ -223,8 +221,8 @@ class AbsoluteReport(PlanningReport):
         table.set_column_order(columns)
         if self.resolution == 'combined':
             link = '#%s' % title
-            formater = reports.CellFormater(link=link)
-            table.add_cell_formater(table.header_row, table.row_name_column, formater)
+            formatter = reports.CellFormatter(link=link)
+            table.cell_formatters[table.header_row][table.row_name_column] = formatter
         return table
 
     def _add_summary_functions(self, table, attribute):

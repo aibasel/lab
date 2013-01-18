@@ -386,7 +386,7 @@ class Report(object):
             logging.critical('All runs have been filtered -> Nothing to report.')
 
 
-class CellFormater:
+class CellFormatter:
     """Formating information for one cell in a table."""
     def __init__(self, bold=False, count=None, link=None):
         self.bold = bold
@@ -466,10 +466,12 @@ class Table(collections.defaultdict):
 
         # For printing.
         # Row for the title of the table and the column headers.
+        # The name of the row is used in the first column, so we use title here.
         self.header_row = self.title
-        # Column for the row descriptions.
+        # Column for the row descriptions. The name is used to uniquely identify
+        # the column, but is never printed.
         self.row_name_column = "row names"
-        self.cell_formaters = collections.defaultdict(dict)
+        self.cell_formatters = collections.defaultdict(dict)
         self.col_size = None
         self.column_order = None
         self.summary_row_order = []
@@ -480,7 +482,7 @@ class Table(collections.defaultdict):
         self._cols = None
 
     def add_row(self, row_name, row):
-        """Add a new row called *row_name* to the table.
+        """Add a new data row called *row_name* to the table.
 
         *row* must be a mapping from column names to values.
         """
@@ -488,7 +490,7 @@ class Table(collections.defaultdict):
         self._cols = None
 
     def add_col(self, col_name, col):
-        """Add a new column called *col_name* to the table.
+        """Add a new data column called *col_name* to the table.
 
         *col* must be a mapping from row names to values.
         """
@@ -532,9 +534,6 @@ class Table(collections.defaultdict):
                 values[col_name].append(self[row_name].get(col_name))
         return values
 
-    def add_cell_formater(self, row_name, col_name, formater):
-        self.cell_formaters[row_name][col_name] = formater
-
     def add_summary_function(self, name, func):
         """
         Add a bottom row with the values ``func(column_values)`` for each column.
@@ -567,24 +566,26 @@ class Table(collections.defaultdict):
                     summary_row[col_name] = None
             summary_row[self.row_name_column] = row_name
             summary_rows[row_name] = summary_row
-            formater = CellFormater(bold=True, count=self.num_values)
-            self.add_cell_formater(row_name, self.row_name_column, formater)
+            formatter = CellFormatter(bold=True, count=self.num_values)
+            self.cell_formatters[row_name][self.row_name_column] = formatter
         return summary_rows
 
-    def _get_row_order(self):
+    def _get_printable_row_order(self):
+        """Return a list of all rows (including non-data rows) in the order they should be printed."""
         row_order = [self.header_row]
         for row_name in self.row_names + self.summary_row_order:
             row_order.append(row_name)
         for dynamic_data_module in self.dynamic_data_modules:
-             row_order = dynamic_data_module.modify_row_order(self, row_order) or row_order
+             row_order = dynamic_data_module.modify_printable_row_order(self, row_order) or row_order
         return row_order
 
-    def _get_column_order(self):
+    def _get_printable_column_order(self):
+        """Return a list of all columns (including non-data columns) in the order they should be printed."""
         column_order = [self.row_name_column]
         for col_name in self.col_names:
             column_order.append(col_name)
         for dynamic_data_module in self.dynamic_data_modules:
-             column_order = dynamic_data_module.modify_column_order(self, column_order) or column_order
+             column_order = dynamic_data_module.modify_printable_column_order(self, column_order) or column_order
         return column_order
 
     def _collect_cells(self):
@@ -605,22 +606,22 @@ class Table(collections.defaultdict):
         return cells
 
     def _format(self, cells):
-        # Shallow copy of cells so all rows that are not formated remain.
-        formated_cells = dict(cells)
+        """Format all entries in **cells** (in place)."""
         for row_name, row in cells.items():
-            formated_cells[row_name] = self._format_row(row_name, row)
+            self._format_row(row_name, row)
         for dynamic_data_module in self.dynamic_data_modules:
-             formated_cells = dynamic_data_module.format(self, formated_cells) or formated_cells
-        return formated_cells
+             dynamic_data_module.format(self, cells)
     
     def _format_row(self, row_name, row):
+        """Format all entries in **row** (in place)."""
         if row_name == self.header_row:
-            return dict((col_name, value.replace('_', '-'))
-                         for col_name, value in row.items())
+            for col_name, value in row.items():
+                row[col_name] = value.replace('_', '-')
+            return
 
-        # Get the slice of the row that should be formated.
-        # Note that there might be other columns (e.g. added by subclasses
-        # of Table) that should not be formated.
+        # Get the slice of the row that should be formated (i.e. the data columns).
+        # Note that there might be other columns (e.g. added by dynamic data
+        # modules) that should not be formated.
         row_slice = dict((col_name, row.get(col_name))
                          for col_name in self.col_names)
 
@@ -637,7 +638,6 @@ class Table(collections.defaultdict):
         highlight = min_wins is not None
         colors = tools.get_colors(row, min_wins) if self.colored else None
         
-        formated_row = {}
         for col_name, value in row.items():
             color = None
             bold = False
@@ -651,14 +651,13 @@ class Table(collections.defaultdict):
                 elif highlight and (rounded_value == min_value and min_wins or
                                      rounded_value == max_value and not min_wins):
                     bold = True
-            formated_row[col_name] = self._format_cell(row_name, col_name, value,
+            row[col_name] = self._format_cell(row_name, col_name, value,
                                                        color=color, bold=bold)
-        return formated_row
 
     def _format_cell(self, row_name, col_name, value, color=None, bold=False):
-        formater = self.cell_formaters.get(row_name, {}).get(col_name)
-        if formater:
-            return formater.format_value(value)
+        formatter = self.cell_formatters.get(row_name, {}).get(col_name)
+        if formatter:
+            return formatter.format_value(value)
         if isinstance(value, float):
             value_text = '%.2f' % value
         elif isinstance(value, list):
@@ -674,13 +673,16 @@ class Table(collections.defaultdict):
         return value_text
 
     def _get_markup(self, cells):
+        """Return a string cotaining all printable cells (see
+        **_get_printable_column_order** and **_get_printable_row_order**)
+        as correctly formatted markup."""
         # Remember the maximal length of each column
         self.col_size = {}
-        for col_name in self._get_column_order():
+        for col_name in self._get_printable_column_order():
             self.col_size[col_name] = max((len(cells[row_name].get(col_name, ''))
-                                      for row_name in self._get_row_order()))
+                                      for row_name in self._get_printable_row_order()))
         parts = []
-        for row_name in self._get_row_order():
+        for row_name in self._get_printable_row_order():
             if row_name == self.header_row:
                 parts.append(self._get_header_markup(row_name, cells[row_name]))
             else:
@@ -696,7 +698,7 @@ class Table(collections.defaultdict):
     def _get_row_markup(self, row_name, row, template=' | %s |'):
         """Return the txt2tags table markup for one row."""
         return template % ' | '.join(self._get_cell_markup(row_name, col_name, row.get(col_name, ''))
-                                     for col_name in self._get_column_order())
+                                     for col_name in self._get_printable_column_order())
 
     def _get_cell_markup(self, row_name, col_name, value):
         """Let all columns have minimal but equal width."""
@@ -707,16 +709,18 @@ class Table(collections.defaultdict):
     def __str__(self):
         """Return the txt2tags markup for this table."""
         cells = self._collect_cells()
-        formated_cells = self._format(cells)
-        return self._get_markup(formated_cells)
+        self._format(cells)
+        return self._get_markup(cells)
 
 
-def extract_summary_lines(from_table, to_table, link=None):
+def extract_summary_rows(from_table, to_table, link=None):
+    """Extract all summary rows of **from_table** and add them as data rows
+    to **to_table**"""
     for name, row in from_table.get_summary_rows().items():
         row_name = '%s - %s' % (from_table.title, name)
         if link is not None:
-            formater = CellFormater(link=link)
-            to_table.add_cell_formater(row_name, to_table.row_name_column, formater)
+            formatter = CellFormatter(link=link)
+            to_table.cell_formatters[row_name][to_table.row_name_column] = formatter
         to_table.row_min_wins[row_name] = from_table.min_wins
         for col_name, value in row.items():
             if col_name == from_table.row_name_column:
@@ -725,14 +729,28 @@ def extract_summary_lines(from_table, to_table, link=None):
 
 
 class DynamicDataModule:
+    """Interface for modules that dynamically add or modify data in a table."""
     def collect(self, table, cells):
+        """Called after the data collection in the table. Subclasses can
+        add new values to **cells** or modify existing values."""
         return cells
 
     def format(self, table, formated_cells):
-        return formated_cells
+        """Called after the formatting in the table. Subclasses can
+        (re-)format all values in **formated_cells**. Specifically all new
+        values added by this modules **collect** method should be formatted."""
+        pass
 
-    def modify_row_order(self, table, row_order):
+    def modify_printable_row_order(self, table, row_order):
+        """Called after retrieving a row order in the table. Subclassed can
+        modify the order or add new rows. Specifically all rows that were
+        added by this modules **collect** method should be appended or
+        inserted."""
         return row_order
 
-    def modify_column_order(self, table, column_order):
+    def modify_printable_column_order(self, table, column_order):
+        """Called after retrieving a column order in the table. Subclassed can
+        modify the order or add new columns. Specifically all columns that were
+        added by this modules **collect** method should be appended or
+        inserted."""
         return column_order
