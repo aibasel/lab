@@ -384,3 +384,98 @@ def select_evenly_spread(seq, num_items):
     step_size = (len(seq) - 1) / float(num_items - 1)
     float_indices = [i * step_size for i in range(num_items)]
     return [seq[int(round(index))] for index in float_indices]
+
+
+# ------- Configs ------------------------------------------------------
+
+def config_suite_core_optimal():
+    return {
+        # A*
+        'astar_blind': ['--search', 'astar(blind)'],
+        'astar_h2': ['--search', 'astar(hm(2))'],
+        'astar_ipdb': ['--search', 'astar(ipdb)'],
+        'astar_lmcount_lm_merged_rhw_hm': ['--search', 'astar(lmcount(lm_merged([lm_rhw(),lm_hm(m=1)]),admissible=true),mpd=true)'],
+        'astar_lmcut': ['--search', 'astar(lmcut)'],
+        'astar_hmax': ['--search', 'astar(hmax)'],
+        'astar_merge_and_shrink_bisim': ['--search', 'astar(merge_and_shrink(merge_strategy=merge_linear_reverse_level,shrink_strategy=shrink_bisimulation(max_states=200000,greedy=false,group_by_h=true)))'],
+        'astar_merge_and_shrink_greedy_bisim': ['--search', 'astar(merge_and_shrink(merge_strategy=merge_linear_reverse_level,shrink_strategy=shrink_bisimulation(max_states=infinity,threshold=1,greedy=true,group_by_h=false)))'],
+        'astar_selmax_lmcut_lmcount': ['--search', 'astar(selmax([lmcut(),lmcount(lm_merged([lm_hm(m=1),lm_rhw()]),admissible=true)],training_set=1000),mpd=true)'],
+    }
+
+def config_suite_core_satisficing():
+    return {
+        # A*
+        'astar_goalcount': ['--search', 'astar(goalcount)'],
+        # eager greedy
+        'eager_greedy_ff': ['--heuristic', 'h=ff()', '--search', 'eager_greedy(h, preferred=h)'],
+        'eager_greedy_add': ['--heuristic', 'h=add()', '--search', 'eager_greedy(h, preferred=h)'],
+        'eager_greedy_cg': ['--heuristic', 'h=cg()', '--search', 'eager_greedy(h, preferred=h)'],
+        'eager_greedy_cea': ['--heuristic', 'h=cea()', '--search', 'eager_greedy(h, preferred=h)'],
+        # lazy greedy
+        'lazy_greedy_ff': ['--heuristic', 'h=ff()', '--search', 'lazy_greedy(h, preferred=h)'],
+        'lazy_greedy_add': ['--heuristic', 'h=add()', '--search', 'lazy_greedy(h, preferred=h)'],
+        'lazy_greedy_cg': ['--heuristic', 'h=cg()', '--search', 'lazy_greedy(h, preferred=h)'],
+    }
+
+def config_suite_ipc_optimal():
+    return {
+        'seq_opt_merge_and_shrink' : ['ipc', 'seq-opt-merge-and-shrink'],
+        'seq_opt_fdss_1' : ['ipc', 'seq-opt-fdss-1'],
+        'seq_opt_fdss_2' : ['ipc', 'seq-opt-fdss-2'],
+    }
+
+def config_suite_ipc_satisficing():
+    return {
+        'seq_sat_lama_2011' : ['ipc', 'seq-sat-lama-2011'],
+        'seq_sat_fdss_1' : ['ipc', 'seq-sat-fdss-1'],
+        'seq_sat_fdss_2' : ['ipc', 'seq-sat-fdss-2'],
+    }
+
+def config_suite_extended_optimal():
+    return {
+        # A*
+        'astar_lmcount_lm_merged_rhw_hm_no_order': ['--search', 'astar(lmcount(lm_merged([lm_rhw(),lm_hm(m=1)]),admissible=true),mpd=true)'],
+        # pareto open list
+        'pareto_lmcut': ['--heuristic', 'h=lmcut()', '--search', 'eager(pareto([sum([g(), h]), h]), reopen_closed=true, pathmax=false, progress_evaluator=sum([g(), h]))'],
+        # bucket-based open list
+        'bucket_lmcut': ['--heuristic', 'h=lmcut()', '--search', 'eager(single_buckets(h), reopen_closed=true, pathmax=false)'],
+    }
+
+def config_suite_extended_satisficing():
+    return {
+        # eager greedy
+        'eager_greedy_alt_ff_cg': ['--heuristic', 'hff=ff()', '--heuristic', 'hcg=cg()', '--search', 'eager_greedy(hff,hcg,preferred=[hff,hcg])'],
+        'eager_greedy_ff_no_pref': ['--search', 'eager_greedy(ff())'],
+        # lazy greedy
+        'lazy_greedy_alt_cea_cg': ['--heuristic', 'hcea=cea()', '--heuristic', 'hcg=cg()', '--search', 'lazy_greedy(hcea,hcg,preferred=[hcea,hcg])'],
+        'lazy_greedy_ff_no_pref': ['--search', 'lazy_greedy(ff())'],
+        'lazy_greedy_cea': ['--heuristic', 'h=cea()', '--search', 'lazy_greedy(h, preferred=h)'],
+        # lazy wA*
+        'lazy_wa3_ff': ['--heuristic', 'h=ff()', '--search', 'lazy_wastar(h,w=3,preferred=h)'],
+        # eager wA*
+        'eager_wa3_cg': ['--heuristic', 'h=cg()', '--search', 'eager(single(sum([g(),weight(h,3)])),preferred=h)'],
+        # ehc
+        'ehc_ff': ['--search', 'ehc(ff())'],
+        # iterated
+        'iterated_wa_merge_and_shrink': ['--heuristic', 'h=merge_and_shrink()', '--search', 'iterated([lazy_wastar(h,w=10), lazy_wastar(h,w=5), lazy_wastar(h,w=3), lazy_wastar(h,w=2), lazy_wastar(h,w=1)])'],
+    }
+
+def config_suite_optimal(use_core_configs=True, use_ipc_configs=True, use_extended_configs=False):
+    configs = {}
+    if use_core_configs:
+        configs.update(config_suite_core_optimal())
+    if use_ipc_configs:
+        configs.update(config_suite_ipc_optimal())
+    if use_extended_configs:
+        configs.update(config_suite_extended_optimal())
+    return configs
+
+def config_suite_satisficing(use_core_configs=True, use_ipc_configs=True, use_extended_configs=False):
+    configs = {}
+    if use_core_configs:
+        configs.update(config_suite_core_satisficing())
+    if use_ipc_configs:
+        configs.update(config_suite_ipc_satisficing())
+    if use_extended_configs:
+        configs.update(config_suite_extended_satisficing())
+    return configs
