@@ -30,7 +30,7 @@ def process_dir(dir):
 def main():
     pool = multiprocessing.Pool(processes="""PROCESSES""")
     try:
-        pool.map(process_dir, dirs)
+        pool.map(process_dir, dirs, chunksize=1)
     except KeyboardInterrupt:
         print 'Main script interrupted'
         pool.terminate()

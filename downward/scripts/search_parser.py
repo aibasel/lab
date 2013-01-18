@@ -231,37 +231,102 @@ def check_min_values(content, props):
 
 
 def get_error(content, props):
-    # First see if we already know the type of error.
-    if props.get('search_mem_limit_exceeded', None) == 1:
-        props['error'] = 'memory'
-    elif props.get('search_timeout', None) == 1:
-        props['error'] = 'timeout'
-    elif props.get('search_wall_clock_timeout', None) == 1:
-        props['error'] = 'wall-clock-timeout'
-    # If we don't know the error type already, look at the error log.
-    elif not content.strip() and not props.get('search_error', 0):
-        props['error'] = 'none'
-    elif 'bad_alloc' in content:
-        props['error'] = 'memory'
-    # If the run was killed (return code: 128 + 9 (SIGKILL) = 137),
-    # we can assume it was because it hit its resource limits.
-    # For other or unknown return values we don't want to hide potential problems
-    elif ('search_error' in props and props.get('search_returncode', None) == '137'):
-        remaining_time = (props['limit_search_time'] -
-                          props.get('last_logged_time', 0))
-        remaining_memory = (props['limit_search_memory'] -
-                            props.get('last_logged_memory', 0))
-        remaining_time_rel = remaining_time / float(props['limit_search_time'])
-        remaining_memory_rel = remaining_memory / float(props['limit_search_memory'])
-        fraction = 0.05
-        if remaining_time_rel < fraction and remaining_memory_rel > fraction:
-            props['error'] = 'probably-timeout'
-        elif remaining_memory_rel < fraction and remaining_time_rel > fraction:
-            props['error'] = 'probably-memory-out'
+    """
+    If there was an error, its source will be stored in props['error'].
+    Possible values are
+      * none: No error, coverage = 1
+      * unsolvable: No error, planner reported that problem is unsolvable
+      * timeout: planner exceeded time limit (recognized by signal SIGXCPU)
+      * mem-limit-exceeded: planner exceeded memory limit
+        (recognized by bad_alloc exception)
+
+    The following reasons should never occur. If they do, this is an indication that
+    something went completely wrong, either in the lab framework or on the executing
+    computer. Check the files run.log, run.err, driver.log and driver.err for further
+    details.
+
+      * unexplained-timeout: lab stopped the planner due to a timeout.
+      * unexplained-wall-clock-timeout: lab stopped the planner due to a
+        wall clock timeout.
+      * unexplained-mem-limit-exceeded: lab stopped the planner due to
+        exceeded memory.
+      * unexplained-probably-timeout: The planner was stopped with
+        return code 128+9 (SIGKILL).
+        The last logged entries for time and memory point to an unrecognized timeout.
+      * unexplained-probably-mem-limit-exceeded: The planner was stopped with
+        return code 128+9 (SIGKILL).
+        The last logged entries for time and memory point to an unrecognized memory out.
+      * unexplained-sigkill: The planner was stopped with return code 128+9 (SIGKILL)
+        before reaching its time or memory limits or reaching both roughly at the same
+        time.
+      * unexplained: The planner did not produce a plan but was not killed with SIGKILL.
+    """
+    # If there is any error, do no count this task as solved.
+    if props.get('error', 'none') != 'none' or props.get('search_error'):
+        props['coverage'] = 0
+        props['search_error'] = 1
+
+    # If coverage is 0, try to explain this
+    if props.get('coverage') == 0:
+        # First see if we already know the type of error.
+        if props.get('unsolvable', None) == 1:
+            props['error'] = 'unsolvable'
+        elif props.get('search_mem_limit_exceeded', None) == 1:
+            props['error'] = 'memory'
+        elif props.get('search_timeout', None) == 1:
+            props['error'] = 'timeout'
+        # If we don't know the error type already, look at the error log.
+        elif 'bad_alloc' in content:
+            props['error'] = 'memory'
+            props['search_mem_limit_exceeded'] = 1
+        # If the run was killed with SIGXCPU (return code: 128 + 24 (SIGXCPU) = 152),
+        # we know it hit its CPU limit.
+        elif props.get('search_returncode', None) == '152':
+            props['error'] = 'timeout'
+            props['search_timeout'] = 1
+        # Maybe the run was stopped by lab
+        elif props.get('error') in ['unexplained-timeout',
+                                    'unexplained-wall-clock-timeout',
+                                    'unexplained-mem-limit-exceeded']:
+            # Error reason is already set by lab.
+            pass
+        # If the run was killed with SIGKILL (return code: 128 + 9 (SIGKILL) = 137),
+        # we can assume it was because it hit its resource limits.
+        # For other or unknown return values we don't want to hide potential problems.
+        elif props.get('search_returncode', None) == '137':
+            remaining_time = (props['limit_search_time'] -
+                              props.get('last_logged_time', 0))
+            remaining_memory = (props['limit_search_memory'] -
+                                props.get('last_logged_memory', 0))
+            remaining_time_rel = remaining_time / float(props['limit_search_time'])
+            remaining_memory_rel = remaining_memory / float(props['limit_search_memory'])
+            fraction = 0.05
+            if remaining_time_rel < fraction and remaining_memory_rel > fraction:
+                props['error'] = 'unexplained-probably-timeout'
+            elif remaining_memory_rel < fraction and remaining_time_rel > fraction:
+                props['error'] = 'unexplained-probably-mem-limit-exceeded'
+            else:
+                props['error'] = 'unexplained-sigkill'
         else:
-            props['error'] = 'unknown-killed'
-    else:
-        props['error'] = 'unknown'
+            props['error'] = 'unexplained'
+
+    # Set all errors that did not occur to '0', so it is possible to sum over
+    # all errors of one type.
+    for attribute in ['unsolvable', 'search_error', 'search_mem_limit_exceeded',
+                      'search_timeout']:
+        if props.get(attribute) is None:
+            props[attribute] = 0
+
+    props['unexplained_error'] = 1
+    for reason in ['coverage', 'unsolvable', 'search_mem_limit_exceeded',
+                   'search_timeout']:
+        if props.get(reason, False):
+            props['unexplained_error'] = 0
+
+    # Check that all errors that occured are handled in exactly one of the categories.
+    assert (props['search_error'] == 0 or
+            (props['unsolvable'] + props['search_timeout'] +
+             props['search_mem_limit_exceeded'] + props['unexplained_error']) == 1)
 
 
 class SearchParser(Parser):
@@ -276,6 +341,15 @@ class SearchParser(Parser):
                          required=False)
         self.add_pattern('landmarks_generation_time',
                          r'Landmarks generation time: (.+)s', type=float,
+                         required=False)
+        self.add_pattern('last_logged_time',
+                         r'total_time: (.+)s', type=float, file='driver.log',
+                         required=False)
+        self.add_pattern('last_logged_wall_clock_time',
+                         r'wall-clock time: (.+)', type=float, file='driver.log',
+                         required=False)
+        self.add_pattern('last_logged_memory',
+                         r'total_vsize: (.+) MB', type=float, file='driver.log',
                          required=False)
 
     def add_search_functions(self):

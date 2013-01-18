@@ -123,6 +123,9 @@ class Fetcher(object):
         fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
         if fetch_from_eval_dir:
             src_props = run_filter.apply(src_props)
+            for prop in src_props.values():
+                if prop.get('unexplained_error'):
+                    logging.warning("Unexplained error in: '%s'" % prop.get('run_dir'))
 
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching files from %s -> %s' % (src_dir, eval_dir))
@@ -138,6 +141,7 @@ class Fetcher(object):
         run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
         total_dirs = len(run_dirs)
         logging.info('Fetching properties from %d run directories' % total_dirs)
+        unxeplained_errors = 0
         for index, run_dir in enumerate(run_dirs, start=1):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
@@ -146,8 +150,14 @@ class Fetcher(object):
 
             if write_combined_props and run_id:
                 combined_props['-'.join(run_id)] = props
+            if props.get('unexplained_error'):
+                logging.warning('Unexplained error in: \'%s\'' % props.get('run_dir'))
+                unxeplained_errors += 1
 
         logging.info('Fetching finished')
+        if unxeplained_errors:
+            logging.warning('There were %s runs with unexplained errors.'
+                            % unxeplained_errors)
         tools.makedirs(eval_dir)
         if write_combined_props:
             combined_props.write()

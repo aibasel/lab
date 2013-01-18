@@ -57,12 +57,12 @@ class PlanningReport(Report):
         Attribute('initial_h_value', min_wins=False),
         Attribute('quality', absolute=True, min_wins=False),
         Attribute('unsolvable', absolute=True, min_wins=False),
-        Attribute('search_time', function=reports.gm),
-        Attribute('total_time', function=reports.gm),
-        Attribute('evaluations', function=reports.gm),
-        Attribute('expansions', function=reports.gm),
-        Attribute('generated', function=reports.gm),
-        Attribute('score_*', min_wins=False, function=reports.avg),
+        Attribute('search_time', functions=reports.gm),
+        Attribute('total_time', functions=reports.gm),
+        Attribute('evaluations', functions=reports.gm),
+        Attribute('expansions', functions=reports.gm),
+        Attribute('generated', functions=reports.gm),
+        Attribute('score_*', min_wins=False, functions=[reports.avg, sum]),
         Attribute('*_error', absolute=True),
     ])
 
@@ -101,7 +101,7 @@ class PlanningReport(Report):
         self.derived_properties = derived_properties or []
 
         # Set non-default options for some attributes.
-        attributes = kwargs.get('attributes', [])
+        attributes = kwargs.get('attributes') or []
         if isinstance(attributes, basestring):
             attributes = [attributes]
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
@@ -113,15 +113,26 @@ class PlanningReport(Report):
         Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
 
+    def get_text(self):
+        markup = Report.get_text(self)
+        unxeplained_errors = 0
+        for run in self.runs.values():
+            if run.get('unexplained_error'):
+                logging.warning('Unexplained error in: \'%s\'' % run.get('run_dir'))
+                unxeplained_errors += 1
+        if unxeplained_errors:
+            logging.warning('There were %s runs with unexplained errors.'
+                            % unxeplained_errors)
+        return markup
+
     def _prepare_attribute(self, attr):
-        if isinstance(attr, Attribute):
-            return attr
-        elif attr in self.ATTRIBUTES:
-            return self.ATTRIBUTES[attr]
-        for pattern in self.ATTRIBUTES.values():
-            if fnmatch.fnmatch(attr, pattern):
-                return pattern.copy(attr)
-        return Attribute(attr)
+        if not isinstance(attr, Attribute):
+            if attr in self.ATTRIBUTES:
+                return self.ATTRIBUTES[attr]
+            for pattern in self.ATTRIBUTES.values():
+                if fnmatch.fnmatch(attr, pattern):
+                    return pattern.copy(attr)
+        return Report._prepare_attribute(self, attr)
 
     def _scan_data(self):
         self._scan_planning_data()
@@ -195,6 +206,24 @@ class PlanningReport(Report):
                 for run in runs:
                     run_id = '-'.join((run['config'], run['domain'], run['problem']))
                     self.props[run_id] = run
+
+    def _get_warnings_table(self):
+        """
+        Returns a :py:class:`Table <lab.reports.Table>` containing one line for each run
+        where a serious error occured. Every error that is not 'none', 'unsolvable',
+        'timeout' or 'mem-limit-exceeded' is considered serious.
+        """
+        sanctioned_error_reasons = [None, 'none', 'unsolvable',
+                                    'timeout', 'mem-limit-exceeded']
+        columns = ['domain', 'problem', 'config', 'error',
+                   'last_logged_time', 'last_logged_memory']
+        table = reports.Table(title='Unexplained errors')
+        table.set_column_order(columns)
+        for run in self.props.values():
+            if run.get('error') not in sanctioned_error_reasons:
+                for column in columns:
+                    table.add_cell(run['run_dir'], column, run.get(column, '?'))
+        return table
 
     def _get_config_order(self):
         """

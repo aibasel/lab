@@ -423,29 +423,40 @@ def get_color(fraction, min_wins):
     return colorsys.hsv_to_rgb(start + fraction * (end - start), 1, 0.7)
 
 
-def get_colors(values, min_wins):
-    default = (0.5,) * 3
-    real_values = [val for val in values if val is not None]
-    if not real_values:
-        return [default for val in values]
-    min_value = min(real_values)
-    max_value = max(real_values)
+def get_colors(cells, min_wins):
+    result = {col: (0.5,) * 3 for col in cells.keys()}
+    min_value, max_value = get_min_max(cells)
+
+    if min_value == max_value:
+        if min_value == 'undefined' or None not in cells.values():
+            # Either there are no float values in this row or 
+            # All values are floats (no value is None) and they are all equal.
+            return result
+        else:
+            # Some values are None, the rest are all equal. The latter have 
+            # a distance of 0 to the min_value, so setting min_wins to True 
+            # highlights them all as the best values in this row.
+            min_wins = True
     diff = float(max_value - min_value)
-    if diff == 0:
-        if len(real_values) == len(values):
-            # No value is None and they are all equal.
-            return [default for val in values]
-        else:
-            # Some values are None, the rest are all equal.
-            return [default if val is None else get_color(0, True) for val in values]
-    colors = []
-    for val in values:
-        if val is None:
-            colors.append(default)
-        else:
+    for col, val in cells.items():
+        if val is not None:
             fraction = (val - min_value) / diff
-            colors.append(get_color(fraction, min_wins))
-    return colors
+            result[col] = get_color(fraction, min_wins)
+    return result
+
+
+def get_min_max(dictionary):
+    """Returns min and max of all values in a dictionary that are not None.
+    Floats are rounded to two decimal places. If no maximum and minimum is
+    defined (e.g. all values None) "undefined" is returned for both min and
+    max."""
+    non_none_values = [val for val in dictionary.values() if val is not None]
+    non_none_values = [(round(val, 2) if isinstance(val, float) else val)
+                       for val in non_none_values]
+    if non_none_values:
+        return min(non_none_values), max(non_none_values)
+    else:
+        return 'undefined', 'undefined'
 
 
 def rgb_fractions_to_html_color(r, g, b):
