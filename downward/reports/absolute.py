@@ -66,8 +66,6 @@ class AbsoluteReport(PlanningReport):
         # The actual section is added at poistion summary_index after creating
         # all other tables.
         summary = self._get_empty_table(title='summary')
-# HACK
-        summary.dynamic_data_modules.append(reports.DiffColumnsModule(['astar_blind'], ['473abcdaa340', '9972c711f3c8']))
         toc_lines.append('- **[""Summary"" #summary]**')
 
         for attribute in self.attributes:

@@ -601,7 +601,7 @@ class Table(collections.defaultdict):
             for col_name in self.col_names:
                 cells[row_name][col_name] = row.get(col_name)
         for dynamic_data_module in self.dynamic_data_modules:
-             dynamic_data_module.collect(self, cells)
+             cells = dynamic_data_module.collect(self, cells) or cells
         return cells
 
     def _format(self, cells):
@@ -610,7 +610,7 @@ class Table(collections.defaultdict):
         for row_name, row in cells.items():
             formated_cells[row_name] = self._format_row(row_name, row)
         for dynamic_data_module in self.dynamic_data_modules:
-             dynamic_data_module.format(self, formated_cells)
+             formated_cells = dynamic_data_module.format(self, formated_cells) or formated_cells
         return formated_cells
     
     def _format_row(self, row_name, row):
@@ -621,7 +621,7 @@ class Table(collections.defaultdict):
         # Get the slice of the row that should be formated.
         # Note that there might be other columns (e.g. added by subclasses
         # of Table) that should not be formated.
-        row_slice = dict((col_name, row[col_name])
+        row_slice = dict((col_name, row.get(col_name))
                          for col_name in self.col_names)
 
         min_value, max_value = tools.get_min_max(row_slice)
@@ -710,6 +710,7 @@ class Table(collections.defaultdict):
         formated_cells = self._format(cells)
         return self._get_markup(formated_cells)
 
+
 def extract_summary_lines(from_table, to_table, link=None):
     for name, row in from_table.get_summary_rows().items():
         row_name = '%s - %s' % (from_table.title, name)
@@ -722,208 +723,16 @@ def extract_summary_lines(from_table, to_table, link=None):
                 continue
             to_table.add_cell(row_name, col_name, value)
 
-# TODO
-# ----------- unfinished stuff for AutoCalculatedColumns ---------------
 
 class DynamicDataModule:
     def collect(self, table, cells):
-        pass
+        return cells
 
     def format(self, table, formated_cells):
-        pass
+        return formated_cells
 
     def modify_row_order(self, table, row_order):
         return row_order
 
     def modify_column_order(self, table, column_order):
         return column_order
-
-
-class DiffColumnsModule(DynamicDataModule):
-    def __init__(self, configs, revisions):
-        self.configs = configs
-        assert len(revisions) == 2, revisions
-        self.revisions = revisions
-
-    def collect(self, table, cells):
-        for config in self.configs:
-            col_names = ['%s-%s' % (r, config) for r in self.revisions]
-            diff_col_name = 'Diff - %s' % config
-            cells[table.header_row][diff_col_name] = diff_col_name
-            dummy_col_name = 'DiffDummy - %s' % config
-            cells[table.header_row][dummy_col_name] = ''
-            for row_name in table.row_names:
-                values = [table[row_name].get(col_name, None) for col_name in col_names]
-                if any(value is None for value in values):
-                    diff = '-'
-                else:
-                    diff = values[1] - values[0]
-                cells[row_name][diff_col_name] = diff
-        # TODO: summary cells
-
-    def format(self, table, formated_cells):
-        for config in self.configs:
-            diff_col_name = 'Diff - %s' % config
-            for row_name in table.row_names:
-                formated_value = formated_cells[row_name][diff_col_name]
-                try:
-                    value = float(formated_value)
-                except:
-                    value = 0
-                if value == 0:
-                    color = 'grey'
-                elif ((value < 0 and table.get_min_wins(row_name)) or
-                      (value > 0 and not table.get_min_wins(row_name))):
-                    color = 'green'
-                else:
-                    color = 'red'
-                formated_value = '{%s|color:%s}' % (value, color)
-                formated_cells[row_name][diff_col_name] = formated_value
-        # TODO: summary cells
-
-    def modify_column_order(self, table, column_order):
-        """
-        Reorder configs such that it contains only those that for
-        self.revisions and the configs that only differ in their revisions
-        are next to each other.
-        """
-        new_column_order = [table.row_name_column]
-        for config in self.configs:
-            if len(new_column_order) > 1:
-                new_column_order.append('DiffDummy - %s' % config)
-            for rev in self.revisions:
-                new_column_order.append('%s-%s' % (rev, config))
-            new_column_order.append('Diff - %s' % config)
-        # keep all other columns at the end in the order they were before
-        for col_name in column_order:
-            if col_name not in new_column_order:
-                new_column_order.append(col_name)
-        return new_column_order
-
-    def modify_row_order(self, table, row_order):
-        return row_order
-        # TODO append summary function if not already there
-
-
-
-
-
-
-
-
-class AutoCalculatedColumn:
-    """Columns in tables which calculate their value automatically from the table data.
-    Such calculated values are not stored within the table and are not considered part
-    of the table data."""
-    def __init__(self, name, function, format=None, summary_functions=None):
-        """Use this class if your table should contain a column whose values
-        are calculated from the table data automatically.
-
-        * *name*: Set the name shown in the column header.
-        * *function*: Set the function that is used to calculate the value
-          for each cell. This function should take the row name and table data
-          as parameters.
-        * *format*: If this is not None, all values are passed through this
-        function along with their row and column name. The return value is used
-        as the formated data value. Without a format function no value is formated.
-        * *summary_functions*: Set the function(s) that aggregates the values
-          for this column over multiple runs. This will be displayed in a summary row.
-        """
-        self.name = name
-        self.function = function
-        self.format = format
-        if summary_functions is None:
-            self.summary_functions = []
-        elif not isinstance(summary_functions, collections.Iterable):
-            self.summary_functions = [summary_functions]
-        else:
-            self.summary_functions = summary_functions
-        self.values = {}
-
-    def get_formated_value(self, row_name, table_data):
-        """Calculate and format the value for one row in this column."""
-        if row_name in self.values:
-            value = self.values[row_name]
-        else:
-            value = self.function(row_name, table_data)
-            self.values[row_name] = value
-        if self.format:
-            value = self.format(value, row_name)
-        return value
-    
-    def get_summary_values(self):
-        """Iterator that yields tuples of summary function name and the
-        calculated value for all values calculated in this column so far."""
-        values = self.values.values()
-        for f in self.summary_functions:
-            yield function_name(f), f(values)
-
-    def __str__(self):
-        return self.name
-
-
-class AugmentedTable(Table):
-    def __init__(self, **kwargs):
-        Table.__init__(self, **kwargs)
-        # Automatically calculated columns are not considered part of the
-        # data. They bring their own methods to calculate and format values.
-        # self.auto_calculated_cols maps names of data columns to a list of
-        # AutoCalculatedColumns that should follow them.
-        self.auto_calculated_cols = {}
-
-
-    def add_auto_calculated_column(self, col, after=None):
-        """
-        Add an automatically calculated column after some data column.
-
-        *col* must be of type AutoCalculatedColumn.
-        """
-        if after not in self.auto_calculated_cols:
-            self.auto_calculated_cols[after] = []
-        self.auto_calculated_cols[after].append(col)
-
-    @property
-    def all_cols(self):
-        """Return all column names (including the automatically calculated
-        columns) in sorted order."""
-        all_cols = []
-        for col in self.cols:
-            all_cols.append(col)
-            # Add all automatically calculated columns that should appear
-            # after this one.
-            all_cols.extend(self.auto_calculated_cols.get(col, []))
-        unused_keys = set(self.auto_calculated_cols.keys()) - set(self.cols)
-        for key in unused_keys:
-            all_cols.extend(self.auto_calculated_cols[key])
-        return all_cols
-
-    def add_auto_calculated_values(self, formated_row, row_name=None):
-        """Add cells for autocalculated columns into the row. If a row_name
-        is given, the cells values are calculated by the AutoCalculatedColumn,
-        otherwise an empty cell is added for each column."""
-        # The first entry is the row title.
-        modified_row = [formated_row.pop(0)]
-        for col in self.all_cols:
-            if isinstance(col, AutoCalculatedColumn):
-                if row_name is None:
-                    modified_row.append('')
-                else:
-                    modified_row.append(col.get_formated_value(row_name, dict(self)))
-            else:
-                modified_row.append(formated_row.pop(0))
-        return modified_row
-    
-    def get_calculated_columns_summary_rows(self):
-        """Combine the summary rows of all automatically calculated columns,
-        i.e. if multiple columns use `sum` as their summary row, only use one
-        row containing all values."""
-        summary_values = defaultdict(dict)
-        for cols in self.auto_calculated_cols.values():
-            for col in cols:
-                for row, value in col.get_summary_values():
-                    summary_values[row][col] = value
-        for row_name, row_summary_values in summary_values.items():
-            row_name = '**%s**' % row_name
-            yield [row_name] + [row_summary_values.get(col, '')
-                                 for col in self.all_cols]
-
