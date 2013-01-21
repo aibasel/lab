@@ -26,6 +26,7 @@ import subprocess
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
 from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11, config_suite_optimal, config_suite_satisficing
+from downward.reports.compare import CompareRevisionsReport
 from lab.steps import Step
 
 
