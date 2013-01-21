@@ -278,8 +278,8 @@ def _host_range(prefix, from_num, to_num):
 
 
 class MaiaEnvironment(OracleGridEngineEnvironment):
-    DEFAULT_QUEUE = 'all.q'
-    DEFAULT_HOST_RESTRICTION = "maia-quad"
+    DEFAULT_QUEUE = '"all.q@ase*"'
+    DEFAULT_HOST_RESTRICTION = ''
 
     HOST_RESTRICTIONS = {
         'maia-quad': _host_range('uni', 1, 32) + _host_range('ugi', 1, 8),
