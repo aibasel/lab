@@ -34,26 +34,51 @@ class CompareRevisionsReport(AbsoluteReport):
         if title == 'summary':
             summary_functions = []
         config_nicks = self._get_config_nick_order()
-        diff_module = DiffColumnsModule(config_nicks, self.revisions, summary_functions)
+        compare_configs = []
+        for config_nick in config_nicks:
+            col_names = ['%s-%s' % (r, config_nick) for r in self.revisions]
+            compare_configs.append((col_names[0], col_names[1], 'Diff - %s' % config_nick))
+        diff_module = DiffColumnsModule(compare_configs, summary_functions)
+        table.dynamic_data_modules.append(diff_module)
+        return table
+
+class CompareConfigsReport(AbsoluteReport):
+    def __init__(self, compare_configs, **kwargs):
+        AbsoluteReport.__init__(self, **kwargs)
+        self.compare_configs = compare_configs
+
+    def _get_empty_table(self, attribute=None, title=None, columns=None):
+        table = AbsoluteReport._get_empty_table(self, attribute=attribute,
+                                                title=title, columns=columns)
+        summary_functions = [sum, reports.avg]
+        if title == 'summary':
+            summary_functions = []
+        diff_module = DiffColumnsModule(self.compare_configs, summary_functions)
         table.dynamic_data_modules.append(diff_module)
         return table
 
 
 class DiffColumnsModule(DynamicDataModule):
-    def __init__(self, config_nicks, revisions, summary_functions):
-        self.config_nicks = config_nicks
-        assert len(revisions) == 2, revisions
-        self.revisions = revisions
+    def __init__(self, compare_configs, summary_functions):
+        self.compare_configs = []
+        diff_column_names = set()
+        for t in compare_configs:
+            diff_name = 'Diff'
+            if len(t) == 3:
+                diff_name = t[2]
+            uniq_count = 0
+            uniq_diff_name = diff_name
+            while uniq_diff_name in diff_column_names:
+                uniq_count += 1
+                uniq_diff_name = diff_name + str(uniq_count)
+            diff_column_names.add(uniq_diff_name)
+            self.compare_configs.append(((t[0], t[1]), diff_name, uniq_diff_name))
         self.summary_functions = summary_functions
 
     def collect(self, table, cells):
-        for config_nick in self.config_nicks:
+        for col_names, diff_col_header, diff_col_name in self.compare_configs:
             non_none_values = []
-            col_names = ['%s-%s' % (r, config_nick) for r in self.revisions]
-            diff_col_name = 'Diff - %s' % config_nick
-            cells[table.header_row][diff_col_name] = diff_col_name
-            dummy_col_name = 'DiffDummy - %s' % config_nick
-            cells[table.header_row][dummy_col_name] = ''
+            cells[table.header_row][diff_col_name] = diff_col_header
             for row_name in table.row_names:
                 values = [table[row_name].get(col_name, None) for col_name in col_names]
                 if any(value is None for value in values):
@@ -69,8 +94,7 @@ class DiffColumnsModule(DynamicDataModule):
         return cells
 
     def format(self, table, formated_cells):
-        for config_nick in self.config_nicks:
-            diff_col_name = 'Diff - %s' % config_nick
+        for col_names, diff_col_header, diff_col_name in self.compare_configs:
             for row_name in table.row_names:
                 formated_value = formated_cells[row_name][diff_col_name]
                 try:
@@ -94,12 +118,12 @@ class DiffColumnsModule(DynamicDataModule):
         are next to each other.
         """
         new_column_order = [table.header_column]
-        for config_nick in self.config_nicks:
+        for col_names, diff_col_header, diff_col_name in self.compare_configs:
             if len(new_column_order) > 1:
-                new_column_order.append('DiffDummy - %s' % config_nick)
-            for rev in self.revisions:
-                new_column_order.append('%s-%s' % (rev, config_nick))
-            new_column_order.append('Diff - %s' % config_nick)
+                new_column_order.append('DiffDummy')
+            for col_name in col_names:
+                new_column_order.append(col_name)
+            new_column_order.append(diff_col_name)
         return new_column_order
 
     def modify_printable_row_order(self, table, row_order):
