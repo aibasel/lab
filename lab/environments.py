@@ -281,6 +281,10 @@ class MaiaEnvironment(OracleGridEngineEnvironment):
     DEFAULT_QUEUE = '"all.q@ase*"'
     DEFAULT_HOST_RESTRICTION = ''
 
+    # Note: the hosts in the following host restrictions are part of the
+    # queue 'all.q' and not part of the default queue '"all.q@ase*"'.
+    # Use them like this:
+    # MaiaEnvironment(queue='all.q', host_restrictions='maia-six')
     HOST_RESTRICTIONS = {
         'maia-quad': _host_range('uni', 1, 32) + _host_range('ugi', 1, 8),
         'maia-six': _host_range('uni', 33, 72),
