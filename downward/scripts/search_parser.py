@@ -272,12 +272,12 @@ def get_error(content, props):
         if props.get('unsolvable', None) == 1:
             props['error'] = 'unsolvable'
         elif props.get('search_mem_limit_exceeded', None) == 1:
-            props['error'] = 'memory'
+            props['error'] = 'mem-limit-exceeded'
         elif props.get('search_timeout', None) == 1:
             props['error'] = 'timeout'
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
-            props['error'] = 'memory'
+            props['error'] = 'mem-limit-exceeded'
             props['search_mem_limit_exceeded'] = 1
         # If the run was killed with SIGXCPU (return code: 128 + 24 (SIGXCPU) = 152),
         # we know it hit its CPU limit.
