@@ -173,15 +173,15 @@ class Call(subprocess.Popen):
             # We allow some extra time and space to avoid race conditions
             # of lab and the started task.
             if total_time >= self.time_limit + 10:
-                self._set_error('error', 'unexplained-timeout')
+                self._set_error('unexplained-timeout')
                 try_term = True
             elif real_time >= self.wall_clock_time_limit:
-                self._set_error('error', 'unexplained-wall-clock-timeout')
+                self._set_error('unexplained-wall-clock-timeout')
                 try_term = True
             # The downward script and the portfolio script together take
             # up around 58MB of memory. We use 128MB to be on the safe side.
             elif total_vsize > self.mem_limit + 128:
-                self._set_error('error', 'unexplained-mem-limit-exceeded')
+                self._set_error('unexplained-mem-limit-exceeded')
                 try_term = True
 
             try_kill = (total_time >= self.time_limit + self.kill_delay or
