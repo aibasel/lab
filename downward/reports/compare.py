@@ -81,12 +81,12 @@ class DiffColumnsModule(DynamicDataModule):
             cells[table.header_row][diff_col_name] = diff_col_header
             for row_name in table.row_names:
                 values = [table[row_name].get(col_name, None) for col_name in col_names]
-                if any(value is None for value in values):
-                    diff = '-'
-                else:
-                    diff = values[1] - values[0]
+                try:
+                    diff = float(values[1]) - float(values[0])
                     non_none_values.append(diff)
-                cells[row_name][diff_col_name] = diff
+                    cells[row_name][diff_col_name] = diff
+                except:
+                    pass
             for func in self.summary_functions:
                 func_name = reports.function_name(func)
                 cells[func_name][table.header_column] = func_name.capitalize()
@@ -96,12 +96,12 @@ class DiffColumnsModule(DynamicDataModule):
     def format(self, table, formated_cells):
         for col_names, diff_col_header, diff_col_name in self.compare_configs:
             for row_name in table.row_names:
-                formated_value = formated_cells[row_name][diff_col_name]
+                formated_value = formated_cells[row_name].get(diff_col_name)
                 try:
                     value = float(formated_value)
                 except:
-                    value = 0
-                if value == 0:
+                    value = '-'
+                if value == 0 or value == '-':
                     color = 'grey'
                 elif ((value < 0 and table.get_min_wins(row_name)) or
                       (value > 0 and not table.get_min_wins(row_name))):
