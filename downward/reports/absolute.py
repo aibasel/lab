@@ -74,7 +74,8 @@ class AbsoluteReport(PlanningReport):
                 if self.attribute_is_numeric(attribute):
                     domain_table = self._get_table(attribute)
                     tables.append(('', domain_table))
-                    reports.extract_summary_rows(domain_table, summary, link='#' + attribute)
+                    reports.extract_summary_rows(domain_table, summary,
+                                                link='#' + attribute)
                 else:
                     tables.append(('', 'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
@@ -180,7 +181,7 @@ class AbsoluteReport(PlanningReport):
             link = None
             if self.resolution == 'combined':
                 link = '#%s-%s' % (attribute, domain)
-            formatter = reports.CellFormatter(link=link, count=count) 
+            formatter = reports.CellFormatter(link=link, count=count)
             table.cell_formatters[domain][table.header_column] = formatter
 
         for (domain, config), values in domain_config_values.items():
