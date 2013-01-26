@@ -46,13 +46,24 @@ class CompareRevisionsReport(AbsoluteReport):
         compare_configs = []
         for config_nick in config_nicks:
             col_names = ['%s-%s' % (r, config_nick) for r in self.revisions]
-            compare_configs.append((col_names[0], col_names[1], 'Diff - %s' % config_nick))
+            compare_configs.append((col_names[0], col_names[1],
+                                   'Diff - %s' % config_nick))
         diff_module = DiffColumnsModule(compare_configs, summary_functions)
         table.dynamic_data_modules.append(diff_module)
         return table
 
+
 class CompareConfigsReport(AbsoluteReport):
+    """Allows to compare different configurations."""
+
     def __init__(self, compare_configs, **kwargs):
+        """
+        See :py:class:`AbsoluteReport <downward.reports.AbsoluteReport>`
+        for inherited parameters.
+
+        See :py:class:`DiffColumnsModule <downward.reports.compare.DiffColumnsModule>`
+        for an explanation of how to set the configs to compare with *compare_configs*.
+        """
         AbsoluteReport.__init__(self, **kwargs)
         self.compare_configs = compare_configs
 
@@ -68,9 +79,24 @@ class CompareConfigsReport(AbsoluteReport):
 
 
 class DiffColumnsModule(DynamicDataModule):
-    """Adds multiple columns each comparing the values in two columns that
-    contain the same config but different revisions."""
-        def __init__(self, compare_configs, summary_functions):
+    """Adds multiple columns each comparing the values in two configs."""
+    def __init__(self, compare_configs, summary_functions):
+        """
+        *compare_configs* is a list of tuples of 2 or 3 elements. The first two entries in
+        each tuple are configs that should be compared. If a third entry is present it
+        is used as the name of the column showing the difference between the two configs.
+        Otherwise the column will be named 'Diff'.
+        All columns in the report will be arragned such that the configurations that are
+        compared are next to each other. After those two columns a diff column is added
+        that shows the difference between the two values. If a config occurs in more than
+        one comparison it is repeated every time. All other columns are not printed.
+        For example if the data contains configs A, B, C and D and *compare_configs* is
+        [('A', 'B', 'Diff BA'), ('A', 'C')] the resulting columns will be
+        'A', 'B', 'Diff BA' (contains B - A), 'A', 'C' , 'Diff' (contains C - A)
+
+        *summary_functions* contains a list of functions that will be calculated for all
+        entries in the diff columns.
+        """
         self.compare_configs = []
         diff_column_names = set()
         for t in compare_configs:

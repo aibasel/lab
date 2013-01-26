@@ -25,8 +25,10 @@ import logging
 import subprocess
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
-from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11, config_suite_optimal, config_suite_satisficing
+from downward.suites import (suite_optimal_with_ipc11, suite_satisficing_with_ipc11,
+                             config_suite_optimal, config_suite_satisficing)
 from downward.reports.compare import CompareRevisionsReport
+from downward.reports.scatter import ScatterPlotReport
 from lab.steps import Step
 
 
@@ -37,11 +39,12 @@ class CompareRevisionsExperiment(DownwardExperiment):
     Both revisions are tested with all the most important configurations.
     Reports that allow a before-after comparison are automaticaly added.
     """
-    def __init__(self, path, repo, opt_or_sat, branch, base_revision=None, 
+    def __init__(self, path, repo, opt_or_sat, branch, base_revision=None,
                  use_core_configs=True, use_ipc_configs=True, use_extended_configs=False,
                  **kwargs):
         """
-        See :py:class:`DownwardExperiment <downward.experiment.DownwardExperiment>` for inherited parameters.
+        See :py:class:`DownwardExperiment <downward.experiment.DownwardExperiment>`
+        for inherited parameters.
 
         The experiment will be built at *path*.
 
@@ -50,7 +53,7 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         If *opt_or_sat* is 'opt', configurations for optimal planning will be
         tested on all domains suited for optimal planning. If it is 'sat',
-        configurations for satisficing planning will be tested on the 
+        configurations for satisficing planning will be tested on the
         satisficing suite.
 
         *branch* determines the revision to test.
@@ -58,11 +61,14 @@ class CompareRevisionsExperiment(DownwardExperiment):
         If *base_revision* is None (default), the latest revision on the branch default
         that is an ancestor of *branch* will be used.
 
-        *use_core_configs* determines if the most common configurations are tested (default: True).
+        *use_core_configs* determines if the most common configurations are tested
+        (default: True).
 
-        *use_ipc_configs* determines if the configurations used in the IPCs are tested (default: True).
+        *use_ipc_configs* determines if the configurations used in the IPCs are tested
+        (default: True).
 
-        *use_extended_configs* determines if some less common configurations are tested (default: False).
+        *use_extended_configs* determines if some less common configurations are tested
+        (default: False).
 
         Example: ::
 
@@ -70,7 +76,7 @@ class CompareRevisionsExperiment(DownwardExperiment):
             env = GkiGridEnvironment(queue='xeon_core.q', priority=-2)
             exppath = os.path.join(HOME, 'experiments/exec', 'issue999-opt')
 
-            exp = CompareRevisionsExperiment(exppath, repo, 'opt', 'issue999', 
+            exp = CompareRevisionsExperiment(exppath, repo, 'opt', 'issue999',
                                              use_extended_configs=True,
                                              environment=env)
         """
@@ -80,7 +86,9 @@ class CompareRevisionsExperiment(DownwardExperiment):
             logging.critical('Base revision for branch \'%s\' could not be determined. ' +
                              'Please provide it manually.' % branch)
 
-        combinations=[(Translator(repo, rev=r), Preprocessor(repo, rev=r), Planner(repo, rev=r))
+        combinations = [(Translator(repo, rev=r),
+                        Preprocessor(repo, rev=r),
+                        Planner(repo, rev=r))
                       for r in (branch, base_revision)]
         DownwardExperiment.__init__(self, path, repo, combinations=combinations, **kwargs)
 
@@ -88,10 +96,14 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         if opt_or_sat == 'opt':
             self.add_suite(suite_optimal_with_ipc11())
-            configs = config_suite_optimal(use_core_configs, use_ipc_configs, use_extended_configs)
+            configs = config_suite_optimal(use_core_configs,
+                                           use_ipc_configs,
+                                           use_extended_configs)
         elif opt_or_sat == 'sat':
             self.add_suite(suite_satisficing_with_ipc11())
-            configs = config_suite_satisficing(use_core_configs, use_ipc_configs, use_extended_configs)
+            configs = config_suite_satisficing(use_core_configs,
+                                               use_ipc_configs,
+                                               use_extended_configs)
         else:
             logging.critical('Select to test either \'opt\' or \'sat\' configurations')
 
@@ -100,27 +112,31 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         # ------ reports -----------------------------------------------
 
-        compare_report = CompareRevisionsReport(
-                            revisions=[base_revision, branch],
-                            resolution='combined',
-                            # TODO add more scores
-                            attributes=['coverage', 'score_expansions', 'score_total_time'])
-        exp.add_step(Step('report-compare-scores',
+        compare_report = CompareRevisionsReport(revisions=[base_revision, branch],
+                                                resolution='combined',
+                                                # TODO add more scores
+                                                attributes=[
+                                                    'coverage',
+                                                    'score_expansions',
+                                                    'score_total_time'])
+        self.add_step(Step('report-compare-scores',
                           compare_report,
-                          exp.eval_dir,
-                          os.path.join(exp.eval_dir, 'report-compare-scores.html')))
+                          self.eval_dir,
+                          os.path.join(self.eval_dir, 'report-compare-scores.html')))
 
         for nick in configs.keys():
-            config_before = '%s-%s-%s-%s' % (base_revision, base_revision, base_revision, nick)
+            config_before = '%s-%s-%s-%s' % (base_revision, base_revision,
+                                             base_revision, nick)
             config_after = '%s-%s-%s-%s' % (branch, branch, branch, nick)
             for attribute in ['total_time', 'search_time', 'memory', 'expansions']:
                 name = 'scatter-%s-%s' % (attribute, nick)
-                exp.add_step(Step(name,
-                              ScatterPlotReport(filter_config=[config_before, config_after],
-                                                attributes=[attribute],
-                                                get_category=domain_tuple_category),
-                              exp.eval_dir,
-                              os.path.join(exp.eval_dir, name)))
+                self.add_step(Step(name,
+                                   ScatterPlotReport(
+                                       filter_config=[config_before, config_after],
+                                       attributes=[attribute],
+                                       get_category=domain_tuple_category),
+                                   self.eval_dir,
+                                   os.path.join(self.eval_dir, name)))
 
 
 # ------ utility functions ---------------------------------------------
@@ -129,9 +145,9 @@ def greatest_common_ancestor(repo, rev1, rev2):
     pipe = subprocess.Popen(
         ['hg', 'id', '--cwd', repo, '-r', 'ancestor(\'%s\', \'%s\')' % (rev1, rev2)],
         stdout=subprocess.PIPE
-        )
+    )
     return pipe.stdout.read().strip()
+
 
 def domain_tuple_category(run1, run2):
     return run1['domain']
-
