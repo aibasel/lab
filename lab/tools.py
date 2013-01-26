@@ -429,12 +429,12 @@ def get_colors(cells, min_wins):
 
     if min_value == max_value:
         if min_value == 'undefined' or None not in cells.values():
-            # Either there are no float values in this row or 
+            # Either there are no float values in this row or
             # All values are floats (no value is None) and they are all equal.
             return result
         else:
-            # Some values are None, the rest are all equal. The latter have 
-            # a distance of 0 to the min_value, so setting min_wins to True 
+            # Some values are None, the rest are all equal. The latter have
+            # a distance of 0 to the min_value, so setting min_wins to True
             # highlights them all as the best values in this row.
             min_wins = True
     diff = float(max_value - min_value)

@@ -99,9 +99,11 @@ def stddev(values):
     mu = avg(values)
     return math.sqrt((sum((v - mu) ** 2 for v in values) / n))
 
+
 def function_name(f):
     names = {'avg': 'average', 'gm': 'geometric mean'}
     return names.get(f.__name__, f.__name__)
+
 
 class Attribute(str):
     """A string subclass for attributes in reports."""
@@ -361,7 +363,8 @@ class Report(object):
         return None
 
     def _get_type_map(self, attributes):
-        return dict(((self._prepare_attribute(attr), self._get_type(attr)) for attr in attributes))
+        return dict((self._prepare_attribute(attr), self._get_type(attr))
+                    for attr in attributes)
 
     def _scan_data(self):
         attributes = set()
@@ -431,7 +434,7 @@ class Table(collections.defaultdict):
          | prob2      |    15 |    25 |
         >>> t.row_names
         ['prob1', 'prob2']
-        >>> t.cols
+        >>> t.col_names
         ['cfg1', 'cfg2']
         >>> t.get_row('prob2')
         [15, 25]
@@ -567,22 +570,24 @@ class Table(collections.defaultdict):
         return summary_rows
 
     def _get_printable_row_order(self):
-        """Return a list of all rows (including non-data rows) in the order they should be printed."""
+        """Return a list of all rows (including non-data rows) in the order
+        they should be printed."""
         row_order = [self.header_row]
         for row_name in self.row_names + self.summary_row_order:
             row_order.append(row_name)
-        for dynamic_data_module in self.dynamic_data_modules:
-             row_order = dynamic_data_module.modify_printable_row_order(self, row_order) or row_order
+        for module in self.dynamic_data_modules:
+            row_order = module.modify_printable_row_order(self, row_order) or row_order
         return row_order
 
     def _get_printable_column_order(self):
-        """Return a list of all columns (including non-data columns) in the order they should be printed."""
-        column_order = [self.header_column]
+        """Return a list of all columns (including non-data columns) in the order
+        they should be printed."""
+        col_order = [self.header_column]
         for col_name in self.col_names:
-            column_order.append(col_name)
-        for dynamic_data_module in self.dynamic_data_modules:
-             column_order = dynamic_data_module.modify_printable_column_order(self, column_order) or column_order
-        return column_order
+            col_order.append(col_name)
+        for module in self.dynamic_data_modules:
+            col_order = module.modify_printable_column_order(self, col_order) or col_order
+        return col_order
 
     def _collect_cells(self):
         """Collect all cells that should be printed including table headers,
@@ -598,7 +603,7 @@ class Table(collections.defaultdict):
             for col_name in self.col_names:
                 cells[row_name][col_name] = row.get(col_name)
         for dynamic_data_module in self.dynamic_data_modules:
-             cells = dynamic_data_module.collect(self, cells) or cells
+            cells = dynamic_data_module.collect(self, cells) or cells
         return cells
 
     def _format(self, cells):
@@ -606,8 +611,8 @@ class Table(collections.defaultdict):
         for row_name, row in cells.items():
             self._format_row(row_name, row)
         for dynamic_data_module in self.dynamic_data_modules:
-             dynamic_data_module.format(self, cells)
-    
+            dynamic_data_module.format(self, cells)
+
     def _format_row(self, row_name, row):
         """Format all entries in **row** (in place)."""
         if row_name == self.header_row:
@@ -633,7 +638,7 @@ class Table(collections.defaultdict):
         min_wins = self.get_min_wins(row_name)
         highlight = min_wins is not None
         colors = tools.get_colors(row, min_wins) if self.colored else None
-        
+
         for col_name, value in row.items():
             color = None
             bold = False
@@ -645,10 +650,10 @@ class Table(collections.defaultdict):
                 elif highlight and only_one_value:
                     color = 'Grey'
                 elif highlight and (rounded_value == min_value and min_wins or
-                                     rounded_value == max_value and not min_wins):
+                                    rounded_value == max_value and not min_wins):
                     bold = True
             row[col_name] = self._format_cell(row_name, col_name, value,
-                                                       color=color, bold=bold)
+                                             color=color, bold=bold)
 
     def _format_cell(self, row_name, col_name, value, color=None, bold=False):
         formatter = self.cell_formatters.get(row_name, {}).get(col_name)
@@ -693,8 +698,11 @@ class Table(collections.defaultdict):
 
     def _get_row_markup(self, row_name, row, template=' | %s |'):
         """Return the txt2tags table markup for one row."""
-        return template % ' | '.join(self._get_cell_markup(row_name, col_name, row.get(col_name, ''))
-                                     for col_name in self._get_printable_column_order())
+        formatted_cells = []
+        for col_name in self._get_printable_column_order():
+            cell = self._get_cell_markup(row_name, col_name, row.get(col_name, ''))
+            formatted_cells.append(cell)
+        return template % ' | '.join(formatted_cells)
 
     def _get_cell_markup(self, row_name, col_name, value):
         """Let all columns have minimal but equal width."""

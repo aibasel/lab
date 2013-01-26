@@ -5,7 +5,17 @@ from downward.reports.absolute import AbsoluteReport
 
 
 class CompareRevisionsReport(AbsoluteReport):
+    """Allows to compare the same configurations in two revisions of the planner."""
     def __init__(self, revisions, **kwargs):
+        """
+        See :py:class:`AbsoluteReport <downward.reports.AbsoluteReport>`
+        for inherited parameters.
+
+        *revisions* is a list of 2 revisions. All columns in the report will be arragned
+        such that the same configurations run for the given revisions are next to each
+        other. After those two columns a diff column is added that shows the difference
+        between the two values. All other columns are not printed.
+        """
         AbsoluteReport.__init__(self, **kwargs)
         assert len(revisions) == 2, revisions
         self.revisions = revisions
@@ -21,12 +31,11 @@ class CompareRevisionsReport(AbsoluteReport):
         for config in self._get_config_order():
             for rev in self.revisions:
                 if config.startswith('%s-' % rev):
-                    config_nick = config[len(rev)+1:]
+                    config_nick = config[len(rev) + 1:]
                     if config_nick not in self.config_nicks:
                         self.config_nicks.append(config_nick)
         return self.config_nicks
 
-    
     def _get_empty_table(self, attribute=None, title=None, columns=None):
         table = AbsoluteReport._get_empty_table(self, attribute=attribute,
                                                 title=title, columns=columns)
@@ -40,7 +49,16 @@ class CompareRevisionsReport(AbsoluteReport):
 
 
 class DiffColumnsModule(DynamicDataModule):
+    """Adds multiple columns each comparing the values in two columns that
+    contain the same config but different revisions."""
     def __init__(self, config_nicks, revisions, summary_functions):
+        """
+        *config_nicks* is a list of config_nicks for which the diff columns will be added.
+        *revisions* is a list of 2 revisions. All columns in the report will be arragned
+        such that the configurations given in *config_nicks* run for the given revisions
+        are next to each other. After those two columns a diff column is added that shows
+        the difference between the two values. All other columns are not printed.
+        """
         self.config_nicks = config_nicks
         assert len(revisions) == 2, revisions
         self.revisions = revisions
@@ -108,4 +126,3 @@ class DiffColumnsModule(DynamicDataModule):
             if func_name not in row_order:
                 row_order.append(func_name)
         return row_order
-
