@@ -114,11 +114,25 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         compare_report = CompareRevisionsReport(revisions=[base_revision, branch],
                                                 resolution='combined',
-                                                # TODO add more scores
                                                 attributes=[
-                                                    'coverage',
-                                                    'score_expansions',
-                                                    'score_total_time'])
+                                                             'coverage',
+                                                             'search_time',
+                                                             'score_search_time',
+                                                             'total_time',
+                                                             'score_total_time',
+                                                             'expansions',
+                                                             'score_expansions',
+                                                             'expansions_until_last_jump',
+                                                             'evaluations',
+                                                             'score_evaluations',
+                                                             'generated',
+                                                             'score_generated',
+                                                             'memory',
+                                                             'score_memory',
+                                                             'run_dir',
+                                                             'cost',
+                                                ],
+                                                )
         self.add_step(Step('report-compare-scores',
                           compare_report,
                           self.eval_dir,
