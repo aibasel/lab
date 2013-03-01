@@ -1,21 +1,20 @@
 Installation
 ============
 
-For the sake of illustration we install everything in the ``~/workshop``
-directory.
+.. highlight:: bash
 
 lab + downward
 --------------
-::
+Choose a destination for the lab package, install the dependencies and clone the
+repository::
 
+    LAB=/path/to/lab
     sudo apt-get install mercurial python2.7 python-matplotlib
-    mkdir ~/workshop
-    cd ~/workshop
-    hg clone https://bitbucket.org/jendrikseipp/lab
+    hg clone https://bitbucket.org/jendrikseipp/lab ${LAB}
 
-Append to your ``.bashrc``::
+Append to your ``.bashrc`` to make lab available on the ``PYTHONPATH``::
 
-    LAB=~/workshop/lab
+    LAB=~/path/to/lab
     if [ -z "$PYTHONPATH" ]; then
         export PYTHONPATH=${LAB}
     else
@@ -25,23 +24,21 @@ Append to your ``.bashrc``::
 Check that everything works::
 
     source ~/.bashrc
-    cd ~/workshop/lab/examples/pi
-    ./pi.py --help
-    ./pi.py build
+    cd ${LAB}/examples/simple
+    ./simple-exp.py --help
 
 Fast Downward planning system
 -----------------------------
 ::
 
+    FAST_DOWNWARD=/path/to/fast-downward/repo
     sudo apt-get install mercurial g++ make python flex bison gawk
     sudo apt-get install g++-multilib  # 64-bit
-    cd ~/workshop
-    hg clone http://hg.fast-downward.org fast-downward
-    cd ~/workshop/fast-downward/src
-    ./build_all
+    hg clone http://hg.fast-downward.org ${FAST_DOWNWARD}
 
-Build ``downward`` experiment::
+After you have adapted the ``EXPPATH`` and ``REPO``
+variables in ``LAB/examples/lmcut.py``, you can run a ``downward`` experiment::
 
-    cd ~/workshop/lab/examples/planner
-    ./planner.py
-    ./planner.py 1 2 3 4
+    cd ${LAB}/examples/
+    ./lmcut.py --help
+    ./lmcut.py --all
