@@ -41,3 +41,5 @@ The comments should help you understand how to use this file as a basis for your
 own experiments.
 
 .. literalinclude:: ../examples/lmcut.py
+
+The ``examples`` directory includes further downward experiments.

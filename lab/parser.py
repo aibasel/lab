@@ -171,7 +171,7 @@ class Parser(object):
         """
         if type == bool:
             logging.warning('Casting any non-empty string to boolean will always '
-                             'evaluate to true. Are you sure you want to use type=bool?')
+                            'evaluate to true. Are you sure you want to use type=bool?')
         self.file_parsers[file].add_pattern(_Pattern(name, regex, group,
                                                      required, type, flags))
 
