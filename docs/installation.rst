@@ -25,7 +25,7 @@ Check that everything works::
 
     source ~/.bashrc
     cd ${LAB}/examples/simple
-    ./simple-exp.py --help
+    ./simple-exp.py
 
 Fast Downward planning system
 -----------------------------
@@ -37,8 +37,8 @@ Fast Downward planning system
     hg clone http://hg.fast-downward.org ${FAST_DOWNWARD}
 
 After you have adapted the ``EXPPATH`` and ``REPO``
-variables in ``LAB/examples/lmcut.py``, you can run a ``downward`` experiment::
+variables in ``LAB/examples/lmcut.py``, you can check that the example
+``downward`` experiment works::
 
     cd ${LAB}/examples/
-    ./lmcut.py --help
-    ./lmcut.py --all
+    ./lmcut.py
