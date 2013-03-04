@@ -1,3 +1,23 @@
+# -*- coding: utf-8 -*-
+#
+# downward uses the lab package to conduct experiments with the
+# Fast Downward planning system.
+#
+# Copyright (C) 2012  Florian Pommerening (florian.pommerening@unibas.ch)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from lab import reports
 
 from lab.reports import DynamicDataModule
@@ -49,8 +69,10 @@ class CompareRevisionsReport(AbsoluteReport):
 
 
 class DiffColumnsModule(DynamicDataModule):
-    """Adds multiple columns each comparing the values in two columns that
-    contain the same config but different revisions."""
+    """
+    Adds multiple columns each comparing the values in two columns that
+    contain the same config but different revisions.
+    """
     def __init__(self, config_nicks, revisions, summary_functions):
         """
         *config_nicks* is a list of config_nicks for which the diff columns will be added.
@@ -65,6 +87,13 @@ class DiffColumnsModule(DynamicDataModule):
         self.summary_functions = summary_functions
 
     def collect(self, table, cells):
+        """
+        Adds cells for the specified diff columns and dynamically computes their values
+        from the respective data columns. If one of the values is None, the difference
+        is set to the string '-'. The summary functions are calculated over all values
+        were both columns have a value. Also adds an empty header for a dummy column after
+        every diff column.
+        """
         for config_nick in self.config_nicks:
             non_none_values = []
             col_names = ['%s-%s' % (r, config_nick) for r in self.revisions]
@@ -87,6 +116,13 @@ class DiffColumnsModule(DynamicDataModule):
         return cells
 
     def format(self, table, formated_cells):
+        """
+        Formats all columns added by this module. Diff values are green if they are better
+        in the second column, red if they are worse and grey if there is no difference.
+        "Better" and "worse" are with respect to the min_wins information of the table for
+        each row.
+        Dummy columns and summary functions are not formatted.
+        """
         for config_nick in self.config_nicks:
             diff_col_name = 'Diff - %s' % config_nick
             for row_name in table.row_names:
