@@ -38,3 +38,5 @@ The comments should help you understand how to use this file as a basis for your
 own experiments.
 
 .. literalinclude:: ../examples/simple/simple-exp.py
+
+In the ``examples\pi`` you can find another example ``lab`` experiment.

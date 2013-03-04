@@ -3,6 +3,4 @@ Roadmap
 
 * Move Plot class into lab.reports
 * Add option for choosing between scattering and plotting points in ProblemPlotReport
-* Do not allow casting parsed values to bool, because any matched string will evaluate to True
-  and using type=bool is likely a mistake.
 * Infer output_format from outfile and vice-versa.
