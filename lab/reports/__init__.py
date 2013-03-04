@@ -389,7 +389,7 @@ class Report(object):
             logging.critical('All runs have been filtered -> Nothing to report.')
 
 
-class CellFormatter:
+class CellFormatter(object):
     """Formating information for one cell in a table."""
     def __init__(self, bold=False, count=None, link=None):
         self.bold = bold
@@ -546,6 +546,11 @@ class Table(collections.defaultdict):
         self._cols = None
 
     def get_min_wins(self, row_name=None):
+        """
+        The table class can store information on whether higher or lower values are better
+        for each row or globally. If no row specific setting for *row_name* is found, the
+        global setting is returned.
+        """
         return self.row_min_wins.get(row_name, self.min_wins)
 
     def get_summary_rows(self):
@@ -570,8 +575,10 @@ class Table(collections.defaultdict):
         return summary_rows
 
     def _get_printable_row_order(self):
-        """Return a list of all rows (including non-data rows) in the order
-        they should be printed."""
+        """
+        Return a list of all rows (including non-data rows) in the order
+        they should be printed.
+        """
         row_order = [self.header_row]
         for row_name in self.row_names + self.summary_row_order:
             row_order.append(row_name)
@@ -580,8 +587,10 @@ class Table(collections.defaultdict):
         return row_order
 
     def _get_printable_column_order(self):
-        """Return a list of all columns (including non-data columns) in the order
-        they should be printed."""
+        """
+        Return a list of all columns (including non-data columns) in the order
+        they should be printed.
+        """
         col_order = [self.header_column]
         for col_name in self.col_names:
             col_order.append(col_name)
@@ -590,9 +599,11 @@ class Table(collections.defaultdict):
         return col_order
 
     def _collect_cells(self):
-        """Collect all cells that should be printed including table headers,
+        """
+        Collect all cells that should be printed including table headers,
         row names, summary rows, etc. Returns a dictionary mapping row names
-        to dictionaries mapping column names to values"""
+        to dictionaries mapping column names to values.
+        """
         cells = collections.defaultdict(dict)
         cells[self.header_row][self.header_column] = self.title
         for col_name in self.col_names:
@@ -656,6 +667,17 @@ class Table(collections.defaultdict):
                                              color=color, bold=bold)
 
     def _format_cell(self, row_name, col_name, value, color=None, bold=False):
+        """
+        Return the formatted value for a single cell in the table.
+        *row_name* and *col_name* specify the position of the cell and *value* is the
+        unformatted value.
+        Floats are rounded to two decimal places and lists are quoted. The *color* to
+        render the result in can be given as a string and setting *bold* to true
+        renders the value in bold.
+
+        If a custom formatter is specified for this cell, it is used instead of this
+        default format.
+        """
         formatter = self.cell_formatters.get(row_name, {}).get(col_name)
         if formatter:
             return formatter.format_value(value)
@@ -674,9 +696,11 @@ class Table(collections.defaultdict):
         return value_text
 
     def _get_markup(self, cells):
-        """Return a string cotaining all printable cells (see
+        """
+        Return a string cotaining all printable cells (see
         **_get_printable_column_order** and **_get_printable_row_order**)
-        as correctly formatted markup."""
+        as correctly formatted markup.
+        """
         # Remember the maximal length of each column
         self.col_size = {}
         for col_name in self._get_printable_column_order():
@@ -718,8 +742,10 @@ class Table(collections.defaultdict):
 
 
 def extract_summary_rows(from_table, to_table, link=None):
-    """Extract all summary rows of **from_table** and add them as data rows
-    to **to_table**"""
+    """
+    Extract all summary rows of **from_table** and add them as data rows
+    to **to_table**.
+    """
     for name, row in from_table.get_summary_rows().items():
         row_name = '%s - %s' % (from_table.title, name)
         if link is not None:
@@ -732,29 +758,37 @@ def extract_summary_rows(from_table, to_table, link=None):
             to_table.add_cell(row_name, col_name, value)
 
 
-class DynamicDataModule:
+class DynamicDataModule(object):
     """Interface for modules that dynamically add or modify data in a table."""
     def collect(self, table, cells):
-        """Called after the data collection in the table. Subclasses can
-        add new values to **cells** or modify existing values."""
+        """
+        Called after the data collection in the table. Subclasses can
+        add new values to **cells** or modify existing values.
+        """
         return cells
 
     def format(self, table, formated_cells):
-        """Called after the formatting in the table. Subclasses can
+        """
+        Called after the formatting in the table. Subclasses can
         (re-)format all values in **formated_cells**. Specifically all new
-        values added by this modules **collect** method should be formatted."""
+        values added by the **collect** method should be formatted.
+        """
         pass
 
     def modify_printable_row_order(self, table, row_order):
-        """Called after retrieving a row order in the table. Subclassed can
+        """
+        Called after retrieving a row order in the table. Subclassed can
         modify the order or add new rows. Specifically all rows that were
-        added by this modules **collect** method should be appended or
-        inserted."""
+        added by the **collect** method should be appended or
+        inserted.
+        """
         return row_order
 
     def modify_printable_column_order(self, table, column_order):
-        """Called after retrieving a column order in the table. Subclassed can
+        """
+        Called after retrieving a column order in the table. Subclassed can
         modify the order or add new columns. Specifically all columns that were
-        added by this modules **collect** method should be appended or
-        inserted."""
+        values added by the **collect** method should be appended or
+        inserted.
+        """
         return column_order
