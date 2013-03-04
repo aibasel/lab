@@ -1,6 +1,32 @@
 News
 ====
 
+v1.3
+----
+
+lab
+^^^
+* For Latex tables only keep the first two and last two hlines.
+
+downward
+^^^^^^^^
+* Plots: Make category_styles a dictionary mapping from names to dictionaries of
+  matplotlib plotting parameters to allow for more and simpler customization.
+  This means e.g. that you can now change the line style in plots.
+* Produce a combined domain- and problem-wise AbsoluteReport if ``resolution=combined``.
+* Include info in AbsoluteReport if a table has no entries.
+* Plots: Add ``params`` argument for specifying matplotlib parameters like
+  font-family, label sizes, line width, etc.
+* AbsoluteReport: If a non-numerical attribute is included in a domain-wise
+  report, include some info in the table instead of aborting.
+* Add :py:class:`Attribute <lab.reports.Attribute>` class for wrapping custom
+  attributes that need non-default report options and aggregation functions.
+* Parse ``expansions_until_last_jump`` attribute.
+* Tex reports: Add number of tasks per domain with new ``\numtasks{x}`` command
+  that can be cutomized in the exported texts.
+* Add pgfplots backend for plots.
+
+
 v1.2
 ----
 

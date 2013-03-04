@@ -19,10 +19,12 @@ exp = DownwardExperiment(path=EXPPATH, repo=REPO)
 exp.add_suite(SUITE)
 exp.add_config('lmcut', ["--search", "astar(lmcut())"])
 
-# Make a problem-wise report.
-exp.add_step(Step('report-abs-p', AbsoluteReport('problem'),
+# Make a report containing absolute numbers (this is the normal report).
+exp.add_step(Step('report-abs',
+                  AbsoluteReport(attributes=['coverage', 'expansions'],
+                                 resolution='problem'),
                   exp.eval_dir,
-                  os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)))
+                  os.path.join(exp.eval_dir, '%s-abs.html' % EXPNAME)))
 
 # Compress the experiment directory.
 exp.add_step(Step.zip_exp_dir(exp))

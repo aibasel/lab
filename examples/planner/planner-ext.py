@@ -1,5 +1,14 @@
 #! /usr/bin/env python
 
+"""
+Example downward experiment that runs FF on two tasks.
+
+Please adapt EXPPATH and REPO to be the path where the experiment shall be put
+and the location of your Fast Downward repository.
+
+The file planner.py contains the "basic" version of this experiment.
+"""
+
 import os
 
 from downward.experiment import DownwardExperiment
@@ -12,9 +21,8 @@ from downward.checkouts import Translator, Preprocessor, Planner
 
 
 EXPNAME = 'planner'
-WORKSHOP = os.path.join(os.path.expanduser('~'), 'workshop')
-EXPPATH = os.path.join(WORKSHOP, EXPNAME)
-REPO = os.path.join(WORKSHOP, 'fast-downward')
+EXPPATH = os.path.join(os.path.expanduser('~'), 'lab', 'experiments', EXPNAME)
+REPO = '/home/jendrik/projects/Downward/downward'
 
 #combos = [
 #    (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097, dest='mypreprocessor'),
@@ -27,7 +35,7 @@ exp = DownwardExperiment(EXPPATH, REPO, #combinations=combos,
                          limits={'search_time': 60})
 
 exp.add_suite(['gripper:prob01.pddl'])
-#exp.add_suite('zenotravel')
+exp.add_suite('zenotravel:pfile2')
 exp.add_config('ff', ['--search', 'lazy(single(ff()))'])
 exp.add_config('add', ['--search', 'lazy(single(add()))'])
 exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-sat-fdss-1.py'))

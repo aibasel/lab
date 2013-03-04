@@ -1,5 +1,14 @@
 #! /usr/bin/env python
 
+"""
+Example lab experiment that approximates the number pi.
+
+This file contains the advanced version of the experiment where pi is
+calculated with increasing precision.
+
+This experiment builds on the basic pi.py experiment.
+"""
+
 import os
 
 from lab.experiment import Experiment
@@ -8,7 +17,7 @@ from lab.reports import Report
 
 
 EXPNAME = 'pi'
-EXPPATH = os.path.join(os.path.expanduser('~'), 'workshop', EXPNAME)
+EXPPATH = os.path.join(os.path.expanduser('~'), 'lab', 'experiments', EXPNAME)
 
 class PiReport(Report):
     def get_text(self):
