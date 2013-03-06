@@ -23,6 +23,7 @@ import email.mime.text
 import functools
 import json
 import logging
+from numbers import Number
 import os
 import platform
 import re
@@ -412,7 +413,7 @@ def sendmail(from_, to, subject, text, smtp_host='localhost', port=25):
 
 
 def get_color(fraction, min_wins):
-    assert 0 <= fraction <= 1
+    assert 0 <= fraction <= 1, fraction
     if min_wins:
         fraction = 1 - fraction
 
@@ -440,6 +441,7 @@ def get_colors(cells, min_wins):
     diff = float(max_value - min_value)
     for col, val in cells.items():
         if val is not None:
+            val = round(val, 2)
             fraction = (val - min_value) / diff
             result[col] = get_color(fraction, min_wins)
     return result
@@ -450,11 +452,10 @@ def get_min_max(dictionary):
     Floats are rounded to two decimal places. If no maximum and minimum is
     defined (e.g. all values None) "undefined" is returned for both min and
     max."""
-    non_none_values = [val for val in dictionary.values() if val is not None]
-    non_none_values = [(round(val, 2) if isinstance(val, float) else val)
-                       for val in non_none_values]
-    if non_none_values:
-        return min(non_none_values), max(non_none_values)
+    numbers = [round(val, 2) for val in dictionary.values()
+               if isinstance(val, Number)]
+    if numbers:
+        return min(numbers), max(numbers)
     else:
         return 'undefined', 'undefined'
 
