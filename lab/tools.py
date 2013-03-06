@@ -282,7 +282,7 @@ class RunFilter(object):
         # Do not define this function inplace to force early binding. See:
         # stackoverflow.com/questions/3107231/currying-functions-in-python-in-a-loop
         def property_filter(run):
-            if isinstance(value, (list, tuple)):
+            if isinstance(value, (list, tuple, set)):
                 return run.get(prop) in value
             else:
                 return run.get(prop) == value

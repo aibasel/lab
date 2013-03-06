@@ -24,55 +24,6 @@ from lab.reports import DynamicDataModule
 from downward.reports.absolute import AbsoluteReport
 
 
-class CompareRevisionsReport(AbsoluteReport):
-    """Allows to compare the same configurations in two revisions of the planner."""
-    def __init__(self, revisions, **kwargs):
-        """
-        See :py:class:`AbsoluteReport <downward.reports.AbsoluteReport>`
-        for inherited parameters.
-
-        *revisions* is a list of 2 revisions. All columns in the report will be arragned
-        such that the same configurations run for the given revisions are next to each
-        other. After those two columns a diff column is added that shows the difference
-        between the two values. All other columns are not printed.
-        """
-        AbsoluteReport.__init__(self, **kwargs)
-        assert len(revisions) == 2, revisions
-        self.revisions = revisions
-        self.config_nicks = []
-
-    def _get_config_nick_order(self):
-        """Extract the config_nicks from the order of columns defined by the
-        report. Maintain the order as good as possible by ordering each
-        config nick at the relative position where it first occured."""
-        if self.config_nicks:
-            return self.config_nicks
-        self.config_nicks = []
-        for config in self._get_config_order():
-            for rev in self.revisions:
-                if config.startswith('%s-' % rev):
-                    config_nick = config[len(rev) + 1:]
-                    if config_nick not in self.config_nicks:
-                        self.config_nicks.append(config_nick)
-        return self.config_nicks
-
-    def _get_empty_table(self, attribute=None, title=None, columns=None):
-        table = AbsoluteReport._get_empty_table(self, attribute=attribute,
-                                                title=title, columns=columns)
-        summary_functions = [sum, reports.avg]
-        if title == 'summary':
-            summary_functions = []
-        config_nicks = self._get_config_nick_order()
-        compare_configs = []
-        for config_nick in config_nicks:
-            col_names = ['%s-%s' % (r, config_nick) for r in self.revisions]
-            compare_configs.append((col_names[0], col_names[1],
-                                   'Diff - %s' % config_nick))
-        diff_module = DiffColumnsModule(compare_configs, summary_functions)
-        table.dynamic_data_modules.append(diff_module)
-        return table
-
-
 class CompareConfigsReport(AbsoluteReport):
     """Allows to compare different configurations."""
 
@@ -84,8 +35,23 @@ class CompareConfigsReport(AbsoluteReport):
         See :py:class:`DiffColumnsModule <downward.reports.compare.DiffColumnsModule>`
         for an explanation of how to set the configs to compare with *compare_configs*.
         """
+        if 'filter_config' in kwargs or 'filter_config_nick' in kwargs:
+            logging.critical('Filtering config(nicks) is not supported in '
+                             'CompareConfigsReport. Use the parameter '
+                             '"compare_configs" to define which configs are shown '
+                             'and in what order they should appear.')
+        if compare_configs:
+            configs = set()
+            for t in compare_configs:
+                for config in t[0:2]:
+                    configs.add(config)
+            print configs
+            kwargs['filter_config'] = configs
         AbsoluteReport.__init__(self, **kwargs)
-        self.compare_configs = compare_configs
+        self._compare_configs = compare_configs
+    
+    def _get_compare_configs(self):
+        return self._compare_configs
 
     def _get_empty_table(self, attribute=None, title=None, columns=None):
         table = AbsoluteReport._get_empty_table(self, attribute=attribute,
@@ -93,9 +59,46 @@ class CompareConfigsReport(AbsoluteReport):
         summary_functions = [sum, reports.avg]
         if title == 'summary':
             summary_functions = []
-        diff_module = DiffColumnsModule(self.compare_configs, summary_functions)
+        diff_module = DiffColumnsModule(self._get_compare_configs(), summary_functions)
         table.dynamic_data_modules.append(diff_module)
         return table
+
+
+class CompareRevisionsReport(CompareConfigsReport):
+    """Allows to compare the same configurations in two revisions of the planner."""
+    def __init__(self, revisions, **kwargs):
+        """
+        See :py:class:`AbsoluteReport <downward.reports.AbsoluteReport>`
+        for inherited parameters.
+
+        *revisions* is a list of 2 revisions. All columns in the report will be arragned
+        such that the same configurations run for the given revisions are next to each
+        other. After those two columns a diff column is added that shows the difference
+        between the two values. All other columns are not printed.
+        """
+        CompareConfigsReport.__init__(self, None, **kwargs)
+        assert len(revisions) == 2, revisions
+        self._revisions = revisions
+        self._config_nicks = []
+
+    def _get_compare_configs(self):
+        # Extract the config_nicks from the order of columns defined by the
+        # report. Maintain the order as good as possible by ordering each
+        # config nick at the relative position where it first occured.
+        if not self._config_nicks:
+            self._config_nicks = []
+            for config in self._get_config_order():
+                for rev in self._revisions:
+                    if config.startswith('%s-' % rev):
+                        config_nick = config[len(rev) + 1:]
+                        if config_nick not in self.config_nicks:
+                            self.config_nicks.append(config_nick)
+        compare_configs = []
+        for config_nick in self._config_nicks:
+            col_names = ['%s-%s' % (r, config_nick) for r in self._revisions]
+            compare_configs.append((col_names[0], col_names[1],
+                                   'Diff - %s' % config_nick))
+        return compare_configs
 
 
 class DiffColumnsModule(DynamicDataModule):
