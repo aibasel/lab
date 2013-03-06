@@ -30,6 +30,7 @@ import logging
 import math
 import numbers
 import os
+import types
 
 from lab import tools
 from markup import Document
@@ -298,7 +299,8 @@ class Report(object):
         If the attribute is None in all runs it may be numeric.
 
         """
-        return self._all_attributes[attribute] in (numbers.Number, None)
+        return issubclass(self._all_attributes[attribute],
+                          (numbers.Number, types.NoneType))
 
     def get_markup(self):
         """
