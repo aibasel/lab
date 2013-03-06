@@ -648,7 +648,7 @@ class Table(collections.defaultdict):
 
         min_wins = self.get_min_wins(row_name)
         highlight = min_wins is not None
-        colors = tools.get_colors(row, min_wins) if self.colored else None
+        colors = tools.get_colors(row_slice, min_wins) if self.colored else None
 
         for col_name, value in row.items():
             color = None
