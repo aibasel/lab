@@ -23,12 +23,13 @@ Module that permits generating reports by reading properties files
 
 from __future__ import with_statement, division
 
-import fnmatch
-import os
-import logging
 import collections
-import math
 from collections import defaultdict
+import fnmatch
+import logging
+import math
+import numbers
+import os
 
 from lab import tools
 from markup import Document
@@ -297,7 +298,7 @@ class Report(object):
         If the attribute is None in all runs it may be numeric.
 
         """
-        return self._all_attributes[attribute] in [int, float, None]
+        return self._all_attributes[attribute] in (numbers.Number, None)
 
     def get_markup(self):
         """
