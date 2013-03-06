@@ -240,7 +240,9 @@ class PlanningReport(Report):
         for run in self.props.values():
             config = run['config']
             configs.add(config)
-            config_nicks_to_config[run['config_nick']].add(config)
+            # For preprocess experiments config_nick is not set.
+            nick = run.get('config_nick', config)
+            config_nicks_to_config[nick].add(config)
         if self.config_nicks and not self.configs:
             self.configs = []
             for nick in self.config_nicks:
