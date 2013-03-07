@@ -55,7 +55,6 @@ class AbsoluteReport(PlanningReport):
 
         # Index of summary section (first section after 'warnings')
         summary_index = 0
-
         warnings = self._get_warnings_table()
         if warnings:
             toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
@@ -75,10 +74,8 @@ class AbsoluteReport(PlanningReport):
                 if self.attribute_is_numeric(attribute):
                     domain_table = self._get_table(attribute)
                     tables.append(('', domain_table))
-                    for name, row in domain_table.get_summary_rows():
-                        row_name = '**[""%s"" #%s]** - %s' % (attribute, attribute, name)
-                        for column, value in row.items():
-                            summary.add_cell(row_name, column, value)
+                    reports.extract_summary_rows(domain_table, summary,
+                                                link='#' + attribute)
                 else:
                     tables.append(('', 'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
@@ -124,12 +121,7 @@ class AbsoluteReport(PlanningReport):
 
     def _get_group_functions(self, attribute):
         """Decide on a list of group functions for this attribute."""
-        names = {'avg': 'average', 'gm': 'geometric mean'}
-        named_functions = []
-        for f in attribute.functions:
-            funcname = names.get(f.__name__, f.__name__)
-            named_functions.append((funcname, f))
-        return named_functions
+        return [(reports.function_name(f), f) for f in attribute.functions]
 
     def _add_table_info(self, attribute, func_name, table):
         """
@@ -141,8 +133,8 @@ class AbsoluteReport(PlanningReport):
             table.info.append('Each table entry gives the %s of "%s" for that '
                               'domain.' % (func_name, attribute))
 
-        summary_names = [name.lower() for name, sum_func in table.summary_funcs]
-        if len(summary_names) == 1 and summary_names[0] != 'sum':
+        summary_names = [name.lower() for name, sum_func in table.summary_funcs.items()]
+        if len(summary_names) == 1:
             table.info.append('The last row reports the %s across all domains.' %
                               summary_names[0])
         elif len(summary_names) > 1:
@@ -181,20 +173,19 @@ class AbsoluteReport(PlanningReport):
             for config in self.configs:
                 values = domain_config_values.get((domain, config), [])
                 num_values_lists[domain].append(str(len(values)))
-        num_values_text = {}
         for domain, num_values_list in num_values_lists.items():
             if len(set(num_values_list)) == 1:
-                text = num_values_list[0]
+                count = num_values_list[0]
             else:
-                text = ','.join(num_values_list)
-            num_values_text[domain] = text
+                count = ','.join(num_values_list)
+            link = None
+            if self.resolution == 'combined':
+                link = '#%s-%s' % (attribute, domain)
+            formatter = reports.CellFormatter(link=link, count=count)
+            table.cell_formatters[domain][table.header_column] = formatter
 
         for (domain, config), values in domain_config_values.items():
-            row_name = domain
-            if self.resolution == 'combined':
-                row_name = '[""%s"" #%s-%s]' % (domain, attribute, domain)
-            table.add_cell('%s (%s)' % (row_name, num_values_text[domain]), config,
-                           func(values))
+            table.add_cell(domain, config, func(values))
 
         table.num_values = num_probs
         return table
@@ -227,11 +218,12 @@ class AbsoluteReport(PlanningReport):
             # Do not highlight anything.
             min_wins = None
             colored = False
-
-        if self.resolution == 'combined':
-            title = '[""%s"" #%s]' % (title, title)
         table = reports.Table(title=title, min_wins=min_wins, colored=colored)
         table.set_column_order(columns)
+        if self.resolution == 'combined':
+            link = '#%s' % title
+            formatter = reports.CellFormatter(link=link)
+            table.cell_formatters[table.header_row][table.header_column] = formatter
         return table
 
     def _add_summary_functions(self, table, attribute):
