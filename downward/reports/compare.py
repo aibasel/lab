@@ -18,10 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from downward.reports.absolute import AbsoluteReport
 from lab import reports
 
-from lab.reports import DynamicDataModule
-from downward.reports.absolute import AbsoluteReport
+import logging
 
 
 class CompareConfigsReport(AbsoluteReport):
@@ -49,7 +49,7 @@ class CompareConfigsReport(AbsoluteReport):
             kwargs['filter_config'] = configs
         AbsoluteReport.__init__(self, **kwargs)
         self._compare_configs = compare_configs
-    
+
     def _get_compare_configs(self):
         return self._compare_configs
 
@@ -101,7 +101,7 @@ class CompareRevisionsReport(CompareConfigsReport):
         return compare_configs
 
 
-class DiffColumnsModule(DynamicDataModule):
+class DiffColumnsModule(reports.DynamicDataModule):
     """Adds multiple columns each comparing the values in two configs."""
     def __init__(self, compare_configs, summary_functions):
         """
