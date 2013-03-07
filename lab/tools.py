@@ -429,22 +429,27 @@ def get_color(fraction, min_wins):
 def get_colors(cells, min_wins):
     result = {col: (0.5,) * 3 for col in cells.keys()}
     min_value, max_value = get_min_max(cells)
+    diff = float(max_value - min_value)
 
-    if min_value == max_value:
+    if diff == 0:
         if min_value == 'undefined' or None not in cells.values():
             # Either there are no float values in this row or
-            # All values are floats (no value is None) and they are all equal.
+            # all values are floats (no value is None) and they are all equal.
             return result
         else:
             # Some values are None, the rest are all equal. The latter have
             # a distance of 0 to the min_value, so setting min_wins to True
             # highlights them all as the best values in this row.
             min_wins = True
-    diff = float(max_value - min_value)
+
     for col, val in cells.items():
         if val is not None:
             val = round(val, 2)
-            fraction = (val - min_value) / diff
+            if diff == 0:
+                assert val - min_value == 0, (val, min_value)
+                fraction = 0
+            else:
+                fraction = (val - min_value) / diff
             result[col] = get_color(fraction, min_wins)
     return result
 

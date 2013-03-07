@@ -235,12 +235,14 @@ class PlanningReport(Report):
            alphabetically.
         3. If no explicit order is given, the configs will be sorted alphabetically.
         """
-        configs = set()
+        all_configs = set()
         config_nicks_to_config = defaultdict(set)
         for run in self.props.values():
             config = run['config']
-            configs.add(config)
-            config_nicks_to_config[run['config_nick']].add(config)
+            all_configs.add(config)
+            # For preprocess experiments config_nick is not set.
+            nick = run.get('config_nick', config)
+            config_nicks_to_config[nick].add(config)
         if self.config_nicks and not self.configs:
             self.configs = []
             for nick in self.config_nicks:
@@ -251,8 +253,8 @@ class PlanningReport(Report):
             # Maintain the original order of configs and only keep configs that still
             # have available runs after filtering. Then add all new configs sorted
             # naturally at the end.
-            config_order = [c for c in self.configs if c in configs]
-            config_order += list(tools.natural_sort(configs - set(self.configs)))
+            config_order = [c for c in self.configs if c in all_configs]
+            config_order += list(tools.natural_sort(all_configs - set(self.configs)))
         else:
-            config_order = list(tools.natural_sort(configs))
+            config_order = list(tools.natural_sort(all_configs))
         return config_order
