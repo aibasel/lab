@@ -4,7 +4,7 @@ import standard_exp
 import translator
 
 
-SUITE = 'SATISFICING_WITH_IPC11'
+SUITE = 'grid'  # originally: 'SATISFICING_WITH_IPC11'
 CONFIGS = [('blind', ['--search', 'astar(blind())'])]
 IPC_CONFIGS = ['seq-sat-fd-autotune-1', 'seq-sat-fd-autotune-2', 'seq-sat-lama-2011']
 
