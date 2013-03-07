@@ -42,9 +42,11 @@ class CompareRevisionsReport(AbsoluteReport):
         self.config_nicks = []
 
     def _get_config_nick_order(self):
-        """Extract the config_nicks from the order of columns defined by the
+        """
+        Extract the config_nicks from the order of columns defined by the
         report. Maintain the order as good as possible by ordering each
-        config nick at the relative position where it first occured."""
+        config nick at the relative position where it first occured.
+        """
         if self.config_nicks:
             return self.config_nicks
         self.config_nicks = []
