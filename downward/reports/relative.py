@@ -64,7 +64,7 @@ class RelativeReport(AbsoluteReport):
         percent_col = {}
 
         # Filter those rows which have no significant changes
-        for row in table.rows:
+        for row in table.row_names:
             val1, val2 = table.get_row(row)
 
             if not val1 and not val2:
@@ -98,16 +98,16 @@ class RelativeReport(AbsoluteReport):
 
         # Add table also if there were missing cells
         if len(quotient_col) == 0:
-            logging.info('No changes for "%s"' % attribute)
-            return None
+            return 'No changes.'
 
+        # TODO: Remove sorting hack.
         table.add_col('ZZ1:sort:Factor', quotient_col)
         #table.add_col('ZZ2:sort:%-Change', percent_col)
         table.min_wins = None
         table.colored = False
-        table.summary_funcs = []
-        table.add_summary_function('avg', reports.avg)
-        table.add_summary_function('min', reports.minimum)
-        table.add_summary_function('max', reports.maximum)
-        table.add_summary_function('StdDev', reports.stddev)
         return table
+
+    def _add_summary_functions(self, table, attribute):
+        for funcname, func in [('avg', reports.avg), ('min', reports.minimum),
+                               ('max', reports.maximum), ('StdDev', reports.stddev)]:
+            table.add_summary_function(funcname.capitalize(), func)
