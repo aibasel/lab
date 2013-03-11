@@ -8,6 +8,18 @@
 .. autoclass:: downward.reports.suite.SuiteReport
 .. autoclass:: downward.reports.timeout.TimeoutReport
 
+
+Comparative reports
+-------------------
+
+.. autoclass:: downward.reports.compare.CompareConfigsReport
+.. autoclass:: downward.reports.compare.CompareRevisionsReport
+
+Helper class
+^^^^^^^^^^^^
+.. autoclass:: downward.reports.compare.DiffColumnsModule
+
+
 Plots
 -----
 

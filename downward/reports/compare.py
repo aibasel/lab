@@ -18,10 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from downward.reports.absolute import AbsoluteReport
-from lab import reports
-
 import logging
+
+from lab import reports
+from downward.reports.absolute import AbsoluteReport
 
 
 class CompareConfigsReport(AbsoluteReport):
@@ -29,7 +29,7 @@ class CompareConfigsReport(AbsoluteReport):
 
     def __init__(self, compared_configs, **kwargs):
         """
-        See :py:class:`AbsoluteReport <downward.reports.AbsoluteReport>`
+        See :py:class:`AbsoluteReport <downward.reports.absolute.AbsoluteReport>`
         for inherited parameters.
 
         See :py:class:`DiffColumnsModule <downward.reports.compare.DiffColumnsModule>`
@@ -45,7 +45,6 @@ class CompareConfigsReport(AbsoluteReport):
             for t in compared_configs:
                 for config in t[0:2]:
                     configs.add(config)
-            print configs
             kwargs['filter_config'] = configs
         AbsoluteReport.__init__(self, **kwargs)
         self._compared_configs = compared_configs
@@ -68,7 +67,7 @@ class CompareRevisionsReport(CompareConfigsReport):
     """Allows to compare the same configurations in two revisions of the planner."""
     def __init__(self, rev1, rev2, **kwargs):
         """
-        See :py:class:`AbsoluteReport <downward.reports.AbsoluteReport>`
+        See :py:class:`AbsoluteReport <downward.reports.absolute.AbsoluteReport>`
         for inherited parameters.
 
         *rev1* and *rev2* are the revisions that should be compared. All columns in the
@@ -117,10 +116,10 @@ class DiffColumnsModule(reports.DynamicDataModule):
         one comparison it is repeated every time. Configs that are in the original data
         but are not mentioned in compared_configs are not printed.
         For example if the data contains configs A, B, C and D and *compared_configs* is
-        [('A', 'B', 'Diff BA'), ('A', 'C')] the resulting columns will be
-        'A', 'B', 'Diff BA' (contains B - A), 'A', 'C' , 'Diff' (contains C - A)
+        ``[('A', 'B', 'Diff BA'), ('A', 'C')]`` the resulting columns will be
+        A, B, Diff BA (contains B - A), A, C , Diff (contains C - A).
 
-        *summary_functions* contains a list of functions that will be calculated for all
+        *summary_functions* is a list of functions that will be calculated for all
         entries in the diff columns.
 
         Example::
@@ -131,6 +130,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
             summary_functions = [sum, reports.avg]
             diff_module = DiffColumnsModule(compared_configs, summary_functions)
             table.dynamic_data_modules.append(diff_module)
+
         """
         self.compared_configs = []
         diff_column_names = set()

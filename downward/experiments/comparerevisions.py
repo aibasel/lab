@@ -23,13 +23,15 @@
 import os
 import logging
 import subprocess
+
+from lab.steps import Step
+
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
 from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11
 from downward.configs import config_suite_optimal, config_suite_satisficing
 from downward.reports.compare import CompareRevisionsReport
 from downward.reports.scatter import ScatterPlotReport
-from lab.steps import Step
 
 
 COMPARED_ATTRIBUTES = ['coverage', 'search_time', 'score_search_time', 'total_time',
