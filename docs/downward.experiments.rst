@@ -3,7 +3,7 @@
 
 :class:`DownwardExperiment` --- Generic Fast Downward experiment
 ----------------------------------------------------------------
-.. autoclass:: downward.experiment.DownwardExperiment
+.. autoclass:: downward.experiments.DownwardExperiment
    :members:
 
 
