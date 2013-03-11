@@ -1,5 +1,5 @@
-:mod:`downward` --- Fast Downward experiments
-=============================================
+:mod:`downward.experiment` --- Generic Fast Downward experiment
+====================================================
 
 :class:`DownwardExperiment`
 ---------------------------
