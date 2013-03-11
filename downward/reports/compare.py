@@ -138,13 +138,15 @@ class DiffColumnsModule(reports.DynamicDataModule):
             diff_name = 'Diff'
             if len(t) == 3:
                 diff_name = t[2]
+            # diff_name is printed in the column header and does not have to be unique.
+            # To identify the column we thus calculate a uniqe name.
             uniq_count = 0
-            uniq_diff_name = diff_name
-            while uniq_diff_name in diff_column_names:
+            col_name = None
+            while col_name is None or col_name in diff_column_names:
                 uniq_count += 1
-                uniq_diff_name = diff_name + str(uniq_count)
-            diff_column_names.add(uniq_diff_name)
-            self.compared_configs.append(((t[0], t[1]), diff_name, uniq_diff_name))
+                col_name = 'diff_column_%s' % uniq_count
+            diff_column_names.add(col_name)
+            self.compared_configs.append(((t[0], t[1]), diff_name, col_name))
         self.summary_functions = summary_functions
 
     def collect(self, table, cells):
