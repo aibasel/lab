@@ -39,6 +39,5 @@ for the `Fast Downward planning system <http://www.fast-downward.org>`_.
 .. toctree::
    :maxdepth: 1
 
-   downward.experiment
    downward.experiments
    downward.reports
