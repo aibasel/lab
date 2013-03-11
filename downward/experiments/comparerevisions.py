@@ -25,21 +25,43 @@ import logging
 import subprocess
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
-from downward.suites import (suite_optimal_with_ipc11, suite_satisficing_with_ipc11,
-                             config_suite_optimal, config_suite_satisficing)
+from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11
+from downward.configs import config_suite_optimal, config_suite_satisficing
 from downward.reports.compare import CompareRevisionsReport
 from downward.reports.scatter import ScatterPlotReport
 from lab.steps import Step
 
 
+COMPARED_ATTRIBUTES = ['coverage', 'search_time', 'score_search_time', 'total_time',
+                       'score_total_time', 'expansions', 'score_expansions',
+                       'expansions_until_last_jump', 'evaluations', 'score_evaluations',
+                       'generated', 'score_generated', 'memory', 'score_memory',
+                       'run_dir', 'cost']
+
+SCATTER_PLOT_ATTRIBUTES = ['total_time', 'search_time', 'memory',
+                           'expansions_until_last_jump']
+
+
+def greatest_common_ancestor(repo, rev1, rev2):
+    pipe = subprocess.Popen(
+        ['hg', 'id', '--cwd', repo, '-r', 'ancestor(\'%s\', \'%s\')' % (rev1, rev2)],
+        stdout=subprocess.PIPE
+    )
+    return pipe.stdout.read().strip()
+
+
+def domain_tuple_category(run1, run2):
+    return run1['domain']
+
+
 class CompareRevisionsExperiment(DownwardExperiment):
     """
-    Convenience class that runs test comparing two revisions or comparing the
+    Convenience experiment that compares two revisions or compares the
     latest revision on a branch to the revision the branch is based on.
     Both revisions are tested with all the most important configurations.
     Reports that allow a before-after comparison are automaticaly added.
     """
-    def __init__(self, path, repo, opt_or_sat, branch, base_revision=None,
+    def __init__(self, path, repo, opt_or_sat, rev, base_rev=None,
                  use_core_configs=True, use_ipc_configs=True, use_extended_configs=False,
                  **kwargs):
         """
@@ -56,10 +78,10 @@ class CompareRevisionsExperiment(DownwardExperiment):
         configurations for satisficing planning will be tested on the
         satisficing suite.
 
-        *branch* determines the revision to test.
+        *rev* determines the new revision to test.
 
-        If *base_revision* is None (default), the latest revision on the branch default
-        that is an ancestor of *branch* will be used.
+        If *base_rev* is None (default), the latest revision on the branch default
+        that is an ancestor of *rev* will be used.
 
         *use_core_configs* determines if the most common configurations are tested
         (default: True).
@@ -80,16 +102,16 @@ class CompareRevisionsExperiment(DownwardExperiment):
                                              use_extended_configs=True,
                                              environment=env)
         """
-        if base_revision is None:
-            base_revision = greatest_common_ancestor(repo, branch, 'default')
-        if not base_revision:
-            logging.critical('Base revision for branch \'%s\' could not be determined. ' +
-                             'Please provide it manually.' % branch)
+        if base_rev is None:
+            base_rev = greatest_common_ancestor(repo, rev, 'default')
+        if not base_rev:
+            logging.critical('Base revision for branch \'%s\' could not be determined. '
+                             'Please provide it manually.' % rev)
 
         combinations = [(Translator(repo, rev=r),
-                        Preprocessor(repo, rev=r),
-                        Planner(repo, rev=r))
-                      for r in (branch, base_revision)]
+                         Preprocessor(repo, rev=r),
+                         Planner(repo, rev=r))
+                      for r in (rev, base_rev)]
         DownwardExperiment.__init__(self, path, repo, combinations=combinations, **kwargs)
 
         # ------ suites and configs ------------------------------------
@@ -112,36 +134,19 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         # ------ reports -----------------------------------------------
 
-        compare_report = CompareRevisionsReport(revisions=[base_revision, branch],
+        compare_report = CompareRevisionsReport(revisions=[base_rev, rev],
                                                 resolution='combined',
-                                                attributes=['coverage',
-                                                            'search_time',
-                                                            'score_search_time',
-                                                            'total_time',
-                                                            'score_total_time',
-                                                            'expansions',
-                                                            'score_expansions',
-                                                            'expansions_until_last_jump',
-                                                            'evaluations',
-                                                            'score_evaluations',
-                                                            'generated',
-                                                            'score_generated',
-                                                            'memory',
-                                                            'score_memory',
-                                                            'run_dir',
-                                                            'cost',
-                                                            ],
+                                                attributes=COMPARED_ATTRIBUTES,
                                                 )
         self.add_step(Step('report-compare-scores',
-                          compare_report,
-                          self.eval_dir,
-                          os.path.join(self.eval_dir, 'report-compare-scores.html')))
+                           compare_report,
+                           self.eval_dir,
+                           os.path.join(self.eval_dir, 'report-compare-scores.html')))
 
         for nick in configs.keys():
-            config_before = '%s-%s-%s-%s' % (base_revision, base_revision,
-                                             base_revision, nick)
-            config_after = '%s-%s-%s-%s' % (branch, branch, branch, nick)
-            for attribute in ['total_time', 'search_time', 'memory', 'expansions']:
+            config_before = '%s-%s-%s-%s' % (base_rev, base_rev, base_rev, nick)
+            config_after = '%s-%s-%s-%s' % (rev, rev, rev, nick)
+            for attribute in SCATTER_PLOT_ATTRIBUTES:
                 name = 'scatter-%s-%s' % (attribute, nick)
                 self.add_step(Step(name,
                                    ScatterPlotReport(
@@ -150,17 +155,3 @@ class CompareRevisionsExperiment(DownwardExperiment):
                                        get_category=domain_tuple_category),
                                    self.eval_dir,
                                    os.path.join(self.eval_dir, name)))
-
-
-# ------ utility functions ---------------------------------------------
-
-def greatest_common_ancestor(repo, rev1, rev2):
-    pipe = subprocess.Popen(
-        ['hg', 'id', '--cwd', repo, '-r', 'ancestor(\'%s\', \'%s\')' % (rev1, rev2)],
-        stdout=subprocess.PIPE
-    )
-    return pipe.stdout.read().strip()
-
-
-def domain_tuple_category(run1, run2):
-    return run1['domain']
