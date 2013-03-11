@@ -67,7 +67,7 @@ class CompareRevisionsExperiment(DownwardExperiment):
                  use_core_configs=True, use_ipc_configs=True, use_extended_configs=False,
                  **kwargs):
         """
-        See :py:class:`DownwardExperiment <downward.experiment.DownwardExperiment>`
+        See :py:class:`DownwardExperiment <downward.experiments.DownwardExperiment>`
         for inherited parameters.
 
         The experiment will be built at *path*.
