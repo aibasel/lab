@@ -164,7 +164,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
                 values = [table[row_name].get(col_name, None) for col_name in col_names]
                 try:
                     diff = float(values[1]) - float(values[0])
-                except ValueError:
+                except (ValueError, TypeError):
                     diff = None
                 if diff is not None:
                     non_none_values.append(diff)
@@ -188,7 +188,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
                 formatted_value = formatted_cells[row_name].get(diff_col_name)
                 try:
                     value = float(formatted_value)
-                except ValueError:
+                except (ValueError, TypeError):
                     value = '-'
                 if value == 0 or value == '-':
                     color = 'grey'
