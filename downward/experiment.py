@@ -23,4 +23,4 @@
 from downward.experiments import DownwardRun, PreprocessRun, SearchRun, DownwardExperiment
 
 # Silence pyflakes
-assert (DownwardRun, PreprocessRun, SearchRun, DownwardExperiment)
+assert DownwardRun and PreprocessRun and SearchRun and DownwardExperiment
