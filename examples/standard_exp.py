@@ -7,7 +7,7 @@ import stat
 from subprocess import call
 import sys
 
-from lab.environments import LocalEnvironment, GkiGridEnvironment
+from lab.environments import LocalEnvironment, MaiaEnvironment
 from lab.steps import Step
 from lab import tools
 
@@ -66,7 +66,7 @@ def create_publish_and_mail_step(exp, *reports):
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, repo=None, environment=None,
                  combinations=None, limits=None, attributes=None, priority=0,
-                 queue='opteron_core.q', processes=2, **kwargs):
+                 queue=None, processes=2, **kwargs):
         if path is None:
             path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
         assert not os.path.isabs(path), path
@@ -78,8 +78,8 @@ class StandardDownwardExperiment(DownwardExperiment):
         if REMOTE:
             exppath = remote_exppath
             repo = repo or REMOTE_REPO
-            environment = environment or GkiGridEnvironment(priority=priority,
-                                                            queue=queue)
+            environment = environment or MaiaEnvironment(priority=priority,
+                                                         queue=queue)
         else:
             exppath = local_exppath
             repo = repo or LOCAL_REPO
