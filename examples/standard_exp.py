@@ -16,17 +16,17 @@ from downward.reports.absolute import AbsoluteReport
 
 
 NODE = platform.node()
-REMOTE = NODE.startswith('gkigrid') or NODE in ['habakuk', 'turtur']
-SCP_LOGIN = 'seipp@turtur'
+REMOTE = NODE.startswith('gkigrid') or NODE.endswith('cluster') or NODE in ['habakuk', 'turtur']
+SCP_LOGIN = 'seipp@maia'
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
-REMOTE_EXPS = '/home/seipp/experiments' #'/users/seipp/experiments/'
+REMOTE_EXPS = '/infai/seipp/experiments'
 LOCAL_EXPS = '/home/jendrik/lab/experiments'
 
-REMOTE_REPO = '/home/seipp/projects/downward'
+REMOTE_REPO = '/infai/seipp/projects/downward'
 LOCAL_REPO = '/home/jendrik/projects/Downward/downward'
 
-REMOTE_PYTHON = '/home/seipp/bin/Python/Python-2.7.3/installed/usr/local/bin/python'
+REMOTE_PYTHON = '/infai/seipp/bin/python/2.7.3/usr/local/bin/python'
 LOCAL_PYTHON = 'python2.7'
 
 if REMOTE:
@@ -121,7 +121,8 @@ class StandardDownwardExperiment(DownwardExperiment):
                 '%s:%s.tar.gz' % (SCP_LOGIN, remote_exppath), '%s.tar.gz' % local_exppath]))
 
         # Copy the results and send mail.
-        self.add_step(create_publish_and_mail_step(self, abs_report_file))
+        # TODO: Fix publish step.
+        #self.add_step(create_publish_and_mail_step(self, abs_report_file))
 
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast
