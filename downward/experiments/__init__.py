@@ -498,7 +498,7 @@ class DownwardExperiment(Experiment):
             logging.info('Building the validator in the experiment repository.')
             tools.run_command(['make', '-j%d' % self._jobs],
                               cwd=os.path.dirname(validate))
-        assert os.path.exists(validate)
+        assert os.path.exists(validate), validate
         self.add_resource('VALIDATE', validate, 'validate')
 
         downward_validate = os.path.join(DOWNWARD_SCRIPTS_DIR, 'validate.py')
