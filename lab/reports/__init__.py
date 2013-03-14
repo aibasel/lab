@@ -639,7 +639,7 @@ class Table(collections.defaultdict):
         row_slice = dict((col_name, row.get(col_name))
                          for col_name in self.col_names)
 
-        min_value, max_value = tools.get_min_max(row_slice)
+        min_value, max_value = tools.get_min_max(row_slice.values())
         try:
             rounded_values = ((round(val, 2) if isinstance(val, float) else val)
                               for val in row_slice.values())
