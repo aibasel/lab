@@ -66,7 +66,7 @@ def create_publish_and_mail_step(exp, *reports):
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, repo=None, environment=None,
                  combinations=None, limits=None, attributes=None, priority=0,
-                 queue='opteron_core.q', processes=2):
+                 queue='opteron_core.q', processes=2, **kwargs):
         if path is None:
             path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
         assert not os.path.isabs(path), path
@@ -87,7 +87,7 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         DownwardExperiment.__init__(self, path=exppath, environment=environment,
                                     repo=repo, combinations=combinations,
-                                    limits=limits)
+                                    limits=limits, **kwargs)
 
         self.set_path_to_python(PYTHON)
 
