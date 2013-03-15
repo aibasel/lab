@@ -159,8 +159,7 @@ class SearchRun(DownwardRun):
         else:
             # We have a portfolio, config_nick is the path to the portfolio file
             config_nick = os.path.basename(config_nick)
-            search_cmd = [self.planner.shell_name, '--portfolio', config_nick,
-                          '--plan-file', 'sas_plan']
+            search_cmd = [self.planner.shell_name, '--portfolio', config_nick]
         self.add_command('search', search_cmd, stdin='output',
                          time_limit=exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
