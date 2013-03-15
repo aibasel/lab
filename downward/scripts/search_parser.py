@@ -35,8 +35,6 @@ from collections import defaultdict
 from lab.parser import Parser
 
 
-# Search functions ------------------------------------------------------------
-
 def _get_states_pattern(attribute, name):
     return (attribute, re.compile(r'%s (\d+) state\(s\)\.' % name), int)
 
@@ -227,7 +225,21 @@ def check_min_values(content, props):
             sec = max(sec, 0.1)
             props[time] = sec
 
-# -----------------------------------------------------------------------------
+
+def parse_last_loggings(content, props):
+    patterns = [('last_logged_time', re.compile(r'total_time: (.+)s')),
+                ('last_logged_wall_clock_time', re.compile(r'wall-clock time: (.+)')),
+                ('last_logged_memory', re.compile(r'total_vsize: (.+) MB'))]
+    new_props = {}
+    for line in reversed(content.splitlines()):
+        for attr, regex in patterns:
+            match = regex.search(line)
+            if match and attr not in new_props:
+                new_props[attr] = float(match.group(1))
+        # Wecan stop once we have found the last value for each attribute.
+        if len(new_props) == 3:
+            break
+    props.update(new_props)
 
 
 def get_error(content, props):
@@ -342,19 +354,11 @@ class SearchParser(Parser):
         self.add_pattern('landmarks_generation_time',
                          r'Landmarks generation time: (.+)s', type=float,
                          required=False)
-        self.add_pattern('last_logged_time',
-                         r'total_time: (.+)s', type=float, file='driver.log',
-                         required=False)
-        self.add_pattern('last_logged_wall_clock_time',
-                         r'wall-clock time: (.+)', type=float, file='driver.log',
-                         required=False)
-        self.add_pattern('last_logged_memory',
-                         r'total_vsize: (.+) MB', type=float, file='driver.log',
-                         required=False)
 
     def add_search_functions(self):
         # TODO: search run.err once parse errors are printed there
         self.add_function(parse_error)
+        self.add_function(parse_last_loggings, file='driver.log')
         self.add_function(unsolvable)
         self.add_function(unsupported, 'run.err')
         self.add_function(get_iterative_results)

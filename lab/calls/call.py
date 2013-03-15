@@ -21,6 +21,7 @@ import os
 import resource
 import signal
 import subprocess
+import sys
 import time
 
 
@@ -119,6 +120,7 @@ class Call(subprocess.Popen):
         print "total_time: %.2fs" % total_time
         print "total_vsize: %.2f MB" % total_vsize
         print
+        sys.stdout.flush()
 
     def wait(self):
         """Wait for child process to terminate.
