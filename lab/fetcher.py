@@ -150,7 +150,7 @@ class Fetcher(object):
 
             if write_combined_props and run_id:
                 combined_props['-'.join(run_id)] = props
-            if props.get('unexplained_error'):
+            if props and props.get('unexplained_error'):
                 logging.warning('Unexplained error in: \'%s\'' % props.get('run_dir'))
                 unxeplained_errors += 1
 
