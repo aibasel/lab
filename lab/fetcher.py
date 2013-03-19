@@ -36,7 +36,7 @@ class Fetcher(object):
     def fetch_dir(self, run_dir, eval_dir, copy_all=False, run_filter=None, parsers=None):
         run_filter = run_filter or tools.RunFilter()
         parsers = parsers or []
-        # Allow specyfing a list multiple parsers or a single parser.
+        # Allow specyfing a list of multiple parsers or a single parser.
         if not isinstance(parsers, (tuple, list)):
             parsers = [parsers]
         # Make sure parsers is a list.
@@ -91,7 +91,7 @@ class Fetcher(object):
         You can include only specific domains or configurations by using
         :py:class:`filters <.Report>`.
 
-        *parsers* can be a (list of) paths to parser scripts. If given, each
+        *parsers* can be a list of paths to parser scripts. If given, each
         parser is called in each run directory and the results are added to
         the properties file which is fetched afterwards. This option is
         useful if you haven't parsed all or some values already during the
@@ -140,21 +140,26 @@ class Fetcher(object):
         # Get all run_dirs. None will be found if we fetch from an eval dir.
         run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
         total_dirs = len(run_dirs)
-        logging.info('Fetching properties from %d run directories' % total_dirs)
+        logging.info('Scanning properties from %d run directories' % total_dirs)
         unxeplained_errors = 0
+        num_fetched_dirs = 0
         for index, run_dir in enumerate(run_dirs, start=1):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-            logging.log(loglevel, 'Fetching: %6d/%d' % (index, total_dirs))
+            logging.log(loglevel, 'Scanning: %6d/%d' % (index, total_dirs))
             run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all,
                                            run_filter=run_filter, parsers=parsers)
+            if props is None:
+                continue
 
-            if write_combined_props and run_id:
+            assert run_id, 'Dir %s has no id' % props.get('run_dir')
+            if write_combined_props:
                 combined_props['-'.join(run_id)] = props
-            if props and props.get('unexplained_error'):
-                logging.warning('Unexplained error in: \'%s\'' % props.get('run_dir'))
+            if props.get('unexplained_error'):
+                logging.warning('Unexplained error in: "%s"' % props.get('run_dir'))
                 unxeplained_errors += 1
+            num_fetched_dirs += 1
 
-        logging.info('Fetching finished')
+        logging.info('Fetched properties from %d runs' % num_fetched_dirs)
         if unxeplained_errors:
             logging.warning('There were %s runs with unexplained errors.'
                             % unxeplained_errors)
