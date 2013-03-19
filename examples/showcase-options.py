@@ -9,6 +9,8 @@ from subprocess import call
 
 from lab.environments import LocalEnvironment, GkiGridEnvironment
 from lab.steps import Step
+from lab.fetcher import Fetcher
+from lab import tools
 
 from downward.experiment import DownwardExperiment
 from downward.checkouts import Translator, Preprocessor, Planner
@@ -95,6 +97,16 @@ def filter_and_transform(run):
     if not only_two_configs(run):
         return False
     return remove_work_tag(run)
+
+
+# Check that the various fetcher options work.
+def eval_dir(num):
+    return os.path.join(exp.eval_dir, 'test%d' % num)
+exp.add_step(Step('fetcher-test1', Fetcher(), exp.path, eval_dir(1), copy_all=True))
+exp.add_step(Step('fetcher-test2', Fetcher(), exp.path, eval_dir(2), copy_all=True, write_combined_props=True))
+exp.add_step(Step('fetcher-test3', Fetcher(), exp.path, eval_dir(3), filter_config_nick='lama11'))
+exp.add_step(Step('fetcher-test4', Fetcher(), exp.path, eval_dir(4),
+                  parsers=os.path.join(tools.BASE_DIR, 'downward', 'scripts', 'search_parser.py')))
 
 
 # Add report steps
