@@ -165,7 +165,8 @@ def unsupported(content, props):
 
 
 def coverage(content, props):
-    props['coverage'] = int('plan_length' in props or 'cost' in props)
+    props['coverage'] = int(('plan_length' in props or 'cost' in props) and
+                            not props.get('validate_error'))
 
 
 def check_memory(content, props):
@@ -283,6 +284,8 @@ def get_error(content, props):
         # First see if we already know the type of error.
         if props.get('unsolvable', None) == 1:
             props['error'] = 'unsolvable'
+        elif props.get('validate_error', None) == 1:
+            props['error'] = 'invalid-solution'
         elif props.get('search_mem_limit_exceeded', None) == 1:
             props['error'] = 'mem-limit-exceeded'
         elif props.get('search_timeout', None) == 1:
