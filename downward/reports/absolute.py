@@ -33,6 +33,11 @@ class AbsoluteReport(PlanningReport):
         || expansions  | hFF    | hCEA   |
         | gripper      | 118    | 72     |
         | zenotravel   | 21     | 17     |
+
+    This report should be part of all your Fast Downward experiments as it
+    automatically generates a table of unexplained errors, e.g. invalid solutions,
+    unexpected timeouts and memory overflows. You should make sure that you
+    check where the errors come from.
     """
     def __init__(self, resolution='combined', colored=False, **kwargs):
         """
