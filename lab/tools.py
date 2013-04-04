@@ -128,8 +128,8 @@ def confirm(question):
         print question
         print 'Running on the grid -> We better stop here.'
         sys.exit('Aborted')
-    answer = raw_input('%s (Y/N): ' % question).upper().strip()
-    if not answer == 'Y':
+    answer = raw_input('%s (y/N): ' % question).strip()
+    if not answer.lower() == 'y':
         sys.exit('Aborted')
 
 
@@ -341,6 +341,12 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
             continue
         srcname = os.path.join(src, name)
         dstname = os.path.join(dst, name)
+        # If dstname is a symbolic link, remove it before trying to override it.
+        # Without this shutil.copy2 cannot override broken symbolic links and
+        # it will override the file that the link points to if the link is valid.
+        # os.path.lexists returns true for broken symbolic links.
+        if os.path.isfile(dstname) and os.path.lexists(dstname):
+            remove(dstname)
         try:
             if symlinks and os.path.islink(srcname):
                 linkto = os.readlink(srcname)
@@ -349,9 +355,6 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
                     abs_link = os.path.abspath(os.path.join(os.path.dirname(srcname),
                                                             linkto))
                     linkto = os.path.relpath(abs_link, os.path.dirname(dstname))
-                # os.path.lexists returns true for broken symbolic links.
-                if os.path.lexists(dstname):
-                    remove(dstname)
                 os.symlink(linkto, dstname)
             elif os.path.isdir(srcname):
                 fast_updatetree(srcname, dstname, symlinks, ignore)
