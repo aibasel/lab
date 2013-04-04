@@ -349,7 +349,8 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
                     abs_link = os.path.abspath(os.path.join(os.path.dirname(srcname),
                                                             linkto))
                     linkto = os.path.relpath(abs_link, os.path.dirname(dstname))
-                if os.path.exists(dstname):
+                # os.path.lexists returns true for broken symbolic links.
+                if os.path.lexists(dstname):
                     remove(dstname)
                 os.symlink(linkto, dstname)
             elif os.path.isdir(srcname):
