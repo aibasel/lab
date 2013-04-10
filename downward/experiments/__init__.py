@@ -175,11 +175,14 @@ class SearchRun(DownwardRun):
 
         if config:
             self.add_command('parse-search', ['SEARCH_PARSER'])
+            planner_type = 'single'
         else:
             self.add_command('parse-portfolio', ['PORTFOLIO_PARSER'])
+            planner_type = 'portfolio'
 
         self.set_property('config_nick', config_nick)
         self.set_property('commandline_config', config)
+        self.set_property('planner_type', planner_type)
 
         # If all three parts have the same revision don't clutter the reports
         names = [self.translator.name, self.preprocessor.name, self.planner.name]

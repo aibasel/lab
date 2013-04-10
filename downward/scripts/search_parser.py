@@ -237,7 +237,7 @@ def parse_last_loggings(content, props):
             match = regex.search(line)
             if match and attr not in new_props:
                 new_props[attr] = float(match.group(1))
-        # Wecan stop once we have found the last value for each attribute.
+        # We can stop once we have found the last value for each attribute.
         if len(new_props) == 3:
             break
     props.update(new_props)
@@ -347,6 +347,8 @@ def get_error(content, props):
 class SearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
+        planner_type = self.props['planner_type']
+        assert planner_type in ['single', 'portfolio'], planner_type
 
         self.add_search_parsing()
         self.add_search_functions()
@@ -375,5 +377,6 @@ class SearchParser(Parser):
 
 
 if __name__ == '__main__':
+    print 'Running search parser'
     parser = SearchParser()
     parser.parse()
