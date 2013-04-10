@@ -90,6 +90,14 @@ def remove_none_values(func):
     return new_func
 
 
+def make_list(value):
+    if isinstance(value, list):
+        return value
+    if isinstance(value, (tuple, set)):
+        return list(value)
+    return [value]
+
+
 def shell_escape(s):
     if s and s[0].isdigit():
         s = 'N' + s

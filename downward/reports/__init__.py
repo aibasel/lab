@@ -101,14 +101,12 @@ class PlanningReport(Report):
         self.derived_properties = derived_properties or []
 
         # Set non-default options for some attributes.
-        attributes = kwargs.get('attributes') or []
-        if isinstance(attributes, basestring):
-            attributes = [attributes]
+        attributes = tools.make_list(kwargs.get('attributes', []))
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
 
         # Remember the order of the configs if it is given as a key word argument filter.
-        self.filter_config = kwargs.get('filter_config', None)
-        self.filter_config_nick = kwargs.get('filter_config_nick', None)
+        self.filter_config = tools.make_list(kwargs.get('filter_config', []))
+        self.filter_config_nick = tools.make_list(kwargs.get('filter_config_nick', []))
 
         Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
@@ -226,8 +224,11 @@ class PlanningReport(Report):
         return table
 
     def _get_config_order(self):
-        """
-        Returns a list of configs in the order that was determined by the user.
+        """ Returns a list of configs in the order that was determined by the user.
+
+        You can use the order of configs in your own custom report subclasses
+        by accessing self.configs which is calculated in self._scan_planning_data.
+
         In order of decreasing priority these are the three ways to determine the order:
         1. A filter for 'config' is given with filter_config.
         2. A filter for 'config_nick' is given with filter_config_nick.
@@ -244,7 +245,6 @@ class PlanningReport(Report):
             nick = run.get('config_nick', config)
             config_nicks_to_config[nick].add(config)
         if self.filter_config_nick and not self.filter_config:
-            self.filter_config = []
             for nick in self.filter_config_nick:
                 self.filter_config += sorted(config_nicks_to_config[nick])
         if self.filter_config:
