@@ -216,7 +216,7 @@ class AbsoluteReport(PlanningReport):
             assert attribute is not None
             title = attribute
         if columns is None:
-            columns = self._get_config_order()
+            columns = self.configs
         if attribute is not None and self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
             min_wins = attribute.min_wins

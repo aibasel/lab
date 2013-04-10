@@ -88,7 +88,7 @@ class CompareRevisionsReport(CompareConfigsReport):
             # report. Maintain the order as good as possible by ordering each
             # config nick at the relative position where it first occured.
             config_nicks = []
-            for config in self._get_config_order():
+            for config in self.configs:
                 for rev in self._revisions:
                     if config.startswith('%s-' % rev):
                         config_nick = config[len(rev) + 1:]

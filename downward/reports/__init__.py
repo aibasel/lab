@@ -107,8 +107,8 @@ class PlanningReport(Report):
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
 
         # Remember the order of the configs if it is given as a key word argument filter.
-        self.configs = kwargs.get('filter_config', None)
-        self.config_nicks = kwargs.get('filter_config_nick', None)
+        self.filter_config = kwargs.get('filter_config', None)
+        self.filter_config_nick = kwargs.get('filter_config_nick', None)
 
         Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
@@ -243,18 +243,18 @@ class PlanningReport(Report):
             # For preprocess experiments config_nick is not set.
             nick = run.get('config_nick', config)
             config_nicks_to_config[nick].add(config)
-        if self.config_nicks and not self.configs:
-            self.configs = []
-            for nick in self.config_nicks:
-                self.configs += sorted(config_nicks_to_config[nick])
-        if self.configs:
+        if self.filter_config_nick and not self.filter_config:
+            self.filter_config = []
+            for nick in self.filter_config_nick:
+                self.filter_config += sorted(config_nicks_to_config[nick])
+        if self.filter_config:
             # Other filters may have changed the set of available configs by either
             # removing all runs from one config or changing the run['config'] for a run.
             # Maintain the original order of configs and only keep configs that still
             # have available runs after filtering. Then add all new configs sorted
             # naturally at the end.
-            config_order = [c for c in self.configs if c in all_configs]
-            config_order += list(tools.natural_sort(all_configs - set(self.configs)))
+            config_order = [c for c in self.filter_config if c in all_configs]
+            config_order += list(tools.natural_sort(all_configs - set(self.filter_config)))
         else:
             config_order = list(tools.natural_sort(all_configs))
         return config_order
