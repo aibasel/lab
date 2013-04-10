@@ -150,6 +150,7 @@ class SearchRun(DownwardRun):
         self.require_resource(self.planner.shell_name)
         if config:
             # We have a single planner configuration
+            planner_type = 'single'
             assert isinstance(config_nick, basestring), config_nick
             if not isinstance(config, list):
                 logging.error('Config strings are not supported. Please use a list: %s' %
@@ -158,6 +159,7 @@ class SearchRun(DownwardRun):
             search_cmd = [self.planner.shell_name] + config
         else:
             # We have a portfolio, config_nick is the path to the portfolio file
+            planner_type = 'portfolio'
             config_nick = os.path.basename(config_nick)
             search_cmd = [self.planner.shell_name, '--portfolio', config_nick]
         self.add_command('search', search_cmd, stdin='output',
@@ -173,12 +175,7 @@ class SearchRun(DownwardRun):
         self.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
                                       'PROBLEM'])
 
-        if config:
-            self.add_command('parse-search', ['SEARCH_PARSER'])
-            planner_type = 'single'
-        else:
-            self.add_command('parse-portfolio', ['PORTFOLIO_PARSER'])
-            planner_type = 'portfolio'
+        self.add_command('parse-search', ['SEARCH_PARSER'])
 
         self.set_property('config_nick', config_nick)
         self.set_property('commandline_config', config)
@@ -410,9 +407,6 @@ class DownwardExperiment(Experiment):
             self.add_resource('SEARCH_PARSER',
                         os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'),
                         'search_parser.py')
-            self.add_resource('PORTFOLIO_PARSER',
-                        os.path.join(DOWNWARD_SCRIPTS_DIR, 'portfolio_parser.py'),
-                        'portfolio_parser.py')
             self._make_search_runs()
         else:
             logging.critical('There is no stage "%s"' % stage)
