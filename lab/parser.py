@@ -122,15 +122,16 @@ def parse_key_value_patterns(content, props):
 
 
 class Parser(object):
-    """Parses files and writes found results into the run's properties file.
+    """
+    Parse files in the current directory and write results into the run's
+    properties file.
 
     Parsing is done as just another run command. After the main command has been
     added to the run, we can add the parsing command::
 
-        myparser = 'path/to/myparser.py'
-        run.add_command('parse-output', [myparser])
+        run.add_command('parse-output', ['path/to/myparser.py'])
 
-    This calls *myparser* in the run directory. Principally a parser can be any
+    This calls *myparser.py* in the run directory. Principally a parser can be any
     program that analyzes any of the files in the run dir (e.g. ``run.log``) and
     manipulates the ``properties`` file in the same directory.
 
@@ -150,6 +151,11 @@ class Parser(object):
     """
     def __init__(self, key_value_patterns=False):
         self.file_parsers = defaultdict(_FileParser)
+        self.run_dir = os.path.abspath('.')
+        prop_file = os.path.join(self.run_dir, 'properties')
+        if not os.path.exists(prop_file):
+            logging.critical('No properties file found at ' % prop_file)
+        self.props = tools.Properties(filename=prop_file)
         if key_value_patterns:
             self.add_function(parse_key_value_patterns)
 
@@ -198,24 +204,20 @@ class Parser(object):
         """
         self.file_parsers[file].add_function(function)
 
-    def parse(self, run_dir='.'):
-        """Search all patterns and apply all functions for the files in *run_dir*.
+    def parse(self):
+        """Search all patterns and apply all functions.
 
         The found values are written to the properties file at
-        ``run_dir/properties``.
+        ``<run_dir>/properties``.
         """
-        prop_file = os.path.join(run_dir, 'properties')
-        props = tools.Properties(filename=prop_file)
-
         for filename, file_parser in self.file_parsers.items():
             # If filename is absolute it will not be changed here
-            path = os.path.join(run_dir, filename)
+            path = os.path.join(self.run_dir, filename)
             success = file_parser.load_file(path)
             if success:
                 # Subclasses directly modify the properties during parsing
-                file_parser.parse(props)
+                file_parser.parse(self.props)
             else:
-                logging.error('File "%s" could not be read' %
-                              os.path.abspath(path))
+                logging.error('File "%s" could not be read' % path)
 
-        props.write()
+        self.props.write()
