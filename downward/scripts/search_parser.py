@@ -23,8 +23,6 @@
 Regular expressions and functions for parsing planning experiments
 """
 
-# TODO: Remove code duplication from {search,portfolio}_parser.py
-
 from __future__ import division
 
 import re
@@ -39,8 +37,13 @@ def _get_states_pattern(attribute, name):
     return (attribute, re.compile(r'%s (\d+) state\(s\)\.' % name), int)
 
 
-ITERATIVE_PATTERNS = [
+PORTFOLIO_PATTERNS = [
     ('cost', re.compile(r'Plan cost: (.+)'), int),
+    ('plan_length', re.compile(r'Plan length: (\d+)'), int),
+]
+
+
+ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
     _get_states_pattern('dead_ends', 'Dead ends:'),
     _get_states_pattern('evaluations', 'Evaluated'),
     _get_states_pattern('expansions', 'Expanded'),
@@ -48,7 +51,6 @@ ITERATIVE_PATTERNS = [
     # We exclude lines like "Initial state h value: 1147184/1703241." that stem
     # from multi-heuristic search.
     ('initial_h_value', re.compile(r'Initial state h value: (\d+)\.'), int),
-    ('plan_length', re.compile(r'Plan length: (\d+)'), int),
     # We cannot include " \[t=.+s\]" in the regex, because older versions don't
     # have this information in the log.
     ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
@@ -71,6 +73,33 @@ CUMULATIVE_PATTERNS = [
     # searches we will find the h value if it isn't a multi-heuristic search.
     ('initial_h_value', re.compile(r'Initial state h value: (\d+)\.'), int),
 ]
+
+
+def get_iterative_portfolio_results(content, props):
+    values = defaultdict(list)
+
+    for line in content.splitlines():
+        for name, pattern, cast in PORTFOLIO_PATTERNS:
+            match = pattern.search(line)
+            if not match:
+                continue
+            values[name].append(cast(match.group(1)))
+            # We can break here, because each line contains only one value
+            break
+
+    # Check that some lists have the same length
+    def same_length(group):
+        return len(set(len(x) for x in group)) == 1
+
+    group1 = ('cost', 'plan_length')
+    assert same_length(values[x] for x in group1), values
+
+    for name, items in values.items():
+        props[name + '_all'] = items
+
+    for attr in ['cost', 'plan_length']:
+        if values[attr]:
+            props[attr] = min(values[attr])
 
 
 def get_iterative_results(content, props):
@@ -152,8 +181,11 @@ def set_search_time(content, props):
 
 
 def unsolvable(content, props):
-    props['unsolvable'] = int('unsolvable' in content or
+    # Iterative searches like lama might report the problem as unsolvable even
+    # after they found a solution.
+    logged_unsolvable = ('unsolvable' in content or
             'Completely explored state space -- no solution!' in content)
+    props['unsolvable'] = int(not props['coverage'] and logged_unsolvable)
 
 
 def parse_error(content, props):
@@ -350,33 +382,49 @@ class SearchParser(Parser):
         planner_type = self.props['planner_type']
         assert planner_type in ['single', 'portfolio'], planner_type
 
-        self.add_search_parsing()
-        self.add_search_functions()
+        # TODO: search run.err once parse errors are printed there
+        self.add_function(parse_error)
+        self.add_function(parse_last_loggings, file='driver.log')
+        self.add_function(get_iterative_results)
+        self.add_function(coverage)
+        self.add_function(unsupported, 'run.err')
+        self.add_function(unsolvable)
+        self.add_function(get_error, 'run.err')
 
-    def add_search_parsing(self):
+
+class SingleSearchParser(SearchParser):
+    def __init__(self):
+        SearchParser.__init__(self)
+
         self.add_pattern('landmarks', r'Discovered (\d+?) landmarks', type=int,
                          required=False)
         self.add_pattern('landmarks_generation_time',
                          r'Landmarks generation time: (.+)s', type=float,
                          required=False)
 
-    def add_search_functions(self):
-        # TODO: search run.err once parse errors are printed there
-        self.add_function(parse_error)
-        self.add_function(parse_last_loggings, file='driver.log')
-        self.add_function(unsolvable)
-        self.add_function(unsupported, 'run.err')
-        self.add_function(get_iterative_results)
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
         self.add_function(set_search_time)
-        self.add_function(coverage)
         self.add_function(scores)
-        self.add_function(get_error, "run.err")
         self.add_function(check_min_values)
 
 
+class PortfolioParser(SearchParser):
+    def __init__(self):
+        SearchParser.__init__(self)
+        self.add_function(get_iterative_portfolio_results)
+
+
 if __name__ == '__main__':
-    print 'Running search parser'
-    parser = SearchParser()
+    parser = SingleSearchParser()
+
+    # Change parser type if we are parsing a portfolio.
+    planner_type = parser.props['planner_type']
+    if planner_type == 'single':
+        print 'Running single search parser'
+    else:
+        assert planner_type == 'portfolio', planner_type
+        parser = PortfolioParser()
+        print 'Running portfolio parser'
+
     parser.parse()
