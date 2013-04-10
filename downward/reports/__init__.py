@@ -101,12 +101,12 @@ class PlanningReport(Report):
         self.derived_properties = derived_properties or []
 
         # Set non-default options for some attributes.
-        attributes = tools.make_list(kwargs.get('attributes', []))
+        attributes = tools.make_list(kwargs.get('attributes') or [])
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
 
         # Remember the order of the configs if it is given as a key word argument filter.
-        self.filter_config = tools.make_list(kwargs.get('filter_config', []))
-        self.filter_config_nick = tools.make_list(kwargs.get('filter_config_nick', []))
+        self.filter_config = tools.make_list(kwargs.get('filter_config') or [])
+        self.filter_config_nick = tools.make_list(kwargs.get('filter_config_nick') or [])
 
         Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
@@ -254,7 +254,8 @@ class PlanningReport(Report):
             # have available runs after filtering. Then add all new configs sorted
             # naturally at the end.
             config_order = [c for c in self.filter_config if c in all_configs]
-            config_order += list(tools.natural_sort(all_configs - set(self.filter_config)))
+            config_order += list(tools.natural_sort(all_configs -
+                                                    set(self.filter_config)))
         else:
             config_order = list(tools.natural_sort(all_configs))
         return config_order
