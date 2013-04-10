@@ -103,7 +103,9 @@ class AbsoluteReport(PlanningReport):
                         parts.append('%(table)s\n' % locals())
                     else:
                         parts.append('No task was found where all configurations '
-                                     'have a value for "%s".\n' % attribute)
+                                     'have a value for "%s". Therefore no '
+                                     'domain-wise table can be generated.\n' %
+                                     attribute)
 
             toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
             toc_lines.append('  - ' + ' '.join(toc_line))
