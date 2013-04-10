@@ -1,6 +1,30 @@
 Roadmap
 =======
 
+* Make sure that proper memory padding is added in src/search/portfolios.py
+
 * Move Plot class into lab.reports
 * Add option for choosing between scattering and plotting points in ProblemPlotReport
 * Infer output_format from outfile and vice-versa.
+* If rev is set for a checkout use it as a default for dest.
+* add_resource use filename as default for destination filename.
+* Add exp.add_report method.
+* profile report generation and make it faster
+  * For a big report taking 42s we spend
+    - 19s converting txt2tags to html.
+    - 10s generating the markup.
+    -  9s decoding json. ultrajson would probably only make this ~1.15 times faster.
+    -  3s scanning the planning data.
+    -  1s applying filters.
+
+Maybe
+-----
+* Enumerate run dirs from 0 to 99 instead of 1 to 100. This yields better tab completion.
+
+Not-todo
+--------
+* Warn when config or nick in filter is not present in dataset. We would need
+  to enable this for all attributes. If we filter for a single item
+  "filter_attr='not-here'" a warning is already shown. For lists this becomes
+  trickier: We cannot easily find out if one of the values in
+  "filter_attr=['here', 'not-here']" does not exist in the dataset.
