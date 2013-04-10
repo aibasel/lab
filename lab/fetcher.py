@@ -51,7 +51,7 @@ class Fetcher(object):
         if props.get('search_error') is not None and props.get("coverage") is None:
             logging.warning('search_parser.py exited abnormally for %s' % run_dir)
             logging.info('Rerunning search_parser.py')
-            parsers.append('../../search_parser.py')
+            parsers.append(os.path.join(run_dir, '../../search_parser.py'))
 
         for parser in parsers:
             rel_parser = os.path.relpath(parser, start=run_dir)
