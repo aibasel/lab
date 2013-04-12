@@ -11,4 +11,4 @@ for the `Fast Downward planning system <http://www.fast-downward.org>`_.
 
 Instructions and documentation
 ==============================
- `http://lab.readthedocs.org <http://readthedocs.org/docs/lab/>`_.
+`http://lab.readthedocs.org <http://readthedocs.org/docs/lab/>`_

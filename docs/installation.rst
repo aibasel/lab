@@ -9,8 +9,11 @@ Choose a destination for the lab package, install the dependencies and clone the
 repository::
 
     LAB=/path/to/lab
-    sudo apt-get install mercurial python2.7 python-matplotlib
+    sudo apt-get install mercurial python2.7 python-matplotlib python-simplejson
     hg clone https://bitbucket.org/jendrikseipp/lab ${LAB}
+
+(python-matplotlib is only needed for reports that generate graphs.
+python-simplejson is optional, but makes generating reports much faster.)
 
 Append to your ``.bashrc`` to make lab available on the ``PYTHONPATH``::
 
