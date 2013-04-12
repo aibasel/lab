@@ -33,6 +33,19 @@ import subprocess
 import sys
 import traceback
 
+# Use simplejson where it's available, because it is compatible (just separately
+# maintained), puts no blanks at line endings and loads json much faster:
+# json_dump: 44.41, simplejson_dump: 45.90
+# json_load: 7.32, simplejson_load: 2.92
+# We cannot use cjson or ujson for the dumping, because the resulting files are
+# very hard to read (cjson_dump: 5.78, ujson_dump: 2.44). Using ujson for
+# loading might be feasible, but it would only result in a very small speed gain
+# (ujson_load: 2.49). cjson loads even slower than simplejson (cjson_load: 3.28).
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 from external import argparse
 
 
