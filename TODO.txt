@@ -5,7 +5,7 @@ Roadmap
 
 * Move Plot class into lab.reports
 * Add option for choosing between scattering and plotting points in ProblemPlotReport
-* Infer output_format from outfile and vice-versa.
+* Infer outfile extension from output_format, but not vice-versa.
 * If rev is set for a checkout use it as a default for dest.
 * add_resource use filename as default for destination filename.
 * Add exp.add_report method.
@@ -34,6 +34,11 @@ Roadmap
     * sjson_read      0.26
     * cjson_read      0.31
     * ujson_read      0.23
+* Time for converting a big report to HTML
+    * txt2tags (txt2tags to html): 0.81s (measured from within the markup.py module)
+    * pandoc (markdown to html): 0.56s (measured for pandoc 1.11.1)
+    * python-markdown (markdown to html): 1.05s (with pipe_tables)
+    * python-markdown2 (markdown to html): seems fast (only supports ugly google code tables)
 
 Maybe
 -----
