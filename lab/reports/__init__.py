@@ -243,6 +243,10 @@ class Report(object):
             logging.info('The source directory does not end with "-eval". '
                          'Are you sure this is an evaluation directory?')
         self.eval_dir = os.path.abspath(eval_dir)
+        # It would be nice if we could infer "format" from "outfile", but the
+        # former is needed before the latter is available.
+        # Also we cannot add the extension ".format" to "outfile" in case it's
+        # missing, because "outfile" might be a directory.
         self.outfile = os.path.abspath(outfile)
 
         # Map from attribute to type.

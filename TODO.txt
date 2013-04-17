@@ -5,7 +5,7 @@ Roadmap
 
 * Move Plot class into lab.reports
 * Add option for choosing between scattering and plotting points in ProblemPlotReport
-* Infer outfile extension from output_format, but not vice-versa.
+
 * If rev is set for a checkout use it as a default for dest.
 * add_resource use filename as default for destination filename.
 * Add exp.add_report method.
@@ -51,3 +51,5 @@ Not-todo
   "filter_attr='not-here'" a warning is already shown. For lists this becomes
   trickier: We cannot easily find out if one of the values in
   "filter_attr=['here', 'not-here']" does not exist in the dataset.
+* Infer outfile extension from output_format or vice-versa. This is not feasible
+  (see comment in code).
