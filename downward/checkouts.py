@@ -127,14 +127,14 @@ class HgCheckout(Checkout):
             sys.exit(1)
 
         # Find proper absolute revision
-        rev = self.get_abs_rev(repo, rev)
+        abs_rev = self.get_abs_rev(repo, rev)
 
-        if rev.upper() == 'WORK':
+        if abs_rev.upper() == 'WORK':
             checkout_dir = repo
         else:
-            checkout_dir = dest if dest else rev
+            checkout_dir = dest or rev
 
-        Checkout.__init__(self, part, repo, rev, checkout_dir)
+        Checkout.__init__(self, part, repo, abs_rev, checkout_dir)
 
     def get_abs_rev(self, repo, rev):
         if str(rev).upper() == 'WORK':
