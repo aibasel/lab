@@ -136,10 +136,10 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         # ------ reports -----------------------------------------------
 
-        compare_report = CompareRevisionsReport(revisions=[base_rev, rev],
+        compare_report = CompareRevisionsReport(rev1=base_rev,
+                                                rev2=rev,
                                                 resolution='combined',
-                                                attributes=COMPARED_ATTRIBUTES,
-                                                )
+                                                attributes=COMPARED_ATTRIBUTES)
         self.add_step(Step('report-compare-scores',
                            compare_report,
                            self.eval_dir,
