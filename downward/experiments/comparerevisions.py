@@ -94,15 +94,9 @@ class CompareRevisionsExperiment(DownwardExperiment):
         *use_extended_configs* determines if some less common configurations are tested
         (default: False).
 
-        Example: ::
+        Example:
 
-            repo = '/path/to/downward-repo'
-            env = GkiGridEnvironment(queue='xeon_core.q', priority=-2)
-            exppath = os.path.join(HOME, 'experiments/exec', 'issue999-opt')
-
-            exp = CompareRevisionsExperiment(exppath, repo, 'opt', 'issue999',
-                                             use_extended_configs=True,
-                                             environment=env)
+        .. literalinclude:: ../examples/issue374.py
         """
         if base_rev is None:
             base_rev = greatest_common_ancestor(repo, rev, 'default')

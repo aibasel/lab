@@ -75,6 +75,7 @@ if [ -d "$REPO" ]; then
     ./initial-opt-config.py
     ./translator-opt.py
     ./translator-sat.py
+    #./issue374.py  # Needs correct repo.
 
     # Check planner experiment
     rm -rf ~/lab/experiments/planner
