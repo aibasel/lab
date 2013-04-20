@@ -379,8 +379,6 @@ def get_error(content, props):
 class SearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
-        planner_type = self.props['planner_type']
-        assert planner_type in ['single', 'portfolio'], planner_type
 
         # TODO: search run.err once parse errors are printed there
         self.add_function(parse_error)
