@@ -307,9 +307,9 @@ def get_error(content, props):
       * unexplained: The planner did not produce a plan but was not killed with SIGKILL.
     """
     # If there is any error, do no count this task as solved.
-    if props.get('error', 'none') != 'none' or props.get('search_error'):
+    # For iterated searches coverage may be 1 even if props['search_error'] is 1.
+    if props.get('error') is not None:
         props['coverage'] = 0
-        props['search_error'] = 1
 
     # If coverage is 0, try to explain this
     if props.get('coverage') == 0:
@@ -371,9 +371,9 @@ def get_error(content, props):
             props['unexplained_error'] = 0
 
     # Check that all errors that occured are handled in exactly one of the categories.
-    assert (props['search_error'] == 0 or
+    assert (props['search_error'] == 0 or props['coverage'] == 1 or
             (props['unsolvable'] + props['search_timeout'] +
-             props['search_mem_limit_exceeded'] + props['unexplained_error']) == 1)
+             props['search_mem_limit_exceeded'] + props['unexplained_error']) == 1), props
 
 
 class SearchParser(Parser):

@@ -211,7 +211,7 @@ class PlanningReport(Report):
         where a serious error occured. Every error that is not 'none', 'unsolvable',
         'timeout' or 'mem-limit-exceeded' is considered serious.
         """
-        sanctioned_error_reasons = [None, 'none', 'unsolvable',
+        sanctioned_error_reasons = [None, 'unsolvable',
                                     'timeout', 'mem-limit-exceeded']
         columns = ['domain', 'problem', 'config', 'error',
                    'last_logged_time', 'last_logged_memory']
