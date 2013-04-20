@@ -228,6 +228,27 @@ class Experiment(_Buildable):
         """
         self.steps.append(step)
 
+    def add_report(self, report, name='', eval_dir='', outfile=''):
+        """Add *report* to the list of experiment steps.
+
+        By using sane defaults, this method is a shortcut for
+        ``add_step(Step(name, report, eval_dir, outfile))``.
+
+        If no *name* is given, use *outfile* or the *report*'s class name.
+
+        By default, use the experiment's standard *eval_dir*.
+
+        If *outfile* is omitted, compose a filename from *name* and the
+        *report*'s format. If *outfile* is a relative path, put it under
+        *eval_dir*.
+        """
+        name = name or outfile or report.__class__.__name__.lower()
+        eval_dir = eval_dir or self.eval_dir
+        outfile = outfile or '%s.%s' % (name, report.output_format)
+        if not os.path.isabs(outfile):
+            outfile = os.path.join(eval_dir, outfile)
+        self.add_step(Step(name, report, eval_dir, outfile))
+
     def add_run(self, run=None):
         """Schedule *run* to be part of the experiment.
 
