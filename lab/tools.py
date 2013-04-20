@@ -21,7 +21,6 @@ import colorsys
 import collections
 import email.mime.text
 import functools
-import json
 import logging
 from numbers import Number
 import os
@@ -43,6 +42,7 @@ import traceback
 # (ujson_load: 2.49). cjson loads even slower than simplejson (cjson_load: 3.28).
 try:
     import simplejson as json
+    assert json  # Silence pyflakes
 except ImportError:
     import json
 
