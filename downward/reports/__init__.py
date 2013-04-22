@@ -207,18 +207,15 @@ class PlanningReport(Report):
 
     def _get_warnings_table(self):
         """
-        Returns a :py:class:`Table <lab.reports.Table>` containing one line for each run
-        where a serious error occured. Every error that is not 'none', 'unsolvable',
-        'timeout' or 'mem-limit-exceeded' is considered serious.
+        Returns a :py:class:`Table <lab.reports.Table>` containing one line for
+        each run where an unexpected error occured.
         """
-        sanctioned_error_reasons = [None, 'unsolvable',
-                                    'timeout', 'mem-limit-exceeded']
         columns = ['domain', 'problem', 'config', 'error',
                    'last_logged_time', 'last_logged_memory']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
         for run in self.props.values():
-            if run.get('error') not in sanctioned_error_reasons:
+            if run.get('unexplained_error'):
                 for column in columns:
                     table.add_cell(run['run_dir'], column, run.get(column, '?'))
         return table

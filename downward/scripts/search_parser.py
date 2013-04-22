@@ -354,26 +354,27 @@ def get_error(content, props):
                 props['error'] = 'unexplained-probably-mem-limit-exceeded'
             else:
                 props['error'] = 'unexplained-sigkill'
+        elif props.get('search_returncode') == '90':
+            props['error'] = 'portfolio-no-plan'
+            props['portfolio_no_plan'] = 1
         else:
             props['error'] = 'unexplained'
 
-    # Set all errors that did not occur to '0', so it is possible to sum over
-    # all errors of one type.
-    for attribute in ['unsolvable', 'search_error', 'search_mem_limit_exceeded',
-                      'search_timeout']:
-        if props.get(attribute) is None:
-            props[attribute] = 0
+    pos_outcomes = ['coverage', 'unsolvable']
+    neg_outcomes = ['search_timeout', 'search_mem_limit_exceeded',
+                    'portfolio_no_plan']
+    outcomes = pos_outcomes + neg_outcomes
 
-    props['unexplained_error'] = 1
-    for reason in ['coverage', 'unsolvable', 'search_mem_limit_exceeded',
-                   'search_timeout']:
-        if props.get(reason, False):
-            props['unexplained_error'] = 0
+    # Set all outcomes that did not occur to '0', so it is possible to sum over
+    # all outcomes.
+    for outcome in outcomes:
+        if props.get(outcome) is None:
+            props[outcome] = 0
+
+    props['unexplained_error'] = not any(props.get(outcome) for outcome in outcomes)
 
     # Check that all errors that occured are handled in exactly one of the categories.
-    assert (props['search_error'] == 0 or props['coverage'] == 1 or
-            (props['unsolvable'] + props['search_timeout'] +
-             props['search_mem_limit_exceeded'] + props['unexplained_error']) == 1), props
+    assert (sum(props[outcome] for outcome in outcomes) == 1), props
 
 
 class SearchParser(Parser):
