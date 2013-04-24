@@ -362,7 +362,7 @@ def get_error(content, props):
 
     pos_outcomes = ['coverage', 'unsolvable']
     neg_outcomes = ['search_timeout', 'search_mem_limit_exceeded',
-                    'portfolio_no_plan']
+                    'portfolio_no_plan', 'unexplained_error']
     outcomes = pos_outcomes + neg_outcomes
 
     # Set all outcomes that did not occur to '0', so it is possible to sum over
