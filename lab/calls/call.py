@@ -90,7 +90,12 @@ class Call(subprocess.Popen):
 
         def prepare_call():
             os.setpgrp()
-            set_limit(resource.RLIMIT_CPU, self.time_limit, self.time_limit)
+            # When the soft time limit is reached, SIGXCPU is emitted. Once we
+            # reach the higher hard time limit, SIGKILL is sent. Having some
+            # padding between the two limits allows us to distinguish between
+            # SIGKILL signals sent by this class and the ones sent by the
+            # system.
+            set_limit(resource.RLIMIT_CPU, self.time_limit, self.time_limit + 5)
             # Memory in Bytes
             set_limit(resource.RLIMIT_AS, self.mem_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
