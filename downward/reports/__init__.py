@@ -94,6 +94,10 @@ class PlanningReport(Report):
             PlanningReport(filter_config=['WORK-lmcut', 'WORK-blind'])
             PlanningReport(filter_config_nick=['lmcut', 'blind'])
 
+        Tip: When you append ´´_relative´´ to an attribute, you will get a table
+        containing the attribute's values of each configuration relative to the
+        leftmost column.
+
         """
         # Allow specifying a single property or a list of properties.
         if hasattr(derived_properties, '__call__'):
@@ -103,6 +107,8 @@ class PlanningReport(Report):
         # Set non-default options for some attributes.
         attributes = tools.make_list(kwargs.get('attributes') or [])
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
+
+        self._handle_relative_attributes(kwargs['attributes'])
 
         # Remember the order of the configs if it is given as a key word argument filter.
         self.filter_config = tools.make_list(kwargs.get('filter_config') or [])
@@ -131,6 +137,24 @@ class PlanningReport(Report):
                 if fnmatch.fnmatch(attr, pattern):
                     return pattern.copy(attr)
         return Report._prepare_attribute(self, attr)
+
+    def _get_relative_attribute_function(self, attr):
+        def relative_attr(runs):
+            first_val = runs[0].get(attr)
+            for run in runs:
+                val = run.get(attr)
+                if val and first_val:
+                    run['%s_relative' % attr] = val / float(first_val)
+        return relative_attr
+
+    def _handle_relative_attributes(self, attributes):
+        for attr in attributes:
+            if attr.endswith('_relative'):
+                # Change name, but keep parameters.
+                abs_attr = attr.copy(attr[:-len('_relative')])
+                attr.functions = [reports.gm]
+                self.derived_properties.append(
+                    self._get_relative_attribute_function(abs_attr))
 
     def _scan_data(self):
         self._scan_planning_data()
