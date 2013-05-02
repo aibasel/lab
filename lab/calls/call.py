@@ -53,7 +53,7 @@ def set_limit(kind, soft_limit, hard_limit=None):
 
 class Call(subprocess.Popen):
     def __init__(self, args, name='call', time_limit=1800, mem_limit=2048,
-                 kill_delay=5, check_interval=0.1, **kwargs):
+                 kill_delay=5, check_interval=5, **kwargs):
         """Make system calls with time and memory constraints.
 
         *args* and *kwargs* will be passed to the base
@@ -132,6 +132,11 @@ class Call(subprocess.Popen):
 
         If the process' processgroup exceeds any limit it is killed.
         Returns returncode attribute.
+
+        Normally, we don't need to double-check that the time and memory bounds
+        have been hit, but we keep it in just to be sure all the resource limits
+        work correctly. Another reason is that we want to have the resource
+        usage logged over time.
         """
         if self.wait_called:
             # wait was called before. This should not happen, but does on
