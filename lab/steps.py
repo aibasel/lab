@@ -110,7 +110,7 @@ class Step(object):
 
         """
         return cls('zip-exp-dir', call,
-                   ['tar', '--dereference', '-czf', exp.name + '.tar.gz', exp.name],
+                   ['tar', '--dereference', '-cjf', exp.name + '.tar.bz2', exp.name],
                    cwd=os.path.dirname(exp.path))
 
     @classmethod
@@ -123,7 +123,7 @@ class Step(object):
 
         """
         return cls('unzip-exp-dir', call,
-                   ['tar', '-xzf', exp.name + '.tar.gz'],
+                   ['tar', '-xjf', exp.name + '.tar.bz2'],
                    cwd=os.path.dirname(exp.path))
 
     @classmethod

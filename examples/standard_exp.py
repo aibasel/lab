@@ -99,16 +99,13 @@ class StandardDownwardExperiment(DownwardExperiment):
         self.add_step(Step('report-abs', AbsoluteReport(attributes=attributes + ['error'], colored=True),
                                                         self.eval_dir, abs_report_file))
 
-        # Compress the experiment directory
-        self.add_step(Step.zip_exp_dir(self))
-
         if REMOTE:
-            self.add_step(Step.remove_exp_dir(self))
+            # Compress the experiment directory
+            self.add_step(Step.zip_exp_dir(self))
+
+        self.add_step(Step.remove_exp_dir(self))
 
         if not REMOTE:
-            # Unzip the experiment directory
-            self.add_step(Step.unzip_exp_dir(self))
-
             # Remove eval dir for a clean scp copy.
             self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
 
@@ -118,7 +115,10 @@ class StandardDownwardExperiment(DownwardExperiment):
 
             # Copy the zipped experiment directory to local directory
             self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
-                '%s:%s.tar.gz' % (SCP_LOGIN, remote_exppath), '%s.tar.gz' % local_exppath]))
+                '%s:%s.tar.bz2' % (SCP_LOGIN, remote_exppath), '%s.tar.bz2' % local_exppath]))
+
+        # Unzip the experiment directory
+        self.add_step(Step.unzip_exp_dir(self))
 
         # Copy the results and send mail.
         # TODO: Fix publish step.
