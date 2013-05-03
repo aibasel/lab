@@ -128,11 +128,8 @@ class PreprocessRun(DownwardRun):
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
         if exp.compact:
-            # Compress and afterwards delete output.sas.
-            self.add_command('compress-output-sas',
-                             ['tar', '-czf', 'output.sas.tar.gz', 'output.sas'])
-            self.add_command('remove-output-sas',
-                             ['rm', 'output.sas'])
+            # Compress and delete output.sas.
+            self.add_command('compress-output-sas', ['bzip2', 'output.sas'])
 
         ext_config = '-'.join([self.translator.name, self.preprocessor.name])
         self._save_id(ext_config)
