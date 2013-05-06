@@ -26,19 +26,3 @@ else
 fi
 
 export PATH=~/bin:$PATH
-
-function format {
-    printf "%%05d" $1
-}
-
-RUN=$SGE_TASK_ID
-let "LOWER = ((RUN - 1) / 100) * 100 + 1"
-let "UPPER = (((RUN + 99) / 100) * 100)"
-DIR="runs-$(format $LOWER)-$(format $UPPER)/$(format $RUN)"
-
-cd $DIR
-./run
-RETCODE=$?
-if [[ $RETCODE != 0 ]]; then
-    echo Run $RUN returned $RETCODE >> driver.err
-fi

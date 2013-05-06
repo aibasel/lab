@@ -147,12 +147,13 @@ class OracleGridEngineEnvironment(Environment):
         job_params = self._get_common_job_params()
         job_params.update(name=self.exp.name, num_tasks=num_tasks)
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
-        script = open(template_file).read() % job_params + '\n'
+        header = open(template_file).read() % job_params
+        body = open(os.path.join(tools.DATA_DIR, 'grid-job-body')).read()
 
         filename = self.exp._get_abs_path(self.main_script_file)
         with open(filename, 'w') as file:
             logging.debug('Writing file "%s"' % filename)
-            file.write(script)
+            file.write('%s\n\n%s' % (header, body))
 
     def start_exp(self):
         submitted_file = os.path.join(self.exp.path, 'submitted')
