@@ -136,7 +136,7 @@ class Matplotlib(object):
 
             X, Y = zip(*coords)
             if not all_x_numeric:
-                X = [indices[val] for val in X]
+                X = [indices[value] for value in X]
             axes.plot(X, Y, label=category, **styles[category])
             if X and Y:
                 has_points = True
