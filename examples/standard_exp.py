@@ -39,34 +39,10 @@ else:
     PYTHON = LOCAL_PYTHON
 
 
-def create_publish_and_mail_step(exp, *reports):
-    user_home = os.path.expanduser('~')
-    user_name = os.path.basename(user_home)
-
-    def publish_and_mail():
-        public_reports = []
-        for report in reports:
-            report_name = os.path.basename(report)
-            local = os.path.join(user_home, '.public_html/', report_name)
-            public = 'http://www.informatik.uni-freiburg.de/~%s/%s' % (user_name, report_name)
-            shutil.copy2(report, local)
-            # Set permission to -rw-r--r--
-            os.chmod(local, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-            print 'Copied report to file://%s' % local
-            print '-> %s' % public
-            public_reports.append(public)
-        tools.sendmail('seipp@informatik.uni-freiburg.de',
-                       'seipp@informatik.uni-freiburg.de',
-                       'Exp finished: %s' % exp.name,
-                       'Path: %s\n' % exp.path + '\n'.join(public_reports))
-
-    return Step('publish-and-mail', publish_and_mail)
-
-
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, repo=None, environment=None,
                  combinations=None, limits=None, attributes=None, priority=0,
-                 queue=None, processes=2, **kwargs):
+                 queue=None, processes=2, email=None, **kwargs):
         if path is None:
             path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
         assert not os.path.isabs(path), path
@@ -79,7 +55,8 @@ class StandardDownwardExperiment(DownwardExperiment):
             exppath = remote_exppath
             repo = repo or REMOTE_REPO
             environment = environment or MaiaEnvironment(priority=priority,
-                                                         queue=queue)
+                                                         queue=queue,
+                                                         email=email)
         else:
             exppath = local_exppath
             repo = repo or LOCAL_REPO
@@ -119,10 +96,6 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         # Unzip the experiment directory
         self.add_step(Step.unzip_exp_dir(self))
-
-        # Copy the results and send mail.
-        # TODO: Fix publish step.
-        #self.add_step(create_publish_and_mail_step(self, abs_report_file))
 
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast
