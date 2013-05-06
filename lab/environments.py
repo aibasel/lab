@@ -139,25 +139,7 @@ class OracleGridEngineEnvironment(Environment):
             'host_spec': self.host_spec,
         }
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
-        header = open(template_file).read() % job_params + '\n'
-        lines = []
-
-        run_groups = tools.divide_list(self.exp.runs, self.runs_per_task)
-
-        for task_id, run_group in enumerate(run_groups, start=1):
-            lines.append('if [[ $SGE_TASK_ID == %s ]]; then' % task_id)
-            for run in run_group:
-                # Change into the run dir
-                lines.append('  cd %s' % os.path.relpath(run.path,
-                                                         self.exp.path))
-                lines.append('  ./run')
-                lines.append('  RETCODE=$?')
-                lines.append('  if [[ $RETCODE != 0 ]]; then')
-                lines.append('    echo Run %s returned $RETCODE >> driver.err' % task_id)
-                lines.append('  fi')
-            lines.append('fi')
-
-        script = header + '\n'.join(lines)
+        script = open(template_file).read() % job_params + '\n'
 
         filename = self.exp._get_abs_path(self.main_script_file)
         with open(filename, 'w') as file:
