@@ -92,13 +92,17 @@ class OracleGridEngineEnvironment(Environment):
     HOST_RESTRICTIONS = {}           # can be overridden in derived classes
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
-    def __init__(self, queue=None, priority=None, host_restriction=None):
+    def __init__(self, queue=None, priority=None, host_restriction=None,
+                 email=None):
         """
         *queue* must be a valid queue name on the grid.
 
         *priority* must be in the range [-1023, ..., 0] where 0 is the highest
         priority. If you're a superuser the value can be in the range
         [-1023, ..., 1024].
+
+        If *email* is provided and ``--all`` is used, a message will be sent
+        when the experiment finishes.
         """
         Environment.__init__(self)
         if queue is None:
@@ -113,6 +117,7 @@ class OracleGridEngineEnvironment(Environment):
         assert priority in xrange(-1023, 1024 + 1)
         self.priority = priority
         self.runs_per_task = 1
+        self.email = email
 
         # When submitting an experiment job, wait for this job name.
         self.__wait_for_job_name = None
@@ -123,21 +128,24 @@ class OracleGridEngineEnvironment(Environment):
         # commandline arguments.
         self._exp_script_args = ""
 
+    def _get_common_job_params(self):
+        return {
+            'logfile': 'driver.log',
+            'errfile': 'driver.err',
+            'priority': self.priority,
+            'queue': self.queue,
+            'host_spec': self.host_spec,
+            'notification': '#$ -m n',
+        }
+
     def write_main_script(self):
         num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
         if num_tasks > self.MAX_TASKS:
             logging.critical('You are trying to submit a job with %d tasks, '
                              'but only %d are allowed.' %
                              (num_tasks, self.MAX_TASKS))
-        job_params = {
-            'name': self.exp.name,
-            'logfile': 'driver.log',
-            'errfile': 'driver.err',
-            'num_tasks': num_tasks,
-            'queue': self.queue,
-            'priority': self.priority,
-            'host_spec': self.host_spec,
-        }
+        job_params = self._get_common_job_params()
+        job_params.update(name=self.exp.name, num_tasks=num_tasks)
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         script = open(template_file).read() % job_params + '\n'
 
@@ -170,15 +178,10 @@ class OracleGridEngineEnvironment(Environment):
                                step.name)
 
     def _get_job_header(self, step):
-        job_params = {
-            'name': self._get_job_name(step),
-            'logfile': 'driver.log',
-            'errfile': 'driver.err',
-            'num_tasks': 1,
-            'queue': self.queue,
-            'priority': self.priority,
-            'host_spec': self.host_spec,
-        }
+        job_params = self._get_common_job_params()
+        job_params.update(name=self._get_job_name(step), num_tasks=1)
+        if step.is_last_step:
+            job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         return open(template_file).read() % job_params
 
@@ -233,8 +236,8 @@ cd %(exp_script_dir)s
                 self._job_name = job_name
                 step()
             else:
-                step_file = os.path.join(job_dir, job_name)
-                with open(step_file, 'w') as f:
+                step.is_last_step = (number == len(steps))
+                with open(os.path.join(job_dir, job_name), 'w') as f:
                     f.write(self._get_job(step))
                 submit = ['qsub']
                 if prev_job_name:

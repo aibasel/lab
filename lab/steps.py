@@ -41,6 +41,9 @@ class Step(object):
         self.func = func
         self.args = list(args)
         self.kwargs = kwargs
+        # Will be set to true by the grid environments if this step comes last
+        # in a series of steps run with --all.
+        self.is_last = False
 
     def __call__(self):
         if self.func is None:

@@ -3,8 +3,6 @@
 #$ -N %(name)s
 ### Set shell.
 #$ -S /bin/bash
-### Don't send emails.
-#$ -m n
 ### Execute job from current working directory.
 #$ -cwd
 ### Redirect stdout and stderr.
@@ -18,6 +16,8 @@
 #$ -p %(priority)d
 ### Restrict to certain machines.
 %(host_spec)s
+### Send mail when job finishes? -m can be e.g. (b)eginning, (e)nd, (n)ever.
+%(notification)s
 
 if [ -z $PYTHONPATH ]; then
     export PYTHONPATH=$(pwd)
