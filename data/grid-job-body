@@ -1,5 +1,5 @@
 function format {
-    printf "%%05d" $1
+    printf "%05d" $1
 }
 
 RUN=$SGE_TASK_ID
