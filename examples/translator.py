@@ -74,7 +74,8 @@ class TranslatorExperiment(standard_exp.StandardDownwardExperiment):
             if not standard_exp.REMOTE:
                 unneeded_steps.extend(['unzip-exp-dir', 'scp-exp-dir'])
             for step_name in unneeded_steps:
-                self.steps.remove_step(step_name)
+                if step_name in self.steps:
+                    self.steps.remove_step(step_name)
 
             # Use normal eval-dir for preprocess results.
             self.steps.insert(2, Step('fetch-preprocess-results', Fetcher(),
