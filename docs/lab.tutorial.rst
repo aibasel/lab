@@ -22,7 +22,7 @@ at ``examples/simple/simple-exp.py``. You can see the available steps with ::
      2 start           run()
      3 fetch           fetcher('/tmp/simple-exp')
      4 report          report('/tmp/simple-exp-eval', '/tmp/simple-exp-eval/simple-exp.html')
-     5 zip-exp-dir     call(['tar', '-czf', 'simple-exp.tar.gz', 'simple-exp'], cwd='/tmp')
+     5 zip-exp-dir     call(['tar', '-cjf', 'simple-exp.tar.bz2', 'simple-exp'], cwd='/tmp')
      6 publish_reports publish_reports()
      7 remove-exp-dir  rmtree('/tmp/simple-exp')
 
