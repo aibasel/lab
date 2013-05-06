@@ -181,7 +181,7 @@ class OracleGridEngineEnvironment(Environment):
     def _get_job_header(self, step):
         job_params = self._get_common_job_params()
         job_params.update(name=self._get_job_name(step), num_tasks=1)
-        if step.is_last_step:
+        if step.is_last_step and self.email:
             job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         return open(template_file).read() % job_params
