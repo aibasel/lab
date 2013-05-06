@@ -7,7 +7,7 @@ import os
 import shutil
 from subprocess import call
 
-from lab.environments import LocalEnvironment, GkiGridEnvironment
+from lab.environments import LocalEnvironment, MaiaEnvironment
 from lab.steps import Step
 from lab.fetcher import Fetcher
 from lab import tools
@@ -28,7 +28,7 @@ EXPNAME = 'showcase-options'
 if standard_exp.REMOTE:
     EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
     REPO = standard_exp.REMOTE_REPO
-    ENV = GkiGridEnvironment()
+    ENV = MaiaEnvironment()
 else:
     EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
