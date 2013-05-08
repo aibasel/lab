@@ -318,10 +318,6 @@ def get_error(content, props):
             props['error'] = 'unsolvable'
         elif props.get('validate_error', None) == 1:
             props['error'] = 'invalid-solution'
-        elif props.get('search_mem_limit_exceeded', None) == 1:
-            props['error'] = 'mem-limit-exceeded'
-        elif props.get('search_timeout', None) == 1:
-            props['error'] = 'timeout'
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
             props['error'] = 'mem-limit-exceeded'
@@ -354,15 +350,16 @@ def get_error(content, props):
                 props['error'] = 'unexplained-probably-mem-limit-exceeded'
             else:
                 props['error'] = 'unexplained-sigkill'
-        elif props.get('search_returncode') == '90':
-            props['error'] = 'portfolio-no-plan'
-            props['portfolio_no_plan'] = 1
+        elif props.get('search_returncode') == '1':
+            # TODO: Currently, this may hide potential errors on single searches.
+            props['error'] = 'no-plan'
+            props['no_plan'] = 1
         else:
             props['error'] = 'unexplained'
 
     pos_outcomes = ['coverage', 'unsolvable']
     neg_outcomes = ['search_timeout', 'search_mem_limit_exceeded',
-                    'portfolio_no_plan', 'unexplained_error']
+                    'no_plan', 'unexplained_error']
     outcomes = pos_outcomes + neg_outcomes
 
     # Set all outcomes that did not occur to '0', so it is possible to sum over
