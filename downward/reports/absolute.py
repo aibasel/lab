@@ -169,7 +169,7 @@ class AbsoluteReport(PlanningReport):
                     if value is not None:
                         domain_config_values[(domain, run['config'])].append(value)
 
-        # If the attribute is absolute (e.g. coverage, search_error) we may have
+        # If the attribute is absolute (e.g. coverage) we may have
         # added problems for which not all configs have a value. Therefore, we
         # can only print the number of instances (in brackets after the domain
         # name) if that number is the same for all configs. If not all configs

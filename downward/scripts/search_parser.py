@@ -306,8 +306,10 @@ def get_error(content, props):
         time.
       * unexplained: The planner did not produce a plan but was not killed with SIGKILL.
     """
+    # Ignore search_error attribute. It only tells us whether returncode != 0.
+    if 'search_error' in props:
+        del props['search_error']
     # If there is any error, do no count this task as solved.
-    # For iterated searches coverage may be 1 even if props['search_error'] is 1.
     if props.get('error') is not None:
         props['coverage'] = 0
 

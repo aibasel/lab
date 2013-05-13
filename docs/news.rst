@@ -77,7 +77,7 @@ downward
 * Plots: Filter duplicate coordinates for nicer drawing.
 * Use less padding for linear scatterplots.
 * Scatterplots: Add ``show_missing`` parameter.
-* Absolute reports: For absolute attributes (like coverage and search_error)
+* Absolute reports: For absolute attributes (e.g. coverage)
   print a list of numbers of problems behind the domain name if not all configs
   have a value for the same number of problems.
 * Make 'unsolvable' an absolute attribute, i.e. one where we consider problem
