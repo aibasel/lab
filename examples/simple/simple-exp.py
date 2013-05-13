@@ -46,9 +46,6 @@ exp.add_step(Step('report', Report(attributes=['number_of_files', 'first_number'
 # Compress the experiment directory.
 exp.add_step(Step.zip_exp_dir(exp))
 
-# Copy the reports to the html directory.
-exp.add_step(Step.publish_reports(reportfile))
-
 # Remove the experiment directory.
 exp.add_step(Step.remove_exp_dir(exp))
 

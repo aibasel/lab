@@ -68,9 +68,6 @@ def solved(run):
 suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
 exp.add_step(Step('report-suite', SuiteReport(filter=solved), exp.eval_dir, suite_file))
 
-# Copy the results
-exp.add_step(Step.publish_reports(abs_domain_report_file, abs_problem_report_file))
-
 # Compress the experiment directory
 exp.add_step(Step.zip_exp_dir(exp))
 

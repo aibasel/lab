@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import getpass
 import logging
 import os
 import shutil
@@ -77,30 +76,6 @@ class Step(object):
                                ', ' if self.args and self.kwargs else '',
                                ', '.join(['%s=%s' % (k, repr(v))
                                           for (k, v) in self.kwargs.items()]))
-
-    @classmethod
-    def publish_reports(cls, *report_files):
-        """
-        Return a step that copies all *report_files* to $HOME/.public_html.
-
-        ::
-
-            exp.add_step(Step.publish_reports(file1, file2))
-
-        """
-        user = getpass.getuser()
-
-        def publish_reports():
-            for path in report_files:
-                pub_html_dir = os.path.join(os.path.expanduser('~'), '.public_html/')
-                tools.makedirs(pub_html_dir)
-                name = os.path.basename(path)
-                dest = os.path.join(pub_html_dir, name)
-                shutil.copy2(path, dest)
-                print 'Copied report to file://%s' % dest
-                print '-> http://www.informatik.uni-freiburg.de/~%s/%s' % (user, name)
-
-        return cls('publish_reports', publish_reports)
 
     @classmethod
     def zip_exp_dir(cls, exp):
