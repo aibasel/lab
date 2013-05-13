@@ -324,7 +324,7 @@ def get_error(content, props):
             props['search_mem_limit_exceeded'] = 1
         # If the run was killed with SIGXCPU (return code: 128 + 24 (SIGXCPU) = 152),
         # we know it hit its CPU limit.
-        elif props.get('search_returncode', None) == '152':
+        elif props.get('search_returncode', None) == 152:
             props['error'] = 'timeout'
             props['search_timeout'] = 1
         # Maybe the run was stopped by lab
@@ -336,7 +336,7 @@ def get_error(content, props):
         # If the run was killed with SIGKILL (return code: 128 + 9 (SIGKILL) = 137),
         # we can assume it was because it hit its resource limits.
         # For other or unknown return values we don't want to hide potential problems.
-        elif props.get('search_returncode', None) == '137':
+        elif props.get('search_returncode', None) == 137:
             remaining_time = (props['limit_search_time'] -
                               props.get('last_logged_time', 0))
             remaining_memory = (props['limit_search_memory'] -
@@ -350,7 +350,7 @@ def get_error(content, props):
                 props['error'] = 'unexplained-probably-mem-limit-exceeded'
             else:
                 props['error'] = 'unexplained-sigkill'
-        elif props.get('search_returncode') == '1':
+        elif props.get('search_returncode') == 1:
             # TODO: Currently, this may hide potential errors on single searches.
             props['error'] = 'no-plan'
             props['no_plan'] = 1
@@ -362,7 +362,7 @@ def get_error(content, props):
                     'no_plan', 'unexplained_error']
     outcomes = pos_outcomes + neg_outcomes
 
-    # Set all outcomes that did not occur to '0', so it is possible to sum over
+    # Set all outcomes that did not occur to 0, so it is possible to sum over
     # all outcomes.
     for outcome in outcomes:
         if props.get(outcome) is None:

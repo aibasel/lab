@@ -37,6 +37,6 @@ def set_property(name, value):
 
 
 def save_returncode(command_name, value):
-    set_property('%s_returncode' % command_name.lower(), str(value))
+    set_property('%s_returncode' % command_name.lower(), value)
     error = 0 if value == 0 else 1
     set_property('%s_error' % command_name.lower(), error)
