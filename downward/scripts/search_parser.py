@@ -33,6 +33,19 @@ from collections import defaultdict
 from lab.parser import Parser
 
 
+# Exit codes.
+EXIT_PLAN_FOUND = 0
+EXIT_CRITICAL_ERROR = 1
+EXIT_INPUT_ERROR = 2
+EXIT_UNSUPPORTED = 3
+EXIT_UNSOLVABLE = 4
+EXIT_UNSOLVED_INCOMPLETE = 5
+EXIT_OUT_OF_MEMORY = 6
+EXIT_TIMEOUT = 7
+EXIT_TIMEOUT_AND_MEMORY = 8
+EXIT_SIGXCPU = 128 + 24
+
+
 def _get_states_pattern(attribute, name):
     return (attribute, re.compile(r'%s (\d+) state\(s\)\.' % name), int)
 
@@ -279,11 +292,10 @@ def get_error(content, props):
     """
     If there was an error, its source will be stored in props['error'].
     Possible values are
-      * none: No error, coverage = 1
-      * unsolvable: No error, planner reported that problem is unsolvable
-      * timeout: planner exceeded time limit (recognized by signal SIGXCPU)
-      * mem-limit-exceeded: planner exceeded memory limit
-        (recognized by bad_alloc exception)
+      * None: No error, coverage = 1
+      * unsolvable: No error, planner reported that problem is unsolvable.
+      * timeout: planner exceeded time limit.
+      * out-of-memory: planner exceeded memory limit.
 
     The following reasons should never occur. If they do, this is an indication that
     something went completely wrong, either in the lab framework or on the executing
@@ -305,7 +317,10 @@ def get_error(content, props):
         before reaching its time or memory limits or reaching both roughly at the same
         time.
       * unexplained: The planner did not produce a plan but was not killed with SIGKILL.
+      * ... see also 'explanations' dictionary below.
     """
+    exitcode = props.get('search_returncode')
+
     # Ignore search_error attribute. It only tells us whether returncode != 0.
     if 'search_error' in props:
         del props['search_error']
@@ -313,28 +328,31 @@ def get_error(content, props):
     if props.get('error') is not None:
         props['coverage'] = 0
 
-    # If coverage is 0, try to explain this
-    if props.get('coverage') == 0:
+    # TODO: Add EXIT_PLAN_FOUND and EXIT_CRITICAL_ERROR later.
+    exitcode_to_error = {
+        EXIT_INPUT_ERROR: 'unexplained-input-error',
+        EXIT_UNSUPPORTED: 'unexplained-unsupported-feature-requested',
+        EXIT_UNSOLVABLE: 'unsolvable',
+        EXIT_UNSOLVED_INCOMPLETE: 'incomplete-search-found-no-plan',
+        EXIT_OUT_OF_MEMORY: 'out-of-memory',
+        EXIT_TIMEOUT: 'timeout',  # Currently only for portfolios.
+        EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
+        EXIT_SIGXCPU: 'timeout',
+    }
+    for code, error in exitcode_to_error.items():
+        if exitcode == code:
+            props['error'] = error
+
+    # If coverage is 0 and we don't know the reason, try to find one.
+    if props.get('coverage') == 0 and props.get('error') is None:
         # First see if we already know the type of error.
-        if props.get('unsolvable', None) == 1:
-            props['error'] = 'unsolvable'
+        if props.get('unsolvable', None) == 1:  # TODO: Remove later.
+            props['error'] = 'unexplained-unsolvable-exitcode-%d' % exitcode
         elif props.get('validate_error', None) == 1:
             props['error'] = 'invalid-solution'
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
-            props['error'] = 'mem-limit-exceeded'
-            props['search_mem_limit_exceeded'] = 1
-        # If the run was killed with SIGXCPU (return code: 128 + 24 (SIGXCPU) = 152),
-        # we know it hit its CPU limit.
-        elif props.get('search_returncode', None) == 152:
-            props['error'] = 'timeout'
-            props['search_timeout'] = 1
-        # Maybe the run was stopped by lab
-        elif props.get('error') in ['unexplained-timeout',
-                                    'unexplained-wall-clock-timeout',
-                                    'unexplained-mem-limit-exceeded']:
-            # Error reason is already set by lab.
-            pass
+            props['error'] = 'unexplained-out-of-memory-exitcode-%d' % exitcode
         # If the run was killed with SIGKILL (return code: 128 + 9 (SIGKILL) = 137),
         # we can assume it was because it hit its resource limits.
         # For other or unknown return values we don't want to hide potential problems.
@@ -352,28 +370,11 @@ def get_error(content, props):
                 props['error'] = 'unexplained-probably-mem-limit-exceeded'
             else:
                 props['error'] = 'unexplained-sigkill'
-        elif props.get('search_returncode') == 1:
-            # TODO: Currently, this may hide potential errors on single searches.
-            props['error'] = 'no-plan'
-            props['no_plan'] = 1
         else:
             props['error'] = 'unexplained'
 
-    pos_outcomes = ['coverage', 'unsolvable']
-    neg_outcomes = ['search_timeout', 'search_mem_limit_exceeded',
-                    'no_plan', 'unexplained_error']
-    outcomes = pos_outcomes + neg_outcomes
-
-    # Set all outcomes that did not occur to 0, so it is possible to sum over
-    # all outcomes.
-    for outcome in outcomes:
-        if props.get(outcome) is None:
-            props[outcome] = 0
-
-    props['unexplained_error'] = not any(props.get(outcome) for outcome in outcomes)
-
-    # Check that all errors that occured are handled in exactly one of the categories.
-    assert (sum(props[outcome] for outcome in outcomes) == 1), props
+    if props.get('error'):
+        props['unexplained_error'] = props.get('error').startswith('unexplained')
 
 
 class SearchParser(Parser):
