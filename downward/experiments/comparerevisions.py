@@ -48,8 +48,9 @@ SCATTER_PLOT_ATTRIBUTES = ['total_time', 'search_time', 'memory',
 def greatest_common_ancestor(repo, rev1, rev2):
     long_rev = tools.get_command_output(['hg', 'debugancestor', rev1, rev2],
                                         cwd=repo, quiet=True)
+    number, hexcode = long_rev.split(':')
     pipe = subprocess.Popen(
-        ['hg', 'id', '-r', long_rev], cwd=repo, stdout=subprocess.PIPE
+        ['hg', 'id', '-r', hexcode], cwd=repo, stdout=subprocess.PIPE
     )
     return pipe.stdout.read().strip()
 
