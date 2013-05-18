@@ -25,6 +25,7 @@ import logging
 import subprocess
 
 from lab.steps import Step
+from lab import tools
 
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
@@ -45,9 +46,10 @@ SCATTER_PLOT_ATTRIBUTES = ['total_time', 'search_time', 'memory',
 
 
 def greatest_common_ancestor(repo, rev1, rev2):
+    long_rev = tools.get_command_output(['hg', 'debugancestor', rev1, rev2],
+                                        cwd=repo, quiet=True)
     pipe = subprocess.Popen(
-        ['hg', 'id', '--cwd', repo, '-r', 'ancestor(\'%s\', \'%s\')' % (rev1, rev2)],
-        stdout=subprocess.PIPE
+        ['hg', 'id', '-r', long_rev], cwd=repo, stdout=subprocess.PIPE
     )
     return pipe.stdout.read().strip()
 
