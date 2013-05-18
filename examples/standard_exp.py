@@ -81,11 +81,9 @@ class StandardDownwardExperiment(DownwardExperiment):
             self.add_step(Step.zip_exp_dir(self))
 
         self.add_step(Step.remove_exp_dir(self))
+        self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
 
         if not REMOTE:
-            # Remove eval dir for a clean scp copy.
-            self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
-
             # Copy the results to local directory
             self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
                 '%s:%s-eval' % (SCP_LOGIN, remote_exppath), '%s-eval' % local_exppath]))
