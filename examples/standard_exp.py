@@ -79,6 +79,9 @@ class StandardDownwardExperiment(DownwardExperiment):
         if REMOTE:
             # Compress the experiment directory
             self.add_step(Step.zip_exp_dir(self))
+            self.add_step(Step('zip-eval-dir', call,
+                ['tar', '--dereference', '-cjf', self.name + '-eval.tar.bz2', self.name + '-eval'],
+                cwd=os.path.dirname(self.path)))
 
         self.add_step(Step.remove_exp_dir(self))
         self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
@@ -94,6 +97,9 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         # Unzip the experiment directory
         self.add_step(Step.unzip_exp_dir(self))
+        self.add_step(Step('unzip-eval-dir', call,
+            ['tar', '-xjf', self.name + '-eval.tar.bz2'],
+            cwd=os.path.dirname(self.path)))
 
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast
