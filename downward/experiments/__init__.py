@@ -341,7 +341,9 @@ class DownwardExperiment(Experiment):
         p = subprocess.Popen([self._get_path_to_python(), '-c', VERSION_STMT])
         p.wait()
         if p.returncode != 0:
-            logging.critical('The translator requires at least Python 2.7.')
+            logging.critical('The translator requires at least Python 2.7. '
+                             'Use exp.set_path_to_python(path) to use a local '
+                             'Python interpreter.')
 
     def _adapt_path(self, stage):
         if stage == 'preprocess':
