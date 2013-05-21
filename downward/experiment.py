@@ -20,7 +20,9 @@
 
 # Provide some classes for backwards compatibility.
 # TODO: Add deprecation warning.
-from downward.experiments import DownwardRun, PreprocessRun, SearchRun, DownwardExperiment
+from downward.experiments import DownwardRun, PreprocessRun, SearchRun, \
+    DownwardExperiment, PREPROCESSED_TASKS_DIR
 
 # Silence pyflakes
-assert DownwardRun and PreprocessRun and SearchRun and DownwardExperiment
+assert (DownwardRun and PreprocessRun and SearchRun and DownwardExperiment and
+        PREPROCESSED_TASKS_DIR)
