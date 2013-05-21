@@ -91,6 +91,10 @@ class StandardDownwardExperiment(DownwardExperiment):
             self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
                 '%s:%s-eval' % (SCP_LOGIN, remote_exppath), '%s-eval' % local_exppath]))
 
+            # Copy the results to local directory
+            self.add_step(Step('scp-zipped-eval-dir', call, ['scp', '-r',
+                '%s:%s-eval.tar.bz2' % (SCP_LOGIN, remote_exppath), '%s-eval.tar.bz2' % local_exppath]))
+
             # Copy the zipped experiment directory to local directory
             self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
                 '%s:%s.tar.bz2' % (SCP_LOGIN, remote_exppath), '%s.tar.bz2' % local_exppath]))
