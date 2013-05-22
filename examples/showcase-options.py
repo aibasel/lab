@@ -39,6 +39,7 @@ LIMITS = {'search_time': 900}
 COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO))]
 
 exp = DownwardExperiment(EXPPATH, repo=REPO, environment=ENV, combinations=COMBINATIONS, limits=LIMITS)
+exp.set_path_to_python(standard_exp.PYTHON)
 
 multiple_plans = [
     "--heuristic", "hlm,hff=lm_ff_syn(lm_rhw(reasonable_orders=false,lm_cost_type=2,cost_type=2))",
