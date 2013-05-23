@@ -73,9 +73,6 @@ if [ -d "$REPO" ]; then
     ./custom-attributes.py
     ./lmcut.py
     ./initial-opt-config.py
-    ./translator-opt.py
-    ./translator-sat.py
-    #./issue374.py  # Needs correct repo.
 
     # Check planner experiment
     rm -rf ~/lab/experiments/planner
