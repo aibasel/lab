@@ -285,7 +285,7 @@ class PlotReport(PlanningReport):
         Otherwise, the only given attribute will be the title. If none is given,
         there will be no title.
 
-        *xscale* and *yscale* can have the values ``linear`` or ``symlog``.
+        *xscale* and *yscale* can have the values 'linear', 'log' or 'symlog'.
         If omitted sensible defaults will be used.
 
         *legend_location* must be a (x, y) pair or one of the following strings:
@@ -373,9 +373,9 @@ class PlotReport(PlanningReport):
         elif self.attribute and self.attribute in self.LINEAR:
             self.yscale = 'linear'
         else:
-            self.yscale = 'symlog'
-        scales = ['linear', 'symlog']
-        assert self.yscale in scales, self.yscale
+            self.yscale = 'log'
+        scales = ['linear', 'log', 'symlog']
+        assert self.xscale in scales, self.xscale
         assert self.yscale in scales, self.yscale
 
     def _get_category_styles(self, categories):
