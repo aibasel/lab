@@ -39,7 +39,7 @@ class AbsoluteReport(PlanningReport):
     unexpected timeouts and memory overflows. You should make sure that you
     check where the errors come from.
     """
-    def __init__(self, resolution='combined', colored=False, **kwargs):
+    def __init__(self, resolution='combined', colored=True, **kwargs):
         """
         *resolution* must be one of "domain" or "problem" or "combined" (default).
 
@@ -50,7 +50,8 @@ class AbsoluteReport(PlanningReport):
         assert resolution in ['domain', 'problem', 'combined']
         self.resolution = resolution
         if colored and not 'html' in self.output_format:
-            logging.critical('Only HTML reports can be colored.')
+            logging.info('Only HTML reports can be colored. Setting colored=False.')
+            colored = False
         self.colored = colored
         self.toc = False
 
