@@ -345,12 +345,12 @@ def get_error(content, props):
     if props.get('coverage') == 0 and props.get('error') is None:
         # First see if we already know the type of error.
         if props.get('unsolvable', None) == 1:  # TODO: Remove later.
-            props['error'] = 'unexplained-unsolvable-exitcode-%d' % exitcode
+            props['error'] = 'probably-unsolvable-exitcode-%d' % exitcode
         elif props.get('validate_error', None) == 1:
             props['error'] = 'invalid-solution'
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
-            props['error'] = 'unexplained-out-of-memory-exitcode-%d' % exitcode
+            props['error'] = 'probably-out-of-memory-exitcode-%d' % exitcode
         # If the run was killed with SIGKILL (return code: 128 + 9 (SIGKILL) = 137),
         # we can assume it was because it hit its resource limits.
         # For other or unknown return values we don't want to hide potential problems.
