@@ -25,7 +25,7 @@ elif [[ "$PYTHONPATH" != *"$LAB"* ]]; then
 fi
 echo PYTHONPATH: $PYTHONPATH
 
-py.test
+py.test-2.7
 
 # Run doctests.
 cd lab
@@ -72,7 +72,6 @@ if [ -d "$REPO" ]; then
     # Check that the examples use the correct API.
     ./custom-attributes.py
     ./lmcut.py
-    ./initial-opt-config.py
 
     # Check planner experiment
     rm -rf ~/lab/experiments/planner
