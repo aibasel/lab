@@ -254,9 +254,12 @@ class DownwardExperiment(Experiment):
         self.configs = []
         self.portfolios = []
 
+        limits = limits or {}
+        for key, value in limits.items():
+            if key not in LIMITS:
+                logging.critical('Unknown limit: %s' % key)
         self.limits = LIMITS
-        if limits:
-            self.limits.update(limits)
+        self.limits.update(limits)
 
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
