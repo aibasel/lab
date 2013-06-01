@@ -9,6 +9,10 @@ downward
 The **downward** package uses *lab* to run experiments and create custom reports
 for the `Fast Downward planning system <http://www.fast-downward.org>`_.
 
-Instructions and documentation
-==============================
-`http://lab.readthedocs.org <http://readthedocs.org/docs/lab/>`_
+Documentation
+=============
+http://lab.rtfd.org
+
+Contact
+=======
+For questions and comments please get in touch with Jendrik Seipp.
