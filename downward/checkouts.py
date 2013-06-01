@@ -112,12 +112,15 @@ class HgCheckout(Checkout):
         0d748429632d, tip, issue324) or "WORK". If *rev* is "WORK" (default),
         the working copy found at *repo* will be used.
 
-        By default all checkouts will be made to <REVISION_CACHE>/<REVISION>.
-        If *dest* is given however, the destination directory will be <dest> if
-        dest is absolute or <REVISION_CACHE>/<dest> otherwise. Use this
-        parameter if you need to checkout the same revision multiple times and
-        want to alter each checkout manually (e.g. for comparing Makefile
-        options).
+        The destination of a checkout is determined as follows:
+
+        - *dest* is absolute: <dest>
+        - *dest* is relative: ~/lab/revision-cache/<dest>
+        - *dest* is None: ~/lab/revision-cache/<rev>
+
+        You have to use the *dest* parameter if you need to checkout the same
+        revision multiple times and want to alter each checkout manually
+        (e.g. for comparing Makefile options).
         """
         if dest and rev == 'WORK':
             logging.error('You cannot have multiple copies of the working '
