@@ -347,7 +347,7 @@ def get_error(content, props):
         if props.get('unsolvable', None) == 1:  # TODO: Remove later.
             props['error'] = 'probably-unsolvable-exitcode-%d' % exitcode
         elif props.get('validate_error', None) == 1:
-            props['error'] = 'invalid-solution'
+            props['error'] = 'unexplained-invalid-solution'
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
             props['error'] = 'probably-out-of-memory-exitcode-%d' % exitcode
