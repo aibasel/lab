@@ -337,7 +337,7 @@ def get_error(content, props):
         EXIT_TIMEOUT: 'timeout',  # Currently only for portfolios.
         EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
         EXIT_SIGXCPU: 'timeout',
-        EXIT_SIGSEGV: 'unexplained-segfault',
+        # EXIT_SIGSEGV: 'unexplained-segfault',  # TODO: Add later.
     }
     for code, error in exitcode_to_error.items():
         if exitcode == code:
