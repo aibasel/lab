@@ -1,8 +1,8 @@
 lab
 ===
-**lab** is a python package for conducting and analyzing experiments that run on
-single machines or on computer clusters. It is useful if you want to run your
-code on a large set of benchmarks.
+**lab** is a python package for running your code on a large set of benchmarks.
+Experiments can be conducted on a single machine or on a cluster. The package
+also facilitates parsing results and creating reports.
 
 downward
 ========
