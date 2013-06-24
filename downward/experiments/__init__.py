@@ -368,7 +368,7 @@ class DownwardExperiment(Experiment):
     def _jobs(self):
         """Return the number of jobs to use when building binaries."""
         jobs = getattr(self.environment, 'processes', None)
-        return jobs or multiprocessing.cpu_count()
+        return jobs or max(1, int(multiprocessing.cpu_count() / 2))
 
     def build(self, stage, **kwargs):
         """Write the experiment to disk.
