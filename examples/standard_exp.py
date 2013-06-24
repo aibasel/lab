@@ -73,7 +73,7 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         # Add report steps
         abs_report_file = os.path.join(self.eval_dir, '%s-abs.html' % expname)
-        self.add_step(Step('report-abs', AbsoluteReport(attributes=attributes + ['error'], colored=True),
+        self.add_step(Step('report-abs', AbsoluteReport(attributes=attributes, colored=True),
                                                         self.eval_dir, abs_report_file))
 
         if REMOTE:
