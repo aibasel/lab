@@ -344,6 +344,7 @@ def get_error(content, props):
             props['error'] = error
 
     # If coverage is 0 and we don't know the reason, try to find one.
+    # TODO: Only allow expected exitcodes even if coverage=1 to find portfolio errors.
     if props.get('coverage') == 0 and props.get('error') is None:
         # First see if we already know the type of error.
         if props.get('unsolvable', None) == 1:  # TODO: Remove later.
