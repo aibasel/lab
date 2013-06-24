@@ -133,7 +133,7 @@ class HgCheckout(Checkout):
         if abs_rev.upper() == 'WORK':
             checkout_dir = repo
         else:
-            checkout_dir = dest or rev
+            checkout_dir = str(dest or rev)
 
         Checkout.__init__(self, part, repo, abs_rev, checkout_dir)
 
