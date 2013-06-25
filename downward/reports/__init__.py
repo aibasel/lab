@@ -25,6 +25,7 @@ from __future__ import with_statement, division
 from collections import defaultdict
 import fnmatch
 import logging
+import traceback
 
 from lab import reports
 from lab import tools
@@ -186,20 +187,28 @@ class PlanningReport(Report):
         # Sort each entry in problem_runs by their config values.
         def run_key(run):
             return self.configs.index(run['config'])
+
         for key, run_list in problem_runs.items():
             problem_runs[key] = sorted(run_list, key=run_key)
 
         self.problem_runs = problem_runs
         self.domain_config_runs = domain_config_runs
         self.runs = runs
+        try:
+            self._perform_sanity_checks()
+        except AssertionError:
+            logging.warning('The following sanity check failed, please make '
+                            'sure you filtered the intended runs:')
+            traceback.print_exc()
 
+    def _perform_sanity_checks(self):
         # Sanity checks
         assert len(self.problems) * len(self.configs) == len(self.runs), (
             'Every problem must be run for all configs\n'
             'Configs (%d):\n%s\nProblems: %d\nDomains (%d):\n%s\nRuns: %d' %
             (len(self.configs), self.configs, len(self.problems), len(self.domains),
              self.domains.keys(), len(self.runs)))
-        assert sum(len(probs) for probs in domains.values()) == len(self.problems)
+        assert sum(len(probs) for probs in self.domains.values()) == len(self.problems)
         assert len(self.problem_runs) == len(self.problems)
         for (domain, problem), runs in self.problem_runs.items():
             if len(runs) != len(self.configs):
