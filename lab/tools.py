@@ -363,8 +363,7 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
         # If dstname is a symbolic link, remove it before trying to override it.
         # Without this shutil.copy2 cannot override broken symbolic links and
         # it will override the file that the link points to if the link is valid.
-        # os.path.lexists returns true for broken symbolic links.
-        if os.path.isfile(dstname) and os.path.lexists(dstname):
+        if os.path.islink(dstname):
             remove(dstname)
         try:
             if symlinks and os.path.islink(srcname):
