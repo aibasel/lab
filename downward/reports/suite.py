@@ -48,6 +48,4 @@ class SuiteReport(PlanningReport):
         problems = [domain + ':' + problem for domain, problem in self.problems]
         problems = ['        "%s",\n' % problem for problem in problems]
         output = ('def suite():\n    return [\n%s    ]\n' % ''.join(problems))
-        print '\nSUITE:'
-        print output
         return output
