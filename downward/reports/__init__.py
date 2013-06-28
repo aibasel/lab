@@ -168,10 +168,12 @@ class PlanningReport(Report):
         domain_config_runs = defaultdict(list)
         runs = {}
         for run_name, run in self.props.items():
-            # Sanity checks
-            if run.get('stage') == 'search':
-                assert 'coverage' in run, ('The run in %s has no coverage value' %
-                                           run.get('run_dir'))
+            if run.get('stage') == 'search' and 'coverage' not in run:
+                if 'search_returncode' in run:
+                    run['error'] = 'unexplained-search-parser-crash'
+                else:
+                    run['error'] = 'unexplained-crash'
+                run['unexplained_error'] = 1
 
             domain, problem, config = run['domain'], run['problem'], run['config']
             problems.add((domain, problem))
