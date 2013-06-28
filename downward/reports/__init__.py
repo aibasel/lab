@@ -23,7 +23,7 @@ Module that permits generating downward reports by reading properties files
 from __future__ import with_statement, division
 
 from collections import defaultdict
-import fnmatch
+from fnmatch import fnmatch
 import logging
 import traceback
 
@@ -133,7 +133,7 @@ class PlanningReport(Report):
             if attr in self.ATTRIBUTES:
                 return self.ATTRIBUTES[attr]
             for pattern in self.ATTRIBUTES.values():
-                if fnmatch.fnmatch(attr, pattern):
+                if (fnmatch(attr, pattern) or fnmatch(attr, pattern + '_relative')):
                     return pattern.copy(attr)
         return Report._prepare_attribute(self, attr)
 
