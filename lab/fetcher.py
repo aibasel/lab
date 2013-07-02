@@ -140,7 +140,6 @@ class Fetcher(object):
         total_dirs = len(run_dirs)
         logging.info('Scanning properties from %d run directories' % total_dirs)
         unxeplained_errors = 0
-        num_fetched_dirs = 0
         for index, run_dir in enumerate(run_dirs, start=1):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Scanning: %6d/%d' % (index, total_dirs))
@@ -155,9 +154,7 @@ class Fetcher(object):
             if props.get('unexplained_error'):
                 logging.warning('Unexplained error in: "%s"' % props.get('run_dir'))
                 unxeplained_errors += 1
-            num_fetched_dirs += 1
 
-        logging.info('Fetched properties from %d runs' % num_fetched_dirs)
         if unxeplained_errors:
             logging.warning('There were %s runs with unexplained errors.'
                             % unxeplained_errors)
