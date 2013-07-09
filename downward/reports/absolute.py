@@ -68,8 +68,9 @@ class AbsoluteReport(PlanningReport):
         # Build a table containing summary functions of all other tables.
         # The actual section is added at poistion summary_index after creating
         # all other tables.
-        summary = self._get_empty_table(title='summary')
-        toc_lines.append('- **[""Summary"" #summary]**')
+        if self.resolution in ['domain', 'combined']:
+            summary = self._get_empty_table(title='summary')
+            toc_lines.append('- **[""Summary"" #summary]**')
 
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
