@@ -63,10 +63,10 @@ class AbsoluteReport(PlanningReport):
         if warnings:
             toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
             sections.append(('unexplained-errors', warnings))
-            summary_index += 1
+            summary_index = 1
 
         # Build a table containing summary functions of all other tables.
-        # The actual section is added at poistion summary_index after creating
+        # The actual section is added at position summary_index after creating
         # all other tables.
         if self.resolution in ['domain', 'combined']:
             summary = self._get_empty_table(title='summary')
