@@ -41,24 +41,15 @@ COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=RE
 exp = DownwardExperiment(EXPPATH, repo=REPO, environment=ENV, combinations=COMBINATIONS, limits=LIMITS)
 exp.set_path_to_python(standard_exp.PYTHON)
 
-multiple_plans = [
-    "--heuristic", "hlm,hff=lm_ff_syn(lm_rhw(reasonable_orders=false,lm_cost_type=2,cost_type=2))",
-    "--heuristic", "hadd=add()",
-    "--search", "iterated([lazy_greedy([hadd]),lazy_wastar([hff,hlm],preferred=[hff,hlm],w=2)],"
-    "repeat_last=false)"]
-
-iterated_search = [
-    "--heuristic", "hadd=add()",
-    "--search", "iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)"]
-
 def ipdb(imp):
     return ("ipdb%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
 
 exp.add_suite('gripper:prob01.pddl')
 exp.add_suite('zenotravel:pfile1')
-exp.add_config('many-plans', multiple_plans)
-exp.add_config('iter-search', iterated_search)
-exp.add_config(*ipdb(10))
+exp.add_config('iter-hadd',
+    ['--heuristic', 'hadd=add()',
+     '--search', 'iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)'])
+exp.add_config('ipdb', ["--search", "astar(ipdb())"])
 # Use original LAMA 2011 configuration
 exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
 exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py'))
@@ -80,7 +71,7 @@ def solved(run):
     return run['coverage'] == 1
 
 def only_two_configs(run):
-    return run['config_nick'] in ['many-plans', 'iter-search']
+    return run['config_nick'] in ['lama11', 'iter-hadd']
 
 def remove_work_tag(run):
     """Remove "WORK-" from the configs."""
@@ -125,8 +116,8 @@ def get_domain(run1, run2):
     return run1['domain']
 
 def sat_vs_opt(run):
-    category = {'many-plans': 'sat', 'iter-search': 'sat', 'ipdb': 'opt',
-                'lama11': 'sat', 'fdss': 'opt'}
+    category = {'lama11': 'sat', 'iter-hadd': 'sat', 'ipdb': 'opt',
+                'fdss': 'opt'}
     for nick, cat in category.items():
         if nick in run['config_nick']:
             return {cat: [(run['config'], run.get('expansions'))]}
@@ -168,12 +159,12 @@ exp.add_step(Step('report-ipc', IpcReport(attributes=['quality']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'ipc.tex')))
 exp.add_step(Step('report-relative-d',
                   RelativeReport('domain', attributes=['expansions'],
-                                 filter_config=['WORK-many-plans', 'WORK-iter-search'],
+                                 filter_config=['WORK-lama11', 'WORK-iter-hadd'],
                                  rel_change=0.1, abs_change=20),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
 exp.add_step(Step('report-relative-p',
                   RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
-                                 filter_config_nick=['many-plans', 'iter-search']),
+                                 filter_config_nick=['lama11', 'iter-hadd']),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
 
 # Write suite of solved problems
