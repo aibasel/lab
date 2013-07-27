@@ -45,7 +45,7 @@ class StandardDownwardExperiment(DownwardExperiment):
                  queue=None, processes=2, email=None, **kwargs):
         if path is None:
             path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-        assert not os.path.isabs(path), path
+
         expname = os.path.basename(path)
 
         remote_exppath = os.path.join(REMOTE_EXPS, path)
