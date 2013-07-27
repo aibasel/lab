@@ -130,6 +130,7 @@ class _Buildable(object):
     def _build_resources(self):
         for name, dest, content in self.new_files:
             filename = self._get_abs_path(dest)
+            tools.makedirs(os.path.dirname(filename))
             with open(filename, 'w') as file:
                 logging.debug('Writing file "%s"' % filename)
                 file.write(content)
