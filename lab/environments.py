@@ -126,6 +126,12 @@ class OracleGridEngineEnvironment(Environment):
         # commandline arguments.
         self._exp_script_args = ""
 
+    @classmethod
+    def _escape_job_name(cls, name):
+        if name[0].isdigit():
+            name = 'j' + name
+        return name
+
     def _get_common_job_params(self):
         return {
             'logfile': 'driver.log',
@@ -143,7 +149,8 @@ class OracleGridEngineEnvironment(Environment):
                              'but only %d are allowed.' %
                              (num_tasks, self.MAX_TASKS))
         job_params = self._get_common_job_params()
-        job_params.update(name=self.exp.name, num_tasks=num_tasks)
+        job_params.update(name=self._escape_job_name(self.exp.name),
+                          num_tasks=num_tasks)
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         header = open(template_file).read() % job_params
         body = open(os.path.join(tools.DATA_DIR, 'grid-job-body')).read()
@@ -173,8 +180,9 @@ class OracleGridEngineEnvironment(Environment):
                     'the queue.')
 
     def _get_job_name(self, step):
-        return '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1,
-                               step.name)
+        return self._escape_job_name(
+            '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1,
+                            step.name))
 
     def _get_job_header(self, step):
         job_params = self._get_common_job_params()
