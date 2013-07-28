@@ -105,12 +105,12 @@ class _Buildable(object):
         if not resource in self.resources:
             self.resources.append(resource)
 
-    def add_new_file(self, name, dest, content):
+    def add_new_file(self, dest, content, name=''):
         """
-        Write *content* to *dest* and make the file available to the commands as
-        *name*. ::
+        Write *content* to *dest* and make the file available to the commands
+        as *name*. ::
 
-            run.add_new_file('LEARN', 'learn.txt', learning_instances)
+            run.add_new_file('a = 5; b = 2; c = 5', 'learn.txt', name='LEARN')
 
         """
         new_file = (name, dest, content)
