@@ -65,27 +65,42 @@ class _Buildable(object):
         """
         self.properties[name] = value
 
-    def add_resource(self, name, source, dest, required=True,
+    def add_resource(self, source, dest='', name='', required=True,
                      symlink=False):
         """Include the file or directory *source* in the experiment or run.
 
-        *source* will be copied to /path/to/exp-or-run/*dest*.
+        *source* is copied to /path/to/exp-or-run/*dest*. If *dest* is
+        omitted, the last part of the path to *source* will be taken as the
+        destination filename.
 
-        *name* is an alias for the resource in commands. ::
+        *name* is an alias for the resource in commands. It must start with a
+        letter and consist exclusively of uppercase letters, numbers and
+        underscores. ::
 
-            exp.add_resource('PLANNER', 'path/to/planner', 'dest-name')
+            exp.add_resource('path/to/planner', name='PLANNER')
 
         includes a "global" file, i.e., one needed for all runs, into the
         main directory of the **experiment**. The name "PLANNER" is an ID for
         this resource that can also be used to refer to it in a command. ::
 
-            run.add_resource('DOMAIN', 'benchmarks/gripper/domain.pddl',
-                             'domain.pddl')
+            run.add_resource('benchmarks/gripper/domain.pddl', name='DOMAIN')
             run.add_command('print-domain', ['cat', 'DOMAIN'])
 
         copies "benchmarks/gripper/domain.pddl" into the **run** directory as
         "domain.pddl" and makes it available to commands as "DOMAIN".
         """
+        if (name and dest and (os.path.exists(dest) or not required) and
+                not os.path.exists(source)):
+            logging.warning('The add_resource signature is now '
+                            'add_resource(source, dest, name=\'\', '
+                            'required=True, symlink=False).')
+            old = 'add_resource(%s, %s, %s)' % (source, dest, name)
+            source, dest, name = dest, name, source
+            new = 'add_resource(%s, %s, name=%s)' % (source, dest, name)
+            logging.warning('Converted %s to %s' % (old, new))
+        if not dest:
+            dest = os.path.basename(source)
+        # TODO: Check if name complies with requirements.
         resource = (name, source, dest, required, symlink)
         if not resource in self.resources:
             self.resources.append(resource)
@@ -104,12 +119,9 @@ class _Buildable(object):
 
     @property
     def _env_vars(self):
-        env_vars = {}
-        for name, dest, content in self.new_files:
-            env_vars[name] = self._get_abs_path(dest)
-        for name, source, dest, required, symlink in self.resources:
-            env_vars[name] = self._get_abs_path(dest)
-        return env_vars
+        pairs = ([(name, dest) for name, dest, content in self.new_files] +
+                 [(name, dest) for name, source, dest, req, sym in self.resources])
+        return dict((name, self._get_abs_path(dest)) for name, dest in pairs if name)
 
     def _get_abs_path(self, rel_path):
         """Return absolute path by applying rel_path to the base dir."""
@@ -189,7 +201,7 @@ class Experiment(_Buildable):
         self.set_property('experiment_file', self._script)
 
         # Include the experiment code
-        self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
+        self.add_resource(tools.SCRIPTS_DIR, dest='lab')
 
         self.steps = Sequence()
         self.add_step(Step('build', self.build))
