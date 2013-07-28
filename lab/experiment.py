@@ -65,6 +65,15 @@ class _Buildable(object):
         """
         self.properties[name] = value
 
+    @classmethod
+    def _check_alias(cls, name):
+        if name and not (name[0].isalpha() and name.isupper() and
+                         name.replace('_', '').isalnum()):
+            logging.critical(
+                'Names for resources must start with a letter and consist '
+                'exclusively of uppercase letters, numbers and underscores: %s' %
+                name)
+
     def add_resource(self, source, dest='', name='', required=True,
                      symlink=False):
         """Include the file or directory *source* in the experiment or run.
@@ -100,7 +109,7 @@ class _Buildable(object):
             logging.warning('Converted %s to %s' % (old, new))
         if not dest:
             dest = os.path.basename(source)
-        # TODO: Check if name complies with requirements.
+        self._check_alias(name)
         resource = (name, source, dest, required, symlink)
         if not resource in self.resources:
             self.resources.append(resource)
@@ -110,9 +119,18 @@ class _Buildable(object):
         Write *content* to *dest* and make the file available to the commands
         as *name*. ::
 
-            run.add_new_file('a = 5; b = 2; c = 5', 'learn.txt', name='LEARN')
+            run.add_new_file('learn.txt', 'a = 5; b = 2; c = 5', name='LEARN')
 
         """
+        if (name and dest[0].isalpha() and dest.isupper() and
+                dest.replace('_', '').isalnum()):
+            logging.warning('The add_new_file signature is now '
+                            'add_new_file(dest, content, name=\'\').')
+            old = 'add_new_file(%s, %s, <content>)' % (dest, content)
+            dest, content, name = content, name, dest
+            new = 'add_resource(%s, <content>, name=%s)' % (dest, name)
+            logging.warning('Converted %s to %s' % (old, new))
+        self._check_alias(name)
         new_file = (name, dest, content)
         if not new_file in self.new_files:
             self.new_files.append(new_file)
@@ -511,8 +529,7 @@ class Run(_Buildable):
         for old, new in [('VARIABLES', env_vars_text), ('CALLS', calls_text)]:
             run_script = run_script.replace('"""%s"""' % old, new)
 
-        self.add_new_file('RUN_SCRIPT', 'run', run_script)
-        return
+        self.add_new_file('run', run_script)
 
     def _build_linked_resources(self):
         """
