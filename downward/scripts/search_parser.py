@@ -45,6 +45,13 @@ EXIT_SIGXCPU = 128 + 24
 EXIT_SIGSEGV = 128 + 11
 
 
+def successful(run):
+    """Return true if a plan was found or if the task was proven unsolvable."""
+    # TODO: Later we want to use the following line for this.
+    # return run.get('search_returncode') in [EXIT_PLAN_FOUND, EXIT_UNSOLVABLE]
+    return run['coverage'] or run['unsolvable']
+
+
 def _get_states_pattern(attribute, name):
     return (attribute, re.compile(r'%s (\d+) state\(s\)\.' % name), int)
 
@@ -214,16 +221,11 @@ def coverage(content, props):
 
 
 def check_memory(content, props):
-    """
-    Set "memory" to the max value if it was exceeded and "-1 KB" was reported
-    """
-    memory = props.get('memory')
-    memory_limit = props.get('limit_search_memory', None)
-    if memory == -1:
-        if memory_limit is not None:
-            # Turn into KB
-            memory_limit *= 1024
-        props['memory'] = memory_limit
+    """Remove memory value if the run was not successful."""
+    # TODO: Generalize check for all attributes that only make sense for
+    #       successful tasks.
+    if not successful(props):
+        props['memory'] = None
 
 
 def scores(content, props):
@@ -368,7 +370,7 @@ def get_error(content, props):
             if remaining_time_rel < fraction and remaining_memory_rel > fraction:
                 props['error'] = 'unexplained-probably-timeout'
             elif remaining_memory_rel < fraction and remaining_time_rel > fraction:
-                props['error'] = 'unexplained-probably-mem-limit-exceeded'
+                props['error'] = 'unexplained-probably-out-of-memory'
             else:
                 props['error'] = 'unexplained-sigkill'
         else:
@@ -381,6 +383,8 @@ def get_error(content, props):
 class SearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
+
+        # TODO: Use FD exitcodes.
 
         # TODO: search run.err once parse errors are printed there
         self.add_function(parse_error)
