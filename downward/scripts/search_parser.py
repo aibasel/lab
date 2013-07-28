@@ -306,12 +306,12 @@ def get_error(content, props):
       * unexplained-timeout: lab stopped the planner due to a timeout.
       * unexplained-wall-clock-timeout: lab stopped the planner due to a
         wall clock timeout.
-      * unexplained-mem-limit-exceeded: lab stopped the planner due to
+      * unexplained-out-of-memory: lab stopped the planner due to
         exceeded memory.
       * unexplained-probably-timeout: The planner was stopped with
         return code 128+9 (SIGKILL).
         The last logged entries for time and memory point to an unrecognized timeout.
-      * unexplained-probably-mem-limit-exceeded: The planner was stopped with
+      * unexplained-probably-out-of-memory: The planner was stopped with
         return code 128+9 (SIGKILL).
         The last logged entries for time and memory point to an unrecognized memory out.
       * unexplained-sigkill: The planner was stopped with return code 128+9 (SIGKILL)
