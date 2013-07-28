@@ -465,8 +465,7 @@ class DownwardExperiment(Experiment):
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
         self.add_resource(translator.get_bin('translate.py'),
-                          dest=translator.get_path_dest('translate', 'translate.py'),
-                          name=translator.shell_name)
+                          dest=translator.get_bin_dest())
         self.add_resource(preprocessor.get_bin('preprocess'),
                           dest=preprocessor.get_bin_dest(),
                           name=preprocessor.shell_name)

@@ -29,6 +29,16 @@ tools.makedirs(REV_CACHE_DIR)
 ABS_REV_CACHE = {}
 
 
+def _escape_char(c):
+    if c.isalnum() or c == '_':
+        return c
+    return '_'
+
+
+def escape_revision_name(name):
+    return ''.join(_escape_char(c) for c in name).upper()
+
+
 class Checkout(object):
     def __init__(self, part, repo, rev, checkout_dir):
         # Directory name of the planner part (translate, preprocess, search)
@@ -90,7 +100,7 @@ class Checkout(object):
 
     @property
     def shell_name(self):
-        return '%s_%s' % (self.part.upper(), tools.shell_escape(self.name))
+        return '%s_%s' % (self.part.upper(), escape_revision_name(self.name))
 
 
 # ---------- Mercurial --------------------------------------------------------
@@ -174,6 +184,9 @@ class HgCheckout(Checkout):
 class Translator(HgCheckout):
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'translate', *args, **kwargs)
+
+    def get_bin_dest(self):
+        return self.get_path_dest('translate', 'translate.py')
 
 
 class Preprocessor(HgCheckout):
