@@ -384,7 +384,7 @@ class Run(_Buildable):
         """Make *resource_name* available for this run.
 
         In environments like the argo cluster, this implies
-        copying the planner into each run. For the gkigrid, we merely
+        copying the resource into each run. For the gkigrid, we merely
         need to set up the PLANNER environment variable.
 
         Currently, this method is not needed, because we always make all aliases
