@@ -32,7 +32,7 @@ ABS_REV_CACHE = {}
 def _escape_char(c):
     if c.isalnum() or c == '_':
         return c
-    return '_'
+    return '_%d_' % ord(c)
 
 
 def escape_revision_name(name):
