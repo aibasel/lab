@@ -185,9 +185,9 @@ def config_suite_extended_satisficing():
             '--search',
             'ehc(ff())'],
         # iterated
-        'iterated_wa_merge_and_shrink': [
+        'iterated_wa_ff': [
             '--heuristic',
-            'h=merge_and_shrink()',
+            'h=ff()',
             '--search',
             'iterated([lazy_wastar(h,w=10), lazy_wastar(h,w=5), lazy_wastar(h,w=3),'
             + 'lazy_wastar(h,w=2), lazy_wastar(h,w=1)])'],
