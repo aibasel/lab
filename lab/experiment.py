@@ -67,15 +67,13 @@ class _Buildable(object):
 
     @classmethod
     def _check_alias(cls, name):
-        if name and not (name[0].isalpha() and name.isupper() and
-                         name.replace('_', '').isalnum()):
+        if name and not (name[0].isalpha() and name.replace('_', '').isalnum()):
             logging.critical(
                 'Names for resources must start with a letter and consist '
-                'exclusively of uppercase letters, numbers and underscores: %s' %
+                'exclusively of letters, numbers and underscores: %s' %
                 name)
 
-    def add_resource(self, source, dest='', name='', required=True,
-                     symlink=False):
+    def add_resource(self, name, source, dest='', required=True, symlink=False):
         """Include the file or directory *source* in the experiment or run.
 
         *source* is copied to /path/to/exp-or-run/*dest*. If *dest* is
@@ -83,30 +81,20 @@ class _Buildable(object):
         destination filename.
 
         *name* is an alias for the resource in commands. It must start with a
-        letter and consist exclusively of uppercase letters, numbers and
-        underscores. ::
+        letter and consist exclusively of letters, numbers and underscores.
+        If you don't need an alias for the resource, set name=''. ::
 
-            exp.add_resource('path/to/planner', name='PLANNER')
+            exp.add_resource('PLANNER', 'path/to/my-planner', 'planner')
 
-        includes a "global" file, i.e., one needed for all runs, into the
-        main directory of the **experiment**. The name "PLANNER" is an ID for
-        this resource that can also be used to refer to it in a command. ::
+        includes "planner" in the experiment directory. The name "PLANNER" can
+        be used to reference it in a run's commands::
 
-            run.add_resource('benchmarks/gripper/domain.pddl', name='DOMAIN')
-            run.add_command('print-domain', ['cat', 'DOMAIN'])
+            run.require_resource('PLANNER')
+            run.add_resource('DOMAIN', 'benchmarks/gripper/domain.pddl')
+            run.add_resource('PROBLEM', 'benchmarks/gripper/prob01.pddl')
+            run.add_command('find-plan', ['PLANNER', 'DOMAIN', 'PROBLEM'])
 
-        copies "benchmarks/gripper/domain.pddl" into the **run** directory as
-        "domain.pddl" and makes it available to commands as "DOMAIN".
         """
-        if (name and dest and (os.path.exists(dest) or not required) and
-                not os.path.exists(source)):
-            logging.warning('The add_resource signature is now '
-                            'add_resource(source, dest, name=\'\', '
-                            'required=True, symlink=False).')
-            old = 'add_resource(%s, %s, %s)' % (source, dest, name)
-            source, dest, name = dest, name, source
-            new = 'add_resource(%s, %s, name=%s)' % (source, dest, name)
-            logging.warning('Converted %s to %s' % (old, new))
         if not dest:
             dest = os.path.basename(source)
         self._check_alias(name)
@@ -114,22 +102,18 @@ class _Buildable(object):
         if not resource in self.resources:
             self.resources.append(resource)
 
-    def add_new_file(self, dest, content, name=''):
+    def add_new_file(self, name, dest, content):
         """
-        Write *content* to *dest* and make the file available to the commands
-        as *name*. ::
+        Write *content* to /path/to/exp-or-run/*dest* and make the new file
+        available to the commands as *name*.
 
-            run.add_new_file('learn.txt', 'a = 5; b = 2; c = 5', name='LEARN')
+        *name* is an alias for the resource in commands. It must start with a
+        letter and consist exclusively of letters, numbers and underscores. ::
+
+            run.add_new_file('LEARN', 'learn.txt', 'a = 5; b = 2; c = 5')
+            run.add_command('print-trainingset', ['cat', 'LEARN'])
 
         """
-        if (name and dest[0].isalpha() and dest.isupper() and
-                dest.replace('_', '').isalnum()):
-            logging.warning('The add_new_file signature is now '
-                            'add_new_file(dest, content, name=\'\').')
-            old = 'add_new_file(%s, %s, <content>)' % (dest, content)
-            dest, content, name = content, name, dest
-            new = 'add_resource(%s, <content>, name=%s)' % (dest, name)
-            logging.warning('Converted %s to %s' % (old, new))
         self._check_alias(name)
         new_file = (name, dest, content)
         if not new_file in self.new_files:
@@ -219,7 +203,7 @@ class Experiment(_Buildable):
         self.set_property('experiment_file', self._script)
 
         # Include the experiment code
-        self.add_resource(tools.SCRIPTS_DIR, dest='lab')
+        self.add_resource('', tools.SCRIPTS_DIR, 'lab')
 
         self.steps = Sequence()
         self.add_step(Step('build', self.build))
@@ -529,7 +513,7 @@ class Run(_Buildable):
         for old, new in [('VARIABLES', env_vars_text), ('CALLS', calls_text)]:
             run_script = run_script.replace('"""%s"""' % old, new)
 
-        self.add_new_file('run', run_script)
+        self.add_new_file('', 'run', run_script)
 
     def _build_linked_resources(self):
         """

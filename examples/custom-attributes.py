@@ -21,7 +21,7 @@ PARSER = os.path.join(tools.BASE_DIR, 'examples', 'simple', 'simple-parser.py')
 class CustomDownwardExperiment(DownwardExperiment):
     def _make_search_runs(self):
         DownwardExperiment._make_search_runs(self)
-        self.add_resource(PARSER, dest='myparser.py', name='MYPARSER')
+        self.add_resource('MYPARSER', PARSER, 'myparser.py')
         for run in self.runs:
             run.require_resource('MYPARSER')
             run.add_command('custom-parse', ['MYPARSER'])

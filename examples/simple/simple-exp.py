@@ -29,7 +29,7 @@ ENV = LocalEnvironment()
 
 # Create a new experiment.
 exp = Experiment(path=EXPPATH, environment=ENV)
-exp.add_resource('simple-parser.py', name='SIMPLE_PARSER')
+exp.add_resource('SIMPLE_PARSER', 'simple-parser.py', 'simple-parser.py')
 reportfile = os.path.join(exp.eval_dir, EXPNAME + '.html')
 
 run = exp.add_run()

@@ -103,10 +103,10 @@ class PreprocessRun(DownwardRun):
 
         self.require_resource(self.preprocessor.shell_name)
 
-        self.add_resource(self.problem.domain_file(), 'domain.pddl',
-                          name='DOMAIN', symlink=exp.compact)
-        self.add_resource(self.problem.problem_file(), 'problem.pddl',
-                          name='PROBLEM', symlink=exp.compact)
+        self.add_resource('DOMAIN', self.problem.domain_file(), 'domain.pddl',
+                          symlink=exp.compact)
+        self.add_resource('PROBLEM', self.problem.problem_file(), 'problem.pddl',
+                          symlink=exp.compact)
 
         python = exp._get_path_to_python()
 
@@ -391,7 +391,7 @@ class DownwardExperiment(Experiment):
         self.resources = []
 
         # Include the experiment code again.
-        self.add_resource(tools.SCRIPTS_DIR, 'lab')
+        self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
 
         self._adapt_path(stage)
         self._setup_ignores(stage)
@@ -399,14 +399,14 @@ class DownwardExperiment(Experiment):
 
         if stage == 'preprocess':
             self._check_python_version()
-            self.add_resource(
-                os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
-                name='PREPROCESS_PARSER')
+            self.add_resource('PREPROCESS_PARSER',
+                    os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
+                    'preprocess_parser.py')
             self._make_preprocess_runs()
         elif stage == 'search':
-            self.add_resource(
-                os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'),
-                name='SEARCH_PARSER')
+            self.add_resource('SEARCH_PARSER',
+                        os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'),
+                        'search_parser.py')
             self._make_search_runs()
         else:
             logging.critical('There is no stage "%s"' % stage)
@@ -416,7 +416,7 @@ class DownwardExperiment(Experiment):
 
     def _require_part(self, part):
         logging.info('Requiring %s' % part.src_dir)
-        self.add_resource(part.src_dir, 'code-%s' % part.name)
+        self.add_resource('', part.src_dir, 'code-%s' % part.name)
 
     def _checkout_and_compile(self, stage, **kwargs):
         translators = set()
@@ -464,16 +464,16 @@ class DownwardExperiment(Experiment):
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
-        self.add_resource(translator.get_bin('translate.py'),
-                          dest=translator.get_bin_dest())
-        self.add_resource(preprocessor.get_bin('preprocess'),
-                          dest=preprocessor.get_bin_dest(),
-                          name=preprocessor.shell_name)
+        self.add_resource(translator.shell_name,
+                          translator.get_bin('translate.py'),
+                          translator.get_bin_dest())
+        self.add_resource(preprocessor.shell_name,
+                          preprocessor.get_bin('preprocess'),
+                          preprocessor.get_bin_dest())
 
     def _prepare_planner(self, planner):
-        self.add_resource(planner.get_bin('downward'),
-                          dest=planner.get_bin_dest(),
-                          name=planner.shell_name)
+        self.add_resource(planner.shell_name, planner.get_bin('downward'),
+                          planner.get_bin_dest())
 
         # Find all portfolios and copy them into the experiment directory
         for portfolio in self.portfolios:
@@ -484,7 +484,7 @@ class DownwardExperiment(Experiment):
             if not os.access(portfolio, os.X_OK):
                 os.chmod(portfolio, 0755)
             name = os.path.basename(portfolio)
-            self.add_resource(portfolio,
+            self.add_resource('', portfolio,
                               planner.get_path_dest('search', name))
 
         # The tip changeset has the newest validator version so we use this one
@@ -494,11 +494,10 @@ class DownwardExperiment(Experiment):
             tools.run_command(['make', '-j%d' % self._jobs],
                               cwd=os.path.dirname(validate))
         assert os.path.exists(validate), validate
-        self.add_resource(validate, name='VALIDATE')
+        self.add_resource('VALIDATE', validate, 'validate')
 
         downward_validate = os.path.join(DOWNWARD_SCRIPTS_DIR, 'validate.py')
-        self.add_resource(downward_validate, dest='downward-validate',
-                          name='DOWNWARD_VALIDATE')
+        self.add_resource('DOWNWARD_VALIDATE', downward_validate, 'downward-validate')
 
     def _make_preprocess_runs(self):
         unique_preprocessing = set()
@@ -542,24 +541,26 @@ class DownwardExperiment(Experiment):
         sym = self.compact
 
         # We definitely need the output file.
-        run.add_resource(path('output'), name='OUTPUT', symlink=sym)
+        run.add_resource('OUTPUT', path('output'), 'output', symlink=sym)
 
         # Needed for validation.
-        run.add_resource(path('domain.pddl'), name='DOMAIN',
+        run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl',
                          symlink=sym, required=False)
-        run.add_resource(path('problem.pddl'), name='PROBLEM',
+        run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl',
                          symlink=sym, required=False)
 
         # The other files are optional.
         if self.include_preprocess_results_in_search_runs:
             # Properties files and logs have to be copied, not linked.
-            run.add_resource(path('properties'))
-            run.add_resource(path('run.log'))
-            run.add_resource(path('run.err'))
+            run.add_resource('PROPERTIES', path('properties'), 'properties')
+            run.add_resource('RUN_LOG', path('run.log'), 'run.log')
+            run.add_resource('RUN_ERR', path('run.err'), 'run.err')
 
-            run.add_resource(path('output.sas'),
+            run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas',
                              symlink=sym, required=False)
 
             # {all,test}.groups were created by old versions of the planner.
-            run.add_resource(path('all.groups'), symlink=sym, required=False)
-            run.add_resource(path('test.groups'), symlink=sym, required=False)
+            run.add_resource('ALL_GROUPS', path('all.groups'), 'all.groups',
+                             symlink=sym, required=False)
+            run.add_resource('TEST_GROUPS', path('test.groups'), 'test.groups',
+                             symlink=sym, required=False)

@@ -27,8 +27,8 @@ class PiReport(Report):
         return '\n'.join(lines)
 
 exp = Experiment(EXPPATH)
-exp.add_resource('pi-parser-ext.py', dest='pi-parser.py', name='PARSER')
-exp.add_resource('calculate.py', name='PARSER')
+exp.add_resource('PARSER', 'pi-parser-ext.py', 'pi-parser.py')
+exp.add_resource('CALC', 'calculate.py', 'calculate.py')
 
 for rounds in [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]:
     run = exp.add_run()
