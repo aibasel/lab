@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+# TODO: Convert to lists of pairs and adapt in compare_revisions().
 def config_suite_core_optimal():
     return {
         # A*

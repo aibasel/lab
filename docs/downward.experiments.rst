@@ -1,16 +1,7 @@
-:mod:`downward.experiments` --- Fast Downward experiments
+:class:`DownwardExperiment` --- Fast Downward experiments
 =========================================================
-
-:class:`DownwardExperiment` --- Generic Fast Downward experiment
-----------------------------------------------------------------
-.. autoclass:: downward.experiments.DownwardExperiment
+.. autoclass:: downward.experiment.DownwardExperiment
    :members:
-
-
-:mod:`downward.experiments` --- Convenience Fast Downward experiments
----------------------------------------------------------------------
-
-.. autoclass:: downward.experiments.comparerevisions.CompareRevisionsExperiment
 
 
 Helper classes
