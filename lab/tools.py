@@ -109,12 +109,6 @@ def make_list(value):
     return [value]
 
 
-def shell_escape(s):
-    if s and s[0].isdigit():
-        s = 'N' + s
-    return s.upper().replace('-', '_').replace(' ', '_').replace('.', '_')
-
-
 def uniq(iterable):
     result = []
     for x in iterable:
