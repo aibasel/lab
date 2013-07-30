@@ -103,9 +103,9 @@ class PreprocessRun(DownwardRun):
 
         self.require_resource(self.preprocessor.shell_name)
 
-        self.add_resource("DOMAIN", self.problem.domain_file(), "domain.pddl",
+        self.add_resource('DOMAIN', self.problem.domain_file(), 'domain.pddl',
                           symlink=exp.compact)
-        self.add_resource("PROBLEM", self.problem.problem_file(), "problem.pddl",
+        self.add_resource('PROBLEM', self.problem.problem_file(), 'problem.pddl',
                           symlink=exp.compact)
 
         python = exp._get_path_to_python()
@@ -157,7 +157,7 @@ class SearchRun(DownwardRun):
             planner_type = 'portfolio'
             config_nick = os.path.basename(config_nick)
             search_cmd = [self.planner.shell_name, '--portfolio', config_nick]
-        self.add_command('search', search_cmd, stdin='output',
+        self.add_command('search', search_cmd, stdin='OUTPUT',
                          time_limit=exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
 
@@ -391,7 +391,7 @@ class DownwardExperiment(Experiment):
         self.resources = []
 
         # Include the experiment code again.
-        self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
+        self.add_resource('', tools.SCRIPTS_DIR, 'lab')
 
         self._adapt_path(stage)
         self._setup_ignores(stage)
@@ -416,8 +416,7 @@ class DownwardExperiment(Experiment):
 
     def _require_part(self, part):
         logging.info('Requiring %s' % part.src_dir)
-        self.add_resource('SRC_%s' % tools.shell_escape(part.name), part.src_dir,
-                          'code-%s' % part.name)
+        self.add_resource('', part.src_dir, 'code-%s' % part.name)
 
     def _checkout_and_compile(self, stage, **kwargs):
         translators = set()
@@ -467,7 +466,7 @@ class DownwardExperiment(Experiment):
         # In order to set an environment variable, overwrite the executable
         self.add_resource(translator.shell_name,
                           translator.get_bin('translate.py'),
-                          translator.get_path_dest('translate', 'translate.py'))
+                          translator.get_bin_dest())
         self.add_resource(preprocessor.shell_name,
                           preprocessor.get_bin('preprocess'),
                           preprocessor.get_bin_dest())
@@ -485,7 +484,7 @@ class DownwardExperiment(Experiment):
             if not os.access(portfolio, os.X_OK):
                 os.chmod(portfolio, 0755)
             name = os.path.basename(portfolio)
-            self.add_resource(tools.shell_escape(name), portfolio,
+            self.add_resource('', portfolio,
                               planner.get_path_dest('search', name))
 
         # The tip changeset has the newest validator version so we use this one
@@ -553,15 +552,15 @@ class DownwardExperiment(Experiment):
         # The other files are optional.
         if self.include_preprocess_results_in_search_runs:
             # Properties files and logs have to be copied, not linked.
-            run.add_resource('PROPERTIES', path('properties'), 'properties')
-            run.add_resource('RUN_LOG', path('run.log'), 'run.log')
-            run.add_resource('RUN_ERR', path('run.err'), 'run.err')
+            run.add_resource('', path('properties'), 'properties')
+            run.add_resource('', path('run.log'), 'run.log')
+            run.add_resource('', path('run.err'), 'run.err')
 
-            run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas',
+            run.add_resource('', path('output.sas'), 'output.sas',
                              symlink=sym, required=False)
 
             # {all,test}.groups were created by old versions of the planner.
-            run.add_resource('ALL_GROUPS', path('all.groups'), 'all.groups',
+            run.add_resource('', path('all.groups'), 'all.groups',
                              symlink=sym, required=False)
-            run.add_resource('TEST_GROUPS', path('test.groups'), 'test.groups',
+            run.add_resource('', path('test.groups'), 'test.groups',
                              symlink=sym, required=False)

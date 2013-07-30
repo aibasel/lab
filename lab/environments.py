@@ -72,7 +72,7 @@ class LocalEnvironment(Environment):
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
-        self.exp.add_new_file('MAIN_SCRIPT', self.main_script_file, script)
+        self.exp.add_new_file('', self.main_script_file, script)
 
     def start_exp(self):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
