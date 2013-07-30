@@ -1,4 +1,4 @@
-:class:`DownwardExperiment` --- Fast Downward experiments
+:mod:`downward.experiments` --- Fast Downward experiments
 =========================================================
 .. autoclass:: downward.experiments.DownwardExperiment
    :members:
