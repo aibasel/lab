@@ -194,9 +194,7 @@ class DownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
     This is the base class for Fast Downward experiments. It can be customized
-    by adding the desired reports. One example of a specialized experiment
-    is :py:class:`CompareRevisionsExperiment
-    <downward.experiments.comparerevisions.CompareRevisionsExperiment>`.
+    by adding the desired configurations, benchmarks and reports.
     """
     def __init__(self, path, repo, environment=None, combinations=None,
                  compact=True, limits=None):
