@@ -1,6 +1,6 @@
 :class:`DownwardExperiment` --- Fast Downward experiments
 =========================================================
-.. autoclass:: downward.experiment.DownwardExperiment
+.. autoclass:: downward.experiments.DownwardExperiment
    :members:
 
 
