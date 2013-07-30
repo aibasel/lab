@@ -398,19 +398,20 @@ class DownwardExperiment(Experiment):
         def group_by_domain(run1, run2):
             return run1['domain']
 
-        for nick in [nick for nick, config in configs]:
-            config_before = '%s-%s' % (base_rev, nick)
-            config_after = '%s-%s' % (rev, nick)
-            for attribute in plot_attributes:
-                name = 'scatter-%s-%s' % (attribute, nick)
-                self.add_report(
-                    scatter.ScatterPlotReport(
-                        filter_config=[config_before, config_after],
-                        attributes=[attribute],
-                        get_category=group_by_domain,
-                        legend_location=(1.3, 0.5)),
-                    name=name,
-                    outfile=name)
+        def make_scatter_plots():
+            for nick in [nick for nick, config in configs]:
+                config_before = '%s-%s' % (base_rev, nick)
+                config_after = '%s-%s' % (rev, nick)
+                for attribute in plot_attributes:
+                    name = 'scatter-%s-%s' % (attribute, nick)
+                    report = scatter.ScatterPlotReport(
+                                filter_config=[config_before, config_after],
+                                attributes=[attribute],
+                                get_category=group_by_domain,
+                                legend_location=(1.3, 0.5))
+                    report(self.eval_dir, os.path.join(self.eval_dir, name))
+
+        self.add_step(Step('make-scatter-plots', make_scatter_plots))
 
     def set_path_to_python(self, path):
         """
