@@ -323,7 +323,7 @@ class DownwardExperiment(Experiment):
         """
         self.portfolios.append(portfolio_file)
 
-    def compare_revisions(self, rev, base_rev=None, opt_or_sat='opt', configs=None,
+    def _compare_revisions(self, rev, base_rev=None, opt_or_sat='opt', configs=None,
                           suite=None, attributes=None, plot_attributes=None,
                           outfile='compare.html'):
         """

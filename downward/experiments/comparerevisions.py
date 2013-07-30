@@ -32,6 +32,8 @@ from downward.configs import config_suite_optimal, config_suite_satisficing
 from downward.reports.compare import CompareRevisionsReport
 from downward.reports.scatter import ScatterPlotReport
 
+# TODO: Remove code duplication.
+
 
 COMPARED_ATTRIBUTES = ['coverage', 'search_time', 'score_search_time', 'total_time',
                        'score_total_time', 'expansions', 'score_expansions',
