@@ -157,7 +157,7 @@ class SearchRun(DownwardRun):
             planner_type = 'portfolio'
             config_nick = os.path.basename(config_nick)
             search_cmd = [self.planner.shell_name, '--portfolio', config_nick]
-        self.add_command('search', search_cmd, stdin='output',
+        self.add_command('search', search_cmd, stdin='OUTPUT',
                          time_limit=exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
 
@@ -391,7 +391,7 @@ class DownwardExperiment(Experiment):
         self.resources = []
 
         # Include the experiment code again.
-        self.add_resource('LAB', tools.SCRIPTS_DIR, 'lab')
+        self.add_resource('', tools.SCRIPTS_DIR, 'lab')
 
         self._adapt_path(stage)
         self._setup_ignores(stage)
@@ -552,15 +552,15 @@ class DownwardExperiment(Experiment):
         # The other files are optional.
         if self.include_preprocess_results_in_search_runs:
             # Properties files and logs have to be copied, not linked.
-            run.add_resource('PROPERTIES', path('properties'), 'properties')
-            run.add_resource('RUN_LOG', path('run.log'), 'run.log')
-            run.add_resource('RUN_ERR', path('run.err'), 'run.err')
+            run.add_resource('', path('properties'), 'properties')
+            run.add_resource('', path('run.log'), 'run.log')
+            run.add_resource('', path('run.err'), 'run.err')
 
-            run.add_resource('OUTPUT_SAS', path('output.sas'), 'output.sas',
+            run.add_resource('', path('output.sas'), 'output.sas',
                              symlink=sym, required=False)
 
             # {all,test}.groups were created by old versions of the planner.
-            run.add_resource('ALL_GROUPS', path('all.groups'), 'all.groups',
+            run.add_resource('', path('all.groups'), 'all.groups',
                              symlink=sym, required=False)
-            run.add_resource('TEST_GROUPS', path('test.groups'), 'test.groups',
+            run.add_resource('', path('test.groups'), 'test.groups',
                              symlink=sym, required=False)
