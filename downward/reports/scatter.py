@@ -27,6 +27,10 @@ from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
     PlotReport, EPSILON
 
 
+DEFAULT_PLOT_ATTRIBUTES = [
+    'total_time', 'search_time', 'memory', 'expansions_until_last_jump']
+
+
 class ScatterMatplotlib(Matplotlib):
     @classmethod
     def _plot(cls, report, axes, categories, styles):

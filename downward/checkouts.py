@@ -39,6 +39,30 @@ def escape_revision_name(name):
     return ''.join(_escape_char(c) for c in name).upper()
 
 
+def greatest_common_ancestor(repo, rev1, rev2):
+    long_rev = tools.get_command_output(['hg', 'debugancestor', str(rev1), str(rev2)],
+                                        cwd=repo, quiet=True)
+    number, hexcode = long_rev.split(':')
+    return tools.get_command_output(['hg', 'id', '-i', '-r', hexcode],
+                                    cwd=repo, quiet=True)
+
+
+def get_combinations(repo, rev, base_rev=None):
+    """
+    Return combinations that compare *rev* with *base_rev*. If *base_rev* is
+    None, use the newest common revision of *rev* and the *default* branch.
+    """
+    if not base_rev:
+        base_rev = greatest_common_ancestor(repo, rev, 'default')
+    if not base_rev:
+        logging.critical('Base revision for branch \'%s\' could not be determined. '
+                         'Please provide it manually.' % rev)
+    return [(Translator(repo, rev=r),
+             Preprocessor(repo, rev=r),
+             Planner(repo, rev=r))
+            for r in (rev, base_rev)]
+
+
 class Checkout(object):
     def __init__(self, part, repo, rev, checkout_dir):
         # Directory name of the planner part (translate, preprocess, search)
