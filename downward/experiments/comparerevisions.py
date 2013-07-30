@@ -111,10 +111,6 @@ class CompareRevisionsExperiment(DownwardExperiment):
         *use_extended_configs* determines if some less common configurations are tested
         (default: False).
 
-        Example:
-
-        .. literalinclude:: ../examples/issue374.py
-
         """
         DownwardExperiment.__init__(self, path, repo,
                                     combinations=get_combinations(repo, rev, base_rev),
