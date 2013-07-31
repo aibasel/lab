@@ -35,9 +35,6 @@ from lab.steps import Step, Sequence
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward import checkouts
 from downward import suites
-from downward.configs import config_suite_optimal, config_suite_satisficing
-from downward.reports import compare
-from downward.reports import scatter
 
 
 PREPROCESSED_TASKS_DIR = os.path.join(tools.USER_DIR, 'preprocessed-tasks')
