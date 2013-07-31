@@ -39,7 +39,7 @@ def escape_revision_name(name):
     return ''.join(_escape_char(c) for c in name).upper()
 
 
-def greatest_common_ancestor(repo, rev1, rev2):
+def get_common_ancestor(repo, rev1, rev2):
     long_rev = tools.get_command_output(['hg', 'debugancestor', str(rev1), str(rev2)],
                                         cwd=repo, quiet=True)
     number, hexcode = long_rev.split(':')
@@ -125,6 +125,9 @@ class Checkout(object):
     @property
     def shell_name(self):
         return '%s_%s' % (self.part.upper(), escape_revision_name(self.name))
+
+    def __repr__(self):
+        return '%s:%s:%s' % (self.repo, self.part, self.rev)
 
 
 # ---------- Mercurial --------------------------------------------------------
