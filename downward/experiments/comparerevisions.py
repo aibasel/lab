@@ -28,7 +28,7 @@ from lab import tools
 from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
 from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11
-from downward.configs import config_suite_optimal, config_suite_satisficing
+from downward.configs import default_configs_optimal, default_configs_satisficing
 from downward.reports.compare import CompareRevisionsReport
 from downward.reports.scatter import ScatterPlotReport
 
@@ -95,14 +95,14 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         if opt_or_sat == 'opt':
             self.add_suite(suite_optimal_with_ipc11())
-            configs = config_suite_optimal(use_core_configs,
-                                           use_ipc_configs,
-                                           use_extended_configs)
+            configs = default_configs_optimal(use_core_configs,
+                                              use_ipc_configs,
+                                              use_extended_configs)
         elif opt_or_sat == 'sat':
             self.add_suite(suite_satisficing_with_ipc11())
-            configs = config_suite_satisficing(use_core_configs,
-                                               use_ipc_configs,
-                                               use_extended_configs)
+            configs = default_configs_satisficing(use_core_configs,
+                                                  use_ipc_configs,
+                                                  use_extended_configs)
         else:
             logging.critical('Select to test either \'opt\' or \'sat\' configurations')
 
