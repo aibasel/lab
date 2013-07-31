@@ -286,6 +286,26 @@ class DownwardExperiment(Experiment):
         benchmark_dir = os.path.join(self.repo, 'benchmarks')
         return suites.build_suite(benchmark_dir, self.suites)
 
+    def add_revision(self, rev, add_ancestor=False):
+        """Add a Fast Downward revision to the experiment.
+
+        *rev* must be a valid revision in your Fast Downward repository like
+        "issue123", "987" or "599dbf7cc6bd".
+
+        If *add_ancestor* is True, the newest revision of the **default** branch
+        that is an ancestor of *rev* will be added as well.
+        """
+        new_revs = [rev]
+        if add_ancestor:
+            ancestor = checkouts.get_common_ancestor(self.repo, rev, 'default')
+            # TODO: Handle case where ancestor == rev ?
+            new_revs.append(ancestor)
+        self.combinations.extend([
+            (Translator(self.repo, rev=r),
+             Preprocessor(self.repo, rev=r),
+             Planner(self.repo, rev=r))
+            for r in new_revs])
+
     def add_suite(self, suite):
         """
         *suite* can either be a string or a list of strings. The strings can be
