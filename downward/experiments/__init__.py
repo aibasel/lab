@@ -250,8 +250,9 @@ class DownwardExperiment(Experiment):
         self.preprocess_exp_path = self.path + '-p'
         self._path_to_python = None
 
-        self.combinations = (combinations or
-                    [(Translator(repo), Preprocessor(repo), Planner(repo))])
+        if combinations is None:
+            combinations = [(Translator(repo), Preprocessor(repo), Planner(repo))]
+        self.combinations = combinations
         self.compact = compact
         self.suites = []
         self.configs = []
