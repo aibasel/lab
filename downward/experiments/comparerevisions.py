@@ -45,16 +45,6 @@ SCATTER_PLOT_ATTRIBUTES = ['total_time', 'search_time', 'memory',
                            'expansions_until_last_jump']
 
 
-def greatest_common_ancestor(repo, rev1, rev2):
-    long_rev = tools.get_command_output(['hg', 'debugancestor', rev1, rev2],
-                                        cwd=repo, quiet=True)
-    number, hexcode = long_rev.split(':')
-    pipe = subprocess.Popen(
-        ['hg', 'id', '-r', hexcode], cwd=repo, stdout=subprocess.PIPE
-    )
-    return pipe.stdout.read().strip()
-
-
 def domain_tuple_category(run1, run2):
     return run1['domain']
 
