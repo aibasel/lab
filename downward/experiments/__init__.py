@@ -206,9 +206,11 @@ class DownwardExperiment(Experiment):
 
         *environment* must be an :ref:`Environment <environments>` instance.
 
-        *combinations* is a list of :ref:`Checkout <checkouts>` tuples of the
-        form (Translator, Preprocessor, Planner). If no combinations are given,
-        perform an experiment with the working copy in *repo*.
+        If given, *combinations* must be a list of :ref:`Checkout <checkouts>`
+        tuples of the form (Translator, Preprocessor, Planner). If combinations
+        is None (default), perform an experiment with the working copy in *repo*.
+        You can also set ``combinations=[]`` and use the :func:`add_revision`
+        method to specify the code versions you want to test.
 
         If *compact* is True, link to benchmarks and preprocessed files instead
         of copying them. Only use this option if the linked files will **not**
@@ -290,10 +292,16 @@ class DownwardExperiment(Experiment):
     def add_revision(self, rev, add_ancestor=False):
         """Add a Fast Downward revision to the experiment.
 
+        In addition to using this convenience method, you can also add
+        revisions by setting the *combinations* constructor parameter which
+        allows combining planner parts from different revisions. If you do not
+        want the constructor to automatically add a default revision, you can
+        set ``combinations=[]``.
+
         *rev* must be a valid revision in your Fast Downward repository like
         "issue123", "987" or "599dbf7cc6bd".
 
-        If *add_ancestor* is True, the newest revision of the **default** branch
+        If *add_ancestor* is True, the newest revision of the default branch
         that is an ancestor of *rev* will be added as well.
         """
         new_revs = [rev]
