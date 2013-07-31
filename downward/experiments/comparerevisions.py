@@ -114,9 +114,8 @@ class CompareRevisionsExperiment(DownwardExperiment):
         (default: False).
 
         """
-        DownwardExperiment.__init__(self, path, repo,
-                                    combinations=get_combinations(repo, rev, base_rev),
-                                    **kwargs)
+        DownwardExperiment.__init__(self, path, repo, combinations=[], **kwargs)
+        self.add_revision(rev, add_ancestor=True)
 
         # ------ suites and configs ------------------------------------
 
