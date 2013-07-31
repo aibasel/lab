@@ -113,10 +113,6 @@ class CompareRevisionsExperiment(DownwardExperiment):
         *use_extended_configs* determines if some less common configurations are tested
         (default: False).
 
-        Example:
-
-        .. literalinclude:: ../examples/issue374.py
-
         """
         DownwardExperiment.__init__(self, path, repo,
                                     combinations=get_combinations(repo, rev, base_rev),
@@ -152,14 +148,15 @@ class CompareRevisionsExperiment(DownwardExperiment):
                            os.path.join(self.eval_dir, 'report-compare-scores.html')))
 
         for nick in configs.keys():
-            config_before = '%s-%s-%s-%s' % (base_rev, base_rev, base_rev, nick)
-            config_after = '%s-%s-%s-%s' % (rev, rev, rev, nick)
+            config_before = '%s-%s' % (base_rev, nick)
+            config_after = '%s-%s' % (rev, nick)
             for attribute in SCATTER_PLOT_ATTRIBUTES:
                 name = 'scatter-%s-%s' % (attribute, nick)
                 self.add_step(Step(name,
                                    ScatterPlotReport(
                                        filter_config=[config_before, config_after],
                                        attributes=[attribute],
-                                       get_category=domain_tuple_category),
+                                       get_category=domain_tuple_category,
+                                       legend_location=(1.3, 0.5)),
                                    self.eval_dir,
                                    os.path.join(self.eval_dir, name)))
