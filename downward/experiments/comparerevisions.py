@@ -55,22 +55,6 @@ def greatest_common_ancestor(repo, rev1, rev2):
     return pipe.stdout.read().strip()
 
 
-def get_combinations(repo, rev, base_rev=None):
-    """
-    Return combinations that compare *rev* with *base_rev*. If *base_rev* is
-    None, use the newest common revision of *rev* and the *default* branch.
-    """
-    if not base_rev:
-        base_rev = greatest_common_ancestor(repo, rev, 'default')
-    if not base_rev:
-        logging.critical('Base revision for branch \'%s\' could not be determined. '
-                         'Please provide it manually.' % rev)
-    return [(Translator(repo, rev=r),
-             Preprocessor(repo, rev=r),
-             Planner(repo, rev=r))
-            for r in (rev, base_rev)]
-
-
 def domain_tuple_category(run1, run2):
     return run1['domain']
 

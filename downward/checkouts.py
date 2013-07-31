@@ -47,22 +47,6 @@ def get_common_ancestor(repo, rev1, rev2):
                                     cwd=repo, quiet=True)
 
 
-def get_combinations(repo, rev, base_rev=None):
-    """
-    Return combinations that compare *rev* with *base_rev*. If *base_rev* is
-    None, use the newest common revision of *rev* and the *default* branch.
-    """
-    if not base_rev:
-        base_rev = greatest_common_ancestor(repo, rev, 'default')
-    if not base_rev:
-        logging.critical('Base revision for branch \'%s\' could not be determined. '
-                         'Please provide it manually.' % rev)
-    return [(Translator(repo, rev=r),
-             Preprocessor(repo, rev=r),
-             Planner(repo, rev=r))
-            for r in (rev, base_rev)]
-
-
 class Checkout(object):
     def __init__(self, part, repo, rev, checkout_dir):
         # Directory name of the planner part (translate, preprocess, search)
