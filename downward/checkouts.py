@@ -127,7 +127,7 @@ class Checkout(object):
         return '%s_%s' % (self.part.upper(), escape_revision_name(self.name))
 
     def __repr__(self):
-        return '%s:%s:%s' % (self.repo, self.part, self.rev)
+        return '%s:%s:%s' % (self.repo, self.rev, self.part)
 
 
 # ---------- Mercurial --------------------------------------------------------
