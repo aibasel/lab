@@ -302,6 +302,7 @@ class DownwardExperiment(Experiment):
         that is an ancestor of *rev* will be added as well.
         """
         new_revs = [rev]
+        ancestor = None
         if add_ancestor:
             ancestor = checkouts.get_common_ancestor(self.repo, rev, 'default')
             # TODO: Handle case where ancestor == rev ?
@@ -311,6 +312,7 @@ class DownwardExperiment(Experiment):
              Preprocessor(self.repo, rev=r),
              Planner(self.repo, rev=r))
             for r in new_revs])
+        return ancestor
 
     def add_suite(self, suite):
         """
