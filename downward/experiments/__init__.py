@@ -300,6 +300,8 @@ class DownwardExperiment(Experiment):
 
         If *add_ancestor* is True, the newest revision of the default branch
         that is an ancestor of *rev* will be added as well.
+
+        Return the ancestor revision or None if *add_ancestor* is False.
         """
         new_revs = [rev]
         ancestor = None
