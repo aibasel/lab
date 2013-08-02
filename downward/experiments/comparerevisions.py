@@ -32,8 +32,6 @@ from downward.configs import default_configs_optimal, default_configs_satisficin
 from downward.reports.compare import CompareRevisionsReport
 from downward.reports.scatter import ScatterPlotReport
 
-# TODO: Remove code duplication.
-
 
 COMPARED_ATTRIBUTES = ['coverage', 'search_time', 'score_search_time', 'total_time',
                        'score_total_time', 'expansions', 'score_expansions',
@@ -43,10 +41,6 @@ COMPARED_ATTRIBUTES = ['coverage', 'search_time', 'score_search_time', 'total_ti
 
 SCATTER_PLOT_ATTRIBUTES = ['total_time', 'search_time', 'memory',
                            'expansions_until_last_jump']
-
-
-def domain_tuple_category(run1, run2):
-    return run1['domain']
 
 
 class CompareRevisionsExperiment(DownwardExperiment):
@@ -111,25 +105,22 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         # ------ reports -----------------------------------------------
 
-        compare_report = CompareRevisionsReport(rev1=base_rev,
-                                                rev2=rev,
-                                                resolution='combined',
-                                                attributes=COMPARED_ATTRIBUTES)
-        self.add_step(Step('report-compare-scores',
-                           compare_report,
-                           self.eval_dir,
-                           os.path.join(self.eval_dir, 'report-compare-scores.html')))
+        comparison = CompareRevisionsReport(base_rev,
+                                            rev,
+                                            attributes=COMPARED_ATTRIBUTES)
+        self.add_report(comparison,
+                        name='report-compare-scores',
+                        outfile='report-compare-scores.html')
 
         for nick in configs.keys():
             config_before = '%s-%s' % (base_rev, nick)
             config_after = '%s-%s' % (rev, nick)
             for attribute in SCATTER_PLOT_ATTRIBUTES:
                 name = 'scatter-%s-%s' % (attribute, nick)
-                self.add_step(Step(name,
-                                   ScatterPlotReport(
-                                       filter_config=[config_before, config_after],
-                                       attributes=[attribute],
-                                       get_category=domain_tuple_category,
-                                       legend_location=(1.3, 0.5)),
-                                   self.eval_dir,
-                                   os.path.join(self.eval_dir, name)))
+                self.add_report(
+                    ScatterPlotReport(
+                        filter_config=[config_before, config_after],
+                        attributes=[attribute],
+                        get_category=lambda run1, run2: run1['domain'],
+                        legend_location=(1.3, 0.5)),
+                    outfile=name)
