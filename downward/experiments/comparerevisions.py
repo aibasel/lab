@@ -89,7 +89,7 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         """
         DownwardExperiment.__init__(self, path, repo, combinations=[], **kwargs)
-        self.add_revision(rev, add_ancestor=True)
+        base_rev = self.add_revision(rev, add_ancestor=True)
 
         # ------ suites and configs ------------------------------------
 
