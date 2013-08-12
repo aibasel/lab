@@ -12,6 +12,6 @@ REPO = '/home/jendrik/projects/Downward/downward'
 SUITE = ['gripper:prob01.pddl', 'zenotravel:pfile1']
 
 exp = CompareRevisionsExperiment(EXPPATH, REPO, 'opt', rev='issue344')
-# exp.suites = ['gripper:prob01.pddl']
+exp.suites = SUITE
 
 exp()
