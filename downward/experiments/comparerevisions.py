@@ -18,14 +18,8 @@
 
 #!/usr/bin/env python
 
-import os
 import logging
-import subprocess
 
-from lab.steps import Step
-from lab import tools
-
-from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
 from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11
 from downward.configs import default_configs_optimal, default_configs_satisficing
@@ -121,6 +115,5 @@ class CompareRevisionsExperiment(DownwardExperiment):
                     ScatterPlotReport(
                         filter_config=[config_before, config_after],
                         attributes=[attribute],
-                        get_category=lambda run1, run2: run1['domain'],
-                        legend_location=(1.3, 0.5)),
+                        get_category=lambda run1, run2: run1['domain']),
                     outfile=name)
