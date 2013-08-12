@@ -43,6 +43,12 @@ class CompareRevisionsExperiment(DownwardExperiment):
     latest revision on a branch to the revision the branch is based on.
     Both revisions are tested with all the most important configurations.
     Reports that allow a before-after comparison are automaticaly added.
+
+    .. note::
+
+        This class has been deprecated in version 1.4 because using the
+        DownwardExperiment class directly is more versatile.
+
     """
     def __init__(self, path, repo, opt_or_sat, rev, base_rev=None,
                  use_core_configs=True, use_ipc_configs=True, use_extended_configs=False,
