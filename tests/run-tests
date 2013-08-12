@@ -25,7 +25,7 @@ elif [[ "$PYTHONPATH" != *"$LAB"* ]]; then
 fi
 echo PYTHONPATH: $PYTHONPATH
 
-py.test-2.7
+py.test-2.7 tests
 
 # Run doctests.
 cd lab
