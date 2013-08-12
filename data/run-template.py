@@ -8,16 +8,10 @@ import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 from lab.calls.call import Call
-
-try:
-    from lab.calls.log import driver_log, driver_err
-except IOError:
-    # Cannot open log files
-    sys.exit(1)
+from lab.calls.log import driver_log, driver_err
 
 sys.stdout = driver_log
 sys.stderr = driver_err
-# All errors that occur from here on out will be written to the log file
 
 from lab.calls.log import print_, redirects, save_returncode
 from lab.calls.log import set_property
