@@ -46,8 +46,7 @@ def make_scatter_plots():
             report = ScatterPlotReport(
                 filter_config=[config_before, config_after],
                 attributes=[attribute],
-                get_category=lambda run1, run2: run1['domain'],
-                legend_location=(1.3, 0.5))
+                get_category=lambda run1, run2: run1['domain'])
             report(exp.eval_dir, os.path.join(exp.eval_dir, name))
 
 exp.add_step(Step('make-scatter-plots', make_scatter_plots))

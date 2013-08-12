@@ -152,7 +152,7 @@ class ScatterPlotReport(PlotReport):
                        category_styles=styles)
 
         """
-        kwargs.setdefault('legend_location', 'upper left')
+        kwargs.setdefault('legend_location', (1.3, 0.5))
         # If the size has not been set explicitly, make it a square.
         params = kwargs.get('params', {})
         params.setdefault('figure.figsize', [8, 8])
