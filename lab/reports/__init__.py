@@ -276,12 +276,18 @@ class Report(object):
     def _glob_attributes(self, attributes):
         expanded_attrs = []
         for attr in attributes:
+            # Attribute without wildcards. Filtering would reset its options.
+            if attr in self.all_attributes:
+                expanded_attrs.append(attr)
+                continue
             matches = fnmatch.filter(self.all_attributes, attr)
             if not matches:
                 logging.warning('Attribute %s is not present in the dataset.' %
                                 attr)
-            # Use the attribute options from the pattern for all matches.
-            expanded_attrs.extend([attr.copy(match) for match in matches])
+            # Use the attribute options from the pattern for all matches, but
+            # don't try to guess options for attributes that appear in the list.
+            expanded_attrs.extend([attr.copy(match) for match in matches
+                                   if not match in attributes])
         if attributes and not expanded_attrs:
             logging.critical('No attributes match your patterns.')
         return expanded_attrs
