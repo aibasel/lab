@@ -195,6 +195,19 @@ class DownwardExperiment(Experiment):
 
     This is the base class for Fast Downward experiments. It can be customized
     by adding the desired configurations, benchmarks and reports.
+
+    .. note::
+
+        Lab will create the directory ~/lab to hold cached files. It
+        contains the following subfolders:
+
+        * grid-steps: Contains temporary grid-tasks for sequential execution.
+        * preprocessed-tasks: Cached results from preprocessing experiments.
+          You only have to run preprocessing experiments for each pair of
+          translator and preprocessor revision once since existing preprocessed
+          tasks are automatically taken from this folder. (Can grow very large.)
+        * revision-cache: Cached Fast Downward clones. (Can grow very large.)
+
     """
     def __init__(self, path, repo, environment=None, combinations=None,
                  compact=True, limits=None):
