@@ -265,7 +265,7 @@ class Report(object):
             logging.info('Using all numerical attributes.')
             self.attributes = self._get_numerical_attributes()
 
-        self.attributes.sort()
+        self.attributes = sorted(set(self.attributes))
         self.write()
 
     def _prepare_attribute(self, attr):
