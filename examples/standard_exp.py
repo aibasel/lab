@@ -80,7 +80,7 @@ class StandardDownwardExperiment(DownwardExperiment):
             # Compress the experiment directory
             self.add_step(Step.zip_exp_dir(self))
             self.add_step(Step('zip-eval-dir', call,
-                ['tar', '--dereference', '-cjf', self.name + '-eval.tar.bz2', self.name + '-eval'],
+                ['tar', '-cjf', self.name + '-eval.tar.bz2', self.name + '-eval'],
                 cwd=os.path.dirname(self.path)))
 
         self.add_step(Step.remove_exp_dir(self))
