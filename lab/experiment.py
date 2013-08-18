@@ -255,7 +255,7 @@ class Experiment(_Buildable):
         *report*'s format. If *outfile* is a relative path, put it under
         *eval_dir*.
         """
-        name = name or outfile or report.__class__.__name__.lower()
+        name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
         eval_dir = eval_dir or self.eval_dir
         outfile = outfile or '%s.%s' % (name, report.output_format)
         if not os.path.isabs(outfile):
