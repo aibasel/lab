@@ -194,7 +194,7 @@ class OracleGridEngineEnvironment(Environment):
 
     def _get_job(self, step):
         # Abort if one step fails.
-        return """\
+        template = """\
 %(job_header)s
 if [ -s "%(stderr)s" ]; then
     echo "There was output on stderr. Please check %(stderr)s. Aborting."
@@ -203,12 +203,14 @@ fi
 
 cd %(exp_script_dir)s
 ./%(script)s %(args)s %(step_name)s
-""" % {'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
-       'script': self.exp._script,
-       'args': self._exp_script_args,
-       'step_name': step.name,
-       'stderr': 'driver.err',
-       'job_header': self._get_job_header(step)}
+"""
+        return template % {
+            'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
+            'script': self.exp._script,
+            'args': self._exp_script_args,
+            'step_name': step.name,
+            'stderr': 'driver.err',
+            'job_header': self._get_job_header(step)}
 
     def _get_host_spec(self, host_restriction):
         if not host_restriction:
