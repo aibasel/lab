@@ -37,7 +37,7 @@ cd ..
 
 # Check imports and unused/missing variables.
 pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
-pyflakes downward
+#pyflakes downward  # TODO: Uncomment
 
 # Check code formatting.
 # Ignore under-indented continuation lines (E128) and allow longer lines.
@@ -71,7 +71,10 @@ if [ -d "$REPO" ]; then
 
     # Check that the examples use the correct API.
     ./custom-attributes.py
+
+    rm -rf lmcut-exp-p lmcut-exp lmcut-exp-eval
     ./lmcut.py
+    ./lmcut.py {1..8}
 
     # Check planner experiment
     rm -rf ~/lab/experiments/planner
