@@ -3,16 +3,16 @@
 """
 Basic example for the use of the lab package.
 
-This only run of the experiment just prints all files contained in the
-run's directory. A simple parser parses the output and counts the number of
-files.
+This experiment consists of a single run that just prints all files contained
+in the run's directory. A simple parser parses the output and counts the number
+of files.
 
-This experiment shows how you
-- add a command to a run
-- add a run to an experiment
-- add a custom result parser
-- use the default report
-- use additional standard steps
+This experiment shows how to
+* add a command to a run
+* add a run to an experiment
+* add a custom result parser
+* use the default report
+* use additional standard steps
 """
 
 import os
@@ -40,18 +40,11 @@ run.require_resource('SIMPLE_PARSER')
 run.add_command('parse', ['SIMPLE_PARSER'])
 
 # Make a default report.
-exp.add_step(Step('report', Report(attributes=['number_of_files', 'first_number']),
-                  exp.eval_dir, reportfile))
+exp.add_report(Report(attributes=['number_of_files', 'first_number']),
+               outfile=reportfile)
 
 # Compress the experiment directory.
 exp.add_step(Step.zip_exp_dir(exp))
 
-# Remove the experiment directory.
-exp.add_step(Step.remove_exp_dir(exp))
-
-# This method parses the commandline.
-# Supported styles:
-# ./simple-exp.py 1
-# ./simple-exp.py report
-# ./simple-exp.py 1 2 3
+# Parse the commandline and run the specified steps.
 exp()
