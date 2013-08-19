@@ -1,25 +1,43 @@
 .. _downward.tutorial:
 
-Tutorial
-========
+Downward Tutorial
+=================
 
-The script below is an example Fast Downward experiment. It is located
-at ``examples/lmcut.py``. After you have adapted the ``EXPPATH`` and ``REPO``
-variables to your system, you can see the available steps with ::
+Install lab and downward
+------------------------
+.. include:: ../INSTALL
 
-    $ ./lmcut.py
+Install Fast Downward
+---------------------
+.. highlight:: bash
+::
+
+    FAST_DOWNWARD=/path/to/fast-downward/repo
+    sudo apt-get install mercurial g++ make python flex bison gawk
+    sudo apt-get install g++-multilib  # 64-bit
+    hg clone http://hg.fast-downward.org ${FAST_DOWNWARD}
+
+Run tutorial experiment
+-----------------------
+.. highlight:: python
+
+The script below is an example Fast Downward experiment. It is located at
+``examples/lmcut.py``. After you have adapted the ``REPO`` variable to point to
+``FAST_DOWNWARD``, you can see the available steps with ::
+
+    ./lmcut.py
 
 
-You can run the individual steps with ::
+Run the individual steps with ::
 
     ./lmcut.py 1
     ./lmcut.py {2..4}
     ./lmcut.py run-search-exp
 
 
-The comments should help you understand how to use this file as a basis for your
-own experiments.
+You can use this file as a basis for your own experiments.
 
 .. literalinclude:: ../examples/lmcut.py
 
-The ``examples`` directory includes further downward experiments.
+Have a look at other Fast Downward experiments in the ``examples`` directory
+and the `downward API <downward.experiments.html>`_.
