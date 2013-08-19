@@ -3,7 +3,6 @@
 import os
 import platform
 import shutil
-import stat
 from subprocess import call
 import sys
 
@@ -73,37 +72,43 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         # Add report steps
         abs_report_file = os.path.join(self.eval_dir, '%s-abs.html' % expname)
-        self.add_step(Step('report-abs', AbsoluteReport(attributes=attributes, colored=True),
-                                                        self.eval_dir, abs_report_file))
+        self.add_report(AbsoluteReport(attributes=attributes, colored=True),
+                        name='report-abs', outfile=abs_report_file)
 
         if REMOTE:
             # Compress the experiment directory
             self.add_step(Step.zip_exp_dir(self))
             self.add_step(Step('zip-eval-dir', call,
-                ['tar', '-cjf', self.name + '-eval.tar.bz2', self.name + '-eval'],
-                cwd=os.path.dirname(self.path)))
+                               ['tar', '-cjf', self.name + '-eval.tar.bz2', self.name + '-eval'],
+                          cwd=os.path.dirname(self.path)))
 
         self.add_step(Step.remove_exp_dir(self))
         self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
 
         if not REMOTE:
             # Copy the results to local directory
-            self.add_step(Step('scp-eval-dir', call, ['scp', '-r',
-                '%s:%s-eval' % (SCP_LOGIN, remote_exppath), '%s-eval' % local_exppath]))
+            self.add_step(Step('scp-eval-dir', call, [
+                'scp', '-r',
+                '%s:%s-eval' % (SCP_LOGIN, remote_exppath),
+                '%s-eval' % local_exppath]))
 
             # Copy the results to local directory
-            self.add_step(Step('scp-zipped-eval-dir', call, ['scp', '-r',
-                '%s:%s-eval.tar.bz2' % (SCP_LOGIN, remote_exppath), '%s-eval.tar.bz2' % local_exppath]))
+            self.add_step(Step('scp-zipped-eval-dir', call, [
+                'scp', '-r',
+                '%s:%s-eval.tar.bz2' % (SCP_LOGIN, remote_exppath),
+                '%s-eval.tar.bz2' % local_exppath]))
 
             # Copy the zipped experiment directory to local directory
-            self.add_step(Step('scp-exp-dir', call, ['scp', '-r',
-                '%s:%s.tar.bz2' % (SCP_LOGIN, remote_exppath), '%s.tar.bz2' % local_exppath]))
+            self.add_step(Step('scp-exp-dir', call, [
+                'scp', '-r',
+                '%s:%s.tar.bz2' % (SCP_LOGIN, remote_exppath),
+                '%s.tar.bz2' % local_exppath]))
 
         # Unzip the experiment directory
         self.add_step(Step.unzip_exp_dir(self))
         self.add_step(Step('unzip-eval-dir', call,
-            ['tar', '-xjf', self.name + '-eval.tar.bz2'],
-            cwd=os.path.dirname(self.path)))
+                           ['tar', '-xjf', self.name + '-eval.tar.bz2'],
+                      cwd=os.path.dirname(self.path)))
 
     def add_config_module(self, path):
         """*path* must be a path to a python module containing only Fast
@@ -123,8 +128,6 @@ class StandardDownwardExperiment(DownwardExperiment):
             exp.add_ipc_config('seq-sat-lama-2011')
         """
         self.add_config(ipc_config_name, ['ipc', ipc_config_name, '--plan-file', 'sas_plan'])
-
-
 
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
