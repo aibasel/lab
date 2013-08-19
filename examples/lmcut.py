@@ -11,14 +11,14 @@ from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
-EXPNAME = 'lmcut-exp'
+EXPPATH = 'exp-lmcut'
 REPO = '/home/jendrik/projects/Downward/downward'
 ENV = LocalEnvironment(processes=2)
 SUITE = ['gripper:prob01.pddl', 'zenotravel:pfile1']
 CONFIGS = [('lmcut', ['--search', 'astar(lmcut())'])]
 ATTRIBUTES = ['coverage', 'expansions']
 
-exp = DownwardExperiment(path=EXPNAME, repo=REPO, environment=ENV)
+exp = DownwardExperiment(path=EXPPATH, repo=REPO, environment=ENV)
 exp.add_suite(SUITE)
 for nick, config in CONFIGS:
     exp.add_config(nick, config)
