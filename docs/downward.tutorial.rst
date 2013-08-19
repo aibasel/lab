@@ -5,7 +5,7 @@ Downward Tutorial
 
 Install lab and downward
 ------------------------
-.. include:: ../INSTALL
+.. include:: ../INSTALL.txt
 
 Install Fast Downward
 ---------------------

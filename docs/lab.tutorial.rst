@@ -6,7 +6,7 @@ Lab tutorial
 Install lab
 -----------
 .. highlight:: bash
-.. include:: ../INSTALL
+.. include:: ../INSTALL.txt
 
 
 Run tutorial experiment
