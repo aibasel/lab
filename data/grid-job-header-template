@@ -19,14 +19,6 @@
 ### Send mail when job finishes? -m can be e.g. (b)eginning, (e)nd, (n)ever.
 %(notification)s
 
-declare -a RUN_IDS=(%(run_ids)s)
-NUM_TASKS=%(num_tasks)d
-if [ ${#RUN_IDS[@]} -ne $NUM_TASKS ]; then
-    for ((i=0; i<$NUM_TASKS; i++)); do
-        RUN_IDS[${i}]=${i}
-    done
-fi
-
 if [ -z $PYTHONPATH ]; then
     export PYTHONPATH=$(pwd)
 else

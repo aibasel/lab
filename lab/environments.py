@@ -145,7 +145,6 @@ class OracleGridEngineEnvironment(Environment):
             'queue': self.queue,
             'host_spec': self.host_spec,
             'notification': '#$ -m n',
-            'run_ids': '',
         }
 
     def write_main_script(self):
@@ -157,13 +156,16 @@ class OracleGridEngineEnvironment(Environment):
         job_params = self._get_common_job_params()
         job_params.update(name=self._escape_job_name(self.exp.name),
                           num_tasks=num_tasks)
-        run_ids = map(str, range(1, num_tasks + 1))
-        if self.randomize_task_order:
-            random.shuffle(run_ids)
-        job_params['run_ids'] = ' '.join(run_ids)
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         header = open(template_file).read() % job_params
-        body = open(os.path.join(tools.DATA_DIR, 'grid-job-body')).read()
+
+        body_params = dict(num_tasks=num_tasks)
+        if self.randomize_task_order:
+            run_ids = map(str, range(1, num_tasks + 1))
+            random.shuffle(run_ids)
+            body_params['run_ids'] = ' '.join(run_ids)
+        body_template_file = os.path.join(tools.DATA_DIR, 'grid-job-body-template')
+        body = open(body_template_file).read() % body_params
 
         filename = self.exp._get_abs_path(self.main_script_file)
         with open(filename, 'w') as file:
