@@ -18,6 +18,7 @@
 import logging
 import math
 import os
+import random
 import sys
 
 from lab import tools
@@ -91,7 +92,7 @@ class OracleGridEngineEnvironment(Environment):
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, host_restriction=None,
-                 email=None):
+                 email=None, randomize_task_order=False):
         """
         *queue* must be a valid queue name on the grid.
 
@@ -101,6 +102,9 @@ class OracleGridEngineEnvironment(Environment):
 
         If *email* is provided and ``--all`` is used, a message will be sent
         when the experiment finishes.
+
+        If *randomize_task_order* is set to True, tasks for runs are started
+        in a random order.
         """
         Environment.__init__(self)
         if queue is None:
@@ -116,6 +120,7 @@ class OracleGridEngineEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
         self.email = email
+        self.randomize_task_order = randomize_task_order
 
         # When submitting an experiment job, wait for this job name.
         self.__wait_for_job_name = None
@@ -151,6 +156,10 @@ class OracleGridEngineEnvironment(Environment):
         job_params = self._get_common_job_params()
         job_params.update(name=self._escape_job_name(self.exp.name),
                           num_tasks=num_tasks)
+        run_ids = map(str, range(num_tasks))
+        if self.randomize_task_order:
+            random.shuffle(run_ids)
+        job_params['run_ids'] = ' '.join(run_ids)
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         header = open(template_file).read() % job_params
         body = open(os.path.join(tools.DATA_DIR, 'grid-job-body')).read()
