@@ -343,8 +343,7 @@ class Report(object):
                       'This happens when no significant changes occured or '
                       'if for all attributes and all problems never all '
                       'configs had a value for this attribute in a '
-                      'domain-wise report. Therefore no output file is '
-                      'created.')
+                      'domain-wise report.')
 
         doc.add_text(markup)
         if len(markup) < 100000:
