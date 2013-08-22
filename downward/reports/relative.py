@@ -36,8 +36,8 @@ class RelativeReport(AbsoluteReport):
 
         *resolution* must be one of "domain" or "problem".
 
-        *rel_change* is the percentage that the value must have changed between
-        two configs to be appended to the result table.
+        Only include pairs of attribute values x and y if
+        abs(y/x - 1) >= *rel_change*.
 
         Only add pairs of values to the result if their absolute difference is
         bigger than *abs_change*.
