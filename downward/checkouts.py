@@ -39,12 +39,18 @@ def escape_revision_name(name):
     return ''.join(_escape_char(c) for c in name).upper()
 
 
+def get_global_rev(repo, rev=None):
+    cmd = ['hg', 'id', '-i']
+    if rev:
+        cmd.extend(['-r', rev])
+    return tools.get_command_output(cmd, cwd=repo, quiet=True)
+
+
 def greatest_common_ancestor(repo, rev1, rev2):
     long_rev = tools.get_command_output(['hg', 'debugancestor', str(rev1), str(rev2)],
                                         cwd=repo, quiet=True)
     number, hexcode = long_rev.split(':')
-    return tools.get_command_output(['hg', 'id', '-i', '-r', hexcode],
-                                    cwd=repo, quiet=True)
+    return get_global_rev(repo, rev=hexcode)
 
 
 def get_combinations(repo, rev, base_rev=None):
