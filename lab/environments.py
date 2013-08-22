@@ -145,10 +145,11 @@ class OracleGridEngineEnvironment(Environment):
             'queue': self.queue,
             'host_spec': self.host_spec,
             'notification': '#$ -m n',
+            'run_ids': '',
         }
 
     def write_main_script(self):
-        num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
+        num_tasks = int(math.ceil(len(self.exp.runs) / float(self.runs_per_task)))
         if num_tasks > self.MAX_TASKS:
             logging.critical('You are trying to submit a job with %d tasks, '
                              'but only %d are allowed.' %
@@ -156,7 +157,7 @@ class OracleGridEngineEnvironment(Environment):
         job_params = self._get_common_job_params()
         job_params.update(name=self._escape_job_name(self.exp.name),
                           num_tasks=num_tasks)
-        run_ids = map(str, range(num_tasks))
+        run_ids = map(str, range(1, num_tasks + 1))
         if self.randomize_task_order:
             random.shuffle(run_ids)
         job_params['run_ids'] = ' '.join(run_ids)
