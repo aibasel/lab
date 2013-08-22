@@ -6,11 +6,11 @@ function format {
 }
 
 function get_run_id {
-    if [[ $1 < 1 || $1 > $NUM_TASKS ]]; then
-        echo "error: SGE_TASK_ID must be in range 1..$NUM_TASKS" 1>&2
+    if (( $1 < 1 || $1 > $NUM_TASKS )); then
+        echo "error: SGE_TASK_ID must be in range 1..$NUM_TASKS but is '$1'" 1>&2
         exit 2
     fi
-    if [ ${#RUN_IDS[@]} -ge $NUM_TASKS ]; then
+    if (( ${#RUN_IDS[@]} >= $NUM_TASKS )); then
         echo ${RUN_IDS[$(($1-1))]}
     else
         echo $1
@@ -25,6 +25,6 @@ DIR="runs-$(format $LOWER)-$(format $UPPER)/$(format $RUN)"
 cd $DIR
 ./run
 RETCODE=$?
-if [[ $RETCODE != 0 ]]; then
+if (( $RETCODE != 0 )); then
     echo Run $RUN returned $RETCODE >> driver.err
 fi
