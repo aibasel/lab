@@ -40,6 +40,20 @@ DEFAULT_ABORT_ON_FAILURE = False
 # How many tasks to group into one top-level directory
 SHARD_SIZE = 100
 
+# Make argparser available globally so users can add custom arguments.
+ARGPARSER = tools.ArgParser()
+ARGPARSER.epilog = "The list of available steps will be added later."
+ARGPARSER.add_argument('steps', metavar='step', nargs='*', default=[],
+        help='Name or number of a step below. If none is given, print help.')
+ARGPARSER.add_argument('--all', dest='run_all_steps', action='store_true',
+        help='Run all supplied steps. If none are given, run all steps '
+        'in the experiment. For local experiments this option has no '
+        'effect if any steps are given on the commandline. Use this '
+        'option to run unattended experiments on computer grids. '
+        'If this option is used, make sure that the experiment script '
+        'doesn\'t change while the experiment is running, because it '
+        'will be called for each step.')
+
 
 class _Buildable(object):
     def __init__(self):
@@ -196,7 +210,6 @@ class Experiment(_Buildable):
         self.environment.exp = self
         self.fetcher = Fetcher()
         self.shard_size = SHARD_SIZE
-        self.argparser = tools.ArgParser()
 
         self.runs = []
 
@@ -274,20 +287,10 @@ class Experiment(_Buildable):
         return run
 
     def __call__(self):
-        self.argparser.epilog = self.steps.get_steps_text()
-        self.argparser.add_argument('steps', metavar='step', nargs='*', default=[],
-                help='Name or number of a step below. If none is given, print help.')
-        self.argparser.add_argument('--all', dest='run_all_steps', action='store_true',
-                help='Run all supplied steps. If none are given, run all steps '
-                'in the experiment. For local experiments this option has no '
-                'effect if any steps are given on the commandline. Use this '
-                'option to run unattended experiments on computer grids. '
-                'If this option is used, make sure that the experiment script '
-                'doesn\'t change while the experiment is running, because it '
-                'will be called for each step.')
-        self.args = self.argparser.parse_args()
+        ARGPARSER.epilog = self.steps.get_steps_text()
+        self.args = ARGPARSER.parse_args()
         if not self.args.steps and not self.args.run_all_steps:
-            self.argparser.print_help()
+            ARGPARSER.print_help()
             sys.exit()
         # If no steps were given on the commandline, run all exp steps.
         steps = [self.steps.get_step(name) for name in self.args.steps] or self.steps
