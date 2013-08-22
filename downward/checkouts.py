@@ -42,7 +42,7 @@ def escape_revision_name(name):
 def get_global_rev(repo, rev=None):
     cmd = ['hg', 'id', '-i']
     if rev:
-        cmd.extend(['-r', rev])
+        cmd.extend(['-r', str(rev)])
     return tools.get_command_output(cmd, cwd=repo, quiet=True)
 
 
@@ -178,17 +178,15 @@ class HgCheckout(Checkout):
         Checkout.__init__(self, part, repo, abs_rev, checkout_dir)
 
     def get_abs_rev(self, repo, rev):
-        if str(rev).upper() == 'WORK':
+        rev = str(rev)
+        if rev.upper() == 'WORK':
             return 'WORK'
-        cmd = ['hg', 'id', '-ir', str(rev).lower(), repo]
-        cmd_string = ' '.join(cmd)
-        if cmd_string in ABS_REV_CACHE:
-            return ABS_REV_CACHE[cmd_string]
-        abs_rev = get_command_output(cmd, quiet=True)
+        if (repo, rev) in ABS_REV_CACHE:
+            return ABS_REV_CACHE[(repo, rev)]
+        abs_rev = get_global_rev(repo, rev=rev)
         if not abs_rev:
-            logging.error('Revision %s not present in repo %s' % (rev, repo))
-            sys.exit(1)
-        ABS_REV_CACHE[cmd_string] = abs_rev
+            logging.critical('Revision %s not present in repo %s' % (rev, repo))
+        ABS_REV_CACHE[(repo, rev)] = abs_rev
         return abs_rev
 
     def checkout(self):
