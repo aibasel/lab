@@ -98,9 +98,9 @@ class RelativeReport(AbsoluteReport):
         if len(quotient_col) == 0:
             return 'No changes.'
 
-        # TODO: Remove sorting hack.
-        table.add_col('ZZ1:sort:Factor', quotient_col)
-        #table.add_col('ZZ2:sort:%-Change', percent_col)
+        table.set_column_order(table.col_names + ['Factor'])
+        table.add_col('Factor', quotient_col)
+        #table.add_col('%-Change', percent_col)
         table.min_wins = None
         table.colored = False
         return table
