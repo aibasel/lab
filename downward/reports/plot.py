@@ -58,8 +58,9 @@ class MatplotlibPlot(object):
 
     @staticmethod
     def set_rc_params(params):
-        # Reset params from rc file.
-        matplotlib.rc_file_defaults()
+        # Reset params from rc file if matplotlib installation supports it.
+        if hasattr(matplotlib, 'rc_file_defaults'):
+            matplotlib.rc_file_defaults()
         if params:
             matplotlib.rcParams.update(params)
 
