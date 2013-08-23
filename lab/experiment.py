@@ -185,11 +185,17 @@ class _Buildable(object):
 
 
 class Experiment(_Buildable):
-    def __init__(self, path, environment=None):
+    def __init__(self, path, environment=None, cache_dir=None):
         """
         Create a new experiment that will be built at *path* using the methods
         provided by :ref:`Environment <environments>` *environment*. If
         *environment* is None, ``LocalEnvironment`` is used (default).
+
+        Lab will use the *cache_dir* for storing temporary files.
+        In case you run :py:class:`Fast Downward experiments
+        <downward.experiments.DownwardExperiment>` this directory can become
+        very large since it is used to cache revisions and preprocessed tasks.
+        By default *cache_dir* points to ``~/lab``.
 
         An experiment consists of multiple steps. Every experiment will need at
         least the following steps:
@@ -208,6 +214,8 @@ class Experiment(_Buildable):
             logging.critical('Path contains commas or colons: %s' % self.path)
         self.environment = environment or LocalEnvironment()
         self.environment.exp = self
+        self.cache_dir = cache_dir or tools.DEFAULT_USER_DIR
+        tools.makedirs(self.cache_dir)
         self.fetcher = Fetcher()
         self.shard_size = SHARD_SIZE
 

@@ -93,7 +93,7 @@ class PlanningReport(Report):
             PlanningReport(filter_config=['WORK-lmcut', 'WORK-blind'])
             PlanningReport(filter_config_nick=['lmcut', 'blind'])
 
-        Tip: When you append ´´_relative´´ to an attribute, you will get a table
+        Tip: When you append ``_relative`` to an attribute, you will get a table
         containing the attribute's values of each configuration relative to the
         leftmost column.
 
