@@ -10,7 +10,7 @@ function get_run_id {
         echo "error: SGE_TASK_ID must be in range 1..$NUM_TASKS but is '$1'" 1>&2
         exit 2
     fi
-    if (( ${#RUN_IDS[@]} >= $NUM_TASKS )); then
+    if (( ${#RUN_IDS[@]} == $NUM_TASKS )); then
         echo ${RUN_IDS[$(($1-1))]}
     else
         echo $1

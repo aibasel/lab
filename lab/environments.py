@@ -104,7 +104,8 @@ class OracleGridEngineEnvironment(Environment):
         when the experiment finishes.
 
         If *randomize_task_order* is set to True, tasks for runs are started
-        in a random order.
+        in a random order. This is useful to avoid systematic noise due to
+        e.g. one of the configs being run on a machine with heavy load.
         """
         Environment.__init__(self)
         if queue is None:
@@ -159,9 +160,9 @@ class OracleGridEngineEnvironment(Environment):
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         header = open(template_file).read() % job_params
 
-        body_params = dict(num_tasks=num_tasks)
+        body_params = dict(num_tasks=num_tasks, run_ids='')
         if self.randomize_task_order:
-            run_ids = map(str, range(1, num_tasks + 1))
+            run_ids = [str(i+1) for i in xrange(num_tasks)]
             random.shuffle(run_ids)
             body_params['run_ids'] = ' '.join(run_ids)
         body_template_file = os.path.join(tools.DATA_DIR, 'grid-job-body-template')
