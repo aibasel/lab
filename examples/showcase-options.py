@@ -20,6 +20,7 @@ from downward.reports.scatter import ScatterPlotReport
 from downward.reports.plot import ProblemPlotReport
 from downward.reports.ipc import IpcReport
 from downward.reports.relative import RelativeReport
+from downward.reports.compare import CompareConfigsReport
 
 import standard_exp
 
@@ -40,9 +41,6 @@ COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=RE
 
 exp = DownwardExperiment(EXPPATH, repo=REPO, environment=ENV, combinations=COMBINATIONS, limits=LIMITS)
 exp.set_path_to_python(standard_exp.PYTHON)
-
-def ipdb(imp):
-    return ("ipdb%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
 
 exp.add_suite('gripper:prob01.pddl')
 exp.add_suite('zenotravel:pfile1')
@@ -161,10 +159,14 @@ exp.add_step(Step('report-relative-d',
                                  filter_config=['WORK-lama11', 'WORK-iter-hadd'],
                                  rel_change=0.1, abs_change=20),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
-exp.add_step(Step('report-relative-p',
-                  RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
-                                 filter_config_nick=['lama11', 'iter-hadd']),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
+exp.add_report(RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
+                              filter_config_nick=['lama11', 'iter-hadd']),
+               name='report-relative-p',
+               outfile='relative.html')
+exp.add_report(CompareConfigsReport([('WORK-lama11', 'WORK-iter-hadd')],
+                                    attributes=['quality', 'coverage', 'expansions']),
+               name='report-compare',
+               outfile='compare.html')
 
 # Write suite of solved problems
 suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
