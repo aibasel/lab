@@ -108,10 +108,8 @@ class PreprocessRun(DownwardRun):
 
         self.require_resource(self.preprocessor.shell_name)
 
-        self.add_resource('DOMAIN', self.problem.domain_file(), 'domain.pddl',
-                          symlink=exp.compact)
-        self.add_resource('PROBLEM', self.problem.problem_file(), 'problem.pddl',
-                          symlink=exp.compact)
+        self.add_resource('DOMAIN', self.problem.domain_file(), 'domain.pddl')
+        self.add_resource('PROBLEM', self.problem.problem_file(), 'problem.pddl')
 
         python = exp._get_path_to_python()
 
