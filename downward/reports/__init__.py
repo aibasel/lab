@@ -64,6 +64,9 @@ class PlanningReport(Report):
         Attribute('score_*', min_wins=False, functions=[reports.avg, sum]),
         Attribute('*_error', absolute=True),
     ])
+    INFO_ATTRIBUTES = [
+        'translator', 'preprocessor', 'planner',
+        'config_nick', 'commandline_config']
 
     def __init__(self, derived_properties=None, **kwargs):
         """
@@ -196,12 +199,24 @@ class PlanningReport(Report):
         self.problem_runs = problem_runs
         self.domain_config_runs = domain_config_runs
         self.runs = runs
+        self.config_info = self._scan_config_info()
         try:
             self._perform_sanity_checks()
         except AssertionError:
             logging.warning('The following sanity check failed, please make '
                             'sure you filtered the intended runs:')
             traceback.print_exc()
+
+    def _scan_config_info(self):
+        info = defaultdict(dict)
+        for (domain, problem), runs in self.problem_runs.items():
+            for run in runs:
+                info[run['config']].update((attr, run[attr])
+                                           for attr in self.INFO_ATTRIBUTES)
+            # Abort when we have found info for all configs.
+            if len(info) == len(self.configs):
+                break
+        return info
 
     def _perform_sanity_checks(self):
         # Sanity checks
