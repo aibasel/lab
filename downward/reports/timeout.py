@@ -29,9 +29,9 @@ class TimeoutReport(PlanningReport):
 
         *timeouts* must be a list of integer timeouts in seconds. ::
 
-            exp.add_step(Step('report-timeouts',
-                              TimeoutReport([60, 180, 300, 900, 1800]),
-                         exp.eval_dir, os.path.join(TIMEOUTS, 'properties')))
+            exp.add_report(TimeoutReport([60, 180, 300, 900, 1800]),
+                           name='report-timeouts',
+                           outfile='timeout-eval/properties')
         """
         PlanningReport.__init__(self, *args, **kwargs)
         self.timeouts = timeouts

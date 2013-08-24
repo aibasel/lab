@@ -26,11 +26,15 @@ from downward.reports import PlanningReport
 
 class AbsoluteReport(PlanningReport):
     """
-    Write an absolute report about the attribute attribute, e.g. ::
+    Write an absolute report about the attribute attribute, e.g.
 
-        || expansions  | hFF    | hCEA   |
-        | gripper      | 118    | 72     |
-        | zenotravel   | 21     | 17     |
+        +------------+--------+--------+
+        | expansions | hFF    | hCEA   |
+        +============+========+========+
+        | gripper    | 118    | 72     |
+        +------------+--------+--------+
+        | zenotravel | 21     | 17     |
+        +------------+--------+--------+
 
     This report should be part of all your Fast Downward experiments as it
     automatically generates a table of unexplained errors, e.g. invalid solutions,
