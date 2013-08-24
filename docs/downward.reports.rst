@@ -15,10 +15,6 @@ Comparative reports
 .. autoclass:: downward.reports.compare.CompareConfigsReport
 .. autoclass:: downward.reports.compare.CompareRevisionsReport
 
-Helper class
-^^^^^^^^^^^^
-.. autoclass:: downward.reports.compare.DiffColumnsModule
-
 
 Plots
 -----

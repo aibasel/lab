@@ -31,15 +31,32 @@ DEFAULT_ATTRIBUTES = [
 
 
 class CompareConfigsReport(AbsoluteReport):
-    """Allows to compare different configurations."""
-
+    """Allows to compare pairs of configurations."""
     def __init__(self, compared_configs, **kwargs):
         """
         See :py:class:`AbsoluteReport <downward.reports.absolute.AbsoluteReport>`
         for inherited parameters.
 
-        See :py:class:`DiffColumnsModule <downward.reports.compare.DiffColumnsModule>`
-        for an explanation of how to set the configs to compare with *compared_configs*.
+        *compared_configs* is a list of tuples of 2 or 3 elements. The first two entries
+        in each tuple are configs that should be compared. If a third entry is present it
+        is used as the name of the column showing the difference between the two configs.
+        Otherwise the column will be named 'Diff'.
+        All columns in the report will be arranged such that the configurations that are
+        compared are next to each other. After those two columns a diff column is added
+        that shows the difference between the two values. If a config occurs in more than
+        one comparison it is repeated every time. Configs that are in the original data
+        but are not mentioned in compared_configs are not printed.
+        For example if the data contains configs A, B, C and D and *compared_configs* is
+        ``[('A', 'B', 'Diff BA'), ('A', 'C')]`` the resulting columns will be
+        A, B, Diff BA (contains B - A), A, C , Diff (contains C - A).
+
+        Example::
+
+            compared_configs = [
+                ('c406c4f77e13-astar_lmcut', '6e09db9b3003-astar_lmcut', 'Diff (lmcut)'),
+                ('c406c4f77e13-astar_ff', '6e09db9b3003-astar_ff', 'Diff (ff)')]
+            exp.add_report(CompareConfigsReport(compared_configs))
+
         """
         kwargs.setdefault('attributes', DEFAULT_ATTRIBUTES)
         if 'filter_config' in kwargs or 'filter_config_nick' in kwargs:
@@ -113,18 +130,8 @@ class DiffColumnsModule(reports.DynamicDataModule):
     """Adds multiple columns each comparing the values in two configs."""
     def __init__(self, compared_configs, summary_functions):
         """
-        *compared_configs* is a list of tuples of 2 or 3 elements. The first two entries
-        in each tuple are configs that should be compared. If a third entry is present it
-        is used as the name of the column showing the difference between the two configs.
-        Otherwise the column will be named 'Diff'.
-        All columns in the report will be arranged such that the configurations that are
-        compared are next to each other. After those two columns a diff column is added
-        that shows the difference between the two values. If a config occurs in more than
-        one comparison it is repeated every time. Configs that are in the original data
-        but are not mentioned in compared_configs are not printed.
-        For example if the data contains configs A, B, C and D and *compared_configs* is
-        ``[('A', 'B', 'Diff BA'), ('A', 'C')]`` the resulting columns will be
-        A, B, Diff BA (contains B - A), A, C , Diff (contains C - A).
+        See :py:class:`.CompareConfigsReport` for an explanation of how to set
+        the configs to compare with *compared_configs*.
 
         *summary_functions* is a list of functions that will be calculated for all
         entries in the diff columns.
