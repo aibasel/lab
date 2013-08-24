@@ -41,7 +41,7 @@ class AbsoluteReport(PlanningReport):
     unexpected timeouts and memory overflows. You should make sure that you
     check where the errors come from.
     """
-    INFO_ATTRIBUTES = ['commandline_config']
+    INFO_ATTRIBUTES = ['translator', 'preprocessor', 'planner', 'commandline_config']
 
     def __init__(self, resolution='combined', colored=True, **kwargs):
         """
@@ -140,6 +140,7 @@ class AbsoluteReport(PlanningReport):
         for config, info in self.config_info.items():
             for attr in self.INFO_ATTRIBUTES:
                 table.add_cell(config, attr, info[attr])
+        table.set_column_order(self.INFO_ATTRIBUTES)
         return str(table)
 
     def _get_group_functions(self, attribute):
