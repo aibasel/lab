@@ -194,8 +194,8 @@ class Experiment(_Buildable):
         Lab will use the *cache_dir* for storing temporary files.
         In case you run :py:class:`Fast Downward experiments
         <downward.experiments.DownwardExperiment>` this directory can become
-        very large since it is used to cache revisions and preprocessed tasks.
-        By default *cache_dir* points to ``~/lab``.
+        very large (tens of GB) since it is used to cache revisions and
+        preprocessed tasks. By default *cache_dir* points to ``~/lab``.
 
         An experiment consists of multiple steps. Every experiment will need at
         least the following steps:
