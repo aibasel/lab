@@ -68,14 +68,22 @@ def get_combinations(repo, rev, base_rev=None):
 
 
 class Checkout(object):
+    DEFAULT_REV = 'WORK'
     REV_CACHE_DIR = os.path.join(tools.DEFAULT_USER_DIR, 'revision-cache')
 
-    def __init__(self, part, repo, rev, checkout_dir):
-        # Directory name of the planner part (translate, preprocess, search)
+    def __init__(self, part, repo, rev=None, dest=None):
+        if dest and rev == 'WORK':
+            logging.critical('You cannot have multiple copies of the working '
+                             'copy. Please specify a specific revision.')
+
+        # Directory name of the planner part (translate, preprocess, search).
         self.part = part
         self.repo = repo
-        self.rev = str(rev)
-        self.checkout_dir = checkout_dir
+        self.rev = str(rev or Checkout.DEFAULT_REV)
+        if self.rev == 'WORK':
+            self.checkout_dir = repo
+        else:
+            self.checkout_dir = str(dest or self.rev)
 
     def __eq__(self, other):
         return self.name == other.name
@@ -138,7 +146,7 @@ class HgCheckout(Checkout):
     Base class for the three checkout classes Translator, Preprocessor,
     Planner.
     """
-    def __init__(self, part, repo, rev='WORK', dest=None):
+    def __init__(self, part, repo, rev=None, dest=None):
         """
         *part* must be one of translate, preprocess or search. It is set by the
         child classes.
@@ -147,8 +155,8 @@ class HgCheckout(Checkout):
         path can be either local or remote.
 
         *rev* can be any any valid hg revision specifier (e.g. 209,
-        0d748429632d, tip, issue324) or "WORK". If *rev* is "WORK" (default),
-        the working copy found at *repo* will be used.
+        0d748429632d, tip, issue324) or "WORK". By default the working copy
+        found at *repo* will be used.
 
         If ``cache_dir`` is the directory set in the Experiment constructor,
         the destination of a checkout is determined as follows:
@@ -161,32 +169,20 @@ class HgCheckout(Checkout):
         revision multiple times and want to alter each checkout manually
         (e.g. for comparing Makefile options).
         """
-        if dest and rev == 'WORK':
-            logging.error('You cannot have multiple copies of the working '
-                          'copy. Please specify a specific revision.')
-            sys.exit(1)
+        if rev and rev != 'WORK':
+            rev = self.get_global_rev(repo, rev)
+        Checkout.__init__(self, part, repo, rev, dest)
 
-        # Find proper absolute revision
-        abs_rev = self.get_abs_rev(repo, rev)
-
-        if abs_rev.upper() == 'WORK':
-            checkout_dir = repo
-        else:
-            checkout_dir = str(dest or rev)
-
-        Checkout.__init__(self, part, repo, abs_rev, checkout_dir)
-
-    def get_abs_rev(self, repo, rev):
+    def get_global_rev(self, repo, rev):
+        assert rev != 'WORK'
         rev = str(rev)
-        if rev.upper() == 'WORK':
-            return 'WORK'
         if (repo, rev) in ABS_REV_CACHE:
             return ABS_REV_CACHE[(repo, rev)]
-        abs_rev = get_global_rev(repo, rev=rev)
-        if not abs_rev:
+        global_rev = get_global_rev(repo, rev=rev)
+        if not global_rev:
             logging.critical('Revision %s not present in repo %s' % (rev, repo))
-        ABS_REV_CACHE[(repo, rev)] = abs_rev
-        return abs_rev
+        ABS_REV_CACHE[(repo, rev)] = global_rev
+        return global_rev
 
     def checkout(self):
         # We don't need to check out the working copy
@@ -225,7 +221,7 @@ class Preprocessor(HgCheckout):
     def compile(self, options=None):
         options = options or []
         retcode = run_command(['make'] + options, cwd=self.bin_dir)
-        if not retcode == 0:
+        if retcode != 0:
             logging.critical('Build failed in: %s' % self.bin_dir)
 
 
@@ -238,7 +234,7 @@ class Planner(HgCheckout):
         for size in [1, 2, 4]:
             retcode = run_command(['make', 'STATE_VAR_BYTES=%d' % size] + options,
                                   cwd=self.bin_dir)
-            if not retcode == 0:
+            if retcode != 0:
                 logging.critical('Build failed in: %s' % self.bin_dir)
 
 # -----------------------------------------------------------------------------
