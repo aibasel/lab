@@ -140,7 +140,7 @@ class HgCheckout(Checkout):
     """
     def __init__(self, part, repo, rev='WORK', dest=None):
         """
-        *part* must be one of translate, preprocess, search. It is set by the
+        *part* must be one of translate, preprocess or search. It is set by the
         child classes.
 
         *repo* must be a path to a Fast Downward mercurial repository. The
@@ -150,11 +150,12 @@ class HgCheckout(Checkout):
         0d748429632d, tip, issue324) or "WORK". If *rev* is "WORK" (default),
         the working copy found at *repo* will be used.
 
-        The destination of a checkout is determined as follows:
+        If ``cache_dir`` is the directory set in the Experiment constructor,
+        the destination of a checkout is determined as follows:
 
         - *dest* is absolute: <dest>
-        - *dest* is relative: ~/lab/revision-cache/<dest>
-        - *dest* is None: ~/lab/revision-cache/<rev>
+        - *dest* is relative: <cache_dir>/revision-cache/<dest>
+        - *dest* is None: <cache_dir>/revision-cache/<rev>
 
         You have to use the *dest* parameter if you need to checkout the same
         revision multiple times and want to alter each checkout manually
