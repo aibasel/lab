@@ -34,6 +34,13 @@ def get_global_rev(repo, rev=None):
     return tools.get_command_output(cmd, cwd=repo, quiet=True)
 
 
+def get_rev_id(repo, rev=None):
+    cmd = ['hg', 'id']
+    if rev:
+        cmd.extend(['-r', str(rev)])
+    return tools.get_command_output(cmd, cwd=repo, quiet=True)
+
+
 def greatest_common_ancestor(repo, rev1, rev2):
     long_rev = tools.get_command_output(['hg', 'debugancestor', str(rev1), str(rev2)],
                                         cwd=repo, quiet=True)
@@ -159,12 +166,13 @@ class HgCheckout(Checkout):
                              'directory. Please specify a specific revision.')
 
         rev = str(rev or self.DEFAULT_REV)
-        nick = nick or rev
         if rev == 'WORK':
             global_rev = 'WORK'
+            nick = nick or 'WORK'
             dest = repo
         else:
             global_rev = self.get_global_rev(repo, rev)
+            nick = nick or get_rev_id(repo, rev).replace(' ', '-')
             dest = str(dest or rev)
         Checkout.__init__(self, part, repo, rev, nick, dest)
 
