@@ -34,6 +34,8 @@ def _escape_char(c):
 
 
 def escape_revision_name(name):
+    # TODO: Simplify: revision name can only consist of hex chars and possibly
+    #       a plus sign.
     return ''.join(_escape_char(c) for c in name).upper()
 
 
@@ -71,7 +73,13 @@ class Checkout(object):
     REV_CACHE_DIR = os.path.join(tools.DEFAULT_USER_DIR, 'revision-cache')
 
     def __init__(self, part, repo, rev, nick, dest):
-        # Directory name of the planner part (translate, preprocess, search).
+        """
+        * *part*: Planner part (translate, preprocess or search).
+        * *repo*: Path to Fast Downward repository.
+        * *rev*: Global Fast Downward revision.
+        * *nick*: Nickname for this checkout.
+        * *dest*: Checkout destination.
+        """
         self.part = part
         self.repo = repo
         self.rev = rev
@@ -83,13 +91,6 @@ class Checkout(object):
 
     def __hash__(self):
         return hash(self.rev)
-
-    @property
-    def name(self):
-        """
-        Nickname for the checkout that is used for the reports.
-        """
-        return self.rev
 
     def checkout(self):
         raise NotImplementedError
@@ -105,7 +106,7 @@ class Checkout(object):
         return os.path.join(self.bin_dir, *bin_path)
 
     def get_path_dest(self, *rel_path):
-        return os.path.join('code-' + self.name, *rel_path)
+        return os.path.join('code-' + self.rev, *rel_path)
 
     def get_bin_dest(self):
         return self.get_path_dest(self.part, self.part)
@@ -126,7 +127,7 @@ class Checkout(object):
 
     @property
     def shell_name(self):
-        return '%s_%s' % (self.part.upper(), escape_revision_name(self.name))
+        return '%s_%s' % (self.part.upper(), escape_revision_name(self.rev))
 
 
 # ---------- Mercurial --------------------------------------------------------

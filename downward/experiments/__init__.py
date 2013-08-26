@@ -128,7 +128,7 @@ class PreprocessRun(DownwardRun):
             # Compress and delete output.sas.
             self.add_command('compress-output-sas', ['bzip2', 'output.sas'])
 
-        ext_config = '-'.join([self.translator.name, self.preprocessor.name])
+        ext_config = '-'.join([self.translator.rev, self.preprocessor.rev])
         self._save_id(ext_config)
         self.set_property('stage', 'preprocess')
 
@@ -176,7 +176,7 @@ class SearchRun(DownwardRun):
         self.set_property('planner_type', planner_type)
 
         # If all three parts have the same revision don't clutter the reports
-        names = [self.translator.name, self.preprocessor.name, self.planner.name]
+        names = [self.translator.rev, self.preprocessor.rev, self.planner.rev]
         if len(set(names)) == 1:
             names = [names[0]]
         ext_config = '-'.join(names + [config_nick])
@@ -400,7 +400,7 @@ class DownwardExperiment(Experiment):
         self.set_property('portfolios', self.portfolios)
         self.set_property('repo', self.repo)
         self.set_property('limits', self.limits)
-        self.set_property('combinations', ['-'.join(part.name for part in combo)
+        self.set_property('combinations', ['-'.join(part.rev for part in combo)
                                            for combo in self.combinations])
 
         self.runs = []
@@ -433,7 +433,7 @@ class DownwardExperiment(Experiment):
 
     def _require_part(self, part):
         logging.info('Requiring %s' % part.src_dir)
-        self.add_resource('', part.src_dir, 'code-%s' % part.name)
+        self.add_resource('', part.src_dir, part.get_path_dest())
 
     def _checkout_and_compile(self, stage, **kwargs):
         translators = set()
@@ -542,7 +542,7 @@ class DownwardExperiment(Experiment):
     def _make_search_run(self, translator, preprocessor, planner, config_nick,
                          config, prob):
         preprocess_dir = os.path.join(self.preprocessed_tasks_dir,
-                                      translator.name + '-' + preprocessor.name,
+                                      translator.rev + '-' + preprocessor.rev,
                                       prob.domain, prob.problem)
 
         def path(filename):
