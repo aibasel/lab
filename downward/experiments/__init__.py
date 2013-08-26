@@ -235,7 +235,7 @@ class DownwardExperiment(Experiment):
 
         .. note::
 
-            The directory *cache_dir* can grow very large.
+            The directory *cache_dir* can grow very large (tens of GB).
 
         Example: ::
 
