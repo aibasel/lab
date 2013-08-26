@@ -86,19 +86,17 @@ class Checkout(object):
             self.dest = str(dest or self.rev)
 
     def __eq__(self, other):
-        return self.name == other.name
+        return self.rev == other.rev
 
     def __hash__(self):
-        return hash(self.name)
+        return hash(self.rev)
 
     @property
     def name(self):
         """
-        Nickname for the checkout that is used for the reports and comparisons.
+        Nickname for the checkout that is used for the reports.
         """
-        if self.rev == 'WORK':
-            return 'WORK'
-        return os.path.basename(self.dest)
+        return self.rev
 
     def checkout(self):
         raise NotImplementedError
