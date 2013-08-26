@@ -461,7 +461,7 @@ class DownwardExperiment(Experiment):
         # Save space by deleting the benchmarks.
         if not kwargs.get('only_main_script', False):
             for part in sorted(translators | preprocessors | planners):
-                if part.rev != 'WORK':
+                if part.local_rev != 'WORK':
                     benchmarks = part.get_path('benchmarks')
                     logging.info('Removing %s to save space.' % benchmarks)
                     shutil.rmtree(benchmarks, ignore_errors=True)

@@ -165,19 +165,19 @@ class HgCheckout(Checkout):
             logging.critical('You cannot have multiple copies of the working '
                              'directory. Please specify a specific revision.')
 
-        rev = str(rev or self.DEFAULT_REV)
-        if rev == 'WORK':
-            global_rev = 'WORK'
+        local_rev = str(rev or self.DEFAULT_REV)
+        if local_rev == 'WORK':
+            global_rev = get_global_rev(repo)
             nick = nick or 'WORK'
             dest = repo
         else:
-            global_rev = self.get_global_rev(repo, rev)
-            nick = nick or get_rev_id(repo, rev).replace(' ', '-')
+            global_rev = self.get_global_rev(repo, local_rev)
+            nick = nick or get_rev_id(repo, local_rev).replace(' ', '-')
             dest = dest or global_rev
         Checkout.__init__(self, part, repo, global_rev, nick, dest)
+        self.local_rev = local_rev
 
     def get_global_rev(self, repo, rev):
-        assert rev != 'WORK'
         rev = str(rev)
         if (repo, rev) in ABS_REV_CACHE:
             return ABS_REV_CACHE[(repo, rev)]
@@ -189,7 +189,7 @@ class HgCheckout(Checkout):
 
     def checkout(self):
         # We don't need to check out the working copy
-        if self.rev == 'WORK':
+        if self.local_rev == 'WORK':
             return
 
         path = self.get_path()
