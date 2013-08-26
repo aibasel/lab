@@ -130,7 +130,7 @@ def config_suite_extended_optimal():
             'h=lmcut()',
             '--search',
             'eager(pareto([sum([g(), h]), h]), reopen_closed=true, pathmax=false,'
-            + 'progress_evaluator=sum([g(), h]))'],
+            + 'f_eval=sum([g(), h]))'],
         # bucket-based open list
         'bucket_lmcut': [
             '--heuristic',
