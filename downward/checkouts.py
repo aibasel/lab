@@ -27,18 +27,6 @@ from lab.tools import run_command, get_command_output
 ABS_REV_CACHE = {}
 
 
-def _escape_char(c):
-    if c.isalnum() or c == '_':
-        return c
-    return '_%d_' % ord(c)
-
-
-def escape_revision_name(name):
-    # TODO: Simplify: revision name can only consist of hex chars and possibly
-    #       a plus sign.
-    return ''.join(_escape_char(c) for c in name).upper()
-
-
 def get_global_rev(repo, rev=None):
     cmd = ['hg', 'id', '-i']
     if rev:
@@ -127,7 +115,8 @@ class Checkout(object):
 
     @property
     def shell_name(self):
-        return '%s_%s' % (self.part.upper(), escape_revision_name(self.rev))
+        # The only non-alphanumeric char in global revisions is the plus sign.
+        return '%s_%s' % (self.part.upper(), self.rev.replace('+', 'PLUS'))
 
 
 # ---------- Mercurial --------------------------------------------------------
