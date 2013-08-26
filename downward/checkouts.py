@@ -81,9 +81,9 @@ class Checkout(object):
         self.repo = repo
         self.rev = str(rev or Checkout.DEFAULT_REV)
         if self.rev == 'WORK':
-            self.checkout_dir = repo
+            self.dest = repo
         else:
-            self.checkout_dir = str(dest or self.rev)
+            self.dest = str(dest or self.rev)
 
     def __eq__(self, other):
         return self.name == other.name
@@ -98,7 +98,7 @@ class Checkout(object):
         """
         if self.rev == 'WORK':
             return 'WORK'
-        return os.path.basename(self.checkout_dir)
+        return os.path.basename(self.dest)
 
     def checkout(self):
         raise NotImplementedError
@@ -107,8 +107,7 @@ class Checkout(object):
         raise NotImplementedError
 
     def get_path(self, *rel_path):
-        #assert os.path.isabs(self.checkout_dir), self.checkout_dir
-        return os.path.join(Checkout.REV_CACHE_DIR, self.checkout_dir, *rel_path)
+        return os.path.join(Checkout.REV_CACHE_DIR, self.dest, *rel_path)
 
     def get_bin(self, *bin_path):
         """Return the absolute path to one of this part's executables."""
@@ -189,7 +188,7 @@ class HgCheckout(Checkout):
         if self.rev == 'WORK':
             return
 
-        path = os.path.abspath(os.path.join(Checkout.REV_CACHE_DIR, self.checkout_dir))
+        path = self.get_path_dest()
         if not os.path.exists(path):
             # Old mercurial versions need the clone's parent directory to exist.
             tools.makedirs(path)
