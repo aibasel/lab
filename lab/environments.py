@@ -24,8 +24,6 @@ import sys
 from lab import tools
 from lab.steps import Sequence
 
-GRID_STEPS_DIR = os.path.join(tools.USER_DIR, 'grid-steps')
-
 
 class Environment(object):
     def __init__(self):
@@ -233,7 +231,7 @@ cd %(exp_script_dir)s
             return '#$ -l hostname="%s"' % '|'.join(hosts)
 
     def run_steps(self, steps):
-        job_dir = os.path.join(GRID_STEPS_DIR, self.exp.name)
+        job_dir = os.path.join(self.exp.cache_dir, 'grid-steps', self.exp.name)
         tools.overwrite_dir(job_dir)
         # Copy the lab and downward packages to the helper dir to make them
         # available for the steps.

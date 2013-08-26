@@ -32,16 +32,12 @@ from lab.experiment import Run, Experiment
 from lab import tools
 from lab.steps import Step, Sequence
 
-from downward.checkouts import Translator, Preprocessor, Planner
-from downward import checkouts
+from downward.checkouts import Checkout, Translator, Preprocessor, Planner
 from downward import suites
 from downward.configs import config_suite_optimal, config_suite_satisficing
 from downward.reports import compare
 from downward.reports import scatter
 
-
-PREPROCESSED_TASKS_DIR = os.path.join(tools.USER_DIR, 'preprocessed-tasks')
-tools.makedirs(PREPROCESSED_TASKS_DIR)
 
 DOWNWARD_SCRIPTS_DIR = os.path.join(tools.BASE_DIR, 'downward', 'scripts')
 
@@ -193,22 +189,19 @@ class DownwardExperiment(Experiment):
 
     This is the base class for Fast Downward experiments. It can be customized
     by adding the desired configurations, benchmarks and reports.
+    See :py:class:`Experiment <lab.experiment.Experiment>` for inherited
+    methods.
 
     .. note::
 
-        Lab will create the directory ~/lab to hold cached files. It
-        contains the following subfolders:
-
-        * grid-steps: Contains temporary grid-tasks for sequential execution.
-        * preprocessed-tasks: Cached results from preprocessing experiments.
-          You only have to run preprocessing experiments for each pair of
-          translator and preprocessor revision once since existing preprocessed
-          tasks are automatically taken from this folder. (Can grow very large.)
-        * revision-cache: Cached Fast Downward clones. (Can grow very large.)
-
+        You only have to run preprocessing experiments and fetch the results for
+        each pair of translator and preprocessor revision once, since the results
+        are cached. When you build a search experiment, the results are
+        automatically taken from the cache. You can change the location of the
+        cache by passing the *cache_dir* parameter.
     """
     def __init__(self, path, repo, environment=None, combinations=None,
-                 compact=True, limits=None):
+                 compact=True, limits=None, cache_dir=None):
         """
         The experiment will be built at *path*.
 
@@ -237,6 +230,13 @@ class DownwardExperiment(Experiment):
                 'search_memory': 2048,
             }
 
+        *cache_dir* is used to cache Fast Downward clones and preprocessed
+        tasks. By default it points to ``~/lab``.
+
+        .. note::
+
+            The directory *cache_dir* can grow very large.
+
         Example: ::
 
             repo = '/path/to/downward-repo'
@@ -250,7 +250,7 @@ class DownwardExperiment(Experiment):
                                              'search_memory': 1024})
 
         """
-        Experiment.__init__(self, path, environment)
+        Experiment.__init__(self, path, environment=environment, cache_dir=cache_dir)
 
         if not repo or not os.path.isdir(repo):
             logging.critical('The path "%s" is not a local Fast Downward '
@@ -260,6 +260,9 @@ class DownwardExperiment(Experiment):
         self.search_exp_path = self.path
         self.preprocess_exp_path = self.path + '-p'
         self._path_to_python = None
+        Checkout.REV_CACHE_DIR = os.path.join(self.cache_dir, 'revision-cache')
+        self.preprocessed_tasks_dir = os.path.join(self.cache_dir, 'preprocessed-tasks')
+        tools.makedirs(self.preprocessed_tasks_dir)
 
         self.combinations = (combinations or
                     [(Translator(repo), Preprocessor(repo), Planner(repo))])
@@ -286,7 +289,7 @@ class DownwardExperiment(Experiment):
         self.add_step(Step('build-preprocess-exp', self.build, stage='preprocess'))
         self.add_step(Step('run-preprocess-exp', self.run, stage='preprocess'))
         self.add_step(Step('fetch-preprocess-results', self.fetcher,
-                           self.preprocess_exp_path, eval_dir=PREPROCESSED_TASKS_DIR,
+                           self.preprocess_exp_path, eval_dir=self.preprocessed_tasks_dir,
                            copy_all=True, write_combined_props=False))
         self.add_step(Step('build-search-exp', self.build, stage='search'))
         self.add_step(Step('run-search-exp', self.run, stage='search'))
@@ -538,7 +541,7 @@ class DownwardExperiment(Experiment):
 
     def _make_search_run(self, translator, preprocessor, planner, config_nick,
                          config, prob):
-        preprocess_dir = os.path.join(PREPROCESSED_TASKS_DIR,
+        preprocess_dir = os.path.join(self.preprocessed_tasks_dir,
                                       translator.name + '-' + preprocessor.name,
                                       prob.domain, prob.problem)
 

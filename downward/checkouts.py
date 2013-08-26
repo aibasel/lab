@@ -23,8 +23,6 @@ import sys
 from lab import tools
 from lab.tools import run_command, get_command_output
 
-REV_CACHE_DIR = os.path.join(tools.USER_DIR, 'revision-cache')
-tools.makedirs(REV_CACHE_DIR)
 
 ABS_REV_CACHE = {}
 
@@ -70,15 +68,14 @@ def get_combinations(repo, rev, base_rev=None):
 
 
 class Checkout(object):
+    REV_CACHE_DIR = os.path.join(tools.DEFAULT_USER_DIR, 'revision-cache')
+
     def __init__(self, part, repo, rev, checkout_dir):
         # Directory name of the planner part (translate, preprocess, search)
         self.part = part
         self.repo = repo
         self.rev = str(rev)
-
-        if not os.path.isabs(checkout_dir):
-            checkout_dir = os.path.join(REV_CACHE_DIR, checkout_dir)
-        self.checkout_dir = os.path.abspath(checkout_dir)
+        self.checkout_dir = checkout_dir
 
     def __eq__(self, other):
         return self.name == other.name
@@ -102,7 +99,8 @@ class Checkout(object):
         raise NotImplementedError
 
     def get_path(self, *rel_path):
-        return os.path.join(self.checkout_dir, *rel_path)
+        #assert os.path.isabs(self.checkout_dir), self.checkout_dir
+        return os.path.join(Checkout.REV_CACHE_DIR, self.checkout_dir, *rel_path)
 
     def get_bin(self, *bin_path):
         """Return the absolute path to one of this part's executables."""
@@ -194,8 +192,10 @@ class HgCheckout(Checkout):
         if self.rev == 'WORK':
             return
 
-        path = self.checkout_dir
+        path = os.path.abspath(os.path.join(Checkout.REV_CACHE_DIR, self.checkout_dir))
         if not os.path.exists(path):
+            # Old mercurial versions need the clone's parent directory to exist.
+            tools.makedirs(path)
             run_command(['hg', 'clone', '-r', self.rev, self.repo, path])
         else:
             logging.info('Checkout "%s" already exists' % path)

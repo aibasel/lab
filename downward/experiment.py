@@ -18,8 +18,7 @@
 
 # Provide some classes for backwards compatibility.
 from downward.experiments import DownwardRun, PreprocessRun, SearchRun, \
-    DownwardExperiment, PREPROCESSED_TASKS_DIR
+    DownwardExperiment
 
 # Silence pyflakes
-assert (DownwardRun and PreprocessRun and SearchRun and DownwardExperiment and
-        PREPROCESSED_TASKS_DIR)
+assert (DownwardRun and PreprocessRun and SearchRun and DownwardExperiment)

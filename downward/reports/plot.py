@@ -91,7 +91,7 @@ class MatplotlibPlot(object):
 
     def print_figure(self, filename):
         # Save the generated scatter plot to a file.
-        # Legend is still bugged in mathplotlib, but there is a patch see:
+        # Legend is still bugged in matplotlib, but there is a patch see:
         # http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg20445.html
         extra_artists = []
         if self.legend:
