@@ -1,6 +1,38 @@
 News
 ====
 
+v1.4
+----
+
+lab
+^^^
+
+* Add :py:func:`exp.add_report() <lab.experiment.Experiment.add_report>` method to simplify adding reports.
+* Use simplejson when available to make loading properties more than twice as fast.
+* Raise default check-interval in Calls to 5s. This should reduce lab's overhead.
+* Send mail when grid experiment finishes. Usage: ``MaiaEnvironment(email='mymail@example.com')``.
+* Remove ``steps.Step.publish_reports()`` method.
+* Allow creating nested new files in experiment directory (e.g. ``exp.add_new_file('path/to/file.txt')``).
+* Remove duplicate attributes from reports.
+* Make argparser available globally as ``lab.experiment.ARGPARSER`` so users can add custom arguments.
+* Add ``cache_dir`` parameter in :py:class:`Experiment <lab.experiment.Experiment>` for specifying where lab stores temporary data.
+
+downward
+^^^^^^^^
+
+* Move ``downward.experiment.DownwardExperiment`` to ``downward.experiments.DownwardExperiment``, but keep both import locations indefinitely.
+* Flag invalid plans in absolute reports.
+* PlanningReport: When you append '_relative' to an attribute, you will get a table containing the attribute's values of each configuration relative to the leftmost column.
+* Use bzip2 for compressing output.sas files instead of tar+gzip to save space and make opening the files easier.
+* Use bzip2 instead of gzip for compressing experiment directories to save space.
+* Color absolute reports by default.
+* Use log-scale instead of symlog-scale for plots. This produces equidistant grid lines.
+* By default place legend right of scatter plots.
+* Remove ``--dereference`` option from tar command.
+* Copy (instead of linking) pddl files into preprocessed-tasks dir.
+* Add table with Fast Downward commandline strings and revisions to AbsoluteReport.
+
+
 v1.3
 ----
 
