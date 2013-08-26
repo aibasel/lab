@@ -194,6 +194,8 @@ class HgCheckout(Checkout):
 
         path = os.path.abspath(os.path.join(Checkout.REV_CACHE_DIR, self.checkout_dir))
         if not os.path.exists(path):
+            # Old mercurial versions need the clone's parent directory to exist.
+            tools.makedirs(path)
             run_command(['hg', 'clone', '-r', self.rev, self.repo, path])
         else:
             logging.info('Checkout "%s" already exists' % path)
