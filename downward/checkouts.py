@@ -68,22 +68,15 @@ def get_combinations(repo, rev, base_rev=None):
 
 
 class Checkout(object):
-    DEFAULT_REV = 'WORK'
     REV_CACHE_DIR = os.path.join(tools.DEFAULT_USER_DIR, 'revision-cache')
 
-    def __init__(self, part, repo, rev=None, dest=None):
-        if dest and rev == 'WORK':
-            logging.critical('You cannot have multiple copies of the working '
-                             'copy. Please specify a specific revision.')
-
+    def __init__(self, part, repo, rev, nick, dest):
         # Directory name of the planner part (translate, preprocess, search).
         self.part = part
         self.repo = repo
-        self.rev = str(rev or Checkout.DEFAULT_REV)
-        if self.rev == 'WORK':
-            self.dest = repo
-        else:
-            self.dest = str(dest or self.rev)
+        self.rev = rev
+        self.nick = nick
+        self.dest = dest
 
     def __eq__(self, other):
         return self.rev == other.rev
@@ -143,7 +136,9 @@ class HgCheckout(Checkout):
     Base class for the three checkout classes Translator, Preprocessor,
     Planner.
     """
-    def __init__(self, part, repo, rev=None, dest=None):
+    DEFAULT_REV = 'WORK'
+
+    def __init__(self, part, repo, rev=None, nick=None, dest=None):
         """
         *part* must be one of translate, preprocess or search. It is set by the
         child classes.
@@ -155,20 +150,33 @@ class HgCheckout(Checkout):
         0d748429632d, tip, issue324) or "WORK". By default the working copy
         found at *repo* will be used.
 
-        If ``cache_dir`` is the directory set in the Experiment constructor,
-        the destination of a checkout is determined as follows:
+        In the reports the planner part will be called *nick*. It defaults to
+        *rev*.
+
+        If ``cache_dir`` is the cache directory set in the Experiment
+        constructor, the destination of a checkout is determined as follows:
 
         - *dest* is absolute: <dest>
         - *dest* is relative: <cache_dir>/revision-cache/<dest>
-        - *dest* is None: <cache_dir>/revision-cache/<rev>
+        - *dest* is None: <cache_dir>/revision-cache/<global_rev>
 
         You have to use the *dest* parameter if you need to checkout the same
         revision multiple times and want to alter each checkout manually
         (e.g. for comparing Makefile options).
         """
-        if rev and rev != 'WORK':
-            rev = self.get_global_rev(repo, rev)
-        Checkout.__init__(self, part, repo, rev, dest)
+        if dest and rev == 'WORK':
+            logging.critical('You cannot have multiple copies of the working '
+                             'directory. Please specify a specific revision.')
+
+        rev = str(rev or self.DEFAULT_REV)
+        nick = nick or rev
+        if rev == 'WORK':
+            global_rev = 'WORK'
+            dest = repo
+        else:
+            global_rev = self.get_global_rev(repo, rev)
+            dest = str(dest or rev)
+        Checkout.__init__(self, part, repo, rev, nick, dest)
 
     def get_global_rev(self, repo, rev):
         assert rev != 'WORK'
