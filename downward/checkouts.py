@@ -173,8 +173,8 @@ class HgCheckout(Checkout):
         else:
             global_rev = self.get_global_rev(repo, rev)
             nick = nick or get_rev_id(repo, rev).replace(' ', '-')
-            dest = str(dest or rev)
-        Checkout.__init__(self, part, repo, rev, nick, dest)
+            dest = dest or global_rev
+        Checkout.__init__(self, part, repo, global_rev, nick, dest)
 
     def get_global_rev(self, repo, rev):
         assert rev != 'WORK'
@@ -192,7 +192,7 @@ class HgCheckout(Checkout):
         if self.rev == 'WORK':
             return
 
-        path = self.get_path_dest()
+        path = self.get_path()
         if not os.path.exists(path):
             # Old mercurial versions need the clone's parent directory to exist.
             tools.makedirs(path)
@@ -202,7 +202,7 @@ class HgCheckout(Checkout):
             run_command(['hg', 'pull', self.repo], cwd=path)
 
         retcode = run_command(['hg', 'update', '-r', self.rev], cwd=path)
-        if not retcode == 0:
+        if retcode != 0:
             # Unknown revision or update crossing branches.
             logging.critical('Repo at %s could not be updated to revision %s. '
                              'Please delete the cached repo and try again.' %
