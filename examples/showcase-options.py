@@ -29,7 +29,7 @@ EXPNAME = 'showcase-options'
 if standard_exp.REMOTE:
     EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
     REPO = standard_exp.REMOTE_REPO
-    ENV = MaiaEnvironment()
+    ENV = MaiaEnvironment(randomize_task_order=True)
 else:
     EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
