@@ -64,9 +64,9 @@ class PlanningReport(Report):
         Attribute('score_*', min_wins=False, functions=[reports.avg, sum]),
         Attribute('*_error', absolute=True),
     ])
-    INFO_ATTRIBUTES = [
-        'translator', 'preprocessor', 'planner',
-        'config_nick', 'commandline_config']
+
+    INFO_ATTRIBUTES = ['translate_summary', 'preprocess_summary', 'search_summary',
+                       'config_nick', 'commandline_config']
 
     def __init__(self, derived_properties=None, **kwargs):
         """
@@ -211,7 +211,7 @@ class PlanningReport(Report):
         info = defaultdict(dict)
         for (domain, problem), runs in self.problem_runs.items():
             for run in runs:
-                info[run['config']].update((attr, run[attr])
+                info[run['config']].update((attr, run.get(attr, ''))
                                            for attr in self.INFO_ATTRIBUTES)
             # Abort when we have found info for all configs.
             if len(info) == len(self.configs):

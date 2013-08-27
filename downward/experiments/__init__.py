@@ -64,26 +64,22 @@ if sys.version_info[0] == 2 and sys.version_info[1] != 7:
 
 
 class DownwardRun(Run):
-    def __init__(self, exp, translator, preprocessor, problem):
+    def __init__(self, exp, parts, problem):
         Run.__init__(self, exp)
 
-        self.translator = translator
-        self.preprocessor = preprocessor
-
+        self.parts = parts
         self.problem = problem
 
         self._set_properties()
         self._save_limits()
 
     def _set_properties(self):
-        self.domain_name = self.problem.domain
-        self.problem_name = self.problem.problem
+        for part in self.parts:
+            self.set_property(part.part + '_rev', part.rev)
+            self.set_property(part.part + '_summary', part.summary)
 
-        self.set_property('translator', self.translator.rev)
-        self.set_property('preprocessor', self.preprocessor.rev)
-
-        self.set_property('domain', self.domain_name)
-        self.set_property('problem', self.problem_name)
+        self.set_property('domain', self.problem.domain)
+        self.set_property('problem', self.problem.problem)
 
         self.set_property('experiment_name', self.experiment.name)
 
@@ -91,18 +87,20 @@ class DownwardRun(Run):
         for name, limit in self.experiment.limits.items():
             self.set_property('limit_' + name, limit)
 
-    def _save_id(self, ext_config):
-        self.set_property('config', ext_config)
-        run_id = [ext_config, self.domain_name, self.problem_name]
+    def _save_ext_config(self):
+        self.set_property('config', self._get_ext_config())
+
+    def _save_id(self):
+        run_id = self._get_id()
         self.set_property('id', run_id)
         self.set_property('id_string', ':'.join(run_id))
 
 
 class PreprocessRun(DownwardRun):
     def __init__(self, exp, translator, preprocessor, problem):
-        DownwardRun.__init__(self, exp, translator, preprocessor, problem)
+        DownwardRun.__init__(self, exp, [translator, preprocessor], problem)
 
-        self.require_resource(self.preprocessor.shell_name)
+        self.require_resource(preprocessor.shell_name)
 
         self.add_resource('DOMAIN', self.problem.domain_file(), 'domain.pddl')
         self.add_resource('PROBLEM', self.problem.problem_file(), 'problem.pddl')
@@ -114,11 +112,11 @@ class PreprocessRun(DownwardRun):
         self.add_command('print-python-version', [python, '-c',
                     "import platform; "
                     "print 'Python version: %s' % platform.python_version()"])
-        self.add_command('translate', [python, self.translator.shell_name,
+        self.add_command('translate', [python, translator.shell_name,
                                        'DOMAIN', 'PROBLEM'],
                          time_limit=exp.limits['translate_time'],
                          mem_limit=exp.limits['translate_memory'])
-        self.add_command('preprocess', [self.preprocessor.shell_name],
+        self.add_command('preprocess', [preprocessor.shell_name],
                          stdin='output.sas',
                          time_limit=exp.limits['preprocess_time'],
                          mem_limit=exp.limits['preprocess_memory'])
@@ -128,20 +126,27 @@ class PreprocessRun(DownwardRun):
             # Compress and delete output.sas.
             self.add_command('compress-output-sas', ['bzip2', 'output.sas'])
 
-        ext_config = '-'.join([self.translator.rev, self.preprocessor.rev])
-        self._save_id(ext_config)
         self.set_property('stage', 'preprocess')
+        self._save_ext_config()
+        self._save_id()
+
+    def _get_ext_config(self):
+        # Use nicks for run['config'] which appears in report table headers.
+        return '-'.join(part.nick for part in self.parts)
+
+    def _get_id(self):
+        # Use global revisions for ids to allow for correct cashing.
+        return ['-'.join(part.rev for part in self.parts),
+                self.problem.domain,
+                self.problem.problem]
 
 
 class SearchRun(DownwardRun):
     def __init__(self, exp, translator, preprocessor, planner, problem,
                  config_nick, config):
-        DownwardRun.__init__(self, exp, translator, preprocessor, problem)
+        DownwardRun.__init__(self, exp, [translator, preprocessor, planner], problem)
 
-        self.planner = planner
-        self.set_property('planner', self.planner.rev)
-
-        self.require_resource(self.planner.shell_name)
+        self.require_resource(planner.shell_name)
         if config:
             # We have a single planner configuration
             planner_type = 'single'
@@ -150,12 +155,14 @@ class SearchRun(DownwardRun):
                 logging.error('Config strings are not supported. Please use a list: %s' %
                               config)
                 sys.exit(1)
-            search_cmd = [self.planner.shell_name] + config
+            search_cmd = [planner.shell_name] + config
         else:
             # We have a portfolio, config_nick is the path to the portfolio file
             planner_type = 'portfolio'
             config_nick = os.path.basename(config_nick)
-            search_cmd = [self.planner.shell_name, '--portfolio', config_nick]
+            search_cmd = [planner.shell_name, '--portfolio', config_nick]
+        self.config_nick = config_nick
+
         self.add_command('search', search_cmd, stdin='OUTPUT',
                          time_limit=exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
@@ -174,14 +181,28 @@ class SearchRun(DownwardRun):
         self.set_property('config_nick', config_nick)
         self.set_property('commandline_config', config)
         self.set_property('planner_type', planner_type)
-
-        # If all three parts have the same revision don't clutter the reports
-        names = [self.translator.rev, self.preprocessor.rev, self.planner.rev]
-        if len(set(names)) == 1:
-            names = [names[0]]
-        ext_config = '-'.join(names + [config_nick])
-        self._save_id(ext_config)
         self.set_property('stage', 'search')
+
+        self._save_ext_config()
+        self._save_id()
+
+    def _get_ext_config(self):
+        # Use nicks for ext_config which appears in report table headers.
+        nicks = [part.nick for part in self.parts]
+        # If all three parts have the same nick just print it once in reports.
+        if len(set(nicks)) == 1:
+            nicks = [nicks[0]]
+        nicks.append(self.config_nick)
+        return '-'.join(nicks)
+
+    def _get_id(self):
+        # Use global revisions for ids to allow for correct cashing.
+        revs = [part.rev for part in self.parts]
+        if len(revs) == 3 and len(set(revs)) == 1:
+            revs = [revs[0]]
+        return ['-'.join(revs + [self.config_nick]),
+                self.problem.domain,
+                self.problem.problem]
 
 
 class DownwardExperiment(Experiment):
@@ -461,7 +482,7 @@ class DownwardExperiment(Experiment):
         # Save space by deleting the benchmarks.
         if not kwargs.get('only_main_script', False):
             for part in sorted(translators | preprocessors | planners):
-                if part.local_rev != 'WORK':
+                if part.rev != 'WORK':
                     benchmarks = part.get_path('benchmarks')
                     logging.info('Removing %s to save space.' % benchmarks)
                     shutil.rmtree(benchmarks, ignore_errors=True)

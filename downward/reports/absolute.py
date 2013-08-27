@@ -41,8 +41,6 @@ class AbsoluteReport(PlanningReport):
     unexpected timeouts and memory overflows. You should make sure that you
     check where the errors come from.
     """
-    INFO_ATTRIBUTES = ['translator', 'preprocessor', 'planner', 'commandline_config']
-
     def __init__(self, resolution='combined', colored=True, **kwargs):
         """
         *resolution* must be one of "domain" or "problem" or "combined" (default).

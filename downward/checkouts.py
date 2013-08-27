@@ -67,18 +67,20 @@ def get_combinations(repo, rev, base_rev=None):
 class Checkout(object):
     REV_CACHE_DIR = os.path.join(tools.DEFAULT_USER_DIR, 'revision-cache')
 
-    def __init__(self, part, repo, rev, nick, dest):
+    def __init__(self, part, repo, rev, nick, summary, dest):
         """
         * *part*: Planner part (translate, preprocess or search).
         * *repo*: Path to Fast Downward repository.
         * *rev*: Global Fast Downward revision.
         * *nick*: Nickname for this checkout.
+        * *summary*: Summary (revision, branch, tags) for this checkout.
         * *dest*: Checkout destination.
         """
         self.part = part
         self.repo = repo
         self.rev = rev
         self.nick = nick
+        self.summary = summary
         self.dest = dest
 
     def __eq__(self, other):
@@ -161,21 +163,22 @@ class HgCheckout(Checkout):
         revision multiple times and want to alter each checkout manually
         (e.g. for comparing Makefile options).
         """
-        if dest and rev == 'WORK':
+        local_rev = str(rev or self.DEFAULT_REV)
+        if dest and local_rev == 'WORK':
             logging.critical('You cannot have multiple copies of the working '
                              'directory. Please specify a specific revision.')
 
-        local_rev = str(rev or self.DEFAULT_REV)
         if local_rev == 'WORK':
-            global_rev = get_global_rev(repo)
+            global_rev = 'WORK'
             nick = nick or 'WORK'
+            summary = 'WORK ' + get_rev_id(repo)
             dest = repo
         else:
             global_rev = self.get_global_rev(repo, local_rev)
-            nick = nick or get_rev_id(repo, local_rev).replace(' ', '-')
+            nick = nick or local_rev
+            summary = get_rev_id(repo, local_rev)
             dest = dest or global_rev
-        Checkout.__init__(self, part, repo, global_rev, nick, dest)
-        self.local_rev = local_rev
+        Checkout.__init__(self, part, repo, global_rev, nick, summary, dest)
 
     def get_global_rev(self, repo, rev):
         rev = str(rev)
@@ -189,7 +192,7 @@ class HgCheckout(Checkout):
 
     def checkout(self):
         # We don't need to check out the working copy
-        if self.local_rev == 'WORK':
+        if self.rev == 'WORK':
             return
 
         path = self.get_path()
