@@ -231,8 +231,6 @@ class DownwardExperiment(Experiment):
         If given, *combinations* must be a list of :ref:`Checkout <checkouts>`
         tuples of the form (Translator, Preprocessor, Planner). If combinations
         is None (default), perform an experiment with the working copy in *repo*.
-        You can also set ``combinations=[]`` and use the :func:`add_revision`
-        method to specify the code versions you want to test.
 
         If *compact* is True, link to benchmarks and preprocessed files instead
         of copying them. Only use this option if the linked files will **not**
@@ -284,9 +282,8 @@ class DownwardExperiment(Experiment):
         self.preprocessed_tasks_dir = os.path.join(self.cache_dir, 'preprocessed-tasks')
         tools.makedirs(self.preprocessed_tasks_dir)
 
-        if combinations is None:
-            combinations = [(Translator(repo), Preprocessor(repo), Planner(repo))]
-        self.combinations = combinations
+        self.combinations = (combinations or
+                             [(Translator(repo), Preprocessor(repo), Planner(repo))])
         self.compact = compact
         self.suites = []
         self.configs = []
@@ -320,36 +317,6 @@ class DownwardExperiment(Experiment):
     def _problems(self):
         benchmark_dir = os.path.join(self.repo, 'benchmarks')
         return suites.build_suite(benchmark_dir, self.suites)
-
-    def add_revision(self, rev, add_ancestor=False):
-        """Add a Fast Downward revision to the experiment.
-
-        In addition to using this convenience method, you can also add
-        revisions by setting the *combinations* constructor parameter which
-        allows combining planner parts from different revisions. If you do not
-        want the constructor to automatically add a default revision, you can
-        set ``combinations=[]``.
-
-        *rev* must be a valid revision in your Fast Downward repository like
-        "issue123", "987" or "599dbf7cc6bd".
-
-        If *add_ancestor* is True, the newest revision of the default branch
-        that is an ancestor of *rev* will be added as well.
-
-        Return the ancestor revision or None if *add_ancestor* is False.
-        """
-        new_revs = [rev]
-        ancestor = None
-        if add_ancestor:
-            ancestor = checkouts.get_common_ancestor(self.repo, rev, 'default')
-            # TODO: Handle case where ancestor == rev ?
-            new_revs.append(ancestor)
-        self.combinations.extend([
-            (Translator(self.repo, rev=r),
-             Preprocessor(self.repo, rev=r),
-             Planner(self.repo, rev=r))
-            for r in new_revs])
-        return ancestor
 
     def add_suite(self, suite):
         """

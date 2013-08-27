@@ -5,6 +5,8 @@ import os
 from lab.steps import Step
 
 from downward.experiment import DownwardExperiment
+from downward import checkouts
+from downward.checkouts import Translator, Preprocessor, Planner
 from downward.suites import suite_optimal_with_ipc11
 from downward.configs import default_configs_optimal
 from downward.reports.compare import CompareRevisionsReport
@@ -27,8 +29,12 @@ ATTRIBUTES = [
 SCATTER_PLOT_ATTRIBUTES = [
     'total_time', 'search_time', 'memory', 'expansions_until_last_jump']
 
-exp = DownwardExperiment(path=EXPPATH, repo=REPO, combinations=[])
-base_rev = exp.add_revision(REV, add_ancestor=True)
+base_rev = checkouts.get_common_ancestor(REPO, REV)
+combos = [(Translator(REPO, rev=r), Preprocessor(REPO, rev=r), Planner(REPO, rev=r))
+          for r in (base_rev, REV)]
+
+exp = DownwardExperiment(path=EXPPATH, repo=REPO, combinations=combos)
+
 exp.add_suite(SUITE)
 for nick, config in CONFIGS.items():
     exp.add_config(nick, config)

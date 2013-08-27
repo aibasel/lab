@@ -21,6 +21,8 @@
 import logging
 
 from downward.experiment import DownwardExperiment
+from downward import checkouts
+from downward.checkouts import Translator, Preprocessor, Planner
 from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11
 from downward.configs import default_configs_optimal, default_configs_satisficing
 from downward.reports.compare import CompareRevisionsReport
@@ -42,7 +44,7 @@ class CompareRevisionsExperiment(DownwardExperiment):
     Convenience experiment that compares two revisions or compares the
     latest revision on a branch to the revision the branch is based on.
     Both revisions are tested with all the most important configurations.
-    Reports that allow a before-after comparison are automaticaly added.
+    Reports that allow a before-after comparison are automatically added.
 
     .. note::
 
@@ -82,8 +84,13 @@ class CompareRevisionsExperiment(DownwardExperiment):
         (default: False).
 
         """
-        DownwardExperiment.__init__(self, path, repo, combinations=[], **kwargs)
-        base_rev = self.add_revision(rev, add_ancestor=True)
+        base_rev = checkouts.get_common_ancestor(repo, rev)
+        print base_rev
+        combos = [(Translator(repo, rev=r),
+                   Preprocessor(repo, rev=r),
+                   Planner(repo, rev=r))
+                  for r in (base_rev, rev)]
+        DownwardExperiment.__init__(self, path, repo, combinations=combos, **kwargs)
 
         # ------ suites and configs ------------------------------------
 
