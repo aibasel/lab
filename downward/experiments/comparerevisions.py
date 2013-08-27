@@ -18,21 +18,15 @@
 
 #!/usr/bin/env python
 
-import os
 import logging
-import subprocess
 
-from lab.steps import Step
-from lab import tools
-
-from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
+from downward import checkouts
+from downward.checkouts import Translator, Preprocessor, Planner
 from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11
-from downward.configs import config_suite_optimal, config_suite_satisficing
+from downward.configs import default_configs_optimal, default_configs_satisficing
 from downward.reports.compare import CompareRevisionsReport
 from downward.reports.scatter import ScatterPlotReport
-
-# TODO: Remove code duplication.
 
 
 COMPARED_ATTRIBUTES = ['coverage', 'search_time', 'score_search_time', 'total_time',
@@ -45,42 +39,18 @@ SCATTER_PLOT_ATTRIBUTES = ['total_time', 'search_time', 'memory',
                            'expansions_until_last_jump']
 
 
-def greatest_common_ancestor(repo, rev1, rev2):
-    long_rev = tools.get_command_output(['hg', 'debugancestor', rev1, rev2],
-                                        cwd=repo, quiet=True)
-    number, hexcode = long_rev.split(':')
-    pipe = subprocess.Popen(
-        ['hg', 'id', '-r', hexcode], cwd=repo, stdout=subprocess.PIPE
-    )
-    return pipe.stdout.read().strip()
-
-
-def get_combinations(repo, rev, base_rev=None):
-    """
-    Return combinations that compare *rev* with *base_rev*. If *base_rev* is
-    None, use the newest common revision of *rev* and the *default* branch.
-    """
-    if not base_rev:
-        base_rev = greatest_common_ancestor(repo, rev, 'default')
-    if not base_rev:
-        logging.critical('Base revision for branch \'%s\' could not be determined. '
-                         'Please provide it manually.' % rev)
-    return [(Translator(repo, rev=r),
-             Preprocessor(repo, rev=r),
-             Planner(repo, rev=r))
-            for r in (rev, base_rev)]
-
-
-def domain_tuple_category(run1, run2):
-    return run1['domain']
-
-
 class CompareRevisionsExperiment(DownwardExperiment):
     """
     Convenience experiment that compares two revisions or compares the
     latest revision on a branch to the revision the branch is based on.
     Both revisions are tested with all the most important configurations.
-    Reports that allow a before-after comparison are automaticaly added.
+    Reports that allow a before-after comparison are automatically added.
+
+    .. note::
+
+        This class has been deprecated in version 1.4 because using the
+        DownwardExperiment class directly is more versatile.
+
     """
     def __init__(self, path, repo, opt_or_sat, rev, base_rev=None,
                  use_core_configs=True, use_ipc_configs=True, use_extended_configs=False,
@@ -114,22 +84,26 @@ class CompareRevisionsExperiment(DownwardExperiment):
         (default: False).
 
         """
-        DownwardExperiment.__init__(self, path, repo,
-                                    combinations=get_combinations(repo, rev, base_rev),
-                                    **kwargs)
+        base_rev = checkouts.get_common_ancestor(repo, rev)
+        print base_rev
+        combos = [(Translator(repo, rev=r),
+                   Preprocessor(repo, rev=r),
+                   Planner(repo, rev=r))
+                  for r in (base_rev, rev)]
+        DownwardExperiment.__init__(self, path, repo, combinations=combos, **kwargs)
 
         # ------ suites and configs ------------------------------------
 
         if opt_or_sat == 'opt':
             self.add_suite(suite_optimal_with_ipc11())
-            configs = config_suite_optimal(use_core_configs,
-                                           use_ipc_configs,
-                                           use_extended_configs)
+            configs = default_configs_optimal(use_core_configs,
+                                              use_ipc_configs,
+                                              use_extended_configs)
         elif opt_or_sat == 'sat':
             self.add_suite(suite_satisficing_with_ipc11())
-            configs = config_suite_satisficing(use_core_configs,
-                                               use_ipc_configs,
-                                               use_extended_configs)
+            configs = default_configs_satisficing(use_core_configs,
+                                                  use_ipc_configs,
+                                                  use_extended_configs)
         else:
             logging.critical('Select to test either \'opt\' or \'sat\' configurations')
 
@@ -138,25 +112,21 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         # ------ reports -----------------------------------------------
 
-        compare_report = CompareRevisionsReport(rev1=base_rev,
-                                                rev2=rev,
-                                                resolution='combined',
-                                                attributes=COMPARED_ATTRIBUTES)
-        self.add_step(Step('report-compare-scores',
-                           compare_report,
-                           self.eval_dir,
-                           os.path.join(self.eval_dir, 'report-compare-scores.html')))
+        comparison = CompareRevisionsReport(base_rev,
+                                            rev,
+                                            attributes=COMPARED_ATTRIBUTES)
+        self.add_report(comparison,
+                        name='report-compare-scores',
+                        outfile='report-compare-scores.html')
 
         for nick in configs.keys():
             config_before = '%s-%s' % (base_rev, nick)
             config_after = '%s-%s' % (rev, nick)
             for attribute in SCATTER_PLOT_ATTRIBUTES:
                 name = 'scatter-%s-%s' % (attribute, nick)
-                self.add_step(Step(name,
-                                   ScatterPlotReport(
-                                       filter_config=[config_before, config_after],
-                                       attributes=[attribute],
-                                       get_category=domain_tuple_category,
-                                       legend_location=(1.3, 0.5)),
-                                   self.eval_dir,
-                                   os.path.join(self.eval_dir, name)))
+                self.add_report(
+                    ScatterPlotReport(
+                        filter_config=[config_before, config_after],
+                        attributes=[attribute],
+                        get_category=lambda run1, run2: run1['domain']),
+                    outfile=name)

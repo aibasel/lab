@@ -34,9 +34,6 @@ from lab.steps import Step, Sequence
 
 from downward.checkouts import Checkout, Translator, Preprocessor, Planner
 from downward import suites
-from downward.configs import config_suite_optimal, config_suite_satisficing
-from downward.reports import compare
-from downward.reports import scatter
 
 
 DOWNWARD_SCRIPTS_DIR = os.path.join(tools.BASE_DIR, 'downward', 'scripts')
@@ -231,9 +228,9 @@ class DownwardExperiment(Experiment):
 
         *environment* must be an :ref:`Environment <environments>` instance.
 
-        *combinations* is a list of :ref:`Checkout <checkouts>` tuples of the
-        form (Translator, Preprocessor, Planner). If no combinations are given,
-        perform an experiment with the working copy in *repo*.
+        If given, *combinations* must be a list of :ref:`Checkout <checkouts>`
+        tuples of the form (Translator, Preprocessor, Planner). If combinations
+        is None (default), perform an experiment with the working copy in *repo*.
 
         If *compact* is True, link to benchmarks and preprocessed files instead
         of copying them. Only use this option if the linked files will **not**
@@ -286,7 +283,7 @@ class DownwardExperiment(Experiment):
         tools.makedirs(self.preprocessed_tasks_dir)
 
         self.combinations = (combinations or
-                    [(Translator(repo), Preprocessor(repo), Planner(repo))])
+                             [(Translator(repo), Preprocessor(repo), Planner(repo))])
         self.compact = compact
         self.suites = []
         self.configs = []

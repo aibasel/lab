@@ -18,10 +18,8 @@
 
 import logging
 import os
-import sys
 
 from lab import tools
-from lab.tools import run_command, get_command_output
 
 
 ABS_REV_CACHE = {}
@@ -41,27 +39,11 @@ def get_rev_id(repo, rev=None):
     return tools.get_command_output(cmd, cwd=repo, quiet=True)
 
 
-def greatest_common_ancestor(repo, rev1, rev2):
+def get_common_ancestor(repo, rev1, rev2='default'):
     long_rev = tools.get_command_output(['hg', 'debugancestor', str(rev1), str(rev2)],
                                         cwd=repo, quiet=True)
     number, hexcode = long_rev.split(':')
     return get_global_rev(repo, rev=hexcode)
-
-
-def get_combinations(repo, rev, base_rev=None):
-    """
-    Return combinations that compare *rev* with *base_rev*. If *base_rev* is
-    None, use the newest common revision of *rev* and the *default* branch.
-    """
-    if not base_rev:
-        base_rev = greatest_common_ancestor(repo, rev, 'default')
-    if not base_rev:
-        logging.critical('Base revision for branch \'%s\' could not be determined. '
-                         'Please provide it manually.' % rev)
-    return [(Translator(repo, rev=r),
-             Preprocessor(repo, rev=r),
-             Planner(repo, rev=r))
-            for r in (rev, base_rev)]
 
 
 class Checkout(object):
@@ -126,6 +108,9 @@ class Checkout(object):
     def shell_name(self):
         # The only non-alphanumeric char in global revisions is the plus sign.
         return '%s_%s' % (self.part.upper(), self.rev.replace('+', 'PLUS'))
+
+    def __repr__(self):
+        return '%s:%s:%s' % (self.repo, self.rev, self.part)
 
 
 # ---------- Mercurial --------------------------------------------------------
@@ -199,12 +184,12 @@ class HgCheckout(Checkout):
         if not os.path.exists(path):
             # Old mercurial versions need the clone's parent directory to exist.
             tools.makedirs(path)
-            run_command(['hg', 'clone', '-r', self.rev, self.repo, path])
+            tools.run_command(['hg', 'clone', '-r', self.rev, self.repo, path])
         else:
             logging.info('Checkout "%s" already exists' % path)
-            run_command(['hg', 'pull', self.repo], cwd=path)
+            tools.run_command(['hg', 'pull', self.repo], cwd=path)
 
-        retcode = run_command(['hg', 'update', '-r', self.rev], cwd=path)
+        retcode = tools.run_command(['hg', 'update', '-r', self.rev], cwd=path)
         if retcode != 0:
             # Unknown revision or update crossing branches.
             logging.critical('Repo at %s could not be updated to revision %s. '
@@ -226,7 +211,7 @@ class Preprocessor(HgCheckout):
 
     def compile(self, options=None):
         options = options or []
-        retcode = run_command(['make'] + options, cwd=self.bin_dir)
+        retcode = tools.run_command(['make'] + options, cwd=self.bin_dir)
         if retcode != 0:
             logging.critical('Build failed in: %s' % self.bin_dir)
 
@@ -238,7 +223,7 @@ class Planner(HgCheckout):
     def compile(self, options=None):
         options = options or []
         for size in [1, 2, 4]:
-            retcode = run_command(['make', 'STATE_VAR_BYTES=%d' % size] + options,
+            retcode = tools.run_command(['make', 'STATE_VAR_BYTES=%d' % size] + options,
                                   cwd=self.bin_dir)
             if retcode != 0:
                 logging.critical('Build failed in: %s' % self.bin_dir)

@@ -27,10 +27,6 @@ from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
     PlotReport, EPSILON
 
 
-DEFAULT_PLOT_ATTRIBUTES = [
-    'total_time', 'search_time', 'memory', 'expansions_until_last_jump']
-
-
 class ScatterMatplotlib(Matplotlib):
     @classmethod
     def _plot(cls, report, axes, categories, styles):
@@ -156,7 +152,7 @@ class ScatterPlotReport(PlotReport):
                        category_styles=styles)
 
         """
-        kwargs.setdefault('legend_location', 'upper left')
+        kwargs.setdefault('legend_location', (1.3, 0.5))
         # If the size has not been set explicitly, make it a square.
         params = kwargs.get('params', {})
         params.setdefault('figure.figsize', [8, 8])

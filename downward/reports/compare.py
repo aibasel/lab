@@ -22,14 +22,6 @@ from lab import reports
 from downward.reports.absolute import AbsoluteReport
 
 
-DEFAULT_ATTRIBUTES = [
-    'coverage', 'search_time', 'score_search_time', 'total_time',
-    'score_total_time', 'expansions', 'score_expansions',
-    'expansions_until_last_jump', 'evaluations', 'score_evaluations',
-    'generated', 'score_generated', 'memory', 'score_memory',
-    'run_dir', 'cost']
-
-
 class CompareConfigsReport(AbsoluteReport):
     """Allows to compare pairs of configurations."""
     def __init__(self, compared_configs, **kwargs):
@@ -58,7 +50,6 @@ class CompareConfigsReport(AbsoluteReport):
             exp.add_report(CompareConfigsReport(compared_configs))
 
         """
-        kwargs.setdefault('attributes', DEFAULT_ATTRIBUTES)
         if 'filter_config' in kwargs or 'filter_config_nick' in kwargs:
             logging.critical('Filtering config(nicks) is not supported in '
                              'CompareConfigsReport. Use the parameter '

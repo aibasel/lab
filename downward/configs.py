@@ -17,8 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# TODO: Convert to lists of pairs and adapt in compare_revisions().
-def config_suite_core_optimal():
+def configs_optimal_core():
     return {
         # A*
         'astar_blind': [
@@ -56,7 +55,7 @@ def config_suite_core_optimal():
     }
 
 
-def config_suite_core_satisficing():
+def configs_satisficing_core():
     return {
         # A*
         'astar_goalcount': [
@@ -102,7 +101,7 @@ def config_suite_core_satisficing():
     }
 
 
-def config_suite_ipc_optimal():
+def configs_optimal_ipc():
     return {
         'seq_opt_merge_and_shrink': ['ipc', 'seq-opt-merge-and-shrink'],
         'seq_opt_fdss_1': ['ipc', 'seq-opt-fdss-1'],
@@ -110,7 +109,7 @@ def config_suite_ipc_optimal():
     }
 
 
-def config_suite_ipc_satisficing():
+def configs_satisficing_ipc():
     return {
         'seq_sat_lama_2011': ['ipc', 'seq-sat-lama-2011'],
         'seq_sat_fdss_1': ['ipc', 'seq-sat-fdss-1'],
@@ -118,7 +117,7 @@ def config_suite_ipc_satisficing():
     }
 
 
-def config_suite_extended_optimal():
+def configs_optimal_extended():
     return {
         # A*
         'astar_lmcount_lm_merged_rhw_hm_no_order': [
@@ -140,7 +139,7 @@ def config_suite_extended_optimal():
     }
 
 
-def config_suite_extended_satisficing():
+def configs_satisficing_extended():
     return {
         # eager greedy
         'eager_greedy_alt_ff_cg': [
@@ -195,25 +194,23 @@ def config_suite_extended_satisficing():
     }
 
 
-def config_suite_optimal(use_core_configs=True, use_ipc_configs=True,
-                         use_extended_configs=False):
+def default_configs_optimal(core=True, ipc=True, extended=False):
     configs = {}
-    if use_core_configs:
-        configs.update(config_suite_core_optimal())
-    if use_ipc_configs:
-        configs.update(config_suite_ipc_optimal())
-    if use_extended_configs:
-        configs.update(config_suite_extended_optimal())
+    if core:
+        configs.update(configs_optimal_core())
+    if ipc:
+        configs.update(configs_optimal_ipc())
+    if extended:
+        configs.update(configs_optimal_extended())
     return configs
 
 
-def config_suite_satisficing(use_core_configs=True, use_ipc_configs=True,
-                             use_extended_configs=False):
+def default_configs_satisficing(core=True, ipc=True, extended=False):
     configs = {}
-    if use_core_configs:
-        configs.update(config_suite_core_satisficing())
-    if use_ipc_configs:
-        configs.update(config_suite_ipc_satisficing())
-    if use_extended_configs:
-        configs.update(config_suite_extended_satisficing())
+    if core:
+        configs.update(configs_satisficing_core())
+    if ipc:
+        configs.update(configs_satisficing_ipc())
+    if extended:
+        configs.update(configs_satisficing_extended())
     return configs
