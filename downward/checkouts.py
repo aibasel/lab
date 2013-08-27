@@ -40,6 +40,12 @@ def get_rev_id(repo, rev=None):
 
 
 def get_common_ancestor(repo, rev1, rev2='default'):
+    """
+    Return the global changeset id of the greatest common ancestor of revisions
+    *rev1* and *rev2* in *repo*. If *rev2* is omitted return the revision at
+    which *rev1* was branched off the default branch. Note that if *rev1* has
+    been merged into the default branch, this method returns *rev1*.
+    """
     long_rev = tools.get_command_output(['hg', 'debugancestor', str(rev1), str(rev2)],
                                         cwd=repo, quiet=True)
     number, hexcode = long_rev.split(':')
