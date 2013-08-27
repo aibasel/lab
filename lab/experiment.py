@@ -40,6 +40,20 @@ DEFAULT_ABORT_ON_FAILURE = False
 # How many tasks to group into one top-level directory
 SHARD_SIZE = 100
 
+# Make argparser available globally so users can add custom arguments.
+ARGPARSER = tools.ArgParser()
+ARGPARSER.epilog = "The list of available steps will be added later."
+ARGPARSER.add_argument('steps', metavar='step', nargs='*', default=[],
+        help='Name or number of a step below. If none is given, print help.')
+ARGPARSER.add_argument('--all', dest='run_all_steps', action='store_true',
+        help='Run all supplied steps. If none are given, run all steps '
+        'in the experiment. For local experiments this option has no '
+        'effect if any steps are given on the commandline. Use this '
+        'option to run unattended experiments on computer grids. '
+        'If this option is used, make sure that the experiment script '
+        'doesn\'t change while the experiment is running, because it '
+        'will be called for each step.')
+
 
 class _Buildable(object):
     def __init__(self):
@@ -171,11 +185,17 @@ class _Buildable(object):
 
 
 class Experiment(_Buildable):
-    def __init__(self, path, environment=None):
+    def __init__(self, path, environment=None, cache_dir=None):
         """
         Create a new experiment that will be built at *path* using the methods
         provided by :ref:`Environment <environments>` *environment*. If
         *environment* is None, ``LocalEnvironment`` is used (default).
+
+        Lab will use the *cache_dir* for storing temporary files.
+        In case you run :py:class:`Fast Downward experiments
+        <downward.experiments.DownwardExperiment>` this directory can become
+        very large (tens of GB) since it is used to cache revisions and
+        preprocessed tasks. By default *cache_dir* points to ``~/lab``.
 
         An experiment consists of multiple steps. Every experiment will need at
         least the following steps:
@@ -194,9 +214,10 @@ class Experiment(_Buildable):
             logging.critical('Path contains commas or colons: %s' % self.path)
         self.environment = environment or LocalEnvironment()
         self.environment.exp = self
+        self.cache_dir = cache_dir or tools.DEFAULT_USER_DIR
+        tools.makedirs(self.cache_dir)
         self.fetcher = Fetcher()
         self.shard_size = SHARD_SIZE
-        self.argparser = tools.ArgParser()
 
         self.runs = []
 
@@ -255,7 +276,7 @@ class Experiment(_Buildable):
         *report*'s format. If *outfile* is a relative path, put it under
         *eval_dir*.
         """
-        name = name or outfile or report.__class__.__name__.lower()
+        name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
         eval_dir = eval_dir or self.eval_dir
         outfile = outfile or '%s.%s' % (name, report.output_format)
         if not os.path.isabs(outfile):
@@ -274,20 +295,10 @@ class Experiment(_Buildable):
         return run
 
     def __call__(self):
-        self.argparser.epilog = self.steps.get_steps_text()
-        self.argparser.add_argument('steps', metavar='step', nargs='*', default=[],
-                help='Name or number of a step below. If none is given, print help.')
-        self.argparser.add_argument('--all', dest='run_all_steps', action='store_true',
-                help='Run all supplied steps. If none are given, run all steps '
-                'in the experiment. For local experiments this option has no '
-                'effect if any steps are given on the commandline. Use this '
-                'option to run unattended experiments on computer grids. '
-                'If this option is used, make sure that the experiment script '
-                'doesn\'t change while the experiment is running, because it '
-                'will be called for each step.')
-        self.args = self.argparser.parse_args()
+        ARGPARSER.epilog = self.steps.get_steps_text()
+        self.args = ARGPARSER.parse_args()
         if not self.args.steps and not self.args.run_all_steps:
-            self.argparser.print_help()
+            ARGPARSER.print_help()
             sys.exit()
         # If no steps were given on the commandline, run all exp steps.
         steps = [self.steps.get_step(name) for name in self.args.steps] or self.steps

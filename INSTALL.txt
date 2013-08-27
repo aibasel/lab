@@ -1,10 +1,3 @@
-Installation
-============
-
-.. highlight:: bash
-
-lab + downward
---------------
 Choose a destination for the lab package, install the dependencies and clone the
 repository::
 
@@ -24,24 +17,6 @@ Append to your ``.bashrc`` to make lab available on the ``PYTHONPATH``::
         export PYTHONPATH=${PYTHONPATH}:${LAB}
     fi
 
-Check that everything works::
+Update shell configuration::
 
     source ~/.bashrc
-    cd ${LAB}/examples/simple
-    ./simple-exp.py
-
-Fast Downward planning system
------------------------------
-::
-
-    FAST_DOWNWARD=/path/to/fast-downward/repo
-    sudo apt-get install mercurial g++ make python flex bison gawk
-    sudo apt-get install g++-multilib  # 64-bit
-    hg clone http://hg.fast-downward.org ${FAST_DOWNWARD}
-
-After you have adapted the ``EXPPATH`` and ``REPO``
-variables in ``LAB/examples/lmcut.py``, you can check that the example
-``downward`` experiment works::
-
-    cd ${LAB}/examples/
-    ./lmcut.py

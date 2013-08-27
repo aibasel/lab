@@ -54,7 +54,8 @@ LOG_LEVEL = None
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SCRIPTS_DIR)
 DATA_DIR = os.path.join(BASE_DIR, 'data')
-USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
+# TODO(v2.0): Use freedesktop specification.
+DEFAULT_USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
 
 RUNNING_ON_GRID = platform.node().startswith('gkigrid')
 

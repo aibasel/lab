@@ -65,6 +65,9 @@ class PlanningReport(Report):
         Attribute('*_error', absolute=True),
     ])
 
+    INFO_ATTRIBUTES = ['translate_summary', 'preprocess_summary', 'search_summary',
+                       'config_nick', 'commandline_config']
+
     def __init__(self, derived_properties=None, **kwargs):
         """
         See :py:class:`Report <lab.reports.Report>` for inherited parameters.
@@ -93,7 +96,7 @@ class PlanningReport(Report):
             PlanningReport(filter_config=['WORK-lmcut', 'WORK-blind'])
             PlanningReport(filter_config_nick=['lmcut', 'blind'])
 
-        Tip: When you append ´´_relative´´ to an attribute, you will get a table
+        Tip: When you append ``_relative`` to an attribute, you will get a table
         containing the attribute's values of each configuration relative to the
         leftmost column.
 
@@ -196,12 +199,24 @@ class PlanningReport(Report):
         self.problem_runs = problem_runs
         self.domain_config_runs = domain_config_runs
         self.runs = runs
+        self.config_info = self._scan_config_info()
         try:
             self._perform_sanity_checks()
         except AssertionError:
             logging.warning('The following sanity check failed, please make '
                             'sure you filtered the intended runs:')
             traceback.print_exc()
+
+    def _scan_config_info(self):
+        info = defaultdict(dict)
+        for (domain, problem), runs in self.problem_runs.items():
+            for run in runs:
+                info[run['config']].update((attr, run.get(attr, ''))
+                                           for attr in self.INFO_ATTRIBUTES)
+            # Abort when we have found info for all configs.
+            if len(info) == len(self.configs):
+                break
+        return info
 
     def _perform_sanity_checks(self):
         # Sanity checks

@@ -26,11 +26,15 @@ from downward.reports import PlanningReport
 
 class AbsoluteReport(PlanningReport):
     """
-    Write an absolute report about the attribute attribute, e.g. ::
+    Write an absolute report about the attribute attribute, e.g.
 
-        || expansions  | hFF    | hCEA   |
-        | gripper      | 118    | 72     |
-        | zenotravel   | 21     | 17     |
+        +------------+--------+--------+
+        | expansions | hFF    | hCEA   |
+        +============+========+========+
+        | gripper    | 118    | 72     |
+        +------------+--------+--------+
+        | zenotravel | 21     | 17     |
+        +------------+--------+--------+
 
     This report should be part of all your Fast Downward experiments as it
     automatically generates a table of unexplained errors, e.g. invalid solutions,
@@ -57,13 +61,16 @@ class AbsoluteReport(PlanningReport):
         sections = []
         toc_lines = []
 
-        # Index of summary section (first section after 'warnings')
-        summary_index = 0
         warnings = self._get_warnings_table()
         if warnings:
             toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
             sections.append(('unexplained-errors', warnings))
-            summary_index = 1
+
+        toc_lines.append('- **[""Info"" #info]**')
+        sections.append(('info', self._get_general_info()))
+
+        # Index of summary section.
+        summary_index = len(sections)
 
         # Build a table containing summary functions of all other tables.
         # The actual section is added at position summary_index after creating
@@ -125,6 +132,14 @@ class AbsoluteReport(PlanningReport):
         content = '\n'.join('= %s =[%s]\n\n%s' % (attr, attr, section)
                             for (attr, section) in sections)
         return '%s\n\n\n%s' % (toc, content)
+
+    def _get_general_info(self):
+        table = reports.Table(title='info')
+        for config, info in self.config_info.items():
+            for attr in self.INFO_ATTRIBUTES:
+                table.add_cell(config, attr, info[attr])
+        table.set_column_order(self.INFO_ATTRIBUTES)
+        return str(table)
 
     def _get_group_functions(self, attribute):
         """Decide on a list of group functions for this attribute."""

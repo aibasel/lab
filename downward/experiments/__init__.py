@@ -32,13 +32,9 @@ from lab.experiment import Run, Experiment
 from lab import tools
 from lab.steps import Step, Sequence
 
-from downward.checkouts import Translator, Preprocessor, Planner
-from downward import checkouts
+from downward.checkouts import Checkout, Translator, Preprocessor, Planner
 from downward import suites
 
-
-PREPROCESSED_TASKS_DIR = os.path.join(tools.USER_DIR, 'preprocessed-tasks')
-tools.makedirs(PREPROCESSED_TASKS_DIR)
 
 DOWNWARD_SCRIPTS_DIR = os.path.join(tools.BASE_DIR, 'downward', 'scripts')
 
@@ -65,26 +61,22 @@ if sys.version_info[0] == 2 and sys.version_info[1] != 7:
 
 
 class DownwardRun(Run):
-    def __init__(self, exp, translator, preprocessor, problem):
+    def __init__(self, exp, parts, problem):
         Run.__init__(self, exp)
 
-        self.translator = translator
-        self.preprocessor = preprocessor
-
+        self.parts = parts
         self.problem = problem
 
         self._set_properties()
         self._save_limits()
 
     def _set_properties(self):
-        self.domain_name = self.problem.domain
-        self.problem_name = self.problem.problem
+        for part in self.parts:
+            self.set_property(part.part + '_rev', part.rev)
+            self.set_property(part.part + '_summary', part.summary)
 
-        self.set_property('translator', self.translator.rev)
-        self.set_property('preprocessor', self.preprocessor.rev)
-
-        self.set_property('domain', self.domain_name)
-        self.set_property('problem', self.problem_name)
+        self.set_property('domain', self.problem.domain)
+        self.set_property('problem', self.problem.problem)
 
         self.set_property('experiment_name', self.experiment.name)
 
@@ -92,23 +84,23 @@ class DownwardRun(Run):
         for name, limit in self.experiment.limits.items():
             self.set_property('limit_' + name, limit)
 
-    def _save_id(self, ext_config):
-        self.set_property('config', ext_config)
-        run_id = [ext_config, self.domain_name, self.problem_name]
+    def _save_ext_config(self):
+        self.set_property('config', self._get_ext_config())
+
+    def _save_id(self):
+        run_id = self._get_id()
         self.set_property('id', run_id)
         self.set_property('id_string', ':'.join(run_id))
 
 
 class PreprocessRun(DownwardRun):
     def __init__(self, exp, translator, preprocessor, problem):
-        DownwardRun.__init__(self, exp, translator, preprocessor, problem)
+        DownwardRun.__init__(self, exp, [translator, preprocessor], problem)
 
-        self.require_resource(self.preprocessor.shell_name)
+        self.require_resource(preprocessor.shell_name)
 
-        self.add_resource('DOMAIN', self.problem.domain_file(), 'domain.pddl',
-                          symlink=exp.compact)
-        self.add_resource('PROBLEM', self.problem.problem_file(), 'problem.pddl',
-                          symlink=exp.compact)
+        self.add_resource('DOMAIN', self.problem.domain_file(), 'domain.pddl')
+        self.add_resource('PROBLEM', self.problem.problem_file(), 'problem.pddl')
 
         python = exp._get_path_to_python()
 
@@ -117,11 +109,11 @@ class PreprocessRun(DownwardRun):
         self.add_command('print-python-version', [python, '-c',
                     "import platform; "
                     "print 'Python version: %s' % platform.python_version()"])
-        self.add_command('translate', [python, self.translator.shell_name,
+        self.add_command('translate', [python, translator.shell_name,
                                        'DOMAIN', 'PROBLEM'],
                          time_limit=exp.limits['translate_time'],
                          mem_limit=exp.limits['translate_memory'])
-        self.add_command('preprocess', [self.preprocessor.shell_name],
+        self.add_command('preprocess', [preprocessor.shell_name],
                          stdin='output.sas',
                          time_limit=exp.limits['preprocess_time'],
                          mem_limit=exp.limits['preprocess_memory'])
@@ -131,20 +123,27 @@ class PreprocessRun(DownwardRun):
             # Compress and delete output.sas.
             self.add_command('compress-output-sas', ['bzip2', 'output.sas'])
 
-        ext_config = '-'.join([self.translator.name, self.preprocessor.name])
-        self._save_id(ext_config)
         self.set_property('stage', 'preprocess')
+        self._save_ext_config()
+        self._save_id()
+
+    def _get_ext_config(self):
+        # Use nicks for run['config'] which appears in report table headers.
+        return '-'.join(part.nick for part in self.parts)
+
+    def _get_id(self):
+        # Use global revisions for ids to allow for correct cashing.
+        return ['-'.join(part.rev for part in self.parts),
+                self.problem.domain,
+                self.problem.problem]
 
 
 class SearchRun(DownwardRun):
     def __init__(self, exp, translator, preprocessor, planner, problem,
                  config_nick, config):
-        DownwardRun.__init__(self, exp, translator, preprocessor, problem)
+        DownwardRun.__init__(self, exp, [translator, preprocessor, planner], problem)
 
-        self.planner = planner
-        self.set_property('planner', self.planner.rev)
-
-        self.require_resource(self.planner.shell_name)
+        self.require_resource(planner.shell_name)
         if config:
             # We have a single planner configuration
             planner_type = 'single'
@@ -153,12 +152,14 @@ class SearchRun(DownwardRun):
                 logging.error('Config strings are not supported. Please use a list: %s' %
                               config)
                 sys.exit(1)
-            search_cmd = [self.planner.shell_name] + config
+            search_cmd = [planner.shell_name] + config
         else:
             # We have a portfolio, config_nick is the path to the portfolio file
             planner_type = 'portfolio'
             config_nick = os.path.basename(config_nick)
-            search_cmd = [self.planner.shell_name, '--portfolio', config_nick]
+            search_cmd = [planner.shell_name, '--portfolio', config_nick]
+        self.config_nick = config_nick
+
         self.add_command('search', search_cmd, stdin='OUTPUT',
                          time_limit=exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
@@ -177,14 +178,28 @@ class SearchRun(DownwardRun):
         self.set_property('config_nick', config_nick)
         self.set_property('commandline_config', config)
         self.set_property('planner_type', planner_type)
-
-        # If all three parts have the same revision don't clutter the reports
-        names = [self.translator.name, self.preprocessor.name, self.planner.name]
-        if len(set(names)) == 1:
-            names = [names[0]]
-        ext_config = '-'.join(names + [config_nick])
-        self._save_id(ext_config)
         self.set_property('stage', 'search')
+
+        self._save_ext_config()
+        self._save_id()
+
+    def _get_ext_config(self):
+        # Use nicks for ext_config which appears in report table headers.
+        nicks = [part.nick for part in self.parts]
+        # If all three parts have the same nick just print it once in reports.
+        if len(set(nicks)) == 1:
+            nicks = [nicks[0]]
+        nicks.append(self.config_nick)
+        return '-'.join(nicks)
+
+    def _get_id(self):
+        # Use global revisions for ids to allow for correct cashing.
+        revs = [part.rev for part in self.parts]
+        if len(revs) == 3 and len(set(revs)) == 1:
+            revs = [revs[0]]
+        return ['-'.join(revs + [self.config_nick]),
+                self.problem.domain,
+                self.problem.problem]
 
 
 class DownwardExperiment(Experiment):
@@ -192,9 +207,19 @@ class DownwardExperiment(Experiment):
 
     This is the base class for Fast Downward experiments. It can be customized
     by adding the desired configurations, benchmarks and reports.
+    See :py:class:`Experiment <lab.experiment.Experiment>` for inherited
+    methods.
+
+    .. note::
+
+        You only have to run preprocessing experiments and fetch the results for
+        each pair of translator and preprocessor revision once, since the results
+        are cached. When you build a search experiment, the results are
+        automatically taken from the cache. You can change the location of the
+        cache by passing the *cache_dir* parameter.
     """
     def __init__(self, path, repo, environment=None, combinations=None,
-                 compact=True, limits=None):
+                 compact=True, limits=None, cache_dir=None):
         """
         The experiment will be built at *path*.
 
@@ -225,6 +250,13 @@ class DownwardExperiment(Experiment):
                 'search_memory': 2048,
             }
 
+        *cache_dir* is used to cache Fast Downward clones and preprocessed
+        tasks. By default it points to ``~/lab``.
+
+        .. note::
+
+            The directory *cache_dir* can grow very large (tens of GB).
+
         Example: ::
 
             repo = '/path/to/downward-repo'
@@ -238,7 +270,7 @@ class DownwardExperiment(Experiment):
                                              'search_memory': 1024})
 
         """
-        Experiment.__init__(self, path, environment)
+        Experiment.__init__(self, path, environment=environment, cache_dir=cache_dir)
 
         if not repo or not os.path.isdir(repo):
             logging.critical('The path "%s" is not a local Fast Downward '
@@ -248,6 +280,9 @@ class DownwardExperiment(Experiment):
         self.search_exp_path = self.path
         self.preprocess_exp_path = self.path + '-p'
         self._path_to_python = None
+        Checkout.REV_CACHE_DIR = os.path.join(self.cache_dir, 'revision-cache')
+        self.preprocessed_tasks_dir = os.path.join(self.cache_dir, 'preprocessed-tasks')
+        tools.makedirs(self.preprocessed_tasks_dir)
 
         if combinations is None:
             combinations = [(Translator(repo), Preprocessor(repo), Planner(repo))]
@@ -275,7 +310,7 @@ class DownwardExperiment(Experiment):
         self.add_step(Step('build-preprocess-exp', self.build, stage='preprocess'))
         self.add_step(Step('run-preprocess-exp', self.run, stage='preprocess'))
         self.add_step(Step('fetch-preprocess-results', self.fetcher,
-                           self.preprocess_exp_path, eval_dir=PREPROCESSED_TASKS_DIR,
+                           self.preprocess_exp_path, eval_dir=self.preprocessed_tasks_dir,
                            copy_all=True, write_combined_props=False))
         self.add_step(Step('build-search-exp', self.build, stage='search'))
         self.add_step(Step('run-search-exp', self.run, stage='search'))
@@ -416,7 +451,7 @@ class DownwardExperiment(Experiment):
         self.set_property('portfolios', self.portfolios)
         self.set_property('repo', self.repo)
         self.set_property('limits', self.limits)
-        self.set_property('combinations', ['-'.join(part.name for part in combo)
+        self.set_property('combinations', ['-'.join(part.rev for part in combo)
                                            for combo in self.combinations])
 
         self.runs = []
@@ -449,7 +484,7 @@ class DownwardExperiment(Experiment):
 
     def _require_part(self, part):
         logging.info('Requiring %s' % part.src_dir)
-        self.add_resource('', part.src_dir, 'code-%s' % part.name)
+        self.add_resource('', part.src_dir, part.get_path_dest())
 
     def _checkout_and_compile(self, stage, **kwargs):
         translators = set()
@@ -557,8 +592,8 @@ class DownwardExperiment(Experiment):
 
     def _make_search_run(self, translator, preprocessor, planner, config_nick,
                          config, prob):
-        preprocess_dir = os.path.join(PREPROCESSED_TASKS_DIR,
-                                      translator.name + '-' + preprocessor.name,
+        preprocess_dir = os.path.join(self.preprocessed_tasks_dir,
+                                      translator.rev + '-' + preprocessor.rev,
                                       prob.domain, prob.problem)
 
         def path(filename):

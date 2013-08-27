@@ -265,7 +265,7 @@ class Report(object):
             logging.info('Using all numerical attributes.')
             self.attributes = self._get_numerical_attributes()
 
-        self.attributes.sort()
+        self.attributes = sorted(set(self.attributes))
         self.write()
 
     def _prepare_attribute(self, attr):
@@ -276,12 +276,18 @@ class Report(object):
     def _glob_attributes(self, attributes):
         expanded_attrs = []
         for attr in attributes:
+            # Attribute without wildcards. Filtering would reset its options.
+            if attr in self.all_attributes:
+                expanded_attrs.append(attr)
+                continue
             matches = fnmatch.filter(self.all_attributes, attr)
             if not matches:
                 logging.warning('Attribute %s is not present in the dataset.' %
                                 attr)
-            # Use the attribute options from the pattern for all matches.
-            expanded_attrs.extend([attr.copy(match) for match in matches])
+            # Use the attribute options from the pattern for all matches, but
+            # don't try to guess options for attributes that appear in the list.
+            expanded_attrs.extend([attr.copy(match) for match in matches
+                                   if not match in attributes])
         if attributes and not expanded_attrs:
             logging.critical('No attributes match your patterns.')
         return expanded_attrs
@@ -337,8 +343,7 @@ class Report(object):
                       'This happens when no significant changes occured or '
                       'if for all attributes and all problems never all '
                       'configs had a value for this attribute in a '
-                      'domain-wise report. Therefore no output file is '
-                      'created.')
+                      'domain-wise report.')
 
         doc.add_text(markup)
         if len(markup) < 100000:

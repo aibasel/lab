@@ -17,9 +17,10 @@ from downward.checkouts import Translator, Preprocessor, Planner
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.suite import SuiteReport
 from downward.reports.scatter import ScatterPlotReport
-from downward.reports.plot import PlotReport, ProblemPlotReport
+from downward.reports.plot import ProblemPlotReport
 from downward.reports.ipc import IpcReport
 from downward.reports.relative import RelativeReport
+from downward.reports.compare import CompareConfigsReport
 
 import standard_exp
 
@@ -28,27 +29,25 @@ EXPNAME = 'showcase-options'
 if standard_exp.REMOTE:
     EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
     REPO = standard_exp.REMOTE_REPO
-    ENV = MaiaEnvironment()
+    ENV = MaiaEnvironment(randomize_task_order=True)
 else:
     EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
-    ENV = LocalEnvironment()
+    ENV = LocalEnvironment(processes=2)
 
 ATTRIBUTES = ['coverage']
 LIMITS = {'search_time': 900}
 COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO))]
 
-exp = DownwardExperiment(EXPPATH, repo=REPO, environment=ENV, combinations=COMBINATIONS, limits=LIMITS)
+exp = DownwardExperiment(EXPPATH, repo=REPO, environment=ENV, combinations=COMBINATIONS,
+                         limits=LIMITS, cache_dir='/home/jendrik/data/lab/')
 exp.set_path_to_python(standard_exp.PYTHON)
-
-def ipdb(imp):
-    return ("ipdb%d" % imp, ["--search", "astar(ipdb(min_improvement=%d))" % imp])
 
 exp.add_suite('gripper:prob01.pddl')
 exp.add_suite('zenotravel:pfile1')
-exp.add_config('iter-hadd',
-    ['--heuristic', 'hadd=add()',
-     '--search', 'iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)'])
+exp.add_config('iter-hadd', [
+    '--heuristic', 'hadd=add()',
+    '--search', 'iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)'])
 exp.add_config('ipdb', ["--search", "astar(ipdb())"])
 # Use original LAMA 2011 configuration
 exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
@@ -122,9 +121,9 @@ def sat_vs_opt(run):
         if nick in run['config_nick']:
             return {cat: [(run['config'], run.get('expansions'))]}
 
-exp.add_step(Step('report-scatter',
-                  ScatterPlotReport(attributes=['expansions'], filter_config_nick=['downward-seq-opt-fdss-1.py', 'lama11']),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter.png')))
+exp.add_report(ScatterPlotReport(attributes=['expansions'],
+                                 filter_config_nick=['downward-seq-opt-fdss-1.py', 'lama11']),
+               name='report-scatter', outfile=os.path.join('plots', 'scatter.png'))
 
 params = {
     'font.family': 'serif',
@@ -148,10 +147,9 @@ exp.add_step(Step('report-scatter-domain',
                                     category_styles={'gripper': {'c': 'b', 'marker': '+'}},
                                     params=params),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
-exp.add_step(Step('report-plot-prob',
-                  ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag, yscale='symlog',
-                  params=params),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
+exp.add_report(ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag,
+                                 yscale='symlog', params=params),
+               name='report-plot-prob', outfile='plots')
 exp.add_step(Step('report-plot-cat',
                   ProblemPlotReport(filter=remove_work_tag, get_points=sat_vs_opt),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'plots')))
@@ -162,24 +160,22 @@ exp.add_step(Step('report-relative-d',
                                  filter_config=['WORK-lama11', 'WORK-iter-hadd'],
                                  rel_change=0.1, abs_change=20),
                   exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
-exp.add_step(Step('report-relative-p',
-                  RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
-                                 filter_config_nick=['lama11', 'iter-hadd']),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'relative.html')))
+exp.add_report(RelativeReport('problem', attributes=['quality', 'coverage', 'expansions'],
+                              filter_config_nick=['lama11', 'iter-hadd']),
+               name='report-relative-p',
+               outfile='relative.html')
+exp.add_report(CompareConfigsReport([('WORK-lama11', 'WORK-iter-hadd')],
+                                    attributes=['quality', 'coverage', 'expansions']),
+               name='report-compare',
+               outfile='compare.html')
 
 # Write suite of solved problems
 suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
 exp.add_step(Step('report-suite', SuiteReport(filter=solved), exp.eval_dir, suite_file))
 
-# Compress the experiment directory
-#exp.add_step(Step.zip_exp_dir(exp))
-
-exp.add_step(Step('report-abs-p', AbsoluteReport('problem', colored=True,
-                    attributes=['coverage', 'search_time', 'cost', 'error', 'cost_all']),
-                  exp.eval_dir, abs_problem_report_file))
-
-# Remove the experiment directory
-#exp.add_step(Step.remove_exp_dir(exp))
+exp.add_report(AbsoluteReport('problem', colored=True,
+                              attributes=['coverage', 'search_time', 'cost', 'error', 'cost_all']),
+               name='report-abs-p', outfile=abs_problem_report_file)
 
 exp.add_step(Step('finished', call, ['echo', 'Experiment', 'finished.']))
 

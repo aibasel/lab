@@ -18,12 +18,11 @@
 import logging
 import math
 import os
+import random
 import sys
 
 from lab import tools
 from lab.steps import Sequence
-
-GRID_STEPS_DIR = os.path.join(tools.USER_DIR, 'grid-steps')
 
 
 class Environment(object):
@@ -91,7 +90,7 @@ class OracleGridEngineEnvironment(Environment):
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, host_restriction=None,
-                 email=None):
+                 email=None, randomize_task_order=False):
         """
         *queue* must be a valid queue name on the grid.
 
@@ -101,6 +100,10 @@ class OracleGridEngineEnvironment(Environment):
 
         If *email* is provided and ``--all`` is used, a message will be sent
         when the experiment finishes.
+
+        If *randomize_task_order* is set to True, tasks for runs are started
+        in a random order. This is useful to avoid systematic noise due to
+        e.g. one of the configs being run on a machine with heavy load.
         """
         Environment.__init__(self)
         if queue is None:
@@ -116,6 +119,7 @@ class OracleGridEngineEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
         self.email = email
+        self.randomize_task_order = randomize_task_order
 
         # When submitting an experiment job, wait for this job name.
         self.__wait_for_job_name = None
@@ -143,7 +147,7 @@ class OracleGridEngineEnvironment(Environment):
         }
 
     def write_main_script(self):
-        num_tasks = math.ceil(len(self.exp.runs) / float(self.runs_per_task))
+        num_tasks = int(math.ceil(len(self.exp.runs) / float(self.runs_per_task)))
         if num_tasks > self.MAX_TASKS:
             logging.critical('You are trying to submit a job with %d tasks, '
                              'but only %d are allowed.' %
@@ -153,7 +157,14 @@ class OracleGridEngineEnvironment(Environment):
                           num_tasks=num_tasks)
         template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
         header = open(template_file).read() % job_params
-        body = open(os.path.join(tools.DATA_DIR, 'grid-job-body')).read()
+
+        body_params = dict(num_tasks=num_tasks, run_ids='')
+        if self.randomize_task_order:
+            run_ids = [str(i + 1) for i in xrange(num_tasks)]
+            random.shuffle(run_ids)
+            body_params['run_ids'] = ' '.join(run_ids)
+        body_template_file = os.path.join(tools.DATA_DIR, 'grid-job-body-template')
+        body = open(body_template_file).read() % body_params
 
         filename = self.exp._get_abs_path(self.main_script_file)
         with open(filename, 'w') as file:
@@ -194,7 +205,7 @@ class OracleGridEngineEnvironment(Environment):
 
     def _get_job(self, step):
         # Abort if one step fails.
-        return """\
+        template = """\
 %(job_header)s
 if [ -s "%(stderr)s" ]; then
     echo "There was output on stderr. Please check %(stderr)s. Aborting."
@@ -203,12 +214,14 @@ fi
 
 cd %(exp_script_dir)s
 ./%(script)s %(args)s %(step_name)s
-""" % {'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
-       'script': self.exp._script,
-       'args': self._exp_script_args,
-       'step_name': step.name,
-       'stderr': 'driver.err',
-       'job_header': self._get_job_header(step)}
+"""
+        return template % {
+            'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
+            'script': self.exp._script,
+            'args': self._exp_script_args,
+            'step_name': step.name,
+            'stderr': 'driver.err',
+            'job_header': self._get_job_header(step)}
 
     def _get_host_spec(self, host_restriction):
         if not host_restriction:
@@ -218,7 +231,7 @@ cd %(exp_script_dir)s
             return '#$ -l hostname="%s"' % '|'.join(hosts)
 
     def run_steps(self, steps):
-        job_dir = os.path.join(GRID_STEPS_DIR, self.exp.name)
+        job_dir = os.path.join(self.exp.cache_dir, 'grid-steps', self.exp.name)
         tools.overwrite_dir(job_dir)
         # Copy the lab and downward packages to the helper dir to make them
         # available for the steps.

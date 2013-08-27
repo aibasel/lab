@@ -16,8 +16,7 @@ from lab.steps import Step
 from lab.reports import Report
 
 
-EXPNAME = 'pi'
-EXPPATH = os.path.join(os.path.expanduser('~'), 'lab', 'experiments', EXPNAME)
+EXPPATH = 'exp-pi'
 
 class PiReport(Report):
     def get_text(self):

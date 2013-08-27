@@ -35,9 +35,16 @@ cd downward
 python -m doctest downward/suites.py
 cd ..
 
+EXAMPLES="lmcut.py custom-attributes.py showcase-options.py standard_exp.py \
+    simple/simple-exp.py pi/pi.py pi/pi-ext.py planner/planner.py \
+    planner/planner-ext.py"
+
 # Check imports and unused/missing variables.
 pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
-pyflakes downward
+#pyflakes downward  # TODO: Uncomment
+cd examples
+pyflakes ${EXAMPLES}
+cd ..
 
 # Check code formatting.
 # Ignore under-indented continuation lines (E128) and allow longer lines.
@@ -46,6 +53,9 @@ pep8 $PEP8_OPTS --exclude=*external* lab
 pep8 $PEP8_OPTS --exclude=suites.py downward
 # Don't require two blank lines between each suite (E302).
 pep8 $PEP8_OPTS --ignore=E302 downward/suites.py
+cd examples
+pep8 $PEP8_OPTS --max-line-length=120 --ignore=E302 ${EXAMPLES}
+cd ..
 
 # Check if documentation builds.
 cd docs
@@ -56,34 +66,39 @@ cd ..
 cd examples/simple
 rm -rf /tmp/simple-exp
 ./simple-exp.py --all
+rm -rf /tmp/simple-exp
 cd ../..
 
 # Check pi experiment
-rm -rf ~/lab/experiments/pi
 cd examples/pi
+rm -rf exp-pi*
 ./pi.py --all
 ./pi-ext.py --help
+rm -rf exp-pi*
 cd ../..
 
 # Only check downward code if $REPO exists.
 if [ -d "$REPO" ]; then
     cd examples
+    rm -rf exp-*
 
-    # Check that the examples use the correct API.
-    ./custom-attributes.py
-    ./lmcut.py
+    # Check the examples.
+    ./custom-attributes.py --all
 
-    # Check planner experiment
-    rm -rf ~/lab/experiments/planner
+    ./lmcut.py {1..8}
+
+    # Check planner experiment.
     cd planner
-    ./planner.py
+    rm -rf exp-planner*
+    ./planner.py --all
     ./planner-ext.py
+    rm -rf exp-planner*
     cd ..
 
     # Run demo downward experiment.
-    ./showcase-options.py
     ./showcase-options.py --all
 
+    rm -rf exp-*
     cd ..
 else
     echo
