@@ -306,12 +306,14 @@ class DownwardExperiment(Experiment):
 
         self.add_step(Step('build-preprocess-exp', self.build, stage='preprocess'))
         self.add_step(Step('run-preprocess-exp', self.run, stage='preprocess'))
-        self.add_step(Step('fetch-preprocess-results', self.fetcher,
-                           self.preprocess_exp_path, eval_dir=self.preprocessed_tasks_dir,
-                           copy_all=True, write_combined_props=False))
+        self.add_fetcher(src=self.preprocess_exp_path,
+                         dest=self.preprocessed_tasks_dir,
+                         name='fetch-preprocess-results',
+                         copy_all=True,
+                         write_combined_props=False)
         self.add_step(Step('build-search-exp', self.build, stage='search'))
         self.add_step(Step('run-search-exp', self.run, stage='search'))
-        self.add_step(Step('fetch-search-results', self.fetcher, self.search_exp_path))
+        self.add_fetcher(src=self.search_exp_path, name='fetch-search-results')
 
     @property
     def _problems(self):

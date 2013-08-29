@@ -216,7 +216,6 @@ class Experiment(_Buildable):
         self.environment.exp = self
         self.cache_dir = cache_dir or tools.DEFAULT_USER_DIR
         tools.makedirs(self.cache_dir)
-        self.fetcher = Fetcher()
         self.shard_size = SHARD_SIZE
 
         self.runs = []
@@ -229,7 +228,7 @@ class Experiment(_Buildable):
         self.steps = Sequence()
         self.add_step(Step('build', self.build))
         self.add_step(Step('start', self.run))
-        self.add_step(Step('fetch', self.fetcher, self.path))
+        self.add_fetcher(name='fetch')
 
     @property
     def name(self):
