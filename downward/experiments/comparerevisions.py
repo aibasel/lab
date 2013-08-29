@@ -85,7 +85,6 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
         """
         base_rev = checkouts.get_common_ancestor(repo, rev)
-        print base_rev
         combos = [(Translator(repo, rev=r),
                    Preprocessor(repo, rev=r),
                    Planner(repo, rev=r))
