@@ -30,6 +30,12 @@ class Fetcher(object):
 
     Use this class to combine data from multiple experiment or evaluation
     directories into a (new) evaluation directory.
+
+    .. note::
+
+        Using :py:func:`exp.add_fetcher() <lab.experiment.Experiment.add_fetcher>`
+        is more convenient.
+
     """
     def fetch_dir(self, run_dir, eval_dir, copy_all=False, run_filter=None, parsers=None):
         run_filter = run_filter or tools.RunFilter()
@@ -98,7 +104,7 @@ class Fetcher(object):
         Examples:
 
         Fetch all results and write a single combined properties file to the
-        default evaluation directory::
+        default evaluation directory (this step is added by default)::
 
             exp.add_step(Step('fetch', Fetcher(), exp.path))
 

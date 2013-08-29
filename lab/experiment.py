@@ -262,6 +262,47 @@ class Experiment(_Buildable):
         """
         self.steps.append(step)
 
+    def add_fetcher(self, src=None, dest=None, name=None, **kwargs):
+        """
+        Fetch results from experiment or evaluation directories into a new
+        or existing evaluation directory. Use this method to combine results
+        from multiple experiments.
+
+        By using sane defaults, this method is a shortcut for
+        ``add_step(Step(name, Fetcher(), src, dest, **kwargs))``.
+
+        *src* can be an experiment or evaluation directory. It defaults to
+        ``exp.path``.
+
+        *dest* must be a new or existing evaluation directory. It defaults to
+        ``exp.eval_dir``.
+
+        If no *name* is given, call this step "fetch-``basename(src)``".
+
+        All remaining keyword arguments (e.g. filters and parsers) will be
+        applied when the :py:class:`Fetcher <lab.fetcher.Fetcher>` instance is
+        called.
+
+        Examples:
+
+        Merge the results from "other-exp" into this experiment's results::
+
+            exp.add_fetcher(src='/path/to/other-exp-eval')
+
+        Merge two evaluation directories at the location of the second one::
+
+            exp.add_fetcher(src=eval_dir1, dest=combined_eval_dir, name='merge')
+
+        Fetch only the runs for certain configuration from an older experiment::
+
+            exp.add_fetcher(src='/path/to/eval-dir',
+                            filter_config_nick=['config_1', 'config_5'])
+        """
+        src = src or self.path
+        dest = dest or self.eval_dir
+        name = name or 'fetch-%s' % os.path.basename(src)
+        self.add_step(Step(name, Fetcher(), src, dest, **kwargs))
+
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.
 
