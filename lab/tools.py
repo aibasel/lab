@@ -145,6 +145,7 @@ def confirm(question):
     answer = raw_input('%s (y/N): ' % question).strip()
     if not answer.lower() == 'y':
         sys.exit('Aborted')
+    return True
 
 
 def overwrite_dir(path, overwrite=False):
