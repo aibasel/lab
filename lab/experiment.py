@@ -525,7 +525,7 @@ class Run(_Buildable):
             # Use lower check interval locally to speed up tests.
             # TODO: Find a better solution for this.
             if isinstance(self.experiment.environment, LocalEnvironment):
-                kwargs.setdefault('check_interval', 0.5)
+                kwargs.setdefault('check_interval', 0.1)
 
             # Support running globally installed binaries
             def format_arg(arg):
