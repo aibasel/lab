@@ -32,10 +32,12 @@ if REMOTE:
     EXPS = REMOTE_EXPS
     REPO = REMOTE_REPO
     PYTHON = REMOTE_PYTHON
+    CACHE_DIR = os.path.expanduser('~/lab/')
 else:
     EXPS = LOCAL_EXPS
     REPO = LOCAL_REPO
     PYTHON = LOCAL_PYTHON
+    CACHE_DIR = os.path.expanduser('~/lab/')
 
 
 class StandardDownwardExperiment(DownwardExperiment):

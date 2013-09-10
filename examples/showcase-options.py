@@ -40,7 +40,7 @@ LIMITS = {'search_time': 900}
 COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO))]
 
 exp = DownwardExperiment(EXPPATH, repo=REPO, environment=ENV, combinations=COMBINATIONS,
-                         limits=LIMITS, cache_dir='/home/jendrik/data/lab/')
+                         limits=LIMITS, cache_dir=standard_exp.CACHE_DIR)
 exp.set_path_to_python(standard_exp.PYTHON)
 
 exp.add_suite('gripper:prob01.pddl')
