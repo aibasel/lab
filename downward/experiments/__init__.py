@@ -581,10 +581,8 @@ class DownwardExperiment(Experiment):
         run.add_resource('OUTPUT', path('output'), 'output', symlink=sym)
 
         # Needed for validation.
-        run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl',
-                         symlink=sym, required=False)
-        run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl',
-                         symlink=sym, required=False)
+        run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl', symlink=sym)
+        run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl', symlink=sym)
 
         # The other files are optional.
         if self.include_preprocess_results_in_search_runs:
