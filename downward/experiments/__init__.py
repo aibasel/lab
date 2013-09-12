@@ -287,7 +287,6 @@ class DownwardExperiment(Experiment):
         self.compact = compact
         self.suites = []
         self.configs = []
-        self.portfolios = []
 
         limits = limits or {}
         for key, value in limits.items():
@@ -319,6 +318,10 @@ class DownwardExperiment(Experiment):
     def _problems(self):
         benchmark_dir = os.path.join(self.repo, 'benchmarks')
         return suites.build_suite(benchmark_dir, self.suites)
+
+    @property
+    def _portfolios(self):
+        return [nick for (nick, config) in self.configs if not config]
 
     def add_suite(self, suite):
         """
@@ -355,7 +358,7 @@ class DownwardExperiment(Experiment):
         """
         *portfolio_file* must be the path to a Fast Downward portfolio file.
         """
-        self.portfolios.append(portfolio_file)
+        self.add_config(portfolio_file, '')
 
     def set_path_to_python(self, path):
         """
@@ -417,7 +420,6 @@ class DownwardExperiment(Experiment):
         self.set_property('stage', stage)
         self.set_property('suite', self.suites)
         self.set_property('configs', [nick for nick, config in self.configs])
-        self.set_property('portfolios', self.portfolios)
         self.set_property('repo', self.repo)
         self.set_property('limits', self.limits)
         self.set_property('combinations', ['-'.join(part.rev for part in combo)
@@ -513,10 +515,9 @@ class DownwardExperiment(Experiment):
                           planner.get_bin_dest())
 
         # Find all portfolios and copy them into the experiment directory
-        for portfolio in self.portfolios:
+        for portfolio in self._portfolios:
             if not os.path.isfile(portfolio):
-                logging.error('Portfolio file %s could not be found.' % portfolio)
-                sys.exit(1)
+                logging.critical('Portfolio file %s could not be found.' % portfolio)
             #  Portfolio has to be executable
             if not os.access(portfolio, os.X_OK):
                 os.chmod(portfolio, 0755)
@@ -548,13 +549,11 @@ class DownwardExperiment(Experiment):
                 self.add_run(PreprocessRun(self, translator, preprocessor, prob))
 
     def _make_search_runs(self):
-        if not self.configs and not self.portfolios:
+        if not self.configs:
             logging.critical('You must add at least one config or portfolio.')
         for translator, preprocessor, planner in self.combinations:
             self._prepare_planner(planner)
-
-            portfolios = [(path, '') for path in self.portfolios]
-            for config_nick, config in self.configs + portfolios:
+            for config_nick, config in self.configs:
                 for prob in self._problems:
                     self._make_search_run(translator, preprocessor, planner,
                                           config_nick, config, prob)
