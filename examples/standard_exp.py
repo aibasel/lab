@@ -43,7 +43,7 @@ else:
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, repo=None, environment=None,
                  combinations=None, limits=None, attributes=None, priority=0,
-                 queue=None, processes=2, email=None, **kwargs):
+                 queue=None, processes=2, email=None, cache_dir=CACHE_DIR, **kwargs):
         if path is None:
             path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 
@@ -65,7 +65,7 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         DownwardExperiment.__init__(self, path=exppath, environment=environment,
                                     repo=repo, combinations=combinations,
-                                    limits=limits, **kwargs)
+                                    limits=limits, cache_dir=cache_dir, **kwargs)
 
         self.set_path_to_python(PYTHON)
 
