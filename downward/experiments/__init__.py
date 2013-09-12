@@ -23,7 +23,6 @@ experiments with them.
 """
 from collections import namedtuple
 import os
-import sys
 import logging
 import multiprocessing
 import shutil
@@ -140,9 +139,11 @@ class PreprocessRun(DownwardRun):
 
 
 class SearchRun(DownwardRun):
-    def __init__(self, exp, translator, preprocessor, planner, problem,
-                 config_nick, config):
+    def __init__(self, exp, translator, preprocessor, planner, problem, setting):
         DownwardRun.__init__(self, exp, [translator, preprocessor, planner], problem)
+
+        config_nick = setting.nick
+        config = setting.config
 
         self.require_resource(planner.shell_name)
         if config:
@@ -150,9 +151,7 @@ class SearchRun(DownwardRun):
             planner_type = 'single'
             assert isinstance(config_nick, basestring), config_nick
             if not isinstance(config, list):
-                logging.error('Config strings are not supported. Please use a list: %s' %
-                              config)
-                sys.exit(1)
+                logging.critical('Configs must be lists: %s' % config)
             search_cmd = [planner.shell_name] + config
         else:
             # We have a portfolio, config_nick is the path to the portfolio file
@@ -162,7 +161,7 @@ class SearchRun(DownwardRun):
         self.config_nick = config_nick
 
         self.add_command('search', search_cmd, stdin='OUTPUT',
-                         time_limit=exp.limits['search_time'],
+                         time_limit=setting.timeout or exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
 
         # Remove temporary files (we need bash for globbing).
@@ -203,7 +202,7 @@ class SearchRun(DownwardRun):
                 self.problem.problem]
 
 
-Setting = namedtuple('Setting', ['nick', 'config'])
+Setting = namedtuple('Setting', ['nick', 'config', 'timeout'])
 
 
 class DownwardExperiment(Experiment):
@@ -325,7 +324,7 @@ class DownwardExperiment(Experiment):
 
     @property
     def _portfolios(self):
-        return [nick for (nick, config) in self.settings if not config]
+        return [setting.nick for setting in self.settings if not setting.config]
 
     def add_suite(self, suite):
         """
@@ -348,7 +347,7 @@ class DownwardExperiment(Experiment):
         else:
             self.suites.extend(suite)
 
-    def add_config(self, nick, config):
+    def add_config(self, nick, config, timeout=None):
         """
         *nick* is the name the config will get in the reports.
         *config* must be a list of arguments that can be passed to the planner
@@ -356,7 +355,7 @@ class DownwardExperiment(Experiment):
 
             exp.add_config("lmcut", ["--search", "astar(lmcut())"])
         """
-        self.settings.append(Setting(nick, config))
+        self.settings.append(Setting(nick, config, timeout))
 
     def add_portfolio(self, portfolio_file):
         """
@@ -423,9 +422,9 @@ class DownwardExperiment(Experiment):
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         self.set_property('suite', self.suites)
-        self.set_property('settings', [nick for nick, config in self.settings])
+        self.set_property('settings', [setting.nick for setting in self.settings])
         self.set_property('repo', self.repo)
-        self.set_property('limits', self.limits)
+        self.set_property('default_limits', self.limits)
         self.set_property('combinations', ['-'.join(part.rev for part in combo)
                                            for combo in self.combinations])
 
@@ -557,13 +556,12 @@ class DownwardExperiment(Experiment):
             logging.critical('You must add at least one config or portfolio.')
         for translator, preprocessor, planner in self.combinations:
             self._prepare_planner(planner)
-            for nick, config in self.settings:
+            for setting in self.settings:
                 for prob in self._problems:
                     self._make_search_run(translator, preprocessor, planner,
-                                          nick, config, prob)
+                                          setting, prob)
 
-    def _make_search_run(self, translator, preprocessor, planner, config_nick,
-                         config, prob):
+    def _make_search_run(self, translator, preprocessor, planner, setting, prob):
         preprocess_dir = os.path.join(self.preprocessed_tasks_dir,
                                       translator.rev + '-' + preprocessor.rev,
                                       prob.domain, prob.problem)
@@ -571,8 +569,7 @@ class DownwardExperiment(Experiment):
         def path(filename):
             return os.path.join(preprocess_dir, filename)
 
-        run = SearchRun(self, translator, preprocessor, planner, prob,
-                        config_nick, config)
+        run = SearchRun(self, translator, preprocessor, planner, prob, setting)
         self.add_run(run)
 
         run.set_property('preprocess_dir', preprocess_dir)
