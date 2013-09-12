@@ -19,11 +19,11 @@ REMOTE = NODE.startswith('gkigrid') or NODE.endswith('cluster') or NODE in ['hab
 SCP_LOGIN = 'seipp@maia'
 ATTRIBUTES = ['coverage', 'cost', 'total_time']
 
-REMOTE_EXPS = os.path.expanduser('~/experiments/')
-LOCAL_EXPS = os.path.expanduser('~/lab/experiments/')
+REMOTE_EXPS = os.path.expanduser('/infai/seipp/experiments/')
+LOCAL_EXPS = os.path.expanduser('/home/jendrik/lab/experiments/')
 
-REMOTE_REPO = os.path.expanduser('~/projects/downward')
-LOCAL_REPO = os.path.expanduser('~/projects/Downward/downward')
+REMOTE_REPO = os.path.expanduser('/infai/seipp/projects/downward')
+LOCAL_REPO = os.path.expanduser('/home/jendrik/projects/Downward/downward')
 
 REMOTE_PYTHON = os.path.expanduser('~/bin/python/2.7.3/usr/local/bin/python')
 LOCAL_PYTHON = 'python2.7'
