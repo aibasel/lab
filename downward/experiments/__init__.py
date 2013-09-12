@@ -350,8 +350,12 @@ class DownwardExperiment(Experiment):
     def add_config(self, nick, config, timeout=None):
         """
         *nick* is the name the config will get in the reports.
+
         *config* must be a list of arguments that can be passed to the planner
-        (see http://www.fast-downward.org/SearchEngine for details). ::
+        (see http://www.fast-downward.org/SearchEngine for details).
+
+        If *timeout* is given it will be used for this config instead of the
+        global time limit set in the constructor. ::
 
             exp.add_config("lmcut", ["--search", "astar(lmcut())"])
         """
