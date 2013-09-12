@@ -286,7 +286,7 @@ class DownwardExperiment(Experiment):
                              [(Translator(repo), Preprocessor(repo), Planner(repo))])
         self.compact = compact
         self.suites = []
-        self.configs = []
+        self.settings = []
 
         limits = limits or {}
         for key, value in limits.items():
@@ -321,7 +321,7 @@ class DownwardExperiment(Experiment):
 
     @property
     def _portfolios(self):
-        return [nick for (nick, config) in self.configs if not config]
+        return [nick for (nick, config) in self.settings if not config]
 
     def add_suite(self, suite):
         """
@@ -352,7 +352,7 @@ class DownwardExperiment(Experiment):
 
             exp.add_config("lmcut", ["--search", "astar(lmcut())"])
         """
-        self.configs.append((nick, config))
+        self.settings.append((nick, config))
 
     def add_portfolio(self, portfolio_file):
         """
@@ -419,7 +419,7 @@ class DownwardExperiment(Experiment):
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         self.set_property('suite', self.suites)
-        self.set_property('configs', [nick for nick, config in self.configs])
+        self.set_property('settings', [nick for nick, config in self.settings])
         self.set_property('repo', self.repo)
         self.set_property('limits', self.limits)
         self.set_property('combinations', ['-'.join(part.rev for part in combo)
@@ -549,14 +549,14 @@ class DownwardExperiment(Experiment):
                 self.add_run(PreprocessRun(self, translator, preprocessor, prob))
 
     def _make_search_runs(self):
-        if not self.configs:
+        if not self.settings:
             logging.critical('You must add at least one config or portfolio.')
         for translator, preprocessor, planner in self.combinations:
             self._prepare_planner(planner)
-            for config_nick, config in self.configs:
+            for nick, config in self.settings:
                 for prob in self._problems:
                     self._make_search_run(translator, preprocessor, planner,
-                                          config_nick, config, prob)
+                                          nick, config, prob)
 
     def _make_search_run(self, translator, preprocessor, planner, config_nick,
                          config, prob):
