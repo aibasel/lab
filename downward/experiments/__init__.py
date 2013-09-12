@@ -361,11 +361,13 @@ class DownwardExperiment(Experiment):
         """
         self.settings.append(Setting(nick, config, timeout))
 
-    def add_portfolio(self, portfolio_file):
+    def add_portfolio(self, portfolio_file, **kwargs):
         """
         *portfolio_file* must be the path to a Fast Downward portfolio file.
+
+        See :py:meth:`.add_config` for valid keyword arguments.
         """
-        self.add_config(portfolio_file, '')
+        self.add_config(portfolio_file, '', **kwargs)
 
     def set_path_to_python(self, path):
         """

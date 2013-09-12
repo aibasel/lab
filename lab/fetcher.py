@@ -33,7 +33,7 @@ class Fetcher(object):
 
     .. note::
 
-        Using :py:func:`exp.add_fetcher() <lab.experiment.Experiment.add_fetcher>`
+        Using :py:meth:`exp.add_fetcher() <lab.experiment.Experiment.add_fetcher>`
         is more convenient.
 
     """
