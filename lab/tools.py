@@ -198,9 +198,11 @@ def import_python_file(filename, dirs=None):
     dirs = dirs or []
     parent_dir = os.path.dirname(filename)
     dirs.append(parent_dir)
-    for dir in dirs:
-        if dir not in sys.path:
-            sys.path.insert(0, dir)
+    # Make sure that dirs appear in the front of sys.path in the correct order.
+    for dir in reversed(dirs):
+        if dir in sys.path:
+            sys.path.remove(dir)
+        sys.path.insert(0, dir)
     filename = os.path.normpath(filename)
     filename = os.path.basename(filename)
     if filename.endswith('.py'):
