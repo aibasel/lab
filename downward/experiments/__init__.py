@@ -21,6 +21,7 @@ A module for cloning different revisions of the three
 components of Fast Downward (translate, preprocess, search) and performing
 experiments with them.
 """
+from collections import namedtuple
 import os
 import sys
 import logging
@@ -202,6 +203,9 @@ class SearchRun(DownwardRun):
                 self.problem.problem]
 
 
+Setting = namedtuple('Setting', ['nick', 'config'])
+
+
 class DownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
@@ -352,7 +356,7 @@ class DownwardExperiment(Experiment):
 
             exp.add_config("lmcut", ["--search", "astar(lmcut())"])
         """
-        self.settings.append((nick, config))
+        self.settings.append(Setting(nick, config))
 
     def add_portfolio(self, portfolio_file):
         """
