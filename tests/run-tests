@@ -60,6 +60,7 @@ cd ..
 # Check if documentation builds.
 cd docs
 make -B html
+echo "Docs: file://$(pwd)/_build/html/index.html"
 cd ..
 
 # Run demo lab experiment.
