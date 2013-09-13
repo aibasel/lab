@@ -149,9 +149,6 @@ class SearchRun(DownwardRun):
         if config:
             # We have a single planner configuration
             planner_type = 'single'
-            assert isinstance(config_nick, basestring), config_nick
-            if not isinstance(config, list):
-                logging.critical('Configs must be lists: %s' % config)
             search_cmd = [planner.shell_name] + config
         else:
             # We have a portfolio, config_nick is the path to the portfolio file
@@ -359,15 +356,25 @@ class DownwardExperiment(Experiment):
 
             exp.add_config("lmcut", ["--search", "astar(lmcut())"])
         """
+        if not isinstance(nick, basestring):
+            logging.critical('Config nick must be a string: %s' % nick)
+        if not isinstance(config, list):
+            logging.critical('Config must be a list: %s' % config)
+        if not nick.endswith('.py') and not config:
+            logging.critical('Config cannot be empty: %s' % config)
         self.settings.append(Setting(nick, config, timeout))
 
-    def add_portfolio(self, portfolio_file, **kwargs):
+    def add_portfolio(self, portfolio, **kwargs):
         """
-        *portfolio_file* must be the path to a Fast Downward portfolio file.
+        *portfolio* must be the path to a Fast Downward portfolio file.
 
-        See :py:meth:`.add_config` for valid keyword arguments.
+        See :py:meth:`.add_config` for valid keyword arguments. ::
+
+            exp.add_portfolio('/home/john/my_portfolio.py')
         """
-        self.add_config(portfolio_file, '', **kwargs)
+        if not isinstance(portfolio, basestring) or not portfolio.endswith('.py'):
+            logging.critical('Path to portfolio must end on .py: %s' % portfolio)
+        self.add_config(portfolio, [], **kwargs)
 
     def set_path_to_python(self, path):
         """
