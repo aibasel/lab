@@ -21,6 +21,7 @@ from downward.reports.plot import ProblemPlotReport
 from downward.reports.ipc import IpcReport
 from downward.reports.relative import RelativeReport
 from downward.reports.compare import CompareConfigsReport
+from downward.reports.timeout import TimeoutReport
 
 import standard_exp
 
@@ -110,6 +111,7 @@ exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=AT
                   filter=filter_and_transform), exp.eval_dir, abs_problem_report_file))
 exp.add_step(Step('report-abs-combined', AbsoluteReport(attributes=None, format='tex'),
                   exp.eval_dir, abs_combined_report_file))
+exp.add_report(TimeoutReport([1, 2, 3]), outfile=os.path.join(exp.eval_dir, 'timeout-eval', 'properties'))
 
 def get_domain(run1, run2):
     return run1['domain']

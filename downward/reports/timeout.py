@@ -48,7 +48,7 @@ class TimeoutReport(PlanningReport):
             for timeout in self.timeouts:
                 solved = total_time is not None and total_time <= timeout
                 new_total_time = total_time if solved else None
-                new_config = '%ds-%s' % (timeout, old_config)
+                new_config = '%s-%ds' % (old_config, timeout)
                 run_id = '-'.join([new_config, domain, problem])
                 new_run = {'domain': domain, 'problem': problem,
                            'config': new_config, 'coverage': int(solved),
