@@ -22,7 +22,6 @@ import functools
 import logging
 from numbers import Number
 import os
-import platform
 import re
 import shutil
 import smtplib
@@ -56,8 +55,6 @@ BASE_DIR = os.path.dirname(SCRIPTS_DIR)
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 # TODO(v2.0): Use freedesktop specification.
 DEFAULT_USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
-
-RUNNING_ON_GRID = platform.node().startswith('gkigrid')
 
 
 class ErrorAbortHandler(logging.StreamHandler):
@@ -138,10 +135,6 @@ def makedirs(dir):
 
 
 def confirm(question):
-    if RUNNING_ON_GRID:
-        print question
-        print 'Running on the grid -> We better stop here.'
-        sys.exit('Aborted')
     answer = raw_input('%s (y/N): ' % question).strip()
     if not answer.lower() == 'y':
         sys.exit('Aborted')
