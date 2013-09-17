@@ -39,10 +39,6 @@ def escape(text):
     return text.replace('_', r'\_')
 
 
-def remove_missing(iterable):
-    return [value for value in iterable if value is not None]
-
-
 class IpcReport(PlanningReport):
     def __init__(self, squeeze=True, page_size='a4', **kwargs):
         """
