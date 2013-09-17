@@ -11,6 +11,7 @@ from lab.environments import LocalEnvironment, MaiaEnvironment
 from lab.steps import Step
 from lab.fetcher import Fetcher
 from lab import tools
+from lab.reports.filter import FilterReport
 
 from downward.experiment import DownwardExperiment
 from downward.checkouts import Translator, Preprocessor, Planner
@@ -112,6 +113,7 @@ exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=AT
 exp.add_step(Step('report-abs-combined', AbsoluteReport(attributes=None, format='tex'),
                   exp.eval_dir, abs_combined_report_file))
 exp.add_report(TimeoutReport([1, 2, 3]), outfile=os.path.join(exp.eval_dir, 'timeout-eval', 'properties'))
+exp.add_report(FilterReport(), outfile=os.path.join(exp.eval_dir, 'filter-eval', 'properties'))
 
 def get_domain(run1, run2):
     return run1['domain']
