@@ -188,6 +188,7 @@ def find_file(filenames, dir='.'):
 
 
 def import_python_file(filename, dirs=None):
+    original_filename = filename
     dirs = dirs or []
     parent_dir = os.path.dirname(filename)
     dirs.append(parent_dir)
@@ -214,7 +215,7 @@ def import_python_file(filename, dirs=None):
         return module
     except ImportError as err:
         print traceback.format_exc()
-        logging.critical('File "%s" could not be imported: %s' % (filename, err))
+        logging.critical('File "%s" could not be imported: %s' % (original_filename, err))
 
 
 def _log_command(cmd, kwargs):
