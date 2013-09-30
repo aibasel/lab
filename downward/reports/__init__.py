@@ -37,7 +37,7 @@ def quality(problem_runs):
     min_cost = reports.minimum(run.get('cost') for run in problem_runs)
     for run in problem_runs:
         cost = run.get('cost')
-        if cost is None:
+        if cost is None or not run.get('coverage'):
             quality = 0.0
         elif cost == 0:
             assert min_cost == 0
