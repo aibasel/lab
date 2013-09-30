@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
 import logging
 import math
 import os
@@ -231,7 +232,10 @@ cd %(exp_script_dir)s
             return '#$ -l hostname="%s"' % '|'.join(hosts)
 
     def run_steps(self, steps):
-        job_dir = os.path.join(self.exp.cache_dir, 'grid-steps', self.exp.name)
+        timestamp = datetime.datetime.now().isoformat()
+        job_dir = os.path.join(self.exp.cache_dir,
+                               'grid-steps',
+                               timestamp + '-' + self.exp.name)
         tools.overwrite_dir(job_dir)
         # Copy the lab and downward packages to the helper dir to make them
         # available for the steps.
