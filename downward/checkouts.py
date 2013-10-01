@@ -18,6 +18,7 @@
 
 import logging
 import os
+import subprocess
 
 from lab import tools
 
@@ -195,7 +196,9 @@ class HgCheckout(Checkout):
             logging.info('Checkout "%s" already exists' % path)
             tools.run_command(['hg', 'pull', self.repo], cwd=path)
 
-        retcode = tools.run_command(['hg', 'update', '-r', self.rev], cwd=path)
+        retcode = tools.run_command(['hg', 'update', '-r', self.rev],
+                                    cwd=path,
+                                    stderr=subprocess.STDOUT)
         if retcode != 0:
             # Unknown revision or update crossing branches.
             logging.critical('Repo at %s could not be updated to revision %s. '
