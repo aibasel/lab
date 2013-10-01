@@ -192,11 +192,7 @@ def import_python_file(filename, dirs=None):
     dirs = dirs or []
     parent_dir = os.path.dirname(filename)
     dirs.append(parent_dir)
-    # Make sure that dirs appear in the front of sys.path in the correct order.
-    for dir in reversed(dirs):
-        if dir in sys.path:
-            sys.path.remove(dir)
-        sys.path.insert(0, dir)
+    sys.path = dirs + sys.path
     filename = os.path.normpath(filename)
     filename = os.path.basename(filename)
     if filename.endswith('.py'):
@@ -208,14 +204,18 @@ def import_python_file(filename, dirs=None):
 
     # Reload already loaded modules to actually get the changes.
     if module_name in sys.modules:
-        return reload(sys.modules[module_name])
+        del sys.modules[module_name]
 
     try:
         module = __import__(module_name)
-        return module
     except ImportError as err:
         print traceback.format_exc()
         logging.critical('File "%s" could not be imported: %s' % (original_filename, err))
+    else:
+        return module
+    finally:
+        for dir in dirs:
+            sys.path.remove(dir)
 
 
 def _log_command(cmd, kwargs):
