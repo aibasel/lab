@@ -5,8 +5,11 @@ repository::
     sudo apt-get install mercurial python2.7 python-matplotlib python-simplejson
     hg clone https://bitbucket.org/jendrikseipp/lab ${LAB} -r v1.4  # or later version
 
-(python-matplotlib is only needed for reports that generate graphs.
-python-simplejson is optional, but makes generating reports much faster.)
+Notes about requirements:
+
+* lab works with Python 2.6 and 2.7.
+* python-matplotlib is only needed for reports that generate graphs.
+* python-simplejson is optional, but makes generating reports much faster.
 
 Append to your ``.bashrc`` to make lab available on the ``PYTHONPATH``::
 
