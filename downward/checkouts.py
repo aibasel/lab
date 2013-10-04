@@ -26,18 +26,20 @@ from lab import tools
 ABS_REV_CACHE = {}
 
 
-def get_global_rev(repo, rev=None):
-    cmd = ['hg', 'id', '-i']
+def hg_id(repo, args=None, rev=None):
+    cmd = ['hg', 'id'] + (args or [])
     if rev:
         cmd.extend(['-r', str(rev)])
-    return tools.get_command_output(cmd, cwd=repo, quiet=True)
+    return tools.get_command_output(cmd, cwd=repo, quiet=True,
+                                    stderr=subprocess.STDOUT)
+
+
+def get_global_rev(repo, rev=None):
+    return hg_id(repo, args=['-i'], rev=rev)
 
 
 def get_rev_id(repo, rev=None):
-    cmd = ['hg', 'id']
-    if rev:
-        cmd.extend(['-r', str(rev)])
-    return tools.get_command_output(cmd, cwd=repo, quiet=True)
+    return hg_id(repo, rev=rev)
 
 
 def get_common_ancestor(repo, rev1, rev2='default'):
@@ -187,14 +189,18 @@ class HgCheckout(Checkout):
         if self.rev == 'WORK':
             return
 
+        # Move mercurial's "waiting for lock" messages from stderr to stdout below.
         path = self.get_path()
         if not os.path.exists(path):
             # Old mercurial versions need the clone's parent directory to exist.
             tools.makedirs(path)
-            tools.run_command(['hg', 'clone', '-r', self.rev, self.repo, path])
+            tools.run_command(['hg', 'clone', '-r', self.rev, self.repo, path],
+                              stderr=subprocess.STDOUT)
         else:
             logging.info('Checkout "%s" already exists' % path)
-            tools.run_command(['hg', 'pull', self.repo], cwd=path)
+            tools.run_command(['hg', 'pull', self.repo],
+                              cwd=path,
+                              stderr=subprocess.STDOUT)
 
         retcode = tools.run_command(['hg', 'update', '-r', self.rev],
                                     cwd=path,
