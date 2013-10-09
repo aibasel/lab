@@ -189,11 +189,11 @@ def find_file(filenames, dir='.'):
 
 def import_python_file(filename, dirs=None):
     original_filename = filename
+    filename = os.path.abspath(filename)
     dirs = dirs or []
     parent_dir = os.path.dirname(filename)
     dirs.append(parent_dir)
     sys.path = dirs + sys.path
-    filename = os.path.normpath(filename)
     filename = os.path.basename(filename)
     if filename.endswith('.py'):
         module_name = filename[:-3]
