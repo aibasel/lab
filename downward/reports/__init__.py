@@ -141,6 +141,13 @@ class PlanningReport(Report):
         return Report._prepare_attribute(self, attr)
 
     def _get_relative_attribute_function(self, attr):
+        def get_ratio(v1, v2):
+            try:
+                return v2 / v1
+            except (TypeError, ZeroDivisionError):
+                pass
+            return None
+
         def relative_attr(runs):
             relname = '%s_relative' % attr
             first_val = runs[0].get(attr)
@@ -148,9 +155,9 @@ class PlanningReport(Report):
                 val = run.get(attr)
                 if (all(isinstance(v, (list, tuple)) for v in [first_val, val]) and
                         len(first_val) == len(val)):
-                    run[relname] = [v2 / v1 for v1, v2 in zip(first_val, val)]
-                elif val and first_val:
-                    run[relname] = val / float(first_val)
+                    run[relname] = [get_ratio(v1, v2) for v1, v2 in zip(first_val, val)]
+                else:
+                    run[relname] = get_ratio(first_val, val)
 
         return relative_attr
 
