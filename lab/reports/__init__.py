@@ -690,13 +690,17 @@ class Table(collections.defaultdict):
         formatter = self.cell_formatters.get(row_name, {}).get(col_name)
         if formatter:
             return formatter.format_value(value)
-        if isinstance(value, float):
-            value_text = '%.2f' % value
-        elif isinstance(value, list):
-            # Avoid involuntary link markup due to the list brackets.
-            value_text = "''%s''" % value
-        else:
-            value_text = str(value)
+
+        def format_value(value):
+            if isinstance(value, float):
+                return '%.2f' % value
+            elif isinstance(value, (list, tuple)):
+                # Avoid involuntary link markup due to the list brackets.
+                return "''[''" + ', '.join(format_value(v) for v in value) + "'']''"
+            else:
+                return str(value)
+
+        value_text = format_value(value)
 
         if color is not None:
             value_text = '{%s|color:%s}' % (value_text, color)

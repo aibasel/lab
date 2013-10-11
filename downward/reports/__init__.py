@@ -142,11 +142,16 @@ class PlanningReport(Report):
 
     def _get_relative_attribute_function(self, attr):
         def relative_attr(runs):
+            relname = '%s_relative' % attr
             first_val = runs[0].get(attr)
             for run in runs:
                 val = run.get(attr)
-                if val and first_val:
-                    run['%s_relative' % attr] = val / float(first_val)
+                if (all(isinstance(v, (list, tuple)) for v in [first_val, val]) and
+                        len(first_val) == len(val)):
+                    run[relname] = [v2 / v1 for v1, v2 in zip(first_val, val)]
+                elif val and first_val:
+                    run[relname] = val / float(first_val)
+
         return relative_attr
 
     def _handle_relative_attributes(self, attributes):
