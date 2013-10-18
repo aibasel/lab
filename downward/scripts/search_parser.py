@@ -220,6 +220,15 @@ def coverage(content, props):
                             not props.get('validate_error'))
 
 
+def get_initial_h_value(content, props):
+    # Ignore logs from searches with multiple heuristics.
+    if 'initial_h_value' not in props:
+        pattern = r'^Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded, t=.+s\]$'
+        match = re.search(pattern, content, flags=re.M)
+        if match:
+            props['initial_h_value'] = int(match.group(1))
+
+
 def check_memory(content, props):
     """Remove memory value if the run was not successful."""
     # TODO: Generalize check for all attributes that only make sense for
@@ -408,6 +417,7 @@ class SingleSearchParser(SearchParser):
 
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
+        self.add_function(get_initial_h_value)
         self.add_function(set_search_time)
         self.add_function(scores)
         self.add_function(check_min_values)
