@@ -94,6 +94,10 @@ CUMULATIVE_PATTERNS = [
 ]
 
 
+def same_length(groups):
+    return len(set(len(x) for x in groups)) == 1
+
+
 def get_iterative_portfolio_results(content, props):
     values = defaultdict(list)
 
@@ -105,10 +109,6 @@ def get_iterative_portfolio_results(content, props):
             values[name].append(cast(match.group(1)))
             # We can break here, because each line contains only one value
             break
-
-    # Check that some lists have the same length
-    def same_length(group):
-        return len(set(len(x) for x in group)) == 1
 
     group1 = ('cost', 'plan_length')
     assert same_length(values[x] for x in group1), values
@@ -147,10 +147,6 @@ def get_iterative_results(content, props):
     # In order to let all lists have the same length, we omit that value here.
     if len(values['search_time']) > len(values['expansions']):
         values['search_time'].pop()
-
-    # Check that some lists have the same length
-    def same_length(group):
-        return len(set(len(x) for x in group)) == 1
 
     group1 = ('cost', 'plan_length')
     group2 = ('expansions', 'generated', 'search_time')
