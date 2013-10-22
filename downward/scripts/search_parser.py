@@ -94,8 +94,22 @@ CUMULATIVE_PATTERNS = [
 ]
 
 
-def same_length(groups):
+def _same_length(groups):
     return len(set(len(x) for x in groups)) == 1
+
+
+def _update_props_with_iterative_values(props, values, attr_groups):
+    for group in attr_groups:
+        if not _same_length(values[attr] for attr in group):
+            print 'Error: malformed log:', values
+            props['error'] = 'unexplained-malformed-log'
+
+    for name, items in values.items():
+        props[name + '_all'] = items
+
+    for attr in ['cost', 'plan_length']:
+        if values[attr]:
+            props[attr] = min(values[attr])
 
 
 def get_iterative_portfolio_results(content, props):
@@ -110,15 +124,7 @@ def get_iterative_portfolio_results(content, props):
             # We can break here, because each line contains only one value
             break
 
-    group1 = ('cost', 'plan_length')
-    assert same_length(values[x] for x in group1), values
-
-    for name, items in values.items():
-        props[name + '_all'] = items
-
-    for attr in ['cost', 'plan_length']:
-        if values[attr]:
-            props[attr] = min(values[attr])
+    _update_props_with_iterative_values(props, values, [('cost', 'plan_length')])
 
 
 def get_iterative_results(content, props):
@@ -148,17 +154,8 @@ def get_iterative_results(content, props):
     if len(values['search_time']) > len(values['expansions']):
         values['search_time'].pop()
 
-    group1 = ('cost', 'plan_length')
-    group2 = ('expansions', 'generated', 'search_time')
-    assert same_length(values[x] for x in group1), values
-    assert same_length(values[x] for x in group2), values
-
-    for name, items in values.items():
-        props[name + '_all'] = items
-
-    for attr in ['cost', 'plan_length']:
-        if values[attr]:
-            props[attr] = min(values[attr])
+    _update_props_with_iterative_values(props, values,
+            [('cost', 'plan_length'), ('expansions', 'generated', 'search_time')])
 
 
 def get_cumulative_results(content, props):
