@@ -126,11 +126,6 @@ class OracleGridEngineEnvironment(Environment):
         self.__wait_for_job_name = None
         self._job_name = None
 
-        # Pass this string when calling the experiment script. Setting this is
-        # only needed for experiment subclasses that have added their own
-        # commandline arguments.
-        self._exp_script_args = ""
-
     @classmethod
     def _escape_job_name(cls, name):
         if name[0].isdigit():
@@ -191,6 +186,19 @@ class OracleGridEngineEnvironment(Environment):
             f.write('This file is created when the experiment is submitted to '
                     'the queue.')
 
+    def _get_script_args(self):
+        """
+        Retrieve additional commandline parameters given when the experiment
+        is called with --all and pass them again when the step is called by
+        the grid.
+        """
+        commandline = sys.argv[1:]
+        assert '--all' in commandline, commandline
+        commandline.remove('--all')
+        for step_name in self.exp.args.steps:
+            commandline.remove(step_name)
+        return commandline
+
     def _get_job_name(self, step):
         return self._escape_job_name(
             '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1,
@@ -219,7 +227,7 @@ cd %(exp_script_dir)s
         return template % {
             'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
             'script': self.exp._script,
-            'args': self._exp_script_args,
+            'args': self._get_script_args(),
             'step_name': step.name,
             'stderr': 'driver.err',
             'job_header': self._get_job_header(step)}
