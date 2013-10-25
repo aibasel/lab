@@ -124,11 +124,12 @@ class PlanningReport(Report):
         unxeplained_errors = 0
         for run in self.runs.values():
             if run.get('unexplained_error'):
-                logging.warning('Unexplained error in: \'%s\'' % run.get('run_dir'))
+                logging.warning('Unexplained error in \'%s\': %s' %
+                                (run.get('run_dir'), run.get('error')))
                 unxeplained_errors += 1
         if unxeplained_errors:
-            logging.warning('There were %s runs with unexplained errors.'
-                            % unxeplained_errors)
+            logging.warning('There were %s runs with unexplained errors.' %
+                            unxeplained_errors)
         return markup
 
     def _prepare_attribute(self, attr):
