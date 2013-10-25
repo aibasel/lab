@@ -227,7 +227,7 @@ cd %(exp_script_dir)s
         return template % {
             'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
             'script': self.exp._script,
-            'args': self._get_script_args(),
+            'args': ' '.join(self._get_script_args()),
             'step_name': step.name,
             'stderr': 'driver.err',
             'job_header': self._get_job_header(step)}
