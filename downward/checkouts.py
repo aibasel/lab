@@ -27,6 +27,7 @@ ABS_REV_CACHE = {}
 
 
 def hg_id(repo, args=None, rev=None):
+    # TODO: Abort if rev is not present in repo.
     cmd = ['hg', 'id'] + (args or [])
     if rev:
         cmd.extend(['-r', str(rev)])
