@@ -339,7 +339,7 @@ class Experiment(_Buildable):
         self.args = ARGPARSER.parse_args()
         if not self.args.steps and not self.args.run_all_steps:
             ARGPARSER.print_help()
-            sys.exit()
+            sys.exit(0)
         # If no steps were given on the commandline, run all exp steps.
         steps = [self.steps.get_step(name) for name in self.args.steps] or self.steps
         if self.args.run_all_steps:
