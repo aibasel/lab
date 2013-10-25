@@ -299,6 +299,7 @@ class DownwardExperiment(Experiment):
         self.set_property('compact', compact)
 
         self.include_preprocess_results_in_search_runs = True
+        self.compilation_options = ['-j%d' % self._jobs]
 
         # Remove the default experiment steps
         self.steps = Sequence()
@@ -487,11 +488,11 @@ class DownwardExperiment(Experiment):
                 part.checkout()
                 self._require_part(part)
             for preprocessor in sorted(preprocessors):
-                preprocessor.compile(options=['-j%d' % self._jobs])
+                preprocessor.compile(options=self.compilation_options)
         elif stage == 'search':
             for planner in sorted(planners):
                 planner.checkout()
-                planner.compile(options=['-j%d' % self._jobs])
+                planner.compile(options=self.compilation_options)
                 self._require_part(planner)
         else:
             logging.critical('There is no stage "%s"' % stage)
