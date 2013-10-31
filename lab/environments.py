@@ -192,12 +192,12 @@ class OracleGridEngineEnvironment(Environment):
         is called with --all and pass them again when the step is called by
         the grid.
         """
-        commandline = sys.argv[1:]
+        commandline = list(reversed(sys.argv[1:]))
         assert '--all' in commandline, commandline
         commandline.remove('--all')
         for step_name in self.exp.args.steps:
             commandline.remove(step_name)
-        return commandline
+        return list(reversed(commandline))
 
     def _get_job_name(self, step):
         return self._escape_job_name(
