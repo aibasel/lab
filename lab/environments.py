@@ -221,12 +221,13 @@ if [ -s "%(stderr)s" ]; then
     exit 1
 fi
 
-cd %(exp_script_dir)s
-./%(script)s %(args)s %(step_name)s
+cd %(cwd)s
+%(python)s %(script)s %(args)s %(step_name)s
 """
         return template % {
-            'exp_script_dir': os.path.dirname(os.path.abspath(sys.argv[0])),
-            'script': self.exp._script,
+            'cwd': os.getcwd(),
+            'python': sys.executable or 'python',
+            'script': sys.argv[0],
             'args': ' '.join(self._get_script_args()),
             'step_name': step.name,
             'stderr': 'driver.err',
