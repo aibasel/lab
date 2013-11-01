@@ -70,7 +70,7 @@ class Call(subprocess.Popen):
         self.name = name
         self.time_limit = time_limit
         # Use wall-clock limit of 30 seconds for very small time limits.
-        self.wall_clock_time_limit = max(30, time_limit * 1.5)
+        self.wall_clock_time_limit = max(30, time_limit * 3)  # TODO: Lower limit.
         self.mem_limit = mem_limit
 
         self.kill_delay = kill_delay
