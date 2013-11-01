@@ -192,6 +192,8 @@ class OracleGridEngineEnvironment(Environment):
         is called with --all and pass them again when the step is called by
         the grid.
         """
+        # Remove step names from the back of the commandline to avoid deleting
+        # custom args by accident.
         commandline = list(reversed(sys.argv[1:]))
         assert '--all' in commandline, commandline
         commandline.remove('--all')
