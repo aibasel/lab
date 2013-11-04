@@ -14,9 +14,13 @@ each run. Here are the relevant bits from the example script
 
 How can I combine the results from multiple experiments?
 --------------------------------------------------------
+::
 
-The best way to do this is to use the :py:class:`Fetcher <lab.fetcher.Fetcher>`
-class.
+    exp = Experiment('/new/path/to/combined-results')
+    exp.add_fetcher('path/to/first/eval/dir')
+    exp.add_fetcher('path/to/second/eval/dir')
+    exp.add_fetcher('path/to/experiment/dir')
+    exp.add_report(AbsoluteReport())
 
 
 How can I run multiple steps sequentially on a computer grid?
