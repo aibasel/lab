@@ -78,7 +78,7 @@ class MatplotlibPlot(object):
 
     def create_legend(self, categories, location):
         # Only print a legend if there is at least one non-default category.
-        if any(key is not None for key in categories.keys()):
+        if location is not None and any(key is not None for key in categories.keys()):
             kwargs = {}
             if isinstance(location, (int, basestring)):
                 kwargs['loc'] = location
@@ -295,8 +295,7 @@ class PlotReport(PlanningReport):
         *legend_location* must be a (x, y) pair or one of the following:
         'upper right', 'upper left', 'lower left', 'lower right', 'right',
         'center left', 'center right', 'lower center', 'upper center',
-        'center'. If *legend_location* is None, no legend will be added for
-        pgfplots. ::
+        'center'. If *legend_location* is None, no legend will be added. ::
 
             # Some example positions.
             legend_location='lower left'  # Lower left corner *inside* the plot
