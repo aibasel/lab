@@ -647,13 +647,6 @@ class Table(collections.defaultdict):
                          for col_name in self.col_names)
 
         min_value, max_value = tools.get_min_max(row_slice.values())
-        try:
-            rounded_values = ((round(val, 2) if isinstance(val, float) else val)
-                              for val in row_slice.values())
-            only_one_value = len(set(rounded_values)) == 1
-        except TypeError:
-            # row_slice may e.g. contain the unhashable type list.
-            only_one_value = False
 
         min_wins = self.get_min_wins(row_name)
         highlight = min_wins is not None
@@ -667,8 +660,6 @@ class Table(collections.defaultdict):
                 rounded_value = round(value, 2) if isinstance(value, float) else value
                 if self.colored:
                     color = tools.rgb_fractions_to_html_color(*colors[col_name])
-                elif highlight and only_one_value:
-                    color = 'Grey'
                 elif highlight and (rounded_value == min_value and min_wins or
                                     rounded_value == max_value and not min_wins):
                     bold = True
