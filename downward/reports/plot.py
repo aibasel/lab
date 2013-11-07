@@ -227,23 +227,28 @@ class PgfPlots(object):
         figsize = report.params.get('figure.figsize')
         if figsize:
             width, height = figsize
-            axis['width'] = '%fin' % width
-            axis['height'] = '%fin' % height
+            axis['width'] = '%.2fin' % width
+            axis['height'] = '%.2fin' % height
 
-        legend_options = {}
-        if report.legend_location in cls.LOCATIONS.values():
+        if report.legend_location:
+            axis['legend style'] = cls._format_options(
+                    cls._get_legend_options(report.legend_location))
+
+        return axis
+
+    @classmethod
+    def _get_legend_options(cls, location):
+        if location in cls.LOCATIONS.values():
             # Found valid pgfplots location.
-            pos = report.legend_location
-        elif report.legend_location in cls.LOCATIONS:
+            return {'legend pos': location}
+        elif location in cls.LOCATIONS:
             # Convert matplotlib location to pgfplots location.
-            pos = cls.LOCATIONS[report.legend_location]
+            return {'legend pos': cls.LOCATIONS[location]}
+        elif isinstance(location, (list, tuple)):
+            return {'at': location}
         else:
             logging.critical('Legend location "%s" is unavailable in pgfplots' %
                              str(report.legend_location))
-        legend_options['legend pos'] = pos
-        axis['legend style'] = cls._format_options(legend_options)
-
-        return axis
 
     @classmethod
     def _format_options(cls, options):
@@ -287,8 +292,11 @@ class PlotReport(PlanningReport):
         *xscale* and *yscale* can have the values 'linear', 'log' or 'symlog'.
         If omitted sensible defaults will be used.
 
-        *legend_location* must be a (x, y) pair or one of the following strings:
-        'upper right', 'upper left', 'lower left', 'lower right', 'right'. ::
+        *legend_location* must be a (x, y) pair or one of the following:
+        'upper right', 'upper left', 'lower left', 'lower right', 'right',
+        'center left', 'center right', 'lower center', 'upper center',
+        'center'. If *legend_location* is None, no legend will be added for
+        pgfplots. ::
 
             # Some example positions.
             legend_location='lower left'  # Lower left corner *inside* the plot
