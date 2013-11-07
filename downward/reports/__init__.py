@@ -25,6 +25,7 @@ from __future__ import with_statement, division
 from collections import defaultdict
 from fnmatch import fnmatch
 import logging
+import sys
 import traceback
 
 from lab import reports
@@ -216,9 +217,10 @@ class PlanningReport(Report):
         try:
             self._perform_sanity_checks()
         except AssertionError:
-            logging.warning('The following sanity check failed, please make '
-                            'sure you filtered the intended runs:')
-            traceback.print_exc()
+            logging.warning(
+                'The following sanity check failed. Did you filter the intended runs? '
+                'Are there old properties in the eval-dir you don\'t want to merge?')
+            traceback.print_exc(file=sys.stdout)
 
     def _scan_config_info(self):
         info = defaultdict(dict)
