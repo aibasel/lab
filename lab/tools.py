@@ -277,12 +277,8 @@ class Properties(dict):
 
 class RunFilter(object):
     def __init__(self, filter, **kwargs):
-        if not filter:
-            self.filters = []
-        elif isinstance(filter, collections.Iterable):
-            self.filters = filter
-        else:
-            self.filters = [filter]
+        filter = filter or []
+        self.filters = make_list(filter)
         for arg_name, arg_value in kwargs.items():
             assert arg_name.startswith('filter_'), (
                 'Did not recognize key word argument "%s"' % arg_name)
