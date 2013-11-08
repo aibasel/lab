@@ -250,7 +250,7 @@ class Properties(dict):
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, indent=2)
+        return json.dumps(self, indent=2, separators=(',', ': '))
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
@@ -271,7 +271,7 @@ class Properties(dict):
         """
         assert self.filename
         with open(self.filename, 'w') as f:
-            json.dump(self, f, indent=2)
+            f.write(str(self))
 
 
 class RunFilter(object):
