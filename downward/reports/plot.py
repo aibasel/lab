@@ -232,7 +232,7 @@ class PgfPlots(object):
 
         if report.legend_location:
             axis['legend style'] = cls._format_options(
-                    cls._get_legend_options(report.legend_location))
+                cls._get_legend_options(report.legend_location))
 
         return axis
 
@@ -248,7 +248,7 @@ class PgfPlots(object):
             return {'at': location}
         else:
             logging.critical('Legend location "%s" is unavailable in pgfplots' %
-                             str(report.legend_location))
+                             str(location))
 
     @classmethod
     def _format_options(cls, options):

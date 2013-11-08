@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import colorsys
-import collections
 import email.mime.text
 import functools
 import logging
