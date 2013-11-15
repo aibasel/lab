@@ -21,7 +21,7 @@ A module for cloning different revisions of the three
 components of Fast Downward (translate, preprocess, search) and performing
 experiments with them.
 """
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import os
 import logging
 import multiprocessing
@@ -285,7 +285,7 @@ class DownwardExperiment(Experiment):
         self.combinations = (combinations or
                              [(Translator(repo), Preprocessor(repo), Planner(repo))])
         self.compact = compact
-        self.suites = []
+        self.suites = defaultdict(list)
         self.settings = []
 
         limits = limits or {}
@@ -317,14 +317,16 @@ class DownwardExperiment(Experiment):
 
     @property
     def _problems(self):
-        benchmark_dir = os.path.join(self.repo, 'benchmarks')
-        return suites.build_suite(benchmark_dir, self.suites)
+        tasks = []
+        for benchmark_dir, suite in self.suites.items():
+            tasks.extend(suites.build_suite(benchmark_dir, suite))
+        return tasks
 
     @property
     def _portfolios(self):
         return [setting.nick for setting in self.settings if not setting.config]
 
-    def add_suite(self, suite):
+    def add_suite(self, suite, dir=None):
         """
         *suite* can either be a string or a list of strings. The strings can be
         tasks or domains. ::
@@ -338,12 +340,15 @@ class DownwardExperiment(Experiment):
             exp.add_suite(suites.suite_strips())
             exp.add_suite(suites.suite_ipc_all())
 
+        If *dir* is given, it must be the path to a benchmark directory. The
+        default is <repo>/benchmarks. The benchmark directory must contain
+        domain directories, which in turn hold the pddl files.
         """
         if isinstance(suite, basestring):
             parts = [part.strip() for part in suite.split(',')]
-            self.suites.extend([part for part in parts if part])
-        else:
-            self.suites.extend(suite)
+            suite = [part for part in parts if part]
+        benchmark_dir = os.path.abspath(dir or os.path.join(self.repo, 'benchmarks'))
+        self.suites[benchmark_dir].extend(suite)
 
     def add_config(self, nick, config, timeout=None):
         """

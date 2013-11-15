@@ -46,7 +46,7 @@ exp = DownwardExperiment(EXPPATH, repo=REPO, environment=ENV, combinations=COMBI
 exp.set_path_to_python(standard_exp.PYTHON)
 
 exp.add_suite('gripper:prob01.pddl')
-exp.add_suite('zenotravel:pfile1')
+exp.add_suite('zenotravel:pfile1', dir=os.path.join(REPO, 'benchmarks'))
 exp.add_config('iter-hadd', [
     '--heuristic', 'hadd=add()',
     '--search', 'iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)'])
