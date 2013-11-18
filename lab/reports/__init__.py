@@ -224,7 +224,7 @@ class Report(object):
         if isinstance(attributes, basestring):
             attributes = [attributes]
         self.attributes = attributes or []
-        assert format in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png']
+        assert format in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png', 'py']
         self.output_format = format
         self.toc = True
         self.run_filter = tools.RunFilter(filter, **kwargs)

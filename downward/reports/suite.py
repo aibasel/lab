@@ -34,6 +34,7 @@ class SuiteReport(PlanningReport):
         exp.add_report(SuiteReport(filter_coverage=1), outfile='solved.py')
     """
     def __init__(self, *args, **kwargs):
+        kwargs.setdefault('format', 'py')
         PlanningReport.__init__(self, *args, **kwargs)
 
     def get_text(self):
