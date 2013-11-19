@@ -30,8 +30,8 @@ def _add_bound(config, optimal):
 
     for i, entry in enumerate(config):
         if entry == '--search':
-            if 'bound=BOUND' not in config[i+1]:
-                config[i+1] = (config[i+1][:-1] + ',bound=BOUND)')
+            if 'bound=BOUND' not in config[i + 1]:
+                config[i + 1] = (config[i + 1][:-1] + ',bound=BOUND)')
     return config
 
 
