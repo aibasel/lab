@@ -326,7 +326,7 @@ class DownwardExperiment(Experiment):
     def _portfolios(self):
         return [setting.nick for setting in self.settings if not setting.config]
 
-    def add_suite(self, suite, dir=None):
+    def add_suite(self, suite, benchmark_dir=None):
         """
         *suite* can either be a string or a list of strings. The strings can be
         tasks or domains. ::
@@ -340,14 +340,16 @@ class DownwardExperiment(Experiment):
             exp.add_suite(suites.suite_strips())
             exp.add_suite(suites.suite_ipc_all())
 
-        If *dir* is given, it must be the path to a benchmark directory. The
-        default is <repo>/benchmarks. The benchmark directory must contain
+        If *benchmark_dir* is given, it must be the path to a benchmark directory.
+        The default is <repo>/benchmarks. The benchmark directory must contain
         domain directories, which in turn hold the pddl files.
         """
         if isinstance(suite, basestring):
             parts = [part.strip() for part in suite.split(',')]
             suite = [part for part in parts if part]
-        benchmark_dir = os.path.abspath(dir or os.path.join(self.repo, 'benchmarks'))
+        if benchmark_dir is None:
+            benchmark_dir = os.path.join(self.repo, 'benchmarks')
+        benchmark_dir = os.path.abspath(benchmark_dir)
         self.suites[benchmark_dir].extend(suite)
 
     def add_config(self, nick, config, timeout=None):
