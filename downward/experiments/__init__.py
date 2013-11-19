@@ -546,8 +546,7 @@ class DownwardExperiment(Experiment):
             if not os.access(portfolio, os.X_OK):
                 os.chmod(portfolio, 0755)
             name = os.path.basename(portfolio)
-            self.add_resource('', portfolio,
-                              planner.get_path_dest('search', name))
+            self.add_resource('', portfolio, planner.get_path_dest('search', name))
 
         # The tip changeset has the newest validator version so we use this one
         validate = os.path.join(self.repo, 'src', 'VAL', 'validate')
