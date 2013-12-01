@@ -380,7 +380,9 @@ class DownwardExperiment(Experiment):
 
             exp.add_portfolio('/home/john/my_portfolio.py')
         """
-        if not isinstance(portfolio, basestring) or not portfolio.endswith('.py'):
+        if not isinstance(portfolio, basestring):
+            logging.critical('portfolio parameter must be a string: %s' % portfolio)
+        if not portfolio.endswith('.py'):
             logging.critical('Path to portfolio must end on .py: %s' % portfolio)
         self.add_config(portfolio, [], **kwargs)
 
