@@ -23,9 +23,10 @@ Regular expressions and functions for parsing preprocessing results.
 
 from __future__ import division
 
+import ast
 import logging
-import re
 import os
+import re
 
 # The lab directory is added automatically in the Experiment constructor
 from lab.parser import Parser
@@ -66,7 +67,8 @@ def parse_statistics(content, props):
         if match:
             part = match.group(1).lower()
             attr = match.group(2).lower().replace(' ', '_')
-            props['%s_%s' % (part, attr)] = int(match.group(3))
+            # Support strings, numbers, tuples, lists, dicts, booleans, and None.
+            props['%s_%s' % (part, attr)] = ast.literal_eval(match.group(3))
         if line.startswith('done'):
             break
 
