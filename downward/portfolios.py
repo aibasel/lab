@@ -69,9 +69,9 @@ def _get_name_and_source(func):
 def create_portfolio_script(portfolio, optimal, final_config=None,
                             final_config_builder=None, notes=''):
     total_time = sum(time for time, config in portfolio)
+    num_configs = len(portfolio)
     portfolio = [(t, _add_bound(config, optimal)) for t, config in portfolio]
     portfolio = json.dumps(portfolio, indent=4, separators=(',', ': '))
-    num_configs = len(portfolio)
     final_config_name, final_config_source = _get_name_and_source(final_config)
     (final_config_builder_name,
         final_config_builder_source) = _get_name_and_source(final_config_builder)
