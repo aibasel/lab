@@ -686,8 +686,8 @@ class Table(collections.defaultdict):
             if isinstance(value, float):
                 return '%.2f' % value
             elif isinstance(value, (list, tuple)):
-                # Avoid involuntary link markup due to the list brackets.
-                return "''[''" + ', '.join(format_value(v) for v in value) + "'']''"
+                # Escape brackets to avoid involuntarily creating txt2tags links.
+                return "''[''%s'']''" % (', '.join(format_value(v) for v in value) or ' ')
             else:
                 return str(value)
 
