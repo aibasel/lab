@@ -17,7 +17,7 @@ from downward.reports.absolute import AbsoluteReport
 NODE = platform.node()
 REMOTE = NODE.startswith('gkigrid') or NODE.endswith('cluster') or NODE in ['habakuk', 'turtur']
 SCP_LOGIN = 'seipp@maia'
-ATTRIBUTES = ['coverage', 'cost', 'total_time']
+ATTRIBUTES = ['coverage', 'cost', 'quality', 'total_time']
 
 REMOTE_EXPS = os.path.expanduser('/infai/seipp/experiments/')
 LOCAL_EXPS = os.path.expanduser('/home/jendrik/lab/experiments/')
