@@ -352,12 +352,12 @@ def suite_optimal_with_ipc11():
 def suite_satisficing_with_ipc11():
     domains = suite_ipc_one_to_five() + suite_lmcut_domains()
     domains += suite_ipc08_sat() + suite_ipc11_sat()
-    return list(sorted(set(domains)))
+    return list(sorted(set(domains) - set(['pathways'])))
 
 def suite_all():
     domains = suite_ipc_one_to_five() + suite_lmcut_domains()
     domains += suite_ipc08_all() + suite_ipc11_all()
-    return list(sorted(set(domains)))
+    return list(sorted(set(domains) - set(['pathways'])))
 
 
 def suite_five_per_domain(benchmarks_dir):
