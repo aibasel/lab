@@ -163,6 +163,9 @@ def build_suite(benchmarks_dir, descriptions):
     return result
 
 
+def suite_alternative_formulations():
+    return ['pathways', 'no-mprime', 'no-mystery']
+
 def suite_ipc_one_to_five():
     # All IPC1-5 domains, including the trivial Movie.
     return [
@@ -352,12 +355,15 @@ def suite_optimal_with_ipc11():
 def suite_satisficing_with_ipc11():
     domains = suite_ipc_one_to_five() + suite_lmcut_domains()
     domains += suite_ipc08_sat() + suite_ipc11_sat()
-    return list(sorted(set(domains) - set(['pathways'])))
+    return list(sorted(set(domains) - set(suite_alternative_formulations())))
 
 def suite_all():
     domains = suite_ipc_one_to_five() + suite_lmcut_domains()
     domains += suite_ipc08_all() + suite_ipc11_all()
-    return list(sorted(set(domains) - set(['pathways'])))
+    return list(sorted(set(domains) - set(suite_alternative_formulations())))
+
+def suite_all_formulations():
+    return list(sorted(suite_all() + suite_alternative_formulations()))
 
 
 def suite_five_per_domain(benchmarks_dir):
