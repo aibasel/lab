@@ -182,7 +182,6 @@ class _Buildable(object):
                 continue
 
             logging.debug('Copying %s to %s' % (source, dest))
-            print source, os.path.exists(dest)
             # If the directory containing a resource has already been added,
             # we don't need to copy and therefore overwrite the resource.
             if not os.path.exists(dest):
