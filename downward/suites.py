@@ -164,7 +164,7 @@ def build_suite(benchmarks_dir, descriptions):
 
 
 def suite_alternative_formulations():
-    return ['pathways', 'no-mprime', 'no-mystery']
+    return ['airport-adl', 'pathways', 'no-mprime', 'no-mystery']
 
 def suite_ipc_one_to_five():
     # All IPC1-5 domains, including the trivial Movie.
