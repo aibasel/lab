@@ -25,7 +25,7 @@ LOCAL_EXPS = os.path.expanduser('/home/jendrik/lab/experiments/')
 REMOTE_REPO = os.path.expanduser('/infai/seipp/projects/downward')
 LOCAL_REPO = os.path.expanduser('/home/jendrik/projects/Downward/downward')
 
-REMOTE_PYTHON = os.path.expanduser('~/bin/python/2.7.3/usr/local/bin/python')
+REMOTE_PYTHON = 'python2.7'
 LOCAL_PYTHON = 'python2.7'
 
 if REMOTE:

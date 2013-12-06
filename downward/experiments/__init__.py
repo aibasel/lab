@@ -517,15 +517,23 @@ class DownwardExperiment(Experiment):
     def _setup_ignores(self, stage):
         self.ignores = []
 
-        # Do not copy the .obj directory into the experiment directory.
-        self.ignores.append('*.obj')
+        # Ignore temporary files dirs from preprocess and search folders.
+        self.ignores.extend(['.obj', 'Makefile.depend'])
 
         # We don't need VAL's sources.
         self.ignores.append('VAL')
 
+        # We don't need the VAL copy produced by the build_all script.
+        self.ignores.append('validate')
+
+        # Ignore some scripts.
+        self.ignores.extend(['build_all', 'cleanup', 'dist', 'plan', 'plan-ipc'])
+
         if stage == 'preprocess':
-            # We don't need the search dir and validator for preprocessing.
-            self.ignores.extend(['search', 'validate'])
+            self.ignores.extend(['search'])
+            self.ignores.extend(['regression-tests', 'tests'])
+        elif stage == 'search':
+            self.ignores.extend(['translate', 'preprocess'])
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
@@ -550,7 +558,6 @@ class DownwardExperiment(Experiment):
             name = os.path.basename(portfolio)
             self.add_resource('', portfolio, planner.get_path_dest('search', name))
 
-        # The tip changeset has the newest validator version so we use this one
         validate = os.path.join(self.repo, 'src', 'VAL', 'validate')
         if not os.path.exists(validate):
             logging.info('Building the validator in the experiment repository.')

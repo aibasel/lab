@@ -331,7 +331,7 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
     Copies the contents from src onto the tree at dst, overwrites files with
     the same name.
 
-    Code taken and expanded from python docs.
+    Code taken and adapted from python docs.
     """
     names = os.listdir(src)
     if ignore is not None:
@@ -388,10 +388,8 @@ def copy(src, dest, required=True, ignores=None):
         makedirs(os.path.dirname(dest))
         shutil.copy2(src, dest)
     elif os.path.isdir(src):
-        if ignores:
-            fast_updatetree(src, dest, ignore=shutil.ignore_patterns(*ignores))
-        else:
-            fast_updatetree(src, dest)
+        ignore = shutil.ignore_patterns(*ignores) if ignores else None
+        fast_updatetree(src, dest, ignore=ignore)
     elif required:
         logging.critical('Required path %s cannot be copied to %s' %
                          (os.path.abspath(src), os.path.abspath(dest)))

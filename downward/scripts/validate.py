@@ -19,7 +19,6 @@
 
 """
 Checks all found plans in the current directory for correctness.
-The path to the validator has to be given as the only command-line argument.
 
 Returns 0 if all of the plans are valid, 1 otherwise.
 """

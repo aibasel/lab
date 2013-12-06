@@ -59,6 +59,7 @@ class _Buildable(object):
     def __init__(self):
         self.resources = []
         self.new_files = []
+        # List of glob-style patterns used to exclude files (not full paths).
         self.ignores = []
 
         self.properties = tools.Properties()
