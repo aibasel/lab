@@ -215,12 +215,14 @@ class HgCheckout(Checkout):
 
 class Translator(HgCheckout):
     BIN_NAME = 'translate.py'
+
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'translate', *args, **kwargs)
 
 
 class Preprocessor(HgCheckout):
     BIN_NAME = 'preprocess'
+
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'preprocess', *args, **kwargs)
 
@@ -233,6 +235,7 @@ class Preprocessor(HgCheckout):
 
 class Planner(HgCheckout):
     BIN_NAME = 'downward'
+
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'search', *args, **kwargs)
 
