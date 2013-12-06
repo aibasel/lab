@@ -617,8 +617,6 @@ class DownwardExperiment(Experiment):
         if self.include_preprocess_results_in_search_runs:
             # Properties files and logs have to be copied, not linked.
             run.add_resource('', path('properties'), 'properties')
-            run.add_resource('', path('run.log'), 'run.log')
-            run.add_resource('', path('run.err'), 'run.err')
 
             run.add_resource('', path('output.sas'), 'output.sas',
                              symlink=sym, required=False)
