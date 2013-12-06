@@ -181,11 +181,10 @@ class _Buildable(object):
                 logging.debug('Linking from %s to %s' % (source, dest))
                 continue
 
+            # Even if the directory containing a resource has already been added,
+            # we copy the resource since we might want to overwrite it.
             logging.debug('Copying %s to %s' % (source, dest))
-            # If the directory containing a resource has already been added,
-            # we don't need to copy and therefore overwrite the resource.
-            if not os.path.exists(dest):
-                tools.copy(source, dest, required, self.ignores)
+            tools.copy(source, dest, required, self.ignores)
 
 
 class Experiment(_Buildable):
