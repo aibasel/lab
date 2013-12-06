@@ -98,7 +98,7 @@ class Checkout(object):
         return os.path.join('code-' + self.rev, *rel_path)
 
     def get_bin_dest(self):
-        return self.get_path_dest(self.part, self.part)
+        return self.get_path_dest(self.part, self.BIN_NAME)
 
     @property
     def src_dir(self):
@@ -214,14 +214,13 @@ class HgCheckout(Checkout):
 
 
 class Translator(HgCheckout):
+    BIN_NAME = 'translate.py'
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'translate', *args, **kwargs)
 
-    def get_bin_dest(self):
-        return self.get_path_dest('translate', 'translate.py')
-
 
 class Preprocessor(HgCheckout):
+    BIN_NAME = 'preprocess'
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'preprocess', *args, **kwargs)
 
@@ -233,6 +232,7 @@ class Preprocessor(HgCheckout):
 
 
 class Planner(HgCheckout):
+    BIN_NAME = 'downward'
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'search', *args, **kwargs)
 
