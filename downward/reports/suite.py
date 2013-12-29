@@ -18,6 +18,8 @@
 
 import sys
 
+from lab import tools
+
 from downward.reports import PlanningReport
 
 
@@ -33,18 +35,15 @@ class SuiteReport(PlanningReport):
 
         exp.add_report(SuiteReport(filter_coverage=1), outfile='solved.py')
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         kwargs.setdefault('format', 'py')
-        PlanningReport.__init__(self, *args, **kwargs)
+        PlanningReport.__init__(self, **kwargs)
 
     def get_text(self):
         """
         We do not need any markup processing or loop over attributes here,
         so the get_text() method is implemented right here.
         """
-        if not self.props:
-            sys.exit('No problems match this filter')
-        problems = [domain + ':' + problem for domain, problem in self.problems]
-        problems = ['        "%s",\n' % problem for problem in problems]
-        output = ('def suite():\n    return [\n%s    ]\n' % ''.join(problems))
-        return output
+        tasks = ['%s:%s' % task for task in self.problems]
+        lines = ['        "%s",' % task for task in tools.natural_sort(tasks)]
+        return 'def suite():\n    return [\n%s\n]\n' % '\n'.join(lines)
