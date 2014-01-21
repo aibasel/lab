@@ -232,9 +232,10 @@ class DownwardExperiment(Experiment):
         tuples of the form (Translator, Preprocessor, Planner). If combinations
         is None (default), perform an experiment with the working copy in *repo*.
 
-        If *compact* is True, link to benchmarks and preprocessed files instead
-        of copying them. Only use this option if the linked files will **not**
-        be changed during the experiment.
+        If *compact* is True, reference benchmarks and preprocessed files instead
+        of copying them. Only use this option if the referenced files will **not**
+        be changed during the experiment. Set *compact*=False if you want a
+        portable experiment.
 
         If *limits* is given, it must be a dictionary and it will be used to
         overwrite the default limits. ::
@@ -587,8 +588,12 @@ class DownwardExperiment(Experiment):
                                       translator.rev + '-' + preprocessor.rev,
                                       prob.domain, prob.problem)
 
+        def source(filename):
+            return os.path.join(preprocess_dir, filename)
+
         def source_and_dest(filename):
-            return os.path.join(preprocess_dir, filename), filename
+            dest = None if self.compact else filename
+            return source(filename), dest
 
         run = SearchRun(self, translator, preprocessor, planner, prob, setting)
         self.add_run(run)
@@ -596,22 +601,19 @@ class DownwardExperiment(Experiment):
         run.set_property('preprocess_dir', preprocess_dir)
 
         run.set_property('compact', self.compact)
-        sym = self.compact
 
         # We definitely need the output file.
-        run.add_resource('OUTPUT', *source_and_dest('output'), symlink=sym)
+        run.add_resource('OUTPUT', *source_and_dest('output'))
 
         # Needed for validation.
-        run.add_resource('DOMAIN', *source_and_dest('domain.pddl'), symlink=sym)
-        run.add_resource('PROBLEM', *source_and_dest('problem.pddl'), symlink=sym)
+        run.add_resource('DOMAIN', *source_and_dest('domain.pddl'))
+        run.add_resource('PROBLEM', *source_and_dest('problem.pddl'))
 
         # The other files are optional.
         if self.include_preprocess_results_in_search_runs:
             # Properties have to be copied, not linked.
-            run.add_resource('', *source_and_dest('properties'))
+            run.add_resource('', source('properties'), 'properties')
 
             # {all,test}.groups were created by old versions of the planner.
-            run.add_resource('', *source_and_dest('all.groups'),
-                             symlink=sym, required=False)
-            run.add_resource('', *source_and_dest('test.groups'),
-                             symlink=sym, required=False)
+            run.add_resource('', *source_and_dest('all.groups'), required=False)
+            run.add_resource('', *source_and_dest('test.groups'), required=False)
