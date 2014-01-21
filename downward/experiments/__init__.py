@@ -587,8 +587,8 @@ class DownwardExperiment(Experiment):
                                       translator.rev + '-' + preprocessor.rev,
                                       prob.domain, prob.problem)
 
-        def path(filename):
-            return os.path.join(preprocess_dir, filename)
+        def source_and_dest(filename):
+            return os.path.join(preprocess_dir, filename), filename
 
         run = SearchRun(self, translator, preprocessor, planner, prob, setting)
         self.add_run(run)
@@ -599,19 +599,19 @@ class DownwardExperiment(Experiment):
         sym = self.compact
 
         # We definitely need the output file.
-        run.add_resource('OUTPUT', path('output'), 'output', symlink=sym)
+        run.add_resource('OUTPUT', *source_and_dest('output'), symlink=sym)
 
         # Needed for validation.
-        run.add_resource('DOMAIN', path('domain.pddl'), 'domain.pddl', symlink=sym)
-        run.add_resource('PROBLEM', path('problem.pddl'), 'problem.pddl', symlink=sym)
+        run.add_resource('DOMAIN', *source_and_dest('domain.pddl'), symlink=sym)
+        run.add_resource('PROBLEM', *source_and_dest('problem.pddl'), symlink=sym)
 
         # The other files are optional.
         if self.include_preprocess_results_in_search_runs:
             # Properties have to be copied, not linked.
-            run.add_resource('', path('properties'), 'properties')
+            run.add_resource('', *source_and_dest('properties'))
 
             # {all,test}.groups were created by old versions of the planner.
-            run.add_resource('', path('all.groups'), 'all.groups',
+            run.add_resource('', *source_and_dest('all.groups'),
                              symlink=sym, required=False)
-            run.add_resource('', path('test.groups'), 'test.groups',
+            run.add_resource('', *source_and_dest('test.groups'),
                              symlink=sym, required=False)
