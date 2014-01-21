@@ -52,7 +52,6 @@ class LazyFile(object):
 redirects = {'stdout': LazyFile('run.log'), 'stderr': LazyFile('run.err')}
 driver_log = LazyFile('driver.log')
 driver_err = LazyFile('driver.err')
-properties = Properties(filename='properties')
 
 
 def print_(stream, text):
@@ -61,6 +60,9 @@ def print_(stream, text):
 
 
 def set_property(name, value):
+    # Read properties again before each write to ensure consistency.
+    # Otherwise we might overwrite results added by parsers.
+    properties = Properties(filename='properties')
     properties[name] = value
     properties.write()
 
