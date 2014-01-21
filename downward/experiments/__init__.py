@@ -25,7 +25,6 @@ from collections import namedtuple, defaultdict
 import os
 import logging
 import multiprocessing
-import shutil
 import subprocess
 
 from lab.experiment import Run, Experiment
