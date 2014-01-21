@@ -52,6 +52,7 @@ class LazyFile(object):
 redirects = {'stdout': LazyFile('run.log'), 'stderr': LazyFile('run.err')}
 driver_log = LazyFile('driver.log')
 driver_err = LazyFile('driver.err')
+properties = Properties(filename='properties')
 
 
 def print_(stream, text):
@@ -60,7 +61,6 @@ def print_(stream, text):
 
 
 def set_property(name, value):
-    properties = Properties(filename='properties')
     properties[name] = value
     properties.write()
 
@@ -68,4 +68,5 @@ def set_property(name, value):
 def save_returncode(command_name, value):
     set_property('%s_returncode' % command_name.lower(), value)
     error = 0 if value == 0 else 1
+    # TODO: Remove once we judge only by Fast Downward's exit code.
     set_property('%s_error' % command_name.lower(), error)
