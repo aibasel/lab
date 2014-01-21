@@ -607,11 +607,8 @@ class DownwardExperiment(Experiment):
 
         # The other files are optional.
         if self.include_preprocess_results_in_search_runs:
-            # Properties files and logs have to be copied, not linked.
+            # Properties have to be copied, not linked.
             run.add_resource('', path('properties'), 'properties')
-
-            run.add_resource('', path('output.sas'), 'output.sas',
-                             symlink=sym, required=False)
 
             # {all,test}.groups were created by old versions of the planner.
             run.add_resource('', path('all.groups'), 'all.groups',
