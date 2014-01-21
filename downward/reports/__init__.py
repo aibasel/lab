@@ -63,7 +63,6 @@ class PlanningReport(Report):
         Attribute('expansions', functions=reports.gm),
         Attribute('generated', functions=reports.gm),
         Attribute('score_*', min_wins=False, functions=[reports.avg, sum]),
-        Attribute('*_error', absolute=True),
     ])
 
     INFO_ATTRIBUTES = ['translate_summary', 'preprocess_summary', 'search_summary',

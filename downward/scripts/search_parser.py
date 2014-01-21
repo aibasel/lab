@@ -201,17 +201,13 @@ def unsolvable(content, props):
     props['unsolvable'] = int(not props['coverage'] and logged_unsolvable)
 
 
-def parse_error(content, props):
-    props['parse_error'] = 'Parse Error:' in content
-
-
 def unsupported(content, props):
     props['unsupported'] = 'does not support' in content
 
 
 def coverage(content, props):
     props['coverage'] = int(('plan_length' in props or 'cost' in props) and
-                            not props.get('validate_error'))
+                            props.get('validate_returncode') == 0)
 
 
 def get_initial_h_value(content, props):
@@ -325,9 +321,6 @@ def get_error(content, props):
     """
     exitcode = props.get('search_returncode')
 
-    # Ignore search_error attribute. It only tells us whether returncode != 0.
-    if 'search_error' in props:
-        del props['search_error']
     # If there is any error, do no count this task as solved.
     if props.get('error') is not None:
         props['coverage'] = 0
@@ -354,7 +347,7 @@ def get_error(content, props):
         # First see if we already know the type of error.
         if props.get('unsolvable', None) == 1:  # TODO: Remove later.
             props['error'] = 'probably-unsolvable-exitcode-%d' % exitcode
-        elif props.get('validate_error', None) == 1:
+        elif props.get('validate_returncode', 0) != 0:
             props['error'] = 'unexplained-invalid-solution'
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
@@ -386,8 +379,6 @@ class SearchParser(Parser):
 
         # TODO: Use FD exitcodes.
 
-        # TODO: search run.err once parse errors are printed there
-        self.add_function(parse_error)
         if os.path.exists('driver.log'):
             self.add_function(parse_last_loggings, file='driver.log')
         self.add_function(get_iterative_results)

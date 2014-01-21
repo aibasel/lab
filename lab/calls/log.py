@@ -69,6 +69,3 @@ def set_property(name, value):
 
 def save_returncode(command_name, value):
     set_property('%s_returncode' % command_name.lower(), value)
-    error = 0 if value == 0 else 1
-    # TODO: Remove once we judge only by Fast Downward's exit code.
-    set_property('%s_error' % command_name.lower(), error)
