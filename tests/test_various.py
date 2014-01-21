@@ -12,6 +12,7 @@ from lab import tools
 from lab import reports
 from lab.reports import gm
 from lab import tools
+from lab.calls.log import LazyFile
 from downward.scripts.preprocess_parser import parse_statistics
 
 
@@ -90,3 +91,18 @@ def test_colors():
     assert tools.get_colors(row, True) == expected_min_wins
     assert tools.get_colors(row, False) == expected_max_wins
     assert tools.rgb_fractions_to_html_color(1, 0, 0.5) == 'rgb(255,0,127)'
+
+def test_lazy_file():
+    path = 'test-lazy-file.txt'
+    if os.path.exists(path):
+        os.remove(path)
+    f = LazyFile(path)
+    assert not os.path.exists(path)
+    f.flush()
+    assert not os.path.exists(path)
+    f.close()
+    assert not os.path.exists(path)
+    f.write('Hello')
+    assert os.path.exists(path)
+    f.close()
+    os.remove(path)

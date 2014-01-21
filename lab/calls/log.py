@@ -15,12 +15,43 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from lab.tools import Properties
 
 
-redirects = {'stdout': open('run.log', 'a'), 'stderr': open('run.err', 'a')}
-driver_log = open('driver.log', 'a')
-driver_err = open('driver.err', 'a')
+class LazyFile(object):
+    def __init__(self, path):
+        self._path = path
+        self._file = None
+
+    def _ensure_file_opened(self):
+        if not self._file:
+            self._file = open(self._path, 'w')
+
+    def write(self, s):
+        self._ensure_file_opened()
+        self._file.write(s)
+
+    def fileno(self):
+        self._ensure_file_opened()
+        return self._file.fileno()
+
+    def flush(self):
+        if self._file:
+            self._file.flush()
+
+    def close(self):
+        if self._file:
+            self._file.close()
+            self._file = None
+            if os.path.getsize(self._path) == 0:
+                os.remove(self._path)
+
+
+redirects = {'stdout': LazyFile('run.log'), 'stderr': LazyFile('run.err')}
+driver_log = LazyFile('driver.log')
+driver_err = LazyFile('driver.err')
 
 
 def print_(stream, text):

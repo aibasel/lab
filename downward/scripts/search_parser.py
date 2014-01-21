@@ -23,9 +23,10 @@ Regular expressions and functions for parsing planning experiments
 
 from __future__ import division
 
-import re
-import math
 from collections import defaultdict
+import math
+import os
+import re
 
 # The lab directory is added automatically in the Experiment constructor
 from lab.parser import Parser
@@ -390,7 +391,8 @@ class SearchParser(Parser):
 
         # TODO: search run.err once parse errors are printed there
         self.add_function(parse_error)
-        self.add_function(parse_last_loggings, file='driver.log')
+        if os.path.exists('driver.log'):
+            self.add_function(parse_last_loggings, file='driver.log')
         self.add_function(get_iterative_results)
         self.add_function(coverage)
         self.add_function(unsupported, 'run.err')

@@ -22,3 +22,6 @@ set_property('queue', os.environ.get('QUEUE'))
 """VARIABLES"""
 
 """CALLS"""
+
+for stream in redirects.values():
+    stream.close()
