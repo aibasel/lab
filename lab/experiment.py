@@ -116,7 +116,7 @@ class _Buildable(object):
         if dest == '':
             dest = os.path.basename(source)
         if dest is None:
-            dest = source
+            dest = os.path.abspath(source)
         self._check_alias(name)
         resource = (name, source, dest, required, symlink)
         if not resource in self.resources:
@@ -176,10 +176,10 @@ class _Buildable(object):
             if required and not os.path.exists(source):
                 logging.critical('The required resource can not be found: %s' %
                                  source)
-            if os.path.abspath(source) == os.path.abspath(dest):
-                # We only want an alias for this resource.
-                continue
             dest = self._get_abs_path(dest)
+            if not dest.startswith(self.path):
+                # Only copy resources that reside in the experiment/run dir.
+                continue
             if symlink:
                 # Do not create a symlink if the file doesn't exist.
                 if not os.path.exists(source):
