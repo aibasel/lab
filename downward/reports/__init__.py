@@ -124,7 +124,7 @@ class PlanningReport(Report):
         markup = Report.get_text(self)
         unxeplained_errors = 0
         for run in self.runs.values():
-            if run.get('unexplained_error'):
+            if run.get('error', '').startswith('unexplained'):
                 logging.warning('Unexplained error in \'%s\': %s' %
                                 (run.get('run_dir'), run.get('error')))
                 unxeplained_errors += 1
@@ -190,7 +190,6 @@ class PlanningReport(Report):
                     run['error'] = 'unexplained-search-parser-crash'
                 else:
                     run['error'] = 'unexplained-crash'
-                run['unexplained_error'] = 1
 
             domain, problem, config = run['domain'], run['problem'], run['config']
             problems.add((domain, problem))
@@ -278,7 +277,7 @@ class PlanningReport(Report):
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
         for run in self.props.values():
-            if run.get('unexplained_error'):
+            if run.get('error', '').startswith('unexplained'):
                 for column in columns:
                     table.add_cell(run['run_dir'], column, run.get(column, '?'))
         return table

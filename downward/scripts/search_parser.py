@@ -379,9 +379,6 @@ def get_error(content, props):
         else:
             props['error'] = 'unexplained'
 
-    if props.get('error'):
-        props['unexplained_error'] = props.get('error').startswith('unexplained')
-
 
 class SearchParser(Parser):
     def __init__(self):

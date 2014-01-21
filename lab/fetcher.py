@@ -128,7 +128,7 @@ class Fetcher(object):
         if fetch_from_eval_dir:
             src_props = run_filter.apply(src_props)
             for prop in src_props.values():
-                if prop.get('unexplained_error'):
+                if prop.get('error', '').startswith('unexplained'):
                     logging.warning("Unexplained error in '%s': %s" %
                         (prop.get('run_dir'), prop.get('error')))
 
@@ -158,12 +158,12 @@ class Fetcher(object):
             assert run_id, 'Dir %s has no id' % props.get('run_dir')
             if write_combined_props:
                 combined_props['-'.join(run_id)] = props
-            if props.get('unexplained_error'):
-                logging.warning('Unexplained error in: "%s"' % props.get('run_dir'))
+            if props.get('error', '').startswith('unexplained'):
+                logging.warning('Unexplained error in {run_dir}: {error}'.format(**props))
                 unxeplained_errors += 1
 
         if unxeplained_errors:
-            logging.warning('There were %s runs with unexplained errors.'
+            logging.warning('There were %d runs with unexplained errors.'
                             % unxeplained_errors)
         tools.makedirs(eval_dir)
         if write_combined_props:
