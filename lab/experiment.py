@@ -91,13 +91,16 @@ class _Buildable(object):
     def add_resource(self, name, source, dest='', required=True, symlink=False):
         """Include the file or directory *source* in the experiment or run.
 
-        *source* is copied to /path/to/exp-or-run/*dest*. If *dest* is
-        omitted, the last part of the path to *source* will be taken as the
-        destination filename.
-
         *name* is an alias for the resource in commands. It must start with a
         letter and consist exclusively of letters, numbers and underscores.
-        If you don't need an alias for the resource, set name=''. ::
+        If you don't need an alias for the resource, set name=''.
+
+        *source* is copied to /path/to/exp-or-run/*dest*. If *dest* is
+        omitted, the last part of the path to *source* will be taken as the
+        destination filename. If you only want an alias for your resource, but
+        don't want to copy or link it, set *dest* to None.
+
+        Example::
 
             exp.add_resource('PLANNER', 'path/to/my-planner', 'planner')
 
@@ -110,8 +113,10 @@ class _Buildable(object):
             run.add_command('find-plan', ['PLANNER', 'DOMAIN', 'PROBLEM'])
 
         """
-        if not dest:
+        if dest == '':
             dest = os.path.basename(source)
+        if dest is None:
+            dest = source
         self._check_alias(name)
         resource = (name, source, dest, required, symlink)
         if not resource in self.resources:
@@ -171,6 +176,9 @@ class _Buildable(object):
             if required and not os.path.exists(source):
                 logging.critical('The required resource can not be found: %s' %
                                  source)
+            if os.path.abspath(source) == os.path.abspath(dest):
+                # We only want an alias for this resource.
+                continue
             dest = self._get_abs_path(dest)
             if symlink:
                 # Do not create a symlink if the file doesn't exist.
@@ -558,9 +566,11 @@ class Run(_Buildable):
         if env_vars:
             env_vars_text = ''
             for var, filename in sorted(env_vars.items()):
-                abs_filename = self._get_abs_path(filename)
-                rel_filename = self._get_rel_path(abs_filename)
-                env_vars_text += ('%s = "%s"\n' % (var, rel_filename))
+                filename = self._get_abs_path(filename)
+                # Only use relative filename for paths in the experiment dir.
+                if filename.startswith(self.experiment.path):
+                    filename = self._get_rel_path(filename)
+                env_vars_text += ('%s = "%s"\n' % (var, filename))
         else:
             env_vars_text = '"Here you would find variable declarations"'
 
