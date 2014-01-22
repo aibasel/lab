@@ -363,11 +363,10 @@ class Report(object):
             logging.info('Wrote file://%s' % self.outfile)
 
     def _get_type(self, attribute):
-        for run_id, run in self.props.items():
+        for run_id, run in self.props.iteritems():
             val = run.get(attribute)
-            if val is None:
-                continue
-            return type(val)
+            if val is not None:
+                return type(val)
         # Attribute is None in all runs.
         return None
 
