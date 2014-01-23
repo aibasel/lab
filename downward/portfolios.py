@@ -84,7 +84,7 @@ def import_portfolio(path):
         content = src.read()
         content = content.replace(',bound=BOUND', '')
         content = content.replace('import portfolio', '')
-        content = content.replace('portfolio.run', '#portfolio.run')
+        content = content.replace('portfolio.run', 'pass #portfolio.run')
 
     with tempfile.NamedTemporaryFile(suffix='.py') as dest:
         dest.write(content)
