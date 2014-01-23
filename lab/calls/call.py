@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import resource
 import subprocess
 import time
@@ -47,8 +48,11 @@ class Call(subprocess.Popen):
         whether the process has finished. As a result the options
         *kill_delay* and *check_interval* are now ignored.
         """
-        kwargs.pop('kill_delay', None)
-        kwargs.pop('check_interval', None)
+        for deprecated_arg in ['kill_delay', 'check_interval']:
+            if deprecated_arg in kwargs:
+                logging.warning('The "%s" argument is obsolete and will be ignored.' %
+                                deprecated_arg)
+                del kwargs[deprecated_arg]
 
         self.name = name
         # Use wall-clock limit of 30 seconds for very small time limits.
