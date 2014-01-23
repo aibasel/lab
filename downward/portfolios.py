@@ -34,23 +34,24 @@ total_time = {total_time}
 CONFIGS = {portfolio}
 {final_config_source}
 {final_config_builder_source}
-portfolio.run(CONFIGS,
-              optimal={optimal},
-              final_config={final_config_name},
-              final_config_builder={final_config_builder_name})
+portfolio.run(CONFIGS, {kwargs_string})
 '''
 
 
-def _add_bound(config, optimal):
-    config = [part.strip() for part in config]
+def _prepare_config(config, optimal):
+    config = [i.strip() for i in config]
     # Don't use bounds for optimal planning.
     if optimal:
         return config
 
     for i, entry in enumerate(config):
         if entry == '--search':
-            if 'bound=BOUND' not in config[i + 1]:
-                config[i + 1] = (config[i + 1][:-1] + ',bound=BOUND)')
+            search = config[i + 1]
+            if 'bound=infinity' in search:
+                search = search.replace('bound=infinity', 'bound=BOUND')
+            elif 'bound=BOUND' not in search:
+                search = search[:-1] + ',bound=BOUND)'
+            config[i + 1] = search
     return config
 
 
@@ -70,12 +71,18 @@ def create_portfolio_script(portfolio, optimal, final_config=None,
                             final_config_builder=None, notes=''):
     total_time = sum(time for time, config in portfolio)
     num_configs = len(portfolio)
-    portfolio = [(t, _add_bound(config, optimal)) for t, config in portfolio]
+    portfolio = [(t, _prepare_config(config, optimal)) for t, config in portfolio]
     portfolio = json.dumps(portfolio, indent=4, separators=(',', ': '))
     final_config_name, final_config_source = _get_name_and_source(final_config)
     (final_config_builder_name,
         final_config_builder_source) = _get_name_and_source(final_config_builder)
     notes = _pad_if_not_empty(notes)
+    kwargs = {'optimal': optimal}
+    if final_config_name is not None:
+        kwargs['final_config'] = final_config_name
+    if final_config_builder_name is not None:
+        kwargs['final_config_builder'] = final_config_builder_name
+    kwargs_string = ', '.join('%s=%s' % pair for pair in kwargs.items())
     return TEMPLATE.format(**locals())
 
 
