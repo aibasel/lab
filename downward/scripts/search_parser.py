@@ -273,9 +273,11 @@ def check_min_values(content, props):
 
 
 def parse_last_loggings(content, props):
-    patterns = [('last_logged_time', re.compile(r'total_time: (.+)s')),
-                ('last_logged_wall_clock_time', re.compile(r'wall-clock time: (.+)')),
-                ('last_logged_memory', re.compile(r'total_vsize: (.+) MB'))]
+    patterns = [
+        #('last_logged_time', re.compile(r'total_time: (.+)s')),
+        ('last_logged_wall_clock_time', re.compile(r'search wall-clock time: (.+)s')),
+        #('last_logged_memory', re.compile(r'total_vsize: (.+) MB')),
+    ]
     new_props = {}
     for line in reversed(content.splitlines()):
         for attr, regex in patterns:
@@ -319,7 +321,7 @@ def get_error(content, props):
       * unexplained: The planner did not produce a plan but was not killed with SIGKILL.
       * ... see also 'explanations' dictionary below.
     """
-    exitcode = props.get('search_returncode')
+    exitcode = props['search_returncode']
 
     # If there is any error, do no count this task as solved.
     if props.get('error') is not None:
