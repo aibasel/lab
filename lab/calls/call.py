@@ -15,23 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import resource
-import signal
 import subprocess
 import time
 
 from lab.calls.log import set_property
-
-
-def kill_pgrp(pgrp, sig, show_error=True):
-    try:
-        os.killpg(pgrp, sig)
-    except OSError:
-        if not show_error:
-            return
-        print ("Process group %s could not be killed with signal %s" %
-               (pgrp, sig))
 
 
 def set_limit(kind, soft_limit, hard_limit=None):
@@ -76,7 +64,6 @@ class Call(subprocess.Popen):
                 kwargs[stream_name] = open(stream, 'w')
 
         def prepare_call():
-            os.setpgrp()
             # When the soft time limit is reached, SIGXCPU is emitted. Once we
             # reach the higher hard time limit, SIGKILL is sent. Having some
             # padding between the two limits allows us to distinguish between
@@ -89,14 +76,6 @@ class Call(subprocess.Popen):
 
         self.wall_clock_start_time = time.time()
         subprocess.Popen.__init__(self, args, preexec_fn=prepare_call, **kwargs)
-
-    def terminate(self):
-        print "aborting children with SIGTERM..."
-        kill_pgrp(self.pid, signal.SIGTERM)
-
-    def kill(self):
-        print "aborting children with SIGKILL..."
-        kill_pgrp(self.pid, signal.SIGKILL)
 
     def wait(self):
         retcode = subprocess.Popen.wait(self)
