@@ -533,11 +533,6 @@ class Run(_Buildable):
             abort_on_failure = kwargs.pop('abort_on_failure',
                                           DEFAULT_ABORT_ON_FAILURE)
 
-            # Use lower check interval locally to speed up tests.
-            # TODO: Find a better solution for this.
-            if isinstance(self.experiment.environment, LocalEnvironment):
-                kwargs.setdefault('check_interval', 0.1)
-
             # Support running globally installed binaries
             def format_arg(arg):
                 return arg if arg in env_vars else '"%s"' % arg
