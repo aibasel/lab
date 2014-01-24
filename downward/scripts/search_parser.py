@@ -44,6 +44,7 @@ EXIT_TIMEOUT = 7
 EXIT_TIMEOUT_AND_MEMORY = 8
 EXIT_SIGXCPU = 128 + 24
 EXIT_SIGSEGV = 128 + 11
+EXIT_SIGKILL = 128 + 9
 
 
 def successful(run):
@@ -354,23 +355,8 @@ def get_error(content, props):
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
             props['error'] = 'probably-out-of-memory-exitcode-%d' % exitcode
-        # If the run was killed with SIGKILL (return code: 128 + 9 (SIGKILL) = 137),
-        # we can assume it was because it hit its resource limits.
-        # For other or unknown return values we don't want to hide potential problems.
-        elif exitcode == 137:
-            remaining_time = (props['limit_search_time'] -
-                              props.get('last_logged_time', 0))
-            remaining_memory = (props['limit_search_memory'] -
-                                props.get('last_logged_memory', 0))
-            remaining_time_rel = remaining_time / float(props['limit_search_time'])
-            remaining_memory_rel = remaining_memory / float(props['limit_search_memory'])
-            fraction = 0.05
-            if remaining_time_rel < fraction and remaining_memory_rel > fraction:
-                props['error'] = 'unexplained-probably-timeout'
-            elif remaining_memory_rel < fraction and remaining_time_rel > fraction:
-                props['error'] = 'unexplained-probably-out-of-memory'
-            else:
-                props['error'] = 'unexplained-sigkill'
+        elif exitcode == EXIT_SIGKILL:
+            props['error'] = 'unexplained-sigkill'
         else:
             props['error'] = 'unexplained'
 
