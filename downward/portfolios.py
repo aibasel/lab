@@ -89,9 +89,10 @@ def create_portfolio_script(portfolio, optimal, final_config=None,
 def import_portfolio(path):
     with open(path) as src:
         content = src.read()
-        content = content.replace(',bound=BOUND', '')
+        # Instead of running the portfolio, do nothing.
+        content = content[:content.find('portfolio.run')] + 'pass'
         content = content.replace('import portfolio', '')
-        content = content.replace('portfolio.run', 'pass #portfolio.run')
+        content = content.replace(',bound=BOUND', '')
 
     with tempfile.NamedTemporaryFile(suffix='.py') as dest:
         dest.write(content)
