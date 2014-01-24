@@ -109,14 +109,13 @@ def generate_problems(benchmarks_dir, description):
     range_expr = re.compile(r'.+_([-]?\d+)TO([-]?\d+)', re.IGNORECASE)
     range_result = range_expr.search(description)
 
+    # TODO: Remove possibility to load suites from arbitrary files.
     if '.py:' in description:
         filename, rest = description.split(':', 1)
         description = rest
+        module_dict = tools.import_python_file(filename).__dict__
     else:
-        filename = __file__
-
-    module = tools.import_python_file(filename)
-    module_dict = module.__dict__
+        module_dict = globals()
 
     if range_result:
         # Allow writing SUITE_NAME_<NUMBER>TO<NUMBER>
