@@ -42,8 +42,9 @@ else:
 
 class StandardDownwardExperiment(DownwardExperiment):
     def __init__(self, path=None, repo=None, environment=None,
-                 combinations=None, limits=None, attributes=None, priority=0,
-                 queue=None, processes=2, email=None, cache_dir=CACHE_DIR, **kwargs):
+                 combinations=None, limits=None, attributes=None,
+                 derived_properties=None, priority=0, queue=None,
+                 processes=2, email=None, cache_dir=CACHE_DIR, **kwargs):
         if path is None:
             path = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 
@@ -74,7 +75,7 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         # Add report steps
         abs_report_file = os.path.join(self.eval_dir, '%s-abs.html' % expname)
-        self.add_report(AbsoluteReport(attributes=attributes, colored=True),
+        self.add_report(AbsoluteReport(attributes=attributes, colored=True, derived_properties=derived_properties),
                         name='report-abs', outfile=abs_report_file)
 
         if REMOTE:
