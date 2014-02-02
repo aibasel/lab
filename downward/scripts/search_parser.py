@@ -72,8 +72,8 @@ ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
     # We exclude lines like "Initial state h value: 1147184/1703241." that stem
     # from multi-heuristic search.
     ('initial_h_value', re.compile(r'Initial state h value: (\d+)\.'), int),
-    # We cannot include " \[t=.+s\]" in the regex, because older versions don't
-    # have this information in the log.
+    # We cannot include " \[t=.+s\]" (global timer) in the regex, because
+    # older versions don't print it.
     ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
 ]
 
@@ -157,14 +157,16 @@ def get_iterative_results(content, props):
         values['search_time'].pop()
 
     _update_props_with_iterative_values(props, values,
-            [('cost', 'plan_length'), ('expansions', 'generated', 'search_time')])
+            [('cost', 'plan_length'),
+             # TODO: add reopened, evaluated and dead ends.
+             ('expansions', 'generated', 'search_time')])
 
 
 def get_cumulative_results(content, props):
     """
     Some cumulative results are printed at the end of the logfile. We revert
     the content to make a search for those values much faster. We would have to
-    convert the content anyways, because there's no real telling if those
+    reverse the content anyways, because there's no real telling if those
     values talk about a single or a cumulative result. If we start parsing at
     the bottom of the file we know that the values are the cumulative ones.
     """
