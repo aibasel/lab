@@ -340,13 +340,12 @@ def get_error(content, props):
         EXIT_SIGXCPU: 'timeout',
         # EXIT_SIGSEGV: 'unexplained-segfault',  # TODO: Add later.
     }
-    for code, error in exitcode_to_error.items():
-        if exitcode == code:
-            props['error'] = error
+    if exitcode in exitcode_to_error:
+        props['error'] = exitcode_to_error[exitcode]
 
     # If coverage is 0 and we don't know the reason, try to find one.
     # TODO: Only allow expected exitcodes even if coverage=1 to find portfolio errors.
-    if props.get('coverage') == 0 and props.get('error') is None:
+    if not props.get('coverage') and not props.get('error'):
         # First see if we already know the type of error.
         if props.get('unsolvable', None) == 1:  # TODO: Remove later.
             props['error'] = 'probably-unsolvable-exitcode-%d' % exitcode
@@ -355,8 +354,6 @@ def get_error(content, props):
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
             props['error'] = 'probably-out-of-memory-exitcode-%d' % exitcode
-        elif exitcode == EXIT_SIGKILL:
-            props['error'] = 'unexplained-sigkill'
         else:
             props['error'] = 'unexplained'
 
