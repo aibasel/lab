@@ -292,35 +292,10 @@ def parse_last_loggings(content, props):
 
 
 def get_error(content, props):
-    """
-    If there was an error, its source will be stored in props['error'].
-    Possible values are
-      * None: No error, coverage = 1
-      * unsolvable: No error, planner reported that problem is unsolvable.
-      * timeout: planner exceeded time limit.
-      * out-of-memory: planner exceeded memory limit.
+    """If there was an error, store its source in props['error'].
 
-    The following reasons should never occur. If they do, this is an indication that
-    something went completely wrong, either in the lab framework or on the executing
-    computer. Check the files run.log, run.err, driver.log and driver.err for further
-    details.
-
-      * unexplained-timeout: lab stopped the planner due to a timeout.
-      * unexplained-wall-clock-timeout: lab stopped the planner due to a
-        wall clock timeout.
-      * unexplained-out-of-memory: lab stopped the planner due to
-        exceeded memory.
-      * unexplained-probably-timeout: The planner was stopped with
-        return code 128+9 (SIGKILL).
-        The last logged entries for time and memory point to an unrecognized timeout.
-      * unexplained-probably-out-of-memory: The planner was stopped with
-        return code 128+9 (SIGKILL).
-        The last logged entries for time and memory point to an unrecognized memory out.
-      * unexplained-sigkill: The planner was stopped with return code 128+9 (SIGKILL)
-        before reaching its time or memory limits or reaching both roughly at the same
-        time.
-      * unexplained: The planner did not produce a plan but was not killed with SIGKILL.
-      * ... see also 'explanations' dictionary below.
+    For unexplained errors please check the files run.log, run.err,
+    driver.log and driver.err manually to find the reason for the error.
     """
     if props.get('error'):
         return
