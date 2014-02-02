@@ -322,11 +322,8 @@ def get_error(content, props):
       * unexplained: The planner did not produce a plan but was not killed with SIGKILL.
       * ... see also 'explanations' dictionary below.
     """
-    exitcode = props['search_returncode']
-
-    # If there is any error, do no count this task as solved.
-    if props.get('error') is not None:
-        props['coverage'] = 0
+    if props.get('error'):
+        return
 
     # TODO: Add EXIT_PLAN_FOUND and EXIT_CRITICAL_ERROR later.
     exitcode_to_error = {
@@ -340,8 +337,12 @@ def get_error(content, props):
         EXIT_SIGXCPU: 'timeout',
         # EXIT_SIGSEGV: 'unexplained-segfault',  # TODO: Add later.
     }
+
+    exitcode = props['search_returncode']
     if exitcode in exitcode_to_error:
         props['error'] = exitcode_to_error[exitcode]
+    elif props.get('validate_returncode', 0) != 0:
+        props['error'] = 'unexplained-invalid-solution'
 
     # If coverage is 0 and we don't know the reason, try to find one.
     # TODO: Only allow expected exitcodes even if coverage=1 to find portfolio errors.
@@ -349,13 +350,11 @@ def get_error(content, props):
         # First see if we already know the type of error.
         if props.get('unsolvable', None) == 1:  # TODO: Remove later.
             props['error'] = 'probably-unsolvable-exitcode-%d' % exitcode
-        elif props.get('validate_returncode', 0) != 0:
-            props['error'] = 'unexplained-invalid-solution'
         # If we don't know the error type already, look at the error log.
         elif 'bad_alloc' in content:
             props['error'] = 'probably-out-of-memory-exitcode-%d' % exitcode
         else:
-            props['error'] = 'unexplained'
+            props['error'] = 'unexplained-exitcode-%d' % exitcode
 
 
 class SearchParser(Parser):
