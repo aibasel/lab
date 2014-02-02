@@ -202,10 +202,6 @@ def unsolvable(content, props):
     props['unsolvable'] = int(not props['coverage'] and logged_unsolvable)
 
 
-def unsupported(content, props):
-    props['unsupported'] = 'does not support' in content
-
-
 def coverage(content, props):
     props['coverage'] = int(('plan_length' in props or 'cost' in props) and
                             props.get('validate_returncode') == 0)
@@ -322,12 +318,8 @@ def get_error(content, props):
     # If coverage is 0 and we don't know the reason, try to find one.
     # TODO: Only allow expected exitcodes even if coverage=1 to find portfolio errors.
     if not props.get('coverage') and not props.get('error'):
-        # First see if we already know the type of error.
         if props.get('unsolvable', None) == 1:  # TODO: Remove later.
             props['error'] = 'probably-unsolvable-exitcode-%d' % exitcode
-        # If we don't know the error type already, look at the error log.
-        elif 'bad_alloc' in content:
-            props['error'] = 'probably-out-of-memory-exitcode-%d' % exitcode
         else:
             props['error'] = 'unexplained-exitcode-%d' % exitcode
 
@@ -336,15 +328,12 @@ class SearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
 
-        # TODO: Use FD exitcodes.
-
         if os.path.exists('driver.log'):
             self.add_function(parse_last_loggings, file='driver.log')
         self.add_function(get_iterative_results)
         self.add_function(coverage)
-        self.add_function(unsupported, 'run.err')
         self.add_function(unsolvable)
-        self.add_function(get_error, 'run.err')
+        self.add_function(get_error)
 
 
 class SingleSearchParser(SearchParser):
