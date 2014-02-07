@@ -81,6 +81,7 @@ class DownwardRun(Run):
 
     def _save_limits(self):
         for name, limit in self.experiment.limits.items():
+            # TODO: Respect timeout parameter.
             self.set_property('limit_' + name, limit)
 
     def _save_ext_config(self):
