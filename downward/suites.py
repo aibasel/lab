@@ -206,7 +206,7 @@ def suite_ipc08_sat_only():
         'sokoban-sat08-strips',
         'transport-sat08-strips',
         'woodworking-sat08-strips',
-        # TODO: cyber-security is missing
+        # Note: cyber-security is missing
     ]
 
 def suite_ipc08_sat_only_strips():
@@ -216,7 +216,7 @@ def suite_ipc08_sat_only_strips():
         'sokoban-sat08-strips',
         'transport-sat08-strips',
         'woodworking-sat08-strips',
-        # TODO: cyber-security is missing
+        # Note: cyber-security is missing
     ]
 
 def suite_ipc08_opt():
