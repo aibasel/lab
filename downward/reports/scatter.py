@@ -74,8 +74,9 @@ class ScatterPgfPlots(PgfPlots):
             plot['color'] = cls.COLORS.get(c, c)
             plot['mark options'] = '{draw=black}'
             lines.append('\\addplot[%s] coordinates {%s};' % (cls._format_options(plot),
-                                ' '.join(str(c) for c in coords)))
-            lines.append('\\addlegendentry{%s}' % category)
+                                ' '.join('(%.2f, %.2f)' % c for c in coords)))
+            if category:
+                lines.append('\\addlegendentry{%s}' % category)
         # Add black line.
         start = min(report.min_x, report.min_y)
         if report.xlim_left is not None:
