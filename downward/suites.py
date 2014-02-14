@@ -108,14 +108,7 @@ def generate_problems(benchmarks_dir, description):
         description = description.replace('_FIRST', '_1TO1')
     range_expr = re.compile(r'.+_([-]?\d+)TO([-]?\d+)', re.IGNORECASE)
     range_result = range_expr.search(description)
-
-    # TODO: Remove possibility to load suites from arbitrary files.
-    if '.py:' in description:
-        filename, rest = description.split(':', 1)
-        description = rest
-        module_dict = tools.import_python_file(filename).__dict__
-    else:
-        module_dict = globals()
+    module_dict = globals()
 
     if range_result:
         # Allow writing SUITE_NAME_<NUMBER>TO<NUMBER>
@@ -123,8 +116,6 @@ def generate_problems(benchmarks_dir, description):
         # return the problems in that range of each domain
         start = int(range_result.group(1))
         end = int(range_result.group(2))
-        #assert start >= 1, start
-        #assert end >= start, (start, end)
         suite_name, numbers = description.rsplit('_', 1)
         suite_func = module_dict.get(suite_name, None)
         func_name = "suite_%s" % suite_name.lower()
@@ -215,7 +206,7 @@ def suite_ipc08_sat_only():
         'sokoban-sat08-strips',
         'transport-sat08-strips',
         'woodworking-sat08-strips',
-        # TODO: cyber-security is missing
+        # Note: cyber-security is missing
     ]
 
 def suite_ipc08_sat_only_strips():
@@ -225,7 +216,7 @@ def suite_ipc08_sat_only_strips():
         'sokoban-sat08-strips',
         'transport-sat08-strips',
         'woodworking-sat08-strips',
-        # TODO: cyber-security is missing
+        # Note: cyber-security is missing
     ]
 
 def suite_ipc08_opt():

@@ -27,12 +27,14 @@ ABS_REV_CACHE = {}
 
 
 def hg_id(repo, args=None, rev=None):
-    # TODO: Abort if rev is not present in repo.
     cmd = ['hg', 'id'] + (args or [])
     if rev:
         cmd.extend(['-r', str(rev)])
-    return tools.get_command_output(cmd, cwd=repo, quiet=True,
-                                    stderr=subprocess.STDOUT)
+    result = tools.get_command_output(cmd, cwd=repo, quiet=True)
+    if not result:
+        logging.critical('Call failed in %s: "%s". Check repo path and revision.' %
+                         (repo, ' '.join(cmd)))
+    return result
 
 
 def get_global_rev(repo, rev=None):
@@ -50,8 +52,11 @@ def get_common_ancestor(repo, rev1, rev2='default'):
     which *rev1* was branched off the default branch. Note that if *rev1* has
     been merged into the default branch, this method returns *rev1*.
     """
-    long_rev = tools.get_command_output(['hg', 'debugancestor', str(rev1), str(rev2)],
-                                        cwd=repo, quiet=True)
+    cmd = ['hg', 'debugancestor', str(rev1), str(rev2)]
+    long_rev = tools.get_command_output(cmd, cwd=repo, quiet=True)
+    if not long_rev:
+        logging.critical('Call failed in %s: "%s". Check repo path and revisions.' %
+                         (repo, ' '.join(cmd)))
     number, hexcode = long_rev.split(':')
     return get_global_rev(repo, rev=hexcode)
 

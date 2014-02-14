@@ -87,5 +87,5 @@ class Call(subprocess.Popen):
         # TODO: Put directly into properties.
         print '%s wall-clock time: %.2fs' % (self.name, wall_clock_time)
         if wall_clock_time > self.wall_clock_time_limit:
-            set_property('error', 'unexplained-wall-clock-timeout')
+            set_property('error', 'unexplained-warning-wall-clock-time-very-high')
         return retcode
