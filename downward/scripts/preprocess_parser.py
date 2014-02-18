@@ -179,13 +179,12 @@ class PreprocessParser(Parser):
         #    311 final queue length
         #    364 total queue pushes
         #    13 uncovered facts
-        #    0 implied effects removed
         #    0 effect conditions simplified
         #    0 implied preconditions added
         #    0 operators removed
         #    38 propositions removed
         for value in ['relevant atoms', 'auxiliary atoms', 'final queue length',
-                'total queue pushes', 'uncovered facts', 'implied effects removed',
+                'total queue pushes', 'uncovered facts',
                 'effect conditions simplified', 'implied preconditions added',
                 'operators removed', 'propositions removed']:
             attribute = 'translator_' + value.lower().replace(' ', '_')
