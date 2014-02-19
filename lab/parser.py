@@ -152,7 +152,7 @@ class Parser(object):
         self.run_dir = os.path.abspath('.')
         prop_file = os.path.join(self.run_dir, 'properties')
         if not os.path.exists(prop_file):
-            logging.critical('No properties file found at ' % prop_file)
+            logging.critical('No properties file found at "%s"' % prop_file)
         self.props = tools.Properties(filename=prop_file)
         if key_value_patterns:
             self.add_function(parse_key_value_patterns)
