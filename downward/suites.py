@@ -289,6 +289,8 @@ def suite_interesting():
 
 def suite_unsolvable():
     # TODO: Add other unsolvable problems (Miconic-FullADL).
+    # TODO: Add "fsc-grid-r:prize5x5_R.pddl" and "t0-uts:uts_r-02.pddl"
+    #       if the extra-domains branch is merged.
     return (["mystery:prob%02d.pddl" % index
              for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]] +
             ["miconic-fulladl:f21-3.pddl", "miconic-fulladl:f30-2.pddl"])
