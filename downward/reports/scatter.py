@@ -60,6 +60,12 @@ class ScatterMatplotlib(Matplotlib):
 
 class ScatterPgfPlots(PgfPlots):
     @classmethod
+    def _format_coord(cls, coord):
+        if type(coord[0]) is int and type(coord[1]) is int:
+            return '(%d, %d)' % coord
+        return '(%.2f, %.2f)' % coord
+
+    @classmethod
     def _get_plot(cls, report):
         lines = []
         options = cls._get_axis_options(report)
@@ -73,8 +79,9 @@ class ScatterPgfPlots(PgfPlots):
             c = category_style.get('c')
             plot['color'] = cls.COLORS.get(c, c)
             plot['mark options'] = '{draw=black}'
-            lines.append('\\addplot[%s] coordinates {%s};' % (cls._format_options(plot),
-                                ' '.join('(%.2f, %.2f)' % c for c in coords)))
+            lines.append('\\addplot[%s] coordinates {\n%s\n};' %
+                    (cls._format_options(plot),
+                     ' '.join(cls._format_coord(c) for c in coords)))
             if category:
                 lines.append('\\addlegendentry{%s}' % category)
         # Add black line.
