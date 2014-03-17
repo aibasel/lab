@@ -88,8 +88,7 @@ class DownwardRun(Run):
     def _save_ext_config(self, ext_config):
         self.set_property('config', ext_config)
 
-    def _save_id(self):
-        run_id = self._get_id()
+    def _save_id(self, run_id):
         self.set_property('id', run_id)
         self.set_property('id_string', ':'.join(run_id))
 
@@ -126,13 +125,11 @@ class PreprocessRun(DownwardRun):
 
         self.set_property('stage', 'preprocess')
         self._save_ext_config('-'.join(part.nick for part in self.parts))
-        self._save_id()
-
-    def _get_id(self):
         # Use global revisions for ids to allow for correct cashing.
-        return ['-'.join(part.rev for part in self.parts),
-                self.problem.domain,
-                self.problem.problem]
+        self._save_id([
+            '-'.join(part.rev for part in self.parts),
+            self.problem.domain,
+            self.problem.problem])
 
 
 class SearchRun(DownwardRun):
@@ -176,16 +173,11 @@ class SearchRun(DownwardRun):
         self.set_property('stage', 'search')
 
         self._save_ext_config('-'.join([combo.nick, self.config_nick]))
-        self._save_id()
-
-    def _get_id(self):
         # Use global revisions for ids to allow for correct cashing.
-        revs = [part.rev for part in self.parts]
-        if len(revs) == 3 and len(set(revs)) == 1:
-            revs = [revs[0]]
-        return ['-'.join(revs + [self.config_nick]),
-                self.problem.domain,
-                self.problem.problem]
+        self._save_id([
+            '-'.join([combo.rev_string, self.config_nick]),
+            self.problem.domain,
+            self.problem.problem])
 
 
 Setting = namedtuple('Setting', ['nick', 'config', 'timeout'])
@@ -442,7 +434,7 @@ class DownwardExperiment(Experiment):
         self.set_property('settings', [setting.nick for setting in self.settings])
         self.set_property('repo', self.repo)
         self.set_property('default_limits', self.limits)
-        self.set_property('combinations', ['-'.join(part.rev for part in combo)
+        self.set_property('combinations', [combo.rev_string
                                            for combo in self.combinations])
 
         self.runs = []
