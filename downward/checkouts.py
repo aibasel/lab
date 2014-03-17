@@ -128,8 +128,6 @@ class Checkout(object):
         return '%s:%s:%s' % (self.repo, self.rev, self.part)
 
 
-# ---------- Mercurial --------------------------------------------------------
-
 class HgCheckout(Checkout):
     """
     Base class for the three checkout classes Translator, Preprocessor,
@@ -252,4 +250,17 @@ class Planner(HgCheckout):
             if retcode != 0:
                 logging.critical('Build failed in: %s' % self.bin_dir)
 
-# -----------------------------------------------------------------------------
+
+class Combination(tuple):
+    def __new__(cls, translator, preprocessor, planner, nick=''):
+        return super(Combination, cls).__new__(cls, (translator, preprocessor, planner))
+
+    def __init__(self, translator, preprocessor, planner, nick=''):
+        self.nick = nick or self.get_revision_nick((translator, preprocessor, planner))
+
+    @classmethod
+    def get_revision_nick(cls, combination):
+        nicks = [part.nick for part in combination]
+        if len(set(nicks)) == 1:
+            nicks = [nicks[0]]
+        return '-'.join(nicks)

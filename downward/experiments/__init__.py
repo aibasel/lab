@@ -31,7 +31,7 @@ from lab.experiment import Run, Experiment
 from lab import tools
 from lab.steps import Step, Sequence
 
-from downward.checkouts import Checkout, Translator, Preprocessor, Planner
+from downward.checkouts import Checkout, Translator, Preprocessor, Planner, Combination
 from downward import suites
 
 
@@ -72,6 +72,7 @@ class DownwardRun(Run):
     def _set_properties(self):
         for part in self.parts:
             self.set_property(part.part + '_rev', part.rev)
+            self.set_property(part.part + '_nick', part.nick)
             self.set_property(part.part + '_summary', part.summary)
 
         self.set_property('domain', self.problem.domain)
@@ -84,8 +85,8 @@ class DownwardRun(Run):
             # TODO: Respect timeout parameter.
             self.set_property('limit_' + name, limit)
 
-    def _save_ext_config(self):
-        self.set_property('config', self._get_ext_config())
+    def _save_ext_config(self, ext_config):
+        self.set_property('config', ext_config)
 
     def _save_id(self):
         run_id = self._get_id()
@@ -124,12 +125,8 @@ class PreprocessRun(DownwardRun):
             self.add_command('compress-output-sas', ['bzip2', 'output.sas'])
 
         self.set_property('stage', 'preprocess')
-        self._save_ext_config()
+        self._save_ext_config('-'.join(part.nick for part in self.parts))
         self._save_id()
-
-    def _get_ext_config(self):
-        # Use nicks for run['config'] which appears in report table headers.
-        return '-'.join(part.nick for part in self.parts)
 
     def _get_id(self):
         # Use global revisions for ids to allow for correct cashing.
@@ -139,8 +136,9 @@ class PreprocessRun(DownwardRun):
 
 
 class SearchRun(DownwardRun):
-    def __init__(self, exp, translator, preprocessor, planner, problem, setting):
-        DownwardRun.__init__(self, exp, [translator, preprocessor, planner], problem)
+    def __init__(self, exp, combo, problem, setting):
+        DownwardRun.__init__(self, exp, combo, problem)
+        translator, preprocessor, planner = combo
 
         config_nick = setting.nick
         config = setting.config
@@ -177,17 +175,8 @@ class SearchRun(DownwardRun):
         self.set_property('planner_type', planner_type)
         self.set_property('stage', 'search')
 
-        self._save_ext_config()
+        self._save_ext_config('-'.join([combo.nick, self.config_nick]))
         self._save_id()
-
-    def _get_ext_config(self):
-        # Use nicks for ext_config which appears in report table headers.
-        nicks = [part.nick for part in self.parts]
-        # If all three parts have the same nick just print it once in reports.
-        if len(set(nicks)) == 1:
-            nicks = [nicks[0]]
-        nicks.append(self.config_nick)
-        return '-'.join(nicks)
 
     def _get_id(self):
         # Use global revisions for ids to allow for correct cashing.
@@ -285,6 +274,10 @@ class DownwardExperiment(Experiment):
 
         self.combinations = (combinations or
                              [(Translator(repo), Preprocessor(repo), Planner(repo))])
+        for index, combo in enumerate(self.combinations):
+            if not isinstance(combo, Combination):
+                self.combinations[index] = Combination(*combo)
+
         self.compact = compact
         self.suites = defaultdict(list)
         self.settings = []
@@ -576,14 +569,15 @@ class DownwardExperiment(Experiment):
     def _make_search_runs(self):
         if not self.settings:
             logging.critical('You must add at least one config or portfolio.')
-        for translator, preprocessor, planner in self.combinations:
+        for combo in self.combinations:
+            translator, preprocessor, planner = combo
             self._prepare_planner(planner)
             for setting in self.settings:
                 for prob in self._problems:
-                    self._make_search_run(translator, preprocessor, planner,
-                                          setting, prob)
+                    self._make_search_run(combo, setting, prob)
 
-    def _make_search_run(self, translator, preprocessor, planner, setting, prob):
+    def _make_search_run(self, combo, setting, prob):
+        translator, preprocessor, planner = combo
         preprocess_dir = os.path.join(self.preprocessed_tasks_dir,
                                       translator.rev + '-' + preprocessor.rev,
                                       prob.domain, prob.problem)
@@ -595,7 +589,7 @@ class DownwardExperiment(Experiment):
             dest = None if self.compact else filename
             return source(filename), dest
 
-        run = SearchRun(self, translator, preprocessor, planner, prob, setting)
+        run = SearchRun(self, combo, prob, setting)
         self.add_run(run)
 
         run.set_property('preprocess_dir', preprocess_dir)
