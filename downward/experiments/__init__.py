@@ -49,6 +49,7 @@ LIMITS = {
 }
 
 
+# TODO: Update check.
 # Make the same check as in src/translate/translate.py.
 VERSION_STMT = '''\
 import platform
@@ -91,6 +92,11 @@ class DownwardRun(Run):
     def _save_id(self, run_id):
         self.set_property('id', run_id)
         self.set_property('id_string', ':'.join(run_id))
+
+    def add_parsers(self, parsers):
+        for parser_name, parser_path in parsers:
+            self.require_resource(parser_name.upper())
+            self.add_command('run-' + parser_name, [parser_name.upper()])
 
 
 class PreprocessRun(DownwardRun):
@@ -164,8 +170,6 @@ class SearchRun(DownwardRun):
         self.require_resource('DOWNWARD_VALIDATE')
         self.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
                                       'PROBLEM'])
-
-        self.add_command('parse-search', ['SEARCH_PARSER'])
 
         self.set_property('config_nick', config_nick)
         self.set_property('commandline_config', config)
@@ -287,6 +291,10 @@ class DownwardExperiment(Experiment):
         self.include_preprocess_results_in_search_runs = True
         self.compilation_options = ['-j%d' % self._jobs]
 
+        # TODO: Use same mechanism for preprocess parser.
+        self._search_parsers = []
+        self.add_search_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
+
         # Remove the default experiment steps
         self.steps = Sequence()
 
@@ -372,6 +380,15 @@ class DownwardExperiment(Experiment):
             logging.critical('Path to portfolio must end on .py: %s' % portfolio)
         self.add_config(portfolio, [], **kwargs)
 
+    def add_search_parser(self, path_to_parser):
+        """
+        Call *path_to_parser* at the end of each search run. ::
+
+            exp.add_search_parser('path/to/parser')
+        """
+        self._search_parsers.append(('search_parser%d' % len(self._search_parsers),
+                                     path_to_parser))
+
     def set_path_to_python(self, path):
         """
         Instead of the default python interpreter "python", let the translator
@@ -455,9 +472,6 @@ class DownwardExperiment(Experiment):
                     'preprocess_parser.py')
             self._make_preprocess_runs()
         elif stage == 'search':
-            self.add_resource('SEARCH_PARSER',
-                        os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'),
-                        'search_parser.py')
             self._make_search_runs()
         else:
             logging.critical('There is no stage "%s"' % stage)
@@ -561,6 +575,8 @@ class DownwardExperiment(Experiment):
     def _make_search_runs(self):
         if not self.settings:
             logging.critical('You must add at least one config or portfolio.')
+        for parser_name, parser_path in self._search_parsers:
+            self.add_resource(parser_name.upper(), parser_path)
         for combo in self.combinations:
             translator, preprocessor, planner = combo
             self._prepare_planner(planner)
@@ -584,8 +600,9 @@ class DownwardExperiment(Experiment):
         run = SearchRun(self, combo, prob, setting)
         self.add_run(run)
 
-        run.set_property('preprocess_dir', preprocess_dir)
+        run.add_parsers(self._search_parsers)
 
+        run.set_property('preprocess_dir', preprocess_dir)
         run.set_property('compact', self.compact)
 
         # We definitely need the output file.
