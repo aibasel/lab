@@ -21,7 +21,7 @@ A module for cloning different revisions of the three
 components of Fast Downward (translate, preprocess, search) and performing
 experiments with them.
 """
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 import os
 import logging
 import multiprocessing
@@ -184,7 +184,12 @@ class SearchRun(DownwardRun):
             self.problem.problem])
 
 
-Algorithm = namedtuple('Algorithm', ['nick', 'config', 'timeout'])
+class DownwardAlgorithm(object):
+    def __init__(self, nick, config, rev=None, timeout=None):
+        self.nick = nick
+        self.config = config
+        self.rev = rev
+        self.timeout = timeout
 
 
 class DownwardExperiment(Experiment):
@@ -364,7 +369,7 @@ class DownwardExperiment(Experiment):
             logging.critical('Config must be a list: %s' % config)
         if not nick.endswith('.py') and not config:
             logging.critical('Config cannot be empty: %s' % config)
-        self.algorithms.append(Algorithm(nick, config, timeout))
+        self.algorithms.append(DownwardAlgorithm(nick, config, timeout=timeout))
 
     def add_portfolio(self, portfolio, **kwargs):
         """
