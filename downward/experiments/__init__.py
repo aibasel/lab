@@ -185,10 +185,10 @@ class SearchRun(DownwardRun):
 
 
 class DownwardAlgorithm(object):
-    def __init__(self, nick, config, rev=None, timeout=None):
+    def __init__(self, nick, config, combinations, timeout=None):
         self.nick = nick
         self.config = config
-        self.rev = rev
+        self.combinations = combinations
         self.timeout = timeout
 
 
@@ -351,12 +351,16 @@ class DownwardExperiment(Experiment):
         benchmark_dir = os.path.abspath(benchmark_dir)
         self.suites[benchmark_dir].extend(suite)
 
-    def add_config(self, nick, config, timeout=None):
+    def add_config(self, nick, config, rev=None, timeout=None):
         """
         *nick* is the name the config will get in the reports.
 
         *config* must be a list of arguments that can be passed to the planner
         (see http://www.fast-downward.org/SearchEngine for details).
+
+        *rev* can be a revision in the experiment's *repo*. If omitted,
+        *config* will be run for all (translator, preprocessor, planner)
+        *combinations* given in the constructor.
 
         If *timeout* is given it will be used for this config instead of the
         global time limit set in the constructor. ::
@@ -369,7 +373,14 @@ class DownwardExperiment(Experiment):
             logging.critical('Config must be a list: %s' % config)
         if not nick.endswith('.py') and not config:
             logging.critical('Config cannot be empty: %s' % config)
-        self.algorithms.append(DownwardAlgorithm(nick, config, timeout=timeout))
+        if rev:
+            combos = [Combination(Translator(self.repo, rev=rev),
+                                  Preprocessor(self.repo, rev=rev),
+                                  Planner(self.repo, rev=rev))]
+        else:
+            combos = self.combinations
+        self.algorithms.append(DownwardAlgorithm(
+            nick, config, combinations=combos, timeout=timeout))
 
     def add_portfolio(self, portfolio, **kwargs):
         """
@@ -456,8 +467,6 @@ class DownwardExperiment(Experiment):
         self.set_property('algorithms', [algo.nick for algo in self.algorithms])
         self.set_property('repo', self.repo)
         self.set_property('default_limits', self.limits)
-        self.set_property('combinations', [combo.rev_string
-                                           for combo in self.combinations])
 
         self.runs = []
         self.new_files = []
@@ -492,10 +501,11 @@ class DownwardExperiment(Experiment):
         translators = set()
         preprocessors = set()
         planners = set()
-        for translator, preprocessor, planner in self.combinations:
-            translators.add(translator)
-            preprocessors.add(preprocessor)
-            planners.add(planner)
+        for algo in self.algorithms:
+            for translator, preprocessor, planner in algo.combinations:
+                translators.add(translator)
+                preprocessors.add(preprocessor)
+                planners.add(planner)
 
         if stage == 'preprocess':
             for part in sorted(translators | preprocessors):
@@ -568,8 +578,9 @@ class DownwardExperiment(Experiment):
 
     def _make_preprocess_runs(self):
         unique_preprocessing = set()
-        for translator, preprocessor, planner in self.combinations:
-            unique_preprocessing.add((translator, preprocessor))
+        for algo in self.algorithms:
+            for translator, preprocessor, planner in algo.combinations:
+                unique_preprocessing.add((translator, preprocessor))
 
         for translator, preprocessor in sorted(unique_preprocessing):
             self._prepare_translator_and_preprocessor(translator, preprocessor)
@@ -582,10 +593,10 @@ class DownwardExperiment(Experiment):
             logging.critical('You must add at least one config or portfolio.')
         for parser_name, parser_path in self._search_parsers:
             self.add_resource(parser_name.upper(), parser_path)
-        for combo in self.combinations:
-            translator, preprocessor, planner = combo
-            self._prepare_planner(planner)
-            for algo in self.algorithms:
+        for algo in self.algorithms:
+            for combo in algo.combinations:
+                translator, preprocessor, planner = combo
+                self._prepare_planner(planner)
                 for prob in self._problems:
                     self._make_search_run(combo, algo, prob)
 
