@@ -497,7 +497,7 @@ class DownwardExperiment(Experiment):
         logging.info('Requiring %s' % part.src_dir)
         self.add_resource('', part.src_dir, part.get_path_dest())
 
-    def _checkout_and_compile(self, stage, **kwargs):
+    def _get_unique_checkouts(self):
         translators = set()
         preprocessors = set()
         planners = set()
@@ -506,6 +506,10 @@ class DownwardExperiment(Experiment):
                 translators.add(translator)
                 preprocessors.add(preprocessor)
                 planners.add(planner)
+        return translators, preprocessors, planners
+
+    def _checkout_and_compile(self, stage, **kwargs):
+        translators, preprocessors, planners = self._get_unique_checkouts()
 
         if stage == 'preprocess':
             for part in sorted(translators | preprocessors):
@@ -593,10 +597,11 @@ class DownwardExperiment(Experiment):
             logging.critical('You must add at least one config or portfolio.')
         for parser_name, parser_path in self._search_parsers:
             self.add_resource(parser_name.upper(), parser_path)
+        _, _, planners = self._get_unique_checkouts()
+        for planner in planners:
+            self._prepare_planner(planner)
         for algo in self.algorithms:
             for combo in algo.combinations:
-                translator, preprocessor, planner = combo
-                self._prepare_planner(planner)
                 for prob in self._problems:
                     self._make_search_run(combo, algo, prob)
 
