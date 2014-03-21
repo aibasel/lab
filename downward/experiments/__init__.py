@@ -139,12 +139,12 @@ class PreprocessRun(DownwardRun):
 
 
 class SearchRun(DownwardRun):
-    def __init__(self, exp, combo, problem, setting):
+    def __init__(self, exp, combo, problem, algorithm):
         DownwardRun.__init__(self, exp, combo, problem)
         translator, preprocessor, planner = combo
 
-        config_nick = setting.nick
-        config = setting.config
+        config_nick = algorithm.nick
+        config = algorithm.config
 
         self.require_resource(planner.shell_name)
         if config:
@@ -159,7 +159,7 @@ class SearchRun(DownwardRun):
         self.config_nick = config_nick
 
         self.add_command('search', search_cmd, stdin='OUTPUT',
-                         time_limit=setting.timeout or exp.limits['search_time'],
+                         time_limit=algorithm.timeout or exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
 
         # Remove temporary files (we need bash for globbing).
@@ -184,7 +184,7 @@ class SearchRun(DownwardRun):
             self.problem.problem])
 
 
-Setting = namedtuple('Setting', ['nick', 'config', 'timeout'])
+Algorithm = namedtuple('Algorithm', ['nick', 'config', 'timeout'])
 
 
 class DownwardExperiment(Experiment):
@@ -276,7 +276,7 @@ class DownwardExperiment(Experiment):
 
         self.compact = compact
         self.suites = defaultdict(list)
-        self.settings = []
+        self.algorithms = []
 
         limits = limits or {}
         for key, value in limits.items():
@@ -318,7 +318,7 @@ class DownwardExperiment(Experiment):
 
     @property
     def _portfolios(self):
-        return [setting.nick for setting in self.settings if not setting.config]
+        return [algo.nick for algo in self.algorithms if not algo.config]
 
     def add_suite(self, suite, benchmark_dir=None):
         """
@@ -364,7 +364,7 @@ class DownwardExperiment(Experiment):
             logging.critical('Config must be a list: %s' % config)
         if not nick.endswith('.py') and not config:
             logging.critical('Config cannot be empty: %s' % config)
-        self.settings.append(Setting(nick, config, timeout))
+        self.algorithms.append(Algorithm(nick, config, timeout))
 
     def add_portfolio(self, portfolio, **kwargs):
         """
@@ -448,7 +448,7 @@ class DownwardExperiment(Experiment):
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         self.set_property('suite', self.suites)
-        self.set_property('settings', [setting.nick for setting in self.settings])
+        self.set_property('algorithms', [algo.nick for algo in self.algorithms])
         self.set_property('repo', self.repo)
         self.set_property('default_limits', self.limits)
         self.set_property('combinations', [combo.rev_string
@@ -573,18 +573,18 @@ class DownwardExperiment(Experiment):
                 self.add_run(PreprocessRun(self, translator, preprocessor, prob))
 
     def _make_search_runs(self):
-        if not self.settings:
+        if not self.algorithms:
             logging.critical('You must add at least one config or portfolio.')
         for parser_name, parser_path in self._search_parsers:
             self.add_resource(parser_name.upper(), parser_path)
         for combo in self.combinations:
             translator, preprocessor, planner = combo
             self._prepare_planner(planner)
-            for setting in self.settings:
+            for algo in self.algorithms:
                 for prob in self._problems:
-                    self._make_search_run(combo, setting, prob)
+                    self._make_search_run(combo, algo, prob)
 
-    def _make_search_run(self, combo, setting, prob):
+    def _make_search_run(self, combo, algorithm, prob):
         translator, preprocessor, planner = combo
         preprocess_dir = os.path.join(self.preprocessed_tasks_dir,
                                       translator.rev + '-' + preprocessor.rev,
@@ -597,7 +597,7 @@ class DownwardExperiment(Experiment):
             dest = None if self.compact else filename
             return source(filename), dest
 
-        run = SearchRun(self, combo, prob, setting)
+        run = SearchRun(self, combo, prob, algorithm)
         self.add_run(run)
 
         run.add_parsers(self._search_parsers)
