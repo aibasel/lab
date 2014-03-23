@@ -139,27 +139,16 @@ class PreprocessRun(DownwardRun):
 
 
 class SearchRun(DownwardRun):
-    def __init__(self, exp, combo, problem, algorithm):
-        DownwardRun.__init__(self, exp, combo, problem)
-        translator, preprocessor, planner = combo
+    def __init__(self, exp, algo, problem):
+        parts = [algo.translator, algo.preprocessor, algo.planner]
+        DownwardRun.__init__(self, exp, parts, problem)
 
-        config_nick = algorithm.nick
-        config = algorithm.config
+        self.require_resource(algo.planner.shell_name)
 
-        self.require_resource(planner.shell_name)
-        if config:
-            # We have a single planner configuration
-            planner_type = 'single'
-            search_cmd = [planner.shell_name] + config
-        else:
-            # We have a portfolio, config_nick is the path to the portfolio file
-            planner_type = 'portfolio'
-            config_nick = os.path.basename(config_nick)
-            search_cmd = [planner.shell_name, '--portfolio', config_nick]
-        self.config_nick = config_nick
-
-        self.add_command('search', search_cmd, stdin='OUTPUT',
-                         time_limit=algorithm.timeout or exp.limits['search_time'],
+        self.add_command('search',
+                         [algo.planner.shell_name] + algo.config,
+                         stdin='OUTPUT',
+                         time_limit=algo.timeout or exp.limits['search_time'],
                          mem_limit=exp.limits['search_memory'])
 
         # Remove temporary files (we need bash for globbing).
@@ -171,25 +160,40 @@ class SearchRun(DownwardRun):
         self.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
                                       'PROBLEM'])
 
+        planner_type = 'portfolio' if self._is_portfolio(algo.config) else 'single'
+
+        # Try to restore the config_nick by stripping combo_nick from
+        # algo.nick and save it for backwards compatibility.
+        combo_nick = algo._get_combo_nick()
+        if algo.nick.startswith(combo_nick + '-'):
+            config_nick = algo.nick[len(combo_nick + '-'):]
+        else:
+            config_nick = algo.nick
         self.set_property('config_nick', config_nick)
-        self.set_property('commandline_config', config)
+        self.set_property('commandline_config', algo.config)
         self.set_property('planner_type', planner_type)
         self.set_property('stage', 'search')
 
-        self._save_ext_config('-'.join([combo.nick, self.config_nick]))
-        # Use global revisions for ids to allow for correct cashing.
-        self._save_id([
-            '-'.join([combo.rev_string, self.config_nick]),
-            self.problem.domain,
-            self.problem.problem])
+        self._save_ext_config(algo.nick)
+        self._save_id([algo.nick, self.problem.domain, self.problem.problem])
+
+    @classmethod
+    def _is_portfolio(cls, config):
+        # TODO: Include built-in portfolios.
+        return '--portfolio' in config
 
 
-class DownwardAlgorithm(object):
-    def __init__(self, nick, config, combinations, timeout=None):
+class _DownwardAlgorithm(object):
+    def __init__(self, nick, config, translator, preprocessor, planner, timeout=None):
         self.nick = nick
         self.config = config
-        self.combinations = combinations
+        self.translator = translator
+        self.preprocessor = preprocessor
+        self.planner = planner
         self.timeout = timeout
+
+    def _get_combo_nick(self):
+        return Combination(self.translator, self.preprocessor, self.planner).nick
 
 
 class DownwardExperiment(Experiment):
@@ -281,7 +285,8 @@ class DownwardExperiment(Experiment):
 
         self.compact = compact
         self.suites = defaultdict(list)
-        self.algorithms = []
+        self._algorithms = []
+        self._portfolios = []
 
         limits = limits or {}
         for key, value in limits.items():
@@ -321,10 +326,6 @@ class DownwardExperiment(Experiment):
             tasks.extend(suites.build_suite(benchmark_dir, suite))
         return tasks
 
-    @property
-    def _portfolios(self):
-        return [algo.nick for algo in self.algorithms if not algo.config]
-
     def add_suite(self, suite, benchmark_dir=None):
         """
         *suite* can either be a string or a list of strings. The strings can be
@@ -351,7 +352,8 @@ class DownwardExperiment(Experiment):
         benchmark_dir = os.path.abspath(benchmark_dir)
         self.suites[benchmark_dir].extend(suite)
 
-    def add_config(self, nick, config, rev=None, timeout=None):
+    def add_config(self, nick, config, timeout=None,
+                   preprocess_rev=None, search_rev=None):
         """
         *nick* is the name the config will get in the reports.
 
@@ -373,18 +375,28 @@ class DownwardExperiment(Experiment):
             logging.critical('Config must be a list: %s' % config)
         if not nick.endswith('.py') and not config:
             logging.critical('Config cannot be empty: %s' % config)
-        if rev:
-            combos = [Combination(Translator(self.repo, rev=rev),
-                                  Preprocessor(self.repo, rev=rev),
-                                  Planner(self.repo, rev=rev))]
+        search_rev = search_rev or preprocess_rev
+        preprocess_rev = preprocess_rev or search_rev
+        if search_rev:
+            assert preprocess_rev
+            algo_nicks_and_combos = [(nick, (
+                Translator(self.repo, rev=preprocess_rev),
+                Preprocessor(self.repo, rev=preprocess_rev),
+                Planner(self.repo, rev=search_rev)))]
         else:
-            combos = self.combinations
-        self.algorithms.append(DownwardAlgorithm(
-            nick, config, combinations=combos, timeout=timeout))
+            assert not preprocess_rev
+            algo_nicks_and_combos = [(combo.nick + '-' + nick, combo)
+                                     for combo in self.combinations]
+        for algo_nick, (translator, preprocessor, planner) in algo_nicks_and_combos:
+            self._algorithms.append(_DownwardAlgorithm(
+                algo_nick, config, timeout=timeout,
+                translator=translator, preprocessor=preprocessor, planner=planner))
 
-    def add_portfolio(self, portfolio, **kwargs):
+    def add_portfolio(self, portfolio, nick=None, **kwargs):
         """
         *portfolio* must be the path to a Fast Downward portfolio file.
+
+        *nick* is the name of the portfolio in reports.
 
         See :py:meth:`.add_config` for valid keyword arguments. ::
 
@@ -394,11 +406,13 @@ class DownwardExperiment(Experiment):
             logging.critical('portfolio parameter must be a string: %s' % portfolio)
         if not portfolio.endswith('.py'):
             logging.critical('Path to portfolio must end on .py: %s' % portfolio)
-        self.add_config(portfolio, [], **kwargs)
+        nick = nick or os.path.basename(portfolio)
+        self._portfolios.append(portfolio)
+        self.add_config(nick, ['--portfolio', os.path.basename(portfolio)], **kwargs)
 
     def add_search_parser(self, path_to_parser):
         """
-        Call *path_to_parser* at the end of each search run. ::
+        Invoke script at *path_to_parser* at the end of each search run. ::
 
             exp.add_search_parser('path/to/parser')
         """
@@ -464,7 +478,7 @@ class DownwardExperiment(Experiment):
         # Save the experiment stage in the properties
         self.set_property('stage', stage)
         self.set_property('suite', self.suites)
-        self.set_property('algorithms', [algo.nick for algo in self.algorithms])
+        self.set_property('algorithms', [algo.nick for algo in self._algorithms])
         self.set_property('repo', self.repo)
         self.set_property('default_limits', self.limits)
 
@@ -501,11 +515,10 @@ class DownwardExperiment(Experiment):
         translators = set()
         preprocessors = set()
         planners = set()
-        for algo in self.algorithms:
-            for translator, preprocessor, planner in algo.combinations:
-                translators.add(translator)
-                preprocessors.add(preprocessor)
-                planners.add(planner)
+        for algo in self._algorithms:
+            translators.add(algo.translator)
+            preprocessors.add(algo.preprocessor)
+            planners.add(algo.planner)
         return translators, preprocessors, planners
 
     def _checkout_and_compile(self, stage, **kwargs):
@@ -564,6 +577,7 @@ class DownwardExperiment(Experiment):
             if not os.path.isfile(portfolio):
                 logging.critical('Portfolio file %s could not be found.' % portfolio)
             #  Portfolio has to be executable
+            # TODO: Change downward script instead of file flags.
             if not os.access(portfolio, os.X_OK):
                 os.chmod(portfolio, 0755)
             name = os.path.basename(portfolio)
@@ -582,9 +596,8 @@ class DownwardExperiment(Experiment):
 
     def _make_preprocess_runs(self):
         unique_preprocessing = set()
-        for algo in self.algorithms:
-            for translator, preprocessor, planner in algo.combinations:
-                unique_preprocessing.add((translator, preprocessor))
+        for algo in self._algorithms:
+            unique_preprocessing.add((algo.translator, algo.preprocessor))
 
         for translator, preprocessor in sorted(unique_preprocessing):
             self._prepare_translator_and_preprocessor(translator, preprocessor)
@@ -593,23 +606,22 @@ class DownwardExperiment(Experiment):
                 self.add_run(PreprocessRun(self, translator, preprocessor, prob))
 
     def _make_search_runs(self):
-        if not self.algorithms:
+        if not self._algorithms:
             logging.critical('You must add at least one config or portfolio.')
         for parser_name, parser_path in self._search_parsers:
             self.add_resource(parser_name.upper(), parser_path)
         _, _, planners = self._get_unique_checkouts()
         for planner in planners:
             self._prepare_planner(planner)
-        for algo in self.algorithms:
-            for combo in algo.combinations:
-                for prob in self._problems:
-                    self._make_search_run(combo, algo, prob)
+        for algo in self._algorithms:
+            for prob in self._problems:
+                self._make_search_run(algo, prob)
 
-    def _make_search_run(self, combo, algorithm, prob):
-        translator, preprocessor, planner = combo
-        preprocess_dir = os.path.join(self.preprocessed_tasks_dir,
-                                      translator.rev + '-' + preprocessor.rev,
-                                      prob.domain, prob.problem)
+    def _make_search_run(self, algo, prob):
+        preprocess_dir = os.path.join(
+            self.preprocessed_tasks_dir,
+            algo.translator.rev + '-' + algo.preprocessor.rev,
+            prob.domain, prob.problem)
 
         def source(filename):
             return os.path.join(preprocess_dir, filename)
@@ -618,7 +630,7 @@ class DownwardExperiment(Experiment):
             dest = None if self.compact else filename
             return source(filename), dest
 
-        run = SearchRun(self, combo, prob, algorithm)
+        run = SearchRun(self, algo, prob)
         self.add_run(run)
 
         run.add_parsers(self._search_parsers)

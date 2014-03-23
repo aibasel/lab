@@ -264,10 +264,3 @@ class Combination(tuple):
         if len(set(nicks)) == 1:
             nicks = [nicks[0]]
         return '-'.join(nicks)
-
-    @property
-    def rev_string(self):
-        revs = [part.rev for part in self]
-        if len(revs) == 3 and len(set(revs)) == 1:
-            revs = [revs[0]]
-        return '-'.join(revs)
