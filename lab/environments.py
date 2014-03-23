@@ -91,7 +91,7 @@ class OracleGridEngineEnvironment(Environment):
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, host_restriction=None,
-                 email=None, randomize_task_order=False):
+                 email=None, randomize_task_order=True):
         """
         *queue* must be a valid queue name on the grid.
 
@@ -102,9 +102,14 @@ class OracleGridEngineEnvironment(Environment):
         If *email* is provided and ``--all`` is used, a message will be sent
         when the experiment finishes.
 
-        If *randomize_task_order* is set to True, tasks for runs are started
-        in a random order. This is useful to avoid systematic noise due to
-        e.g. one of the configs being run on a machine with heavy load.
+        If *randomize_task_order* is True (this is the default since
+        version 1.5), tasks for runs are started in a random order.
+        This is useful to avoid systematic noise due to e.g. one of
+        the configs being run on a machine with heavy load. Note
+        that due to the randomization, run directories may be
+        pristine while the experiment is running even though the
+        grid engine marks the runs as finished.
+
         """
         Environment.__init__(self)
         if queue is None:
