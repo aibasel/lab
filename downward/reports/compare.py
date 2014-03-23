@@ -105,11 +105,11 @@ class CompareRevisionsReport(CompareConfigsReport):
             config_nicks = []
             for config in self.configs:
                 for rev in self._revisions:
-                    if config.startswith('%s-' % rev):
-                        if any(config.startswith('%s-' % r)
+                    if config.startswith(rev + '-'):
+                        if any(config.startswith(r + '-')
                                for r in self._revisions if r != rev):
                             continue
-                        config_nick = config[len(rev) + 1:]
+                        config_nick = config[len(rev + '-'):]
                         if config_nick not in config_nicks:
                             config_nicks.append(config_nick)
             self._compared_configs = []
