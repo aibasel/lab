@@ -31,7 +31,7 @@ from lab.experiment import Run, Experiment
 from lab import tools
 from lab.steps import Step, Sequence
 
-from downward.checkouts import Checkout, Translator, Preprocessor, Planner, Combination
+from downward.checkouts import Checkout, Translator, Preprocessor, Planner
 from downward import suites
 
 
@@ -58,6 +58,13 @@ sys.stdout.write('Translator Python version: %s\\n' % platform.python_version())
 if sys.version_info[0] == 2 and sys.version_info[1] != 7:
     sys.exit(1)
 '''
+
+
+def _get_rev_nick(translator, preprocessor, planner):
+    nicks = [part.nick for part in (translator, preprocessor, planner)]
+    if len(set(nicks)) == 1:
+        nicks = [nicks[0]]
+    return '-'.join(nicks)
 
 
 class DownwardRun(Run):
@@ -164,7 +171,7 @@ class SearchRun(DownwardRun):
 
         # Try to restore the config_nick by stripping combo_nick from
         # algo.nick and save it for backwards compatibility.
-        combo_nick = algo._get_combo_nick()
+        combo_nick = _get_rev_nick(algo.translator, algo.preprocessor, algo.planner)
         if algo.nick.startswith(combo_nick + '-'):
             config_nick = algo.nick[len(combo_nick + '-'):]
         else:
@@ -191,9 +198,6 @@ class _DownwardAlgorithm(object):
         self.preprocessor = preprocessor
         self.planner = planner
         self.timeout = timeout
-
-    def _get_combo_nick(self):
-        return Combination(self.translator, self.preprocessor, self.planner).nick
 
 
 class DownwardExperiment(Experiment):
@@ -279,9 +283,6 @@ class DownwardExperiment(Experiment):
 
         self.combinations = (combinations or
                              [(Translator(repo), Preprocessor(repo), Planner(repo))])
-        for index, combo in enumerate(self.combinations):
-            if not isinstance(combo, Combination):
-                self.combinations[index] = Combination(*combo)
 
         self.compact = compact
         self.suites = defaultdict(list)
@@ -385,7 +386,7 @@ class DownwardExperiment(Experiment):
                 Planner(self.repo, rev=search_rev)))]
         else:
             assert not preprocess_rev
-            algo_nicks_and_combos = [(combo.nick + '-' + nick, combo)
+            algo_nicks_and_combos = [(_get_rev_nick(*combo) + '-' + nick, combo)
                                      for combo in self.combinations]
         for algo_nick, (translator, preprocessor, planner) in algo_nicks_and_combos:
             self._algorithms.append(_DownwardAlgorithm(
