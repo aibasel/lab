@@ -274,24 +274,36 @@ class Experiment(_Buildable):
 
     def add_fetcher(self, src=None, dest=None, name=None, **kwargs):
         """
-        Fetch results from experiment or evaluation directories into a new
-        or existing evaluation directory. Use this method to combine results
-        from multiple experiments.
-
-        By using sane defaults, this method is a shortcut for
-        ``add_step(Step(name, Fetcher(), src, dest, **kwargs))``.
+        Add a step that fetches results from experiment or
+        evaluation directories into a new or existing evaluation
+        directory. Use this method to combine results from multiple
+        experiments.
 
         *src* can be an experiment or evaluation directory. It defaults to
         ``exp.path``.
 
-        *dest* must be a new or existing evaluation directory. It defaults to
-        ``exp.eval_dir``.
+        *dest* must be a new or existing evaluation directory. It
+        defaults to ``exp.eval_dir``. If *dest* already contains
+        data, the old and new data will be merged, not replaced.
 
         If no *name* is given, call this step "fetch-``basename(src)``".
 
-        All remaining keyword arguments (e.g. filters and parsers) will be
-        applied when the :py:class:`Fetcher <lab.fetcher.Fetcher>` instance is
-        called.
+        Valid keyword args:
+
+        If *copy_all* is True (default: False), copy all files from the run
+        dirs to a new directory tree at *dest*. Without this option only
+        the combined properties file is written do disk.
+
+        If *write_combined_props* is True (default), write the combined
+        properties file.
+
+        You can include only specific domains or configurations by using
+        :py:class:`filters <.Report>`.
+
+        *parsers* can be a list of paths to parser scripts. If given, each
+        parser is called in each run directory and the results are added to
+        the properties file which is fetched afterwards. This option is
+        useful if you forgot to parse some attributes during the experiment.
 
         Examples:
 

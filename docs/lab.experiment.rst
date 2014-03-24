@@ -55,11 +55,3 @@
 .. autoclass:: lab.steps.Step
    :members:
    :undoc-members:
-
-
-:mod:`lab.fetcher` -- Fetch results
------------------------------------
-
-.. autoclass:: lab.fetcher.Fetcher
-   :members: __call__
-   :undoc-members:
