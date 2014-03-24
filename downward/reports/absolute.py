@@ -134,7 +134,7 @@ class AbsoluteReport(PlanningReport):
         return '%s\n\n\n%s' % (toc, content)
 
     def _get_general_info(self):
-        table = reports.Table(title='info')
+        table = reports.Table(title='algorithm')
         for config, info in self.config_info.items():
             for attr in self.INFO_ATTRIBUTES:
                 table.add_cell(config, attr, info[attr])
