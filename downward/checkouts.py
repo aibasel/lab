@@ -57,6 +57,9 @@ def get_common_ancestor(repo, rev1, rev2='default'):
     """
     long_rev = tools.get_command_output(
         repo, ['hg', 'debugancestor', str(rev1), str(rev2)])
+    if not long_rev:
+        logging.critical('%s or %s is not part of the repo at %s.' %
+                         (rev1, rev2, repo))
     number, hexcode = long_rev.split(':')
     return get_global_rev(repo, rev=hexcode)
 
