@@ -190,8 +190,9 @@ class SearchRun(DownwardRun):
 
     @classmethod
     def _is_portfolio(cls, config):
-        # TODO: Include built-in portfolios.
-        return '--portfolio' in config
+        built_in = ['seq-opt-fdss-1', 'seq-opt-fdss-2',
+                    'seq-sat-fdss-1', 'seq-sat-fdss-2']
+        return any(x in config for x in built_in + ['--portfolio'])
 
 
 class _DownwardAlgorithm(object):

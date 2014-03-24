@@ -53,6 +53,7 @@ exp.add_config('iter-hadd', [
 exp.add_config('ipdb', ["--search", "astar(ipdb())"], timeout=10)
 # Use original LAMA 2011 configuration
 exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
+exp.add_config('fdss-1', ['ipc', 'seq-sat-fdss-1', '--plan-file', 'sas_plan'])
 exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py'))
 
 # Before we fetch the new results, delete the old ones
@@ -179,7 +180,7 @@ suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
 exp.add_step(Step('report-suite', SuiteReport(filter=solved), exp.eval_dir, suite_file))
 
 exp.add_report(AbsoluteReport('problem', colored=True,
-                              attributes=['coverage', 'search_time', 'cost',
+                              attributes=['coverage', 'search_time', 'cost', 'memory',
                                           'error', 'cost_all', 'limit_search_time']),
                name='report-abs-p', outfile=abs_problem_report_file)
 
