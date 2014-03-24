@@ -49,14 +49,16 @@ LIMITS = {
 }
 
 
-# TODO: Update check.
 # Make the same check as in src/translate/translate.py.
 VERSION_STMT = '''\
-import platform
 import sys
-sys.stdout.write('Translator Python version: %s\\n' % platform.python_version())
-if sys.version_info[0] == 2 and sys.version_info[1] != 7:
-    sys.exit(1)
+
+def python_version_supported():
+    major, minor = sys.version_info[:2]
+    return (major == 2 and minor >= 7) or (major, minor) >= (3, 2)
+
+if not python_version_supported():
+    sys.exit("Error: Translator only supports Python >= 2.7 and Python >= 3.2.")
 '''
 
 
@@ -438,13 +440,12 @@ class DownwardExperiment(Experiment):
         return self._path_to_python or 'python'
 
     def _check_python_version(self):
-        """Abort if the Python version is smaller than 2.7."""
+        """Abort if the Python version is not supported by the translator."""
         p = subprocess.Popen([self._get_path_to_python(), '-c', VERSION_STMT])
         p.wait()
         if p.returncode != 0:
-            logging.critical('The translator requires at least Python 2.7. '
-                             'Use exp.set_path_to_python(path) to use a local '
-                             'Python interpreter.')
+            logging.critical('Use exp.set_path_to_python(path) to select a '
+                             'supported Python interpreter.')
 
     def _adapt_path(self, stage):
         if stage == 'preprocess':
