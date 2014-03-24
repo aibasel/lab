@@ -19,6 +19,7 @@ import datetime
 import logging
 import math
 import os
+import pkgutil
 import random
 import sys
 
@@ -67,8 +68,7 @@ class LocalEnvironment(Environment):
         replacements = {'DIRS': ',\n'.join(dirs),
                         'PROCESSES': str(self.processes)}
 
-        script = open(os.path.join(tools.DATA_DIR,
-                                   'local-job-template.py')).read()
+        script = pkgutil.get_data('lab', 'data/local-job-template.py')
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
@@ -156,16 +156,14 @@ class OracleGridEngineEnvironment(Environment):
         job_params = self._get_common_job_params()
         job_params.update(name=self._escape_job_name(self.exp.name),
                           num_tasks=num_tasks)
-        template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
-        header = open(template_file).read() % job_params
+        header = pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
 
         body_params = dict(num_tasks=num_tasks, run_ids='')
         if self.randomize_task_order:
             run_ids = [str(i + 1) for i in xrange(num_tasks)]
             random.shuffle(run_ids)
             body_params['run_ids'] = ' '.join(run_ids)
-        body_template_file = os.path.join(tools.DATA_DIR, 'grid-job-body-template')
-        body = open(body_template_file).read() % body_params
+        body = pkgutil.get_data('lab', 'data/grid-job-body-template') % body_params
 
         filename = self.exp._get_abs_path(self.main_script_file)
         with open(filename, 'w') as file:
@@ -216,8 +214,7 @@ class OracleGridEngineEnvironment(Environment):
         job_params.update(name=self._get_job_name(step), num_tasks=1)
         if step.is_last_step and self.email:
             job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
-        template_file = os.path.join(tools.DATA_DIR, self.TEMPLATE_FILE)
-        return open(template_file).read() % job_params
+        return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
 
     def _get_job(self, step):
         # Abort if one step fails.

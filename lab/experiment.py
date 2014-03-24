@@ -20,6 +20,7 @@ Main module for experiment creation
 """
 
 import os
+import pkgutil
 import sys
 import logging
 
@@ -539,7 +540,7 @@ class Run(_Buildable):
         env_vars = self.experiment._env_vars
         env_vars.update(self._env_vars)
 
-        run_script = open(os.path.join(tools.DATA_DIR, 'run-template.py')).read()
+        run_script = pkgutil.get_data('lab', 'data/run-template.py')
 
         def make_call(name, cmd, kwargs):
             abort_on_failure = kwargs.pop('abort_on_failure',
