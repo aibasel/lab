@@ -23,25 +23,21 @@ import subprocess
 from lab import tools
 
 
-_COMMAND_CACHE = {}
-
-
-def get_hg_output(repo, args):
-    cmd = ('hg', '--repository', repo) + tuple(args)
-    if cmd not in _COMMAND_CACHE:
-        result = tools.get_command_output(cmd, quiet=True)
-        _COMMAND_CACHE[cmd] = result
-        if not result:
-            logging.critical('Call failed: "%s". Check repo path and revision.' %
-                             ' '.join(cmd))
-    return _COMMAND_CACHE[cmd]
+_HG_ID_CACHE = {}
 
 
 def hg_id(repo, args=None, rev=None):
-    cmd = ['id'] + (args or [])
+    args = args or []
     if rev:
-        cmd.extend(['-r', str(rev)])
-    return get_hg_output(repo, cmd)
+        args.extend(['-r', str(rev)])
+    cmd = ('hg', 'id', '--repository', repo) + tuple(args)
+    if cmd not in _HG_ID_CACHE:
+        result = tools.get_command_output(cmd, quiet=True)
+        if not result:
+            logging.critical('Call failed: "%s". Check path and revision.' %
+                             ' '.join(cmd))
+        _HG_ID_CACHE[cmd] = result
+    return _HG_ID_CACHE[cmd]
 
 
 def get_global_rev(repo, rev=None):
@@ -59,7 +55,8 @@ def get_common_ancestor(repo, rev1, rev2='default'):
     which *rev1* was branched off the default branch. Note that if *rev1* has
     been merged into the default branch, this method returns *rev1*.
     """
-    long_rev = get_hg_output(repo, ['debugancestor', str(rev1), str(rev2)])
+    long_rev = tools.get_command_output(
+        repo, ['hg', 'debugancestor', str(rev1), str(rev2)])
     number, hexcode = long_rev.split(':')
     return get_global_rev(repo, rev=hexcode)
 
