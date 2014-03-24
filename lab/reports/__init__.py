@@ -437,9 +437,9 @@ class Table(collections.defaultdict):
         >>> t.add_cell('prob1', 'cfg2', 20)
         >>> t.add_row('prob2', {'cfg1': 15, 'cfg2': 25})
         >>> print t
-        || expansions |  cfg1 |  cfg2 |
-         | prob1      |    10 |    20 |
-         | prob2      |    15 |    25 |
+        || expansions | cfg1 | cfg2 |
+         | prob1 |  10 |  20 |
+         | prob2 |  15 |  25 |
         >>> t.row_names
         ['prob1', 'prob2']
         >>> t.col_names
@@ -450,16 +450,16 @@ class Table(collections.defaultdict):
         True
         >>> t.add_summary_function('SUM', sum)
         >>> print t
-        || expansions |  cfg1 |  cfg2 |
-         | prob1      |    10 |    20 |
-         | prob2      |    15 |    25 |
-         | **SUM**    |    25 |    45 |
+        || expansions | cfg1 | cfg2 |
+         | prob1 |  10 |  20 |
+         | prob2 |  15 |  25 |
+         | **SUM** |  25 |  45 |
         >>> t.set_column_order(['cfg2', 'cfg1'])
         >>> print t
-        || expansions |  cfg2 |  cfg1 |
-         | prob1      |    20 |    10 |
-         | prob2      |    25 |    15 |
-         | **SUM**    |    45 |    25 |
+        || expansions | cfg2 | cfg1 |
+         | prob1 |  20 |  10 |
+         | prob2 |  25 |  15 |
+         | **SUM** |  45 |  25 |
         """
         collections.defaultdict.__init__(self, dict)
 
@@ -726,14 +726,8 @@ class Table(collections.defaultdict):
         """Return the txt2tags table markup for one row."""
         formatted_cells = []
         for col_name in self._get_printable_column_order():
-            cell = self._get_cell_markup(row_name, col_name, row.get(col_name, ''))
-            formatted_cells.append(cell)
+            formatted_cells.append(row.get(col_name, ''))
         return template % ' | '.join(formatted_cells)
-
-    def _get_cell_markup(self, row_name, col_name, value):
-        """Values are already formatted."""
-        # TODO: Remove this method?
-        return str(value)
 
     def __str__(self):
         """Return the txt2tags markup for this table."""
