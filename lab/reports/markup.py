@@ -21,6 +21,7 @@ from lab.external import txt2tags
 
 
 TABLE_HEAD_BG = '#aaa'
+ESCAPE_WORDBREAK = 'xxxWORDBREAKxxx'
 
 CSS = """\
 <style type="text/css">
@@ -98,6 +99,9 @@ def _get_config(target):
         config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR',
                                    r'<span style="color:\2">\1</span>'])
 
+        # Allow line-breaking at additional places.
+        config['postproc'].append([ESCAPE_WORDBREAK, r'<wbr>'])
+
     elif target == 'tex':
         # AUtomatically add \usepackage directives.
         config['style'] = []
@@ -148,8 +152,9 @@ def _get_config(target):
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\\\\', '\n'])
 
-    # Disable colors for all other targets.
+    # Disable some filters for all other targets.
     config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR', r'\1'])
+    config['postproc'].append([ESCAPE_WORDBREAK, r''])
 
     return config
 

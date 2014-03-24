@@ -30,8 +30,8 @@ import numbers
 import os
 
 from lab import tools
-from markup import Document
 from lab.external import txt2tags
+from lab.reports.markup import Document, ESCAPE_WORDBREAK
 
 
 @tools.remove_none_values
@@ -636,7 +636,7 @@ class Table(collections.defaultdict):
         """Format all entries in **row** (in place)."""
         if row_name == self.header_row:
             for col_name, value in row.items():
-                row[col_name] = value.replace('_', '-')
+                row[col_name] = value.replace('_', '_' + ESCAPE_WORDBREAK)
             return
 
         # Get the slice of the row that should be formated (i.e. the data columns).
