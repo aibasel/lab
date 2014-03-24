@@ -663,7 +663,7 @@ class Table(collections.defaultdict):
                                     rounded_value == max_value and not min_wins):
                     bold = True
             row[col_name] = self._format_cell(row_name, col_name, value,
-                                             color=color, bold=bold)
+                                              color=color, bold=bold)
 
     def _format_cell(self, row_name, col_name, value, color=None, bold=False):
         """
@@ -681,6 +681,8 @@ class Table(collections.defaultdict):
         if formatter:
             return formatter.format_value(value)
 
+        justify_right = isinstance(value, (float, int))
+
         def format_value(value):
             if isinstance(value, float):
                 return '%.2f' % value
@@ -696,6 +698,8 @@ class Table(collections.defaultdict):
             value_text = '{%s|color:%s}' % (value_text, color)
         if bold:
             value_text = '**%s**' % value_text
+        if justify_right:
+            value_text = ' ' + value_text
         return value_text
 
     def _get_markup(self, cells):
@@ -732,10 +736,9 @@ class Table(collections.defaultdict):
         return template % ' | '.join(formatted_cells)
 
     def _get_cell_markup(self, row_name, col_name, value):
-        """Let all columns have minimal but equal width."""
-        if col_name == self.header_column:
-            return str(value).ljust(self.col_size[col_name])
-        return ' ' + str(value).rjust(self.col_size[col_name])
+        """Values are already formatted."""
+        # TODO: Remove this method? Remove col_size?
+        return str(value)
 
     def __str__(self):
         """Return the txt2tags markup for this table."""
@@ -780,7 +783,7 @@ class DynamicDataModule(object):
 
     def modify_printable_row_order(self, table, row_order):
         """
-        Called after retrieving a row order in the table. Subclassed can
+        Called after retrieving a row order in the table. Subclasses can
         modify the order or add new rows. Specifically all rows that were
         added by the **collect** method should be appended or
         inserted.

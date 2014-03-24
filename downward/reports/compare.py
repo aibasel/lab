@@ -205,7 +205,8 @@ class DiffColumnsModule(reports.DynamicDataModule):
                     color = 'green'
                 else:
                     color = 'red'
-                formatted_value = '{%s|color:%s}' % (value, color)
+                # Add space in front of value to right-justify it.
+                formatted_value = ' {%s|color:%s}' % (value, color)
                 formatted_cells[row_name][diff_col_name] = formatted_value
 
     def modify_printable_column_order(self, table, column_order):
