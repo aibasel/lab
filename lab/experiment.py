@@ -328,7 +328,7 @@ class Experiment(_Buildable):
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.
 
-        By using sane defaults, this method is a shortcut for
+        This method is a shortcut for
         ``add_step(Step(name, report, eval_dir, outfile))``.
 
         If no *name* is given, use *outfile* or the *report*'s class name.

@@ -7,8 +7,8 @@ How can I parse and report my own attributes?
 You will have to write a parser that is executed at the end of run
 and manipulates the ``properties`` file in the run directory. The
 simplest way for this is to write a Python script that uses the
-Parser class. Here is the example parser from
-``examples/simple/simple-parser.py``:
+:py:class:`Parser <lab.parser.Parser>` class. Here is the example
+parser from ``examples/simple/simple-parser.py``:
 
 .. literalinclude:: ../examples/simple/simple-parser.py
 
