@@ -25,7 +25,6 @@ from __future__ import division
 
 from collections import defaultdict
 import math
-import os
 import re
 
 # The lab directory is added automatically in the Experiment constructor
@@ -274,24 +273,6 @@ def check_min_values(content, props):
             props[time] = sec
 
 
-def parse_last_loggings(content, props):
-    patterns = [
-        #('last_logged_time', re.compile(r'total_time: (.+)s')),
-        ('last_logged_wall_clock_time', re.compile(r'search wall-clock time: (.+)s')),
-        #('last_logged_memory', re.compile(r'total_vsize: (.+) MB')),
-    ]
-    new_props = {}
-    for line in reversed(content.splitlines()):
-        for attr, regex in patterns:
-            match = regex.search(line)
-            if match and attr not in new_props:
-                new_props[attr] = float(match.group(1))
-        # We can stop once we have found the last value for each attribute.
-        if len(new_props) == 3:
-            break
-    props.update(new_props)
-
-
 def get_error(content, props):
     """If there was an error, store its source in props['error'].
 
@@ -333,8 +314,6 @@ class SearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
 
-        if os.path.exists('driver.log'):
-            self.add_function(parse_last_loggings, file='driver.log')
         self.add_function(get_iterative_results)
         self.add_function(coverage)
         self.add_function(unsolvable)

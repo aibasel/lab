@@ -272,7 +272,7 @@ class PlanningReport(Report):
         each run where an unexpected error occured.
         """
         columns = ['domain', 'problem', 'config', 'error',
-                   'last_logged_time', 'last_logged_memory']
+                   'search_wall_clock_time', 'memory']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
         for run in self.props.values():
