@@ -708,11 +708,6 @@ class Table(collections.defaultdict):
         **_get_printable_column_order** and **_get_printable_row_order**)
         as correctly formatted markup.
         """
-        # Remember the maximal length of each column
-        self.col_size = {}
-        for col_name in self._get_printable_column_order():
-            self.col_size[col_name] = max((len(cells[row_name].get(col_name, ''))
-                                      for row_name in self._get_printable_row_order()))
         parts = []
         for row_name in self._get_printable_row_order():
             if row_name == self.header_row:
@@ -737,7 +732,7 @@ class Table(collections.defaultdict):
 
     def _get_cell_markup(self, row_name, col_name, value):
         """Values are already formatted."""
-        # TODO: Remove this method? Remove col_size?
+        # TODO: Remove this method?
         return str(value)
 
     def __str__(self):
