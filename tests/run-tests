@@ -35,7 +35,7 @@ cd downward
 python -m doctest downward/suites.py
 cd ..
 
-EXAMPLES="lmcut.py custom-attributes.py showcase-options.py standard_exp.py \
+EXAMPLES="lmcut.py showcase-options.py standard_exp.py \
     simple/simple-exp.py pi/pi.py pi/pi-ext.py planner/planner.py \
     planner/planner-ext.py"
 
@@ -49,7 +49,7 @@ cd ..
 # Check code formatting.
 # Ignore under-indented continuation lines (E128) and allow longer lines.
 PEP8_OPTS="--ignore=E128 --max-line-length=90"
-pep8 $PEP8_OPTS --exclude=*external* lab
+pep8 $PEP8_OPTS --exclude=*external*,data lab
 pep8 $PEP8_OPTS --exclude=suites.py downward
 # Don't require two blank lines between each suite (E302).
 pep8 $PEP8_OPTS --ignore=E302 downward/suites.py
@@ -83,9 +83,7 @@ if [ -d "$REPO" ]; then
     cd examples
     rm -rf exp-*
 
-    # Check the examples.
-    ./custom-attributes.py --all
-
+    # Check example experiment.
     ./lmcut.py {1..8}
 
     # Check planner experiment.
