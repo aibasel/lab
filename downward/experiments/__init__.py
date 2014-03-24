@@ -244,7 +244,7 @@ class DownwardExperiment(Experiment):
 
         If *compact* is True, reference benchmarks and preprocessed files instead
         of copying them. Only use this option if the referenced files will **not**
-        be changed during the experiment. Set *compact*=False if you want a
+        be changed during the experiment. Set *compact* to False if you want a
         portable experiment.
 
         If *limits* is given, it must be a dictionary which will be used to

@@ -10,6 +10,7 @@ Install lab and downward
 Install Fast Downward
 ---------------------
 .. highlight:: bash
+
 ::
 
     FAST_DOWNWARD=/path/to/fast-downward/repo
