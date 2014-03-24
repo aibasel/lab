@@ -24,15 +24,18 @@ from lab import tools
 
 
 ABS_REV_CACHE = {}
+_COMMAND_CACHE = {}
 
 
-def get_hg_output(repo, cmd):
-    cmd = ['hg'] + cmd
-    result =  tools.get_command_output(cmd, cwd=repo, quiet=True)
-    if not result:
-        logging.critical('Call failed in %s: "%s". Check repo path and revision.' %
-                         (repo, ' '.join(cmd)))
-    return result
+def get_hg_output(repo, args):
+    cmd = ('hg', '--repository', repo) + tuple(args)
+    if cmd not in _COMMAND_CACHE:
+        result = tools.get_command_output(cmd, quiet=True)
+        _COMMAND_CACHE[cmd] = result
+        if not result:
+            logging.critical('Call failed: "%s". Check repo path and revision.' %
+                             ' '.join(cmd))
+    return _COMMAND_CACHE[cmd]
 
 
 def hg_id(repo, args=None, rev=None):
