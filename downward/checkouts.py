@@ -56,7 +56,7 @@ def get_common_ancestor(repo, rev1, rev2='default'):
     been merged into the default branch, this method returns *rev1*.
     """
     long_rev = tools.get_command_output(
-        repo, ['hg', 'debugancestor', str(rev1), str(rev2)])
+        ['hg', '-R', repo, 'debugancestor', str(rev1), str(rev2)])
     if not long_rev:
         logging.critical('%s or %s is not part of the repo at %s.' %
                          (rev1, rev2, repo))
