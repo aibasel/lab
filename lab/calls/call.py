@@ -18,6 +18,7 @@
 import logging
 import resource
 import subprocess
+import sys
 import time
 
 from lab.calls.log import set_property
@@ -28,7 +29,7 @@ def set_limit(kind, soft_limit, hard_limit=None):
     try:
         resource.setrlimit(kind, (soft_limit, hard_limit))
     except (OSError, ValueError), err:
-        print ("Resource limit for %s could not be set to %s (%s)" %
+        sys.stderr.write('Resource limit for %s could not be set to %s (%s)\n' %
                (kind, (soft_limit, hard_limit), err))
 
 
@@ -84,8 +85,9 @@ class Call(subprocess.Popen):
     def wait(self):
         retcode = subprocess.Popen.wait(self)
         wall_clock_time = time.time() - self.wall_clock_start_time
-        # TODO: Put directly into properties.
-        print '%s wall-clock time: %.2fs' % (self.name, wall_clock_time)
+        set_property('%s_wall_clock_time' % self.name, wall_clock_time)
         if wall_clock_time > self.wall_clock_time_limit:
             set_property('error', 'unexplained-warning-wall-clock-time-very-high')
+            sys.stderr.write('Error: wall-clock time for %s too high: %.2f > %d\n' %
+                (self.name, wall_clock_time, self.wall_clock_time_limit))
         return retcode
