@@ -3,8 +3,6 @@
 .. autoclass:: downward.experiments.DownwardExperiment
    :members:
 
-.. autoclass:: downward.experiments.comparerevisions.CompareRevisionsExperiment
-
 
 Helper classes
 ^^^^^^^^^^^^^^
