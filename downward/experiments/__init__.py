@@ -226,21 +226,28 @@ class DownwardExperiment(Experiment):
         """
         The experiment will be built at *path*.
 
-        *repo* must be the path to a Fast Downward repository. This repository
-        is used to search for problem files.
+        *repo* must be the path to a Fast Downward repository. Among other things
+        this repository is used to search for benchmark files.
 
         *environment* must be an :ref:`Environment <environments>` instance.
+        By default the experiment is run locally.
 
         If given, *combinations* must be a list of :ref:`Checkout <checkouts>`
         tuples of the form (Translator, Preprocessor, Planner). If combinations
         is None (default), perform an experiment with the working copy in *repo*.
+
+        .. note::
+
+            It is recommended to use the *preprocess_rev* and
+            *search_rev* arguments in :py:meth:`.add_config` instead
+            of the *combinations* parameter.
 
         If *compact* is True, reference benchmarks and preprocessed files instead
         of copying them. Only use this option if the referenced files will **not**
         be changed during the experiment. Set *compact*=False if you want a
         portable experiment.
 
-        If *limits* is given, it must be a dictionary and it will be used to
+        If *limits* is given, it must be a dictionary which will be used to
         overwrite the default limits. ::
 
             default_limits = {
