@@ -4,12 +4,17 @@ Frequently Asked Questions
 How can I parse and report my own attributes?
 ---------------------------------------------
 
-You will have to subclass DownwardExperiment and add a new parsing command to
-each run. Here are the relevant bits from the example script
-(``examples/custom-attributes.py``):
+You will have to write a parser that is executed at the end of run
+and manipulates the ``properties`` file in the run directory. The
+simplest way for this is to write a Python script that uses the
+Parser class. Here is the example parser from
+``examples/simple/simple-parser.py``:
 
-.. literalinclude:: ../examples/custom-attributes.py
-   :pyobject: CustomDownwardExperiment
+.. literalinclude:: ../examples/simple/simple-parser.py
+
+You can add your parser to all experiment runs with::
+
+    exp.add_search_parser('path/to/myparser.py')
 
 
 How can I combine the results from multiple experiments?
