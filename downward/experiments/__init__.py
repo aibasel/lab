@@ -361,19 +361,32 @@ class DownwardExperiment(Experiment):
     def add_config(self, nick, config, timeout=None,
                    preprocess_rev=None, search_rev=None):
         """
-        *nick* is the name the config will get in the reports.
+        Add a Fast Downward configuration to the experiment.
 
-        *config* must be a list of arguments that can be passed to the planner
+        *config* must be a list of Fast Downward arguments
         (see http://www.fast-downward.org/SearchEngine for details).
 
-        *rev* can be a revision in the experiment's *repo*. If omitted,
-        *config* will be run for all (translator, preprocessor, planner)
-        *combinations* given in the constructor.
+        Optionally, you can request specific revisions for the
+        preprocess and search code: *preprocess_rev* and
+        *search_rev* can be any valid revision specifier in the
+        experiment's repository. If none of them is given, *config*
+        will be run for all (translator, preprocessor, planner)
+        *combinations* given in the constructor. If only one of
+        them is given, the other will use the same revision.
 
-        If *timeout* is given it will be used for this config instead of the
-        global time limit set in the constructor. ::
+        If *preprocess_rev* or *search_rev* are given, *nick* is a
+        name for **both** the combination of the Fast Downward
+        revisions and the configuration. Otherwise, it is a name for
+        **only** the configuration (and the nick of the revision
+        combinations will be prepended in the reports).
 
-            exp.add_config("lmcut", ["--search", "astar(lmcut())"])
+        If *timeout* is given it will be used for this config
+        instead of the global time limit set in the constructor. ::
+
+            exp.add_config('lmcut', ['--search', 'astar(lmcut())'])
+            exp.add_config('issue123-ipdb',
+                           ['--search', 'astar(ipdb())'],
+                           search_rev='issue123')
         """
         if not isinstance(nick, basestring):
             logging.critical('Config nick must be a string: %s' % nick)
@@ -402,11 +415,15 @@ class DownwardExperiment(Experiment):
         """
         *portfolio* must be the path to a Fast Downward portfolio file.
 
-        *nick* is the name of the portfolio in reports.
+        *nick* is the name of the portfolio in reports. If it is not
+        set explicitly, the portfolio's filename will be used.
 
-        See :py:meth:`.add_config` for valid keyword arguments. ::
+        Arguments in *kwargs* are passed to :py:meth:`.add_config`. ::
 
             exp.add_portfolio('/home/john/my_portfolio.py')
+            exp.add_portfolio('/home/john/my_portfolio.py',
+                              search_rev='issue123',
+                              nick='issue123-my_portfolio')
         """
         if not isinstance(portfolio, basestring):
             logging.critical('portfolio parameter must be a string: %s' % portfolio)
