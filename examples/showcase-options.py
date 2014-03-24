@@ -50,7 +50,7 @@ exp.add_suite('zenotravel:pfile1', benchmark_dir=os.path.join(REPO, 'benchmarks'
 exp.add_config('iter-hadd', [
     '--heuristic', 'hadd=add()',
     '--search', 'iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)'])
-exp.add_config('ipdb', ["--search", "astar(ipdb())"])
+exp.add_config('ipdb', ["--search", "astar(ipdb())"], timeout=10)
 # Use original LAMA 2011 configuration
 exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
 exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py'))
@@ -179,7 +179,8 @@ suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
 exp.add_step(Step('report-suite', SuiteReport(filter=solved), exp.eval_dir, suite_file))
 
 exp.add_report(AbsoluteReport('problem', colored=True,
-                              attributes=['coverage', 'search_time', 'cost', 'error', 'cost_all']),
+                              attributes=['coverage', 'search_time', 'cost',
+                                          'error', 'cost_all', 'limit_search_time']),
                name='report-abs-p', outfile=abs_problem_report_file)
 
 exp.add_step(Step('finished', call, ['echo', 'Experiment', 'finished.']))

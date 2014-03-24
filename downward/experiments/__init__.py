@@ -92,7 +92,6 @@ class DownwardRun(Run):
 
     def _save_limits(self):
         for name, limit in self.experiment.limits.items():
-            # TODO: Respect timeout parameter.
             self.set_property('limit_' + name, limit)
 
     def _save_ext_config(self, ext_config):
@@ -185,6 +184,9 @@ class SearchRun(DownwardRun):
 
         self._save_ext_config(algo.nick)
         self._save_id([algo.nick, self.problem.domain, self.problem.problem])
+
+        if algo.timeout is not None:
+            self.set_property('limit_search_time', algo.timeout)
 
     @classmethod
     def _is_portfolio(cls, config):
