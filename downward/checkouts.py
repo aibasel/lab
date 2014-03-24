@@ -23,7 +23,6 @@ import subprocess
 from lab import tools
 
 
-ABS_REV_CACHE = {}
 _COMMAND_CACHE = {}
 
 
@@ -176,21 +175,11 @@ class HgCheckout(Checkout):
             summary = 'WORK ' + get_rev_id(repo)
             dest = repo
         else:
-            global_rev = self.get_global_rev(repo, local_rev)
+            global_rev = get_global_rev(repo, local_rev)
             nick = nick or local_rev
             summary = get_rev_id(repo, local_rev)
             dest = dest or global_rev
         Checkout.__init__(self, part, repo, global_rev, nick, summary, dest)
-
-    def get_global_rev(self, repo, rev):
-        rev = str(rev)
-        if (repo, rev) in ABS_REV_CACHE:
-            return ABS_REV_CACHE[(repo, rev)]
-        global_rev = get_global_rev(repo, rev=rev)
-        if not global_rev:
-            logging.critical('Revision %s not present in repo %s' % (rev, repo))
-        ABS_REV_CACHE[(repo, rev)] = global_rev
-        return global_rev
 
     def checkout(self):
         # We don't need to check out the working copy
