@@ -21,7 +21,7 @@ from lab.external import txt2tags
 
 
 TABLE_HEAD_BG = '#aaa'
-ESCAPE_WORDBREAK = 'xxxWORDBREAKxxx'
+ESCAPE_WORDBREAK = 'xWBRx'
 
 CSS = """\
 <style type="text/css">
