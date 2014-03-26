@@ -1,8 +1,6 @@
 #!/bin/bash
 # Automatically rebuild Sphinx documentation upon file change
 
-set -e
-
 DOCS="$( dirname "$0" )"
 REPO="$DOCS/../"
 
