@@ -235,12 +235,6 @@ class DownwardExperiment(Experiment):
         tuples of the form (Translator, Preprocessor, Planner). If combinations
         is None (default), perform an experiment with the working copy in *repo*.
 
-        .. note::
-
-            It is recommended to use the *preprocess_rev* and
-            *search_rev* arguments in :py:meth:`.add_config` instead
-            of the *combinations* parameter.
-
         If *compact* is True, reference benchmarks and preprocessed files instead
         of copying them. Only use this option if the referenced files will **not**
         be changed during the experiment. Set *compact* to False if you want a
@@ -364,35 +358,21 @@ class DownwardExperiment(Experiment):
         benchmark_dir = os.path.abspath(benchmark_dir)
         self.suites[benchmark_dir].extend(suite)
 
-    def add_config(self, nick, config, timeout=None,
-                   preprocess_rev=None, search_rev=None):
+    def add_config(self, nick, config, timeout=None):
         """
         Add a Fast Downward configuration to the experiment.
 
         *config* must be a list of Fast Downward arguments
-        (see http://www.fast-downward.org/SearchEngine for details).
+        (see http://www.fast-downward.org/SearchEngine for details). It will
+        be run for all (translator, preprocessor, planner) combinations
+        given in the constructor.
 
-        Optionally, you can request specific revisions for the
-        preprocess and search code: *preprocess_rev* and
-        *search_rev* can be any valid revision specifier in the
-        experiment's repository. If none of them is given, *config*
-        will be run for all (translator, preprocessor, planner)
-        *combinations* given in the constructor. If only one of
-        them is given, the other will use the same revision.
-
-        If *preprocess_rev* or *search_rev* are given, *nick* is a
-        name for **both** the combination of the Fast Downward
-        revisions and the configuration. Otherwise, it is a name for
-        **only** the configuration (and the nick of the revision
-        combinations will be prepended in the reports).
+        *nick* is an abbreviation for the configuration used in the reports.
 
         If *timeout* is given it will be used for this config
         instead of the global time limit set in the constructor. ::
 
             exp.add_config('lmcut', ['--search', 'astar(lmcut())'])
-            exp.add_config('issue123-ipdb',
-                           ['--search', 'astar(ipdb())'],
-                           search_rev='issue123')
         """
         if not isinstance(nick, basestring):
             logging.critical('Config nick must be a string: %s' % nick)
@@ -400,19 +380,8 @@ class DownwardExperiment(Experiment):
             logging.critical('Config must be a list: %s' % config)
         if not nick.endswith('.py') and not config:
             logging.critical('Config cannot be empty: %s' % config)
-        search_rev = search_rev or preprocess_rev
-        preprocess_rev = preprocess_rev or search_rev
-        if search_rev:
-            assert preprocess_rev
-            algo_nicks_and_combos = [(nick, (
-                Translator(self.repo, rev=preprocess_rev),
-                Preprocessor(self.repo, rev=preprocess_rev),
-                Planner(self.repo, rev=search_rev)))]
-        else:
-            assert not preprocess_rev
-            algo_nicks_and_combos = [(_get_rev_nick(*combo) + '-' + nick, combo)
-                                     for combo in self.combinations]
-        for algo_nick, (translator, preprocessor, planner) in algo_nicks_and_combos:
+        for translator, preprocessor, planner in self.combinations:
+            algo_nick = _get_rev_nick(translator, preprocessor, planner) + '-' + nick
             self._algorithms.append(_DownwardAlgorithm(
                 algo_nick, config, timeout=timeout,
                 translator=translator, preprocessor=preprocessor, planner=planner))
@@ -428,7 +397,6 @@ class DownwardExperiment(Experiment):
 
             exp.add_portfolio('/home/john/my_portfolio.py')
             exp.add_portfolio('/home/john/my_portfolio.py',
-                              search_rev='issue123',
                               nick='issue123-my_portfolio')
         """
         if not isinstance(portfolio, basestring):
