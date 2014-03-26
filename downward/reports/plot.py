@@ -477,7 +477,7 @@ class ProblemPlotReport(PlotReport):
             # configs: 'ipdb-1000', 'ipdb-2000', 'mas-1000', 'mas-2000'
             def config_and_states(run):
                 nick, states = run['config_nick'].split('-')
-                return {'nick': [(states, run.get('expansions'))]}
+                return {nick: [(states, run.get('expansions'))]}
 
             PlotReport(attributes=['expansions'], get_points=config_and_states)
 
