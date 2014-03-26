@@ -2,7 +2,6 @@
 =========================================================
 .. autoclass:: downward.experiments.DownwardExperiment
    :members:
-   :show-inheritance:
 
 
 Helper classes

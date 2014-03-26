@@ -210,8 +210,7 @@ class DownwardExperiment(Experiment):
 
     This is the base class for Fast Downward experiments. It can be customized
     by adding the desired configurations, benchmarks and reports.
-    See :py:class:`Experiment <lab.experiment.Experiment>` for inherited
-    methods.
+    See :py:class:`lab.experiment.Experiment` for inherited methods.
 
     .. note::
 
@@ -274,7 +273,7 @@ class DownwardExperiment(Experiment):
                        Preprocessor(repo, rev='e2a018c865f7'),
                        Planner(repo, rev='tip', dest='myplanner-version')]
             exp = DownwardExperiment('/tmp/path', repo, environment=env,
-                                     combinations=combos, compact=False,
+                                     combinations=combos,
                                      limits={'search_time': 30,
                                              'search_memory': 1024})
 
