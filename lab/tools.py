@@ -49,7 +49,9 @@ LOG_LEVEL = None
 
 # Directories and files
 
+# TODO: Remove SCRIPTS_DIR once we have removed BASE_DIR.
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+# TODO: Remove BASE_DIR variable since only the lab dir might be present.
 BASE_DIR = os.path.dirname(SCRIPTS_DIR)
 # TODO(v2.0): Use freedesktop specification.
 DEFAULT_USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')

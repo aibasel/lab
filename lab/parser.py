@@ -140,14 +140,16 @@ class Parser(object):
 
     A single run can have multiple parsing commands.
 
-    If *key_value_patterns* is True, the parser will parse all lines with the
-    following format automatically (underlying regex: r'^(.+): (\d+)$')::
-
-        My attribute: 89            --> props['my_attribute'] = 89
-        other attribute name: 1234  --> props['other_attribute_name'] = 1234
-
     """
     def __init__(self, key_value_patterns=False):
+        """
+        If *key_value_patterns* is True, the parser will parse all lines with the
+        following format automatically (underlying regex: r'^(.+): (\d+)$')::
+
+            My attribute: 89            --> props['my_attribute'] = 89
+            other attribute name: 1234  --> props['other_attribute_name'] = 1234
+
+        """
         self.file_parsers = defaultdict(_FileParser)
         self.run_dir = os.path.abspath('.')
         prop_file = os.path.join(self.run_dir, 'properties')

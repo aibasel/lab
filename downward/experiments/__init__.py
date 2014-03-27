@@ -35,6 +35,7 @@ from downward.checkouts import Checkout, Translator, Preprocessor, Planner
 from downward import suites
 
 
+# TODO: Use pkgutil.get_data() for this.
 DOWNWARD_SCRIPTS_DIR = os.path.join(tools.BASE_DIR, 'downward', 'scripts')
 
 

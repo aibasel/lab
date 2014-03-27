@@ -95,9 +95,9 @@ class OracleGridEngineEnvironment(Environment):
         """
         *queue* must be a valid queue name on the grid.
 
-        *priority* must be in the range [-1023, ..., 0] where 0 is the highest
+        *priority* must be in the range [-1023, 0] where 0 is the highest
         priority. If you're a superuser the value can be in the range
-        [-1023, ..., 1024].
+        [-1023, 1024].
 
         If *email* is provided and ``--all`` is used, a message will be sent
         when the experiment finishes.
@@ -252,7 +252,8 @@ cd %(cwd)s
         tools.overwrite_dir(job_dir)
         # Copy the lab and downward packages to the helper dir to make them
         # available for the steps.
-        for folder in ['data', 'downward', 'examples', 'lab']:
+        # TODO: Check if we really need to copy this.
+        for folder in ['downward', 'examples', 'lab']:
             tools.copy(os.path.join(tools.BASE_DIR, folder),
                        os.path.join(job_dir, folder))
         # Build the job files before submitting the other jobs.
