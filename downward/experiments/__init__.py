@@ -22,9 +22,9 @@ components of Fast Downward (translate, preprocess, search) and performing
 experiments with them.
 """
 from collections import defaultdict
-import os
 import logging
 import multiprocessing
+import os
 import subprocess
 
 from lab.experiment import Run, Experiment
@@ -36,7 +36,7 @@ from downward import suites
 
 
 # TODO: Use pkgutil.get_data() for this.
-DOWNWARD_SCRIPTS_DIR = os.path.join(tools.BASE_DIR, 'downward', 'scripts')
+DOWNWARD_SCRIPTS_DIR = os.path.abspath(os.path.join(__file__, '..', '..', 'scripts'))
 
 
 # Limits can be overwritten in DownwardExperiment constructor.
