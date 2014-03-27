@@ -10,7 +10,6 @@ from subprocess import call
 from lab.environments import LocalEnvironment, MaiaEnvironment
 from lab.steps import Step
 from lab.fetcher import Fetcher
-from lab import tools
 from lab.reports.filter import FilterReport
 
 from downward.experiment import DownwardExperiment
@@ -27,6 +26,7 @@ from downward.reports.timeout import TimeoutReport
 import standard_exp
 
 
+DIR = os.path.dirname(os.path.abspath(__file__))
 EXPNAME = 'showcase-options'
 if standard_exp.REMOTE:
     EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
@@ -100,7 +100,7 @@ exp.add_step(Step('fetcher-test1', Fetcher(), exp.path, eval_dir(1), copy_all=Tr
 exp.add_step(Step('fetcher-test2', Fetcher(), exp.path, eval_dir(2), copy_all=True, write_combined_props=True))
 exp.add_step(Step('fetcher-test3', Fetcher(), exp.path, eval_dir(3), filter_config_nick='lama11'))
 exp.add_step(Step('fetcher-test4', Fetcher(), exp.path, eval_dir(4),
-                  parsers=os.path.join(tools.BASE_DIR, 'downward', 'scripts', 'search_parser.py')))
+                  parsers=os.path.join(DIR, 'simple', 'simple-parser.py')))
 
 
 # Add report steps
