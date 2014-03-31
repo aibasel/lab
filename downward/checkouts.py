@@ -227,6 +227,8 @@ class Preprocessor(HgCheckout):
         retcode = tools.run_command(['make'] + options, cwd=self.bin_dir)
         if retcode != 0:
             logging.critical('Build failed in: %s' % self.bin_dir)
+        if self.rev != 'WORK':
+            tools.run_command(['make', 'clean'], cwd=self.bin_dir)
 
 
 class Planner(HgCheckout):
@@ -239,6 +241,8 @@ class Planner(HgCheckout):
         options = options or []
         for size in [1, 2, 4]:
             retcode = tools.run_command(['make', 'STATE_VAR_BYTES=%d' % size] + options,
-                                  cwd=self.bin_dir)
+                                        cwd=self.bin_dir)
             if retcode != 0:
                 logging.critical('Build failed in: %s' % self.bin_dir)
+        if self.rev != 'WORK':
+            tools.run_command(['make', 'clean'], cwd=self.bin_dir)
