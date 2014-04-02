@@ -483,9 +483,6 @@ class DownwardExperiment(Experiment):
         self.new_files = []
         self.resources = []
 
-        # Include the experiment code again.
-        self.add_resource('', tools.SCRIPTS_DIR, 'lab')
-
         self._adapt_path(stage)
         self._setup_ignores(stage)
         self._checkout_and_compile(stage, **kwargs)

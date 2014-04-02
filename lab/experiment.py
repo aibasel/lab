@@ -234,9 +234,6 @@ class Experiment(_Buildable):
 
         self.set_property('experiment_file', self._script)
 
-        # Include the experiment code
-        self.add_resource('', tools.SCRIPTS_DIR, 'lab')
-
         self.steps = Sequence()
         self.add_step(Step('build', self.build))
         self.add_step(Step('start', self.run))

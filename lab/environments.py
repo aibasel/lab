@@ -35,11 +35,6 @@ class Environment(object):
     def write_main_script(self):
         raise NotImplementedError
 
-    def get_env(self):
-        env = os.environ.copy()
-        env['PYTHONPATH'] = self.exp.path
-        return env
-
     def build_linked_resources(self, run):
         """
         Only if we are building an argo experiment, we need to add all linked
@@ -75,8 +70,7 @@ class LocalEnvironment(Environment):
         self.exp.add_new_file('', self.main_script_file, script)
 
     def start_exp(self):
-        tools.run_command(['./' + self.main_script_file], cwd=self.exp.path,
-                          env=self.get_env())
+        tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)
 
     def run_steps(self, steps):
         Sequence.run_steps(steps)
@@ -183,7 +177,7 @@ class OracleGridEngineEnvironment(Environment):
             # The name set in the job file will be ignored.
             submit.extend(['-N', self._job_name])
         submit.append(self.main_script_file)
-        tools.run_command(submit, cwd=self.exp.path, env=self.get_env())
+        tools.run_command(submit, cwd=self.exp.path)
         # Write "submitted" file.
         with open(submitted_file, 'w') as f:
             f.write('This file is created when the experiment is submitted to '
