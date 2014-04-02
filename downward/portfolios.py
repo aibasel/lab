@@ -18,6 +18,7 @@
 
 import inspect
 import json
+import re
 import tempfile
 
 from lab import tools
@@ -38,19 +39,18 @@ portfolio.run(CONFIGS, {kwargs_string})
 '''
 
 
-def _prepare_config(config, optimal):
+def set_bound(config, bound):
+    assert bound in ['BOUND', 'infinity'] or isinstance(bound, int), bound
     config = [i.strip() for i in config]
-    # Don't use bounds for optimal planning.
-    if optimal:
-        return config
 
     for i, entry in enumerate(config):
         if entry == '--search':
             search = config[i + 1]
-            if 'bound=infinity' in search:
-                search = search.replace('bound=infinity', 'bound=BOUND')
-            elif 'bound=BOUND' not in search:
-                search = search[:-1] + ',bound=BOUND)'
+            search, num_subs = re.subn(
+                r'bound=(?:\d+|BOUND|infinity)', 'bound=%s' % bound, search)
+            assert num_subs <= 1, config
+            if num_subs == 0:
+                search = search[:-1] + ',bound=%s)' % bound
             config[i + 1] = search
     return config
 
@@ -71,7 +71,8 @@ def create_portfolio_script(portfolio, optimal, final_config=None,
                             final_config_builder=None, notes=''):
     total_time = sum(time for time, config in portfolio)
     num_configs = len(portfolio)
-    portfolio = [(t, _prepare_config(config, optimal)) for t, config in portfolio]
+    if not optimal:
+        portfolio = [(t, set_bound(config, 'BOUND')) for t, config in portfolio]
     portfolio = json.dumps(portfolio, indent=4, separators=(',', ': '))
     final_config_name, final_config_source = _get_name_and_source(final_config)
     (final_config_builder_name,
