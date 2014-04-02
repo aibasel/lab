@@ -19,10 +19,4 @@
 ### Send mail when job finishes? -m can be e.g. (b)eginning, (e)nd, (n)ever.
 %(notification)s
 
-if [ -z $PYTHONPATH ]; then
-    export PYTHONPATH=$(pwd)
-else
-    export PYTHONPATH=$(pwd):$PYTHONPATH
-fi
-
 export PATH=~/bin:$PATH

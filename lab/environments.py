@@ -250,12 +250,7 @@ cd %(cwd)s
                                'grid-steps',
                                timestamp + '-' + self.exp.name)
         tools.overwrite_dir(job_dir)
-        # Copy the lab and downward packages to the helper dir to make them
-        # available for the steps.
-        # TODO: Check if we really need to copy this.
-        for folder in ['downward', 'examples', 'lab']:
-            tools.copy(os.path.join(tools.BASE_DIR, folder),
-                       os.path.join(job_dir, folder))
+
         # Build the job files before submitting the other jobs.
         logging.info('Building job scripts')
         for step in steps:
