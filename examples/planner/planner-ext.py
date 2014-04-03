@@ -24,8 +24,8 @@ EXPPATH = 'exp-planner'
 REPO = '/home/jendrik/projects/Downward/downward'
 
 # combos = [
-#     (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097, dest='mypreprocessor'), Planner(REPO)),
-#      (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097, dest='mypreprocessor'), Planner(MYOTHER_REPO)),
+#     (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097), Planner(REPO)),
+#      (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097), Planner(MYOTHER_REPO)),
 # ]
 
 exp = DownwardExperiment(EXPPATH, REPO,  # combinations=combos,
