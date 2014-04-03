@@ -213,14 +213,7 @@ def import_python_file(filename, dirs=None):
 
 def _log_command(cmd, kwargs):
     assert isinstance(cmd, list)
-    # Do not show complete env variables, only show PYTHONPATH
-    kwargs_clean = kwargs.copy()
-    env = kwargs_clean.get('env')
-    if env:
-        pythonpath = env.get('PYTHONPATH')
-        if pythonpath:
-            kwargs_clean['env'] = {'PYTHONPATH': pythonpath, '...': '...'}
-    logging.info('Running command: %s %s' % (' '.join(cmd), kwargs_clean))
+    logging.info('Running command: %s %s' % (' '.join(cmd), kwargs))
 
 
 def run_command(cmd, **kwargs):
