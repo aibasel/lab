@@ -18,6 +18,7 @@
 
 import logging
 import os
+import shutil
 import subprocess
 
 from lab import tools
@@ -188,9 +189,11 @@ class HgCheckout(Checkout):
         if not os.path.exists(path):
             # Old mercurial versions need the clone's parent directory to exist.
             tools.makedirs(path)
-            tools.run_command(['hg', 'archive', '-r', self.rev, '-I', 'src', path],
-                              cwd=self.repo)
-            # TODO: Remove path if checkout failed.
+            retcode = tools.run_command(
+                ['hg', 'archive', '-r', self.rev, '-I', 'src', path], cwd=self.repo)
+            if retcode != 0:
+                shutil.rmtree(path)
+                logging.critical('Failed to make checkout.')
         else:
             logging.info('Checkout "%s" already exists' % path)
 
