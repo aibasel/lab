@@ -143,8 +143,7 @@ class HgCheckout(Checkout):
         *part* must be one of translate, preprocess or search. It is set by the
         child classes.
 
-        *repo* must be a path to a Fast Downward mercurial repository. The
-        path can be either local or remote.
+        *repo* must be a path to a **local** Fast Downward Mercurial repository.
 
         *rev* can be any any valid hg revision specifier (e.g. 209,
         0d748429632d, tip, issue324) or "WORK". By default the working copy
@@ -162,6 +161,7 @@ class HgCheckout(Checkout):
         .. versionchanged :: 1.6
 
             Removed *dest* keyword argument.
+            Removed support for remote repositories.
 
         """
         local_rev = str(rev or self.DEFAULT_REV)
@@ -188,22 +188,11 @@ class HgCheckout(Checkout):
         if not os.path.exists(path):
             # Old mercurial versions need the clone's parent directory to exist.
             tools.makedirs(path)
-            tools.run_command(['hg', 'clone', '-r', self.rev, self.repo, path],
-                              stderr=subprocess.STDOUT)
+            tools.run_command(['hg', 'archive', '-r', self.rev, '-I', 'src', path],
+                              cwd=self.repo)
+            # TODO: Remove path if checkout failed.
         else:
             logging.info('Checkout "%s" already exists' % path)
-            tools.run_command(['hg', 'pull', self.repo],
-                              cwd=path,
-                              stderr=subprocess.STDOUT)
-
-        retcode = tools.run_command(['hg', 'update', '-r', self.rev],
-                                    cwd=path,
-                                    stderr=subprocess.STDOUT)
-        if retcode != 0:
-            # Unknown revision or update crossing branches.
-            logging.critical('Repo at %s could not be updated to revision %s. '
-                             'Please delete the cached repo and try again.' %
-                             (path, self.rev))
 
 
 class Translator(HgCheckout):
