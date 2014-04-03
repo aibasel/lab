@@ -138,7 +138,7 @@ class HgCheckout(Checkout):
     """
     DEFAULT_REV = 'WORK'
 
-    def __init__(self, part, repo, rev=None, nick=None, dest=None):
+    def __init__(self, part, repo, rev=None, nick=None):
         """
         *part* must be one of translate, preprocess or search. It is set by the
         child classes.
@@ -153,21 +153,18 @@ class HgCheckout(Checkout):
         In the reports the planner part will be called *nick*. It defaults to
         *rev*.
 
-        If ``cache_dir`` is the cache directory set in the Experiment
-        constructor, the destination of a checkout is determined as follows:
+        If *rev* is not 'WORK' the checkout will be made to
+        ``cache_dir``/revision-cache/``hash_id`` where ``cache_dir`` is
+        the cache directory set in the Experiment constructor and
+        ``hash_id`` is the global revision id corresponding to the
+        local revision id *rev*.
 
-        - *dest* is absolute: <dest>
-        - *dest* is relative: <cache_dir>/revision-cache/<dest>
-        - *dest* is None: <cache_dir>/revision-cache/<global_rev>
+        .. versionchanged :: 1.6
 
-        You have to use the *dest* parameter if you need to checkout the same
-        revision multiple times and want to alter each checkout manually
-        (e.g. for comparing Makefile options).
+            Removed *dest* keyword argument.
+
         """
         local_rev = str(rev or self.DEFAULT_REV)
-        if dest and local_rev == 'WORK':
-            logging.critical('You cannot have multiple copies of the working '
-                             'directory. Please specify a specific revision.')
 
         if local_rev == 'WORK':
             global_rev = 'WORK'
@@ -178,7 +175,7 @@ class HgCheckout(Checkout):
             global_rev = get_global_rev(repo, local_rev)
             nick = nick or local_rev
             summary = get_rev_id(repo, local_rev)
-            dest = dest or global_rev
+            dest = global_rev
         Checkout.__init__(self, part, repo, global_rev, nick, summary, dest)
 
     def checkout(self):
