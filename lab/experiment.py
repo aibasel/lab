@@ -489,11 +489,10 @@ class Run(_Buildable):
         *command* has to be a list of strings where the first item is the
         executable.
 
-        If *kwargs["abort_on_failure"]* is True and the command does not return
-        0, subsequent commands of this run are not executed.
+        If you pass ``abort_on_failure=True`` and the command does not exit with
+        code 0, subsequent commands of this run are not executed.
 
         The other items in *kwargs* are passed to the :ref:`Call <call>` class.
-        You can find the valid keys there.
 
         Examples::
 
