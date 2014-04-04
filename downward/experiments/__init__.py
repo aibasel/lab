@@ -400,9 +400,13 @@ class DownwardExperiment(Experiment):
                               nick='issue123-my_portfolio')
         """
         if not isinstance(portfolio, basestring):
-            logging.critical('portfolio parameter must be a string: %s' % portfolio)
+            logging.critical('portfolio must be a string: %s' % portfolio)
         if not portfolio.endswith('.py'):
             logging.critical('Path to portfolio must end on .py: %s' % portfolio)
+        if not os.path.isfile(portfolio):
+            logging.critical('Portfolio %s could not be found.' % portfolio)
+        if not os.access(portfolio, os.X_OK):
+            logging.critical('Portfolio is not executable. Run "chmod +x %s"' % portfolio)
         nick = nick or os.path.basename(portfolio)
         self._portfolios.append(portfolio)
         self.add_config(nick, ['--portfolio', os.path.basename(portfolio)], **kwargs)
@@ -565,14 +569,8 @@ class DownwardExperiment(Experiment):
         self.add_resource(planner.shell_name, planner.get_bin('downward'),
                           planner.get_bin_dest())
 
-        # Find all portfolios and copy them into the experiment directory
+        # Copy portfolios into experiment directory.
         for portfolio in self._portfolios:
-            if not os.path.isfile(portfolio):
-                logging.critical('Portfolio file %s could not be found.' % portfolio)
-            #  Portfolio has to be executable
-            # TODO: Change downward script instead of file flags.
-            if not os.access(portfolio, os.X_OK):
-                os.chmod(portfolio, 0755)
             name = os.path.basename(portfolio)
             self.add_resource('', portfolio, planner.get_path_dest('search', name))
 
