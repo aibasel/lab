@@ -61,6 +61,9 @@ if not python_version_supported():
     sys.exit("Error: Translator only supports Python >= 2.7 and Python >= 3.2.")
 '''
 
+PRINT_PYTHON_VERSION = """\
+import platform; print 'Python version: %s' % platform.python_version()"""
+
 
 def _get_rev_nick(translator, preprocessor, planner):
     nicks = [part.nick for part in (translator, preprocessor, planner)]
@@ -120,9 +123,8 @@ class PreprocessRun(DownwardRun):
 
         # Print python version used for translator.
         # python -V prints to stderr so we execute a little program.
-        self.add_command('print-python-version', [python, '-c',
-                    "import platform; "
-                    "print 'Python version: %s' % platform.python_version()"])
+        self.add_command('print-python-version',
+                         [python, '-c', PRINT_PYTHON_VERSION])
         self.add_command('translate', [python, translator.shell_name,
                                        'DOMAIN', 'PROBLEM'],
                          time_limit=exp.limits['translate_time'],
@@ -307,7 +309,6 @@ class DownwardExperiment(Experiment):
         self.include_preprocess_results_in_search_runs = True
         self.compilation_options = ['-j%d' % self._jobs]
 
-        # TODO: Use same mechanism for preprocess parser.
         self._search_parsers = []
         self.add_search_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
 
@@ -491,10 +492,6 @@ class DownwardExperiment(Experiment):
         self._checkout_and_compile(stage, **kwargs)
 
         if stage == 'preprocess':
-            self._check_python_version()
-            self.add_resource('PREPROCESS_PARSER',
-                    os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
-                    'preprocess_parser.py')
             self._make_preprocess_runs()
         elif stage == 'search':
             self._make_search_runs()
@@ -586,6 +583,11 @@ class DownwardExperiment(Experiment):
         self.add_resource('DOWNWARD_VALIDATE', downward_validate, 'downward-validate')
 
     def _make_preprocess_runs(self):
+        self._check_python_version()
+        self.add_resource(
+            'PREPROCESS_PARSER',
+            os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
+
         unique_preprocessing = set()
         for algo in self._algorithms:
             unique_preprocessing.add((algo.translator, algo.preprocessor))
