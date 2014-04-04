@@ -68,7 +68,7 @@ downward
 * Use log-scale instead of symlog-scale for plots. This produces equidistant grid lines.
 * By default place legend right of scatter plots.
 * Remove ``--dereference`` option from tar command.
-* Copy (instead of linking) pddl files into preprocessed-tasks dir.
+* Copy (instead of linking) PDDL files into preprocessed-tasks dir.
 * Add table with Fast Downward commandline strings and revisions to AbsoluteReport.
 
 

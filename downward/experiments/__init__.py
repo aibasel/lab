@@ -349,7 +349,7 @@ class DownwardExperiment(Experiment):
 
         If *benchmark_dir* is given, it must be the path to a benchmark directory.
         The default is <repo>/benchmarks. The benchmark directory must contain
-        domain directories, which in turn hold the pddl files.
+        domain directories, which in turn hold the PDDL files.
         """
         if isinstance(suite, basestring):
             parts = [part.strip() for part in suite.split(',')]
