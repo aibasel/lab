@@ -1,6 +1,45 @@
 News
 ====
 
+v1.5
+----
+
+lab
+^^^
+.. module :: lab.experiment
+
+* Add :func:`Experiment.add_fetcher()` method.
+* If all columns have the same value in an uncolored table row, make all values bold, not grey.
+* In :func:`Experiment.add_resource()` and :func:`Run.add_resource()` set ``dest=None`` if you don't want to copy or link the resource, but only need an alias to reference it in a command.
+* Write and keep all logfiles only if they actually have content.
+* Don't log time and memory consumption of process groups. It is still an unexplained error if too much wall-clock time is used.
+* Randomize task order for grid experiments by default. Use ``randomize_task_order=False`` to disable this.
+* Save wall-clock times in properties file.
+* Do not replace underscores by dashes in table headers. Instead allow browsers to break lines after underscores.
+* Left-justify string and list values in tables.
+
+
+downward
+^^^^^^^^
+.. module :: downward.experiments
+
+* Add optional *nick* parameter to Translator, Preprocessor and Planner classes. It defaults to the revision name *rev*.
+* Save ``hg id`` output for each checkout and include it in reports.
+* Add *timeout* parameter to :func:`DownwardExperiment.add_config()`.
+* Count malformed-logs as unexplained errors.
+* Pass ``legend_location=None`` if you don't need a legend in your plot.
+* Pass custom benchmark directories in :func:`DownwardExperiment.add_suite()` by using the *benchmarks_dir* keyword argument.
+* Do not copy logs from preprocess runs into search runs.
+* Reference preprocessed files in run scripts instead of creating links if ``compact=True`` is given in the experiment constructor (default).
+* Remove ``unexplained_error`` attribute. Errors are unexplained if ``run['error']`` starts with 'unexplained'.
+* Remove ``*_error`` attributes. It is preferrable to inspect ``*_returncode`` attributes instead (e.g. ``search_returncode``).
+* Make report generation faster (10-fold speedup for big reports).
+* Add :func:`DownwardExperiment.add_search_parser()` method.
+* Run ``make clean`` in revision-cache after compiling preprocessor and search code.
+* Strip executables after compilation in revision-cache.
+* Do not copy lab into experiment directories and grid-steps. Use the global lab version instead.
+
+
 v1.4
 ----
 
@@ -14,7 +53,7 @@ lab
 * Remove ``steps.Step.publish_reports()`` method.
 * Allow creating nested new files in experiment directory (e.g. ``exp.add_new_file('path/to/file.txt')``).
 * Remove duplicate attributes from reports.
-* Make argparser available globally as ``lab.experiment.ARGPARSER`` so users can add custom arguments.
+* Make commandline parser available globally as :data:`lab.experiment.ARGPARSER` so users can add custom arguments.
 * Add ``cache_dir`` parameter in :py:class:`Experiment <lab.experiment.Experiment>` for specifying where lab stores temporary data.
 
 downward
