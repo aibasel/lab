@@ -18,6 +18,3 @@
 %(host_spec)s
 ### Send mail when job finishes? -m can be e.g. (b)eginning, (e)nd, (n)ever.
 %(notification)s
-
-# TODO: Can we remove this?
-export PATH=~/bin:$PATH
