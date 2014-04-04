@@ -35,7 +35,6 @@ from downward.checkouts import Checkout, Translator, Preprocessor, Planner
 from downward import suites
 
 
-# TODO: Use pkgutil.get_data() for this.
 DOWNWARD_SCRIPTS_DIR = os.path.abspath(os.path.join(__file__, '..', '..', 'scripts'))
 
 
@@ -61,6 +60,9 @@ def python_version_supported():
 if not python_version_supported():
     sys.exit("Error: Translator only supports Python >= 2.7 and Python >= 3.2.")
 '''
+
+PRINT_PYTHON_VERSION = """\
+import platform; print 'Python version: %s' % platform.python_version()"""
 
 
 def _get_rev_nick(translator, preprocessor, planner):
@@ -121,9 +123,8 @@ class PreprocessRun(DownwardRun):
 
         # Print python version used for translator.
         # python -V prints to stderr so we execute a little program.
-        self.add_command('print-python-version', [python, '-c',
-                    "import platform; "
-                    "print 'Python version: %s' % platform.python_version()"])
+        self.add_command('print-python-version',
+                         [python, '-c', PRINT_PYTHON_VERSION])
         self.add_command('translate', [python, translator.shell_name,
                                        'DOMAIN', 'PROBLEM'],
                          time_limit=exp.limits['translate_time'],
@@ -308,7 +309,6 @@ class DownwardExperiment(Experiment):
         self.include_preprocess_results_in_search_runs = True
         self.compilation_options = ['-j%d' % self._jobs]
 
-        # TODO: Use same mechanism for preprocess parser.
         self._search_parsers = []
         self.add_search_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
 
@@ -349,7 +349,7 @@ class DownwardExperiment(Experiment):
 
         If *benchmark_dir* is given, it must be the path to a benchmark directory.
         The default is <repo>/benchmarks. The benchmark directory must contain
-        domain directories, which in turn hold the pddl files.
+        domain directories, which in turn hold the PDDL files.
         """
         if isinstance(suite, basestring):
             parts = [part.strip() for part in suite.split(',')]
@@ -401,9 +401,13 @@ class DownwardExperiment(Experiment):
                               nick='issue123-my_portfolio')
         """
         if not isinstance(portfolio, basestring):
-            logging.critical('portfolio parameter must be a string: %s' % portfolio)
+            logging.critical('portfolio must be a string: %s' % portfolio)
         if not portfolio.endswith('.py'):
             logging.critical('Path to portfolio must end on .py: %s' % portfolio)
+        if not os.path.isfile(portfolio):
+            logging.critical('Portfolio %s could not be found.' % portfolio)
+        if not os.access(portfolio, os.X_OK):
+            logging.critical('Portfolio is not executable. Run "chmod +x %s"' % portfolio)
         nick = nick or os.path.basename(portfolio)
         self._portfolios.append(portfolio)
         self.add_config(nick, ['--portfolio', os.path.basename(portfolio)], **kwargs)
@@ -488,10 +492,6 @@ class DownwardExperiment(Experiment):
         self._checkout_and_compile(stage, **kwargs)
 
         if stage == 'preprocess':
-            self._check_python_version()
-            self.add_resource('PREPROCESS_PARSER',
-                    os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'),
-                    'preprocess_parser.py')
             self._make_preprocess_runs()
         elif stage == 'search':
             self._make_search_runs()
@@ -566,14 +566,8 @@ class DownwardExperiment(Experiment):
         self.add_resource(planner.shell_name, planner.get_bin('downward'),
                           planner.get_bin_dest())
 
-        # Find all portfolios and copy them into the experiment directory
+        # Copy portfolios into experiment directory.
         for portfolio in self._portfolios:
-            if not os.path.isfile(portfolio):
-                logging.critical('Portfolio file %s could not be found.' % portfolio)
-            #  Portfolio has to be executable
-            # TODO: Change downward script instead of file flags.
-            if not os.access(portfolio, os.X_OK):
-                os.chmod(portfolio, 0755)
             name = os.path.basename(portfolio)
             self.add_resource('', portfolio, planner.get_path_dest('search', name))
 
@@ -589,6 +583,11 @@ class DownwardExperiment(Experiment):
         self.add_resource('DOWNWARD_VALIDATE', downward_validate, 'downward-validate')
 
     def _make_preprocess_runs(self):
+        self._check_python_version()
+        self.add_resource(
+            'PREPROCESS_PARSER',
+            os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
+
         unique_preprocessing = set()
         for algo in self._algorithms:
             unique_preprocessing.add((algo.translator, algo.preprocessor))
