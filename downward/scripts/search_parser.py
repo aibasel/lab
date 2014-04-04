@@ -46,7 +46,7 @@ EXIT_SIGSEGV = 128 + 11
 EXIT_SIGKILL = 128 + 9
 
 
-def successful(run):
+def solved(run):
     """Return true if a plan was found or if the task was proven unsolvable."""
     # TODO: Later we want to use the following line for this.
     # return run.get('search_returncode') in [EXIT_PLAN_FOUND, EXIT_UNSOLVABLE]
@@ -223,8 +223,8 @@ def get_initial_h_value(content, props):
 def check_memory(content, props):
     """Remove memory value if the run was not successful."""
     # TODO: Generalize check for all attributes that only make sense for
-    #       successful tasks.
-    if not successful(props):
+    #       solved tasks.
+    if not solved(props):
         props['memory'] = None
 
 
