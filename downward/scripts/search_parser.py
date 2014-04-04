@@ -282,8 +282,13 @@ def get_error(content, props):
     if props.get('error'):
         return
 
-    # TODO: Add EXIT_PLAN_FOUND and EXIT_CRITICAL_ERROR later.
+    if props.get('validate_returncode') != 0:
+        props['error'] = 'unexplained-invalid-solution'
+        return
+
     exitcode_to_error = {
+        EXIT_PLAN_FOUND: 'none',
+        EXIT_CRITICAL_ERROR: 'unexplained-critical-error',
         EXIT_INPUT_ERROR: 'unexplained-input-error',
         EXIT_UNSUPPORTED: 'unexplained-unsupported-feature-requested',
         EXIT_UNSOLVABLE: 'unsolvable',
@@ -292,22 +297,14 @@ def get_error(content, props):
         EXIT_TIMEOUT: 'timeout',  # Currently only for portfolios.
         EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
         EXIT_SIGXCPU: 'timeout',
-        # EXIT_SIGSEGV: 'unexplained-segfault',  # TODO: Add later.
+        EXIT_SIGSEGV: 'unexplained-segfault',
     }
 
     exitcode = props['search_returncode']
     if exitcode in exitcode_to_error:
         props['error'] = exitcode_to_error[exitcode]
-    elif props.get('validate_returncode', 0) != 0:
-        props['error'] = 'unexplained-invalid-solution'
-
-    # If coverage is 0 and we don't know the reason, try to find one.
-    # TODO: Only allow expected exitcodes even if coverage=1 to find portfolio errors.
-    if not props.get('coverage') and not props.get('error'):
-        if props.get('unsolvable', None) == 1:  # TODO: Remove later.
-            props['error'] = 'probably-unsolvable-exitcode-%d' % exitcode
-        else:
-            props['error'] = 'unexplained-exitcode-%d' % exitcode
+    else:
+        props['error'] = 'unexplained-exitcode-%d' % exitcode
 
 
 class SearchParser(Parser):
