@@ -306,6 +306,7 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocess files are copied
         self.set_property('compact', compact)
 
+        # TODO: Integrate these into the API.
         self.include_preprocess_results_in_search_runs = True
         self.compilation_options = ['-j%d' % self._jobs]
 
@@ -418,8 +419,8 @@ class DownwardExperiment(Experiment):
 
             exp.add_search_parser('path/to/parser')
         """
-        self._search_parsers.append(('search_parser%d' % len(self._search_parsers),
-                                     path_to_parser))
+        self._search_parsers.append(
+            ('search_parser%d' % len(self._search_parsers), path_to_parser))
 
     def set_path_to_python(self, path):
         """
@@ -440,9 +441,7 @@ class DownwardExperiment(Experiment):
 
     def _check_python_version(self):
         """Abort if the Python version is not supported by the translator."""
-        p = subprocess.Popen([self._get_path_to_python(), '-c', VERSION_STMT])
-        p.wait()
-        if p.returncode != 0:
+        if subprocess.call([self._get_path_to_python(), '-c', VERSION_STMT]) != 0:
             logging.critical('Use exp.set_path_to_python(path) to select a '
                              'supported Python interpreter.')
 

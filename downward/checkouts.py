@@ -65,7 +65,7 @@ def get_common_ancestor(repo, rev1, rev2='default'):
 
 
 class Checkout(object):
-    REV_CACHE_DIR = os.path.join(tools.DEFAULT_USER_DIR, 'revision-cache')
+    REV_CACHE_DIR = None  # Set by DownwardExperiment.
 
     def __init__(self, part, repo, rev, nick, summary, dest):
         """
