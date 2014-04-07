@@ -15,5 +15,3 @@ Helper classes
 .. autoclass:: downward.checkouts.Translator
 .. autoclass:: downward.checkouts.Preprocessor
 .. autoclass:: downward.checkouts.Planner
-
-.. autofunction:: downward.checkouts.get_common_ancestor
