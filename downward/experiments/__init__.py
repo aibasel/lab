@@ -533,17 +533,8 @@ class DownwardExperiment(Experiment):
     def _setup_ignores(self, stage):
         self.ignores = []
 
-        # Ignore temporary files dirs from preprocess and search folders.
-        self.ignores.extend(['.obj', 'Makefile.depend'])
-
-        # We don't need VAL's sources.
-        self.ignores.append('VAL')
-
-        # We don't need the VAL copy produced by the build_all script.
-        self.ignores.append('validate')
-
         # Ignore some scripts.
-        self.ignores.extend(['build_all', 'cleanup', 'dist', 'plan', 'plan-ipc'])
+        self.ignores.extend(['build_all', 'cleanup', 'plan', 'plan-ipc'])
 
         if stage == 'preprocess':
             self.ignores.extend(['search'])
