@@ -44,9 +44,9 @@ class CompareRevisionsExperiment(DownwardExperiment):
     Both revisions are tested with all the most important configurations.
     Reports that allow a before-after comparison are automatically added.
 
-    .. note::
+    .. deprecated:: 1.4
 
-        This class has been deprecated in version 1.4 because using the
+        This class has been deprecated in because using the
         DownwardExperiment class directly is more versatile.
 
     """
