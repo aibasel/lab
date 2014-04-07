@@ -172,7 +172,7 @@ class SearchRun(DownwardRun):
 
         planner_type = 'portfolio' if self._is_portfolio(algo.config) else 'single'
 
-        # Try to restore the config_nick by stripping combo_nick from
+        # Restore the config_nick by stripping combo_nick from
         # algo.nick and save it for backwards compatibility.
         combo_nick = _get_rev_nick(algo.translator, algo.preprocessor, algo.planner)
         if algo.nick.startswith(combo_nick + '-'):
@@ -364,7 +364,7 @@ class DownwardExperiment(Experiment):
         Add a Fast Downward configuration to the experiment.
 
         *config* must be a list of Fast Downward arguments
-        (see http://www.fast-downward.org/SearchEngine for details). It will
+        (see http://www.fast-downward.org/SearchEngine). It will
         be run for all (translator, preprocessor, planner) combinations
         given in the constructor.
 
@@ -506,7 +506,6 @@ class DownwardExperiment(Experiment):
         self.add_resource('', part.src_dir, part.get_path_dest())
 
     def _get_unique_checkouts(self):
-        # TODO: Check if we still need this method.
         translators = set()
         preprocessors = set()
         planners = set()
