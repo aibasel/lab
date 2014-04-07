@@ -489,10 +489,18 @@ class Run(_Buildable):
         *command* has to be a list of strings where the first item is the
         executable.
 
-        If you pass ``abort_on_failure=True`` and the command does not exit with
-        code 0, subsequent commands of this run are not executed.
+        Keyword arguments and default values:
 
-        The other items in *kwargs* are passed to the :ref:`Call <call>` class.
+        *abort_on_failure=False*: If set to True and *command* does
+        not exit with code 0, subsequent commands of this run are
+        not executed.
+
+        *time_limit=1800*: Abort *command* after *time_limit* seconds.
+
+        *mem_limit=2048*: Allow *command* to use at most *mem_limit* MiB.
+
+        All other items in *kwargs* are passed to
+        `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
 
         Examples::
 
