@@ -51,7 +51,7 @@ class AbsoluteReport(PlanningReport):
         PlanningReport.__init__(self, **kwargs)
         assert resolution in ['domain', 'problem', 'combined']
         self.resolution = resolution
-        if colored and not 'html' in self.output_format:
+        if colored and 'html' not in self.output_format:
             logging.info('Only HTML reports can be colored. Setting colored=False.')
             colored = False
         self.colored = colored

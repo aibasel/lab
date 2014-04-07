@@ -109,7 +109,6 @@ class ScatterPgfPlots(PgfPlots):
         for axis in ['x', 'y']:
             opts['extra %s ticks' % axis] = report.missing_val
             opts['extra %s tick style' % axis] = 'grid=major'
-            #opts['extra %s tick labels' % axis] = 'missing'
         return opts
 
 

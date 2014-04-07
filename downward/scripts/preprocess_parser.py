@@ -113,12 +113,12 @@ def _get_facts(content):
 
 
 def translator_facts(content, props):
-    if not 'translator_facts' in props:
+    if 'translator_facts' not in props:
         props['translator_facts'] = _get_facts(content)
 
 
 def preprocessor_facts(content, props):
-    if not 'preprocessor_facts' in props:
+    if 'preprocessor_facts' not in props:
         props['preprocessor_facts'] = _get_facts(content)
 
 

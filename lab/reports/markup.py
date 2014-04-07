@@ -137,10 +137,6 @@ def _get_config(target):
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\$\\backslash\$\$\\backslash\$', r'\\\\'])
 
-        # BEGINCOLORred textSEPRedENDCOLOR -> r'\\textcolor{Red}{red text}'
-        #config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR',
-        #                           r'\\textcolor{\2}{\1}'])
-
         # Add default \numtasks command.
         config['postproc'].append([r'\\title',
                     r'\\newcommand{\\numtasks}[1]{\\small{(#1)}}\n\n\\title'])
