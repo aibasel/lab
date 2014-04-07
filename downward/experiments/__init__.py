@@ -543,16 +543,14 @@ class DownwardExperiment(Experiment):
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
-        self.add_resource(translator.shell_name,
-                          translator.get_bin('translate.py'),
-                          translator.get_bin_dest())
-        self.add_resource(preprocessor.shell_name,
-                          preprocessor.get_bin('preprocess'),
-                          preprocessor.get_bin_dest())
+        self.add_resource(
+            translator.shell_name, translator.get_bin(), translator.get_bin_dest())
+        self.add_resource(
+            preprocessor.shell_name, preprocessor.get_bin(), preprocessor.get_bin_dest())
 
     def _prepare_planner(self, planner):
-        self.add_resource(planner.shell_name, planner.get_bin('downward'),
-                          planner.get_bin_dest())
+        self.add_resource(
+            planner.shell_name, planner.get_bin(), planner.get_bin_dest())
 
         # Copy portfolios into experiment directory.
         for portfolio in self._portfolios:

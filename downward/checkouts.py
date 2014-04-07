@@ -95,9 +95,9 @@ class Checkout(object):
     def get_path(self, *rel_path):
         return os.path.join(Checkout.REV_CACHE_DIR, self.dest, *rel_path)
 
-    def get_bin(self, *bin_path):
-        """Return the absolute path to one of this part's executables."""
-        return os.path.join(self.src_dir, self.part, *bin_path)
+    def get_bin(self):
+        """Return the absolute path to this part's executable."""
+        return os.path.join(self.src_dir, self.part, self.BIN_NAME)
 
     def get_path_dest(self, *rel_path):
         return os.path.join('code-' + self.rev, *rel_path)
