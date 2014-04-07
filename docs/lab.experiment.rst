@@ -53,14 +53,6 @@
 .. autoclass:: lab.environments.MaiaEnvironment
 
 
-.. _call:
-
-:class:`Call` -- Make system calls
-----------------------------------
-
-.. autoclass:: lab.calls.call.Call
-
-
 .. _parser:
 
 :class:`Parser` -- Parse log output
