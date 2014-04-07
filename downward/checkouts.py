@@ -119,8 +119,7 @@ class Checkout(object):
 
     @property
     def shell_name(self):
-        # The only non-alphanumeric char in global revisions is the plus sign.
-        return '%s_%s' % (self.part.upper(), self.rev.replace('+', 'PLUS'))
+        return '%s_%s' % (self.part.upper(), self.rev)
 
     def __repr__(self):
         return '%s:%s:%s' % (self.repo, self.rev, self.part)
