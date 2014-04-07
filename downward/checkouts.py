@@ -89,10 +89,7 @@ class Checkout(object):
     def __hash__(self):
         return hash(self.rev)
 
-    def checkout(self):
-        raise NotImplementedError
-
-    def compile(self, options=None):
+    def checkout(self, compilation_options=None):
         raise NotImplementedError
 
     def get_path(self, *rel_path):
@@ -100,7 +97,7 @@ class Checkout(object):
 
     def get_bin(self, *bin_path):
         """Return the absolute path to one of this part's executables."""
-        return os.path.join(self.bin_dir, *bin_path)
+        return os.path.join(self.src_dir, self.part, *bin_path)
 
     def get_path_dest(self, *rel_path):
         return os.path.join('code-' + self.rev, *rel_path)
@@ -112,10 +109,6 @@ class Checkout(object):
     def src_dir(self):
         """Return the path to the Fast Downward source directory."""
         return self.get_path('src')
-
-    @property
-    def bin_dir(self):
-        return os.path.join(self.src_dir, self.part)
 
     @property
     def shell_name(self):
