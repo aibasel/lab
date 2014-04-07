@@ -228,7 +228,6 @@ class Preprocessor(HgCheckout):
         if retcode != 0:
             logging.critical('Build failed in: %s' % self.bin_dir)
         if self.rev != 'WORK':
-            tools.run_command(['make', 'clean'], cwd=self.bin_dir)
             tools.run_command(['strip', 'preprocess'], cwd=self.bin_dir)
 
 
@@ -246,7 +245,6 @@ class Planner(HgCheckout):
             if retcode != 0:
                 logging.critical('Build failed in: %s' % self.bin_dir)
         if self.rev != 'WORK':
-            tools.run_command(['make', 'clean'], cwd=self.bin_dir)
             downward_release = os.path.join(self.bin_dir, 'downward-release')
             if os.path.exists(downward_release):
                 tools.run_command(['strip', downward_release])
