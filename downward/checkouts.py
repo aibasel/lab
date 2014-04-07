@@ -110,12 +110,7 @@ class Checkout(object):
 
     @property
     def src_dir(self):
-        """Return the path to the global Fast Downward source directory.
-
-        The directory "downward" dir has been renamed to "src", so this code
-        doesn't work for older changesets. We can't check for the dir's
-        existence here though, because the directory might not have been created
-        yet."""
+        """Return the path to the Fast Downward source directory."""
         return self.get_path('src')
 
     @property
