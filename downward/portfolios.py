@@ -16,12 +16,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+""" Preliminary module for working with Fast Downward portfolios.
+
+Since the mechanism for loading portfolios in Fast Downward is
+subject to change, this part of the downward package is not
+considered stable and is therefore not part of the HTML
+documentation. """
+
 import inspect
 import json
 import re
 import tempfile
 
 from lab import tools
+
 
 TEMPLATE = '''\
 #! /usr/bin/env python
