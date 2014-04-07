@@ -178,13 +178,12 @@ class HgCheckout(Checkout):
             dest = global_rev
         Checkout.__init__(self, part, repo, global_rev, nick, summary, dest)
 
-    def checkout(self):
-        # We don't need to check out the working copy
+    def checkout(self, compilation_options=None):
+        path = self.get_path()
         if self.rev == 'WORK':
+            self._compile(compilation_options)
             return
 
-        # Move mercurial's "waiting for lock" messages from stderr to stdout below.
-        path = self.get_path()
         if not os.path.exists(path):
             # Old mercurial versions need the clone's parent directory to exist.
             tools.makedirs(path)
@@ -193,8 +192,36 @@ class HgCheckout(Checkout):
             if retcode != 0:
                 shutil.rmtree(path)
                 logging.critical('Failed to make checkout.')
+            self._compile(compilation_options)
+            self._cleanup()
         else:
             logging.info('Checkout "%s" already exists' % path)
+
+    def _compile(self, options=None):
+        options = options or []
+        retcode = tools.run_command(['./build_all'] + options, cwd=self.src_dir)
+        if retcode != 0:
+            logging.critical('Build failed in: %s' % self.src_dir)
+
+    def _cleanup(self):
+        assert self.rev != 'WORK'
+        tools.run_command(['./build_all', 'clean'], cwd=self.src_dir)
+        # Strip binaries.
+        downward_bin = os.path.join(self.src_dir, 'search', 'downward-release')
+        preprocess_bin = os.path.join(self.src_dir, 'preprocess', 'preprocess')
+        assert os.path.exists(preprocess_bin), preprocess_bin
+        binaries = [preprocess_bin]
+        if os.path.exists(downward_bin):
+            binaries.append(downward_bin)
+        tools.run_command(['strip'] + binaries)
+        # Remove unneeded files from "src" dir if they exist.
+        # TODO: Remove "lp" and "ext" dirs?
+        for name in ['dist', 'VAL', 'validate']:
+            path = os.path.join(self.src_dir, name)
+            if os.path.isfile(path):
+                os.remove(path)
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
 
 
 class Translator(HgCheckout):
@@ -210,31 +237,9 @@ class Preprocessor(HgCheckout):
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'preprocess', *args, **kwargs)
 
-    def compile(self, options=None):
-        options = options or []
-        retcode = tools.run_command(['make'] + options, cwd=self.bin_dir)
-        if retcode != 0:
-            logging.critical('Build failed in: %s' % self.bin_dir)
-        if self.rev != 'WORK':
-            tools.run_command(['make', 'clean'], cwd=self.bin_dir)
-            tools.run_command(['strip', 'preprocess'], cwd=self.bin_dir)
-
 
 class Planner(HgCheckout):
     BIN_NAME = 'downward'
 
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'search', *args, **kwargs)
-
-    def compile(self, options=None):
-        options = options or []
-        for size in [1, 2, 4]:
-            retcode = tools.run_command(['make', 'STATE_VAR_BYTES=%d' % size] + options,
-                                        cwd=self.bin_dir)
-            if retcode != 0:
-                logging.critical('Build failed in: %s' % self.bin_dir)
-        if self.rev != 'WORK':
-            tools.run_command(['make', 'clean'], cwd=self.bin_dir)
-            downward_release = os.path.join(self.bin_dir, 'downward-release')
-            if os.path.exists(downward_release):
-                tools.run_command(['strip', downward_release])

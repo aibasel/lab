@@ -506,6 +506,7 @@ class DownwardExperiment(Experiment):
         self.add_resource('', part.src_dir, part.get_path_dest())
 
     def _get_unique_checkouts(self):
+        # TODO: Check if we still need this method.
         translators = set()
         preprocessors = set()
         planners = set()
@@ -518,16 +519,14 @@ class DownwardExperiment(Experiment):
     def _checkout_and_compile(self, stage, **kwargs):
         translators, preprocessors, planners = self._get_unique_checkouts()
 
+        for part in sorted(translators | preprocessors | planners):
+            part.checkout(self.compilation_options)
+
         if stage == 'preprocess':
             for part in sorted(translators | preprocessors):
-                part.checkout()
                 self._require_part(part)
-            for preprocessor in sorted(preprocessors):
-                preprocessor.compile(options=self.compilation_options)
         elif stage == 'search':
             for planner in sorted(planners):
-                planner.checkout()
-                planner.compile(options=self.compilation_options)
                 self._require_part(planner)
         else:
             logging.critical('There is no stage "%s"' % stage)
