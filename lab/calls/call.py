@@ -49,6 +49,7 @@ class Call(subprocess.Popen):
         whether the process has finished. As a result the options
         *kill_delay* and *check_interval* are now ignored.
         """
+        # TODO: Use time_limit=None and mem_limit=None by default.
         for deprecated_arg in ['kill_delay', 'check_interval']:
             if deprecated_arg in kwargs:
                 logging.warning('The "%s" argument is obsolete and will be ignored.' %

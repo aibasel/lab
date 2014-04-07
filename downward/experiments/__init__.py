@@ -630,7 +630,3 @@ class DownwardExperiment(Experiment):
         if self.include_preprocess_results_in_search_runs:
             # Properties have to be copied, not linked.
             run.add_resource('', source('properties'), 'properties')
-
-            # {all,test}.groups were created by old versions of the planner.
-            run.add_resource('', *source_and_dest('all.groups'), required=False)
-            run.add_resource('', *source_and_dest('test.groups'), required=False)
