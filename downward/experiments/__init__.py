@@ -570,6 +570,7 @@ class DownwardExperiment(Experiment):
             name = os.path.basename(portfolio)
             self.add_resource('', portfolio, planner.get_path_dest('search', name))
 
+    def _prepare_validator(self):
         validate = os.path.join(self.repo, 'src', 'VAL', 'validate')
         if not os.path.exists(validate):
             logging.info('Building the validator in the experiment repository.')
@@ -605,6 +606,7 @@ class DownwardExperiment(Experiment):
         _, _, planners = self._get_unique_checkouts()
         for planner in planners:
             self._prepare_planner(planner)
+        self._prepare_validator()
         for algo in self._algorithms:
             for prob in self._problems:
                 self._make_search_run(algo, prob)
