@@ -13,7 +13,6 @@ from lab import reports
 from lab.reports import gm
 from lab import tools
 from lab.calls.log import LazyFile
-from downward.scripts.preprocess_parser import parse_statistics
 
 
 base = os.path.join('/tmp', str(datetime.datetime.now()))
@@ -65,14 +64,6 @@ def test_gm1():
     for l in lists:
         assert round(gm_old(l), 2) == round(gm(l), 2)
 
-
-def test_statistics():
-    props = {}
-    parse_statistics('Translator peak memory: 12345 KB\n'
-                      'Preprocessor facts: 123\n'
-                      'Translator facts: 543\n', props)
-    assert props == {'translator_peak_memory': 12345, 'preprocessor_facts': 123,
-                     'translator_facts': 543}
 
 def test_none_removal():
     @tools.remove_none_values
