@@ -66,6 +66,7 @@ def get_common_ancestor(repo, rev1, rev2='default'):
 
 class Checkout(object):
     REV_CACHE_DIR = None  # Set by DownwardExperiment.
+    BIN_NAME = None  # Set by subclasses.
 
     def __init__(self, part, repo, rev, nick, summary, dest):
         """
@@ -95,6 +96,11 @@ class Checkout(object):
     def get_path(self, *rel_path):
         return os.path.join(Checkout.REV_CACHE_DIR, self.dest, *rel_path)
 
+    @property
+    def src_dir(self):
+        """Return path to Fast Downward source directory."""
+        return self.get_path('src')
+
     def get_bin(self):
         """Return the absolute path to this part's executable."""
         return os.path.join(self.src_dir, self.part, self.BIN_NAME)
@@ -104,11 +110,6 @@ class Checkout(object):
 
     def get_bin_dest(self):
         return self.get_path_dest(self.part, self.BIN_NAME)
-
-    @property
-    def src_dir(self):
-        """Return the path to the Fast Downward source directory."""
-        return self.get_path('src')
 
     @property
     def shell_name(self):
