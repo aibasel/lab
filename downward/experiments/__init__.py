@@ -553,10 +553,10 @@ class DownwardExperiment(Experiment):
             self.ignores.extend(['translate', 'preprocess'])
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
-        # In order to set an environment variable, overwrite the executable
+        # Do not copy translator, only obtain an alias.
         self.add_resource(translator.shell_name,
                           translator.get_bin('translate.py'),
-                          translator.get_bin_dest())
+                          dest=None)
         self.add_resource(preprocessor.shell_name,
                           preprocessor.get_bin('preprocess'),
                           preprocessor.get_bin_dest())
