@@ -100,7 +100,7 @@ class RelativeReport(AbsoluteReport):
 
         table.set_column_order(table.col_names + ['Factor'])
         table.add_col('Factor', quotient_col)
-        #table.add_col('%-Change', percent_col)
+        table.add_col('%-Change', percent_col)
         table.min_wins = None
         table.colored = False
         return table
