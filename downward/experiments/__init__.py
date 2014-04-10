@@ -135,9 +135,7 @@ class PreprocessRun(DownwardRun):
                          mem_limit=exp.limits['preprocess_memory'])
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
-        if exp.compact:
-            # Compress and delete output.sas.
-            self.add_command('compress-output-sas', ['bzip2', 'output.sas'])
+        self.add_command('compress-output-sas', ['xz', 'output.sas'])
 
         self.set_property('stage', 'preprocess')
         self._save_ext_config('-'.join(part.nick for part in self.parts))
@@ -303,7 +301,7 @@ class DownwardExperiment(Experiment):
         self.limits = LIMITS
         self.limits.update(limits)
 
-        # Save if this is a compact experiment i.e. preprocess files are copied
+        # Save if this is a compact experiment i.e. preprocessed tasks are referenced.
         self.set_property('compact', compact)
 
         self.include_preprocess_results_in_search_runs = True
