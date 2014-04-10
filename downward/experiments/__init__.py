@@ -251,8 +251,9 @@ class DownwardExperiment(Experiment):
         files. Use ``compact=False`` only if you really need a
         portable experiment.
 
-        If *limits* is given, it must be a dictionary which will be used to
-        overwrite the default limits. ::
+        If *limits* is given, it must be a dictionary that maps a
+        subset of the keys below to seconds and MiB. It will be used
+        to overwrite the default limits::
 
             default_limits = {
                 'translate_time': 7200,
