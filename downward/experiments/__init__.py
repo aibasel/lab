@@ -208,17 +208,24 @@ class _DownwardAlgorithm(object):
 class DownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
-    This is the base class for Fast Downward experiments. It can be customized
-    by adding the desired configurations, benchmarks and reports.
-    See :py:class:`lab.experiment.Experiment` for inherited methods.
+    Experiments can be customized by adding the desired
+    configurations, benchmarks and reports. See
+    :class:`lab.experiment.Experiment` for inherited methods.
+
+    Fast Downward experiments consist of the following steps: In the
+    first 2 steps the benchmarks are preprocessed with Fast
+    Downward's translator and preprocessor. Step 3 copies the
+    results into a cache for preprocessed tasks (default:
+    ~/lab/preprocessed-tasks). Step 4 prepares the search stage of
+    the experiment and step 5 runs Fast Downward's search component
+    on the preprocessed tasks. You can add report steps with
+    :func:`lab.experiment.Experiment.add_report()`.
 
     .. note::
 
-        You only have to run preprocessing experiments and fetch the results for
-        each pair of translator and preprocessor revision once, since the results
-        are cached. When you build a search experiment, the results are
-        automatically taken from the cache. You can change the location of the
-        cache by passing the *cache_dir* parameter.
+        You only have to run the preprocessing stage (steps 1-3) for
+        each pair of translator and preprocessor revision once,
+        since the results are cached.
     """
     def __init__(self, path, repo, environment=None, combinations=None,
                  compact=True, limits=None, cache_dir=None):
@@ -235,9 +242,13 @@ class DownwardExperiment(Experiment):
         tuples of the form (Translator, Preprocessor, Planner). If combinations
         is None (default), perform an experiment with the working copy in *repo*.
 
-        If *compact* is True, reference benchmarks and preprocessed files instead
-        of copying them. Only use this option if the referenced files will **not**
-        be changed during the experiment. Set *compact* to False if you want a
+        The *compact* parameter is only relevant for the search
+        stage. If *compact* is ``False``, the preprocessed task and
+        the two PDDL files are **copied** into the respective run
+        directories for all configurations. This requires a lot of
+        space (tens of GB), so it is strongly recommended to use the
+        default (``compact=True``) which only references these
+        files. Use ``compact=False`` only if you really need a
         portable experiment.
 
         If *limits* is given, it must be a dictionary which will be used to
