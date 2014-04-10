@@ -380,8 +380,9 @@ class DownwardExperiment(Experiment):
 
         *nick* is an abbreviation for the configuration used in the reports.
 
-        If *timeout* is given it will be used for this config
-        instead of the global time limit set in the constructor. ::
+        If *timeout* is given it will be used for this search
+        configuration instead of the global time limit set in the
+        constructor. ::
 
             exp.add_config('lmcut', ['--search', 'astar(lmcut())'])
         """
