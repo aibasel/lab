@@ -361,6 +361,43 @@ def suite_all():
 def suite_all_formulations():
     return list(sorted(suite_all() + suite_alternative_formulations()))
 
+def suite_unit_costs():
+    return [
+        'airport', 'assembly', 'blocks', 'depot', 'driverlog', 'freecell',
+        'grid', 'gripper', 'logistics00', 'logistics98', 'miconic',
+        'miconic-fulladl', 'miconic-simpleadl', 'movie', 'mprime',
+        'mystery', 'nomystery-opt11-strips', 'nomystery-sat11-strips',
+        'openstacks', 'openstacks-strips', 'optical-telegraphs',
+        'parking-opt11-strips', 'parking-sat11-strips', 'pathways-noneg',
+        'philosophers', 'pipesworld-notankage', 'pipesworld-tankage',
+        'psr-large', 'psr-middle', 'psr-small', 'rovers', 'satellite',
+        'schedule', 'storage', 'tidybot-opt11-strips',
+        'tidybot-sat11-strips', 'tpp', 'trucks', 'trucks-strips',
+        'visitall-opt11-strips', 'visitall-sat11-strips', 'zenotravel'
+    ]
+
+def suite_diverse_costs():
+    return [
+        'barman-opt11-strips', 'barman-sat11-strips',
+        'elevators-opt08-strips', 'elevators-opt11-strips',
+        'elevators-sat08-strips', 'elevators-sat11-strips',
+        'floortile-opt11-strips', 'floortile-sat11-strips',
+        'openstacks-opt08-adl', 'openstacks-opt08-strips',
+        'openstacks-opt11-strips', 'openstacks-sat08-adl',
+        'openstacks-sat08-strips', 'openstacks-sat11-strips',
+        'parcprinter-08-strips', 'parcprinter-opt11-strips',
+        'parcprinter-sat11-strips', 'pegsol-08-strips',
+        'pegsol-opt11-strips', 'pegsol-sat11-strips',
+        'scanalyzer-08-strips', 'scanalyzer-opt11-strips',
+        'scanalyzer-sat11-strips', 'sokoban-opt08-strips',
+        'sokoban-opt11-strips', 'sokoban-sat08-strips',
+        'sokoban-sat11-strips', 'transport-opt08-strips',
+        'transport-opt11-strips', 'transport-sat08-strips',
+        'transport-sat11-strips', 'woodworking-opt08-strips',
+        'woodworking-opt11-strips', 'woodworking-sat08-strips',
+        'woodworking-sat11-strips'
+    ]
+
 
 def suite_five_per_domain(benchmarks_dir):
     for domain in Repository(benchmarks_dir):
