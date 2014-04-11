@@ -25,7 +25,7 @@ from lab import tools
 class Repository(object):
     def __init__(self, benchmarks_dir):
         domains = [d for d in os.listdir(benchmarks_dir)
-                   if not d.startswith(".")]
+                   if not d.startswith('.')]
         domains.sort()
         self.domains = [Domain(domain) for domain in domains]
 
@@ -39,8 +39,8 @@ class Domain(object):
         self.directory = os.path.join(benchmarks_dir, domain)
         problems = os.listdir(self.directory)
         problems = tools.natural_sort([p for p in problems
-                                       if "domain" not in p and
-                                       not p.startswith(".")])
+                                       if 'domain' not in p and
+                                       not p.startswith('.')])
         tools.natural_sort(problems)
         self.problems = [Problem(benchmarks_dir, domain, problem)
                          for problem in problems]
@@ -49,7 +49,7 @@ class Domain(object):
         return self.domain
 
     def __repr__(self):
-        return "<Domain %s>" % self.domain
+        return '<Domain %s>' % self.domain
 
     def __hash__(self):
         return hash(self.domain)
@@ -68,10 +68,10 @@ class Problem(object):
         self.problem = problem
 
     def __str__(self):
-        return "%s:%s" % (self.domain, self.problem)
+        return '%s:%s' % (self.domain, self.problem)
 
     def __repr__(self):
-        return "<Problem %s:%s>" % (self.domain, self.problem)
+        return '<Problem %s:%s>' % (self.domain, self.problem)
 
     def __hash__(self):
         return hash((self.domain, self.problem))
@@ -118,11 +118,11 @@ def generate_problems(benchmarks_dir, description):
         end = int(range_result.group(2))
         suite_name, numbers = description.rsplit('_', 1)
         suite_func = module_dict.get(suite_name, None)
-        func_name = "suite_%s" % suite_name.lower()
+        func_name = 'suite_%s' % suite_name.lower()
         if suite_func is None:
             suite_func = module_dict.get(func_name, None)
         if not suite_func:
-            raise SystemExit("unknown suite: %s" % func_name)
+            raise SystemExit('unknown suite: %s' % func_name)
         for domain_name in suite_func():
             domain = Domain(benchmarks_dir, domain_name)
             for problem in domain.problems[start - 1:end]:
@@ -134,16 +134,16 @@ def generate_problems(benchmarks_dir, description):
             yield problem
     elif description.isupper() or description in module_dict:
         suite_func = module_dict.get(description, None)
-        func_name = "suite_%s" % description.lower()
+        func_name = 'suite_%s' % description.lower()
         if suite_func is None:
             suite_func = module_dict.get(func_name, None)
         if suite_func is None:
-            raise SystemExit("unknown suite: %s" % func_name)
+            raise SystemExit('unknown suite: %s' % func_name)
         for element in suite_func():
             for problem in generate_problems(benchmarks_dir, element):
                 yield problem
-    elif ":" in description:
-        domain_name, problem_name = description.split(":", 1)
+    elif ':' in description:
+        domain_name, problem_name = description.split(':', 1)
         yield Problem(benchmarks_dir, domain_name, problem_name)
     else:
         for problem in Domain(benchmarks_dir, description):
@@ -163,20 +163,20 @@ def suite_alternative_formulations():
 def suite_ipc_one_to_five():
     # All IPC1-5 domains, including the trivial Movie.
     return [
-        "airport", "assembly", "blocks", "depot", "driverlog",
-        "freecell", "grid", "gripper", "logistics00", "logistics98",
-        "miconic", "miconic-fulladl", "miconic-simpleadl", "movie", "mprime",
-        "mystery", "openstacks", "optical-telegraphs", "pathways",
-        "philosophers", "pipesworld-notankage", "pipesworld-tankage",
-        "psr-large", "psr-middle", "psr-small", "rovers", "satellite",
-        "schedule", "storage", "tpp", "trucks", "zenotravel",
+        'airport', 'assembly', 'blocks', 'depot', 'driverlog',
+        'freecell', 'grid', 'gripper', 'logistics00', 'logistics98',
+        'miconic', 'miconic-fulladl', 'miconic-simpleadl', 'movie', 'mprime',
+        'mystery', 'openstacks', 'optical-telegraphs', 'pathways',
+        'philosophers', 'pipesworld-notankage', 'pipesworld-tankage',
+        'psr-large', 'psr-middle', 'psr-small', 'rovers', 'satellite',
+        'schedule', 'storage', 'tpp', 'trucks', 'zenotravel',
     ]
 
 def suite_ipc08_common():
     return [
-        "parcprinter-08-strips",
-        "pegsol-08-strips",
-        "scanalyzer-08-strips",
+        'parcprinter-08-strips',
+        'pegsol-08-strips',
+        'scanalyzer-08-strips',
     ]
 
 def suite_ipc08_opt_only():
@@ -243,38 +243,38 @@ def suite_ipc08_all_strips():
 
 def suite_ipc11_opt():
     return [
-        "barman-opt11-strips",
-        "elevators-opt11-strips",
-        "floortile-opt11-strips",
-        "nomystery-opt11-strips",
-        "openstacks-opt11-strips",
-        "parcprinter-opt11-strips",
-        "parking-opt11-strips",
-        "pegsol-opt11-strips",
-        "scanalyzer-opt11-strips",
-        "sokoban-opt11-strips",
-        "tidybot-opt11-strips",
-        "transport-opt11-strips",
-        "visitall-opt11-strips",
-        "woodworking-opt11-strips",
+        'barman-opt11-strips',
+        'elevators-opt11-strips',
+        'floortile-opt11-strips',
+        'nomystery-opt11-strips',
+        'openstacks-opt11-strips',
+        'parcprinter-opt11-strips',
+        'parking-opt11-strips',
+        'pegsol-opt11-strips',
+        'scanalyzer-opt11-strips',
+        'sokoban-opt11-strips',
+        'tidybot-opt11-strips',
+        'transport-opt11-strips',
+        'visitall-opt11-strips',
+        'woodworking-opt11-strips',
     ]
 
 def suite_ipc11_sat():
     return [
-        "barman-sat11-strips",
-        "elevators-sat11-strips",
-        "floortile-sat11-strips",
-        "nomystery-sat11-strips",
-        "openstacks-sat11-strips",
-        "parcprinter-sat11-strips",
-        "parking-sat11-strips",
-        "pegsol-sat11-strips",
-        "scanalyzer-sat11-strips",
-        "sokoban-sat11-strips",
-        "tidybot-sat11-strips",
-        "transport-sat11-strips",
-        "visitall-sat11-strips",
-        "woodworking-sat11-strips",
+        'barman-sat11-strips',
+        'elevators-sat11-strips',
+        'floortile-sat11-strips',
+        'nomystery-sat11-strips',
+        'openstacks-sat11-strips',
+        'parcprinter-sat11-strips',
+        'parking-sat11-strips',
+        'pegsol-sat11-strips',
+        'scanalyzer-sat11-strips',
+        'sokoban-sat11-strips',
+        'tidybot-sat11-strips',
+        'transport-sat11-strips',
+        'visitall-sat11-strips',
+        'woodworking-sat11-strips',
     ]
 
 def suite_ipc11_all():
@@ -284,55 +284,55 @@ def suite_interesting():
     # A domain is boring if all planners solve all tasks in < 1 sec.
     # We include logistics00 even though it has that property because
     # we merge its results with logistics98 (which doesn't).
-    boring = set(["gripper", "miconic", "miconic-simpleadl", "movie"])
+    boring = set(['gripper', 'miconic', 'miconic-simpleadl', 'movie'])
     return [domain for domain in suite_all() if domain not in boring]
 
 def suite_unsolvable():
     # TODO: Add other unsolvable problems (Miconic-FullADL).
-    # TODO: Add "fsc-grid-r:prize5x5_R.pddl" and "t0-uts:uts_r-02.pddl"
+    # TODO: Add 'fsc-grid-r:prize5x5_R.pddl' and 't0-uts:uts_r-02.pddl'
     #       if the extra-domains branch is merged.
-    return (["mystery:prob%02d.pddl" % index
+    return (['mystery:prob%02d.pddl' % index
              for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]] +
-            ["miconic-fulladl:f21-3.pddl", "miconic-fulladl:f30-2.pddl"])
+            ['miconic-fulladl:f21-3.pddl', 'miconic-fulladl:f30-2.pddl'])
 
 def suite_test():
     # Three smallish domains for quick tests.
-    return ["grid", "gripper", "blocks"]
+    return ['grid', 'gripper', 'blocks']
 
 def suite_minitest():
-    return ["gripper:prob01.pddl", "gripper:prob02.pddl",
-            "gripper:prob03.pddl", "zenotravel:pfile1",
-            "zenotravel:pfile2", "zenotravel:pfile3", ]
+    return ['gripper:prob01.pddl', 'gripper:prob02.pddl',
+            'gripper:prob03.pddl', 'zenotravel:pfile1',
+            'zenotravel:pfile2', 'zenotravel:pfile3', ]
 
 def suite_tinytest():
-    return ["gripper:prob01.pddl", "trucks-strips:p01.pddl",
-            "trucks:p01.pddl", "psr-middle:p01-s17-n2-l2-f30.pddl"]
+    return ['gripper:prob01.pddl', 'trucks-strips:p01.pddl',
+            'trucks:p01.pddl', 'psr-middle:p01-s17-n2-l2-f30.pddl']
 
 
 def suite_lmcut_domains():
     return [
-        "airport",
-        "blocks",
-        "depot",
-        "driverlog",
-        "freecell",
-        "grid",
-        "gripper",
-        "logistics00",
-        "logistics98",
-        "miconic",
-        "mprime",
-        "mystery",
-        "openstacks-strips",
-        "pathways-noneg",
-        "pipesworld-notankage",
-        "pipesworld-tankage",
-        "psr-small",
-        "rovers",
-        "satellite",
-        "tpp",
-        "trucks-strips",
-        "zenotravel",
+        'airport',
+        'blocks',
+        'depot',
+        'driverlog',
+        'freecell',
+        'grid',
+        'gripper',
+        'logistics00',
+        'logistics98',
+        'miconic',
+        'mprime',
+        'mystery',
+        'openstacks-strips',
+        'pathways-noneg',
+        'pipesworld-notankage',
+        'pipesworld-tankage',
+        'psr-small',
+        'rovers',
+        'satellite',
+        'tpp',
+        'trucks-strips',
+        'zenotravel',
     ]
 
 def suite_strips():
@@ -412,7 +412,7 @@ def select_evenly_spread(seq, num_items):
     Otherwise, include first and last items and spread evenly in between.
     (If num_items is 1, only include first item.)
 
-    >>> select_evenly_spread("abcdef", 3)
+    >>> select_evenly_spread('abcdef', 3)
     ['a', 'd', 'f']
     """
     if len(seq) <= num_items:
