@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Regular expressions and functions for parsing planning experiments
+Regular expressions and functions for parsing Fast Downward experiments.
 """
 
 from __future__ import division
@@ -207,8 +207,12 @@ def unsolvable(content, props):
 
 
 def coverage(content, props):
-    props['coverage'] = int(('plan_length' in props or 'cost' in props) and
-                            props.get('validate_returncode') == 0)
+    props['coverage'] = int(
+        'plan_length' in props and
+        'cost' in props and
+        # We don't have timing information for portfolios and iterated searches.
+        props.get('total_time', 0) <= props['limit_search_time'] and
+        props.get('validate_returncode') == 0)
 
 
 def get_initial_h_value(content, props):
