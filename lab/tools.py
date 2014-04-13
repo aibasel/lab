@@ -30,10 +30,10 @@ import traceback
 
 # Use simplejson where it's available, because it is compatible (just separately
 # maintained), puts no blanks at line endings and loads json much faster:
-# json_dump: 44.41, simplejson_dump: 45.90
-# json_load: 7.32, simplejson_load: 2.92
-# We cannot use cjson or ujson for the dumping, because the resulting files are
-# very hard to read (cjson_dump: 5.78, ujson_dump: 2.44). Using ujson for
+# json_dump: 44.41s, simplejson_dump: 45.90s
+# json_load: 7.32s, simplejson_load: 2.92s
+# We cannot use cjson or ujson for dumping, because the resulting files are
+# hard to read for humans (cjson_dump: 5.78, ujson_dump: 2.44). Using ujson for
 # loading might be feasible, but it would only result in a very small speed gain
 # (ujson_load: 2.49). cjson loads even slower than simplejson (cjson_load: 3.28).
 try:
@@ -249,13 +249,7 @@ class Properties(dict):
                 logging.critical("JSON parse error in file '%s': %s" % (filename, e))
 
     def write(self):
-        """Write the properties to disk.
-
-        The default implementation writes each item of a list on its own line
-        making the file very long. Unfortunately this cannot be fixed by
-        subclassing JSONEncoder, because the encode() method is only called once
-        for the properties dict.
-        """
+        """Write the properties to disk."""
         assert self.filename
         with open(self.filename, 'w') as f:
             f.write(str(self))
@@ -268,16 +262,15 @@ class RunFilter(object):
         for arg_name, arg_value in kwargs.items():
             if not arg_name.startswith('filter_'):
                 logging.critical('Invalid keyword argument name "%s"' % arg_name)
-            filter_for = arg_name[len('filter_'):]
+            attribute = arg_name[len('filter_'):]
             # Add a filter for the specified property.
-            self.filters.append(self._build_filter(filter_for, arg_value))
+            self.filters.append(self._build_filter(attribute, arg_value))
 
     def _build_filter(self, prop, value):
-        # Do not define this function inplace to force early binding. See:
-        # stackoverflow.com/questions/3107231/currying-functions-in-python-in-a-loop
+        # Do not define this function inplace to force early binding.
         def property_filter(run):
-            # Do not use Collections.Iterable here to avoid strings being converted to a
-            # list, e.g. filter_config_nick='astar' --> ['a', 's', 't', 'a', 'r']
+            # We cannot use collections.Iterable here since we don't want
+            # membership testing for str.
             if isinstance(value, (list, tuple, set)):
                 return run.get(prop) in value
             else:
@@ -293,7 +286,7 @@ class RunFilter(object):
             if not isinstance(result, (dict, bool)):
                 logging.critical('Filters must return a dictionary or boolean')
             # If a dict is returned, use it as the new run,
-            # else take the old one.
+            # otherwise take the old one.
             if isinstance(result, dict):
                 modified_run = result
             if not result:
@@ -451,7 +444,7 @@ def get_colors(cells, min_wins):
 
 
 def get_min_max(items):
-    """Returns min and max of all values in *items* that are not None.
+    """Return min and max of all values in *items* that are not None.
 
     Floats are rounded to two decimal places. If no maximum and minimum is
     defined (e.g. all values None) None is returned for both min and max.
@@ -489,7 +482,7 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
     default values to argument help.
     """
     def __init__(self, prog, **kwargs):
-        # Use the whole terminal width
+        # Use the whole terminal width.
         width, height = get_terminal_size()
         argparse.HelpFormatter.__init__(self, prog, width=width, **kwargs)
 
@@ -527,7 +520,7 @@ class ArgParser(argparse.ArgumentParser):
                                   choices=['DEBUG', 'INFO', 'WARNING'],
                                   default='INFO')
             except argparse.ArgumentError:
-                # The option may have already been added by a parent
+                # The option may have already been added by a parent class.
                 pass
 
     def parse_known_args(self, *args, **kwargs):
@@ -549,5 +542,5 @@ class ArgParser(argparse.ArgumentParser):
         return string
 
 
-# Parse the log-level and set it
+# Parse the log level and set it.
 ArgParser(add_help=False).parse_known_args()

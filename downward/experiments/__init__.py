@@ -135,9 +135,7 @@ class PreprocessRun(DownwardRun):
                          mem_limit=exp.limits['preprocess_memory'])
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
-        if exp.compact:
-            # Compress and delete output.sas.
-            self.add_command('compress-output-sas', ['bzip2', 'output.sas'])
+        self.add_command('compress-output-sas', ['xz', 'output.sas'])
 
         self.set_property('stage', 'preprocess')
         self._save_ext_config('-'.join(part.nick for part in self.parts))
@@ -210,17 +208,24 @@ class _DownwardAlgorithm(object):
 class DownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
-    This is the base class for Fast Downward experiments. It can be customized
-    by adding the desired configurations, benchmarks and reports.
-    See :py:class:`lab.experiment.Experiment` for inherited methods.
+    Experiments can be customized by adding the desired
+    configurations, benchmarks and reports. See
+    :class:`lab.experiment.Experiment` for inherited methods.
+
+    Fast Downward experiments consist of the following steps: In the
+    first 2 steps the benchmarks are preprocessed with Fast
+    Downward's translator and preprocessor. Step 3 copies the
+    results into a cache for preprocessed tasks (default:
+    ~/lab/preprocessed-tasks). Step 4 prepares the search stage of
+    the experiment and step 5 runs Fast Downward's search component
+    on the preprocessed tasks. You can add report steps with
+    :func:`lab.experiment.Experiment.add_report()`.
 
     .. note::
 
-        You only have to run preprocessing experiments and fetch the results for
-        each pair of translator and preprocessor revision once, since the results
-        are cached. When you build a search experiment, the results are
-        automatically taken from the cache. You can change the location of the
-        cache by passing the *cache_dir* parameter.
+        You only have to run the preprocessing stage (steps 1-3) for
+        each pair of translator and preprocessor revision once,
+        since the results are cached.
     """
     def __init__(self, path, repo, environment=None, combinations=None,
                  compact=True, limits=None, cache_dir=None):
@@ -237,13 +242,18 @@ class DownwardExperiment(Experiment):
         tuples of the form (Translator, Preprocessor, Planner). If combinations
         is None (default), perform an experiment with the working copy in *repo*.
 
-        If *compact* is True, reference benchmarks and preprocessed files instead
-        of copying them. Only use this option if the referenced files will **not**
-        be changed during the experiment. Set *compact* to False if you want a
+        The *compact* parameter is only relevant for the search
+        stage. If *compact* is ``False``, the preprocessed task and
+        the two PDDL files are **copied** into the respective run
+        directories for all configurations. This requires a lot of
+        space (tens of GB), so it is strongly recommended to use the
+        default (``compact=True``) which only references these
+        files. Use ``compact=False`` only if you really need a
         portable experiment.
 
-        If *limits* is given, it must be a dictionary which will be used to
-        overwrite the default limits. ::
+        If *limits* is given, it must be a dictionary that maps a
+        subset of the keys below to seconds and MiB. It will be used
+        to overwrite the default limits::
 
             default_limits = {
                 'translate_time': 7200,
@@ -303,7 +313,7 @@ class DownwardExperiment(Experiment):
         self.limits = LIMITS
         self.limits.update(limits)
 
-        # Save if this is a compact experiment i.e. preprocess files are copied
+        # Save if this is a compact experiment i.e. preprocessed tasks are referenced.
         self.set_property('compact', compact)
 
         # TODO: Integrate these into the API.
@@ -371,8 +381,9 @@ class DownwardExperiment(Experiment):
 
         *nick* is an abbreviation for the configuration used in the reports.
 
-        If *timeout* is given it will be used for this config
-        instead of the global time limit set in the constructor. ::
+        If *timeout* is given it will be used for this search
+        configuration instead of the global time limit set in the
+        constructor. ::
 
             exp.add_config('lmcut', ['--search', 'astar(lmcut())'])
         """

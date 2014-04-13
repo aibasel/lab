@@ -47,6 +47,9 @@ class Environment(object):
 
 
 class LocalEnvironment(Environment):
+    """
+    Environment for running experiments locally on a single machine.
+    """
     def __init__(self, processes=1):
         """
         *processes* must be in the range [1, ..., #CPUs].
@@ -77,6 +80,8 @@ class LocalEnvironment(Environment):
 
 
 class OracleGridEngineEnvironment(Environment):
+    """Abstract base class for grid environments."""
+
     DEFAULT_QUEUE = None             # must be overridden in derived classes
     TEMPLATE_FILE = 'grid-job-header-template'  # can be overridden in derived classes
     MAX_TASKS = float('inf')         # can be overridden in derived classes
@@ -275,6 +280,8 @@ cd %(cwd)s
 
 
 class GkiGridEnvironment(OracleGridEngineEnvironment):
+    """Environment for Freiburg's AI group."""
+
     DEFAULT_QUEUE = 'opteron_core.q'
     MAX_TASKS = 75000
 
@@ -290,6 +297,8 @@ def _host_range(prefix, from_num, to_num):
 
 
 class MaiaEnvironment(OracleGridEngineEnvironment):
+    """Environment for Basel's AI group."""
+
     DEFAULT_QUEUE = '"all.q@ase*"'
     DEFAULT_HOST_RESTRICTION = ''
 

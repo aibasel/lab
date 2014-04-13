@@ -15,9 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Main module for experiment creation
-"""
+"""Main module for creating experiments."""
 
 import os
 import pkgutil
@@ -38,22 +36,24 @@ except ImportError:
 
 
 DEFAULT_ABORT_ON_FAILURE = False
-# How many tasks to group into one top-level directory
+# How many tasks to group into one top-level directory.
 SHARD_SIZE = 100
 
 # Make argparser available globally so users can add custom arguments.
 ARGPARSER = tools.ArgParser()
 ARGPARSER.epilog = "The list of available steps will be added later."
-ARGPARSER.add_argument('steps', metavar='step', nargs='*', default=[],
-        help='Name or number of a step below. If none is given, print help.')
-ARGPARSER.add_argument('--all', dest='run_all_steps', action='store_true',
-        help='Run all supplied steps. If none are given, run all steps '
-        'in the experiment. For local experiments this option has no '
-        'effect if any steps are given on the commandline. Use this '
-        'option to run unattended experiments on computer grids. '
-        'If this option is used, make sure that the experiment script '
-        'doesn\'t change while the experiment is running, because it '
-        'will be called for each step.')
+ARGPARSER.add_argument(
+    'steps', metavar='step', nargs='*', default=[],
+    help='Name or number of a step below. If none is given, print help.')
+ARGPARSER.add_argument(
+    '--all', dest='run_all_steps', action='store_true',
+    help='Run all supplied steps. If none are given, run all steps '
+    'in the experiment. For local experiments this option has no '
+    'effect if any steps are given on the commandline. Use this '
+    'option to run unattended experiments on computer grids. '
+    'If this option is used, make sure that the experiment script '
+    'doesn\'t change while the experiment is running, because it '
+    'will be called for each step.')
 
 
 class _Buildable(object):
@@ -62,7 +62,6 @@ class _Buildable(object):
         self.new_files = []
         # List of glob-style patterns used to exclude files (not full paths).
         self.ignores = []
-
         self.properties = tools.Properties()
 
     def set_property(self, name, value):
@@ -86,8 +85,7 @@ class _Buildable(object):
         if name and not (name[0].isalpha() and name.replace('_', '').isalnum()):
             logging.critical(
                 'Names for resources must start with a letter and consist '
-                'exclusively of letters, numbers and underscores: %s' %
-                name)
+                'exclusively of letters, numbers and underscores: %s' % name)
 
     def add_resource(self, name, source, dest='', required=True, symlink=False):
         """Include the file or directory *source* in the experiment or run.
@@ -154,10 +152,6 @@ class _Buildable(object):
         return os.path.relpath(abs_path, start=self.path)
 
     def _build_properties_file(self):
-        """
-        Load existing properties file if there is any and update it with the new
-        properties.
-        """
         combined_props = tools.Properties(self._get_abs_path('properties'))
         combined_props.update(self.properties)
         combined_props.write()
@@ -170,13 +164,13 @@ class _Buildable(object):
                 logging.debug('Writing file "%s"' % filename)
                 file.write(content)
                 if dest == 'run':
-                    # Make run script executable
+                    # Make run script executable.
+                    # TODO: Replace by adding an "executable" kwarg in add_new_file().
                     os.chmod(filename, 0755)
 
         for name, source, dest, required, symlink in self.resources:
             if required and not os.path.exists(source):
-                logging.critical('The required resource can not be found: %s' %
-                                 source)
+                logging.critical('Required resource not found: %s' % source)
             dest = self._get_abs_path(dest)
             if not dest.startswith(self.path):
                 # Only copy resources that reside in the experiment/run dir.
@@ -450,15 +444,14 @@ class Experiment(_Buildable):
 
 
 class Run(_Buildable):
+    """
+    An experiment consists of one or multiple runs. If you run various
+    algrithms on a set of benchmarks, there should be one run for each
+    (algorithm, benchmark) pair.
+
+    A run consists of one or more commands.
+    """
     def __init__(self, experiment):
-        """Create a new run.
-
-        An experiment consists of one or multiple runs. If you run various
-        algrithms on a set of benchmarks, there should be one run for each
-        (algorithm, benchmark) pair.
-
-        A run consists of one or more commands.
-        """
         _Buildable.__init__(self)
         self.experiment = experiment
 
@@ -470,7 +463,7 @@ class Run(_Buildable):
         """Make *resource_name* available for this run.
 
         In environments like the argo cluster, this implies
-        copying the resource into each run. For the gkigrid, we merely
+        copying the resource into each run. For other environments, we merely
         need to set up the PLANNER environment variable.
 
         Currently, this method is not needed, because we always make all aliases
@@ -538,7 +531,7 @@ class Run(_Buildable):
 
     def _build_run_script(self):
         if not self.commands:
-            raise SystemExit('Please add at least one command')
+            logging.critical('Please add at least one command')
 
         # Copy missing env_vars from experiment.
         env_vars = self.experiment._env_vars
