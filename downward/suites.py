@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import os
 import re
 
@@ -122,7 +123,7 @@ def generate_problems(benchmarks_dir, description):
         if suite_func is None:
             suite_func = module_dict.get(func_name, None)
         if not suite_func:
-            raise SystemExit('unknown suite: %s' % func_name)
+            logging.critical('unknown suite: %s' % func_name)
         for domain_name in suite_func():
             domain = Domain(benchmarks_dir, domain_name)
             for problem in domain.problems[start - 1:end]:
@@ -138,7 +139,7 @@ def generate_problems(benchmarks_dir, description):
         if suite_func is None:
             suite_func = module_dict.get(func_name, None)
         if suite_func is None:
-            raise SystemExit('unknown suite: %s' % func_name)
+            logging.critical('unknown suite: %s' % func_name)
         for element in suite_func():
             for problem in generate_problems(benchmarks_dir, element):
                 yield problem

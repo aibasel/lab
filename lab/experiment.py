@@ -531,7 +531,7 @@ class Run(_Buildable):
 
     def _build_run_script(self):
         if not self.commands:
-            raise SystemExit('Please add at least one command')
+            logging.critical('Please add at least one command')
 
         # Copy missing env_vars from experiment.
         env_vars = self.experiment._env_vars
