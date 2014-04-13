@@ -165,7 +165,7 @@ class _Buildable(object):
                 file.write(content)
                 if dest == 'run':
                     # Make run script executable.
-                    # TODO: Replace by adding executable=False kwarg in add_new_file().
+                    # TODO: Replace by adding an "executable" kwarg in add_new_file().
                     os.chmod(filename, 0755)
 
         for name, source, dest, required, symlink in self.resources:
@@ -444,15 +444,14 @@ class Experiment(_Buildable):
 
 
 class Run(_Buildable):
+    """
+    An experiment consists of one or multiple runs. If you run various
+    algrithms on a set of benchmarks, there should be one run for each
+    (algorithm, benchmark) pair.
+
+    A run consists of one or more commands.
+    """
     def __init__(self, experiment):
-        """Create a new run.
-
-        An experiment consists of one or multiple runs. If you run various
-        algrithms on a set of benchmarks, there should be one run for each
-        (algorithm, benchmark) pair.
-
-        A run consists of one or more commands.
-        """
         _Buildable.__init__(self)
         self.experiment = experiment
 
@@ -464,7 +463,7 @@ class Run(_Buildable):
         """Make *resource_name* available for this run.
 
         In environments like the argo cluster, this implies
-        copying the resource into each run. For the gkigrid, we merely
+        copying the resource into each run. For other environments, we merely
         need to set up the PLANNER environment variable.
 
         Currently, this method is not needed, because we always make all aliases
