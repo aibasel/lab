@@ -207,11 +207,12 @@ def unsolvable(content, props):
 
 
 def coverage(content, props):
+    # TODO: Count runs as unsuccessful if they used more than the
+    # alotted time. Currently this is not possible since we don't
+    # have timing information for portfolios and iterated searches.
     props['coverage'] = int(
         'plan_length' in props and
         'cost' in props and
-        # We don't have timing information for portfolios and iterated searches.
-        props.get('total_time', 0) <= props['limit_search_time'] and
         props.get('validate_returncode') == 0)
 
 
