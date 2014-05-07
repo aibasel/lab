@@ -170,7 +170,7 @@ class SearchRun(DownwardRun):
 
         planner_type = 'portfolio' if self._is_portfolio(algo.config) else 'single'
 
-        # Try to restore the config_nick by stripping combo_nick from
+        # Restore the config_nick by stripping combo_nick from
         # algo.nick and save it for backwards compatibility.
         combo_nick = _get_rev_nick(algo.translator, algo.preprocessor, algo.planner)
         if algo.nick.startswith(combo_nick + '-'):
@@ -316,6 +316,7 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocessed tasks are referenced.
         self.set_property('compact', compact)
 
+        # TODO: Integrate these into the API.
         self.include_preprocess_results_in_search_runs = True
         self.compilation_options = ['-j%d' % self._jobs]
 
@@ -374,7 +375,7 @@ class DownwardExperiment(Experiment):
         Add a Fast Downward configuration to the experiment.
 
         *config* must be a list of Fast Downward arguments
-        (see http://www.fast-downward.org/SearchEngine for details). It will
+        (see http://www.fast-downward.org/SearchEngine). It will
         be run for all (translator, preprocessor, planner) combinations
         given in the constructor.
 
@@ -429,8 +430,8 @@ class DownwardExperiment(Experiment):
 
             exp.add_search_parser('path/to/parser')
         """
-        self._search_parsers.append(('search_parser%d' % len(self._search_parsers),
-                                     path_to_parser))
+        self._search_parsers.append(
+            ('search_parser%d' % len(self._search_parsers), path_to_parser))
 
     def set_path_to_python(self, path):
         """
@@ -451,9 +452,7 @@ class DownwardExperiment(Experiment):
 
     def _check_python_version(self):
         """Abort if the Python version is not supported by the translator."""
-        p = subprocess.Popen([self._get_path_to_python(), '-c', VERSION_STMT])
-        p.wait()
-        if p.returncode != 0:
+        if subprocess.call([self._get_path_to_python(), '-c', VERSION_STMT]) != 0:
             logging.critical('Use exp.set_path_to_python(path) to select a '
                              'supported Python interpreter.')
 
@@ -529,16 +528,14 @@ class DownwardExperiment(Experiment):
     def _checkout_and_compile(self, stage, **kwargs):
         translators, preprocessors, planners = self._get_unique_checkouts()
 
+        for part in sorted(translators | preprocessors | planners):
+            part.checkout(self.compilation_options)
+
         if stage == 'preprocess':
             for part in sorted(translators | preprocessors):
-                part.checkout()
                 self._require_part(part)
-            for preprocessor in sorted(preprocessors):
-                preprocessor.compile(options=self.compilation_options)
         elif stage == 'search':
             for planner in sorted(planners):
-                planner.checkout()
-                planner.compile(options=self.compilation_options)
                 self._require_part(planner)
         else:
             logging.critical('There is no stage "%s"' % stage)
@@ -546,17 +543,8 @@ class DownwardExperiment(Experiment):
     def _setup_ignores(self, stage):
         self.ignores = []
 
-        # Ignore temporary files dirs from preprocess and search folders.
-        self.ignores.extend(['.obj', 'Makefile.depend'])
-
-        # We don't need VAL's sources.
-        self.ignores.append('VAL')
-
-        # We don't need the VAL copy produced by the build_all script.
-        self.ignores.append('validate')
-
         # Ignore some scripts.
-        self.ignores.extend(['build_all', 'cleanup', 'dist', 'plan', 'plan-ipc'])
+        self.ignores.extend(['build_all', 'cleanup', 'plan', 'plan-ipc'])
 
         if stage == 'preprocess':
             self.ignores.extend(['search'])
@@ -566,22 +554,21 @@ class DownwardExperiment(Experiment):
 
     def _prepare_translator_and_preprocessor(self, translator, preprocessor):
         # In order to set an environment variable, overwrite the executable
-        self.add_resource(translator.shell_name,
-                          translator.get_bin('translate.py'),
-                          translator.get_bin_dest())
-        self.add_resource(preprocessor.shell_name,
-                          preprocessor.get_bin('preprocess'),
-                          preprocessor.get_bin_dest())
+        self.add_resource(
+            translator.shell_name, translator.get_bin(), translator.get_bin_dest())
+        self.add_resource(
+            preprocessor.shell_name, preprocessor.get_bin(), preprocessor.get_bin_dest())
 
     def _prepare_planner(self, planner):
-        self.add_resource(planner.shell_name, planner.get_bin('downward'),
-                          planner.get_bin_dest())
+        self.add_resource(
+            planner.shell_name, planner.get_bin(), planner.get_bin_dest())
 
         # Copy portfolios into experiment directory.
         for portfolio in self._portfolios:
             name = os.path.basename(portfolio)
             self.add_resource('', portfolio, planner.get_path_dest('search', name))
 
+    def _prepare_validator(self):
         validate = os.path.join(self.repo, 'src', 'VAL', 'validate')
         if not os.path.exists(validate):
             logging.info('Building the validator in the experiment repository.')
@@ -617,6 +604,7 @@ class DownwardExperiment(Experiment):
         _, _, planners = self._get_unique_checkouts()
         for planner in planners:
             self._prepare_planner(planner)
+        self._prepare_validator()
         for algo in self._algorithms:
             for prob in self._problems:
                 self._make_search_run(algo, prob)

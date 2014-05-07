@@ -18,7 +18,7 @@
 
 import logging
 import os
-import subprocess
+import shutil
 
 from lab import tools
 
@@ -65,7 +65,8 @@ def get_common_ancestor(repo, rev1, rev2='default'):
 
 
 class Checkout(object):
-    REV_CACHE_DIR = os.path.join(tools.DEFAULT_USER_DIR, 'revision-cache')
+    REV_CACHE_DIR = None  # Set by DownwardExperiment.
+    BIN_NAME = None  # Set by subclasses.
 
     def __init__(self, part, repo, rev, nick, summary, dest):
         """
@@ -89,18 +90,20 @@ class Checkout(object):
     def __hash__(self):
         return hash(self.rev)
 
-    def checkout(self):
-        raise NotImplementedError
-
-    def compile(self, options=None):
+    def checkout(self, compilation_options=None):
         raise NotImplementedError
 
     def get_path(self, *rel_path):
         return os.path.join(Checkout.REV_CACHE_DIR, self.dest, *rel_path)
 
-    def get_bin(self, *bin_path):
-        """Return the absolute path to one of this part's executables."""
-        return os.path.join(self.bin_dir, *bin_path)
+    @property
+    def src_dir(self):
+        """Return path to Fast Downward source directory."""
+        return self.get_path('src')
+
+    def get_bin(self):
+        """Return the absolute path to this part's executable."""
+        return os.path.join(self.src_dir, self.part, self.BIN_NAME)
 
     def get_path_dest(self, *rel_path):
         return os.path.join('code-' + self.rev, *rel_path)
@@ -109,23 +112,8 @@ class Checkout(object):
         return self.get_path_dest(self.part, self.BIN_NAME)
 
     @property
-    def src_dir(self):
-        """Return the path to the global Fast Downward source directory.
-
-        The directory "downward" dir has been renamed to "src", so this code
-        doesn't work for older changesets. We can't check for the dir's
-        existence here though, because the directory might not have been created
-        yet."""
-        return self.get_path('src')
-
-    @property
-    def bin_dir(self):
-        return os.path.join(self.src_dir, self.part)
-
-    @property
     def shell_name(self):
-        # The only non-alphanumeric char in global revisions is the plus sign.
-        return '%s_%s' % (self.part.upper(), self.rev.replace('+', 'PLUS'))
+        return '%s_%s' % (self.part.upper(), self.rev)
 
     def __repr__(self):
         return '%s:%s:%s' % (self.repo, self.rev, self.part)
@@ -138,13 +126,12 @@ class HgCheckout(Checkout):
     """
     DEFAULT_REV = 'WORK'
 
-    def __init__(self, part, repo, rev=None, nick=None, dest=None):
+    def __init__(self, part, repo, rev=None, nick=None):
         """
         *part* must be one of translate, preprocess or search. It is set by the
         child classes.
 
-        *repo* must be a path to a Fast Downward mercurial repository. The
-        path can be either local or remote.
+        *repo* must be a path to a **local** Fast Downward Mercurial repository.
 
         *rev* can be any any valid hg revision specifier (e.g. 209,
         0d748429632d, tip, issue324) or "WORK". By default the working copy
@@ -153,21 +140,19 @@ class HgCheckout(Checkout):
         In the reports the planner part will be called *nick*. It defaults to
         *rev*.
 
-        If ``cache_dir`` is the cache directory set in the Experiment
-        constructor, the destination of a checkout is determined as follows:
+        If *rev* is not 'WORK' the checkout will be made to
+        ``cache_dir``/revision-cache/``hash_id`` where ``cache_dir`` is
+        the cache directory set in the Experiment constructor and
+        ``hash_id`` is the global revision id corresponding to the
+        local revision id *rev*.
 
-        - *dest* is absolute: <dest>
-        - *dest* is relative: <cache_dir>/revision-cache/<dest>
-        - *dest* is None: <cache_dir>/revision-cache/<global_rev>
+        .. versionchanged :: 1.6
 
-        You have to use the *dest* parameter if you need to checkout the same
-        revision multiple times and want to alter each checkout manually
-        (e.g. for comparing Makefile options).
+            Removed *dest* keyword argument.
+            Removed support for remote repositories.
+
         """
         local_rev = str(rev or self.DEFAULT_REV)
-        if dest and local_rev == 'WORK':
-            logging.critical('You cannot have multiple copies of the working '
-                             'directory. Please specify a specific revision.')
 
         if local_rev == 'WORK':
             global_rev = 'WORK'
@@ -178,35 +163,53 @@ class HgCheckout(Checkout):
             global_rev = get_global_rev(repo, local_rev)
             nick = nick or local_rev
             summary = get_rev_id(repo, local_rev)
-            dest = dest or global_rev
+            dest = global_rev
         Checkout.__init__(self, part, repo, global_rev, nick, summary, dest)
 
-    def checkout(self):
-        # We don't need to check out the working copy
+    def checkout(self, compilation_options=None):
+        path = self.get_path()
         if self.rev == 'WORK':
+            self._compile(compilation_options)
             return
 
-        # Move mercurial's "waiting for lock" messages from stderr to stdout below.
-        path = self.get_path()
         if not os.path.exists(path):
             # Old mercurial versions need the clone's parent directory to exist.
             tools.makedirs(path)
-            tools.run_command(['hg', 'clone', '-r', self.rev, self.repo, path],
-                              stderr=subprocess.STDOUT)
+            retcode = tools.run_command(
+                ['hg', 'archive', '-r', self.rev, '-I', 'src', path], cwd=self.repo)
+            if retcode != 0:
+                shutil.rmtree(path)
+                logging.critical('Failed to make checkout.')
+            self._compile(compilation_options)
+            self._cleanup()
         else:
             logging.info('Checkout "%s" already exists' % path)
-            tools.run_command(['hg', 'pull', self.repo],
-                              cwd=path,
-                              stderr=subprocess.STDOUT)
 
-        retcode = tools.run_command(['hg', 'update', '-r', self.rev],
-                                    cwd=path,
-                                    stderr=subprocess.STDOUT)
+    def _compile(self, options=None):
+        options = options or []
+        retcode = tools.run_command(['./build_all'] + options, cwd=self.src_dir)
         if retcode != 0:
-            # Unknown revision or update crossing branches.
-            logging.critical('Repo at %s could not be updated to revision %s. '
-                             'Please delete the cached repo and try again.' %
-                             (path, self.rev))
+            logging.critical('Build failed in: %s' % self.src_dir)
+
+    def _cleanup(self):
+        assert self.rev != 'WORK'
+        tools.run_command(['./build_all', 'clean'], cwd=self.src_dir)
+        # Strip binaries.
+        downward_bin = os.path.join(self.src_dir, 'search', 'downward-release')
+        preprocess_bin = os.path.join(self.src_dir, 'preprocess', 'preprocess')
+        assert os.path.exists(preprocess_bin), preprocess_bin
+        binaries = [preprocess_bin]
+        if os.path.exists(downward_bin):
+            binaries.append(downward_bin)
+        tools.run_command(['strip'] + binaries)
+        # Remove unneeded files from "src" dir if they exist.
+        # TODO: Remove "lp" and "ext" dirs?
+        for name in ['dist', 'VAL', 'validate']:
+            path = os.path.join(self.src_dir, name)
+            if os.path.isfile(path):
+                os.remove(path)
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
 
 
 class Translator(HgCheckout):
@@ -222,29 +225,9 @@ class Preprocessor(HgCheckout):
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'preprocess', *args, **kwargs)
 
-    def compile(self, options=None):
-        options = options or []
-        retcode = tools.run_command(['make'] + options, cwd=self.bin_dir)
-        if retcode != 0:
-            logging.critical('Build failed in: %s' % self.bin_dir)
-        if self.rev != 'WORK':
-            tools.run_command(['strip', 'preprocess'], cwd=self.bin_dir)
-
 
 class Planner(HgCheckout):
     BIN_NAME = 'downward'
 
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'search', *args, **kwargs)
-
-    def compile(self, options=None):
-        options = options or []
-        for size in [1, 2, 4]:
-            retcode = tools.run_command(['make', 'STATE_VAR_BYTES=%d' % size] + options,
-                                        cwd=self.bin_dir)
-            if retcode != 0:
-                logging.critical('Build failed in: %s' % self.bin_dir)
-        if self.rev != 'WORK':
-            downward_release = os.path.join(self.bin_dir, 'downward-release')
-            if os.path.exists(downward_release):
-                tools.run_command(['strip', downward_release])

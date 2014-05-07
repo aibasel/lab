@@ -287,7 +287,7 @@ class Report(object):
             # Use the attribute options from the pattern for all matches, but
             # don't try to guess options for attributes that appear in the list.
             expanded_attrs.extend([attr.copy(match) for match in matches
-                                   if not match in attributes])
+                                   if match not in attributes])
         if attributes and not expanded_attrs:
             logging.critical('No attributes match your patterns.')
         return expanded_attrs
@@ -320,7 +320,7 @@ class Report(object):
         for run_id, run in self.props.items():
             row = {}
             for key, value in run.items():
-                if not key in self.attributes:
+                if key not in self.attributes:
                     continue
                 if isinstance(value, (list, tuple)):
                     key = '-'.join([str(item) for item in value])
