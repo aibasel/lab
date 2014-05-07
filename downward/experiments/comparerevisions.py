@@ -46,8 +46,8 @@ class CompareRevisionsExperiment(DownwardExperiment):
 
     .. deprecated:: 1.4
 
-        This class has been deprecated in because using the
-        DownwardExperiment class directly is more versatile.
+        This class has been deprecated because using
+        DownwardExperiment directly is more versatile.
 
     """
     def __init__(self, path, repo, opt_or_sat, rev, base_rev=None,
