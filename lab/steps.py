@@ -128,11 +128,6 @@ class Sequence(list):
                 logging.critical('There is no step number %s' % step_name)
         return self[self._get_step_index(step_name)]
 
-    def remove_step(self, step_name):
-        """Delete the step with the name *step_name*."""
-        index = self._get_step_index(step_name)
-        del self[index]
-
     def get_steps_text(self):
         name_width = min(max(len(step.name) for step in self), 50)
         terminal_width, terminal_height = tools.get_terminal_size()
