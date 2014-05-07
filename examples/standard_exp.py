@@ -15,7 +15,7 @@ from downward.reports.absolute import AbsoluteReport
 
 
 NODE = platform.node()
-REMOTE = NODE.startswith('gkigrid') or NODE.endswith('cluster') or NODE in ['habakuk', 'turtur']
+REMOTE = 'cluster' in NODE or NODE.startswith('gkigrid') or NODE in ['habakuk', 'turtur']
 SCP_LOGIN = 'seipp@maia'
 ATTRIBUTES = ['coverage', 'cost', 'quality', 'total_time']
 
