@@ -112,13 +112,6 @@ class StandardDownwardExperiment(DownwardExperiment):
                            ['tar', '-xjf', self.name + '-eval.tar.bz2'],
                       cwd=os.path.dirname(self.path)))
 
-    def add_ipc_config(self, ipc_config_name):
-        """Example: ::
-
-            exp.add_ipc_config('seq-sat-lama-2011')
-        """
-        self.add_config(ipc_config_name, ['ipc', ipc_config_name, '--plan-file', 'sas_plan'])
-
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
     exp = StandardDownwardExperiment(combinations=combinations, limits=limits,

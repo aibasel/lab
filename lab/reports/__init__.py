@@ -479,7 +479,6 @@ class Table(collections.defaultdict):
         self.header_row = 'column names (never printed)'
         self.header_column = 'row names (never printed)'
         self.cell_formatters = collections.defaultdict(dict)
-        self.col_size = None
         self.column_order = None
         self.summary_row_order = []
 
