@@ -404,7 +404,7 @@ class PlotReport(PlanningReport):
             # The same coordinate may have been added multiple times. To avoid
             # drawing it more than once which results in a bolder spot, we
             # filter duplicate items.
-            coords = tools.uniq(coords)
+            coords = list(set(coords))
             # Logarithmic axes cannot handle values <= 0.
             if not self.xscale == 'linear':
                 coords = [(handle_zero(x), y) for x, y in coords]

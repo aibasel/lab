@@ -8,7 +8,6 @@ import sys
 
 from lab.environments import LocalEnvironment, MaiaEnvironment
 from lab.steps import Step
-from lab import tools
 
 from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
@@ -112,18 +111,6 @@ class StandardDownwardExperiment(DownwardExperiment):
         self.add_step(Step('unzip-eval-dir', call,
                            ['tar', '-xjf', self.name + '-eval.tar.bz2'],
                       cwd=os.path.dirname(self.path)))
-
-    def add_config_module(self, path):
-        """*path* must be a path to a python module containing only Fast
-        Downward configurations in the form
-
-        my_config = ["--search", "astar(lmcut())"]
-        """
-        module = tools.import_python_file(path)
-        configs = [(c, getattr(module, c)) for c in dir(module)
-                   if not c.startswith('__')]
-        for nick, config in configs:
-            self.add_config(nick, config)
 
     def add_ipc_config(self, ipc_config_name):
         """Example: ::

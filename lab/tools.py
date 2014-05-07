@@ -42,6 +42,7 @@ try:
 except ImportError:
     import json
 
+# Never use argparse module from stdlib. Its implementation has changed.
 from external import argparse
 
 
@@ -98,14 +99,6 @@ def make_list(value):
     if isinstance(value, (tuple, set)):
         return list(value)
     return [value]
-
-
-def uniq(iterable):
-    result = []
-    for x in iterable:
-        if x not in result:
-            result.append(x)
-    return result
 
 
 def divide_list(seq, size):
@@ -180,22 +173,24 @@ def find_file(filenames, dir='.'):
     raise IOError('none found in %r: %r' % (dir, filenames))
 
 
-def import_python_file(filename, dirs=None):
-    filename = os.path.abspath(filename)
-    original_filename = filename
-    dirs = dirs or []
-    parent_dir = os.path.dirname(filename)
-    dirs.append(parent_dir)
-    sys.path = dirs + sys.path
-    filename = os.path.basename(filename)
-    if filename.endswith('.py'):
-        module_name = filename[:-3]
-    elif filename.endswith('.pyc'):
-        module_name = filename[:-4]
+def _get_module_name(filename):
+    basename = os.path.basename(filename)
+    if basename.endswith('.py'):
+        return basename[:-3]
+    elif basename.endswith('.pyc'):
+        return basename[:-4]
     else:
-        module_name = filename
+        return basename
 
-    # Reload already loaded modules to actually get the changes.
+
+def import_python_file(filename):
+    filename = os.path.abspath(filename)
+    original_sys_path = sys.path[:]
+    sys.path = [os.path.dirname(filename)] + sys.path
+    module_name = _get_module_name(filename)
+
+    # If we have already loaded a file with the same basename, we need
+    # to delete the cached module before loading the new one.
     if module_name in sys.modules:
         del sys.modules[module_name]
 
@@ -203,12 +198,11 @@ def import_python_file(filename, dirs=None):
         module = __import__(module_name)
     except ImportError as err:
         print traceback.format_exc()
-        logging.critical('File "%s" could not be imported: %s' % (original_filename, err))
+        logging.critical('File "%s" could not be imported: %s' % (filename, err))
     else:
         return module
     finally:
-        for dir in dirs:
-            sys.path.remove(dir)
+        sys.path = original_sys_path
 
 
 def _log_command(cmd, kwargs):
