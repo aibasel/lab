@@ -303,6 +303,7 @@ def get_error(content, props):
         EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
         EXIT_SIGXCPU: 'timeout',
         EXIT_SIGSEGV: 'unexplained-segfault',
+        EXIT_SIGKILL: 'unexplained-sigkill',
     }
 
     exitcode = props['search_returncode']
