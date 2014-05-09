@@ -5,6 +5,8 @@
 #$ -S /bin/bash
 ### Execute job from current working directory.
 #$ -cwd
+### Export all environment variables to the job context.
+#$ -V
 ### Redirect stdout and stderr.
 #$ -e %(errfile)s
 #$ -o %(logfile)s
