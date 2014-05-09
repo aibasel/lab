@@ -166,14 +166,24 @@ class HgCheckout(Checkout):
             dest = global_rev
         Checkout.__init__(self, part, repo, global_rev, nick, summary, dest)
 
+    @property
+    def _sentinel_file(self):
+        return self.get_path('build_successful')
+
     def checkout(self, compilation_options=None):
-        path = self.get_path()
         if self.rev == 'WORK':
             self._compile(compilation_options)
-            return
+        else:
+            self._cache(compilation_options)
 
-        if not os.path.exists(path):
-            # Old mercurial versions need the clone's parent directory to exist.
+    def _cache(self, compilation_options):
+        path = self.get_path()
+        if os.path.exists(path):
+            logging.info('Revision is already cached: "%s"' % path)
+            if not os.path.exists(self._sentinel_file):
+                logging.critical('The build at "%s" is corrupted. Please '
+                                 'delete it and try again.' % path)
+        else:
             tools.makedirs(path)
             retcode = tools.run_command(
                 ['hg', 'archive', '-r', self.rev, '-I', 'src', path], cwd=self.repo)
@@ -182,13 +192,13 @@ class HgCheckout(Checkout):
                 logging.critical('Failed to make checkout.')
             self._compile(compilation_options)
             self._cleanup()
-        else:
-            logging.info('Checkout "%s" already exists' % path)
 
     def _compile(self, options=None):
         options = options or []
         retcode = tools.run_command(['./build_all'] + options, cwd=self.src_dir)
-        if retcode != 0:
+        if retcode == 0:
+            tools.touch(self._sentinel_file)
+        else:
             logging.critical('Build failed in: %s' % self.src_dir)
 
     def _cleanup(self):

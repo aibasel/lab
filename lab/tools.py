@@ -145,6 +145,11 @@ def remove(filename):
         pass
 
 
+def touch(filename):
+    with open(filename, 'a'):
+        os.utime(filename, None)
+
+
 def natural_sort(alist):
     """Sort alist alphabetically, but special-case numbers to get
     file2.txt before file10.txt.
