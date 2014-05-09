@@ -316,8 +316,9 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocessed tasks are referenced.
         self.set_property('compact', compact)
 
-        # TODO: Integrate these into the API.
+        # TODO: Integrate this into the API.
         self.include_preprocess_results_in_search_runs = True
+
         self.compilation_options = ['-j%d' % self._jobs]
 
         self._search_parsers = []
