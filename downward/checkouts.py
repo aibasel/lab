@@ -181,8 +181,10 @@ class HgCheckout(Checkout):
         if os.path.exists(path):
             logging.info('Revision is already cached: "%s"' % path)
             if not os.path.exists(self._sentinel_file):
-                logging.critical('The build at "%s" is corrupted. Please '
-                                 'delete it and try again.' % path)
+                logging.critical(
+                    'The build for the cached revision at "%s" is corrupted '
+                    'or was made with an older lab version. Please delete '
+                    'it and try again.' % path)
         else:
             tools.makedirs(path)
             retcode = tools.run_command(
