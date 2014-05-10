@@ -1,6 +1,37 @@
 News
 ====
 
+v1.6
+----
+
+lab
+^^^
+
+* Restore earlier default behavior for grid jobs by passing all environment variables (e.g. ``PYTHONPATH``) to the job environments.
+
+
+
+downward
+^^^^^^^^
+
+* Use write-once revision cache: instead of *cloning* the full FD repo
+  into the revision cache only *copy* the ``src`` directory. This
+  greatly reduces the time and space needed to cache revisions. As a
+  consequence you cannot specify the destination for the clone
+  anymore (the ``dest`` keyword argument is removed from the
+  ``Translator``, ``Preprocessor`` and ``Planner`` classes) and only
+  local FD repositories are supported (see
+  :class:`downward.checkouts.HgCheckout`). After the files have been
+  copied into the cache and FD has been compiled, a special file
+  (``build_successful``) is written in the cache directory. When
+  the cached revision is requested later an error is shown if this
+  file is missing.
+* Only use exit codes to reason about error reasons. Merge from FD master if your FD version does not produce meaningful exit codes.
+* Preprocess parser: only parse logs and never output files.
+* Never copy ``all.groups`` and ``test.groups`` files. Old Fast Downward branches need to merge from master.
+* Always compress ``output.sas`` (also for ``compact=False``). Use ``xz`` for compressing.
+
+
 v1.5
 ----
 
@@ -17,7 +48,6 @@ lab
 * Save wall-clock times in properties file.
 * Do not replace underscores by dashes in table headers. Instead allow browsers to break lines after underscores.
 * Left-justify string and list values in tables.
-
 
 downward
 ^^^^^^^^
