@@ -3,7 +3,7 @@ repository::
 
     LAB=/path/to/lab
     sudo apt-get install mercurial python2.7 python-matplotlib python-simplejson
-    hg clone https://bitbucket.org/jendrikseipp/lab ${LAB} -r v1.4  # or later version
+    hg clone https://bitbucket.org/jendrikseipp/lab ${LAB} -r v1.6  # or later version
 
 Notes about requirements:
 
