@@ -549,7 +549,11 @@ class Run(_Buildable):
                 return arg if arg in env_vars else '"%s"' % arg
 
             def format_key_value_pair(key, val):
-                return '%s=%s' % (key, val if val in env_vars else repr(val))
+                if isinstance(val, basestring) and val in env_vars:
+                    formatted_value = val
+                else:
+                    formatted_value = repr(val)
+                return '%s=%s' % (key, formatted_value)
 
             cmd_string = '[%s]' % ', '.join([format_arg(arg) for arg in cmd])
             kwargs_string = ', '.join(format_key_value_pair(key, value)
