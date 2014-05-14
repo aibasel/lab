@@ -437,7 +437,7 @@ class Table(collections.defaultdict):
         >>> t.add_cell('prob1', 'cfg2', 20)
         >>> t.add_row('prob2', {'cfg1': 15, 'cfg2': 25})
         >>> print t
-        || expansions | cfg1 | cfg2 |
+        || expansions |  cfg1 |  cfg2 |
          | prob1 |  10 |  20 |
          | prob2 |  15 |  25 |
         >>> t.row_names
@@ -450,13 +450,13 @@ class Table(collections.defaultdict):
         True
         >>> t.add_summary_function('SUM', sum)
         >>> print t
-        || expansions | cfg1 | cfg2 |
+        || expansions |  cfg1 |  cfg2 |
          | prob1 |  10 |  20 |
          | prob2 |  15 |  25 |
          | **SUM** |  25 |  45 |
         >>> t.set_column_order(['cfg2', 'cfg1'])
         >>> print t
-        || expansions | cfg2 | cfg1 |
+        || expansions |  cfg2 |  cfg1 |
          | prob1 |  20 |  10 |
          | prob2 |  25 |  15 |
          | **SUM** |  45 |  25 |
@@ -635,7 +635,12 @@ class Table(collections.defaultdict):
         """Format all entries in **row** (in place)."""
         if row_name == self.header_row:
             for col_name, value in row.items():
-                row[col_name] = value.replace('_', '_' + ESCAPE_WORDBREAK)
+                # Allow breaking after underlines.
+                value = value.replace('_', '_' + ESCAPE_WORDBREAK)
+                # Right-align headers (except the left-most one).
+                if col_name != self.header_column:
+                    value = ' ' + value
+                row[col_name] = value
             return
 
         # Get the slice of the row that should be formated (i.e. the data columns).
