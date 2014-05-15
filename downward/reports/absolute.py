@@ -230,6 +230,8 @@ class AbsoluteReport(PlanningReport):
         if title is None:
             assert attribute is not None
             title = attribute
+            if self.output_format == 'tex':
+                title = title.capitalize().replace('_', ' ')
         if columns is None:
             columns = self.configs
         if attribute is not None and self.attribute_is_numeric(attribute):
