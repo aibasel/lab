@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import re
 
 from lab.external import txt2tags
 
@@ -215,12 +216,18 @@ class Document(object):
             logging.error(result)
 
         if target == 'tex':
-            # Remove \hlines in latex output. Use booktabs commands instead.
             hline = '\\hline '
             lines = result.splitlines()
             new_lines = []
             table_row = 0
             for line in lines:
+                # Remove vertical lines (recommended by booktabs docs).
+                def remove_vertical_lines(match):
+                    alignment = match.group(1)
+                    return 'begin{tabular}{@{}%s@{}}' % alignment.replace('|', '')
+                line = re.sub(r'begin{tabular}{(.*)}', remove_vertical_lines, line)
+
+                # Remove \hlines in latex output. Use booktabs commands instead.
                 if line.startswith(hline):
                     table_row += 1
                     if table_row == 1:
