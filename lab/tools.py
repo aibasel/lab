@@ -301,6 +301,8 @@ class RunFilter(object):
             modified_run = self.apply_to_run(run)
             if modified_run:
                 new_props[run_id] = modified_run
+        # TODO: Warn if filter removed all runs. This may stem from a typo
+        # in a filter_* parameter (e.g. filter_configs).
         new_props.filename = props.filename
         return new_props
 
