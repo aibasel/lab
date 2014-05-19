@@ -167,7 +167,7 @@ class PlanningReport(Report):
             if attr.endswith('_relative'):
                 # Change name, but keep parameters.
                 abs_attr = attr.copy(attr[:-len('_relative')])
-                attr.functions = [reports.gm]
+                attr.functions = [reports.gm, reports.avg]
                 self.derived_properties.append(
                     self._get_relative_attribute_function(abs_attr))
 
