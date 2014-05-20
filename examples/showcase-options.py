@@ -22,6 +22,7 @@ from downward.reports.ipc import IpcReport
 from downward.reports.relative import RelativeReport
 from downward.reports.compare import CompareConfigsReport
 from downward.reports.timeout import TimeoutReport
+from downward.reports.taskwise import TaskwiseReport
 
 import standard_exp
 
@@ -178,6 +179,11 @@ exp.add_report(CompareConfigsReport([('WORK-lama11', 'WORK-iter-hadd')],
 # Write suite of solved problems
 suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
 exp.add_step(Step('report-suite', SuiteReport(filter=solved), exp.eval_dir, suite_file))
+
+exp.add_report(TaskwiseReport(attributes=['coverage', 'expansions'],
+                              filter_config_nick=['ipdb']),
+               name='report-taskwise',
+               outfile='taskwise.html')
 
 exp.add_report(AbsoluteReport('problem', colored=True,
                               attributes=['coverage', 'search_time', 'cost', 'memory',
