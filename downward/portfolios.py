@@ -107,12 +107,3 @@ def import_portfolio(path):
         dest.write(content)
         dest.flush()
         return tools.import_python_file(dest.name).CONFIGS
-
-
-def print_config(config):
-    for part in config:
-        if part.startswith('--'):
-            print part,
-        else:
-            print '"%s"' % part,
-    print
