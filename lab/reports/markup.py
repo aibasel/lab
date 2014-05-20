@@ -65,10 +65,6 @@ CSS = """\
 """ % globals()
 
 
-def raw(s):
-    return '""%s""' % s
-
-
 def _get_config(target):
 
     config = {}
