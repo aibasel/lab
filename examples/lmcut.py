@@ -3,20 +3,25 @@
 """Solve some tasks with A* and the LM-Cut heuristic."""
 
 import os
+import platform
 import subprocess
 
 from lab.steps import Step
-from lab.environments import LocalEnvironment
+from lab.environments import LocalEnvironment, MaiaEnvironment
 from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
 EXPPATH = 'exp-lmcut'
 REPO = os.path.expanduser('~/projects/Downward/downward')
-ENV = LocalEnvironment(processes=2)
 SUITE = ['gripper:prob01.pddl', 'zenotravel:pfile1']
 CONFIGS = [('lmcut', ['--search', 'astar(lmcut())'])]
 ATTRIBUTES = ['coverage', 'expansions']
+
+if 'cluster' in platform.node():
+    ENV = MaiaEnvironment(priority=-10)
+else:
+    ENV = LocalEnvironment(processes=2)
 
 exp = DownwardExperiment(path=EXPPATH, repo=REPO, environment=ENV)
 exp.add_suite(SUITE)
