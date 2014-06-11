@@ -277,7 +277,7 @@ class DownwardExperiment(Experiment):
             env = GkiGridEnvironment(queue='xeon_core.q', priority=-2)
             combos = [(Translator(repo, rev=123),
                        Preprocessor(repo, rev='e2a018c865f7'),
-                       Planner(repo, rev='tip')]
+                       Planner(repo, rev='tip'))]
             exp = DownwardExperiment('/tmp/path', repo, environment=env,
                                      combinations=combos,
                                      limits={'search_time': 30,
