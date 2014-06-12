@@ -500,6 +500,10 @@ class DownwardExperiment(Experiment):
 
         self._adapt_path(stage)
         self._setup_ignores(stage)
+
+        if not self._algorithms:
+            logging.critical('You must add at least one config or portfolio.')
+
         self._checkout_and_compile(stage, **kwargs)
 
         if stage == 'preprocess':
@@ -598,8 +602,6 @@ class DownwardExperiment(Experiment):
                 self.add_run(PreprocessRun(self, translator, preprocessor, prob))
 
     def _make_search_runs(self):
-        if not self._algorithms:
-            logging.critical('You must add at least one config or portfolio.')
         for parser_name, parser_path in self._search_parsers:
             self.add_resource(parser_name.upper(), parser_path)
         _, _, planners = self._get_unique_checkouts()
