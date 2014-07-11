@@ -58,7 +58,7 @@ def _get_states_pattern(attribute, name):
 
 
 PORTFOLIO_PATTERNS = [
-    ('cost', re.compile(r'Plan cost: (.+)'), int),
+    ('cost', re.compile(r'Plan cost: (.+)'), float),
     ('plan_length', re.compile(r'Plan length: (\d+)'), int),
 ]
 
