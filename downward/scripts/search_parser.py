@@ -72,7 +72,9 @@ ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
     # from multi-heuristic search. We also do not look for
     # "Initial state h value: " because this is only written
     # for successful search runs.
-    ('initial_h_value', re.compile(r'Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded'), int),
+    ('initial_h_value',
+     re.compile(r'Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded'),
+     int),
     # We cannot include " \[t=.+s\]" (global timer) in the regex, because
     # older versions don't print it.
     ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
