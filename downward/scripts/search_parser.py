@@ -68,9 +68,11 @@ ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
     _get_states_pattern('evaluations', 'Evaluated'),
     _get_states_pattern('expansions', 'Expanded'),
     _get_states_pattern('generated', 'Generated'),
-    # We exclude lines like "Initial state h value: 1147184/1703241." that stem
-    # from multi-heuristic search.
-    ('initial_h_value', re.compile(r'Initial state h value: (\d+)\.'), int),
+    # We exclude heuristic values like "1147184/1703241." that stem
+    # from multi-heuristic search. We also do not look for
+    # "Initial state h value: " because this is only written
+    # for successful search runs.
+    ('initial_h_value', re.compile(r'Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded'), int),
     # We cannot include " \[t=.+s\]" (global timer) in the regex, because
     # older versions don't print it.
     ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
