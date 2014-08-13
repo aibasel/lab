@@ -64,7 +64,6 @@ def gm(values):
     >>> gm([2, 8])
     4.0
     """
-    values = [val if val > 0 else 0.1 for val in values]
     exp = 1.0 / len(values)
     return round(prod([val ** exp for val in values]), 4)
 
