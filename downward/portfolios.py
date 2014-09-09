@@ -56,7 +56,6 @@ def set_bound(config, bound):
             search = config[i + 1]
             search, num_subs = re.subn(
                 r'bound=(?:\d+|BOUND|infinity)', 'bound=%s' % bound, search)
-            assert num_subs <= 1, config
             if num_subs == 0:
                 search = search[:-1] + ',bound=%s)' % bound
             config[i + 1] = search
