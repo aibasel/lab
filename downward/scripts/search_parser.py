@@ -98,7 +98,9 @@ CUMULATIVE_PATTERNS = [
     # For iterated searches we discard any h values. Here we will not find
     # anything before the "cumulative" line and stop the search. For single
     # searches we will find the h value if it isn't a multi-heuristic search.
-    ('initial_h_value', re.compile(r'Initial state h value: (\d+)\.'), int),
+    ('initial_h_value',
+     re.compile(r'Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded'),
+     int),
 ]
 
 
