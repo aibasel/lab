@@ -191,7 +191,8 @@ class SearchRun(DownwardRun):
     @classmethod
     def _is_portfolio(cls, config):
         built_in = ['seq-opt-fdss-1', 'seq-opt-fdss-2',
-                    'seq-sat-fdss-1', 'seq-sat-fdss-2']
+                    'seq-sat-fdss-1', 'seq-sat-fdss-2',
+                    'seq-opt-merge-and-shrink']
         return any(x in config for x in built_in + ['--portfolio'])
 
 
