@@ -236,7 +236,13 @@ def check_memory(content, props):
     # TODO: Generalize check for all attributes that only make sense for
     #       solved tasks.
     if solved(props):
-        props['memory'] = props.get('raw_memory')
+        try:
+            memory = int(props.get('raw_memory'))
+            if memory < 0:
+                raise ValueError
+            props['memory'] = memory
+        except ValueError:
+            props['error'] = 'unexplained-could-not-determine-peak-memory'
 
 
 def scores(content, props):
