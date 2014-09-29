@@ -275,13 +275,12 @@ def scores(content, props):
 
 def check_min_values(content, props):
     """
-    Ensure that times are at least 0.1s if they are present in log
+    Ensure that times are not 0 if they are present in log.
     """
-    for time in ['search_time', 'total_time']:
-        sec = props.get(time, None)
-        if sec is not None:
-            sec = max(sec, 0.1)
-            props[time] = sec
+    for attr in ['search_time', 'total_time']:
+        time = props.get(attr, None)
+        if time is not None:
+            props[attr] = max(time, 0.01)
 
 
 def get_error(content, props):
