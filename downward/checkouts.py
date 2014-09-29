@@ -177,6 +177,7 @@ class HgCheckout(Checkout):
             self._cache(compilation_options)
 
     def _cache(self, compilation_options):
+        assert self.rev != 'WORK'
         path = self.get_path()
         if os.path.exists(path):
             logging.info('Revision is already cached: "%s"' % path)
@@ -198,10 +199,10 @@ class HgCheckout(Checkout):
     def _compile(self, options=None):
         options = options or []
         retcode = tools.run_command(['./build_all'] + options, cwd=self.src_dir)
-        if retcode == 0:
-            tools.touch(self._sentinel_file)
-        else:
+        if retcode != 0:
             logging.critical('Build failed in: %s' % self.src_dir)
+        elif self.rev != "WORK":
+            tools.touch(self._sentinel_file)
 
     def _cleanup(self):
         assert self.rev != 'WORK'
