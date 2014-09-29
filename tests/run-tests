@@ -46,6 +46,8 @@ cd examples
 pyflakes ${EXAMPLES}
 cd ..
 
+./tests/find-dead-code
+
 # Check code formatting.
 # Ignore under-indented continuation lines (E128) and allow longer lines.
 PEP8_OPTS="--ignore=E128 --max-line-length=90"
