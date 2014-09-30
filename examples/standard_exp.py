@@ -84,7 +84,6 @@ class StandardDownwardExperiment(DownwardExperiment):
                                ['tar', '-cjf', self.name + '-eval.tar.bz2', self.name + '-eval'],
                           cwd=os.path.dirname(self.path)))
 
-        self.add_step(Step.remove_exp_dir(self))
         self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
 
         if not REMOTE:

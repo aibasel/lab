@@ -97,6 +97,7 @@ if [ -d "$REPO" ]; then
     cd ..
 
     # Run demo downward experiment.
+    rm -rf data/showcase-options
     ./showcase-options.py --all
 
     rm -rf exp-*

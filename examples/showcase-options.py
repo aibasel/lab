@@ -29,13 +29,12 @@ import standard_exp
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 EXPNAME = 'showcase-options'
+EXPPATH = os.path.join(DIR, 'data', EXPNAME)
 if standard_exp.REMOTE:
-    EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
     REPO = standard_exp.REMOTE_REPO
     ENV = MaiaEnvironment(randomize_task_order=True)
 else:
-    EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
-    REPO = '/home/jendrik/projects/Downward/downward'
+    REPO = standard_exp.LOCAL_REPO
     ENV = LocalEnvironment(processes=2)
 
 ATTRIBUTES = ['coverage']
@@ -59,12 +58,6 @@ exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.p
 
 # Before we fetch the new results, delete the old ones
 exp.steps.insert(5, Step('delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
-
-# Before we build the experiment, delete the old experiment directory
-# and the preprocess directory
-exp.steps.insert(0, Step('delete-exp-dir', shutil.rmtree, exp.path, ignore_errors=True))
-exp.steps.insert(0, Step('delete-preprocess-dir', shutil.rmtree, exp.preprocess_exp_path,
-                         ignore_errors=True))
 
 
 # Define some filters

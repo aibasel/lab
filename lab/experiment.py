@@ -257,10 +257,10 @@ class Experiment(_Buildable):
     def add_step(self, step):
         """Add :ref:`Step <steps>` *step* to the list of experiment steps.
 
-        >>> import shutil
+        >>> from subprocess import call
         >>> from lab.experiment import Experiment
         >>> exp = Experiment('/tmp/myexp')
-        >>> exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
+        >>> exp.add_step(Step('greet', call, ['echo', 'Hello world']))
 
         """
         self.steps.append(step)

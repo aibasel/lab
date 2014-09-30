@@ -17,7 +17,6 @@
 
 import logging
 import os
-import shutil
 from subprocess import call
 
 import tools
@@ -98,17 +97,6 @@ class Step(object):
         return cls('unzip-exp-dir', call,
                    ['tar', '-xjf', exp.name + '.tar.bz2'],
                    cwd=os.path.dirname(exp.path))
-
-    @classmethod
-    def remove_exp_dir(cls, exp):
-        """Return a Step that removes the experiment directory.
-
-        ::
-
-            exp.add_step(Step.remove_exp_dir(exp))
-
-        """
-        return cls('remove-exp-dir', shutil.rmtree, exp.path)
 
 
 class Sequence(list):
