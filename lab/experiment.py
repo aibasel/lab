@@ -370,20 +370,16 @@ class Experiment(_Buildable):
         or on a computer cluster."""
         self.environment.start_exp()
 
-    def build(self, overwrite=False, only_main_script=False):
+    def build(self, only_main_script=False):
         """Apply all the actions to the filesystem.
-
-        If *overwrite* is True and the experiment directory exists, it is
-        overwritten without prior confirmation.
         """
-        # TODO: Remove overwrite parameter.
         logging.info('Exp Dir: "%s"' % self.path)
 
         # Needed for building the main script.
         self._set_run_dirs()
 
         if only_main_script:
-            tools.overwrite_dir(self.path, overwrite)
+            tools.overwrite_dir(self.path)
             self._build_main_script()
             return
         else:
