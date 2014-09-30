@@ -244,11 +244,7 @@ cd %(cwd)s
             return '#$ -l hostname="%s"' % '|'.join(hosts)
 
     def run_steps(self, steps):
-        timestamp = datetime.datetime.now().isoformat()
-        job_dir = os.path.join(self.exp.cache_dir,
-                               'grid-steps',
-                               timestamp + '-' + self.exp.name)
-        tools.overwrite_dir(job_dir)
+        job_dir = os.path.join(self.exp.path)
 
         # Build the job files before submitting the other jobs.
         logging.info('Building job scripts')
