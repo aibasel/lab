@@ -127,14 +127,13 @@ def confirm(question):
     return True
 
 
-def overwrite_dir(path, overwrite=False):
+def overwrite_dir(path):
     if os.path.exists(path):
         logging.info('The directory "%s" already exists.' % path)
-        if not overwrite:
-            confirm('Do you want to overwrite the existing directory?')
+        confirm('Do you want to overwrite the existing directory?')
         shutil.rmtree(path)
-    # We use the os.makedirs method instead of our own here to check if the dir
-    # has really been properly deleted.
+    # Use os.makedirs() instead of tools.makedirs() to check if the dir
+    # has really been deleted.
     os.makedirs(path)
 
 
