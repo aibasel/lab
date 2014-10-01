@@ -44,6 +44,14 @@ class Environment(object):
     def run_steps(self):
         raise NotImplementedError
 
+    def build_scripts(self, steps):
+        logging.info('Building scripts')
+        for step in steps:
+            if step._funcname == 'build':
+                script_step = step.copy()
+                script_step.kwargs['only_main_script'] = True
+                script_step()
+
 
 class LocalEnvironment(Environment):
     """
@@ -75,6 +83,7 @@ class LocalEnvironment(Environment):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)
 
     def run_steps(self, steps):
+        self.build_scripts(steps)
         Sequence.run_steps(steps)
 
 
@@ -243,16 +252,8 @@ cd %(cwd)s
             return '#$ -l hostname="%s"' % '|'.join(hosts)
 
     def run_steps(self, steps):
+        self.build_scripts(steps)
         job_dir = os.path.join(self.exp.path)
-
-        # Build the job files before submitting the other jobs.
-        logging.info('Building job scripts')
-        for step in steps:
-            if step._funcname == 'build':
-                script_step = step.copy()
-                script_step.kwargs['only_main_script'] = True
-                script_step()
-
         prev_job_name = None
         for number, step in enumerate(steps, start=1):
             job_name = self._get_job_name(step)
