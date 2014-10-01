@@ -370,21 +370,22 @@ class Experiment(_Buildable):
         or on a computer cluster."""
         self.environment.start_exp()
 
-    def build(self, only_main_script=False):
+    def build(self, overwrite=True, build_runs=True):
         """Apply all the actions to the filesystem.
         """
         logging.info('Exp Dir: "%s"' % self.path)
 
-        # Needed for building the main script.
-        self._set_run_dirs()
-
-        if only_main_script:
+        if overwrite:
             tools.overwrite_dir(self.path)
-            self._build_main_script()
-            return
         else:
             tools.makedirs(self.path)
-            self._build_main_script()
+
+        # Needed for building the main script.
+        self._set_run_dirs()
+        self._build_main_script()
+
+        if not build_runs:
+            return
 
         self._build_resources()
         self._build_runs()

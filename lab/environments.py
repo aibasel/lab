@@ -49,7 +49,7 @@ class Environment(object):
         for step in steps:
             if step._funcname == 'build':
                 script_step = step.copy()
-                script_step.kwargs['only_main_script'] = True
+                script_step.kwargs['build_runs'] = False
                 script_step()
 
 
@@ -84,7 +84,10 @@ class LocalEnvironment(Environment):
 
     def run_steps(self, steps):
         self.build_scripts(steps)
-        Sequence.run_steps(steps)
+        for step in steps:
+            if step._funcname == 'build':
+                step.kwargs['overwrite'] = False
+            step()
 
 
 class OracleGridEngineEnvironment(Environment):
@@ -264,6 +267,8 @@ cd %(cwd)s
                 self._job_name = job_name
                 step()
             else:
+                if step._funcname == 'build':
+                    step.kwargs['overwrite'] = False
                 step.is_last_step = (number == len(steps))
                 with open(os.path.join(job_dir, job_name), 'w') as f:
                     f.write(self._get_job(step))
