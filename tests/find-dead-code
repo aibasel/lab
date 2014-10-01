@@ -7,4 +7,4 @@ cd "$(dirname "$0")"
 cd ..
 
 python tests/whitelist.py
-vulture --exclude=external lab downward examples tests
+vulture --exclude=external lab downward examples/*.py examples/*/*.py tests
