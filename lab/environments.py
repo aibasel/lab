@@ -23,7 +23,6 @@ import random
 import sys
 
 from lab import tools
-from lab.steps import Sequence
 
 
 class Environment(object):
@@ -269,6 +268,7 @@ cd %(cwd)s
             else:
                 if step._funcname == 'build':
                     step.kwargs['overwrite'] = False
+                    assert False, 'kwargs for grid steps are not passed to build()'
                 step.is_last_step = (number == len(steps))
                 with open(os.path.join(job_dir, job_name), 'w') as f:
                     f.write(self._get_job(step))
