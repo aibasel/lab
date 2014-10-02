@@ -153,11 +153,15 @@ class SearchRun(DownwardRun):
 
         self.require_resource(algo.planner.shell_name)
 
-        self.add_command('search',
-                         [algo.planner.shell_name] + algo.config,
-                         stdin='OUTPUT',
-                         time_limit=algo.timeout or exp.limits['search_time'],
-                         mem_limit=exp.limits['search_memory'])
+        args = [algo.planner.shell_name] + algo.config
+        kwargs = dict(time_limit=algo.timeout or exp.limits['search_time'],
+                      mem_limit=exp.limits['search_memory'])
+        if algo.planner.has_python_plan_script():
+            args.insert(1, 'OUTPUT')
+        else:
+            logging.info('plan.py not found. Consider merging from master.')
+            kwargs['stdin'] = 'OUTPUT'
+        self.add_command('search', args, **kwargs)
 
         # Remove temporary files (we need bash for globbing).
         self.add_command('rm-tmp-files', ['bash', '-c', 'rm -f downward.tmp.*'])
