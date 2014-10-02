@@ -153,12 +153,23 @@ class SearchRun(DownwardRun):
 
         self.require_resource(algo.planner.shell_name)
 
-        args = [algo.planner.shell_name] + algo.config
+        planner_type = 'portfolio' if self._is_portfolio(algo.config) else 'single'
+
+        args = [algo.planner.shell_name]
         kwargs = dict(time_limit=algo.timeout or exp.limits['search_time'],
                       mem_limit=exp.limits['search_memory'])
         if algo.planner.has_python_plan_script():
-            args.insert(1, 'OUTPUT')
+            config = ['--alias' if x == 'ipc' else x for x in algo.config]
+            if '--portfolio' in config:
+                assert len(config) == 2, config
+                config[1] = os.path.join('..', '..',
+                    algo.planner.get_path_dest(algo.planner.part, config[1]))
+            if any(x in config for x in ['--alias', '--portfolio']):
+                args += config + ['OUTPUT']
+            else:
+                args += ['OUTPUT'] + config
         else:
+            args += algo.config
             logging.info('plan.py not found. Consider merging from master.')
             kwargs['stdin'] = 'OUTPUT'
         self.add_command('search', args, **kwargs)
@@ -171,8 +182,6 @@ class SearchRun(DownwardRun):
         self.require_resource('DOWNWARD_VALIDATE')
         self.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
                                       'PROBLEM'])
-
-        planner_type = 'portfolio' if self._is_portfolio(algo.config) else 'single'
 
         # Restore the config_nick by stripping combo_nick from
         # algo.nick and save it for backwards compatibility.
@@ -424,8 +433,6 @@ class DownwardExperiment(Experiment):
             logging.critical('Path to portfolio must end on .py: %s' % portfolio)
         if not os.path.isfile(portfolio):
             logging.critical('Portfolio %s could not be found.' % portfolio)
-        if not os.access(portfolio, os.X_OK):
-            logging.critical('Portfolio is not executable. Run "chmod +x %s"' % portfolio)
         nick = nick or os.path.basename(portfolio)
         self._portfolios.append(portfolio)
         self.add_config(nick, ['--portfolio', os.path.basename(portfolio)], **kwargs)
