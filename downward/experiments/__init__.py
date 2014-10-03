@@ -159,15 +159,15 @@ class SearchRun(DownwardRun):
         kwargs = dict(time_limit=algo.timeout or exp.limits['search_time'],
                       mem_limit=exp.limits['search_memory'])
         if algo.planner.has_python_plan_script():
-            config = ['--alias' if x == 'ipc' else x for x in algo.config]
-            if '--portfolio' in config:
-                assert len(config) == 2, config
-                config[1] = os.path.join('..', '..',
-                    algo.planner.get_path_dest(algo.planner.part, config[1]))
-            if any(x in config for x in ['--alias', '--portfolio']):
-                args += config + ['OUTPUT']
+            algo.config = ['--alias' if x == 'ipc' else x for x in algo.config]
+            if '--portfolio' in algo.config:
+                assert len(algo.config) == 2, algo.config
+                algo.config[1] = os.path.join('..', '..',
+                    algo.planner.get_path_dest(algo.planner.part, algo.config[1]))
+            if any(x in algo.config for x in ['--alias', '--portfolio']):
+                args += algo.config + ['OUTPUT']
             else:
-                args += ['OUTPUT'] + config
+                args += ['OUTPUT'] + algo.config
         else:
             args += algo.config
             logging.info('plan.py not found. Consider merging from master.')
