@@ -224,6 +224,22 @@ class HgCheckout(Checkout):
             elif os.path.isdir(path):
                 shutil.rmtree(path)
 
+    def _get_plan_script(self):
+        return os.path.join(self.src_dir, 'plan.py')
+
+    def has_python_plan_script(self):
+        return os.path.exists(self._get_plan_script())
+
+    def get_bin(self):
+        if self.has_python_plan_script():
+            return self._get_plan_script()
+        return Checkout.get_bin(self)
+
+    def get_bin_dest(self):
+        if self.has_python_plan_script():
+            return self.get_path_dest('plan.py')
+        return Checkout.get_bin_dest(self)
+
 
 class Translator(HgCheckout):
     BIN_NAME = 'translate.py'
@@ -244,19 +260,3 @@ class Planner(HgCheckout):
 
     def __init__(self, *args, **kwargs):
         HgCheckout.__init__(self, 'search', *args, **kwargs)
-
-    def _get_plan_script(self):
-        return os.path.join(self.src_dir, 'plan.py')
-
-    def has_python_plan_script(self):
-        return os.path.exists(self._get_plan_script())
-
-    def get_bin(self):
-        if self.has_python_plan_script():
-            return self._get_plan_script()
-        return HgCheckout.get_bin(self)
-
-    def get_bin_dest(self):
-        if self.has_python_plan_script():
-            return self.get_path_dest('plan.py')
-        return HgCheckout.get_bin_dest(self)

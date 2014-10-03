@@ -125,14 +125,24 @@ class PreprocessRun(DownwardRun):
         # python -V prints to stderr so we execute a little program.
         self.add_command('print-python-version',
                          [python, '-c', PRINT_PYTHON_VERSION])
-        self.add_command('translate', [python, translator.shell_name,
-                                       'DOMAIN', 'PROBLEM'],
+
+        args = [python, translator.shell_name]
+        if translator.has_python_plan_script():
+            args.append('--run-translator')
+        args.extend(['DOMAIN', 'PROBLEM'])
+        self.add_command('translate', args,
                          time_limit=exp.limits['translate_time'],
                          mem_limit=exp.limits['translate_memory'])
-        self.add_command('preprocess', [preprocessor.shell_name],
-                         stdin='output.sas',
-                         time_limit=exp.limits['preprocess_time'],
-                         mem_limit=exp.limits['preprocess_memory'])
+
+        args = [preprocessor.shell_name]
+        kwargs = dict(time_limit=exp.limits['preprocess_time'],
+                      mem_limit=exp.limits['preprocess_memory'])
+        if preprocessor.has_python_plan_script():
+            args.extend(['--run-preprocessor', 'output.sas'])
+        else:
+            kwargs['stdin'] = 'output.sas'
+        self.add_command('preprocess', args, **kwargs)
+
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
         self.add_command('compress-output-sas', ['xz', 'output.sas'])
