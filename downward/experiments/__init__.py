@@ -179,6 +179,7 @@ class SearchRun(DownwardRun):
             else:
                 args += ['OUTPUT'] + algo.config
         else:
+            algo.config = ['ipc' if x == '--alias' else x for x in algo.config]
             args += algo.config
             logging.info('plan.py not found. Consider merging from master.')
             kwargs['stdin'] = 'OUTPUT'
