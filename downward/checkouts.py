@@ -225,7 +225,7 @@ class HgCheckout(Checkout):
                 shutil.rmtree(path)
 
     def _get_plan_script(self):
-        return os.path.join(self.src_dir, 'plan.py')
+        return os.path.join(self.src_dir, 'fast-downward.py')
 
     def has_python_plan_script(self):
         return os.path.exists(self._get_plan_script())
@@ -237,7 +237,7 @@ class HgCheckout(Checkout):
 
     def get_bin_dest(self):
         if self.has_python_plan_script():
-            return self.get_path_dest('plan.py')
+            return self.get_path_dest('fast-downward.py')
         return Checkout.get_bin_dest(self)
 
 

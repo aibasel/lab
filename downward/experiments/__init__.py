@@ -128,7 +128,7 @@ class PreprocessRun(DownwardRun):
 
         args = [python, translator.shell_name]
         if translator.has_python_plan_script():
-            args.append('--run-translator')
+            args.append('--translate')
         args.extend(['DOMAIN', 'PROBLEM'])
         self.add_command('translate', args,
                          time_limit=exp.limits['translate_time'],
@@ -138,7 +138,7 @@ class PreprocessRun(DownwardRun):
         kwargs = dict(time_limit=exp.limits['preprocess_time'],
                       mem_limit=exp.limits['preprocess_memory'])
         if preprocessor.has_python_plan_script():
-            args.extend(['--run-preprocessor', 'output.sas'])
+            args.extend(['--preprocess', 'output.sas'])
         else:
             kwargs['stdin'] = 'output.sas'
         self.add_command('preprocess', args, **kwargs)
