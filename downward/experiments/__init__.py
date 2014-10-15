@@ -181,7 +181,7 @@ class SearchRun(DownwardRun):
         else:
             algo.config = ['ipc' if x == '--alias' else x for x in algo.config]
             args += algo.config
-            logging.info('plan.py not found. Consider merging from master.')
+            logging.info('fast-downward.py not found. Consider merging from master.')
             kwargs['stdin'] = 'OUTPUT'
         self.add_command('search', args, **kwargs)
 
