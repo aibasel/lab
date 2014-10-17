@@ -224,6 +224,22 @@ class HgCheckout(Checkout):
             elif os.path.isdir(path):
                 shutil.rmtree(path)
 
+    def _get_plan_script(self):
+        return os.path.join(self.src_dir, 'fast-downward.py')
+
+    def has_python_plan_script(self):
+        return os.path.exists(self._get_plan_script())
+
+    def get_bin(self):
+        if self.has_python_plan_script():
+            return self._get_plan_script()
+        return Checkout.get_bin(self)
+
+    def get_bin_dest(self):
+        if self.has_python_plan_script():
+            return self.get_path_dest('fast-downward.py')
+        return Checkout.get_bin_dest(self)
+
 
 class Translator(HgCheckout):
     BIN_NAME = 'translate.py'

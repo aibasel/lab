@@ -125,14 +125,24 @@ class PreprocessRun(DownwardRun):
         # python -V prints to stderr so we execute a little program.
         self.add_command('print-python-version',
                          [python, '-c', PRINT_PYTHON_VERSION])
-        self.add_command('translate', [python, translator.shell_name,
-                                       'DOMAIN', 'PROBLEM'],
+
+        args = [python, translator.shell_name]
+        if translator.has_python_plan_script():
+            args.append('--translate')
+        args.extend(['DOMAIN', 'PROBLEM'])
+        self.add_command('translate', args,
                          time_limit=exp.limits['translate_time'],
                          mem_limit=exp.limits['translate_memory'])
-        self.add_command('preprocess', [preprocessor.shell_name],
-                         stdin='output.sas',
-                         time_limit=exp.limits['preprocess_time'],
-                         mem_limit=exp.limits['preprocess_memory'])
+
+        args = [preprocessor.shell_name]
+        kwargs = dict(time_limit=exp.limits['preprocess_time'],
+                      mem_limit=exp.limits['preprocess_memory'])
+        if preprocessor.has_python_plan_script():
+            args.extend(['--preprocess', 'output.sas'])
+        else:
+            kwargs['stdin'] = 'output.sas'
+        self.add_command('preprocess', args, **kwargs)
+
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
 
         self.add_command('compress-output-sas', ['xz', 'output.sas'])
@@ -153,11 +163,27 @@ class SearchRun(DownwardRun):
 
         self.require_resource(algo.planner.shell_name)
 
-        self.add_command('search',
-                         [algo.planner.shell_name] + algo.config,
-                         stdin='OUTPUT',
-                         time_limit=algo.timeout or exp.limits['search_time'],
-                         mem_limit=exp.limits['search_memory'])
+        planner_type = 'portfolio' if self._is_portfolio(algo.config) else 'single'
+
+        args = [algo.planner.shell_name]
+        kwargs = dict(time_limit=algo.timeout or exp.limits['search_time'],
+                      mem_limit=exp.limits['search_memory'])
+        if algo.planner.has_python_plan_script():
+            algo.config = ['--alias' if x == 'ipc' else x for x in algo.config]
+            if '--portfolio' in algo.config:
+                assert len(algo.config) == 2, algo.config
+                algo.config[1] = os.path.join('..', '..',
+                    algo.planner.get_path_dest(algo.planner.part, algo.config[1]))
+            if any(x in algo.config for x in ['--alias', '--portfolio']):
+                args += algo.config + ['OUTPUT']
+            else:
+                args += ['OUTPUT'] + algo.config
+        else:
+            algo.config = ['ipc' if x == '--alias' else x for x in algo.config]
+            args += algo.config
+            logging.info('fast-downward.py not found. Consider merging from master.')
+            kwargs['stdin'] = 'OUTPUT'
+        self.add_command('search', args, **kwargs)
 
         # Remove temporary files (we need bash for globbing).
         self.add_command('rm-tmp-files', ['bash', '-c', 'rm -f downward.tmp.*'])
@@ -167,8 +193,6 @@ class SearchRun(DownwardRun):
         self.require_resource('DOWNWARD_VALIDATE')
         self.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
                                       'PROBLEM'])
-
-        planner_type = 'portfolio' if self._is_portfolio(algo.config) else 'single'
 
         # Restore the config_nick by stripping combo_nick from
         # algo.nick and save it for backwards compatibility.
@@ -420,8 +444,6 @@ class DownwardExperiment(Experiment):
             logging.critical('Path to portfolio must end on .py: %s' % portfolio)
         if not os.path.isfile(portfolio):
             logging.critical('Portfolio %s could not be found.' % portfolio)
-        if not os.access(portfolio, os.X_OK):
-            logging.critical('Portfolio is not executable. Run "chmod +x %s"' % portfolio)
         nick = nick or os.path.basename(portfolio)
         self._portfolios.append(portfolio)
         self.add_config(nick, ['--portfolio', os.path.basename(portfolio)], **kwargs)
