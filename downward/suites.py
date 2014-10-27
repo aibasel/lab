@@ -173,7 +173,7 @@ def suite_ipc_one_to_five():
         'schedule', 'storage', 'tpp', 'trucks', 'zenotravel',
     ]
 
-def suite_ipc06_sat():
+def suite_ipc06():
     return [
         'openstacks',
         'pathways',
