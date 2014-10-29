@@ -90,7 +90,7 @@ class OracleGridEngineEnvironment(Environment):
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, host_restriction=None,
-                 email=None, randomize_task_order=True):
+                 email=None, randomize_task_order=True, extra_options=None):
         """
         *queue* must be a valid queue name on the grid.
 
@@ -109,6 +109,11 @@ class OracleGridEngineEnvironment(Environment):
         pristine while the experiment is running even though the
         grid engine marks the runs as finished.
 
+        Use *extra_options* to pass additional options. Example that
+        allocates 16 cores per run on maia::
+
+            MaiaEnvironment(extra_options='#$ -pe smp 16')
+
         """
         Environment.__init__(self)
         if queue is None:
@@ -125,6 +130,7 @@ class OracleGridEngineEnvironment(Environment):
         self.runs_per_task = 1
         self.email = email
         self.randomize_task_order = randomize_task_order
+        self.extra_options = extra_options or '## (not used)'
 
         # When submitting an experiment job, wait for this job name.
         self.__wait_for_job_name = None
@@ -144,6 +150,7 @@ class OracleGridEngineEnvironment(Environment):
             'queue': self.queue,
             'host_spec': self.host_spec,
             'notification': '#$ -m n',
+            'extra_options': self.extra_options,
         }
 
     def write_main_script(self):
