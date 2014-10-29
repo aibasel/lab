@@ -42,6 +42,7 @@ class LazyFile(object):
             self._file.flush()
 
     def close(self):
+        self.flush()
         if self._file:
             self._file.close()
             self._file = None
