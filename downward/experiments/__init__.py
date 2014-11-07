@@ -574,6 +574,9 @@ class DownwardExperiment(Experiment):
         # Ignore some scripts.
         self.ignores.extend(['build_all', 'cleanup', 'plan', 'plan-ipc'])
 
+        # Ignore files from working copy.
+        self.ignores.extend(['.obj', 'VAL'])
+
         if stage == 'preprocess':
             self.ignores.extend(['search'])
             self.ignores.extend(['regression-tests', 'tests'])
