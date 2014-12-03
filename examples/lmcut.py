@@ -12,7 +12,7 @@ from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
-EXPPATH = 'exp-lmcut'
+EXPPATH = 'data/exp-lmcut'
 REPO = os.path.expanduser('~/projects/Downward/downward')
 SUITE = ['gripper:prob01.pddl', 'zenotravel:pfile1']
 CONFIGS = [('lmcut', ['--search', 'astar(lmcut())'])]

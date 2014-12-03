@@ -29,12 +29,11 @@ import standard_exp
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 EXPNAME = 'showcase-options'
+EXPPATH = os.path.join(DIR, 'data', EXPNAME)
 if standard_exp.REMOTE:
-    EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
     REPO = standard_exp.REMOTE_REPO
     ENV = MaiaEnvironment(randomize_task_order=True)
 else:
-    EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
     ENV = LocalEnvironment(processes=2)
 

@@ -15,8 +15,11 @@ GkiGridEnvironment()
 Call(['ls'], stdout='/dev/null')
 lab.calls.log.print_(open('/dev/null', 'w'), 'Test')
 lab.calls.log.save_returncode
+lab.steps.Step.unzip_exp_dir
+lab.steps.Step.remove_exp_dir
 
 [
+    suites.suite_ipc06,
     suites.suite_ipc08_opt,
     suites.suite_ipc08_sat_strips,
     suites.suite_interesting,
@@ -33,3 +36,4 @@ lab.calls.log.save_returncode
 
 CompareRevisionsExperiment
 standard_exp.get_exp('gripper', [('blind', ['--search', 'astar(blind())'])])
+standard_exp.EXPS
