@@ -602,7 +602,8 @@ class DownwardExperiment(Experiment):
     def _prepare_validator(self):
         validate = os.path.join(self.repo, 'src', 'VAL', 'validate')
         if not os.path.exists(validate):
-            logging.info('Building the validator in the experiment repository.')
+            logging.info('validate not found at %s. Building it now.' %
+                         validate)
             tools.run_command(['make', '-j%d' % self._jobs],
                               cwd=os.path.dirname(validate))
         assert os.path.exists(validate), validate
