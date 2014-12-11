@@ -209,10 +209,9 @@ class Parser(object):
             path = os.path.join(self.run_dir, filename)
             try:
                 file_parser.load_file(path)
-            except IOError:
-                logging.error('File "%s" could not be read' % path)
-            except MemoryError:
-                logging.error('File "%s" did not fit into memory' % path)
+            except (IOError, MemoryError) as err:
+                logging.error('File "%s" could not be read: %s' % (path, err))
+                self.props['error'] = 'unexplained-parser-failed-to-read-file'
             else:
                 # Subclasses directly modify the properties during parsing
                 file_parser.parse(self.props)
