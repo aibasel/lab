@@ -231,16 +231,22 @@ def get_initial_h_value(content, props):
 
 def check_memory(content, props):
     """Add memory value if the run was successful."""
-    # TODO: Generalize check for all attributes that only make sense for
-    #       solved tasks.
+    raw_memory = props.get('raw_memory')
+
+    try:
+        # Conversion fails if raw_memory is None.
+        memory = int(raw_memory)
+        if memory < 0:
+            raise ValueError
+    except ValueError:
+        props['error'] = 'unexplained-could-not-determine-peak-memory'
+        return
+
     if solved(props):
-        try:
-            memory = int(props.get('raw_memory'))
-            if memory < 0:
-                raise ValueError
-            props['memory'] = memory
-        except ValueError:
-            props['error'] = 'unexplained-could-not-determine-peak-memory'
+        props['memory'] = memory
+        props['memory_capped'] = memory
+    elif props['search_returncode'] == EXIT_OUT_OF_MEMORY:
+        props['memory_capped'] = props['limit_search_memory'] * 1024
 
 
 def scores(content, props):
