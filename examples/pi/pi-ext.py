@@ -16,7 +16,7 @@ from lab.steps import Step
 from lab.reports import Report
 
 
-EXPPATH = 'exp-pi'
+EXPPATH = 'data/exp-pi'
 
 class PiReport(Report):
     def get_text(self):

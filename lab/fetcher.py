@@ -53,8 +53,8 @@ class Fetcher(object):
         # TODO: This HACK should be removed once the source of the error is clear.
         props = tools.Properties(filename=prop_file)
         if props.get('search_returncode') is not None and props.get("coverage") is None:
-            logging.warning('search_parser.py exited abnormally for %s' % run_dir)
-            logging.info('Rerunning search_parser.py')
+            logging.warning('search_parser.py failed in %s. Will run it again now.' %
+                            run_dir)
             parsers.append(os.path.join(run_dir, '../../search_parser.py'))
 
         for parser in parsers:

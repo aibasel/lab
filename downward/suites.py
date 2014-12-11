@@ -173,6 +173,17 @@ def suite_ipc_one_to_five():
         'schedule', 'storage', 'tpp', 'trucks', 'zenotravel',
     ]
 
+def suite_ipc06():
+    return [
+        'openstacks',
+        'pathways',
+        'pipesworld-tankage',
+        'rovers',
+        'storage',
+        'tpp',
+        'trucks',
+    ]
+
 def suite_ipc08_common():
     return [
         'parcprinter-08-strips',

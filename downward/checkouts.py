@@ -177,6 +177,7 @@ class HgCheckout(Checkout):
             self._cache(compilation_options)
 
     def _cache(self, compilation_options):
+        assert self.rev != 'WORK'
         path = self.get_path()
         if os.path.exists(path):
             logging.info('Revision is already cached: "%s"' % path)
@@ -198,10 +199,10 @@ class HgCheckout(Checkout):
     def _compile(self, options=None):
         options = options or []
         retcode = tools.run_command(['./build_all'] + options, cwd=self.src_dir)
-        if retcode == 0:
-            tools.touch(self._sentinel_file)
-        else:
+        if retcode != 0:
             logging.critical('Build failed in: %s' % self.src_dir)
+        elif self.rev != "WORK":
+            tools.touch(self._sentinel_file)
 
     def _cleanup(self):
         assert self.rev != 'WORK'
@@ -222,6 +223,22 @@ class HgCheckout(Checkout):
                 os.remove(path)
             elif os.path.isdir(path):
                 shutil.rmtree(path)
+
+    def _get_plan_script(self):
+        return os.path.join(self.src_dir, 'fast-downward.py')
+
+    def has_python_plan_script(self):
+        return os.path.exists(self._get_plan_script())
+
+    def get_bin(self):
+        if self.has_python_plan_script():
+            return self._get_plan_script()
+        return Checkout.get_bin(self)
+
+    def get_bin_dest(self):
+        if self.has_python_plan_script():
+            return self.get_path_dest('fast-downward.py')
+        return Checkout.get_bin_dest(self)
 
 
 class Translator(HgCheckout):

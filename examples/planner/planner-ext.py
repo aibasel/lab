@@ -20,7 +20,7 @@ from lab.steps import Step
 # from downward.checkouts import Translator, Preprocessor, Planner
 
 
-EXPPATH = 'exp-planner'
+EXPPATH = 'data/exp-planner'
 REPO = '/home/jendrik/projects/Downward/downward'
 
 # combos = [
@@ -35,7 +35,7 @@ exp.add_suite(['gripper:prob01.pddl'])
 exp.add_suite('zenotravel:pfile2')
 exp.add_config('ff', ['--search', 'lazy(single(ff()))'])
 exp.add_config('add', ['--search', 'lazy(single(add()))'])
-exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-sat-fdss-1.py'))
+exp.add_portfolio(os.path.join(REPO, 'src', 'driver', 'portfolios', 'seq_sat_fdss_1.py'))
 
 exp.add_report(AbsoluteReport('problem'), name='make-report', outfile='report-abs-p.html')
 

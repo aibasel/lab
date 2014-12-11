@@ -11,7 +11,7 @@ You can find a more advanced experiment in pi-ext.py .
 from lab.experiment import Experiment
 
 
-EXPPATH = 'exp-pi'
+EXPPATH = 'data/exp-pi'
 
 exp = Experiment(EXPPATH)
 

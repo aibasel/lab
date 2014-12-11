@@ -41,7 +41,7 @@ class Call(subprocess.Popen):
         `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
 
         *time_limit* and *mem_limit* are the time and memory contraints in
-        seconds and MiB.
+        seconds and MiB. Pass None to enforce no limit.
 
         Previously, not only the main process, but also all spawned
         child processes were watched. This functionality has been removed
@@ -75,9 +75,11 @@ class Call(subprocess.Popen):
             # padding between the two limits allows us to distinguish between
             # SIGKILL signals sent by this class and the ones sent by the
             # system.
-            set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
+            if time_limit is not None:
+                set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
             # Memory in Bytes.
-            set_limit(resource.RLIMIT_AS, mem_limit * 1024 * 1024)
+            if mem_limit is not None:
+                set_limit(resource.RLIMIT_AS, mem_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
 
         self.wall_clock_start_time = time.time()

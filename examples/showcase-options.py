@@ -29,12 +29,11 @@ import standard_exp
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 EXPNAME = 'showcase-options'
+EXPPATH = os.path.join(DIR, 'data', EXPNAME)
 if standard_exp.REMOTE:
-    EXPPATH = os.path.join(standard_exp.REMOTE_EXPS, EXPNAME)
     REPO = standard_exp.REMOTE_REPO
     ENV = MaiaEnvironment(randomize_task_order=True)
 else:
-    EXPPATH = os.path.join('/home/jendrik/lab/experiments', EXPNAME)
     REPO = '/home/jendrik/projects/Downward/downward'
     ENV = LocalEnvironment(processes=2)
 
@@ -55,7 +54,14 @@ exp.add_config('ipdb', ["--search", "astar(ipdb())"], timeout=10)
 # Use original LAMA 2011 configuration
 exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
 exp.add_config('fdss-1', ['ipc', 'seq-sat-fdss-1', '--plan-file', 'sas_plan'])
-exp.add_portfolio(os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py'))
+old_portfolio_path = os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py')
+new_portfolio_path = os.path.join(REPO, 'src', 'driver', 'portfolios', 'seq_opt_fdss_1.py')
+if os.path.exists(old_portfolio_path):
+    exp.add_portfolio(old_portfolio_path)
+elif os.path.exists(new_portfolio_path):
+    exp.add_portfolio(new_portfolio_path)
+else:
+    raise SystemExit('portfolio not found')
 
 # Before we fetch the new results, delete the old ones
 exp.steps.insert(5, Step('delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
@@ -128,7 +134,7 @@ def sat_vs_opt(run):
             return {cat: [(run['config'], run.get('expansions'))]}
 
 exp.add_report(ScatterPlotReport(attributes=['expansions'],
-                                 filter_config_nick=['downward-seq-opt-fdss-1.py', 'lama11']),
+                                 filter_config_nick=['iter-hadd', 'lama11']),
                name='report-scatter', outfile=os.path.join('plots', 'scatter.png'))
 
 params = {

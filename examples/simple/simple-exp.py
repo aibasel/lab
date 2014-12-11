@@ -24,7 +24,7 @@ from lab.reports import Report
 
 
 EXPNAME = 'simple-exp'
-EXPPATH = os.path.join('/tmp', EXPNAME)
+EXPPATH = os.path.join('data', EXPNAME)
 ENV = LocalEnvironment()
 
 # Create a new experiment.

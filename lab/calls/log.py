@@ -43,6 +43,8 @@ class LazyFile(object):
 
     def close(self):
         if self._file:
+            self.flush()
+            os.fsync(self.fileno())
             self._file.close()
             self._file = None
             if os.path.getsize(self._path) == 0:
