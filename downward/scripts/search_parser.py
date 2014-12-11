@@ -233,18 +233,13 @@ def check_memory(content, props):
     """Add memory value if the run was successful."""
     raw_memory = props.get('raw_memory')
 
-    try:
-        # Conversion fails if raw_memory is None.
-        memory = int(raw_memory)
-        if memory < 0:
-            raise ValueError
-    except ValueError:
+    if raw_memory is None or raw_memory < 0:
         props['error'] = 'unexplained-could-not-determine-peak-memory'
         return
 
     if solved(props):
-        props['memory'] = memory
-        props['memory_capped'] = memory
+        props['memory'] = raw_memory
+        props['memory_capped'] = raw_memory
     elif props['search_returncode'] == EXIT_OUT_OF_MEMORY:
         props['memory_capped'] = props['limit_search_memory'] * 1024
 
