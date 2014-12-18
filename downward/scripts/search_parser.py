@@ -233,9 +233,11 @@ def check_memory(content, props):
     """Add memory value if the run was successful."""
     raw_memory = props.get('raw_memory')
 
-    if raw_memory is None or raw_memory < 0:
-        props['error'] = 'unexplained-could-not-determine-peak-memory'
-        return
+    # TODO: Add unexplained error if memory could not be determined once
+    # the signal handling code is fixed.
+    #if raw_memory is None or raw_memory < 0:
+    #    props['error'] = 'unexplained-could-not-determine-peak-memory'
+    #    return
 
     if solved(props):
         props['memory'] = raw_memory
