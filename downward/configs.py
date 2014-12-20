@@ -194,7 +194,7 @@ def configs_satisficing_extended():
         # pareto open list
         'pareto_lmcut': [
             '--heuristic',
-            'h=lmcut()',
+            'h=ff()',
             '--search',
             'eager(pareto([sum([g(), h]), h]), reopen_closed=true, pathmax=false,'
             + 'f_eval=sum([g(), h]))'],
