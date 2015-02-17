@@ -406,9 +406,9 @@ class PlotReport(PlanningReport):
             # filter duplicate items.
             coords = list(set(coords))
             # Logarithmic axes cannot handle values <= 0.
-            if not self.xscale == 'linear':
+            if self.xscale != 'linear':
                 coords = [(handle_zero(x), y) for x, y in coords]
-            if not self.yscale == 'linear':
+            if self.yscale != 'linear':
                 coords = [(x, handle_zero(y)) for x, y in coords]
             new_categories[category] = coords
         return new_categories
