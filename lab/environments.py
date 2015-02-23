@@ -42,6 +42,12 @@ class Environment(object):
         """
         pass
 
+    def start_exp(self):
+        """
+        Run main experiment step.
+        """
+        raise NotImplementedError
+
     def run_steps(self):
         raise NotImplementedError
 
