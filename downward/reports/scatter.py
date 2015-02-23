@@ -61,7 +61,9 @@ class ScatterMatplotlib(Matplotlib):
 class ScatterPgfPlots(PgfPlots):
     @classmethod
     def _format_coord(cls, coord):
-        return '(%s, %s)' % tuple(str(v) if isinstance(v, int) else '%.2f' % v for v in coord)
+        def format_value(v):
+            return str(v) if isinstance(v, int) else '%.2f' % v
+        return '(%s, %s)' % (format_value(coord[0]), format_value(coord[1]))
 
     @classmethod
     def _get_plot(cls, report):

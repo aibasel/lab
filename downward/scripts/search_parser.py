@@ -235,9 +235,9 @@ def check_memory(content, props):
 
     # TODO: Add unexplained error if memory could not be determined once
     # the signal handling code is fixed.
-    #if raw_memory is None or raw_memory < 0:
-    #    props['error'] = 'unexplained-could-not-determine-peak-memory'
-    #    return
+    # if raw_memory is None or raw_memory < 0:
+    #     props['error'] = 'unexplained-could-not-determine-peak-memory'
+    #     return
 
     if solved(props):
         props['memory'] = raw_memory
