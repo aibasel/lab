@@ -98,6 +98,21 @@ class OracleGridEngineEnvironment(Environment):
     def __init__(self, queue=None, priority=None, host_restriction=None,
                  email=None, randomize_task_order=True, extra_options=None):
         """
+        .. note::
+
+            Previously, you had to provide the ``--all`` option on the
+            commandline to queue steps sequentially on the grid engine.
+            Now, the selected steps will be queued sequentially if at
+            least one of them itself submits runs to the queue.
+
+            For correct sequential execution, this class writes job
+            files to <cache_dir>/grid-steps/<timestamp>-<exp-name> and
+            makes them depend on one another. The driver.{log,err}
+            files in this directory can be inspected if something goes
+            wrong. Since the job files call the main experiment script
+            during execution, it mustn't be changed during the
+            experiment.
+
         *queue* must be a valid queue name on the grid.
 
         *priority* must be in the range [-1023, 0] where 0 is the highest

@@ -46,17 +46,9 @@ ARGPARSER.add_argument(
     'steps', metavar='step', nargs='*', default=[],
     help='Name or number of a step below. If none is given, print help.')
 ARGPARSER.add_argument(
-    '--all', dest='run_all_steps', action='store_true', help='''
-        Run an unattended experiment. For grid experiments this option
-        writes job files to
-        <cache_dir>/grid-steps/<timestamp>-<exp-name> and makes them
-        depend on one another to ensure the correct sequential
-        execution. The driver.{log,err} files in this directory can be
-        inspected if something goes wrong. If steps are passed
-        explicitly, only these will be run, otherwise all steps are
-        executed. When using this option the script mustn't be changed
-        during the experiment. For local experiments this option can be
-        used instead of listing all experiment steps.''')
+    '--all', dest='run_all_steps', action='store_true',
+    help='Run all steps. If steps are listed explicitly, this option is '
+        'ignored for backwards compatibility.')
 
 
 class _Buildable(object):
