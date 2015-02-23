@@ -1,6 +1,18 @@
 News
 ====
 
+v1.8 (unreleased)
+-----------------
+
+lab
+^^^
+* Automatically determine whether to queue steps sequentially on the grid.
+
+downward
+^^^^^^^^
+* ...
+
+
 v1.7
 ----
 
