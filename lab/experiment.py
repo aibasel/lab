@@ -48,7 +48,7 @@ ARGPARSER.add_argument(
 ARGPARSER.add_argument(
     '--all', dest='run_all_steps', action='store_true',
     help='Run all steps. If steps are listed explicitly, this option is '
-        'ignored for backwards compatibility.')
+         'ignored for backwards compatibility.')
 
 
 class _Buildable(object):
