@@ -46,17 +46,9 @@ ARGPARSER.add_argument(
     'steps', metavar='step', nargs='*', default=[],
     help='Name or number of a step below. If none is given, print help.')
 ARGPARSER.add_argument(
-    '--all', dest='run_all_steps', action='store_true', help='''
-        Run an unattended experiment. For grid experiments this option
-        writes job files to
-        <cache_dir>/grid-steps/<timestamp>-<exp-name> and makes them
-        depend on one another to ensure the correct sequential
-        execution. The driver.{log,err} files in this directory can be
-        inspected if something goes wrong. If steps are passed
-        explicitly, only these will be run, otherwise all steps are
-        executed. When using this option the script mustn't be changed
-        during the experiment. For local experiments this option can be
-        used instead of listing all experiment steps.''')
+    '--all', dest='run_all_steps', action='store_true',
+    help='Run all steps. If steps are listed explicitly, this option is '
+         'ignored for backwards compatibility.')
 
 
 class _Buildable(object):
@@ -361,7 +353,8 @@ class Experiment(_Buildable):
             sys.exit(0)
         # If no steps were given on the commandline, run all exp steps.
         steps = [self.steps.get_step(name) for name in self.args.steps] or self.steps
-        if self.args.run_all_steps:
+        # If the main experiment step is present, we always run the jobs sequentially.
+        if self.args.run_all_steps or any(step._funcname == 'run' for step in steps):
             self.environment.run_steps(steps)
         else:
             Sequence.run_steps(steps)

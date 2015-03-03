@@ -31,8 +31,6 @@ How can I combine the results from multiple experiments?
 How can I run multiple steps sequentially on a computer grid?
 -------------------------------------------------------------
 
-If your experiment is named ``exp.py``, you can use the command
-``./exp.py --all build-search-exp run-search-exp fetch-search-results`` or
-``./exp.py --all 4 5 6`` to let the grid run each of those three steps when the
-previous one is finished. ``./exp.py --help`` has more infos about the ``--all``
-parameter.
+Previously, you had to use the ``--all`` commandline option for this.
+Since version 1.8 lab will automatically run steps sequentially on the
+grid engine if one of the steps itself submits runs to the grid engine.
