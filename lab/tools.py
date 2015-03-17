@@ -479,16 +479,16 @@ def get_terminal_size():
 
 class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
     """
-    Help message formatter which retains any formatting in descriptions and adds
-    default values to argument help.
+    Help message formatter which preserves the description format and adds
+    default values to argument help messages.
     """
     def __init__(self, prog, **kwargs):
         # Use the whole terminal width.
-        width, height = get_terminal_size()
+        width, _ = get_terminal_size()
         argparse.HelpFormatter.__init__(self, prog, width=width, **kwargs)
 
     def _fill_text(self, text, width, indent):
-        return ''.join([indent + line for line in text.splitlines(True)])
+        return '\n'.join([indent + line for line in text.splitlines()])
 
     def _get_help_string(self, action):
         help = action.help
@@ -498,16 +498,6 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
                 if action.option_strings or action.nargs in defaulting_nargs:
                     help += ' (default: %(default)s)'
         return help
-
-    def _format_args(self, action, default_metavar):
-        """
-        We want to show "[environment-specific options]" instead of "...".
-        """
-        get_metavar = self._metavar_formatter(action, default_metavar)
-        if action.nargs == argparse.PARSER:
-            return '%s [environment-specific options]' % get_metavar(1)
-        else:
-            return argparse.HelpFormatter._format_args(self, action, default_metavar)
 
 
 class ArgParser(argparse.ArgumentParser):
