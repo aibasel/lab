@@ -509,7 +509,8 @@ class ArgParser(argparse.ArgumentParser):
             try:
                 self.add_argument('-l', '--log-level', dest='log_level',
                                   choices=['DEBUG', 'INFO', 'WARNING'],
-                                  default='INFO')
+                                  default='INFO',
+                                  help='Logging verbosity')
             except argparse.ArgumentError:
                 # The option may have already been added by a parent class.
                 pass
