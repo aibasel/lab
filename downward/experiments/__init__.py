@@ -454,6 +454,10 @@ class DownwardExperiment(Experiment):
 
             exp.add_search_parser('path/to/parser')
         """
+        if not os.path.isfile(path_to_parser):
+            logging.critical('Parser %s could not be found.' % path_to_parser)
+        if not os.access(path_to_parser, os.X_OK):
+            logging.critical('Parser %s is not executable.' % path_to_parser)
         self._search_parsers.append(
             ('search_parser%d' % len(self._search_parsers), path_to_parser))
 
