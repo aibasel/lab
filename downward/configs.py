@@ -192,7 +192,7 @@ def configs_satisficing_extended():
             'iterated([lazy_wastar(h,w=10), lazy_wastar(h,w=5), lazy_wastar(h,w=3),'
             + 'lazy_wastar(h,w=2), lazy_wastar(h,w=1)])'],
         # pareto open list
-        'pareto_lmcut': [
+        'pareto_ff': [
             '--heuristic',
             'h=ff()',
             '--search',
