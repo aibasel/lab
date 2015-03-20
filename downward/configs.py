@@ -130,12 +130,6 @@ def configs_optimal_extended():
         'astar_lmcount_lm_merged_rhw_hm_no_order': [
             '--search',
             'astar(lmcount(lm_merged([lm_rhw(),lm_hm(m=1)]),admissible=true),mpd=true)'],
-        # bucket-based open list
-        'bucket_lmcut': [
-            '--heuristic',
-            'h=lmcut()',
-            '--search',
-            'eager(single_buckets(h), reopen_closed=true, pathmax=false)'],
     }
 
 
@@ -198,6 +192,12 @@ def configs_satisficing_extended():
             '--search',
             'eager(pareto([sum([g(), h]), h]), reopen_closed=true, pathmax=false,'
             + 'f_eval=sum([g(), h]))'],
+        # bucket-based open list
+        'bucket_lmcut': [
+            '--heuristic',
+            'h=lmcut()',
+            '--search',
+            'eager(single_buckets(h), reopen_closed=true, pathmax=false)'],
     }
 
 
