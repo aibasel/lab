@@ -16,6 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from lab import tools
+
+tools.show_deprecation_warning(
+    'The downward/configs.py module has been deprecated in version 1.8. '
+    'Please copy the module or the relevant functions, dictionaries and '
+    'configurations directly into your experiment.')
+
 
 def configs_optimal_core():
     return {
