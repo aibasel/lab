@@ -18,6 +18,8 @@
 
 import logging
 
+from lab.tools import deprecated
+
 from downward.experiment import DownwardExperiment
 from downward import checkouts
 from downward.checkouts import Translator, Preprocessor, Planner
@@ -37,6 +39,9 @@ SCATTER_PLOT_ATTRIBUTES = ['total_time', 'search_time', 'memory',
                            'expansions_until_last_jump']
 
 
+@deprecated(
+    'CompareRevisionsExperiment has been deprecated in version 1.4. '
+    'Please use DownwardExperiment directly.')
 class CompareRevisionsExperiment(DownwardExperiment):
     """
     Convenience experiment that compares two revisions or compares the

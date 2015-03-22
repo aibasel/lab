@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 import resource
 import subprocess
 import sys
 import time
 
 from lab.calls.log import set_property
+from lab import tools
 
 
 def set_limit(kind, soft_limit, hard_limit=None):
@@ -52,8 +52,9 @@ class Call(subprocess.Popen):
         # TODO: Use time_limit=None and mem_limit=None by default.
         for deprecated_arg in ['kill_delay', 'check_interval']:
             if deprecated_arg in kwargs:
-                logging.warning('The "%s" argument is obsolete and will be ignored.' %
-                                deprecated_arg)
+                tools.show_deprecation_warning(
+                    'The "%s" argument has been deprecated in version 1.5 '
+                    'and will be ignored.' % deprecated_arg)
                 del kwargs[deprecated_arg]
 
         self.name = name
