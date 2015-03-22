@@ -80,6 +80,28 @@ def setup_logging(level):
     root_logger.setLevel(level)
 
 
+def show_deprecation_warning(msg):
+    logging.warning(msg)
+
+
+class deprecated(object):
+    """Decorator for marking deprecated functions or classes.
+
+    The *msg* argument is optional, but the decorator always has to be
+    called with brackets.
+    """
+    def __init__(self, msg=''):
+        self.msg = msg
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def new_func(*args, **kwargs):
+            msg = self.msg or '%s is deprecated.' % (func.__name__)
+            show_deprecation_warning(msg)
+            return func(*args, **kwargs)
+        return new_func
+
+
 def remove_none_values(func):
     """
     Remove all None values from the input list and call the original function.
