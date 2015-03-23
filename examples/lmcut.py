@@ -13,14 +13,15 @@ from downward.reports.absolute import AbsoluteReport
 
 
 EXPPATH = 'data/exp-lmcut'
-REPO = os.path.expanduser('~/projects/Downward/downward')
 SUITE = ['gripper:prob01.pddl', 'zenotravel:pfile1']
 CONFIGS = [('lmcut', ['--search', 'astar(lmcut())'])]
 ATTRIBUTES = ['coverage', 'expansions']
 
 if 'cluster' in platform.node():
+    REPO = os.path.expanduser('~/projects/downward')
     ENV = MaiaEnvironment(priority=-10)
 else:
+    REPO = os.path.expanduser('~/projects/Downward/downward')
     ENV = LocalEnvironment(processes=2)
 
 exp = DownwardExperiment(path=EXPPATH, repo=REPO, environment=ENV)
@@ -34,9 +35,6 @@ exp.add_report(AbsoluteReport(attributes=ATTRIBUTES), outfile=report)
 
 # "Publish" the results with "cat" for demonstration purposes.
 exp.add_step(Step('publish-report', subprocess.call, ['cat', report]))
-
-# Compress the experiment directory.
-exp.add_step(Step.zip_exp_dir(exp))
 
 # Parse the commandline and show or run experiment steps.
 exp()
