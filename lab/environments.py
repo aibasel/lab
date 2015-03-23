@@ -40,6 +40,12 @@ class Environment(object):
         """
         pass
 
+    def start_exp(self):
+        """
+        Run main experiment step.
+        """
+        raise NotImplementedError
+
     def run_steps(self):
         raise NotImplementedError
 
@@ -100,16 +106,31 @@ class OracleGridEngineEnvironment(Environment):
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, host_restriction=None,
-                 email=None, randomize_task_order=True):
+                 email=None, randomize_task_order=True, extra_options=None):
         """
+        .. note::
+
+            Previously, you had to provide the ``--all`` option on the
+            commandline to queue steps sequentially on the grid engine.
+            Now, the selected steps will be queued sequentially if at
+            least one of them itself submits runs to the queue.
+
+            For correct sequential execution, this class writes job
+            files to <cache_dir>/grid-steps/<timestamp>-<exp-name> and
+            makes them depend on one another. The driver.{log,err}
+            files in this directory can be inspected if something goes
+            wrong. Since the job files call the main experiment script
+            during execution, it mustn't be changed during the
+            experiment.
+
         *queue* must be a valid queue name on the grid.
 
         *priority* must be in the range [-1023, 0] where 0 is the highest
         priority. If you're a superuser the value can be in the range
         [-1023, 1024].
 
-        If *email* is provided and ``--all`` is used, a message will be sent
-        when the experiment finishes.
+        If *email* is provided and the steps run on the grid, a message
+        will be sent when the experiment finishes.
 
         If *randomize_task_order* is True (this is the default since
         version 1.5), tasks for runs are started in a random order.
@@ -118,6 +139,11 @@ class OracleGridEngineEnvironment(Environment):
         that due to the randomization, run directories may be
         pristine while the experiment is running even though the
         grid engine marks the runs as finished.
+
+        Use *extra_options* to pass additional options. Example that
+        allocates 16 cores per run on maia::
+
+            MaiaEnvironment(extra_options='#$ -pe smp 16')
 
         """
         Environment.__init__(self)
@@ -135,6 +161,7 @@ class OracleGridEngineEnvironment(Environment):
         self.runs_per_task = 1
         self.email = email
         self.randomize_task_order = randomize_task_order
+        self.extra_options = extra_options or '## (not used)'
 
         # When submitting an experiment job, wait for this job name.
         self.__wait_for_job_name = None
@@ -154,6 +181,7 @@ class OracleGridEngineEnvironment(Environment):
             'queue': self.queue,
             'host_spec': self.host_spec,
             'notification': '#$ -m n',
+            'extra_options': self.extra_options,
         }
 
     def write_main_script(self):
@@ -201,14 +229,14 @@ class OracleGridEngineEnvironment(Environment):
     def _get_script_args(self):
         """
         Retrieve additional commandline parameters given when the experiment
-        is called with --all and pass them again when the step is called by
+        is called by the user and pass them again when the step is called by
         the grid.
         """
         # Remove step names from the back of the commandline to avoid deleting
         # custom args by accident.
         commandline = list(reversed(sys.argv[1:]))
-        assert '--all' in commandline, commandline
-        commandline.remove('--all')
+        if '--all' in commandline:
+            commandline.remove('--all')
         for step_name in self.exp.args.steps:
             commandline.remove(step_name)
         return list(reversed(commandline))

@@ -353,10 +353,11 @@ class PlotReport(PlanningReport):
                 category_styles[cat] = {'marker': marker, 'c': color}
                 logging.info('Converted %s to %s' % (style, category_styles[cat]))
         if used_old_format:
-            logging.warning('The old category_styles tuple format has been '
-                            'deprecated. You should use a dictionary mapping '
-                            'category names to dictionaries of matplotlib params '
-                            'instead: %s' % category_styles[cat])
+            tools.show_deprecation_warning(
+                'The old category_styles tuple format has been deprecated '
+                'in version 1.3. You should use a dictionary mapping '
+                'category names to dictionaries of matplotlib params '
+                'instead.')
 
         self.category_styles = category_styles
         self._set_scales(xscale, yscale)
@@ -406,9 +407,9 @@ class PlotReport(PlanningReport):
             # filter duplicate items.
             coords = list(set(coords))
             # Logarithmic axes cannot handle values <= 0.
-            if not self.xscale == 'linear':
+            if self.xscale != 'linear':
                 coords = [(handle_zero(x), y) for x, y in coords]
-            if not self.yscale == 'linear':
+            if self.yscale != 'linear':
                 coords = [(x, handle_zero(y)) for x, y in coords]
             new_categories[category] = coords
         return new_categories

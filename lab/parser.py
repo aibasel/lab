@@ -80,14 +80,8 @@ class _FileParser(object):
 
     def load_file(self, filename):
         self.filename = filename
-        try:
-            with open(filename, 'rb') as file:
-                self.content = file.read()
-        except IOError:
-            self.content = ''
-            return False
-        else:
-            return True
+        with open(filename, 'rb') as file:
+            self.content = file.read()
 
     def add_pattern(self, pattern):
         self.patterns.append(pattern)
@@ -213,11 +207,13 @@ class Parser(object):
         for filename, file_parser in self.file_parsers.items():
             # If filename is absolute it will not be changed here
             path = os.path.join(self.run_dir, filename)
-            success = file_parser.load_file(path)
-            if success:
+            try:
+                file_parser.load_file(path)
+            except (IOError, MemoryError) as err:
+                logging.error('File "%s" could not be read: %s' % (path, err))
+                self.props['error'] = 'unexplained-parser-failed-to-read-file'
+            else:
                 # Subclasses directly modify the properties during parsing
                 file_parser.parse(self.props)
-            else:
-                logging.error('File "%s" could not be read' % path)
 
         self.props.write()

@@ -47,13 +47,8 @@ ARGPARSER.add_argument(
     help='Name or number of a step below. If none is given, print help.')
 ARGPARSER.add_argument(
     '--all', dest='run_all_steps', action='store_true',
-    help='Run all supplied steps. If none are given, run all steps '
-    'in the experiment. For local experiments this option has no '
-    'effect if any steps are given on the commandline. Use this '
-    'option to run unattended experiments on computer grids. '
-    'If this option is used, make sure that the experiment script '
-    'doesn\'t change while the experiment is running, because it '
-    'will be called for each step.')
+    help='Run all steps. If steps are listed explicitly, this option is '
+         'ignored for backwards compatibility.')
 
 
 class _Buildable(object):
@@ -358,7 +353,8 @@ class Experiment(_Buildable):
             sys.exit(0)
         # If no steps were given on the commandline, run all exp steps.
         steps = [self.steps.get_step(name) for name in self.args.steps] or self.steps
-        if self.args.run_all_steps:
+        # If the main experiment step is present, we always run the jobs sequentially.
+        if self.args.run_all_steps or any(step._funcname == 'run' for step in steps):
             self.environment.run_steps(steps)
         else:
             Sequence.run_steps(steps)

@@ -1,19 +1,46 @@
 News
 ====
 
+v1.8 (unreleased)
+-----------------
+
+lab
+^^^
+* Automatically determine whether to queue steps sequentially on the grid.
+
+downward
+^^^^^^^^
+* ...
+
+
+v1.7
+----
+
+lab
+^^^
+* Reports: right-align headers (except the left-most one).
+* Reports: let :func:`lab.reports.gm` return 0 if any of the numbers is 0.
+
+downward
+^^^^^^^^
+* Add support for new python driver script ``fast-downward.py``.
+* Use booktabs package for latex tables.
+* Remove vertical lines from Latex tables (recommended by booktabs docs).
+* Capitalize attribute names and remove underscores for Latex reports.
+* Allow fractional plan costs.
+* Set search_time and total_time to 0.01 instead of 0.1 if they are 0.0 in the log.
+* Parse initial h-value for aborted searches (Florian).
+
+
 v1.6
 ----
 
 lab
 ^^^
-
 * Restore earlier default behavior for grid jobs by passing all environment variables (e.g. ``PYTHONPATH``) to the job environments.
-
-
 
 downward
 ^^^^^^^^
-
 * Use write-once revision cache: instead of *cloning* the full FD repo
   into the revision cache only *copy* the ``src`` directory. This
   greatly reduces the time and space needed to cache revisions. As a
@@ -75,7 +102,6 @@ v1.4
 
 lab
 ^^^
-
 * Add :py:func:`exp.add_report() <lab.experiment.Experiment.add_report>` method to simplify adding reports.
 * Use simplejson when available to make loading properties more than twice as fast.
 * Raise default check-interval in Calls to 5s. This should reduce lab's overhead.
@@ -88,7 +114,6 @@ lab
 
 downward
 ^^^^^^^^
-
 * Move ``downward.experiment.DownwardExperiment`` to ``downward.experiments.DownwardExperiment``, but keep both import locations indefinitely.
 * Flag invalid plans in absolute reports.
 * PlanningReport: When you append '_relative' to an attribute, you will get a table containing the attribute's values of each configuration relative to the leftmost column.

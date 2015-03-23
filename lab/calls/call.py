@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 import resource
 import subprocess
 import sys
 import time
 
 from lab.calls.log import set_property
+from lab import tools
 
 
 def set_limit(kind, soft_limit, hard_limit=None):
@@ -41,7 +41,7 @@ class Call(subprocess.Popen):
         `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
 
         *time_limit* and *mem_limit* are the time and memory contraints in
-        seconds and MiB.
+        seconds and MiB. Pass None to enforce no limit.
 
         Previously, not only the main process, but also all spawned
         child processes were watched. This functionality has been removed
@@ -52,8 +52,9 @@ class Call(subprocess.Popen):
         # TODO: Use time_limit=None and mem_limit=None by default.
         for deprecated_arg in ['kill_delay', 'check_interval']:
             if deprecated_arg in kwargs:
-                logging.warning('The "%s" argument is obsolete and will be ignored.' %
-                                deprecated_arg)
+                tools.show_deprecation_warning(
+                    'The "%s" argument has been deprecated in version 1.5 '
+                    'and will be ignored.' % deprecated_arg)
                 del kwargs[deprecated_arg]
 
         self.name = name
@@ -75,9 +76,11 @@ class Call(subprocess.Popen):
             # padding between the two limits allows us to distinguish between
             # SIGKILL signals sent by this class and the ones sent by the
             # system.
-            set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
+            if time_limit is not None:
+                set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
             # Memory in Bytes.
-            set_limit(resource.RLIMIT_AS, mem_limit * 1024 * 1024)
+            if mem_limit is not None:
+                set_limit(resource.RLIMIT_AS, mem_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
 
         self.wall_clock_start_time = time.time()

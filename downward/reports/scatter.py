@@ -61,9 +61,9 @@ class ScatterMatplotlib(Matplotlib):
 class ScatterPgfPlots(PgfPlots):
     @classmethod
     def _format_coord(cls, coord):
-        if type(coord[0]) is int and type(coord[1]) is int:
-            return '(%d, %d)' % coord
-        return '(%.2f, %.2f)' % coord
+        def format_value(v):
+            return str(v) if isinstance(v, int) else '%.2f' % v
+        return '(%s, %s)' % (format_value(coord[0]), format_value(coord[1]))
 
     @classmethod
     def _get_plot(cls, report):
@@ -193,7 +193,7 @@ class ScatterPlotReport(PlotReport):
         assert max_value is not None
         if self.yscale == 'linear':
             return max_value * 1.1
-        return 10 ** math.ceil(math.log10(max_value))
+        return int(10 ** math.ceil(math.log10(max_value)))
 
     def _handle_none_values(self, X, Y, replacement):
         assert len(X) == len(Y), (X, Y)

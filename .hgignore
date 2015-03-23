@@ -1,4 +1,11 @@
 ~$
 \.pyc$
 ^docs/_build/
-^examples/lmcut-exp.*/
+^docs/driver.err
+^docs/driver.log
+^docs/run.err
+^docs/run.log
+^examples/data/
+^examples/pi/data/
+^examples/planner/data/
+^examples/simple/data/

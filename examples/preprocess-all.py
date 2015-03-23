@@ -1,11 +1,9 @@
 #! /usr/bin/env python
 
-import os
-
 import standard_exp
 
 
-EXPPATH = os.path.join(standard_exp.EXPS, 'preprocess-all')
+EXPPATH = 'data/preprocess-all'
 SUITE = 'ALL'
 
 exp = standard_exp.StandardDownwardExperiment(path=EXPPATH)

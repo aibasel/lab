@@ -13,7 +13,7 @@ from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
-EXPPATH = 'exp-planner'
+EXPPATH = 'data/exp-planner'
 REPO = '/home/jendrik/projects/Downward/downward'
 
 exp = DownwardExperiment(EXPPATH, REPO)

@@ -16,6 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from lab import tools
+
+tools.show_deprecation_warning(
+    'The downward/configs.py module has been deprecated in version 1.8. '
+    'Please copy the module or the relevant functions, dictionaries and '
+    'configurations directly into your experiment.')
+
 
 def configs_optimal_core():
     return {
@@ -130,19 +137,6 @@ def configs_optimal_extended():
         'astar_lmcount_lm_merged_rhw_hm_no_order': [
             '--search',
             'astar(lmcount(lm_merged([lm_rhw(),lm_hm(m=1)]),admissible=true),mpd=true)'],
-        # pareto open list
-        'pareto_lmcut': [
-            '--heuristic',
-            'h=lmcut()',
-            '--search',
-            'eager(pareto([sum([g(), h]), h]), reopen_closed=true, pathmax=false,'
-            + 'f_eval=sum([g(), h]))'],
-        # bucket-based open list
-        'bucket_lmcut': [
-            '--heuristic',
-            'h=lmcut()',
-            '--search',
-            'eager(single_buckets(h), reopen_closed=true, pathmax=false)'],
     }
 
 
@@ -198,6 +192,19 @@ def configs_satisficing_extended():
             '--search',
             'iterated([lazy_wastar(h,w=10), lazy_wastar(h,w=5), lazy_wastar(h,w=3),'
             + 'lazy_wastar(h,w=2), lazy_wastar(h,w=1)])'],
+        # pareto open list
+        'pareto_ff': [
+            '--heuristic',
+            'h=ff()',
+            '--search',
+            'eager(pareto([sum([g(), h]), h]), reopen_closed=true, pathmax=false,'
+            + 'f_eval=sum([g(), h]))'],
+        # bucket-based open list
+        'bucket_lmcut': [
+            '--heuristic',
+            'h=lmcut()',
+            '--search',
+            'eager(single_buckets(h), reopen_closed=true, pathmax=false)'],
     }
 
 

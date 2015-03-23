@@ -80,6 +80,28 @@ def setup_logging(level):
     root_logger.setLevel(level)
 
 
+def show_deprecation_warning(msg):
+    logging.warning(msg)
+
+
+class deprecated(object):
+    """Decorator for marking deprecated functions or classes.
+
+    The *msg* argument is optional, but the decorator always has to be
+    called with brackets.
+    """
+    def __init__(self, msg=''):
+        self.msg = msg
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def new_func(*args, **kwargs):
+            msg = self.msg or '%s is deprecated.' % (func.__name__)
+            show_deprecation_warning(msg)
+            return func(*args, **kwargs)
+        return new_func
+
+
 def remove_none_values(func):
     """
     Remove all None values from the input list and call the original function.
@@ -478,16 +500,16 @@ def get_terminal_size():
 
 class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
     """
-    Help message formatter which retains any formatting in descriptions and adds
-    default values to argument help.
+    Help message formatter which preserves the description format and adds
+    default values to argument help messages.
     """
     def __init__(self, prog, **kwargs):
         # Use the whole terminal width.
-        width, height = get_terminal_size()
+        width, _ = get_terminal_size()
         argparse.HelpFormatter.__init__(self, prog, width=width, **kwargs)
 
     def _fill_text(self, text, width, indent):
-        return ''.join([indent + line for line in text.splitlines(True)])
+        return '\n'.join([indent + line for line in text.splitlines()])
 
     def _get_help_string(self, action):
         help = action.help
@@ -497,16 +519,6 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
                 if action.option_strings or action.nargs in defaulting_nargs:
                     help += ' (default: %(default)s)'
         return help
-
-    def _format_args(self, action, default_metavar):
-        """
-        We want to show "[environment-specific options]" instead of "...".
-        """
-        get_metavar = self._metavar_formatter(action, default_metavar)
-        if action.nargs == argparse.PARSER:
-            return '%s [environment-specific options]' % get_metavar(1)
-        else:
-            return argparse.HelpFormatter._format_args(self, action, default_metavar)
 
 
 class ArgParser(argparse.ArgumentParser):
@@ -518,7 +530,8 @@ class ArgParser(argparse.ArgumentParser):
             try:
                 self.add_argument('-l', '--log-level', dest='log_level',
                                   choices=['DEBUG', 'INFO', 'WARNING'],
-                                  default='INFO')
+                                  default='INFO',
+                                  help='Logging verbosity')
             except argparse.ArgumentError:
                 # The option may have already been added by a parent class.
                 pass

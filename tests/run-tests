@@ -9,6 +9,13 @@ set -e
 
 REPO='/home/jendrik/projects/Downward/downward'
 
+function cleanup {
+    rm -rf examples/data
+    rm -rf examples/pi/data
+    rm -rf examples/planner/data
+    rm -rf examples/simple/data
+}
+
 # Change into top directory.
 cd "$(dirname "$0")"
 cd ..
@@ -25,6 +32,8 @@ elif [[ "$PYTHONPATH" != *"$LAB"* ]]; then
 fi
 echo PYTHONPATH: $PYTHONPATH
 
+cleanup
+
 py.test-2.7 tests
 
 # Run doctests.
@@ -37,7 +46,7 @@ cd ..
 
 EXAMPLES="lmcut.py showcase-options.py standard_exp.py \
     simple/simple-exp.py pi/pi.py pi/pi-ext.py planner/planner.py \
-    planner/planner-ext.py"
+    planner/planner-ext.py preprocess-all.py"
 
 # Check imports and unused/missing variables.
 pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
@@ -65,46 +74,35 @@ make -B html
 echo "Docs: file://$(pwd)/_build/html/index.html"
 cd ..
 
-# Run demo lab experiment.
-cd examples/simple
-rm -rf /tmp/simple-exp
-./simple-exp.py --all
-rm -rf /tmp/simple-exp
-cd ../..
+cd examples
 
-# Check pi experiment
-cd examples/pi
-rm -rf exp-pi*
+cd simple
+./simple-exp.py --all
+cd ..
+
+cd pi
 ./pi.py --all
 ./pi-ext.py --help
-rm -rf exp-pi*
-cd ../..
+cd ..
 
 # Only check downward code if $REPO exists.
 if [ -d "$REPO" ]; then
-    cd examples
-    rm -rf exp-*
-
-    # Check example experiment.
     ./lmcut.py {1..8}
 
-    # Check planner experiment.
     cd planner
-    rm -rf exp-planner*
     ./planner.py --all
     ./planner-ext.py
-    rm -rf exp-planner*
     cd ..
 
-    # Run demo downward experiment.
-    rm -rf data/showcase-options*
+    ./preprocess-all.py --help
     ./showcase-options.py --all
 
-    rm -rf exp-*
     cd ..
 else
     echo
     echo "Repo $REPO is missing. Could not run downward tests."
 fi
+
+cleanup
 
 echo TESTS PASSED

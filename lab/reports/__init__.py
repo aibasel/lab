@@ -130,7 +130,8 @@ class Attribute(str):
             from lab.reports import minimum, maximum
             avg_h = Attribute('average_h', min_wins=False,
                               functions=[sum, minimum, maximum])
-            abstraction_done = Attribute('abstraction_done', absolute=True)
+            abstraction_done = Attribute('abstraction_done', absolute=True,
+                                         min_wins=False)
 
             Report(attributes=[avg_g, abstraction_done, 'coverage', 'expansions'])
 

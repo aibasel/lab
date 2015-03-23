@@ -77,13 +77,6 @@ class StandardDownwardExperiment(DownwardExperiment):
         self.add_report(AbsoluteReport(attributes=attributes, colored=True, derived_properties=derived_properties),
                         name='report-abs', outfile=abs_report_file)
 
-        if REMOTE:
-            # Compress the experiment directory
-            self.add_step(Step.zip_exp_dir(self))
-            self.add_step(Step('zip-eval-dir', call,
-                               ['tar', '-cjf', self.name + '-eval.tar.bz2', self.name + '-eval'],
-                          cwd=os.path.dirname(self.path)))
-
         self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
 
         if not REMOTE:
@@ -92,24 +85,6 @@ class StandardDownwardExperiment(DownwardExperiment):
                 'scp', '-r',
                 '%s:%s-eval' % (SCP_LOGIN, remote_exppath),
                 '%s-eval' % local_exppath]))
-
-            # Copy the results to local directory
-            self.add_step(Step('scp-zipped-eval-dir', call, [
-                'scp', '-r',
-                '%s:%s-eval.tar.bz2' % (SCP_LOGIN, remote_exppath),
-                '%s-eval.tar.bz2' % local_exppath]))
-
-            # Copy the zipped experiment directory to local directory
-            self.add_step(Step('scp-exp-dir', call, [
-                'scp', '-r',
-                '%s:%s.tar.bz2' % (SCP_LOGIN, remote_exppath),
-                '%s.tar.bz2' % local_exppath]))
-
-        # Unzip the experiment directory
-        self.add_step(Step.unzip_exp_dir(self))
-        self.add_step(Step('unzip-eval-dir', call,
-                           ['tar', '-xjf', self.name + '-eval.tar.bz2'],
-                      cwd=os.path.dirname(self.path)))
 
 
 def get_exp(suite, configs, combinations=None, limits=None, attributes=None):
