@@ -159,11 +159,11 @@ def overwrite_dir(path):
     os.makedirs(path)
 
 
-def remove(filename):
-    try:
-        os.remove(filename)
-    except OSError:
-        pass
+def remove(path):
+    if os.path.isfile(path):
+        os.remove(path)
+    elif os.path.isdir(path):
+        os.removedirs(path)
 
 
 def touch(filename):

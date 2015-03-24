@@ -25,6 +25,17 @@ import sys
 from lab import tools
 
 
+def get_job_prefix(exp_name):
+    # TODO: Simplify code.
+    assert exp_name
+    prefix = []
+    if exp_name[0].isdigit():
+        prefix.append('j')
+    prefix.append(exp_name)
+    prefix.append('-')
+    return ''.join(prefix)
+
+
 class Environment(object):
     def __init__(self):
         self.exp = None
@@ -49,14 +60,6 @@ class Environment(object):
     def run_steps(self):
         raise NotImplementedError
 
-    def build_scripts(self, steps):
-        logging.info('Building scripts')
-        for step in steps:
-            if step._funcname == 'build':
-                script_step = step.copy()
-                script_step.kwargs['build_runs'] = False
-                script_step()
-
 
 class LocalEnvironment(Environment):
     """
@@ -64,7 +67,7 @@ class LocalEnvironment(Environment):
     """
     def __init__(self, processes=1):
         """
-        *processes* must be in the range [1, ..., #CPUs].
+        *processes* must be between 1 and #CPUs.
         """
         Environment.__init__(self)
         import multiprocessing
@@ -88,10 +91,7 @@ class LocalEnvironment(Environment):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)
 
     def run_steps(self, steps):
-        self.build_scripts(steps)
         for step in steps:
-            if step._funcname == 'build':
-                step.kwargs['overwrite'] = False
             step()
 
 
@@ -163,68 +163,9 @@ class OracleGridEngineEnvironment(Environment):
         self.randomize_task_order = randomize_task_order
         self.extra_options = extra_options or '## (not used)'
 
-        # When submitting an experiment job, wait for this job name.
-        self.__wait_for_job_name = None
-        self._job_name = None
-
-    @classmethod
-    def _escape_job_name(cls, name):
-        if name[0].isdigit():
-            name = 'j' + name
-        return name
-
-    def _get_common_job_params(self):
-        return {
-            'logfile': 'driver.log',
-            'errfile': 'driver.err',
-            'priority': self.priority,
-            'queue': self.queue,
-            'host_spec': self.host_spec,
-            'notification': '#$ -m n',
-            'extra_options': self.extra_options,
-        }
-
-    def write_main_script(self):
-        num_tasks = int(math.ceil(len(self.exp.runs) / float(self.runs_per_task)))
-        if num_tasks > self.MAX_TASKS:
-            logging.critical('You are trying to submit a job with %d tasks, '
-                             'but only %d are allowed.' %
-                             (num_tasks, self.MAX_TASKS))
-        job_params = self._get_common_job_params()
-        job_params.update(name=self._escape_job_name(self.exp.name),
-                          num_tasks=num_tasks)
-        header = pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
-
-        body_params = dict(num_tasks=num_tasks, run_ids='')
-        if self.randomize_task_order:
-            run_ids = [str(i + 1) for i in xrange(num_tasks)]
-            random.shuffle(run_ids)
-            body_params['run_ids'] = ' '.join(run_ids)
-        body = pkgutil.get_data('lab', 'data/grid-job-body-template') % body_params
-
-        filename = self.exp._get_abs_path(self.main_script_file)
-        with open(filename, 'w') as file:
-            logging.debug('Writing file "%s"' % filename)
-            file.write('%s\n\n%s' % (header, body))
-
     def start_exp(self):
-        submitted_file = os.path.join(self.exp.path, 'submitted')
-        if os.path.exists(submitted_file):
-            tools.confirm('The file "%s" already exists so it seems the '
-                          'experiment has already been submitted. Are you '
-                          'sure you want to submit it again?' % submitted_file)
-        submit = ['qsub']
-        if self.__wait_for_job_name:
-            submit.extend(['-hold_jid', self.__wait_for_job_name])
-        if self._job_name:
-            # The name set in the job file will be ignored.
-            submit.extend(['-N', self._job_name])
-        submit.append(self.main_script_file)
-        tools.run_command(submit, cwd=self.exp.path)
-        # Write "submitted" file.
-        with open(submitted_file, 'w') as f:
-            f.write('This file is created when the experiment is submitted to '
-                    'the queue.')
+        # The queue will start the experiment by itself.
+        pass
 
     def _get_script_args(self):
         """
@@ -242,37 +183,66 @@ class OracleGridEngineEnvironment(Environment):
         return list(reversed(commandline))
 
     def _get_job_name(self, step):
-        return self._escape_job_name(
-            '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1,
-                            step.name))
+        return '%s%02d-%s' % (
+            get_job_prefix(self.exp.name),
+            self.exp.steps.index(step) + 1,
+            step.name)
 
-    def _get_job_header(self, step):
-        job_params = self._get_common_job_params()
-        job_params.update(name=self._get_job_name(step), num_tasks=1)
-        if step.is_last_step and self.email:
+    def _get_num_runs(self):
+        num_runs = int(math.ceil(len(self.exp.runs) / float(self.runs_per_task)))
+        if num_runs > self.MAX_TASKS:
+            logging.critical('You are trying to submit a job with %d tasks, '
+                             'but only %d are allowed.' %
+                             (num_runs, self.MAX_TASKS))
+        return num_runs
+
+    def _get_num_tasks(self, step):
+        if step._funcname == "run":
+            return self._get_num_runs()
+        else:
+            return 1
+
+    def _get_job_params(self, step):
+        return {
+            'errfile': 'driver.err',
+            'extra_options': self.extra_options,
+            'host_spec': self.host_spec,
+            'logfile': 'driver.log',
+            'name': self._get_job_name(step),
+            'notification': '#$ -m n',
+            'num_tasks': self._get_num_tasks(step),
+            'priority': self.priority,
+            'queue': self.queue,
+        }
+
+    def _get_job_header(self, step, is_last):
+        job_params = self._get_job_params(step)
+        if is_last and self.email:
             job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
         return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
 
-    def _get_job(self, step):
-        # Abort if one step fails.
-        template = """\
-%(job_header)s
-if [ -s "%(stderr)s" ]; then
-    echo "There was output on stderr. Please check %(stderr)s. Aborting."
-    exit 1
-fi
+    def _get_main_job_body(self):
+        num_tasks = self._get_num_runs()
+        body_params = dict(num_tasks=num_tasks, run_ids='')
+        if self.randomize_task_order:
+            run_ids = [str(i + 1) for i in xrange(num_tasks)]
+            random.shuffle(run_ids)
+            body_params['run_ids'] = ' '.join(run_ids)
+        return pkgutil.get_data('lab', 'data/grid-job-body-template') % body_params
 
-cd %(cwd)s
-%(python)s %(script)s %(args)s %(step_name)s
-"""
-        return template % {
+    def _get_job_body(self, step):
+        if step._funcname == 'run':
+            return self._get_main_job_body()
+        return 'cd %(cwd)s\n%(python)s %(script)s %(args)s %(step_name)s\n' % {
             'cwd': os.getcwd(),
             'python': sys.executable or 'python',
             'script': sys.argv[0],
             'args': ' '.join(self._get_script_args()),
-            'step_name': step.name,
-            'stderr': 'driver.err',
-            'job_header': self._get_job_header(step)}
+            'step_name': step.name}
+
+    def _get_job(self, step, is_last):
+        return '%s\n\n%s' % (self._get_job_header(step, is_last),
+                             self._get_job_body(step))
 
     def _get_host_spec(self, host_restriction):
         if not host_restriction:
@@ -281,30 +251,35 @@ cd %(cwd)s
             hosts = self.HOST_RESTRICTIONS[host_restriction]
             return '#$ -l hostname="%s"' % '|'.join(hosts)
 
+    def write_main_script(self):
+        # The main script is written by the run_steps() method.
+        pass
+
     def run_steps(self, steps):
-        self.build_scripts(steps)
-        job_dir = os.path.join(self.exp.path)
         prev_job_name = None
+        job_dir = self.exp.path
+        tools.makedirs(job_dir)
         for number, step in enumerate(steps, start=1):
-            job_name = self._get_job_name(step)
-            # We cannot submit a job from within the grid, so we submit it
-            # directly.
             if step._funcname == 'run':
-                self.__wait_for_job_name = prev_job_name
-                self._job_name = job_name
-                step()
-            else:
-                if step._funcname == 'build':
-                    step.kwargs['overwrite'] = False
-                    assert False, 'kwargs for grid steps are not passed to build()'
-                step.is_last_step = (number == len(steps))
-                with open(os.path.join(job_dir, job_name), 'w') as f:
-                    f.write(self._get_job(step))
-                submit = ['qsub']
-                if prev_job_name:
-                    submit.extend(['-hold_jid', prev_job_name])
-                submit.append(job_name)
-                tools.run_command(submit, cwd=job_dir)
+                submitted_file = os.path.join(job_dir, 'submitted')
+                if os.path.exists(submitted_file):
+                    tools.confirm('The file "%s" already exists so it seems the '
+                                  'experiment has already been submitted. Are you '
+                                  'sure you want to submit it again?' % submitted_file)
+            job_name = self._get_job_name(step)
+            # We cannot submit jobs from within the grid, so we submit
+            # them all at once with dependencies.
+            with open(os.path.join(job_dir, job_name), 'w') as f:
+                f.write(self._get_job(step, is_last=(number == len(steps))))
+            submit = ['qsub']
+            if prev_job_name:
+                submit.extend(['-hold_jid', prev_job_name])
+            submit.append(job_name)
+            tools.run_command(submit, cwd=job_dir)
+            if step._funcname == 'run':
+                with open(submitted_file, 'w') as f:
+                    f.write('This file is created when the experiment is submitted to '
+                            'the queue.')
             prev_job_name = job_name
 
 

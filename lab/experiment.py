@@ -22,10 +22,10 @@ import pkgutil
 import sys
 import logging
 
+from lab import environments
 from lab import tools
 from lab.fetcher import Fetcher
 from lab.steps import Step, Sequence
-from lab.environments import LocalEnvironment
 
 try:
     # Python 2.7, 3.1 and above.
@@ -214,7 +214,7 @@ class Experiment(_Buildable):
         self.path = os.path.abspath(path)
         if any(char in self.path for char in (':', ',')):
             logging.critical('Path contains commas or colons: %s' % self.path)
-        self.environment = environment or LocalEnvironment()
+        self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
         self.cache_dir = cache_dir or tools.DEFAULT_USER_DIR
         tools.makedirs(self.cache_dir)
@@ -366,26 +366,30 @@ class Experiment(_Buildable):
         or on a computer cluster."""
         self.environment.start_exp()
 
-    def build(self, overwrite=True, build_runs=True):
-        """Apply all the actions to the filesystem.
+    def build(self):
+        """Apply all actions to the filesystem.
         """
-        logging.info('Exp Dir: "%s"' % self.path)
-
-        if overwrite:
-            tools.overwrite_dir(self.path)
-        else:
-            tools.makedirs(self.path)
+        self._create_exp_dir()
+        self._clean_exp_dir()
 
         # Needed for building the main script.
         self._set_run_dirs()
+
         self._build_main_script()
-
-        if not build_runs:
-            return
-
         self._build_resources()
         self._build_runs()
         self._build_properties_file()
+
+    def _create_exp_dir(self):
+        logging.info('Exp Dir: "%s"' % self.path)
+        tools.makedirs(self.path)
+
+    def _clean_exp_dir(self):
+        # TODO: Confirm deletion.
+        job_prefix = environments.get_job_prefix(self.name)
+        for path in os.listdir(self.path):
+            if not path.startswith(job_prefix):
+                tools.remove(os.path.join(self.path, path))
 
     def _set_run_dirs(self):
         """
