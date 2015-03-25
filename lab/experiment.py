@@ -366,7 +366,7 @@ class Experiment(_Buildable):
         or on a computer cluster."""
         self.environment.start_exp()
 
-    def build(self):
+    def build(self, dry_run=False):
         """Apply all actions to the filesystem.
         """
         self._create_exp_dir()
@@ -374,6 +374,9 @@ class Experiment(_Buildable):
 
         # Needed for building the main script.
         self._set_run_dirs()
+
+        if dry_run:
+            return
 
         self._build_main_script()
         self._build_resources()
