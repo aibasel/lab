@@ -26,14 +26,9 @@ from lab import tools
 
 
 def get_job_prefix(exp_name):
-    # TODO: Simplify code.
     assert exp_name
-    prefix = []
-    if exp_name[0].isdigit():
-        prefix.append('j')
-    prefix.append(exp_name)
-    prefix.append('-')
-    return ''.join(prefix)
+    escape_char = 'j' if exp_name[0].isdigit() else ''
+    return ''.join([escape_char, exp_name, '-'])
 
 
 class Environment(object):
