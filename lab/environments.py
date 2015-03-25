@@ -255,12 +255,12 @@ class OracleGridEngineEnvironment(Environment):
         job_dir = self.exp.path
         tools.makedirs(job_dir)
         for number, step in enumerate(steps, start=1):
-            # Let build() add runs, etc. to the experiment.
-            # TODO: Can we compare functions instead of strings?
-            if step._funcname == 'build':
-                kwargs = step.kwargs.copy()
-                kwargs['dry_run'] = True
-                self.exp.build(*step.args, **kwargs)
+            # Hack: Let build() add runs, etc. to the experiment.
+            # TODO: Find a better solution for this.
+            if step.name == 'run-preprocess-exp':
+                self.exp.build(stage='preprocess', dry_run=True)
+            if step.name == 'run-search-exp':
+                self.exp.build(stage='search', dry_run=True)
             if step._funcname == 'run':
                 submitted_file = os.path.join(job_dir, 'submitted')
                 if os.path.exists(submitted_file):
