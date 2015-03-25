@@ -129,9 +129,3 @@ class Sequence(list):
             else:
                 lines.extend(['', line, step_text, ''])
         return '\n'.join(lines)
-
-    # TODO: Remove.
-    @staticmethod
-    def run_steps(steps):
-        for step in steps:
-            step()

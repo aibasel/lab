@@ -357,7 +357,7 @@ class Experiment(_Buildable):
         if self.args.run_all_steps or any(step._funcname == 'run' for step in steps):
             self.environment.run_steps(steps)
         else:
-            Sequence.run_steps(steps)
+            environments.LocalEnvironment().run_steps(steps)
 
     def run(self):
         """Start the experiment by running all runs that were added to it.
