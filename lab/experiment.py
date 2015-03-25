@@ -385,10 +385,12 @@ class Experiment(_Buildable):
         tools.makedirs(self.path)
 
     def _clean_exp_dir(self):
-        # TODO: Confirm deletion.
         job_prefix = environments.get_job_prefix(self.name)
-        for path in os.listdir(self.path):
-            if not path.startswith(job_prefix):
+        paths = [path for path in os.listdir(self.path)
+                 if not path.startswith(job_prefix)]
+        if paths:
+            tools.confirm_overwrite_or_abort(self.path)
+            for path in paths:
                 tools.remove(os.path.join(self.path, path))
 
     def _set_run_dirs(self):

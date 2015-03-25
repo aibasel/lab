@@ -263,9 +263,10 @@ class OracleGridEngineEnvironment(Environment):
             if step._funcname == 'run':
                 submitted_file = os.path.join(job_dir, 'submitted')
                 if os.path.exists(submitted_file):
-                    tools.confirm('The file "%s" already exists so it seems the '
-                                  'experiment has already been submitted. Are you '
-                                  'sure you want to submit it again?' % submitted_file)
+                    tools.confirm_or_abort(
+                        'The file "%s" already exists so it seems the '
+                        'experiment has already been submitted. Are you '
+                        'sure you want to submit it again?' % submitted_file)
             job_name = self._get_job_name(step)
             # We cannot submit jobs from within the grid, so we submit
             # them all at once with dependencies.
