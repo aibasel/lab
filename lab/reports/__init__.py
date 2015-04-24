@@ -691,7 +691,7 @@ class Table(collections.defaultdict):
             if isinstance(value, float):
                 result = '%.2f' % value
             elif isinstance(value, (list, tuple)):
-                result = [format_value(v) for v in value]
+                result = '[%s]' % ', '.join(format_value(v) for v in value)
             else:
                 result = str(value)
             # Escape brackets to avoid involuntarily creating txt2tags links.
