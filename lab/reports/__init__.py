@@ -689,12 +689,15 @@ class Table(collections.defaultdict):
 
         def format_value(value):
             if isinstance(value, float):
-                return '%.2f' % value
+                result = '%.2f' % value
             elif isinstance(value, (list, tuple)):
-                # Escape brackets to avoid involuntarily creating txt2tags links.
-                return "''[''%s'']''" % (', '.join(format_value(v) for v in value) or ' ')
+                result = '[%s]' % ', '.join(format_value(v) for v in value)
             else:
-                return str(value)
+                result = str(value)
+            # Escape brackets to avoid involuntarily creating txt2tags links.
+            for before, after in [('[]', '[ ]'), ('[', "''[''"), (']', "'']''")]:
+                result = result.replace(before, after)
+            return result
 
         value_text = format_value(value)
 
