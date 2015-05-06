@@ -111,12 +111,11 @@ class OracleGridEngineEnvironment(Environment):
             least one of them itself submits runs to the queue.
 
             For correct sequential execution, this class writes job
-            files to <cache_dir>/grid-steps/<timestamp>-<exp-name> and
-            makes them depend on one another. The driver.{log,err}
-            files in this directory can be inspected if something goes
-            wrong. Since the job files call the main experiment script
-            during execution, it mustn't be changed during the
-            experiment.
+            files to the experiment directory and makes them depend on
+            one another. The driver.{log,err} files in this directory
+            can be inspected if something goes wrong. Since the job
+            files call the main experiment script during execution, it
+            mustn't be changed during the experiment.
 
         *queue* must be a valid queue name on the grid.
 
