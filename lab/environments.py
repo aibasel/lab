@@ -255,10 +255,15 @@ class OracleGridEngineEnvironment(Environment):
         job_dir = self.exp.path
         tools.makedirs(job_dir)
         for number, step in enumerate(steps, start=1):
-            # Hack: Let build() add runs, etc. to the experiment.
+            # HACK: Let build() add runs, etc. to the experiment.
             # TODO: Find a better solution for this.
             if step.name == 'run-preprocess-exp':
                 self.exp.build(stage='preprocess', dry_run=True)
+                # HACK
+                job_dir = self.exp.preprocess_exp_path
+                tools.makedirs(job_dir)
+            else:
+                job_dir = self.exp.path
             if step.name == 'run-search-exp':
                 self.exp.build(stage='search', dry_run=True)
             if step._funcname == 'run':
