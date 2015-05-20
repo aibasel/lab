@@ -268,16 +268,17 @@ def scores(content, props):
     # Maximum memory in KB
     max_memory = (props.get('limit_search_memory') or 2048) * 1024
 
-    props.update({'score_expansions': log_score(props.get('expansions'),
-                    min_bound=100, max_bound=1000000, min_score=0.0),
-            'score_evaluations': log_score(props.get('evaluations'),
-                    min_bound=100, max_bound=1000000, min_score=0.0),
-            'score_memory': log_score(props.get('memory'),
-                    min_bound=2000, max_bound=max_memory, min_score=0.0),
-            'score_total_time': log_score(props.get('total_time'),
-                    min_bound=1.0, max_bound=1800.0, min_score=0.0),
-            'score_search_time': log_score(props.get('search_time'),
-                    min_bound=1.0, max_bound=1800.0, min_score=0.0)})
+    for attr in ('expansions', 'evaluations', 'generated'):
+        props['score_' + attr] = log_score(
+            props.get(attr), min_bound=100, max_bound=1e6, min_score=0.0)
+
+    props.update({
+        'score_memory': log_score(props.get('memory'),
+                min_bound=2000, max_bound=max_memory, min_score=0.0),
+        'score_total_time': log_score(props.get('total_time'),
+                min_bound=1.0, max_bound=1800.0, min_score=0.0),
+        'score_search_time': log_score(props.get('search_time'),
+                min_bound=1.0, max_bound=1800.0, min_score=0.0)})
 
 
 def check_min_values(content, props):
