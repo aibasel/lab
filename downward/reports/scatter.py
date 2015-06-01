@@ -24,7 +24,7 @@ import os
 from lab import tools
 
 from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
-    PlotReport, EPSILON
+    PlotReport, MIN_AXIS
 
 
 class ScatterMatplotlib(Matplotlib):
@@ -169,8 +169,8 @@ class ScatterPlotReport(PlotReport):
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
-        self.xlim_left = self.xlim_left or EPSILON
-        self.ylim_bottom = self.ylim_bottom or EPSILON
+        self.xlim_left = self.xlim_left or MIN_AXIS
+        self.ylim_bottom = self.ylim_bottom or MIN_AXIS
         if self.output_format == 'tex':
             self.writer = ScatterPgfPlots
         else:

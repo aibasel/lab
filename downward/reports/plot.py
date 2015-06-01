@@ -34,12 +34,13 @@ from lab import tools
 from downward.reports import PlanningReport
 
 
-EPSILON = 0.01
+MIN_AXIS = 0.005
+MIN_VALUE = 0.01
 
 
 def handle_zero(number):
     if number == 0:
-        return number + EPSILON
+        return MIN_VALUE
     return number
 
 
@@ -417,8 +418,8 @@ class PlotReport(PlanningReport):
     def set_min_max_values(self, categories):
         min_x = sys.maxint
         min_y = sys.maxint
-        max_x = EPSILON
-        max_y = EPSILON
+        max_x = MIN_VALUE
+        max_y = MIN_VALUE
         for coordinates in categories.values():
             for x, y in coordinates:
                 if x is not None:
@@ -428,8 +429,8 @@ class PlotReport(PlanningReport):
                     min_y = min(min_y, y)
                     max_y = max(max_y, y)
         # Make sure we don't get too low for log plots.
-        min_x = max(min_x, EPSILON)
-        min_y = max(min_y, EPSILON)
+        min_x = max(min_x, MIN_VALUE)
+        min_y = max(min_y, MIN_VALUE)
         self.min_x, self.min_y, self.max_x, self.max_y = min_x, min_y, max_x, max_y
 
     def _write_plot(self, runs, filename):
