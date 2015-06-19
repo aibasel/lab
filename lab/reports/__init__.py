@@ -690,16 +690,18 @@ class Table(collections.defaultdict):
 
         justify_right = isinstance(value, (float, int))
 
-        def format_value(value):
+        def format_value(value, escape=True):
             if isinstance(value, float):
-                result = '%.2f' % value
-            elif isinstance(value, (list, tuple)):
-                result = '[%s]' % ', '.join(format_value(v) for v in value)
+                return '%.2f' % value
+            if isinstance(value, (list, tuple)):
+                result = '[%s]' % ', '.join(format_value(v, escape=False) for v in value)
             else:
                 result = str(value)
+            if escape:
+                result = markup.escape(result)
             return result
 
-        value_text = markup.escape(format_value(value))
+        value_text = format_value(value)
 
         if color is not None:
             value_text = '{%s|color:%s}' % (value_text, color)
