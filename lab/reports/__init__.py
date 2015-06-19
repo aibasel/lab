@@ -31,6 +31,7 @@ import os
 
 from lab import tools
 from lab.external import txt2tags
+from lab.reports import markup
 from lab.reports.markup import Document, ESCAPE_WORDBREAK
 
 
@@ -336,17 +337,17 @@ class Report(object):
         """
         name, ext = os.path.splitext(os.path.basename(self.outfile))
         doc = Document(title=name)
-        markup = self.get_markup()
+        text = self.get_markup()
 
-        if not markup:
-            markup = ('No tables were generated. '
-                      'This happens when no significant changes occured or '
-                      'if for all attributes and all problems never all '
-                      'configs had a value for this attribute in a '
-                      'domain-wise report.')
+        text = (text or
+            'No tables were generated. '
+            'This happens when no significant changes occured or '
+            'if for all attributes and all problems never all '
+            'configs had a value for this attribute in a '
+            'domain-wise report.')
 
-        doc.add_text(markup)
-        if len(markup) < 100000:
+        doc.add_text(text)
+        if len(text) < 100000:
             print 'REPORT MARKUP:\n'
             print doc
         return doc.render(self.output_format, {'toc': self.toc})
@@ -436,7 +437,9 @@ class Table(collections.defaultdict):
         >>> t.add_cell('prob1', 'cfg1', 10)
         >>> t.add_cell('prob1', 'cfg2', 20)
         >>> t.add_row('prob2', {'cfg1': 15, 'cfg2': 25})
-        >>> print t
+        >>> def remove_quotes(s):
+        ...     return s.replace('""', '')
+        >>> print remove_quotes(str(t))
         || expansions |  cfg1 |  cfg2 |
          | prob1 |  10 |  20 |
          | prob2 |  15 |  25 |
@@ -449,13 +452,13 @@ class Table(collections.defaultdict):
         >>> t.get_columns() == {'cfg1': [10, 15], 'cfg2': [20, 25]}
         True
         >>> t.add_summary_function('SUM', sum)
-        >>> print t
+        >>> print remove_quotes(str(t))
         || expansions |  cfg1 |  cfg2 |
          | prob1 |  10 |  20 |
          | prob2 |  15 |  25 |
          | **SUM** |  25 |  45 |
         >>> t.set_column_order(['cfg2', 'cfg1'])
-        >>> print t
+        >>> print remove_quotes(str(t))
         || expansions |  cfg2 |  cfg1 |
          | prob1 |  20 |  10 |
          | prob2 |  25 |  15 |
@@ -694,12 +697,9 @@ class Table(collections.defaultdict):
                 result = '[%s]' % ', '.join(format_value(v) for v in value)
             else:
                 result = str(value)
-            # Escape brackets to avoid involuntarily creating txt2tags links.
-            for before, after in [('[]', '[ ]'), ('[', "''[''"), (']', "'']''")]:
-                result = result.replace(before, after)
             return result
 
-        value_text = format_value(value)
+        value_text = markup.escape(format_value(value))
 
         if color is not None:
             value_text = '{%s|color:%s}' % (value_text, color)

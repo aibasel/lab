@@ -66,7 +66,7 @@ CSS = """\
 
 
 def escape(text):
-    return "''%s''" % text
+    return '""%s""' % text
 
 
 def _get_config(target):

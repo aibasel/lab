@@ -20,7 +20,6 @@ from collections import defaultdict
 import logging
 
 from lab import reports
-from lab.reports import markup
 
 from downward.reports import PlanningReport
 
@@ -138,7 +137,7 @@ class AbsoluteReport(PlanningReport):
         table = reports.Table(title='algorithm')
         for config, info in self.config_info.items():
             for attr in self.INFO_ATTRIBUTES:
-                table.add_cell(config, attr, markup.escape(info[attr]))
+                table.add_cell(config, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
         return str(table)
 
