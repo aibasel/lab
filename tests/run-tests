@@ -5,7 +5,7 @@
 # $ sudo apt-get install pip
 # $ sudo pip install -U pytest pep8 pyflakes sphinx
 
-set -e
+set -euo pipefail
 
 REPO='/home/jendrik/projects/Downward/downward'
 
