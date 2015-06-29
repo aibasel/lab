@@ -8,9 +8,14 @@ import sys
 
 from lab.environments import LocalEnvironment, MaiaEnvironment
 from lab.steps import Step
+from lab import tools
 
 from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
+
+tools.show_deprecation_warning(
+    'The standard_exp.py module has been deprecated in version 1.8. '
+    'Please copy the relevant parts into your own experiment.')
 
 
 NODE = platform.node()
