@@ -4,6 +4,7 @@ This experiment demonstrates most of the available options.
 """
 
 import os
+import platform
 import shutil
 from subprocess import call
 
@@ -24,26 +25,27 @@ from downward.reports.compare import CompareConfigsReport
 from downward.reports.timeout import TimeoutReport
 from downward.reports.taskwise import TaskwiseReport
 
-import standard_exp
-
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 EXPNAME = 'showcase-options'
 EXPPATH = os.path.join(DIR, 'data', EXPNAME)
-if standard_exp.REMOTE:
-    REPO = standard_exp.REMOTE_REPO
-    ENV = MaiaEnvironment(randomize_task_order=True)
+REMOTE = 'cluster' in platform.node()
+if REMOTE:
+    REPO = '/infai/seipp/projects/downward'
+    ENV = MaiaEnvironment()
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
-    ENV = LocalEnvironment(processes=2)
+    ENV = LocalEnvironment(processes=4)
+CACHE_DIR = os.path.expanduser('~/lab/')
+PYTHON = 'python'
 
 ATTRIBUTES = ['coverage']
 LIMITS = {'search_time': 900}
 COMBINATIONS = [(Translator(repo=REPO), Preprocessor(repo=REPO), Planner(repo=REPO))]
 
 exp = DownwardExperiment(EXPPATH, repo=REPO, environment=ENV, combinations=COMBINATIONS,
-                         limits=LIMITS, cache_dir=standard_exp.CACHE_DIR)
-exp.set_path_to_python(standard_exp.PYTHON)
+                         limits=LIMITS, cache_dir=CACHE_DIR)
+exp.set_path_to_python(PYTHON)
 
 exp.add_suite('gripper:prob01.pddl')
 exp.add_suite('zenotravel:pfile1', benchmark_dir=os.path.join(REPO, 'benchmarks'))
