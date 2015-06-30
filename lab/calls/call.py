@@ -83,12 +83,12 @@ class Call(subprocess.Popen):
                 set_limit(resource.RLIMIT_AS, mem_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
 
-        self.wall_clock_start_time = time.time()
         subprocess.Popen.__init__(self, args, preexec_fn=prepare_call, **kwargs)
 
     def wait(self):
+        wall_clock_start_time = time.time()
         retcode = subprocess.Popen.wait(self)
-        wall_clock_time = time.time() - self.wall_clock_start_time
+        wall_clock_time = time.time() - wall_clock_start_time
         set_property('%s_wall_clock_time' % self.name, wall_clock_time)
         if wall_clock_time > self.wall_clock_time_limit:
             set_property('error', 'unexplained-warning-wall-clock-time-very-high')
