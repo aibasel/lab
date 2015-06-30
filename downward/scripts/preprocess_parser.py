@@ -87,11 +87,12 @@ class PreprocessParser(Parser):
         #    0 effect conditions simplified
         #    0 implied preconditions added
         #    0 operators removed
+        #    0 axioms removed
         #    38 propositions removed
         for value in ['relevant atoms', 'auxiliary atoms', 'final queue length',
                 'total queue pushes', 'uncovered facts',
                 'effect conditions simplified', 'implied preconditions added',
-                'operators removed', 'propositions removed']:
+                'operators removed', 'axioms_removed', 'propositions removed']:
             attribute = 'translator_' + value.lower().replace(' ', '_')
             # These lines are not required, because they were not always printed.
             self.add_pattern(attribute, r'(.+) %s' % value, type=int,
