@@ -46,7 +46,7 @@ cd ..
 
 EXAMPLES="lmcut.py showcase-options.py standard_exp.py \
     simple/simple-exp.py pi/pi.py pi/pi-ext.py planner/planner.py \
-    planner/planner-ext.py preprocess-all.py"
+    planner/planner-ext.py"
 
 # Check imports and unused/missing variables.
 pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
@@ -94,7 +94,6 @@ if [ -d "$REPO" ]; then
     ./planner-ext.py
     cd ..
 
-    ./preprocess-all.py --help
     ./showcase-options.py --all
 
     cd ..

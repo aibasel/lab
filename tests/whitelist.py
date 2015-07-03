@@ -1,6 +1,7 @@
 import lab
 from lab.environments import GkiGridEnvironment
-from lab.calls.call import Call
+from lab.calls import call
+from lab.calls import log
 
 from downward import configs
 from downward import suites
@@ -12,9 +13,12 @@ lab.experiment.ARGPARSER.epilog
 lab.tools.RawAndDefaultsHelpFormatter._fill_text
 lab.tools.RawAndDefaultsHelpFormatter._get_help_string
 GkiGridEnvironment()
-Call(['ls'], stdout='/dev/null')
-lab.calls.log.print_(open('/dev/null', 'w'), 'Test')
-lab.calls.log.save_returncode
+call.Call(['ls'], stdout='/dev/null')
+log.redirects
+log.driver_log
+log.driver_err
+log.print_(open('/dev/null', 'w'), 'Test')
+log.save_returncode
 lab.steps.Step.unzip_exp_dir
 lab.steps.Step.remove_exp_dir
 
