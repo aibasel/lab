@@ -216,7 +216,7 @@ def get_initial_h_values(content, props):
     """
     heuristic_to_values = defaultdict(list)
     matches = re.findall(
-        r'^Initial heuristic value for (.+): (\d+|infinity)$' ,
+        r'^Initial heuristic value for (.+): (\d+|infinity)$',
         content, flags=re.M)
     for heuristic, init_h in matches:
         if init_h == "infinity":
