@@ -18,6 +18,7 @@
 import datetime
 import logging
 import math
+import multiprocessing
 import os
 import pkgutil
 import random
@@ -56,14 +57,17 @@ class LocalEnvironment(Environment):
     """
     Environment for running experiments locally on a single machine.
     """
-    def __init__(self, processes=1):
+    def __init__(self, processes=None):
         """
-        *processes* must be in the range [1, ..., #CPUs].
+        If given, *processes* must be in the range [1, ..., #CPUs].
+        If omitted, it will be set to #CPUs.
         """
         Environment.__init__(self)
-        import multiprocessing
         cores = multiprocessing.cpu_count()
-        assert processes <= cores, cores
+        if processes is None:
+            processes = cores
+        if not 1 <= processes <= cores:
+            raise ValueError("processes must be in the range [1, ..., #CPUs].")
         self.processes = processes
 
     def write_main_script(self):
