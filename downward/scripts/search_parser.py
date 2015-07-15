@@ -70,13 +70,6 @@ ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
     _get_states_pattern('evaluations', 'Evaluated'),
     _get_states_pattern('expansions', 'Expanded'),
     _get_states_pattern('generated', 'Generated'),
-    # We exclude heuristic values like "11/17." that stem
-    # from multi-heuristic search. We also do not look for
-    # "Initial state h value: " because this is only written
-    # for successful search runs.
-    ('initial_h_value',
-     re.compile(r'Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded'),
-     int),
     # We cannot include " \[t=.+s\]" (global timer) in the regex, because
     # older versions don't print it.
     ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
@@ -84,7 +77,6 @@ ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
 
 
 CUMULATIVE_PATTERNS = [
-    # This time we parse the cumulative values
     _get_states_pattern('dead_ends', 'Dead ends:'),
     _get_states_pattern('evaluations', 'Evaluated'),
     _get_states_pattern('expansions', 'Expanded'),
@@ -97,12 +89,6 @@ CUMULATIVE_PATTERNS = [
     ('search_time', re.compile(r'^Search time: (.+)s$'), float),
     ('total_time', re.compile(r'^Total time: (.+)s$'), float),
     ('raw_memory', re.compile(r'Peak memory: (.+) KB'), int),
-    # For iterated searches we discard all h values. Here we will not find
-    # anything before the "cumulative" line and stop the search. For single
-    # searches we will find the h value if it isn't a multi-heuristic search.
-    ('initial_h_value',
-     re.compile(r'Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded'),
-     int),
 ]
 
 
@@ -220,13 +206,31 @@ def coverage(content, props):
         props.get('validate_returncode') == 0)
 
 
-def get_initial_h_value(content, props):
-    # Ignore logs from searches with multiple heuristics.
-    if 'initial_h_value' not in props:
-        pattern = r'^Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded, t=.+s\]$'
-        match = re.search(pattern, content, flags=re.M)
-        if match:
-            props['initial_h_value'] = int(match.group(1))
+def get_initial_h_values(content, props):
+    """
+    For each heuristic, collect the reported initial heuristic values in
+    a list. For iterative searches this list may contain more than one
+    value. Add a dictionary mapping from heuristics to initial heuristic
+    values to the properties. If exactly one initial heuristic value was
+    reported, add it to the properties under the name "initial_h_value".
+    """
+    heuristic_to_values = defaultdict(list)
+    matches = re.findall(
+        r'^Initial heuristic value for (.+): (\d+|infinity)$' ,
+        content, flags=re.M)
+    for heuristic, init_h in matches:
+        if init_h == "infinity":
+            init_h = int(float('inf'))
+        else:
+            init_h = int(init_h)
+        heuristic_to_values[heuristic].append(init_h)
+
+    props['initial_h_values'] = heuristic_to_values
+
+    if len(heuristic_to_values) == 1:
+        for heuristic, values in heuristic_to_values.items():
+            if len(values) == 1:
+                props['initial_h_value'] = values[0]
 
 
 def check_memory(content, props):
@@ -351,7 +355,7 @@ class SingleSearchParser(SearchParser):
 
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
-        self.add_function(get_initial_h_value)
+        self.add_function(get_initial_h_values)
         self.add_function(set_search_time)
         self.add_function(scores)
         self.add_function(check_min_values)
