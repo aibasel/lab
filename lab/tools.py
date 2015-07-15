@@ -258,7 +258,7 @@ class Properties(dict):
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, indent=2, separators=(',', ': '))
+        return json.dumps(self, indent=2, separators=(',', ': '), sort_keys=True)
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
