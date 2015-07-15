@@ -283,8 +283,8 @@ class Report(object):
                 continue
             matches = fnmatch.filter(self.all_attributes, attr)
             if not matches:
-                logging.warning('Attribute %s is not present in the dataset.' %
-                                attr)
+                logging.critical(
+                    'There is no attribute "%s" in the properties file.' % attr)
             # Use the attribute options from the pattern for all matches, but
             # don't try to guess options for attributes that appear in the list.
             expanded_attrs.extend([attr.copy(match) for match in matches
