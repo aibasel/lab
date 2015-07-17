@@ -34,7 +34,7 @@ def set_limit(kind, soft_limit, hard_limit=None):
 
 
 class Call(subprocess.Popen):
-    def __init__(self, args, name='call', time_limit=1800, mem_limit=2048, **kwargs):
+    def __init__(self, args, name='call', time_limit=None, mem_limit=None, **kwargs):
         """Make system calls with time and memory constraints.
 
         *args* and *kwargs* are passed to the base class
@@ -49,7 +49,6 @@ class Call(subprocess.Popen):
         whether the process has finished. As a result the options
         *kill_delay* and *check_interval* are now ignored.
         """
-        # TODO: Use time_limit=None and mem_limit=None by default.
         for deprecated_arg in ['kill_delay', 'check_interval']:
             if deprecated_arg in kwargs:
                 tools.show_deprecation_warning(
@@ -58,8 +57,11 @@ class Call(subprocess.Popen):
                 del kwargs[deprecated_arg]
 
         self.name = name
-        # Use wall-clock limit of 30 seconds for very small time limits.
-        self.wall_clock_time_limit = max(30, time_limit * 1.5)
+        if time_limit is None:
+            self.wall_clock_time_limit = None
+        else:
+            # Enforce miminum on wall-clock limit to account for disk latencies.
+            self.wall_clock_time_limit = max(30, time_limit * 1.5)
 
         stdin = kwargs.get('stdin')
         if isinstance(stdin, basestring):
@@ -78,8 +80,8 @@ class Call(subprocess.Popen):
             # system.
             if time_limit is not None:
                 set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
-            # Memory in Bytes.
             if mem_limit is not None:
+                # Convert memory from MiB to Bytes.
                 set_limit(resource.RLIMIT_AS, mem_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
 
@@ -90,7 +92,8 @@ class Call(subprocess.Popen):
         retcode = subprocess.Popen.wait(self)
         wall_clock_time = time.time() - wall_clock_start_time
         set_property('%s_wall_clock_time' % self.name, wall_clock_time)
-        if wall_clock_time > self.wall_clock_time_limit:
+        if (self.wall_clock_time_limit is not None and
+                wall_clock_time > self.wall_clock_time_limit):
             set_property('error', 'unexplained-warning-wall-clock-time-very-high')
             sys.stderr.write('Error: wall-clock time for %s too high: %.2f > %d\n' %
                 (self.name, wall_clock_time, self.wall_clock_time_limit))

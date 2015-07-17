@@ -485,9 +485,9 @@ class Run(_Buildable):
         not exit with code 0, subsequent commands of this run are
         not executed.
 
-        *time_limit=1800*: Abort *command* after *time_limit* seconds.
+        *time_limit=None*: Abort *command* after *time_limit* seconds.
 
-        *mem_limit=2048*: Allow *command* to use at most *mem_limit* MiB.
+        *mem_limit=None*: Allow *command* to use at most *mem_limit* MiB.
 
         All other items in *kwargs* are passed to
         `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
