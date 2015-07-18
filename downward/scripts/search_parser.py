@@ -26,6 +26,7 @@ from __future__ import division
 from collections import defaultdict
 import math
 import re
+import sys
 
 from lab.parser import Parser
 
@@ -220,7 +221,7 @@ def get_initial_h_values(content, props):
         content, flags=re.M)
     for heuristic, init_h in matches:
         if init_h == "infinity":
-            init_h = int(float('inf'))
+            init_h = sys.maxint
         else:
             init_h = int(init_h)
         heuristic_to_values[heuristic].append(init_h)
