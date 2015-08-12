@@ -128,6 +128,10 @@ class PreprocessRun(DownwardRun):
 
         args = [python, translator.shell_name]
         if translator.has_python_plan_script():
+            if translator._using_cmake:
+                code_dir = os.path.join(
+                    '..', '..', translator.get_path_dest())
+                args.extend(['--build', code_dir])
             args.append('--translate')
         args.extend(['DOMAIN', 'PROBLEM'])
         self.add_command('translate', args,
@@ -138,6 +142,10 @@ class PreprocessRun(DownwardRun):
         kwargs = dict(time_limit=exp.limits['preprocess_time'],
                       mem_limit=exp.limits['preprocess_memory'])
         if preprocessor.has_python_plan_script():
+            if preprocessor._using_cmake:
+                preprocess_dir = os.path.join(
+                    '..', '..', preprocessor.get_path_dest(), 'preprocess')
+                args.extend(['--build', preprocess_dir])
             args.extend(['--preprocess', 'output.sas'])
         else:
             kwargs['stdin'] = 'output.sas'
@@ -169,6 +177,10 @@ class SearchRun(DownwardRun):
         kwargs = dict(time_limit=algo.timeout or exp.limits['search_time'],
                       mem_limit=exp.limits['search_memory'])
         if algo.planner.has_python_plan_script():
+            if algo.planner._using_cmake:
+                search_dir = os.path.join(
+                    '..', '..', algo.planner.get_path_dest(), 'search')
+                args.extend(['--build', search_dir])
             algo.config = ['--alias' if x == 'ipc' else x for x in algo.config]
             if '--portfolio' in algo.config:
                 assert len(algo.config) == 2, algo.config
@@ -562,6 +574,9 @@ class DownwardExperiment(Experiment):
 
         for part in sorted(translators | preprocessors | planners):
             part.checkout(self.compilation_options)
+            if part._using_cmake:
+                self.add_resource(
+                    '', part.get_path('driver'), part.get_path_dest('driver'))
 
         if stage == 'preprocess':
             for part in sorted(translators | preprocessors):
@@ -604,13 +619,11 @@ class DownwardExperiment(Experiment):
             self.add_resource('', portfolio, planner.get_path_dest('search', name))
 
     def _prepare_validator(self):
-        validate = os.path.join(self.repo, 'src', 'VAL', 'validate')
+        assert self.combinations
+        first_planner_checkout = self.combinations[0][2]
+        validate = first_planner_checkout.get_path('src', 'validate')
         if not os.path.exists(validate):
-            logging.info('validate not found at %s. Building it now.' %
-                         validate)
-            tools.run_command(['make', '-j%d' % self._jobs],
-                              cwd=os.path.dirname(validate))
-        assert os.path.exists(validate), validate
+            logging.critical('validate not found at %s.' % validate)
         self.add_resource('VALIDATE', validate, 'validate')
 
         downward_validate = os.path.join(DOWNWARD_SCRIPTS_DIR, 'validate.py')
