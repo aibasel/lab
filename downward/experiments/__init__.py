@@ -128,7 +128,7 @@ class PreprocessRun(DownwardRun):
 
         args = [python, translator.shell_name]
         if translator.has_python_plan_script():
-            if translator._using_cmake:
+            if translator.using_cmake:
                 code_dir = os.path.join(
                     '..', '..', translator.get_path_dest())
                 args.extend(['--build', code_dir])
@@ -142,7 +142,7 @@ class PreprocessRun(DownwardRun):
         kwargs = dict(time_limit=exp.limits['preprocess_time'],
                       mem_limit=exp.limits['preprocess_memory'])
         if preprocessor.has_python_plan_script():
-            if preprocessor._using_cmake:
+            if preprocessor.using_cmake:
                 preprocess_dir = os.path.join(
                     '..', '..', preprocessor.get_path_dest(), 'preprocess')
                 args.extend(['--build', preprocess_dir])
@@ -177,7 +177,7 @@ class SearchRun(DownwardRun):
         kwargs = dict(time_limit=algo.timeout or exp.limits['search_time'],
                       mem_limit=exp.limits['search_memory'])
         if algo.planner.has_python_plan_script():
-            if algo.planner._using_cmake:
+            if algo.planner.using_cmake:
                 search_dir = os.path.join(
                     '..', '..', algo.planner.get_path_dest(), 'search')
                 args.extend(['--build', search_dir])
@@ -574,7 +574,7 @@ class DownwardExperiment(Experiment):
 
         for part in sorted(translators | preprocessors | planners):
             part.checkout(self.compilation_options)
-            if part._using_cmake:
+            if part.using_cmake:
                 self.add_resource(
                     '', part.get_path('driver'), part.get_path_dest('driver'))
 

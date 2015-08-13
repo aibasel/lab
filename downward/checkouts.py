@@ -19,11 +19,20 @@
 import logging
 import os
 import shutil
+import subprocess
 
 from lab import tools
 
 
 _HG_ID_CACHE = {}
+
+
+def hg_revision_has_file(repo, rev, path):
+    if rev == 'WORK':
+        return os.path.exists(os.path.join(repo, path))
+    cmd = ['hg', 'cat', '-r', rev, path]
+    return subprocess.call(
+        cmd, cwd=repo, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
 
 def hg_id(repo, args=None, rev=None):
@@ -165,14 +174,18 @@ class HgCheckout(Checkout):
             summary = get_rev_id(repo, local_rev)
             dest = global_rev
         Checkout.__init__(self, part, repo, global_rev, nick, summary, dest)
+        self._using_cmake = None
 
     @property
     def _sentinel_file(self):
         return self.get_path('build_successful')
 
     @property
-    def _using_cmake(self):
-        return os.path.exists(os.path.join(self.repo, 'src', 'CMakeLists.txt'))
+    def using_cmake(self):
+        if self._using_cmake is None:
+            self._using_cmake = hg_revision_has_file(
+                self.repo, self.rev, os.path.join('src', 'CMakeLists.txt'))
+        return self._using_cmake
 
     def checkout(self, compilation_options=None):
         if self.rev == 'WORK':
@@ -192,7 +205,7 @@ class HgCheckout(Checkout):
                     'it and try again.' % path)
         else:
             tools.makedirs(path)
-            if self._using_cmake:
+            if self.using_cmake:
                 dirs = ['-I{}'.format(d) for d in
                     ['build.py', 'driver', 'fast-downward.py', 'src']]
                 retcode = tools.run_command(
@@ -209,7 +222,7 @@ class HgCheckout(Checkout):
     def _compile(self, options=None):
         options = options or []
         repo = self.get_path()
-        if self._using_cmake:
+        if self.using_cmake:
             retcode = tools.run_command(['./build.py'] + options, cwd=repo)
         else:
             retcode = tools.run_command(['./build_all'] + options, cwd=self.src_dir)
@@ -222,7 +235,7 @@ class HgCheckout(Checkout):
         assert self.rev != 'WORK'
 
         # Move binaries out of "builds" directory.
-        if self._using_cmake:
+        if self.using_cmake:
             bin_dir = self.get_path('builds', 'release32', 'bin')
             for src, dest in [
                     ("preprocess", ["preprocess", "preprocess"]),
@@ -231,7 +244,7 @@ class HgCheckout(Checkout):
                 shutil.move(os.path.join(bin_dir, src), os.path.join(self.src_dir, *dest))
 
         # Strip binaries.
-        planner_name = 'downward' if self._using_cmake else 'downward-release'
+        planner_name = 'downward' if self.using_cmake else 'downward-release'
         binaries = [os.path.join(self.src_dir, *parts) for parts in [
             ('search', planner_name),
             ('preprocess', 'preprocess'),
@@ -248,13 +261,13 @@ class HgCheckout(Checkout):
             elif os.path.isdir(path):
                 shutil.rmtree(path)
         # Remove intermediate files.
-        if self._using_cmake:
+        if self.using_cmake:
             shutil.rmtree(os.path.join(self.get_path("builds")))
         else:
             tools.run_command(['./build_all', 'clean'], cwd=self.src_dir)
 
     def _get_plan_script(self):
-        if self._using_cmake:
+        if self.using_cmake:
             return self.get_path('fast-downward.py')
         else:
             return os.path.join(self.src_dir, 'fast-downward.py')
