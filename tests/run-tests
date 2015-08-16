@@ -87,7 +87,7 @@ cd ..
 
 # Only check downward code if $REPO exists.
 if [ -d "$REPO" ]; then
-    ./lmcut.py {1..8}
+    ./lmcut.py --all
 
     cd planner
     ./planner.py --all

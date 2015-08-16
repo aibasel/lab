@@ -17,661 +17,246 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-A module for cloning Fast Downward revisions and running experiments
-for them.
+A module for running Fast Downward experiments.
 """
 
 from collections import defaultdict
 import logging
 import multiprocessing
 import os
-import subprocess
 
 from lab.experiment import Run, Experiment
 from lab import tools
-from lab.steps import Step, Sequence
 
-from downward.checkouts import Checkout, Translator, Preprocessor, Planner
+from downward.cached_revision import CachedRevision
 from downward import suites
 
 
-DOWNWARD_SCRIPTS_DIR = os.path.abspath(os.path.join(__file__, '..', '..', 'scripts'))
+DIR = os.path.dirname(os.path.abspath(__file__))
+DOWNWARD_SCRIPTS_DIR = os.path.join(os.path.dirname(DIR), 'scripts')
 
 
-# Limits can be overwritten in DownwardExperiment constructor.
-LIMITS = {
-    'translate_time': 7200,
-    'translate_memory': 8192,
-    'preprocess_time': 7200,
-    'preprocess_memory': 8192,
-    'search_time': 1800,
-    'search_memory': 2048,
-}
-
-
-# Make the same check as in src/translate/translate.py.
-VERSION_STMT = '''\
-import sys
-
-def python_version_supported():
-    major, minor = sys.version_info[:2]
-    return (major == 2 and minor >= 7) or (major, minor) >= (3, 2)
-
-if not python_version_supported():
-    sys.exit("Error: Translator only supports Python >= 2.7 and Python >= 3.2.")
-'''
-
-PRINT_PYTHON_VERSION = """\
-import platform; print 'Python version: %s' % platform.python_version()"""
-
-
-def _get_rev_nick(translator, preprocessor, planner):
-    nicks = [part.nick for part in (translator, preprocessor, planner)]
-    if len(set(nicks)) == 1:
-        nicks = [nicks[0]]
-    return '-'.join(nicks)
-
-
-class DownwardRun(Run):
-    def __init__(self, exp, parts, problem):
+class FastDownwardRun(Run):
+    def __init__(self, exp, algo, task):
         Run.__init__(self, exp)
-
-        self.parts = parts
-        self.problem = problem
+        self.algo = algo
+        self.task = task
 
         self._set_properties()
-        self._save_limits()
+
+        self.add_resource('DOMAIN', self.task.domain_file(), 'domain.pddl')
+        self.add_resource('PROBLEM', self.task.problem_file(), 'problem.pddl')
+
+        # TODO: After removing DownwardExperiment, use name "fast-downward".
+        self.add_command(
+            'search',
+            ['FAST_DOWNWARD'] + algo.driver_options +
+            ['DOMAIN', 'PROBLEM'] + algo.component_options)
+
+        # TODO: Remove this once the driver validates on its own.
+        self.add_command('validate', ['echo', 'dummy-validate'])
+
+        # TODO: Use exp.add_command() ?
+        self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
+        self.add_command('parse-search', ['SEARCH_PARSER'])
+
+        self.add_command(
+            'compress-output-files',
+            ['xz', 'domain.pddl', 'problem.pddl', 'output.sas', 'output'])
 
     def _set_properties(self):
-        for part in self.parts:
-            self.set_property(part.part + '_rev', part.rev)
-            self.set_property(part.part + '_nick', part.nick)
-            self.set_property(part.part + '_summary', part.summary)
+        self.set_property('algorithm_nick', self.algo.nick)
+        self.set_property('repo', self.algo.cached_revision.repo)
+        self.set_property('local_revision', self.algo.cached_revision.local_rev)
+        self.set_property('global_revision', self.algo.cached_revision.global_rev)
+        self.set_property('revision_summary', self.algo.cached_revision.summary)
+        self.set_property('build_options', self.algo.cached_revision.build_options)
+        self.set_property('driver_options', self.algo.driver_options)
+        self.set_property('component_options', self.algo.component_options)
 
-        self.set_property('domain', self.problem.domain)
-        self.set_property('problem', self.problem.problem)
+        self.set_property('domain', self.task.domain)
+        self.set_property('problem', self.task.problem)
 
         self.set_property('experiment_name', self.experiment.name)
 
-    def _save_limits(self):
-        for name, limit in self.experiment.limits.items():
-            self.set_property('limit_' + name, limit)
+        self.set_property('config', self.algo.nick)
 
-    def _save_ext_config(self, ext_config):
-        self.set_property('config', ext_config)
+        # TODO: Remove planner_type property. Let portfolios output token instead.
+        self.set_property(
+            'planner_type', 'portfolio' if self._is_portfolio() else 'single')
+
+        self._save_id([
+            self.algo.nick,
+            self.task.domain,
+            self.task.problem])
 
     def _save_id(self, run_id):
         self.set_property('id', run_id)
         self.set_property('id_string', ':'.join(run_id))
 
-    def add_parsers(self, parsers):
-        for parser_name, parser_path in parsers:
-            self.require_resource(parser_name.upper())
-            self.add_command('run-' + parser_name, [parser_name.upper()])
-
-
-class PreprocessRun(DownwardRun):
-    def __init__(self, exp, translator, preprocessor, problem):
-        DownwardRun.__init__(self, exp, [translator, preprocessor], problem)
-
-        self.require_resource(preprocessor.shell_name)
-
-        self.add_resource('DOMAIN', self.problem.domain_file(), 'domain.pddl')
-        self.add_resource('PROBLEM', self.problem.problem_file(), 'problem.pddl')
-
-        python = exp._get_path_to_python()
-
-        # Print python version used for translator.
-        # python -V prints to stderr so we execute a little program.
-        self.add_command('print-python-version',
-                         [python, '-c', PRINT_PYTHON_VERSION])
-
-        args = [python, translator.shell_name]
-        if translator.has_python_plan_script():
-            args.append('--translate')
-        args.extend(['DOMAIN', 'PROBLEM'])
-        self.add_command('translate', args,
-                         time_limit=exp.limits['translate_time'],
-                         mem_limit=exp.limits['translate_memory'])
-
-        args = [preprocessor.shell_name]
-        kwargs = dict(time_limit=exp.limits['preprocess_time'],
-                      mem_limit=exp.limits['preprocess_memory'])
-        if preprocessor.has_python_plan_script():
-            args.extend(['--preprocess', 'output.sas'])
-        else:
-            kwargs['stdin'] = 'output.sas'
-        self.add_command('preprocess', args, **kwargs)
-
-        self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
-
-        self.add_command('compress-output-sas', ['xz', 'output.sas'])
-
-        self.set_property('stage', 'preprocess')
-        self._save_ext_config('-'.join(part.nick for part in self.parts))
-        # Use global revisions for ids to allow for correct cashing.
-        self._save_id([
-            '-'.join(part.rev for part in self.parts),
-            self.problem.domain,
-            self.problem.problem])
-
-
-class SearchRun(DownwardRun):
-    def __init__(self, exp, algo, problem):
-        parts = [algo.translator, algo.preprocessor, algo.planner]
-        DownwardRun.__init__(self, exp, parts, problem)
-
-        self.require_resource(algo.planner.shell_name)
-
-        planner_type = 'portfolio' if self._is_portfolio(algo.config) else 'single'
-
-        args = [algo.planner.shell_name]
-        kwargs = dict(time_limit=algo.timeout or exp.limits['search_time'],
-                      mem_limit=exp.limits['search_memory'])
-        if algo.planner.has_python_plan_script():
-            algo.config = ['--alias' if x == 'ipc' else x for x in algo.config]
-            if '--portfolio' in algo.config:
-                assert len(algo.config) == 2, algo.config
-                algo.config[1] = os.path.join('..', '..',
-                    algo.planner.get_path_dest(algo.planner.part, algo.config[1]))
-            if any(x in algo.config for x in ['--alias', '--portfolio']):
-                args += algo.config + ['OUTPUT']
-            else:
-                args += ['OUTPUT'] + algo.config
-        else:
-            algo.config = ['ipc' if x == '--alias' else x for x in algo.config]
-            args += algo.config
-            logging.info('fast-downward.py not found. Consider merging from master.')
-            kwargs['stdin'] = 'OUTPUT'
-        self.add_command('search', args, **kwargs)
-
-        # Remove temporary files (we need bash for globbing).
-        self.add_command('rm-tmp-files', ['bash', '-c', 'rm -f downward.tmp.*'])
-
-        # Validation
-        self.require_resource('VALIDATE')
-        self.require_resource('DOWNWARD_VALIDATE')
-        self.add_command('validate', ['DOWNWARD_VALIDATE', 'VALIDATE', 'DOMAIN',
-                                      'PROBLEM'])
-
-        # Restore the config_nick by stripping combo_nick from
-        # algo.nick and save it for backwards compatibility.
-        combo_nick = _get_rev_nick(algo.translator, algo.preprocessor, algo.planner)
-        if algo.nick.startswith(combo_nick + '-'):
-            config_nick = algo.nick[len(combo_nick + '-'):]
-        else:
-            config_nick = algo.nick
-        self.set_property('config_nick', config_nick)
-        self.set_property('commandline_config', algo.config)
-        self.set_property('planner_type', planner_type)
-        self.set_property('stage', 'search')
-
-        self._save_ext_config(algo.nick)
-        self._save_id([algo.nick, self.problem.domain, self.problem.problem])
-
-        if algo.timeout is not None:
-            self.set_property('limit_search_time', algo.timeout)
-
-    @classmethod
-    def _is_portfolio(cls, config):
-        built_in = ['seq-opt-fdss-1', 'seq-opt-fdss-2',
-                    'seq-sat-fdss-1', 'seq-sat-fdss-2',
-                    'seq-opt-merge-and-shrink']
-        return any(x in config for x in built_in + ['--portfolio'])
+    def _is_portfolio(self):
+        built_in = [
+            'seq-opt-fdss-1', 'seq-opt-fdss-2', 'seq-opt-merge-and-shrink'
+            'seq-sat-fdss-1', 'seq-sat-fdss-2']
+        return any(x in self.algo.driver_options for x in built_in + ['--portfolio'])
 
 
 class _DownwardAlgorithm(object):
-    def __init__(self, nick, config, translator, preprocessor, planner, timeout=None):
+    def __init__(self, nick, cached_revision, driver_options, component_options):
         self.nick = nick
-        self.config = config
-        self.translator = translator
-        self.preprocessor = preprocessor
-        self.planner = planner
-        self.timeout = timeout
+        self.cached_revision = cached_revision
+        self.driver_options = driver_options
+        self.component_options = component_options
 
 
-class DownwardExperiment(Experiment):
+class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
     Experiments can be customized by adding the desired
     configurations, benchmarks and reports. See
     :class:`lab.experiment.Experiment` for inherited methods.
 
-    Fast Downward experiments consist of the following steps: In the
-    first 2 steps the benchmarks are preprocessed with Fast
-    Downward's translator and preprocessor. Step 3 copies the
-    results into a cache for preprocessed tasks (default:
-    ~/lab/preprocessed-tasks). Step 4 prepares the search stage of
-    the experiment and step 5 runs Fast Downward's search component
-    on the preprocessed tasks. You can add report steps with
+    Fast Downward experiments consist of the following steps: Step 1
+    writes the experiment files to disk. Step 2 runs the experiment.
+    Step 3 fetches the results and saves them in a directory named
+    "*path*-eval". You can add report steps with
     :func:`lab.experiment.Experiment.add_report()`.
-
-    .. note::
-
-        You only have to run the preprocessing stage (steps 1-3) for
-        each pair of translator and preprocessor revision once,
-        since the results are cached.
     """
-    def __init__(self, path, repo, environment=None, combinations=None,
-                 compact=True, limits=None, cache_dir=None):
+    def __init__(self, path, environment=None, cache_dir=None):
         """
         The experiment will be built at *path*.
-
-        *repo* must be the path to a Fast Downward repository. Among other things
-        this repository is used to search for benchmark files.
 
         *environment* must be an :ref:`Environment <environments>` instance.
         By default the experiment is run locally.
 
-        If given, *combinations* must be a list of :ref:`Checkout <checkouts>`
-        tuples of the form (Translator, Preprocessor, Planner). If combinations
-        is None (default), perform an experiment with the working copy in *repo*.
+        *cache_dir* is used to cache Fast Downward clones. By default
+        it points to ``~/lab``.
 
-        The *compact* parameter is only relevant for the search
-        stage. If *compact* is ``False``, the preprocessed task and
-        the two PDDL files are **copied** into the respective run
-        directories for all configurations. This requires a lot of
-        space (tens of GB), so it is strongly recommended to use the
-        default (``compact=True``) which only references these
-        files. Use ``compact=False`` only if you really need a
-        portable experiment.
+        Example::
 
-        If *limits* is given, it must be a dictionary that maps a
-        subset of the keys below to seconds and MiB. It will be used
-        to overwrite the default limits::
-
-            default_limits = {
-                'translate_time': 7200,
-                'translate_memory': 8192,
-                'preprocess_time': 7200,
-                'preprocess_memory': 8192,
-                'search_time': 1800,
-                'search_memory': 2048,
-            }
-
-        *cache_dir* is used to cache Fast Downward clones and preprocessed
-        tasks. By default it points to ``~/lab``.
-
-        .. note::
-
-            The directory *cache_dir* can grow very large (tens of GB).
-
-        Example: ::
-
-            repo = '/path/to/downward-repo'
-            env = GkiGridEnvironment(queue='xeon_core.q', priority=-2)
-            combos = [(Translator(repo, rev=123),
-                       Preprocessor(repo, rev='e2a018c865f7'),
-                       Planner(repo, rev='tip'))]
-            exp = DownwardExperiment('/tmp/path', repo, environment=env,
-                                     combinations=combos,
-                                     limits={'search_time': 30,
-                                             'search_memory': 1024})
+            exp = DownwardExperiment(
+                '/tmp/exp-path', environment=MaiaEnvironment(priority=-2))
 
         """
+        # TODO: Allow using default path (data/scriptname).
+        # TODO: Use different default cache directory? E.g. (data/revision-cache).
         Experiment.__init__(self, path, environment=environment, cache_dir=cache_dir)
+        self.revision_cache_dir = os.path.join(self.cache_dir, 'revision-cache')
 
-        if not repo or not os.path.isdir(repo):
-            logging.critical('The path "%s" is not a local Fast Downward '
-                             'repository.' % repo)
-        self.repo = repo
-        self.orig_path = self.path
-        self.search_exp_path = self.path
-        self.preprocess_exp_path = self.path + '-p'
-        self._path_to_python = None
-        Checkout.REV_CACHE_DIR = os.path.join(self.cache_dir, 'revision-cache')
-        self.preprocessed_tasks_dir = os.path.join(self.cache_dir, 'preprocessed-tasks')
-        tools.makedirs(self.preprocessed_tasks_dir)
+        self._suites = defaultdict(list)
 
-        self.combinations = (combinations or
-                             [(Translator(repo), Preprocessor(repo), Planner(repo))])
+        # Use OrderedDict to ensure that nicks are unique and ordered.
+        self._algorithms = tools.OrderedDict()
 
-        self.compact = compact
-        self.suites = defaultdict(list)
-        self._algorithms = []
-        self._portfolios = []
-
-        limits = limits or {}
-        for key, value in limits.items():
-            if key not in LIMITS:
-                logging.critical('Unknown limit: %s' % key)
-        self.limits = LIMITS
-        self.limits.update(limits)
-
-        # Save if this is a compact experiment i.e. preprocessed tasks are referenced.
-        self.set_property('compact', compact)
-
-        # TODO: Integrate this into the API.
-        self.include_preprocess_results_in_search_runs = True
-
-        self.compilation_options = ['-j%d' % self._jobs]
-
-        self._search_parsers = []
-        self.add_search_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
-
-        # Remove the default experiment steps
-        self.steps = Sequence()
-
-        self.add_step(Step('build-preprocess-exp', self.build, stage='preprocess'))
-        self.add_step(Step('run-preprocess-exp', self.run, stage='preprocess'))
-        self.add_fetcher(src=self.preprocess_exp_path,
-                         dest=self.preprocessed_tasks_dir,
-                         name='fetch-preprocess-results',
-                         copy_all=True,
-                         write_combined_props=False)
-        self.add_step(Step('build-search-exp', self.build, stage='search'))
-        self.add_step(Step('run-search-exp', self.run, stage='search'))
-        self.add_fetcher(src=self.search_exp_path, name='fetch-search-results')
-
-    @property
-    def _problems(self):
+    def _get_tasks(self):
         tasks = []
-        for benchmark_dir, suite in self.suites.items():
-            tasks.extend(suites.build_suite(benchmark_dir, suite))
+        for benchmarks_dir, suite in self._suites.items():
+            tasks.extend(suites.build_suite(benchmarks_dir, suite))
         return tasks
 
-    def add_suite(self, suite, benchmark_dir=None):
+    def add_suite(self, benchmarks_dir, suite):
         """
-        *suite* can either be a string or a list of strings. The strings can be
-        tasks or domains. ::
+        *benchmarks_dir* must be a path to a benchmark directory. It
+        must contain domain directories, which in turn hold PDDL files.
 
-            exp.add_suite("gripper:prob01.pddl")
-            exp.add_suite("gripper")
-            exp.add_suite(["miconic", "trucks", "grid", "gripper:prob01.pddl"])
+        *suite* can either be a string or a list of strings. The
+        strings can be tasks or domains. ::
+
+            benchmarks_dir = os.path.join(myrepo, "benchmarks")
+            exp.add_suite("gripper:prob01.pddl", benchmarks_dir)
+            exp.add_suite("gripper", benchmarks_dir)
+            exp.add_suite(
+                ["miconic", "trucks", "grid", "gripper:prob01.pddl"],
+                benchmarks_dir)
 
         There are some predefined suites in ``suites.py``. ::
 
-            exp.add_suite(suites.suite_strips())
-            exp.add_suite(suites.suite_ipc_all())
+            exp.add_suite(suites.suite_strips(), benchmarks_dir)
+            exp.add_suite(suites.suite_ipc_all(), benchmarks_dir)
 
-        If *benchmark_dir* is given, it must be the path to a benchmark directory.
-        The default is <repo>/benchmarks. The benchmark directory must contain
-        domain directories, which in turn hold the PDDL files.
         """
         if isinstance(suite, basestring):
             parts = [part.strip() for part in suite.split(',')]
             suite = [part for part in parts if part]
-        if benchmark_dir is None:
-            benchmark_dir = os.path.join(self.repo, 'benchmarks')
-        benchmark_dir = os.path.abspath(benchmark_dir)
-        self.suites[benchmark_dir].extend(suite)
+        benchmarks_dir = os.path.abspath(benchmarks_dir)
+        if not os.path.exists(benchmarks_dir):
+            logging.critical(
+                'Benchmarks directory {} not found.'.format(benchmarks_dir))
+        self._suites[benchmarks_dir].extend(suite)
 
-    def add_config(self, nick, config, timeout=None):
+    def add_algorithm(self, nick, repo, rev, component_options,
+                      build_options=None, driver_options=None):
         """
-        Add a Fast Downward configuration to the experiment.
+        Add a Fast Downward algorithm to the experiment, i.e., a
+        planner configuration in a given repository at a given
+        revision.
 
-        *config* must be a list of Fast Downward arguments
-        (see http://www.fast-downward.org/SearchEngine). It will
-        be run for all (translator, preprocessor, planner) combinations
-        given in the constructor.
+        *repo* must be the path to a Fast Downward repository. Among
+        other things this repository is used to search for benchmark
+        files.
 
-        *nick* is an abbreviation for the configuration used in the reports.
-
-        If *timeout* is given it will be used for this search
-        configuration instead of the global time limit set in the
-        constructor. ::
-
-            exp.add_config('lmcut', ['--search', 'astar(lmcut())'])
         """
         if not isinstance(nick, basestring):
             logging.critical('Config nick must be a string: %s' % nick)
-        if not isinstance(config, list):
-            logging.critical('Config must be a list: %s' % config)
-        if not nick.endswith('.py') and not config:
-            logging.critical('Config cannot be empty: %s' % config)
-        for translator, preprocessor, planner in self.combinations:
-            algo_nick = _get_rev_nick(translator, preprocessor, planner) + '-' + nick
-            self._algorithms.append(_DownwardAlgorithm(
-                algo_nick, config, timeout=timeout,
-                translator=translator, preprocessor=preprocessor, planner=planner))
+        if nick in self._algorithms:
+            logging.critical('Algorithm nicks must be unique: {}' % nick)
+        build_options = build_options or self._get_default_build_options()
+        driver_options = driver_options or []
+        component_options = component_options or []
+        self._algorithms[nick] = _DownwardAlgorithm(
+            nick, CachedRevision(repo, rev, build_options),
+            driver_options, component_options)
 
-    def add_portfolio(self, portfolio, nick=None, **kwargs):
+    def add_command(self, name, command, **kwargs):
         """
-        *portfolio* must be the path to a Fast Downward portfolio file.
+        Use this function to add custom parsers::
 
-        *nick* is the name of the portfolio in reports. If it is not
-        set explicitly, the portfolio's filename will be used.
-
-        Arguments in *kwargs* are passed to :py:meth:`.add_config`. ::
-
-            exp.add_portfolio('/home/john/my_portfolio.py')
-            exp.add_portfolio('/home/john/my_portfolio.py',
-                              nick='issue123-my_portfolio')
+            exp.add_command('myparser', ['path/to/parser'])
         """
-        if not isinstance(portfolio, basestring):
-            logging.critical('portfolio must be a string: %s' % portfolio)
-        if not portfolio.endswith('.py'):
-            logging.critical('Path to portfolio must end on .py: %s' % portfolio)
-        if not os.path.isfile(portfolio):
-            logging.critical('Portfolio %s could not be found.' % portfolio)
-        nick = nick or os.path.basename(portfolio)
-        self._portfolios.append(portfolio)
-        self.add_config(nick, ['--portfolio', os.path.basename(portfolio)], **kwargs)
+        raise NotImplementedError
 
-    def add_search_parser(self, path_to_parser):
-        """
-        Invoke script at *path_to_parser* at the end of each search run. ::
-
-            exp.add_search_parser('path/to/parser')
-        """
-        if not os.path.isfile(path_to_parser):
-            logging.critical('Parser %s could not be found.' % path_to_parser)
-        if not os.access(path_to_parser, os.X_OK):
-            logging.critical('Parser %s is not executable.' % path_to_parser)
-        self._search_parsers.append(
-            ('search_parser%d' % len(self._search_parsers), path_to_parser))
-
-    def set_path_to_python(self, path):
-        """
-        Instead of the default python interpreter "python", let the translator
-        use a different one.
-
-        *path* must be an absolute path to a python interpreter or a name that
-        will be found on the system PATH like "python2.7". ::
-
-            exp.set_path_to_python('/home/john/bin/Python-2.7.3/python')
-            exp.set_path_to_python('/usr/bin/python3.2')
-            exp.set_path_to_python('python2.7')
-        """
-        self._path_to_python = path
-
-    def _get_path_to_python(self):
-        return self._path_to_python or 'python'
-
-    def _check_python_version(self):
-        """Abort if the Python version is not supported by the translator."""
-        if subprocess.call([self._get_path_to_python(), '-c', VERSION_STMT]) != 0:
-            logging.critical('Use exp.set_path_to_python(path) to select a '
-                             'supported Python interpreter.')
-
-    def _adapt_path(self, stage):
-        if stage == 'preprocess':
-            self.path = self.preprocess_exp_path
-        elif stage == 'search':
-            self.path = self.search_exp_path
-        else:
-            logging.critical('There is no stage "%s"' % stage)
-
-    def run(self, stage):
-        """Run the specified experiment stage.
-
-        *stage* can be "preprocess" or "search".
-
-        """
-        self._adapt_path(stage)
-        Experiment.run(self)
-        self.path = self.orig_path
-
-    @property
-    def _jobs(self):
-        """Return the number of jobs to use when building binaries."""
-        jobs = getattr(self.environment, 'processes', None)
-        return jobs or multiprocessing.cpu_count()
-
-    def build(self, stage, **kwargs):
-        """Write the experiment to disk.
-
-        Overriding methods cannot add resources or new files here, because we
-        clear those lists in this method.
-        """
-        # Save the experiment stage in the properties
-        self.set_property('stage', stage)
-        self.set_property('suite', self.suites)
-        self.set_property('algorithms', [algo.nick for algo in self._algorithms])
-        self.set_property('repo', self.repo)
-        self.set_property('default_limits', self.limits)
-
-        self.runs = []
-        self.new_files = []
-        self.resources = []
-
-        self._adapt_path(stage)
-        self._setup_ignores(stage)
-
+    def build(self, **kwargs):
+        """Write the experiment to disk."""
         if not self._algorithms:
-            logging.critical('You must add at least one config or portfolio.')
+            logging.critical('You must add at least one algorithm.')
 
-        self._checkout_and_compile(stage, **kwargs)
+        self.set_property('suite', self._suites)
+        self.set_property('algorithm_nicks', self._algorithms.keys())
 
-        if stage == 'preprocess':
-            self._make_preprocess_runs()
-        elif stage == 'search':
-            self._make_search_runs()
-        else:
-            logging.critical('There is no stage "%s"' % stage)
+        self._cache_revisions()
+        self._add_code()
+        self._add_runs()
 
         Experiment.build(self, **kwargs)
-        self.path = self.orig_path
 
-    def _require_part(self, part):
-        logging.info('Requiring %s' % part.src_dir)
-        self.add_resource('', part.src_dir, part.get_path_dest())
+    def _get_default_build_options(self):
+        cores = multiprocessing.cpu_count()
+        return ['-j{}'.format(cores)]
 
-    def _get_unique_checkouts(self):
-        translators = set()
-        preprocessors = set()
-        planners = set()
-        for algo in self._algorithms:
-            translators.add(algo.translator)
-            preprocessors.add(algo.preprocessor)
-            planners.add(algo.planner)
-        return translators, preprocessors, planners
+    def _cache_revisions(self):
+        for algo in self._algorithms.values():
+            algo.cached_revision.cache(self.revision_cache_dir)
 
-    def _checkout_and_compile(self, stage, **kwargs):
-        translators, preprocessors, planners = self._get_unique_checkouts()
-
-        for part in sorted(translators | preprocessors | planners):
-            part.checkout(self.compilation_options)
-
-        if stage == 'preprocess':
-            for part in sorted(translators | preprocessors):
-                self._require_part(part)
-        elif stage == 'search':
-            for planner in sorted(planners):
-                self._require_part(planner)
-        else:
-            logging.critical('There is no stage "%s"' % stage)
-
-    def _setup_ignores(self, stage):
-        self.ignores = []
-
-        # Ignore some scripts.
-        self.ignores.extend(['build_all', 'cleanup', 'plan', 'plan-ipc'])
-
-        # Ignore files from working copy.
-        self.ignores.extend(['.obj', 'VAL'])
-
-        if stage == 'preprocess':
-            self.ignores.extend(['search'])
-            self.ignores.extend(['regression-tests', 'tests'])
-        elif stage == 'search':
-            self.ignores.extend(['translate', 'preprocess'])
-
-    def _prepare_translator_and_preprocessor(self, translator, preprocessor):
-        # In order to set an environment variable, overwrite the executable
-        self.add_resource(
-            translator.shell_name, translator.get_bin(), translator.get_bin_dest())
-        self.add_resource(
-            preprocessor.shell_name, preprocessor.get_bin(), preprocessor.get_bin_dest())
-
-    def _prepare_planner(self, planner):
-        self.add_resource(
-            planner.shell_name, planner.get_bin(), planner.get_bin_dest())
-
-        # Copy portfolios into experiment directory.
-        for portfolio in self._portfolios:
-            name = os.path.basename(portfolio)
-            self.add_resource('', portfolio, planner.get_path_dest('search', name))
-
-    def _prepare_validator(self):
-        validate = os.path.join(self.repo, 'src', 'VAL', 'validate')
-        if not os.path.exists(validate):
-            logging.info('validate not found at %s. Building it now.' %
-                         validate)
-            tools.run_command(['make', '-j%d' % self._jobs],
-                              cwd=os.path.dirname(validate))
-        assert os.path.exists(validate), validate
-        self.add_resource('VALIDATE', validate, 'validate')
-
-        downward_validate = os.path.join(DOWNWARD_SCRIPTS_DIR, 'validate.py')
-        self.add_resource('DOWNWARD_VALIDATE', downward_validate, 'downward-validate')
-
-    def _make_preprocess_runs(self):
-        self._check_python_version()
+    def _add_code(self):
         self.add_resource(
             'PREPROCESS_PARSER',
             os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
+        self.add_resource(
+            'SEARCH_PARSER',
+            os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
+        for algo in self._algorithms.values():
+            cached_rev = algo.cached_revision
+            self.add_resource(
+                '',
+                cached_rev.get_cached_path(),
+                cached_rev.get_exp_path())
+            # Overwrite the script to set an environment variable.
+            self.add_resource(
+                'FAST_DOWNWARD',
+                cached_rev.get_cached_path('fast-downward.py'),
+                cached_rev.get_exp_path('fast-downward.py'))
 
-        unique_preprocessing = set()
-        for algo in self._algorithms:
-            unique_preprocessing.add((algo.translator, algo.preprocessor))
-
-        for translator, preprocessor in sorted(unique_preprocessing):
-            self._prepare_translator_and_preprocessor(translator, preprocessor)
-
-            for prob in self._problems:
-                self.add_run(PreprocessRun(self, translator, preprocessor, prob))
-
-    def _make_search_runs(self):
-        for parser_name, parser_path in self._search_parsers:
-            self.add_resource(parser_name.upper(), parser_path)
-        _, _, planners = self._get_unique_checkouts()
-        for planner in planners:
-            self._prepare_planner(planner)
-        self._prepare_validator()
-        for algo in self._algorithms:
-            for prob in self._problems:
-                self._make_search_run(algo, prob)
-
-    def _make_search_run(self, algo, prob):
-        preprocess_dir = os.path.join(
-            self.preprocessed_tasks_dir,
-            algo.translator.rev + '-' + algo.preprocessor.rev,
-            prob.domain, prob.problem)
-
-        def source(filename):
-            return os.path.join(preprocess_dir, filename)
-
-        def source_and_dest(filename):
-            dest = None if self.compact else filename
-            return source(filename), dest
-
-        run = SearchRun(self, algo, prob)
-        self.add_run(run)
-
-        run.add_parsers(self._search_parsers)
-
-        run.set_property('preprocess_dir', preprocess_dir)
-        run.set_property('compact', self.compact)
-
-        # We definitely need the output file.
-        run.add_resource('OUTPUT', *source_and_dest('output'))
-
-        # Needed for validation.
-        run.add_resource('DOMAIN', *source_and_dest('domain.pddl'))
-        run.add_resource('PROBLEM', *source_and_dest('problem.pddl'))
-
-        # The other files are optional.
-        if self.include_preprocess_results_in_search_runs:
-            # Properties have to be copied, not linked.
-            run.add_resource('', source('properties'), 'properties')
+    def _add_runs(self):
+        for algo in self._algorithms.values():
+            for task in self._get_tasks():
+                self.add_run(FastDownwardRun(self, algo, task))
