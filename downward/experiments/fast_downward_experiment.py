@@ -56,7 +56,7 @@ class FastDownwardRun(Run):
         # TODO: Remove this once the driver validates on its own.
         self.add_command('validate', ['echo', 'dummy-validate'])
 
-        # TODO: Use exp.add_command() ?
+        # TODO: Use exp.add_command() once it is available.
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
         self.add_command('parse-search', ['SEARCH_PARSER'])
 
@@ -206,14 +206,6 @@ class FastDownwardExperiment(Experiment):
         self._algorithms[nick] = _DownwardAlgorithm(
             nick, CachedRevision(repo, rev, build_options),
             driver_options, component_options)
-
-    def add_command(self, name, command, **kwargs):
-        """
-        Use this function to add custom parsers::
-
-            exp.add_command('myparser', ['path/to/parser'])
-        """
-        raise NotImplementedError
 
     def build(self, **kwargs):
         """Write the experiment to disk."""
