@@ -93,7 +93,13 @@ class CachedRevision(object):
             logging.critical('Build failed in {}'.format(self.path))
 
     def _cleanup(self):
-        # TODO: Only keep the bin directories in "builds" dir.
+        # Only keep the bin directories in "builds" dir.
+        for path in glob.glob(os.path.join(self.path, "builds", "*", "*")):
+            if os.path.basename(path) != 'bin':
+                tools.remove_path(path)
+
+        # Remove unneeded files.
+        #tools.remove_path(self.get_cached_path('build.py'))
 
         # Strip binaries.
         binaries = []

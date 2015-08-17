@@ -168,11 +168,11 @@ def overwrite_dir(path, overwrite=False):
     os.makedirs(path)
 
 
-def remove(filename):
-    try:
-        os.remove(filename)
-    except OSError:
-        pass
+def remove_path(path):
+    if os.path.isfile(path):
+        os.remove(path)
+    else:
+        shutil.rmtree(path)
 
 
 def touch(filename):
@@ -362,7 +362,7 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
         # Without this shutil.copy2 cannot override broken symbolic links and
         # it will override the file that the link points to if the link is valid.
         if os.path.islink(dstname):
-            remove(dstname)
+            os.remove(dstname)
         try:
             if symlinks and os.path.islink(srcname):
                 linkto = os.readlink(srcname)
