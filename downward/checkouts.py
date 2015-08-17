@@ -216,7 +216,6 @@ class HgCheckout(Checkout):
             binaries.append(downward_bin)
         tools.run_command(['strip'] + binaries)
         # Remove unneeded files from "src" dir if they exist.
-        # TODO: Remove "lp" and "ext" dirs?
         for name in ['dist', 'VAL', 'validate']:
             path = os.path.join(self.src_dir, name)
             if os.path.isfile(path):
