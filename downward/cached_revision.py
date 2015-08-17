@@ -20,6 +20,7 @@ import glob
 import logging
 import os.path
 import shutil
+import subprocess
 
 from lab import tools
 
@@ -99,13 +100,17 @@ class CachedRevision(object):
                 tools.remove_path(path)
 
         # Remove unneeded files.
-        #tools.remove_path(self.get_cached_path('build.py'))
+        tools.remove_path(self.get_cached_path('build.py'))
 
         # Strip binaries.
         binaries = []
         for path in glob.glob(os.path.join(self.path, "builds", "*", "bin", "*")):
             if os.path.basename(path) in ['downward', 'preprocess']:
                 binaries.append(path)
-        tools.run_command(['strip'] + binaries)
+        subprocess.call(['strip'] + binaries)
 
-        # TODO: Compress src directory.
+        # Compress src directory.
+        subprocess.call(
+            ['tar', '-cf', 'src.tar', '--remove-files', 'src'],
+            cwd=self.path)
+        subprocess.call(['xz', 'src.tar'], cwd=self.path)
