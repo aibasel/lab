@@ -19,7 +19,7 @@
 from lab import tools
 
 tools.show_deprecation_warning(
-    'The downward/configs.py module has been deprecated in version 1.8. '
+    'The downward/configs.py module has been deprecated in version 1.7. '
     'Please copy the module or the relevant functions, dictionaries and '
     'configurations directly into your experiment.')
 

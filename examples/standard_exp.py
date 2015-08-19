@@ -14,7 +14,7 @@ from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 tools.show_deprecation_warning(
-    'The standard_exp.py module has been deprecated in version 1.8. '
+    'The standard_exp.py module has been deprecated in version 1.7. '
     'Please copy the relevant parts into your own experiment.')
 
 
