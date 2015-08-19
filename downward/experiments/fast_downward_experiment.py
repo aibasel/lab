@@ -129,7 +129,6 @@ class _DownwardAlgorithm(object):
         self.component_options = component_options
 
 
-# TODO: Update documentation.
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
@@ -137,11 +136,15 @@ class FastDownwardExperiment(Experiment):
     configurations, benchmarks and reports. See
     :class:`lab.experiment.Experiment` for inherited methods.
 
-    Fast Downward experiments consist of the following steps: Step 1
-    writes the experiment files to disk. Step 2 runs the experiment.
-    Step 3 fetches the results and saves them in a directory named
-    "*path*-eval". You can add report steps with
-    :func:`lab.experiment.Experiment.add_report()`.
+    Fast Downward experiments consist of the following steps:
+
+    * Step 1: write experiment files to disk
+    * Step 2: run experiment
+    * Step 3: fetch results and save them in ``<path>-eval``
+
+    You can add report steps with :py:func:`add_report()
+    <downward.experiment.FastDownwardExperiment.add_report>`.
+
     """
 
     DEFAULT_SEARCH_TIME_LIMIT = "30m"
