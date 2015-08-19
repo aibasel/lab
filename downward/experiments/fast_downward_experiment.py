@@ -23,7 +23,7 @@ A module for running Fast Downward experiments.
 from collections import defaultdict
 import logging
 import multiprocessing
-import os
+import os.path
 
 from lab.experiment import Run, Experiment
 from lab import tools
@@ -45,10 +45,15 @@ def _get_default_experiment_name():
     return os.path.splitext(os.path.basename(tools.get_script_path()))[0]
 
 
+def _get_default_data_dir():
+    """E.g. "ham/spam/eggs.py" => "ham/spam/data/"."""
+    return os.path.join(tools.get_script_dir(), "data")
+
+
 def _get_default_experiment_dir():
     """E.g. "ham/spam/eggs.py" => "ham/spam/data/eggs"."""
     return os.path.join(
-        tools.get_script_dir(), "data", _get_default_experiment_name())
+        _get_default_data_dir(), _get_default_experiment_name())
 
 
 class FastDownwardRun(Run):
@@ -144,22 +149,27 @@ class FastDownwardExperiment(Experiment):
 
     def __init__(self, path=None, environment=None, cache_dir=None):
         """
-        The experiment will be built at *path*.
+        The experiment will be built at *path*. It defaults to
+        ``<scriptdir>/data/<scriptname>/``. E.g. if your script is at
+        ``experiments/myexp.py``, *path* will be
+        ``experiments/data/myexp/``.
 
-        *environment* must be an :ref:`Environment <environments>` instance.
-        By default the experiment is run locally.
+        *environment* must be an :ref:`Environment <environments>`
+        instance. By default a :py:class:`LocalEnvironment
+        <lab.environments.LocalEnvironment>` is used and the experiment
+        is run locally.
 
-        *cache_dir* is used to cache Fast Downward clones. By default
-        it points to ``~/lab``.
+        *cache_dir* is used to cache compiled Fast Downward revisions.
+        It defaults to ``<scriptdir>/data/``.
 
-        Example::
+        Example:
 
-            exp = DownwardExperiment(
-                '/tmp/exp-path', environment=MaiaEnvironment(priority=-2))
+        >>> exp = FastDownwardExperiment(
+        ...     environment=MaiaEnvironment(priority=-2))
 
         """
-        # TODO: Use different default cache directory? E.g. (data/revision-cache).
         path = path or _get_default_experiment_dir()
+        cache_dir = cache_dir or _get_default_data_dir()
         Experiment.__init__(self, path, environment=environment, cache_dir=cache_dir)
         self.revision_cache_dir = os.path.join(self.cache_dir, 'revision-cache')
 
@@ -175,7 +185,8 @@ class FastDownwardExperiment(Experiment):
         return tasks
 
     def add_suite(self, benchmarks_dir, suite):
-        """
+        """Add benchmarks to the experiment.
+
         *benchmarks_dir* must be a path to a benchmark directory. It
         must contain domain directories, which in turn hold PDDL files.
 
@@ -196,8 +207,7 @@ class FastDownwardExperiment(Experiment):
 
         """
         if isinstance(suite, basestring):
-            parts = [part.strip() for part in suite.split(',')]
-            suite = [part for part in parts if part]
+            suite = [suite]
         benchmarks_dir = os.path.abspath(benchmarks_dir)
         if not os.path.exists(benchmarks_dir):
             logging.critical(
@@ -211,9 +221,58 @@ class FastDownwardExperiment(Experiment):
         planner configuration in a given repository at a given
         revision.
 
-        *repo* must be the path to a Fast Downward repository. Among
-        other things this repository is used to search for benchmark
-        files.
+        *nick* is a string describing the algorithm (e.g.
+        "issue123-lmcut").
+
+        *repo* must be a path to a Fast Downward repository.
+
+        *rev* must be a valid revision in the given repository (e.g.
+        "default", "tip", "issue123").
+
+        *component_options* must be a list of strings. By default these
+        options are passed to the search component. Use
+        "--translate-options", "--preprocess-options" or
+        "--search-options" within the component options to override the
+        default for the following options, until overridden again.
+
+        If given, *build_options* must be a list of strings. They will
+        be passed to the ``build.py`` script. Options can be build
+        names (e.g. "release32", "debug64") or options for Make. The
+        default is ``["-j<num_cpus>"]``. This setting causes
+        ``build.py`` to build "release32" with all CPUs.
+
+        If given, *driver_options* must be a list of strings. They will
+        be passed to the ``fast-downward.py`` script. See
+        ``fast-downward.py --help`` for available options. The default
+        is ``["--search-time-limit", "30m", "--search-memory-limit',
+        "2G"]``.
+
+        Examples::
+
+            # Test iPDB in the latest revision on the default branch.
+            exp.add_algorithm(
+                "ipdb", "path/to/repo", "default",
+                ["--search", "astar(ipdb())"])
+
+            # Test LM-cut in an issue experiment.
+            exp.add_algorithm(
+                "issue123-v1-lmcut", "path/to/repo", "issue123-v1",
+                ["--search", "astar(lmcut())"])
+
+            # Run blind search in debug mode.
+            exp.add_algorithm(
+                "blind", "path/to/repo", "default",
+                ["--search", "astar(blind())"],
+                build_options=["debug32"],
+                driver_options=["--build", "debug32"])
+
+            # Run LAMA-2011 with custom search time limit.
+            exp.add_algorithm(
+                "lama", "path/to/repo", "default",
+                [],
+                driver_options=[
+                    "--alias", "seq-saq-lama-2011",
+                    "--search-time-limit", "5m"])
 
         """
         if not isinstance(nick, basestring):
@@ -229,7 +288,7 @@ class FastDownwardExperiment(Experiment):
             driver_options, component_options)
 
     def build(self, **kwargs):
-        """Write the experiment to disk."""
+        """Write the experiment to disk. Called internally by lab."""
         if not self._algorithms:
             logging.critical('You must add at least one algorithm.')
 
@@ -251,6 +310,7 @@ class FastDownwardExperiment(Experiment):
             algo.cached_revision.cache(self.revision_cache_dir)
 
     def _add_code(self):
+        """Add the compiled code to the experiment."""
         self.add_resource(
             'PREPROCESS_PARSER',
             os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
