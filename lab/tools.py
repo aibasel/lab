@@ -59,6 +59,17 @@ DEFAULT_USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
 LOG_LEVEL = None
 
 
+def get_script_path():
+    """Get absolute path to main script."""
+    import __main__
+    return os.path.abspath(__main__.__file__)
+
+
+def get_script_dir():
+    """Get absolute path to directory of main script."""
+    return os.path.dirname(get_script_path())
+
+
 class ErrorAbortHandler(logging.StreamHandler):
     """
     Custom logging Handler that exits when a critical error is encountered.
