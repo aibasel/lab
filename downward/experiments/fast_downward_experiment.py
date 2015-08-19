@@ -36,6 +36,21 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNWARD_SCRIPTS_DIR = os.path.join(os.path.dirname(DIR), 'scripts')
 
 
+def _get_default_experiment_name():
+    """Get default name for experiment.
+
+    Derived from the filename of the main script, e.g.
+    "ham/spam/eggs.py" => "eggs".
+    """
+    return os.path.splitext(os.path.basename(tools.get_script_path()))[0]
+
+
+def _get_default_experiment_dir():
+    """E.g. "ham/spam/eggs.py" => "ham/spam/data/eggs"."""
+    return os.path.join(
+        tools.get_script_dir(), "data", _get_default_experiment_name())
+
+
 class FastDownwardRun(Run):
     def __init__(self, exp, algo, task):
         Run.__init__(self, exp)
@@ -109,6 +124,7 @@ class _DownwardAlgorithm(object):
         self.component_options = component_options
 
 
+# TODO: Update documentation.
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
@@ -122,7 +138,11 @@ class FastDownwardExperiment(Experiment):
     "*path*-eval". You can add report steps with
     :func:`lab.experiment.Experiment.add_report()`.
     """
-    def __init__(self, path, environment=None, cache_dir=None):
+
+    DEFAULT_SEARCH_TIME_LIMIT = "30m"
+    DEFAULT_SEARCH_MEMORY_LIMIT = "2G"
+
+    def __init__(self, path=None, environment=None, cache_dir=None):
         """
         The experiment will be built at *path*.
 
@@ -138,8 +158,8 @@ class FastDownwardExperiment(Experiment):
                 '/tmp/exp-path', environment=MaiaEnvironment(priority=-2))
 
         """
-        # TODO: Allow using default path (data/scriptname).
         # TODO: Use different default cache directory? E.g. (data/revision-cache).
+        path = path or _get_default_experiment_dir()
         Experiment.__init__(self, path, environment=environment, cache_dir=cache_dir)
         self.revision_cache_dir = os.path.join(self.cache_dir, 'revision-cache')
 
@@ -201,8 +221,9 @@ class FastDownwardExperiment(Experiment):
         if nick in self._algorithms:
             logging.critical('Algorithm nicks must be unique: {}' % nick)
         build_options = build_options or self._get_default_build_options()
-        driver_options = driver_options or []
-        component_options = component_options or []
+        driver_options = driver_options or [
+            '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
+            '--search-memory-limit', self.DEFAULT_SEARCH_MEMORY_LIMIT]
         self._algorithms[nick] = _DownwardAlgorithm(
             nick, CachedRevision(repo, rev, build_options),
             driver_options, component_options)
