@@ -28,6 +28,10 @@ from downward.checkouts import get_global_rev, get_rev_id
 
 
 class CachedRevision(object):
+    """This class represents Fast Downward checkouts.
+
+    It provides methods for caching and compiling given revisions.
+    """
     def __init__(self, repo, local_rev, build_options):
         """
         * *repo*: Path to Fast Downward repository.

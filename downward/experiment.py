@@ -22,3 +22,8 @@ from downward.experiments import DownwardRun, PreprocessRun, SearchRun, \
 
 # Silence pyflakes
 assert (DownwardRun and PreprocessRun and SearchRun and DownwardExperiment)
+
+from downward.experiments.fast_downward_experiment import FastDownwardExperiment
+
+# Silence pyflakes
+assert FastDownwardExperiment

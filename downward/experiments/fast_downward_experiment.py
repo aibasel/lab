@@ -159,13 +159,14 @@ class FastDownwardExperiment(Experiment):
         <lab.environments.LocalEnvironment>` is used and the experiment
         is run locally.
 
-        *cache_dir* is used to cache compiled Fast Downward revisions.
-        It defaults to ``<scriptdir>/data/``.
+        *cache_dir* is used to cache temporary data. It defaults to
+        ``<scriptdir>/data/``. Compiled Fast Downward revisions are
+        cached under ``<cache_dir>/revision-cache/``.
 
-        Example:
+        Example::
 
-        >>> exp = FastDownwardExperiment(
-        ...     environment=MaiaEnvironment(priority=-2))
+            env = MaiaEnvironment(priority=-2)
+            exp = FastDownwardExperiment(environment=env)
 
         """
         path = path or _get_default_experiment_dir()

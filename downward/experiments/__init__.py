@@ -246,6 +246,11 @@ class DownwardExperiment(Experiment):
     on the preprocessed tasks. You can add report steps with
     :func:`lab.experiment.Experiment.add_report()`.
 
+    .. deprecated:: 1.9
+
+        This class has been deprecated in favor of
+        :py:class:`downward.experiment.FastDownwardExperiment`.
+
     .. note::
 
         You only have to run the preprocessing stage (steps 1-3) for
