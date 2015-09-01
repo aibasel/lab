@@ -194,11 +194,13 @@ exp.add_report(TaskwiseReport(attributes=['coverage', 'expansions'],
                name='report-taskwise',
                outfile='taskwise.html')
 
-exp.add_report(AbsoluteReport('problem', colored=True,
-                              attributes=['coverage', 'search_time', 'cost', 'memory',
-                                          'error', 'cost_all', 'limit_search_time',
-                                          'initial_h_value', 'initial_h_values']),
-               name='report-abs-p', outfile=abs_problem_report_file)
+exp.add_report(
+    AbsoluteReport(
+        'problem', colored=True, attributes=[
+            'coverage', 'evaluated', 'evaluations', 'search_time',
+            'cost', 'memory', 'error', 'cost_all', 'limit_search_time',
+            'initial_h_value', 'initial_h_values', 'run_dir']),
+    name='report-abs-p', outfile=abs_problem_report_file)
 
 exp.add_step(Step('finished', call, ['echo', 'Experiment', 'finished.']))
 

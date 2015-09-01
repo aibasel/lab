@@ -84,6 +84,7 @@ ITERATIVE_PATTERNS = COMMON_PATTERNS + PORTFOLIO_PATTERNS + [
 
 
 CUMULATIVE_PATTERNS = COMMON_PATTERNS + [
+    # TODO: Rename to evaluated_until_last_jump and expanded_until_last_jump.
     _get_states_pattern('evaluations_until_last_jump', 'Evaluated until last jump:'),
     _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
