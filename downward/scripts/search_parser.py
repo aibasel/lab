@@ -66,24 +66,24 @@ PORTFOLIO_PATTERNS = [
 ]
 
 
-ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
-    _get_states_pattern('dead_ends', 'Dead ends:'),
-    _get_states_pattern('evaluations', 'Evaluated'),
-    _get_states_pattern('expansions', 'Expanded'),
-    _get_states_pattern('generated', 'Generated'),
-    # We cannot include " \[t=.+s\]" (global timer) in the regex, because
-    # older versions don't print it.
-    ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
-]
-
-
-CUMULATIVE_PATTERNS = [
+COMMON_PATTERNS = [
     _get_states_pattern('dead_ends', 'Dead ends:'),
     _get_states_pattern('evaluated', 'Evaluated'),
     ('evaluations', re.compile(r'^Evaluations: (.+)$'), int),
     _get_states_pattern('expansions', 'Expanded'),
     _get_states_pattern('generated', 'Generated'),
     _get_states_pattern('reopened', 'Reopened'),
+]
+
+
+ITERATIVE_PATTERNS = COMMON_PATTERNS + PORTFOLIO_PATTERNS + [
+    # We cannot include " \[t=.+s\]" (global timer) in the regex, because
+    # older versions don't print it.
+    ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
+]
+
+
+CUMULATIVE_PATTERNS = COMMON_PATTERNS + [
     _get_states_pattern('evaluations_until_last_jump', 'Evaluated until last jump:'),
     _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
