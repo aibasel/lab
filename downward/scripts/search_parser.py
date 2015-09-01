@@ -79,7 +79,8 @@ ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
 
 CUMULATIVE_PATTERNS = [
     _get_states_pattern('dead_ends', 'Dead ends:'),
-    _get_states_pattern('evaluations', 'Evaluated'),
+    _get_states_pattern('evaluated', 'Evaluated'),
+    ('evaluations', re.compile(r'^Evaluations: (.+)$'), int),
     _get_states_pattern('expansions', 'Expanded'),
     _get_states_pattern('generated', 'Generated'),
     _get_states_pattern('reopened', 'Reopened'),
