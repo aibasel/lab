@@ -446,29 +446,33 @@ class PlotReport(PlanningReport):
 
 
 class ProblemPlotReport(PlotReport):
-    """
-    For each problem generate a plot for a specific attribute.
-    """
+    """Generate a separate plot for each task."""
     def __init__(self, get_points=None, **kwargs):
         """
-        *get_points* can be a function that takes a **single** run (dictionary
-        of properties) and returns the points that should be drawn for this run.
-        The return value can be a list of (x,y) coordinates or a dictionary
-        mapping category names to lists of (x,y) coordinates, i.e.::
+        The coordinates for each task plot are computed from either the
+        values of a single attribute in *attributes* or with the
+        function *get_points*.
+
+        If get_points is None (default), *attributes* must contain
+        exactly one attribute. Then we will plot the config names on
+        the x-axis and the corresponding values for *attribute* on the
+        y-axis. Otherwise *attributes* will be ignored.
+
+        If *get_points* is not None, it must be a function that takes a
+        **single** run (dictionary of properties) and returns the
+        points that should be drawn for this run. The return value can
+        be a list of (x,y) coordinates or a dictionary mapping category
+        names to lists of (x,y) coordinates, i.e.::
 
             get_points(run) == [(1, 1), (2, 4), (3, 9)]
             or
             get_points(run) == {'x^2': [(1, 1), (2, 4), (3, 9)],
                                 'x^3': [(1, 1), (2, 8), (3, 27)]}
 
-        Internally all coordinates of a category are combined and drawn in the
-        same style (e.g. red circles). Returned lists without a category are
-        assigned to a default category that does not appear in the legend.
-
-        If get_points is None, *attributes* must contain exactly one attribute.
-        Then we will plot the config names on the x-axis and the corresponding
-        values for *attribute* on the y-axis. Otherwise *attributes* will be
-        ignored and it's up to you to retrieve the y-values from the runs.
+        Internally all coordinates of a category are combined and drawn
+        in the same style (e.g. red circles). Returned lists without a
+        category are assigned to a default category that does not
+        appear in the legend.
 
         Examples::
 
@@ -481,16 +485,18 @@ class ProblemPlotReport(PlotReport):
                 nick, states = run['config_nick'].split('-')
                 return {nick: [(states, run.get('expansions'))]}
 
-            PlotReport(attributes=['expansions'], get_points=config_and_states)
+            ProblemPlotReport(
+                attributes=['expansions'],
+                get_points=config_and_states)
 
         """
         PlotReport.__init__(self, **kwargs)
         if get_points:
             if self.attribute:
-                logging.critical('If get_points() is given, attributes are ignored.')
+                logging.critical('Either pass "get_points" or "attributes".')
             self.get_points = get_points
         elif not self.attribute:
-            logging.critical('Need exactly one attribute without get_points().')
+            logging.critical('Need exactly one attribute without "get_points".')
 
     def get_points(self, run):
         """
@@ -507,12 +513,11 @@ class ProblemPlotReport(PlotReport):
                 for category, points in new_categories.items():
                     categories[category].extend(points)
             elif isinstance(new_categories, (list, tuple)):
-                # Implicitly check that this is a list of pairs.
                 for x, y in new_categories:
                     categories[None].append((x, y))
-            elif new_categories is not None:
-                # Allow returning None.
+            else:
                 logging.critical('get_points() returned the wrong format.')
+        print categories
         return categories
 
     def _prepare_categories(self, categories):

@@ -10,7 +10,7 @@ keys must be unique, but otherwise they are irrelevant. Each mapped
 value must itself be a dictionary with at least the keys "domain",
 "problem" and "config". In addition you need the attribute names and
 values that you want to make reports for, e.g. "coverage",
-"expansions".
+"expansions", "time".
 
 """
 
@@ -22,6 +22,7 @@ from lab.steps import Sequence
 from lab import tools
 
 from downward.reports.absolute import AbsoluteReport
+from downward.reports.plot import ProblemPlotReport
 
 
 EXP_DIR = "data/custom"
@@ -33,12 +34,14 @@ PROPERTIES = {
         "problem": "prob01.pddl",
         "config": "ff",
         "coverage": 1,
+        "expansions": 1234
     },
     "blind-gripper-prob01.pddl": {
         "domain": "gripper",
         "problem": "prob01.pddl",
         "config": "blind",
-        "coverage": 0,
+        "coverage": 1,
+        "expansions": 6543,
     },
 }
 
@@ -53,7 +56,8 @@ def write_properties(eval_dir):
 exp = Experiment(EXP_DIR)
 # Remove all existing experiment steps.
 exp.steps = Sequence()
-exp.add_report(AbsoluteReport(attributes=['coverage']))
+exp.add_report(AbsoluteReport(attributes=['coverage', 'expansions']))
+exp.add_report(ProblemPlotReport(attributes=['expansions']))
 
 write_properties(exp.eval_dir)
 exp()

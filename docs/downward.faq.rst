@@ -54,4 +54,4 @@ Call the fetcher by invoking the new experiment step::
 How can I make reports and plots for results obtained without lab?
 ------------------------------------------------------------------
 
-See ``examples/plot-external-results.py`` for an example.
+See ``examples/report-external-results.py`` for an example.

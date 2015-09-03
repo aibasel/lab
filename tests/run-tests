@@ -44,7 +44,7 @@ cd downward
 python -m doctest downward/suites.py
 cd ..
 
-EXAMPLES="lmcut.py plot-external-results.py showcase-options.py \
+EXAMPLES="lmcut.py report-external-results.py showcase-options.py \
     standard_exp.py simple/simple-exp.py pi/pi.py pi/pi-ext.py \
     planner/planner.py planner/planner-ext.py"
 
@@ -85,7 +85,7 @@ cd pi
 ./pi-ext.py --help
 cd ..
 
-./plot-external-results.py --all
+./report-external-results.py --all
 
 # Only check downward code if $REPO exists.
 if [ -d "$REPO" ]; then
