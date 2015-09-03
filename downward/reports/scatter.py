@@ -154,9 +154,10 @@ class ScatterPlotReport(PlotReport):
                 'worse':  ('o','y'),
             }
 
-            PlotReport(attributes=['search_time'],
-                       get_category=improvement,
-                       category_styles=styles)
+            ScatterPlotReport(
+                attributes=['search_time'],
+                get_category=improvement,
+                category_styles=styles)
 
         """
         kwargs.setdefault('legend_location', (1.3, 0.5))
