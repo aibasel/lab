@@ -1,0 +1,59 @@
+#! /usr/bin/env python
+
+"""
+Simple experiment showing how to make reports for data obtained without
+lab.
+
+To use custom results, create the file <EXP_DIR>-eval/properties. It
+must be a json file mapping planner runs to results (see below). The
+keys must be unique, but otherwise they are irrelevant. Each mapped
+value must itself be a dictionary with at least the keys "domain",
+"problem" and "config". In addition you need the attribute names and
+values that you want to make reports for, e.g. "coverage",
+"expansions".
+
+"""
+
+import json
+import os.path
+
+from lab.experiment import Experiment
+from lab.steps import Sequence
+from lab import tools
+
+from downward.reports.absolute import AbsoluteReport
+
+
+EXP_DIR = "data/custom"
+
+
+PROPERTIES = {
+    "ff-gripper-prob01.pddl": {
+        "domain": "gripper",
+        "problem": "prob01.pddl",
+        "config": "ff",
+        "coverage": 1,
+    },
+    "blind-gripper-prob01.pddl": {
+        "domain": "gripper",
+        "problem": "prob01.pddl",
+        "config": "blind",
+        "coverage": 0,
+    },
+}
+
+
+def write_properties(eval_dir):
+    tools.makedirs(eval_dir)
+    with open(os.path.join(eval_dir, 'properties'), 'w') as f:
+        json.dump(PROPERTIES, f)
+
+
+# Create new experiment. The file <EXP_DIR>-eval/properties must exist.
+exp = Experiment(EXP_DIR)
+# Remove all existing experiment steps.
+exp.steps = Sequence()
+exp.add_report(AbsoluteReport(attributes=['coverage']))
+
+write_properties(exp.eval_dir)
+exp()
