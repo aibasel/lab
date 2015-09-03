@@ -129,7 +129,8 @@ class Sequence(list):
         return self[self._get_step_index(step_name)]
 
     def get_steps_text(self):
-        name_width = min(max(len(step.name) for step in self), 50)
+        # Use width 0 if no steps have been added.
+        name_width = min(max([len(step.name) for step in self] + [0]), 50)
         terminal_width, terminal_height = tools.get_terminal_size()
         terminal_width = terminal_width or 80
         lines = ['Available steps:', '================']
