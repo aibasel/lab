@@ -517,7 +517,6 @@ class ProblemPlotReport(PlotReport):
                     categories[None].append((x, y))
             else:
                 logging.critical('get_points() returned the wrong format.')
-        print categories
         return categories
 
     def _prepare_categories(self, categories):
