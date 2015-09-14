@@ -30,7 +30,7 @@ elif [[ "$PYTHONPATH" != *"$LAB"* ]]; then
     # LAB is NOT on the PYTHONPATH.
     export PYTHONPATH=${LAB}:${PYTHONPATH}
 fi
-echo PYTHONPATH: $PYTHONPATH
+echo "PYTHONPATH: $PYTHONPATH"
 
 cleanup
 
@@ -74,7 +74,7 @@ cd ..
 
 # Only check downward code if $REPO exists.
 if [ -d "$REPO" ]; then
-    ./lmcut.py {1..8}
+    ./lmcut.py --all
 
     cd planner
     ./planner.py --all
@@ -91,4 +91,4 @@ fi
 
 cleanup
 
-echo TESTS PASSED
+echo "TESTS PASSED"
