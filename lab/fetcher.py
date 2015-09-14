@@ -129,7 +129,8 @@ class Fetcher(object):
             src_props = run_filter.apply(src_props)
             for prop in src_props.values():
                 if prop.get('error', '').startswith('unexplained'):
-                    logging.warning("Unexplained error in '%s': %s" %
+                    logging.warning(
+                        "Unexplained error in '%s': %s" %
                         (prop.get('run_dir'), prop.get('error')))
 
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'

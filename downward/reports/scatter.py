@@ -53,8 +53,8 @@ class ScatterMatplotlib(Matplotlib):
         axes.set_ylim(report.ylim_bottom or -1, report.ylim_top or plot_size)
 
         for axis in [axes.xaxis, axes.yaxis]:
-            MatplotlibPlot.change_axis_formatter(axis,
-                                report.missing_val if report.show_missing else None)
+            MatplotlibPlot.change_axis_formatter(
+                axis, report.missing_val if report.show_missing else None)
         return has_points
 
 
@@ -79,9 +79,10 @@ class ScatterPgfPlots(PgfPlots):
             c = category_style.get('c')
             plot['color'] = cls.COLORS.get(c, c)
             plot['mark options'] = '{draw=black}'
-            lines.append('\\addplot[%s] coordinates {\n%s\n};' %
-                    (cls._format_options(plot),
-                     ' '.join(cls._format_coord(c) for c in coords)))
+            lines.append(
+                '\\addplot[%s] coordinates {\n%s\n};' % (
+                    cls._format_options(plot),
+                    ' '.join(cls._format_coord(c) for c in coords)))
             if category:
                 lines.append('\\addlegendentry{%s}' % category)
         # Add black line.

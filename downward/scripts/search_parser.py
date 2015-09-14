@@ -155,10 +155,11 @@ def get_iterative_results(content, props):
     if len(values['search_time']) > len(values['expansions']):
         values['search_time'].pop()
 
-    _update_props_with_iterative_values(props, values,
-            [('cost', 'plan_length'),
-             # TODO: add reopened, evaluated and dead ends.
-             ('expansions', 'generated', 'search_time')])
+    _update_props_with_iterative_values(
+        props, values, [
+            ('cost', 'plan_length'),
+            # TODO: add reopened, evaluated and dead ends.
+            ('expansions', 'generated', 'search_time')])
 
 
 def get_cumulative_results(content, props):
@@ -280,12 +281,15 @@ def scores(content, props):
             props.get(attr), min_bound=100, max_bound=1e6, min_score=0.0)
 
     props.update({
-        'score_memory': log_score(props.get('memory'),
-                min_bound=2000, max_bound=max_memory, min_score=0.0),
-        'score_total_time': log_score(props.get('total_time'),
-                min_bound=1.0, max_bound=1800.0, min_score=0.0),
-        'score_search_time': log_score(props.get('search_time'),
-                min_bound=1.0, max_bound=1800.0, min_score=0.0)})
+        'score_memory': log_score(
+            props.get('memory'),
+            min_bound=2000, max_bound=max_memory, min_score=0.0),
+        'score_total_time': log_score(
+            props.get('total_time'),
+            min_bound=1.0, max_bound=1800.0, min_score=0.0),
+        'score_search_time': log_score(
+            props.get('search_time'),
+            min_bound=1.0, max_bound=1800.0, min_score=0.0)})
 
 
 def check_min_values(content, props):

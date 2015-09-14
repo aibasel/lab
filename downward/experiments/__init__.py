@@ -172,7 +172,9 @@ class SearchRun(DownwardRun):
             algo.config = ['--alias' if x == 'ipc' else x for x in algo.config]
             if '--portfolio' in algo.config:
                 assert len(algo.config) == 2, algo.config
-                algo.config[1] = os.path.join('..', '..',
+                algo.config[1] = os.path.join(
+                    '..',
+                    '..',
                     algo.planner.get_path_dest(algo.planner.part, algo.config[1]))
             if any(x in algo.config for x in ['--alias', '--portfolio']):
                 args += algo.config + ['OUTPUT']

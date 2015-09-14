@@ -58,8 +58,7 @@ cd ..
 ./tests/find-dead-code
 
 # Check code formatting.
-# Ignore under-indented continuation lines (E128) and allow longer lines.
-PEP8_OPTS="--ignore=E128 --max-line-length=90"
+PEP8_OPTS="--max-line-length=90"
 pep8 $PEP8_OPTS --exclude=*external*,data lab downward
 cd examples
 pep8 $PEP8_OPTS --max-line-length=120 ${EXAMPLES}
