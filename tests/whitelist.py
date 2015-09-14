@@ -35,6 +35,7 @@ lab.steps.Step.remove_exp_dir
     suites.suite_all_formulations,
     suites.suite_unit_costs,
     suites.suite_diverse_costs,
+    suites.suite_sat_strips,
     suites.suite_five_per_domain,
 ]
 
