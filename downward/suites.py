@@ -410,6 +410,12 @@ def suite_diverse_costs():
         'woodworking-sat11-strips'
     ]
 
+def suite_sat_strips():
+    return (
+        suite_lmcut_domains() +
+        suite_ipc08_sat_strips() +
+        suite_ipc11_sat())
+
 
 def suite_five_per_domain(benchmarks_dir):
     for domain in Repository(benchmarks_dir):
