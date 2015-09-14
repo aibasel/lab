@@ -62,7 +62,7 @@ cd ..
 PEP8_OPTS="--ignore=E128 --max-line-length=90"
 pep8 $PEP8_OPTS --exclude=*external*,data lab downward
 cd examples
-pep8 $PEP8_OPTS --max-line-length=120 --ignore=E302 ${EXAMPLES}
+pep8 $PEP8_OPTS --max-line-length=120 ${EXAMPLES}
 cd ..
 
 # Check if documentation builds.

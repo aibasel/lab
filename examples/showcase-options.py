@@ -82,8 +82,10 @@ def solved(run):
     """Only include solved problems."""
     return run['coverage'] == 1
 
+
 def only_two_configs(run):
     return run['config_nick'] in ['lama11', 'iter-hadd']
+
 
 def remove_work_tag(run):
     """Remove "WORK-" from the configs."""
@@ -93,6 +95,7 @@ def remove_work_tag(run):
     config = config.replace('downward-', '')
     run['config'] = config
     return run
+
 
 def filter_and_transform(run):
     """Remove "WORK-" from the configs and only include certain configurations.
@@ -106,6 +109,8 @@ def filter_and_transform(run):
 # Check that the various fetcher options work.
 def eval_dir(num):
     return os.path.join(exp.eval_dir, 'test%d' % num)
+
+
 exp.add_step(Step('fetcher-test1', Fetcher(), exp.path, eval_dir(1), copy_all=True))
 exp.add_step(Step('fetcher-test2', Fetcher(), exp.path, eval_dir(2), copy_all=True, write_combined_props=True))
 exp.add_step(Step('fetcher-test3', Fetcher(), exp.path, eval_dir(3), filter_config_nick='lama11'))
@@ -126,8 +131,10 @@ exp.add_step(Step('report-abs-combined', AbsoluteReport(attributes=None, format=
 exp.add_report(TimeoutReport([1, 2, 3]), outfile=os.path.join(exp.eval_dir, 'timeout-eval', 'properties'))
 exp.add_report(FilterReport(), outfile=os.path.join(exp.eval_dir, 'filter-eval', 'properties'))
 
+
 def get_domain(run1, run2):
     return run1['domain']
+
 
 def sat_vs_opt(run):
     category = {'lama11': 'sat', 'iter-hadd': 'sat', 'ipdb': 'opt',
@@ -135,6 +142,7 @@ def sat_vs_opt(run):
     for nick, cat in category.items():
         if nick in run['config_nick']:
             return {cat: [(run['config'], run.get('expansions'))]}
+
 
 exp.add_report(ScatterPlotReport(attributes=['expansions'],
                                  filter_config_nick=['iter-hadd', 'lama11']),
