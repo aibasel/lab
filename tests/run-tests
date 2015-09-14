@@ -44,16 +44,9 @@ cd downward
 python -m doctest downward/suites.py
 cd ..
 
-EXAMPLES="lmcut.py report-external-results.py showcase-options.py \
-    standard_exp.py simple/simple-exp.py pi/pi.py pi/pi-ext.py \
-    planner/planner.py planner/planner-ext.py"
-
 # Check imports and unused/missing variables.
 pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
-pyflakes downward
-cd examples
-pyflakes ${EXAMPLES}
-cd ..
+pyflakes downward examples
 
 ./tests/find-dead-code
 
