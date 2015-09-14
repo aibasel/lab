@@ -51,8 +51,7 @@ pyflakes downward examples
 ./tests/find-dead-code
 
 # Check code formatting.
-PEP8_OPTS="--max-line-length=90"
-pep8 $PEP8_OPTS --exclude=*external*,data lab downward examples/*.py examples/*/*.py
+pep8 --max-line-length=90 --exclude=*external*,data lab downward examples
 
 # Check if documentation builds.
 cd docs

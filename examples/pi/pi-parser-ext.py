@@ -4,6 +4,7 @@ import math
 
 from lab.parser import Parser
 
+
 def diff(content, props):
     pi = props.get('pi')
     props['diff'] = abs(math.pi - pi)

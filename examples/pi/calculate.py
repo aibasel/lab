@@ -3,6 +3,7 @@
 import sys
 import time
 
+
 def calculate_pi(rounds):
     s = 0
     i = 1
@@ -11,6 +12,7 @@ def calculate_pi(rounds):
         s += 1./i - 1./(i+2)
         i += 4
     return 4 * s
+
 
 if __name__ == '__main__':
     start = time.time()
