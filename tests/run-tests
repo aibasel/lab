@@ -59,10 +59,7 @@ cd ..
 
 # Check code formatting.
 PEP8_OPTS="--max-line-length=90"
-pep8 $PEP8_OPTS --exclude=*external*,data lab downward
-cd examples
-pep8 $PEP8_OPTS --max-line-length=120 ${EXAMPLES}
-cd ..
+pep8 $PEP8_OPTS --exclude=*external*,data lab downward examples/*.py examples/*/*.py
 
 # Check if documentation builds.
 cd docs
