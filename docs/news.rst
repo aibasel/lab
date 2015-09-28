@@ -1,6 +1,19 @@
 News
 ====
 
+v1.8 (unreleased)
+-----------------
+
+lab
+^^^
+* Deprecate predefined experiment steps (``remove_exp_dir``,
+  ``zip_exp_dir``, ``unzip_exp_dir``).
+
+downward
+^^^^^^^^
+
+
+
 v1.7 (2015-08-19)
 -----------------
 
