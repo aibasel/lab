@@ -22,7 +22,7 @@ cd ..
 
 # Make lab available on the PYTHONPATH.
 LAB=`realpath .`
-echo Checking lab at $LAB
+echo "Checking lab at $LAB"
 if [ -z "$PYTHONPATH" ]; then
     # PYTHONPATH is empty.
     export PYTHONPATH=${LAB}
@@ -34,7 +34,7 @@ echo "PYTHONPATH: $PYTHONPATH"
 
 cleanup
 
-py.test-2.7 tests
+py.test tests
 
 # Run doctests.
 cd lab
