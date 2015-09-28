@@ -61,6 +61,7 @@ class Step(object):
         return (getattr(self.func, '__name__', None) or
                 self.func.__class__.__name__.lower())
 
+    # TODO: Can we remove this after cleaning up the environments module?
     def copy(self):
         """Return a copy of this Step."""
         return Step(self.name, self.func, *self.args[:], **self.kwargs.copy())
