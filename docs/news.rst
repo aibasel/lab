@@ -6,20 +6,31 @@ v1.8 (unreleased)
 
 lab
 ^^^
-* Automatically determine whether to queue steps sequentially on the grid.
+* Deprecate predefined experiment steps (``remove_exp_dir``,
+  ``zip_exp_dir``, ``unzip_exp_dir``).
 
 downward
 ^^^^^^^^
-* ...
 
 
-v1.7
-----
+
+v1.7 (2015-08-19)
+-----------------
 
 lab
 ^^^
+* Automatically determine whether to queue steps sequentially on the grid.
 * Reports: right-align headers (except the left-most one).
 * Reports: let :func:`lab.reports.gm` return 0 if any of the numbers is 0.
+* Add test that checks for dead code with vulture.
+* Remove Step.remove_exp_dir step.
+* Remove default time and memory limits for commands. You can now pass
+  ``mem_limit=None`` and ``time_limit=None`` to disable limits for a
+  command.
+* Pass ``extra_options`` kwarg to
+  :py:class:`lab.environments.OracleGridEngineEnvironment` to set
+  additional options like parallel environments.
+* Sort ``properties`` files by keys.
 
 downward
 ^^^^^^^^
@@ -30,6 +41,13 @@ downward
 * Allow fractional plan costs.
 * Set search_time and total_time to 0.01 instead of 0.1 if they are 0.0 in the log.
 * Parse initial h-value for aborted searches (Florian).
+* Use EXIT_UNSOLVABLE instead of logs to determine unsolvability.
+  Currently, this exit code is only returned by EHC.
+* Exit with warning if search parser is not executable.
+* Deprecate ``downward/configs.py`` module.
+* Deprecate ``examples/standard_exp.py`` module.
+* Remove ``preprocess-all.py`` script.
+* By default, use all CPUs for compiling Fast Downward.
 
 
 v1.6

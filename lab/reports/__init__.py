@@ -339,7 +339,8 @@ class Report(object):
         doc = Document(title=name)
         text = self.get_markup()
 
-        text = (text or
+        text = (
+            text or
             'No tables were generated. '
             'This happens when no significant changes occured or '
             'if for all attributes and all problems never all '

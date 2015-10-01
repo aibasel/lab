@@ -58,7 +58,8 @@ exp.add_config('ipdb', ["--search", "astar(ipdb())"], timeout=10)
 exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
 exp.add_config('fdss-1', ['ipc', 'seq-sat-fdss-1', '--plan-file', 'sas_plan'])
 old_portfolio_path = os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py')
-new_portfolio_path = os.path.join(REPO, 'src', 'driver', 'portfolios', 'seq_opt_fdss_1.py')
+new_portfolio_path = os.path.join(
+    REPO, 'src', 'driver', 'portfolios', 'seq_opt_fdss_1.py')
 if os.path.exists(old_portfolio_path):
     exp.add_portfolio(old_portfolio_path)
 elif os.path.exists(new_portfolio_path):
@@ -67,7 +68,8 @@ else:
     raise SystemExit('portfolio not found')
 
 # Before we fetch the new results, delete the old ones
-exp.steps.insert(5, Step('delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
+exp.steps.insert(5, Step(
+    'delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
 
 # Before we build the experiment, delete the old experiment directory
 # and the preprocess directory
@@ -82,8 +84,10 @@ def solved(run):
     """Only include solved problems."""
     return run['coverage'] == 1
 
+
 def only_two_configs(run):
     return run['config_nick'] in ['lama11', 'iter-hadd']
+
 
 def remove_work_tag(run):
     """Remove "WORK-" from the configs."""
@@ -93,6 +97,7 @@ def remove_work_tag(run):
     config = config.replace('downward-', '')
     run['config'] = config
     return run
+
 
 def filter_and_transform(run):
     """Remove "WORK-" from the configs and only include certain configurations.
@@ -106,9 +111,15 @@ def filter_and_transform(run):
 # Check that the various fetcher options work.
 def eval_dir(num):
     return os.path.join(exp.eval_dir, 'test%d' % num)
+
+
 exp.add_step(Step('fetcher-test1', Fetcher(), exp.path, eval_dir(1), copy_all=True))
-exp.add_step(Step('fetcher-test2', Fetcher(), exp.path, eval_dir(2), copy_all=True, write_combined_props=True))
-exp.add_step(Step('fetcher-test3', Fetcher(), exp.path, eval_dir(3), filter_config_nick='lama11'))
+exp.add_step(Step(
+    'fetcher-test2', Fetcher(), exp.path, eval_dir(2),
+    copy_all=True, write_combined_props=True))
+exp.add_step(Step(
+    'fetcher-test3', Fetcher(), exp.path, eval_dir(3),
+    filter_config_nick='lama11'))
 exp.add_step(Step('fetcher-test4', Fetcher(), exp.path, eval_dir(4),
                   parsers=os.path.join(DIR, 'simple', 'simple-parser.py')))
 
@@ -117,17 +128,26 @@ exp.add_step(Step('fetcher-test4', Fetcher(), exp.path, eval_dir(4),
 abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
 abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
 abs_combined_report_file = os.path.join(exp.eval_dir, '%s-abs-c.tex' % EXPNAME)
-exp.add_step(Step('report-abs-d', AbsoluteReport('domain', attributes=ATTRIBUTES + ['expansions', 'cost']),
-                  exp.eval_dir, abs_domain_report_file))
+exp.add_step(Step(
+    'report-abs-d',
+    AbsoluteReport('domain', attributes=ATTRIBUTES + ['expansions', 'cost']),
+    exp.eval_dir,
+    abs_domain_report_file))
 exp.add_step(Step('report-abs-p-filter', AbsoluteReport('problem', attributes=ATTRIBUTES,
                   filter=filter_and_transform), exp.eval_dir, abs_problem_report_file))
 exp.add_step(Step('report-abs-combined', AbsoluteReport(attributes=None, format='tex'),
                   exp.eval_dir, abs_combined_report_file))
-exp.add_report(TimeoutReport([1, 2, 3]), outfile=os.path.join(exp.eval_dir, 'timeout-eval', 'properties'))
-exp.add_report(FilterReport(), outfile=os.path.join(exp.eval_dir, 'filter-eval', 'properties'))
+exp.add_report(
+    TimeoutReport([1, 2, 3]),
+    outfile=os.path.join(exp.eval_dir, 'timeout-eval', 'properties'))
+exp.add_report(
+    FilterReport(),
+    outfile=os.path.join(exp.eval_dir, 'filter-eval', 'properties'))
+
 
 def get_domain(run1, run2):
     return run1['domain']
+
 
 def sat_vs_opt(run):
     category = {'lama11': 'sat', 'iter-hadd': 'sat', 'ipdb': 'opt',
@@ -135,6 +155,7 @@ def sat_vs_opt(run):
     for nick, cat in category.items():
         if nick in run['config_nick']:
             return {cat: [(run['config'], run.get('expansions'))]}
+
 
 exp.add_report(ScatterPlotReport(attributes=['expansions'],
                                  filter_config_nick=['iter-hadd', 'lama11']),
@@ -156,13 +177,17 @@ params = {
     'savefig.dpi': 100,
 }
 
-exp.add_step(Step('report-scatter-domain',
-                  ScatterPlotReport(attributes=['expansions'], filter=only_two_configs,
-                                    get_category=get_domain, xscale='linear', yscale='linear',
-                                    category_styles={'gripper': {'c': 'b', 'marker': '+'}},
-                                    params=params,
-                                    legend_location=None),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
+exp.add_step(Step(
+    'report-scatter-domain',
+    ScatterPlotReport(
+        attributes=['expansions'],
+        filter=only_two_configs,
+        get_category=get_domain, xscale='linear', yscale='linear',
+        category_styles={'gripper': {'c': 'b', 'marker': '+'}},
+        params=params,
+        legend_location=None),
+    exp.eval_dir,
+    os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
 exp.add_report(ProblemPlotReport(attributes=['expansions'], filter=remove_work_tag,
                                  yscale='symlog', params=params),
                name='report-plot-prob', outfile='plots')
@@ -194,11 +219,13 @@ exp.add_report(TaskwiseReport(attributes=['coverage', 'expansions'],
                name='report-taskwise',
                outfile='taskwise.html')
 
-exp.add_report(AbsoluteReport('problem', colored=True,
-                              attributes=['coverage', 'search_time', 'cost', 'memory',
-                                          'error', 'cost_all', 'limit_search_time',
-                                          'initial_h_value', 'initial_h_values']),
-               name='report-abs-p', outfile=abs_problem_report_file)
+exp.add_report(
+    AbsoluteReport(
+        'problem', colored=True, attributes=[
+            'coverage', 'evaluated', 'evaluations', 'search_time',
+            'cost', 'memory', 'error', 'cost_all', 'limit_search_time',
+            'initial_h_value', 'initial_h_values', 'run_dir']),
+    name='report-abs-p', outfile=abs_problem_report_file)
 
 exp.add_step(Step('finished', call, ['echo', 'Experiment', 'finished.']))
 

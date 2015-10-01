@@ -22,7 +22,7 @@ cd ..
 
 # Make lab available on the PYTHONPATH.
 LAB=`realpath .`
-echo Checking lab at $LAB
+echo "Checking lab at $LAB"
 if [ -z "$PYTHONPATH" ]; then
     # PYTHONPATH is empty.
     export PYTHONPATH=${LAB}
@@ -30,11 +30,11 @@ elif [[ "$PYTHONPATH" != *"$LAB"* ]]; then
     # LAB is NOT on the PYTHONPATH.
     export PYTHONPATH=${LAB}:${PYTHONPATH}
 fi
-echo PYTHONPATH: $PYTHONPATH
+echo "PYTHONPATH: $PYTHONPATH"
 
 cleanup
 
-py.test-2.7 tests
+py.test tests
 
 # Run doctests.
 cd lab
@@ -44,29 +44,14 @@ cd downward
 python -m doctest downward/suites.py
 cd ..
 
-EXAMPLES="lmcut.py showcase-options.py standard_exp.py \
-    simple/simple-exp.py pi/pi.py pi/pi-ext.py planner/planner.py \
-    planner/planner-ext.py"
-
 # Check imports and unused/missing variables.
 pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
-pyflakes downward
-cd examples
-pyflakes ${EXAMPLES}
-cd ..
+pyflakes downward examples
 
 ./tests/find-dead-code
 
 # Check code formatting.
-# Ignore under-indented continuation lines (E128) and allow longer lines.
-PEP8_OPTS="--ignore=E128 --max-line-length=90"
-pep8 $PEP8_OPTS --exclude=*external*,data lab
-pep8 $PEP8_OPTS --exclude=suites.py downward
-# Don't require two blank lines between each suite (E302).
-pep8 $PEP8_OPTS --ignore=E302 downward/suites.py
-cd examples
-pep8 $PEP8_OPTS --max-line-length=120 --ignore=E302 ${EXAMPLES}
-cd ..
+pep8 --max-line-length=90 --exclude=*external*,data lab downward examples
 
 # Check if documentation builds.
 cd docs
@@ -85,9 +70,11 @@ cd pi
 ./pi-ext.py --help
 cd ..
 
+./report-external-results.py --all
+
 # Only check downward code if $REPO exists.
 if [ -d "$REPO" ]; then
-    ./lmcut.py {1..8}
+    ./lmcut.py --all
 
     cd planner
     ./planner.py --all
@@ -104,4 +91,4 @@ fi
 
 cleanup
 
-echo TESTS PASSED
+echo "TESTS PASSED"

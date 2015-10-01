@@ -206,8 +206,8 @@ class HgCheckout(Checkout):
         else:
             tools.makedirs(path)
             if self.using_cmake:
-                dirs = ['-I{}'.format(d) for d in
-                    ['build.py', 'driver', 'fast-downward.py', 'src']]
+                dirs = ['-I{}'.format(d) for d in [
+                    'build.py', 'driver', 'fast-downward.py', 'src']]
                 retcode = tools.run_command(
                     ['hg', 'archive', '-r', self.rev, path] + dirs, cwd=self.repo)
             else:

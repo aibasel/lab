@@ -18,6 +18,7 @@ from lab.reports import Report
 
 EXPPATH = 'data/exp-pi'
 
+
 class PiReport(Report):
     def get_text(self):
         lines = []
@@ -37,8 +38,10 @@ for rounds in [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]:
     run.add_command('parse-pi', ['PARSER'])
     run.set_property('id', ['calc-%d' % rounds])
 
+
 def good(run):
     return run['diff'] <= 0.01
+
 
 exp.add_step(Step('report', Report(format='html', attributes=['pi', 'diff'],
                   filter=good), exp.eval_dir,

@@ -66,23 +66,25 @@ PORTFOLIO_PATTERNS = [
 ]
 
 
-ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
+COMMON_PATTERNS = [
     _get_states_pattern('dead_ends', 'Dead ends:'),
-    _get_states_pattern('evaluations', 'Evaluated'),
+    _get_states_pattern('evaluated', 'Evaluated'),
+    ('evaluations', re.compile(r'^Evaluations: (.+)$'), int),
     _get_states_pattern('expansions', 'Expanded'),
     _get_states_pattern('generated', 'Generated'),
+    _get_states_pattern('reopened', 'Reopened'),
+]
+
+
+ITERATIVE_PATTERNS = COMMON_PATTERNS + PORTFOLIO_PATTERNS + [
     # We cannot include " \[t=.+s\]" (global timer) in the regex, because
     # older versions don't print it.
     ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
 ]
 
 
-CUMULATIVE_PATTERNS = [
-    _get_states_pattern('dead_ends', 'Dead ends:'),
-    _get_states_pattern('evaluations', 'Evaluated'),
-    _get_states_pattern('expansions', 'Expanded'),
-    _get_states_pattern('generated', 'Generated'),
-    _get_states_pattern('reopened', 'Reopened'),
+CUMULATIVE_PATTERNS = COMMON_PATTERNS + [
+    # TODO: Rename to evaluated_until_last_jump and expanded_until_last_jump.
     _get_states_pattern('evaluations_until_last_jump', 'Evaluated until last jump:'),
     _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
@@ -153,10 +155,11 @@ def get_iterative_results(content, props):
     if len(values['search_time']) > len(values['expansions']):
         values['search_time'].pop()
 
-    _update_props_with_iterative_values(props, values,
-            [('cost', 'plan_length'),
-             # TODO: add reopened, evaluated and dead ends.
-             ('expansions', 'generated', 'search_time')])
+    _update_props_with_iterative_values(
+        props, values, [
+            ('cost', 'plan_length'),
+            # TODO: add reopened, evaluated and dead ends.
+            ('expansions', 'generated', 'search_time')])
 
 
 def get_cumulative_results(content, props):
@@ -217,7 +220,7 @@ def get_initial_h_values(content, props):
     """
     heuristic_to_values = defaultdict(list)
     matches = re.findall(
-        r'^Initial heuristic value for (.+): (\d+|infinity)$',
+        r'^Initial heuristic value for (.+): ([-]?\d+|infinity)$',
         content, flags=re.M)
     for heuristic, init_h in matches:
         if init_h == "infinity":
@@ -278,12 +281,15 @@ def scores(content, props):
             props.get(attr), min_bound=100, max_bound=1e6, min_score=0.0)
 
     props.update({
-        'score_memory': log_score(props.get('memory'),
-                min_bound=2000, max_bound=max_memory, min_score=0.0),
-        'score_total_time': log_score(props.get('total_time'),
-                min_bound=1.0, max_bound=1800.0, min_score=0.0),
-        'score_search_time': log_score(props.get('search_time'),
-                min_bound=1.0, max_bound=1800.0, min_score=0.0)})
+        'score_memory': log_score(
+            props.get('memory'),
+            min_bound=2000, max_bound=max_memory, min_score=0.0),
+        'score_total_time': log_score(
+            props.get('total_time'),
+            min_bound=1.0, max_bound=1800.0, min_score=0.0),
+        'score_search_time': log_score(
+            props.get('search_time'),
+            min_bound=1.0, max_bound=1800.0, min_score=0.0)})
 
 
 def check_min_values(content, props):

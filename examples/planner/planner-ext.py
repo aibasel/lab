@@ -25,7 +25,7 @@ REPO = '/home/jendrik/projects/Downward/downward'
 
 # combos = [
 #     (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097), Planner(REPO)),
-#      (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097), Planner(MYOTHER_REPO)),
+#     (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097), Planner(MYOTHER_REPO)),
 # ]
 
 exp = DownwardExperiment(EXPPATH, REPO,  # combinations=combos,
@@ -39,8 +39,10 @@ exp.add_portfolio(os.path.join(REPO, 'src', 'driver', 'portfolios', 'seq_sat_fds
 
 exp.add_report(AbsoluteReport('problem'), name='make-report', outfile='report-abs-p.html')
 
+
 def solved(run):
     return run['coverage'] == 1
+
 
 exp.add_step(Step('suite', SuiteReport(filter=solved),
                   exp.eval_dir,

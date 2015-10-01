@@ -34,3 +34,24 @@ How can I run multiple steps sequentially on a computer grid?
 Previously, you had to use the ``--all`` commandline option for this.
 Since version 1.8 lab will automatically run steps sequentially on the
 grid engine if one of the steps itself submits runs to the grid engine.
+
+
+I forgot to parse something. How can I run only the parser again?
+-----------------------------------------------------------------
+
+See above for writing a parser. Once you have it, add a new fetcher
+with :py:func:`add_fetcher <lab.experiment.Experiment.add_fetcher>` and
+let it use your parser::
+
+    exp = Experiment('my-path')
+    exp.add_fetcher(name='parse-again', parsers=['path/to/my-parser'])
+
+Call the fetcher by invoking the new experiment step::
+
+    ./my-exp.py parse-again
+
+
+How can I make reports and plots for results obtained without lab?
+------------------------------------------------------------------
+
+See ``examples/report-external-results.py`` for an example.

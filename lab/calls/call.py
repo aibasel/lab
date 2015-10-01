@@ -29,8 +29,9 @@ def set_limit(kind, soft_limit, hard_limit=None):
     try:
         resource.setrlimit(kind, (soft_limit, hard_limit))
     except (OSError, ValueError), err:
-        sys.stderr.write('Resource limit for %s could not be set to %s (%s)\n' %
-               (kind, (soft_limit, hard_limit), err))
+        sys.stderr.write(
+            'Resource limit for %s could not be set to %s (%s)\n' %
+            (kind, (soft_limit, hard_limit), err))
 
 
 class Call(subprocess.Popen):
@@ -95,6 +96,7 @@ class Call(subprocess.Popen):
         if (self.wall_clock_time_limit is not None and
                 wall_clock_time > self.wall_clock_time_limit):
             set_property('error', 'unexplained-warning-wall-clock-time-very-high')
-            sys.stderr.write('Error: wall-clock time for %s too high: %.2f > %d\n' %
+            sys.stderr.write(
+                'Error: wall-clock time for %s too high: %.2f > %d\n' %
                 (self.name, wall_clock_time, self.wall_clock_time_limit))
         return retcode
