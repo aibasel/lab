@@ -19,12 +19,14 @@ from downward.reports.scatter import ScatterPlotReport
 from lab.steps import Step
 
 
-EXPPATH = 'data/exp-planner'
+EXPPATH = 'data/exp-planner-ext'
 REPO = '/home/jendrik/projects/Downward/downward'
 
-REV = 'default'
+# Use CMake and Make revision.
+REVS = ['default', '10299f45f82a']
 COMBOS = [
-    (Translator(REPO, rev=REV), Preprocessor(REPO, rev=REV), Planner(REPO, rev=REV)),
+    (Translator(REPO, rev=rev), Preprocessor(REPO, rev=rev), Planner(REPO, rev=rev))
+    for rev in REVS
 ]
 
 exp = DownwardExperiment(
@@ -46,7 +48,7 @@ exp.add_step(Step('suite', SuiteReport(filter=solved),
                   exp.eval_dir,
                   os.path.join(exp.eval_dir, 'suite.py')))
 
-exp.add_step(Step('scatter', ScatterPlotReport(filter_config_nick=['ff', 'add'],
+exp.add_step(Step('scatter', ScatterPlotReport(filter_config_nick=['ff'],
                                                attributes='expansions', format='png'),
                   exp.eval_dir,
                   os.path.join(exp.eval_dir, 'scatter')))
