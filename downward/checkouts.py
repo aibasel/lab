@@ -190,6 +190,8 @@ class HgCheckout(Checkout):
     def checkout(self, compilation_options=None):
         if self.rev == 'WORK':
             self._compile(compilation_options)
+            if self.using_cmake:
+                self._copy_binaries_into_src_dir()
         else:
             self._cache(compilation_options)
 
@@ -231,17 +233,21 @@ class HgCheckout(Checkout):
         elif self.rev != "WORK":
             tools.touch(self._sentinel_file)
 
+    def _copy_binaries_into_src_dir(self):
+        assert self.using_cmake
+        bin_dir = self.get_path('builds', 'release32', 'bin')
+        for src, dest in [
+                ("preprocess", ["preprocess", "preprocess"]),
+                ("downward", ["search", "downward"]),
+                ("validate", ["validate"])]:
+            shutil.copy2(os.path.join(bin_dir, src), os.path.join(self.src_dir, *dest))
+
     def _cleanup(self):
         assert self.rev != 'WORK'
 
         # Move binaries out of "builds" directory.
         if self.using_cmake:
-            bin_dir = self.get_path('builds', 'release32', 'bin')
-            for src, dest in [
-                    ("preprocess", ["preprocess", "preprocess"]),
-                    ("downward", ["search", "downward"]),
-                    ("validate", ["validate"])]:
-                shutil.move(os.path.join(bin_dir, src), os.path.join(self.src_dir, *dest))
+            self._copy_binaries_into_src_dir()
 
         # Strip binaries.
         planner_name = 'downward' if self.using_cmake else 'downward-release'
