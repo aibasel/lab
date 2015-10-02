@@ -1,17 +1,23 @@
 News
 ====
 
-v1.8 (unreleased)
+v1.8 (2015-10-02)
 -----------------
 
 lab
 ^^^
 * Deprecate predefined experiment steps (``remove_exp_dir``,
   ``zip_exp_dir``, ``unzip_exp_dir``).
+* Docs: add FAQs, update docs.
+* Add more regression and style tests.
 
 downward
 ^^^^^^^^
-
+* Parse both evaluated states (evaluated) and evaluations (evaluations).
+* Add example experiment showing how to make reports for data obtained without lab.
+* Add suite_sat_strips().
+* Parse negative initial h values.
+* Support CMake builds.
 
 
 v1.7 (2015-08-19)
