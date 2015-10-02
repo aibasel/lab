@@ -629,7 +629,9 @@ class DownwardExperiment(Experiment):
         first_planner_checkout = self.combinations[0][2]
         validate = first_planner_checkout.get_path('src', 'validate')
         if not os.path.exists(validate):
-            logging.critical('validate not found at %s.' % validate)
+            logging.critical(
+                'validate not found at %s. Try deleting the cached revision.'
+                % validate)
         self.add_resource('VALIDATE', validate, 'validate')
 
         downward_validate = os.path.join(DOWNWARD_SCRIPTS_DIR, 'validate.py')
