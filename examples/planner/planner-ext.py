@@ -11,31 +11,29 @@ The file planner.py contains the "basic" version of this experiment.
 
 import os
 
+from downward.checkouts import Translator, Preprocessor, Planner
 from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.suite import SuiteReport
 from downward.reports.scatter import ScatterPlotReport
 from lab.steps import Step
-# from downward import suites
-# from downward.checkouts import Translator, Preprocessor, Planner
 
 
 EXPPATH = 'data/exp-planner'
 REPO = '/home/jendrik/projects/Downward/downward'
 
-# combos = [
-#     (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097), Planner(REPO)),
-#     (Translator(REPO, rev='WORK'), Preprocessor(REPO, rev=3097), Planner(MYOTHER_REPO)),
-# ]
+REV = 'default'
+COMBOS = [
+    (Translator(REPO, rev=REV), Preprocessor(REPO, rev=REV), Planner(REPO, rev=REV)),
+]
 
-exp = DownwardExperiment(EXPPATH, REPO,  # combinations=combos,
-                         limits={'search_time': 60})
+exp = DownwardExperiment(
+    EXPPATH, REPO, combinations=COMBOS, limits={'search_time': 60})
 
 exp.add_suite(['gripper:prob01.pddl'])
 exp.add_suite('zenotravel:pfile2')
 exp.add_config('ff', ['--search', 'lazy(single(ff()))'])
 exp.add_config('add', ['--search', 'lazy(single(add()))'])
-exp.add_portfolio(os.path.join(REPO, 'src', 'driver', 'portfolios', 'seq_sat_fdss_1.py'))
 
 exp.add_report(AbsoluteReport('problem'), name='make-report', outfile='report-abs-p.html')
 
