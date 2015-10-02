@@ -89,7 +89,8 @@ class PreprocessParser(Parser):
         #    0 operators removed
         #    0 axioms removed
         #    38 propositions removed
-        for value in ['relevant atoms', 'auxiliary atoms', 'final queue length',
+        for value in [
+                'relevant atoms', 'auxiliary atoms', 'final queue length',
                 'total queue pushes', 'uncovered facts',
                 'effect conditions simplified', 'implied preconditions added',
                 'operators removed', 'axioms_removed', 'propositions removed']:

@@ -46,7 +46,6 @@ except ImportError:
 # (ujson_load: 2.49). cjson loads even slower than simplejson (cjson_load: 3.28).
 try:
     import simplejson as json
-    assert json  # Silence pyflakes
 except ImportError:
     import json
 
@@ -543,9 +542,8 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
 
 class ArgParser(argparse.ArgumentParser):
     def __init__(self, add_log_option=True, *args, **kwargs):
-        argparse.ArgumentParser.__init__(self, *args,
-                                formatter_class=RawAndDefaultsHelpFormatter,
-                                **kwargs)
+        argparse.ArgumentParser.__init__(
+            self, *args, formatter_class=RawAndDefaultsHelpFormatter, **kwargs)
         if add_log_option:
             try:
                 self.add_argument('-l', '--log-level', dest='log_level',

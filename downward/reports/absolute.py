@@ -86,10 +86,12 @@ class AbsoluteReport(PlanningReport):
                 if self.attribute_is_numeric(attribute):
                     domain_table = self._get_table(attribute)
                     tables.append(('', domain_table))
-                    reports.extract_summary_rows(domain_table, summary,
-                                                link='#' + attribute)
+                    reports.extract_summary_rows(
+                        domain_table, summary, link='#' + attribute)
                 else:
-                    tables.append(('', 'Domain-wise reports only support numeric '
+                    tables.append((
+                        '',
+                        'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
                         (attribute, self._all_attributes[attribute].__name__)))
             if self.resolution in ['problem', 'combined']:

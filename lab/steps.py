@@ -61,6 +61,7 @@ class Step(object):
         return (getattr(self.func, '__name__', None) or
                 self.func.__class__.__name__.lower())
 
+    # TODO: Can we remove this after cleaning up the environments module?
     def copy(self):
         """Return a copy of this Step."""
         return Step(self.name, self.func, *self.args[:], **self.kwargs.copy())
@@ -72,7 +73,12 @@ class Step(object):
                                ', '.join(['%s=%s' % (k, repr(v))
                                           for (k, v) in self.kwargs.items()]))
 
+    _predefined_steps_warning = (
+        'Predefined steps have been deprecated in version 1.8. '
+        'Please define your extra experiment steps manually.')
+
     @classmethod
+    @tools.deprecated(_predefined_steps_warning)
     def zip_exp_dir(cls, exp):
         """
         Return a Step that creates a compressed tarball containing the
@@ -81,12 +87,17 @@ class Step(object):
 
             exp.add_step(Step.zip_exp_dir(exp))
 
+        .. deprecated:: 1.8
+
+            Please define your extra experiment steps manually.
+
         """
         return cls('zip-exp-dir', call,
                    ['tar', '-cjf', exp.name + '.tar.bz2', exp.name],
                    cwd=os.path.dirname(exp.path))
 
     @classmethod
+    @tools.deprecated(_predefined_steps_warning)
     def unzip_exp_dir(cls, exp):
         """
         Return a Step that unzips a compressed tarball containing the
@@ -94,18 +105,27 @@ class Step(object):
 
             exp.add_step(Step.unzip_exp_dir(exp))
 
+        .. deprecated:: 1.8
+
+            Please define your extra experiment steps manually.
+
         """
         return cls('unzip-exp-dir', call,
                    ['tar', '-xjf', exp.name + '.tar.bz2'],
                    cwd=os.path.dirname(exp.path))
 
     @classmethod
+    @tools.deprecated(_predefined_steps_warning)
     def remove_exp_dir(cls, exp):
         """Return a Step that removes the experiment directory.
 
         ::
 
             exp.add_step(Step.remove_exp_dir(exp))
+
+        .. deprecated:: 1.8
+
+            Please define your extra experiment steps manually.
 
         """
         return cls('remove-exp-dir', shutil.rmtree, exp.path)
@@ -129,7 +149,8 @@ class Sequence(list):
         return self[self._get_step_index(step_name)]
 
     def get_steps_text(self):
-        name_width = min(max(len(step.name) for step in self), 50)
+        # Use width 0 if no steps have been added.
+        name_width = min(max([len(step.name) for step in self] + [0]), 50)
         terminal_width, terminal_height = tools.get_terminal_size()
         terminal_width = terminal_width or 80
         lines = ['Available steps:', '================']

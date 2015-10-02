@@ -19,11 +19,20 @@
 import logging
 import os
 import shutil
+import subprocess
 
 from lab import tools
 
 
 _HG_ID_CACHE = {}
+
+
+def hg_revision_has_file(repo, rev, path):
+    if rev == 'WORK':
+        return os.path.exists(os.path.join(repo, path))
+    cmd = ['hg', 'cat', '-r', rev, path]
+    return subprocess.call(
+        cmd, cwd=repo, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
 
 def hg_id(repo, args=None, rev=None):
@@ -165,14 +174,24 @@ class HgCheckout(Checkout):
             summary = get_rev_id(repo, local_rev)
             dest = global_rev
         Checkout.__init__(self, part, repo, global_rev, nick, summary, dest)
+        self._using_cmake = None
 
     @property
     def _sentinel_file(self):
         return self.get_path('build_successful')
 
+    @property
+    def using_cmake(self):
+        if self._using_cmake is None:
+            self._using_cmake = hg_revision_has_file(
+                self.repo, self.rev, os.path.join('src', 'CMakeLists.txt'))
+        return self._using_cmake
+
     def checkout(self, compilation_options=None):
         if self.rev == 'WORK':
             self._compile(compilation_options)
+            if self.using_cmake:
+                self._copy_binaries_into_src_dir()
         else:
             self._cache(compilation_options)
 
@@ -188,8 +207,14 @@ class HgCheckout(Checkout):
                     'it and try again.' % path)
         else:
             tools.makedirs(path)
-            retcode = tools.run_command(
-                ['hg', 'archive', '-r', self.rev, '-I', 'src', path], cwd=self.repo)
+            if self.using_cmake:
+                dirs = ['-I{}'.format(d) for d in [
+                    'build.py', 'driver', 'fast-downward.py', 'src']]
+                retcode = tools.run_command(
+                    ['hg', 'archive', '-r', self.rev, path] + dirs, cwd=self.repo)
+            else:
+                retcode = tools.run_command(
+                    ['hg', 'archive', '-r', self.rev, '-I', 'src', path], cwd=self.repo)
             if retcode != 0:
                 shutil.rmtree(path)
                 logging.critical('Failed to make checkout.')
@@ -198,33 +223,60 @@ class HgCheckout(Checkout):
 
     def _compile(self, options=None):
         options = options or []
-        retcode = tools.run_command(['./build_all'] + options, cwd=self.src_dir)
+        repo = self.get_path()
+        if self.using_cmake:
+            retcode = tools.run_command(['./build.py'] + options, cwd=repo)
+        else:
+            retcode = tools.run_command(['./build_all'] + options, cwd=self.src_dir)
         if retcode != 0:
-            logging.critical('Build failed in: %s' % self.src_dir)
+            logging.critical('Build failed in %s' % repo)
         elif self.rev != "WORK":
             tools.touch(self._sentinel_file)
 
+    def _copy_binaries_into_src_dir(self):
+        assert self.using_cmake
+        bin_dir = self.get_path('builds', 'release32', 'bin')
+        for src, dest in [
+                ("preprocess", ["preprocess", "preprocess"]),
+                ("downward", ["search", "downward"]),
+                ("validate", ["validate"])]:
+            shutil.copy2(os.path.join(bin_dir, src), os.path.join(self.src_dir, *dest))
+
     def _cleanup(self):
         assert self.rev != 'WORK'
-        tools.run_command(['./build_all', 'clean'], cwd=self.src_dir)
+
+        # Move binaries out of "builds" directory.
+        if self.using_cmake:
+            self._copy_binaries_into_src_dir()
+
         # Strip binaries.
-        downward_bin = os.path.join(self.src_dir, 'search', 'downward-release')
-        preprocess_bin = os.path.join(self.src_dir, 'preprocess', 'preprocess')
-        assert os.path.exists(preprocess_bin), preprocess_bin
-        binaries = [preprocess_bin]
-        if os.path.exists(downward_bin):
-            binaries.append(downward_bin)
+        planner_name = 'downward' if self.using_cmake else 'downward-release'
+        binaries = [os.path.join(self.src_dir, *parts) for parts in [
+            ('search', planner_name),
+            ('preprocess', 'preprocess'),
+            ('validate',)]]
+        for binary in binaries:
+            assert os.path.exists(binary), binary
         tools.run_command(['strip'] + binaries)
+
         # Remove unneeded files from "src" dir if they exist.
-        for name in ['dist', 'VAL', 'validate']:
+        for name in ['dist', 'VAL']:
             path = os.path.join(self.src_dir, name)
             if os.path.isfile(path):
                 os.remove(path)
             elif os.path.isdir(path):
                 shutil.rmtree(path)
+        # Remove intermediate files.
+        if self.using_cmake:
+            shutil.rmtree(os.path.join(self.get_path("builds")))
+        else:
+            tools.run_command(['./build_all', 'clean'], cwd=self.src_dir)
 
     def _get_plan_script(self):
-        return os.path.join(self.src_dir, 'fast-downward.py')
+        if self.using_cmake:
+            return self.get_path('fast-downward.py')
+        else:
+            return os.path.join(self.src_dir, 'fast-downward.py')
 
     def has_python_plan_script(self):
         return os.path.exists(self._get_plan_script())
