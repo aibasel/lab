@@ -57,15 +57,19 @@ exp.add_config('ipdb', ["--search", "astar(ipdb())"], timeout=10)
 # Use original LAMA 2011 configuration
 exp.add_config('lama11', ['ipc', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
 exp.add_config('fdss-1', ['ipc', 'seq-sat-fdss-1', '--plan-file', 'sas_plan'])
-old_portfolio_path = os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py')
-new_portfolio_path = os.path.join(
-    REPO, 'src', 'driver', 'portfolios', 'seq_opt_fdss_1.py')
-if os.path.exists(old_portfolio_path):
-    exp.add_portfolio(old_portfolio_path)
-elif os.path.exists(new_portfolio_path):
-    exp.add_portfolio(new_portfolio_path)
-else:
-    raise SystemExit('portfolio not found')
+
+portfolio_paths = [
+    os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py'),
+    os.path.join(REPO, 'src', 'driver', 'portfolios', 'seq_opt_fdss_1.py'),
+    os.path.join(REPO, 'driver', 'portfolios', 'seq_opt_fdss_1.py'),
+]
+portfolio_found = False
+for path in portfolio_paths:
+    if os.path.exists(path):
+        exp.add_portfolio(path)
+        portfolio_found = True
+if not portfolio_found:
+    raise SystemExit('Error: portfolio not found')
 
 # Before we fetch the new results, delete the old ones
 exp.steps.insert(5, Step(
