@@ -24,13 +24,17 @@ from downward.reports import PlanningReport
 
 
 class TaskwiseReport(PlanningReport):
-    def get_markup(self):
-        if not len(self.configs) == 1:
-            logging.critical('The number of configs has to be one for taskwise reports.')
-        table = Table()
-        for (domain, problem), runs in self.problem_runs.items():
-            assert len(runs) == 1, len(runs)
-            run = runs[0]
+    def _get_table(self, domain, runs):
+        table = Table(title=domain)
+        for run in runs:
             for attr in self.attributes:
-                table.add_cell('%s:%s' % (domain, problem), attr, run.get(attr))
-        return str(table)
+                table.add_cell(run['problem'], attr, run.get(attr))
+        return table
+
+    def get_markup(self):
+        if len(self.configs) != 1:
+            logging.critical('Taskwise reports need exactly one config.')
+        tables = [
+            self._get_table(domain, runs)
+            for (domain, config), runs in sorted(self.domain_config_runs.items())]
+        return '\n'.join(str(table) for table in tables)
