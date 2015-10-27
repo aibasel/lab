@@ -244,8 +244,8 @@ class FastDownwardExperiment(Experiment):
 
         If given, *driver_options* must be a list of strings. They will
         be passed to the ``fast-downward.py`` script. See
-        ``fast-downward.py --help`` for available options. The list will
-        always start with ``["--search-time-limit", "30m",
+        ``fast-downward.py --help`` for available options. The list is
+        always prepended with ``["--search-time-limit", "30m",
         "--search-memory-limit', "2G"]``. Specifying custom limits will
         override these default limits.
 
