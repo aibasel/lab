@@ -1,13 +1,13 @@
-Choose a destination for the lab package, install the dependencies and clone the
-repository::
+Choose a destination for the lab package, install the dependencies and
+clone the repository::
 
     LAB=/path/to/lab
     sudo apt-get install mercurial python2.7 python-matplotlib python-simplejson
-    hg clone https://bitbucket.org/jendrikseipp/lab ${LAB} -r v1.6  # or later version
+    hg clone https://bitbucket.org/jendrikseipp/lab ${LAB}
 
 Notes about requirements:
 
-* lab works with Python 2.6 and 2.7.
+* lab needs Python 2.7. Python 3 is not supported.
 * python-matplotlib is only needed for reports that generate graphs.
 * python-simplejson is optional, but makes generating reports much faster.
 
