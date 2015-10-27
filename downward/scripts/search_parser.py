@@ -200,6 +200,14 @@ def unsolvable(content, props):
     props['unsolvable'] = int(props['search_returncode'] == EXIT_UNSOLVABLE)
 
 
+def invalid_solution(props):
+    if 'driver_options' in props:
+        # Catch invalid plans by examining the driver's exitcode below.
+        return False
+    else:
+        return props.get('validate_returncode') != 0
+
+
 def coverage(content, props):
     # TODO: Count runs as unsuccessful if they used more than the
     # alotted time. Currently this is not possible since we don't
@@ -207,7 +215,7 @@ def coverage(content, props):
     props['coverage'] = int(
         'plan_length' in props and
         'cost' in props and
-        props.get('validate_returncode') == 0)
+        not invalid_solution(props))
 
 
 def get_initial_h_values(content, props):
@@ -306,12 +314,12 @@ def get_error(content, props):
     """If there was an error, store its source in props['error'].
 
     For unexplained errors please check the files run.log, run.err,
-    driver.log and driver.err manually to find the reason for the error.
+    driver.log and driver.err to find the reason for the error.
     """
     if props.get('error'):
         return
 
-    if props.get('validate_returncode') != 0:
+    if invalid_solution(props):
         props['error'] = 'unexplained-invalid-solution'
         return
 
