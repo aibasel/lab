@@ -6,6 +6,7 @@ import os.path
 import platform
 
 from lab.environments import LocalEnvironment, MaiaEnvironment
+
 from downward.experiments.fast_downward_experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
@@ -14,10 +15,10 @@ SUITE = ['gripper:prob01.pddl', 'zenotravel:pfile1']
 ATTRIBUTES = ['coverage']
 
 if 'cluster' in platform.node():
-    REPO = os.path.expanduser('~/projects/issue67')
+    REPO = os.path.expanduser('~/projects/downward')
     ENV = MaiaEnvironment(priority=-10)
 else:
-    REPO = os.path.expanduser('~/projects/Downward/issue67')
+    REPO = os.path.expanduser('~/projects/Downward/downward')
     ENV = LocalEnvironment(processes=2)
 BENCHMARKS = os.path.join(REPO, 'benchmarks')
 CACHE_DIR = os.path.expanduser('~/lab')
