@@ -17,13 +17,13 @@
 
 """Main module for creating experiments."""
 
+from collections import OrderedDict
+import logging
 import os
 import pkgutil
 import sys
-import logging
 
 from lab import tools
-from lab.tools import OrderedDict
 from lab.fetcher import Fetcher
 from lab.steps import Step, Sequence
 from lab.environments import LocalEnvironment

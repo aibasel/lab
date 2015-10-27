@@ -20,7 +20,7 @@
 A module for running Fast Downward experiments.
 """
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import logging
 import multiprocessing
 import os.path
@@ -177,7 +177,7 @@ class FastDownwardExperiment(Experiment):
         self._suites = defaultdict(list)
 
         # Use OrderedDict to ensure that nicks are unique and ordered.
-        self._algorithms = tools.OrderedDict()
+        self._algorithms = OrderedDict()
 
     def _get_tasks(self):
         tasks = []

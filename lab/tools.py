@@ -28,14 +28,6 @@ import subprocess
 import sys
 import traceback
 
-try:
-    # Python 2.7, 3.1 and above.
-    from collections import OrderedDict
-    OrderedDict  # Silence pyflakes
-except ImportError:
-    from lab.external.ordereddict import OrderedDict
-    OrderedDict  # Silence pyflakes
-
 # Use simplejson where it's available, because it is compatible (just separately
 # maintained), puts no blanks at line endings and loads json much faster:
 # json_dump: 44.41s, simplejson_dump: 45.90s
