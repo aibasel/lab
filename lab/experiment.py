@@ -39,7 +39,7 @@ DEFAULT_ABORT_ON_FAILURE = False
 SHARD_SIZE = 100
 
 # Make argparser available globally so users can add custom arguments.
-ARGPARSER = tools.ArgParser()
+ARGPARSER = tools.get_parser()
 ARGPARSER.epilog = "The list of available steps will be added later."
 ARGPARSER.add_argument(
     'steps', metavar='step', nargs='*', default=[],
