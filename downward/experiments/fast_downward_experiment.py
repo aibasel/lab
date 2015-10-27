@@ -73,9 +73,6 @@ class FastDownwardRun(Run):
             ['FAST_DOWNWARD'] + algo.driver_options +
             ['DOMAIN', 'PROBLEM'] + algo.component_options)
 
-        # TODO: Remove this once the driver validates on its own.
-        self.add_command('validate', ['echo', 'dummy-validate'])
-
         # TODO: Use exp.add_command() once it is available.
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
         self.add_command('parse-search', ['SEARCH_PARSER'])
