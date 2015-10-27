@@ -244,9 +244,10 @@ class FastDownwardExperiment(Experiment):
 
         If given, *driver_options* must be a list of strings. They will
         be passed to the ``fast-downward.py`` script. See
-        ``fast-downward.py --help`` for available options. The default
-        is ``["--search-time-limit", "30m", "--search-memory-limit',
-        "2G"]``.
+        ``fast-downward.py --help`` for available options. The list will
+        always start with ``["--search-time-limit", "30m",
+        "--search-memory-limit', "2G"]``. Specifying custom limits will
+        override these default limits.
 
         Examples::
 
@@ -281,9 +282,10 @@ class FastDownwardExperiment(Experiment):
         if nick in self._algorithms:
             logging.critical('Algorithm nicks must be unique: {}' % nick)
         build_options = build_options or self._get_default_build_options()
-        driver_options = driver_options or [
+        driver_options = ([
             '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
-            '--search-memory-limit', self.DEFAULT_SEARCH_MEMORY_LIMIT]
+            '--search-memory-limit', self.DEFAULT_SEARCH_MEMORY_LIMIT] +
+            (driver_options or []))
         self._algorithms[nick] = _DownwardAlgorithm(
             nick, CachedRevision(repo, rev, build_options),
             driver_options, component_options)
