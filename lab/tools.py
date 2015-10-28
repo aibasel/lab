@@ -531,7 +531,8 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
 
 
 def get_parser(add_log_option=True, **kwargs):
-    parser = argparse.ArgumentParser()
+    kwargs.setdefault('formatter_class', RawAndDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(**kwargs)
     if add_log_option:
         parser.add_argument(
             '-l', '--log-level',
