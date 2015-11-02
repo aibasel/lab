@@ -27,6 +27,32 @@ from lab import tools
 from downward.checkouts import get_global_rev, get_rev_id
 
 
+def _get_options_relevant_for_cache_name(options):
+    """
+    Remove "-j", "-j4" and "-j 4" options.
+
+    These options do not influence the result of the build and a build
+    shouldn't be done again just because we build with a different
+    number of jobs.
+
+    This behaviour is important on the grid, where the compute and the
+    job submission nodes have different numbers of cores. If we made
+    these options part of the directory name, lab would try to
+    recompile the planner on a compute node, which is undesirable.
+    """
+    relevant_options = options[:]
+    for index, option in enumerate(relevant_options):
+        if option and option.startswith('-j'):
+            jobs = option[2:]
+            if not jobs or jobs.isdigit():
+                relevant_options[index] = None
+            if not jobs and len(relevant_options) > index + 1:
+                next_option = relevant_options[index + 1]
+                if next_option.isdigit():
+                    relevant_options[index + 1] = None
+    return [x for x in relevant_options if x is not None]
+
+
 class CachedRevision(object):
     """This class represents Fast Downward checkouts.
 
@@ -54,7 +80,8 @@ class CachedRevision(object):
         return self._path
 
     def _get_cached_revision_name(self):
-        return '-'.join([self.global_rev] + self.build_options)
+        relevant_options = _get_options_relevant_for_cache_name(self.build_options)
+        return '-'.join([self.global_rev] + relevant_options)
 
     def cache(self, revision_cache_dir):
         self._path = os.path.join(

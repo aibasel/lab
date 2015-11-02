@@ -215,6 +215,7 @@ class FastDownwardExperiment(Experiment):
                 'Benchmarks directory {} not found.'.format(benchmarks_dir))
         self._suites[benchmarks_dir].extend(suite)
 
+    # TODO: Always add -j option and update docs.
     def add_algorithm(self, nick, repo, rev, component_options,
                       build_options=None, driver_options=None):
         """

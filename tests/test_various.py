@@ -83,6 +83,7 @@ def test_colors():
     assert tools.get_colors(row, False) == expected_max_wins
     assert tools.rgb_fractions_to_html_color(1, 0, 0.5) == 'rgb(255,0,127)'
 
+
 def test_lazy_file():
     path = 'test-lazy-file.txt'
     if os.path.exists(path):
