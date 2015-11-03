@@ -282,7 +282,8 @@ def scores(content, props):
         return round(score * 100, 2)
 
     # Maximum memory in KB
-    max_memory = (props.get('limit_search_memory') or 2048) * 1024
+    max_memory = props['limit_search_memory'] * 1024
+    max_time = props['limit_search_time']
 
     for attr in ('expansions', 'evaluations', 'generated'):
         props['score_' + attr] = log_score(
@@ -294,10 +295,10 @@ def scores(content, props):
             min_bound=2000, max_bound=max_memory, min_score=0.0),
         'score_total_time': log_score(
             props.get('total_time'),
-            min_bound=1.0, max_bound=1800.0, min_score=0.0),
+            min_bound=1.0, max_bound=max_time, min_score=0.0),
         'score_search_time': log_score(
             props.get('search_time'),
-            min_bound=1.0, max_bound=1800.0, min_score=0.0)})
+            min_bound=1.0, max_bound=max_time, min_score=0.0)})
 
 
 def check_min_values(content, props):
@@ -362,11 +363,15 @@ class SingleSearchParser(SearchParser):
     def __init__(self):
         SearchParser.__init__(self)
 
-        self.add_pattern('landmarks', r'Discovered (\d+?) landmarks', type=int,
+        self.add_pattern('landmarks', 'Discovered (\d+?) landmarks', type=int,
                          required=False)
         self.add_pattern('landmarks_generation_time',
-                         r'Landmarks generation time: (.+)s', type=float,
+                         'Landmarks generation time: (.+)s', type=float,
                          required=False)
+        self.add_pattern('limit_search_time', 'search time limit: (\d+)s',
+                         type=int, required=True)
+        self.add_pattern('limit_search_memory', 'search memory limit: (\d+) MB',
+                         type=int, required=True)
 
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
