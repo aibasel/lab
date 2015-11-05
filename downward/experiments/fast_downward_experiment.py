@@ -64,6 +64,8 @@ class FastDownwardRun(Run):
 
         self._set_properties()
 
+        # Linking to instead of copying the PDDL files makes building
+        # the experiment twice as fast.
         self.add_resource(
             'DOMAIN', self.task.domain_file(), 'domain.pddl', symlink=True)
         self.add_resource(
@@ -79,8 +81,7 @@ class FastDownwardRun(Run):
         self.add_command('parse-search', ['SEARCH_PARSER'])
 
         self.add_command(
-            'compress-output-files',
-            ['xz', 'domain.pddl', 'problem.pddl', 'output.sas', 'output'])
+            'compress-output-files', ['xz', 'output.sas', 'output'])
 
     def _set_properties(self):
         self.set_property('algorithm_nick', self.algo.nick)
