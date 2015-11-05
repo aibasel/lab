@@ -22,8 +22,9 @@ from lab.steps import Step
 EXPPATH = 'data/exp-planner-ext'
 REPO = '/home/jendrik/projects/Downward/downward'
 
-# Use CMake and Make revision.
-REVS = ['default', '10299f45f82a']
+# Use CMake and Make revision. We can't use "tip" since it is already
+# used by some FastDownwardExperiments.
+REVS = ['54e1a1399d4b', '10299f45f82a']
 COMBOS = [
     (Translator(REPO, rev=rev), Preprocessor(REPO, rev=rev), Planner(REPO, rev=rev))
     for rev in REVS
