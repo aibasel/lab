@@ -174,6 +174,8 @@ class _Buildable(object):
         if not command:
             logging.critical('command "%s" cannot be empty' % name)
         name = name.replace(' ', '_')
+        if name in self.commands:
+            logging.critical('a command named "%s" has already been added' % name)
         self.commands[name] = (command, kwargs)
 
     @property
