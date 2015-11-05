@@ -57,7 +57,7 @@ class _Pattern(object):
                 value = self.typ(value)
                 found_props[self.attribute] = value
             except IndexError:
-                logging.error('Atrribute %s not found for pattern %s in '
+                logging.error('Attribute %s not found for pattern %s in '
                               'file %s' % (self.attribute, self, filename))
         elif self.required:
             logging.error('Pattern %s not found in %s' % (self, filename))
