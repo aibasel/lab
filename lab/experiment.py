@@ -50,6 +50,7 @@ class _Buildable(object):
     def __init__(self):
         self.resources = []
         self.new_files = []
+        self.commands = OrderedDict()
         # List of glob-style patterns used to exclude files (not full paths).
         self.ignores = []
         self.properties = tools.Properties()
@@ -127,6 +128,53 @@ class _Buildable(object):
         new_file = (name, dest, content)
         if new_file not in self.new_files:
             self.new_files.append(new_file)
+
+    def add_command(self, name, command, **kwargs):
+        """Add a call to an executable.
+
+        If invoked on a *run*, this method adds the command to the
+        specific run. If invoked on the experiment, the command is
+        appended to the list of commands of each run.
+
+        *name* is a string describing the command.
+
+        *command* has to be a list of strings where the first item is
+        the executable.
+
+        Keyword arguments and default values:
+
+        *abort_on_failure=False*: If set to True and *command* does
+        not exit with code 0, subsequent commands of this run are
+        not executed.
+
+        *time_limit=None*: Abort *command* after *time_limit* seconds.
+
+        *mem_limit=None*: Allow *command* to use at most *mem_limit* MiB.
+
+        All other items in *kwargs* are passed to
+        `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
+
+        Examples::
+
+            # Add command to a specific run.
+            run.add_command('list-directory', ['ls', '-al'])
+            run.add_command(
+                'solver', [path-to-my-solver, 'input-file'], time_limit=60)
+            run.add_command(
+                'preprocess', ['path-to-preprocessor'], stdin='output.sas')
+
+            # Add parser to each run part of the experiment.
+            exp.add_command('parser', ['path-to-my-parser'])
+
+        """
+        if not isinstance(name, basestring):
+            logging.critical('name %s is not a string' % name)
+        if not isinstance(command, (list, tuple)):
+            logging.critical('%s is not a list' % command)
+        if not command:
+            logging.critical('command "%s" cannot be empty' % name)
+        name = name.replace(' ', '_')
+        self.commands[name] = (command, kwargs)
 
     @property
     def _env_vars(self):
@@ -429,9 +477,12 @@ class Experiment(_Buildable):
         self.set_property('runs', num_runs)
         logging.info('Building %d runs' % num_runs)
         for index, run in enumerate(self.runs, 1):
-            run.build()
             if index % 100 == 0:
-                logging.info('Built run %6d/%d' % (index, num_runs))
+                logging.info('Build run %6d/%d' % (index, num_runs))
+            for name, (command, kwargs) in self.commands.items():
+                run.add_command(name, command, **kwargs)
+            run.build()
+        logging.info('Finished building runs')
 
 
 class Run(_Buildable):
@@ -448,7 +499,6 @@ class Run(_Buildable):
 
         self.path = ''
         self.linked_resources = []
-        self.commands = OrderedDict()
 
     def require_resource(self, resource_name):
         """Make *resource_name* available for this run.
@@ -464,43 +514,6 @@ class Run(_Buildable):
 
         """
         self.linked_resources.append(resource_name)
-
-    def add_command(self, name, command, **kwargs):
-        """Add a command to the run.
-
-        *name* is a descriptive name for the command.
-
-        *command* has to be a list of strings where the first item is the
-        executable.
-
-        Keyword arguments and default values:
-
-        *abort_on_failure=False*: If set to True and *command* does
-        not exit with code 0, subsequent commands of this run are
-        not executed.
-
-        *time_limit=None*: Abort *command* after *time_limit* seconds.
-
-        *mem_limit=None*: Allow *command* to use at most *mem_limit* MiB.
-
-        All other items in *kwargs* are passed to
-        `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
-
-        Examples::
-
-            run.add_command('list-directory', ['ls', '-al'])
-            run.add_command('translate', [run.translator.shell_name,
-                                          'domain.pddl', 'problem.pddl'])
-            run.add_command('preprocess', [run.preprocessor.shell_name],
-                            {'stdin': 'output.sas'})
-            run.add_command('validate', ['VALIDATE', 'DOMAIN', 'PROBLEM',
-                                         'sas_plan'])
-        """
-        assert isinstance(name, basestring), 'name %s is not a string' % name
-        assert isinstance(command, (list, tuple)), '%s is not a list' % command
-        assert command, 'Command "%s" cannot be empty' % name
-        name = name.replace(' ', '_')
-        self.commands[name] = (command, kwargs)
 
     def build(self):
         """
