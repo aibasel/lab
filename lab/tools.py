@@ -50,8 +50,7 @@ LOG_LEVEL = None
 
 def get_script_path():
     """Get absolute path to main script."""
-    import __main__
-    return os.path.abspath(__main__.__file__)
+    return os.path.abspath(sys.argv[0])
 
 
 def get_script_dir():
