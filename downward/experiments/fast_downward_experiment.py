@@ -64,8 +64,10 @@ class FastDownwardRun(Run):
 
         self._set_properties()
 
-        self.add_resource('DOMAIN', self.task.domain_file(), 'domain.pddl')
-        self.add_resource('PROBLEM', self.task.problem_file(), 'problem.pddl')
+        self.add_resource(
+            'DOMAIN', self.task.domain_file(), 'domain.pddl', symlink=True)
+        self.add_resource(
+            'PROBLEM', self.task.problem_file(), 'problem.pddl', symlink=True)
 
         # TODO: After removing DownwardExperiment, use name "fast-downward".
         self.add_command(
@@ -73,7 +75,6 @@ class FastDownwardRun(Run):
             ['FAST_DOWNWARD'] + algo.driver_options +
             ['DOMAIN', 'PROBLEM'] + algo.component_options)
 
-        # TODO: Use exp.add_command() once it is available.
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
         self.add_command('parse-search', ['SEARCH_PARSER'])
 
