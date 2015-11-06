@@ -152,7 +152,7 @@ class FastDownwardExperiment(Experiment):
     def __init__(self, path=None, environment=None, cache_dir=None):
         """
         The experiment will be built at *path*. It defaults to
-        ``<scriptdir>/data/<scriptname>/``. E.g. if your script is at
+        ``<scriptdir>/data/<scriptname>/``. E.g., if your script is at
         ``experiments/myexp.py``, *path* will be
         ``experiments/data/myexp/``.
 
