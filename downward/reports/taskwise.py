@@ -24,6 +24,17 @@ from downward.reports import PlanningReport
 
 
 class TaskwiseReport(PlanningReport):
+    """
+    For each task, report all attributes in a single row.
+
+    If the experiment contains more than one algorithm, use
+    ``filter_config='my_algorithm'`` to select exactly one algorithm for
+    the report.
+
+    """
+    def __init__(self, **kwargs):
+        PlanningReport.__init__(self, **kwargs)
+
     def _get_table(self, domain, runs):
         table = Table(title=domain)
         for run in runs:
@@ -33,7 +44,7 @@ class TaskwiseReport(PlanningReport):
 
     def get_markup(self):
         if len(self.configs) != 1:
-            logging.critical('Taskwise reports need exactly one config.')
+            logging.critical('Taskwise reports need exactly one algorithm.')
         tables = [
             self._get_table(domain, runs)
             for (domain, config), runs in sorted(self.domain_config_runs.items())]
