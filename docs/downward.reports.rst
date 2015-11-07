@@ -6,6 +6,7 @@
 .. autoclass:: downward.reports.relative.RelativeReport
 .. autoclass:: downward.reports.ipc.IpcReport
 .. autoclass:: downward.reports.suite.SuiteReport
+.. autoclass:: downward.reports.taskwise.TaskwiseReport
 .. autoclass:: downward.reports.timeout.TimeoutReport
 
 
