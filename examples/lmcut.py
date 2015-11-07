@@ -7,7 +7,7 @@ import platform
 
 from lab.environments import LocalEnvironment, MaiaEnvironment
 
-from downward.experiments.fast_downward_experiment import FastDownwardExperiment
+from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
@@ -28,8 +28,9 @@ exp.add_suite(BENCHMARKS, SUITE)
 exp.add_algorithm(
     'lmcut', REPO, 'tip', ['--search', 'astar(lmcut())'])
 
-# Make a report containing absolute numbers (this is the most common report).
-exp.add_report(AbsoluteReport(attributes=ATTRIBUTES), outfile='report.html')
+# Make a report (AbsoluteReport is the standard report).
+exp.add_report(
+    AbsoluteReport(attributes=ATTRIBUTES), outfile='report.html')
 
 # Parse the commandline and show or run experiment steps.
 exp()
