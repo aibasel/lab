@@ -9,17 +9,19 @@ and the location of your Fast Downward repository.
 The file planner-ext.py contains an "advanced" version of this basic experiment.
 """
 
-from downward.experiment import DownwardExperiment
+import os.path
+
+from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
-EXPPATH = 'data/exp-planner'
-REPO = '/home/jendrik/projects/Downward/downward'
+REPO = os.path.expanduser('~/projects/Downward/downward')
+BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
 
-exp = DownwardExperiment(EXPPATH, REPO)
+exp = FastDownwardExperiment()
 
-exp.add_suite('gripper:prob01.pddl')
-exp.add_config('ff', ['--search', 'lazy(single(ff()))'])
+exp.add_suite(BENCHMARKS_DIR, 'gripper:prob01.pddl')
+exp.add_algorithm('ff', REPO, 'tip', ['--search', 'lazy_greedy(ff())'])
 
 exp.add_report(AbsoluteReport())
 

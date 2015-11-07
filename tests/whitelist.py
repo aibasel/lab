@@ -5,6 +5,7 @@ from lab.calls import log
 
 from downward import configs
 from downward import suites
+from downward.experiments import DownwardExperiment
 from downward.experiments.comparerevisions import CompareRevisionsExperiment
 
 from examples import standard_exp
@@ -41,5 +42,6 @@ lab.steps.Step.remove_exp_dir
 ]
 
 CompareRevisionsExperiment
+DownwardExperiment.add_portfolio
 standard_exp.get_exp
 standard_exp.EXPS

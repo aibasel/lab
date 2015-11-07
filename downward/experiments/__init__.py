@@ -260,6 +260,11 @@ class DownwardExperiment(Experiment):
     on the preprocessed tasks. You can add report steps with
     :func:`lab.experiment.Experiment.add_report()`.
 
+    .. deprecated:: 1.9
+
+        This class has been deprecated in favor of
+        :py:class:`downward.experiment.FastDownwardExperiment`.
+
     .. note::
 
         You only have to run the preprocessing stage (steps 1-3) for
@@ -355,7 +360,6 @@ class DownwardExperiment(Experiment):
         # Save if this is a compact experiment i.e. preprocessed tasks are referenced.
         self.set_property('compact', compact)
 
-        # TODO: Integrate this into the API.
         self.include_preprocess_results_in_search_runs = True
 
         self.compilation_options = ['-j%d' % self._jobs]
@@ -625,7 +629,9 @@ class DownwardExperiment(Experiment):
         first_planner_checkout = self.combinations[0][2]
         validate = first_planner_checkout.get_path('src', 'validate')
         if not os.path.exists(validate):
-            logging.critical('validate not found at %s.' % validate)
+            logging.critical(
+                'validate not found at %s. Try deleting the cached revision.'
+                % validate)
         self.add_resource('VALIDATE', validate, 'validate')
 
         downward_validate = os.path.join(DOWNWARD_SCRIPTS_DIR, 'validate.py')
