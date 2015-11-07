@@ -22,7 +22,7 @@ from downward.reports import PlanningReport
 
 
 class TimeoutReport(PlanningReport):
-    def __init__(self, timeouts, *args, **kwargs):
+    def __init__(self, timeouts, **kwargs):
         """
         For all runs in the experiment, simulate the timeouts in *timeouts* and
         write a new properties file at *outfile*.
@@ -33,7 +33,7 @@ class TimeoutReport(PlanningReport):
                            name='report-timeouts',
                            outfile='timeout-eval/properties')
         """
-        PlanningReport.__init__(self, *args, **kwargs)
+        PlanningReport.__init__(self, **kwargs)
         self.timeouts = timeouts
 
     def get_text(self):
