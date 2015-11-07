@@ -14,7 +14,7 @@ parser from ``examples/simple/simple-parser.py``:
 
 You can add your parser to all experiment runs with::
 
-    exp.add_search_parser('path/to/myparser.py')
+    exp.add_command('myparser', ['path/to/myparser.py'])
 
 
 How can I combine the results from multiple experiments?

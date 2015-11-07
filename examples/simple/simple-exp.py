@@ -18,7 +18,6 @@ import os
 
 from lab.experiment import Experiment
 from lab.environments import LocalEnvironment
-from lab.experiment import Step
 from lab.reports import Report
 
 

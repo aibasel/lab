@@ -21,6 +21,7 @@ log.driver_log
 log.driver_err
 log.print_
 log.save_returncode
+lab.steps.Step.zip_exp_dir
 lab.steps.Step.unzip_exp_dir
 lab.steps.Step.remove_exp_dir
 

@@ -1,6 +1,22 @@
 News
 ====
 
+v1.9 (2015-11-07)
+-----------------
+
+lab
+^^^
+* Add :func:`lab.experiment.Experiment.add_command()` method.
+* Add :py:data:`lab.__version__` string.
+* Explicitly remove support for Python 2.6.
+
+downward
+^^^^^^^^
+* Add :py:class:`downward.experiment.FastDownwardExperiment` class for whole-planner experiments.
+* Deprecate :py:class:`downward.experiments.DownwardExperiment` class.
+* Repeat headers between domains in :py:class:`downward.reports.taskwise.TaskwiseReport`.
+
+
 v1.8 (2015-10-02)
 -----------------
 

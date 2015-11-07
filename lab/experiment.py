@@ -130,7 +130,7 @@ class _Buildable(object):
             self.new_files.append(new_file)
 
     def add_command(self, name, command, **kwargs):
-        """Add a call to an executable.
+        """Call an executable.
 
         If invoked on a *run*, this method adds the command to the
         specific run. If invoked on the experiment, the command is
