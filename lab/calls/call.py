@@ -25,7 +25,8 @@ from lab import tools
 
 
 def set_limit(kind, soft_limit, hard_limit=None):
-    hard_limit = hard_limit or soft_limit
+    if hard_limit is None:
+        hard_limit = soft_limit
     try:
         resource.setrlimit(kind, (soft_limit, hard_limit))
     except (OSError, ValueError), err:
@@ -76,9 +77,7 @@ class Call(subprocess.Popen):
         def prepare_call():
             # When the soft time limit is reached, SIGXCPU is emitted. Once we
             # reach the higher hard time limit, SIGKILL is sent. Having some
-            # padding between the two limits allows us to distinguish between
-            # SIGKILL signals sent by this class and the ones sent by the
-            # system.
+            # padding between the two limits allows programs to handle SIGXCPU.
             if time_limit is not None:
                 set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
             if mem_limit is not None:
