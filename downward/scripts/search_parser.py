@@ -245,6 +245,12 @@ def get_initial_h_values(content, props):
                 props['initial_h_value'] = values[0]
 
 
+def get_memory_limit_in_kb(props):
+    # TODO: Remove constant once we no longer want to support old
+    # planner revisions that don't output memory limits.
+    return props.get('limit_search_memory', 2048) * 1024
+
+
 def check_memory(content, props):
     """Add memory value if the run was successful."""
     raw_memory = props.get('raw_memory')
@@ -259,7 +265,7 @@ def check_memory(content, props):
         props['memory'] = raw_memory
         props['memory_capped'] = raw_memory
     elif props['search_returncode'] == EXIT_OUT_OF_MEMORY:
-        props['memory_capped'] = props['limit_search_memory'] * 1024
+        props['memory_capped'] = get_memory_limit_in_kb(props)
 
 
 def scores(content, props):
@@ -282,8 +288,11 @@ def scores(content, props):
         return round(score * 100, 2)
 
     # Maximum memory in KB
-    max_memory = props['limit_search_memory'] * 1024
-    max_time = props['limit_search_time']
+    max_memory = get_memory_limit_in_kb(props)
+
+    # TODO: Remove constant once we no longer want to support old
+    # planner revisions that don't output time limits.
+    max_time = props.get('limit_search_time', 1800)
 
     for attr in ('expansions', 'evaluations', 'generated'):
         props['score_' + attr] = log_score(
@@ -363,15 +372,18 @@ class SingleSearchParser(SearchParser):
     def __init__(self):
         SearchParser.__init__(self)
 
-        self.add_pattern('landmarks', 'Discovered (\d+?) landmarks', type=int,
-                         required=False)
-        self.add_pattern('landmarks_generation_time',
-                         'Landmarks generation time: (.+)s', type=float,
-                         required=False)
-        self.add_pattern('limit_search_time', 'search time limit: (\d+)s',
-                         type=int, required=True)
-        self.add_pattern('limit_search_memory', 'search memory limit: (\d+) MB',
-                         type=int, required=True)
+        self.add_pattern(
+            'landmarks', 'Discovered (\d+?) landmarks',
+            type=int, required=False)
+        self.add_pattern(
+            'landmarks_generation_time', 'Landmarks generation time: (.+)s',
+            type=float, required=False)
+        self.add_pattern(
+            'limit_search_time', 'search time limit: (\d+)s',
+            type=int, required=True)
+        self.add_pattern(
+            'limit_search_memory', 'search memory limit: (\d+) MB',
+            type=int, required=True)
 
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
