@@ -1,6 +1,16 @@
 News
 ====
 
+v1.9.1 (2015-11-12)
+-------------------
+
+downward
+^^^^^^^^
+* Always prepend build options with ``-j<num_cpus>``.
+* Fix: Use correct revisions in ``FastDownwardExperiment``.
+* Don't abort parser if resource limits can't be found (support old planner versions).
+
+
 v1.9 (2015-11-07)
 -----------------
 
