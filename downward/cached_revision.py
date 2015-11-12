@@ -111,6 +111,10 @@ class CachedRevision(object):
     def get_exp_path(self, *rel_path):
         return os.path.join('code-' + self.global_rev, *rel_path)
 
+    def get_planner_resource_name(self):
+        # TODO: Take relevant build options into account.
+        return 'FAST_DOWNWARD_' + self.global_rev
+
     def _get_sentinel_file(self):
         return self.get_cached_path('build_successful')
 

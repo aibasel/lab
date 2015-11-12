@@ -74,8 +74,8 @@ class FastDownwardRun(Run):
         # TODO: After removing DownwardExperiment, use name "fast-downward".
         self.add_command(
             'search',
-            ['FAST_DOWNWARD'] + algo.driver_options +
-            ['DOMAIN', 'PROBLEM'] + algo.component_options)
+            [algo.cached_revision.get_planner_resource_name()] +
+            algo.driver_options + ['DOMAIN', 'PROBLEM'] + algo.component_options)
 
         self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
         self.add_command('parse-search', ['SEARCH_PARSER'])
@@ -331,7 +331,7 @@ class FastDownwardExperiment(Experiment):
                 cached_rev.get_exp_path())
             # Overwrite the script to set an environment variable.
             self.add_resource(
-                'FAST_DOWNWARD',
+                cached_rev.get_planner_resource_name(),
                 cached_rev.get_cached_path('fast-downward.py'),
                 cached_rev.get_exp_path('fast-downward.py'))
 
