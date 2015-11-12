@@ -217,7 +217,6 @@ class FastDownwardExperiment(Experiment):
                 'Benchmarks directory {} not found.'.format(benchmarks_dir))
         self._suites[benchmarks_dir].extend(suite)
 
-    # TODO: Always add -j option and update docs.
     def add_algorithm(self, nick, repo, rev, component_options,
                       build_options=None, driver_options=None):
         """
@@ -241,9 +240,12 @@ class FastDownwardExperiment(Experiment):
 
         If given, *build_options* must be a list of strings. They will
         be passed to the ``build.py`` script. Options can be build
-        names (e.g. "release32", "debug64") or options for Make. The
-        default is ``["-j<num_cpus>"]``. This setting causes
-        ``build.py`` to build "release32" with all CPUs.
+        names (e.g., "release32", "debug64"), ``build.py`` options
+        (e.g., "--debug") or options for Make. The list is always
+        prepended with ``["-j<num_cpus>"]``. This setting can be
+        overriden, e.g., ``driver_options=["-j1"]`` builds the planner
+        using a single CPU. If *build_options* is omitted, the
+        "release32" version is built using all CPUs.
 
         If given, *driver_options* must be a list of strings. They will
         be passed to the ``fast-downward.py`` script. See
@@ -268,8 +270,8 @@ class FastDownwardExperiment(Experiment):
             exp.add_algorithm(
                 "blind", "path/to/repo", "default",
                 ["--search", "astar(blind())"],
-                build_options=["debug32"],
-                driver_options=["--build", "debug32"])
+                build_options=["--debug"],
+                driver_options=["--debug"])
 
             # Run LAMA-2011 with custom search time limit.
             exp.add_algorithm(
@@ -284,7 +286,7 @@ class FastDownwardExperiment(Experiment):
             logging.critical('Algorithm nick must be a string: {}'.format(nick))
         if nick in self._algorithms:
             logging.critical('Algorithm nicks must be unique: {}'.format(nick))
-        build_options = build_options or self._get_default_build_options()
+        build_options = self._get_default_build_options() + (build_options or [])
         driver_options = ([
             '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
             '--search-memory-limit', self.DEFAULT_SEARCH_MEMORY_LIMIT] +
