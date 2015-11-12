@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import glob
+import hashlib
 import logging
 import os.path
 import shutil
@@ -53,6 +54,13 @@ def _get_options_relevant_for_cache_name(options):
     return [x for x in relevant_options if x is not None]
 
 
+def _compute_md5_hash(mylist):
+    m = hashlib.md5()
+    for s in mylist:
+        m.update(s)
+    return m.hexdigest()[:8]
+
+
 class CachedRevision(object):
     """This class represents Fast Downward checkouts.
 
@@ -73,19 +81,22 @@ class CachedRevision(object):
         self.global_rev = get_global_rev(repo, local_rev)
         self.summary = get_rev_id(self.repo, local_rev)
         self._path = None
+        self._hashed_name = self._compute_hashed_name()
 
     @property
     def path(self):
         assert self._path is not None
         return self._path
 
-    def _get_cached_revision_name(self):
+    def _compute_hashed_name(self):
         relevant_options = _get_options_relevant_for_cache_name(self.build_options)
-        return '-'.join([self.global_rev] + relevant_options)
+        if relevant_options:
+            return self.global_rev + '_' + _compute_md5_hash(relevant_options)
+        else:
+            return self.global_rev
 
     def cache(self, revision_cache_dir):
-        self._path = os.path.join(
-            revision_cache_dir, self._get_cached_revision_name())
+        self._path = os.path.join(revision_cache_dir, self._hashed_name)
         if os.path.exists(self.path):
             logging.info('Revision is already cached: "%s"' % self.path)
             if not os.path.exists(self._get_sentinel_file()):
@@ -109,11 +120,10 @@ class CachedRevision(object):
         return os.path.join(self.path, *rel_path)
 
     def get_exp_path(self, *rel_path):
-        return os.path.join('code-' + self.global_rev, *rel_path)
+        return os.path.join('code-' + self._hashed_name, *rel_path)
 
     def get_planner_resource_name(self):
-        # TODO: Take relevant build options into account.
-        return 'FAST_DOWNWARD_' + self.global_rev
+        return 'FAST_DOWNWARD_' + self._hashed_name
 
     def _get_sentinel_file(self):
         return self.get_cached_path('build_successful')
