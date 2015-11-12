@@ -281,9 +281,9 @@ class FastDownwardExperiment(Experiment):
 
         """
         if not isinstance(nick, basestring):
-            logging.critical('Config nick must be a string: %s' % nick)
+            logging.critical('Algorithm nick must be a string: {}'.format(nick))
         if nick in self._algorithms:
-            logging.critical('Algorithm nicks must be unique: {}' % nick)
+            logging.critical('Algorithm nicks must be unique: {}'.format(nick))
         build_options = build_options or self._get_default_build_options()
         driver_options = ([
             '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
