@@ -48,6 +48,7 @@ ARGPARSER.add_argument(
 class _Buildable(object):
     """Abstract base class for Experiment and Run."""
     def __init__(self):
+        # TODO: Make sure that a name is not used twice.
         self.resources = []
         self.new_files = []
         self.commands = OrderedDict()
