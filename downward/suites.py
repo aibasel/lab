@@ -141,16 +141,33 @@ def suite_ipc_one_to_four():
         suite_ipc_one_to_four_adl() + suite_ipc_one_to_four_strips()))
 
 
-def suite_ipc06():
+def suite_ipc06_adl():
     return [
         'openstacks',
         'pathways',
+        'trucks',
+    ]
+
+
+def suite_ipc06_strips_compilations():
+    return [
+        'openstacks-strips',
+        'pathways-noneg',
+        'trucks-strips',
+    ]
+
+
+def suite_ipc06_strips():
+    return [
         'pipesworld-tankage',
         'rovers',
         'storage',
         'tpp',
-        'trucks',
     ]
+
+
+def suite_ipc06():
+    return suite_ipc06_adl() + suite_ipc06_strips()
 
 
 def suite_ipc08_common():
@@ -314,21 +331,22 @@ def suite_lmcut_domains():
 
 
 def suite_strips():
-    return suite_lmcut_domains() + suite_ipc08_all_strips()
+    return suite_lmcut_domains() + suite_ipc08_all_strips() + suite_ipc11_all()
 
 
 def suite_optimal():
-    return suite_lmcut_domains() + suite_ipc08_opt_strips()
+    # In addition to the domains in the old "suite_optimal_with_ipc11"
+    # suite, this suite also contains "movie" and "storage".
+    return (
+        suite_ipc_one_to_four_strips() + suite_ipc06_strips() +
+        suite_ipc06_strips_compilations() + suite_ipc08_opt_strips() +
+        suite_ipc11_opt())
 
 
-def suite_optimal_with_ipc11():
-    return suite_optimal() + suite_ipc11_opt()
-
-
-def suite_satisficing_with_ipc11():
+def suite_satisficing():
     domains = (
         suite_ipc_one_to_four() + suite_ipc06() +
-        suite_lmcut_domains() + suite_ipc08_sat() + suite_ipc11_sat())
+        suite_ipc06_strips_compilations() + suite_ipc08_sat() + suite_ipc11_sat())
     return list(sorted(set(domains) - set(suite_alternative_formulations())))
 
 
