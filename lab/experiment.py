@@ -49,7 +49,7 @@ class _Buildable(object):
     """Abstract base class for Experiment and Run."""
     def __init__(self):
         self.resources = []
-        self.new_files = OrderedDict()
+        self.new_files = []
         self.env_vars_relative = {}
         self.commands = OrderedDict()
         # List of glob-style patterns used to exclude files (not full paths).
@@ -127,7 +127,9 @@ class _Buildable(object):
 
         """
         self._check_alias(name)
-        self.new_files[name] = (dest, content, permissions)
+        if name:
+            self.env_vars_relative[name] = dest
+        self.new_files.append((dest, content, permissions))
 
     def add_command(self, name, command, **kwargs):
         """Call an executable.
@@ -197,7 +199,7 @@ class _Buildable(object):
         combined_props.write()
 
     def _build_resources(self):
-        for name, (dest, content, permissions) in self.new_files.items():
+        for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
             with open(filename, 'w') as file:
