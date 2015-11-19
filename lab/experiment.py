@@ -545,9 +545,15 @@ class Run(_Buildable):
         if not self.commands:
             logging.critical('Please add at least one command')
 
-        # Copy missing env_vars from experiment.
-        env_vars = self.experiment._env_vars
-        env_vars.update(self._env_vars)
+        exp_vars = self.experiment._env_vars
+        run_vars = self._env_vars
+        doubly_used_vars = set(exp_vars) & set(run_vars)
+        if doubly_used_vars:
+            logging.critical(
+                'Resource names cannot be shared between experiments '
+                'and runs, they must be unique: {}'.format(doubly_used_vars))
+        env_vars = exp_vars
+        env_vars.update(run_vars)
 
         run_script = pkgutil.get_data('lab', 'data/run-template.py')
 
