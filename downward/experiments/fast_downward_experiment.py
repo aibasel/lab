@@ -320,8 +320,8 @@ class FastDownwardExperiment(Experiment):
         return ['-j{}'.format(cores)]
 
     def _cache_revisions(self):
-        for algo in self._algorithms.values():
-            algo.cached_revision.cache(self.revision_cache_dir)
+        for cached_rev in self._get_unique_cached_revisions():
+            cached_rev.cache(self.revision_cache_dir)
 
     def _add_code(self):
         """Add the compiled code to the experiment."""
