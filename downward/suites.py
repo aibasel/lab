@@ -118,16 +118,27 @@ def suite_alternative_formulations():
     return ['airport-adl', 'pathways', 'no-mprime', 'no-mystery']
 
 
-def suite_ipc_one_to_four():
-    # All IPC1-5 domains, including the trivial Movie.
+def suite_ipc_one_to_four_adl():
     return [
-        'airport', 'assembly', 'blocks', 'depot', 'driverlog',
-        'freecell', 'grid', 'gripper', 'logistics00', 'logistics98',
-        'miconic', 'miconic-fulladl', 'miconic-simpleadl', 'movie',
-        'mprime', 'mystery', 'optical-telegraphs', 'philosophers',
-        'pipesworld-notankage', 'psr-large', 'psr-middle', 'psr-small',
-        'satellite', 'schedule', 'zenotravel',
+        'assembly', 'miconic-fulladl', 'miconic-simpleadl',
+        'optical-telegraphs', 'philosophers', 'psr-large',
+        'psr-middle', 'schedule',
     ]
+
+
+def suite_ipc_one_to_four_strips():
+    return [
+        'airport', 'blocks', 'depot', 'driverlog', 'freecell', 'grid',
+        'gripper', 'logistics00', 'logistics98', 'miconic', 'movie',
+        'mprime', 'mystery', 'pipesworld-notankage', 'psr-small',
+        'satellite', 'zenotravel',
+    ]
+
+
+def suite_ipc_one_to_four():
+    # All IPC1-4 domains, including the trivial Movie.
+    return list(sorted(
+        suite_ipc_one_to_four_adl() + suite_ipc_one_to_four_strips()))
 
 
 def suite_ipc06():
@@ -211,15 +222,17 @@ def suite_ipc08_sat_strips():
 
 
 def suite_ipc08_all():
-    return (suite_ipc08_common() +
-            suite_ipc08_opt_only() +
-            suite_ipc08_sat_only())
+    return (
+        suite_ipc08_common() +
+        suite_ipc08_opt_only() +
+        suite_ipc08_sat_only())
 
 
 def suite_ipc08_all_strips():
-    return (suite_ipc08_common() +
-            suite_ipc08_opt_only_strips() +
-            suite_ipc08_sat_only_strips())
+    return (
+        suite_ipc08_common() +
+        suite_ipc08_opt_only_strips() +
+        suite_ipc08_sat_only_strips())
 
 
 def suite_ipc11_opt():
@@ -302,11 +315,6 @@ def suite_lmcut_domains():
 
 def suite_strips():
     return suite_lmcut_domains() + suite_ipc08_all_strips()
-
-
-def suite_strips_ipc12345():
-    ipc08 = set(suite_ipc08_all())
-    return [domain for domain in suite_strips() if domain not in ipc08]
 
 
 def suite_optimal():
