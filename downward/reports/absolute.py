@@ -20,7 +20,6 @@ from collections import defaultdict
 import logging
 
 from lab import reports
-from lab.reports import markup
 
 from downward.reports import PlanningReport
 
@@ -87,10 +86,12 @@ class AbsoluteReport(PlanningReport):
                 if self.attribute_is_numeric(attribute):
                     domain_table = self._get_table(attribute)
                     tables.append(('', domain_table))
-                    reports.extract_summary_rows(domain_table, summary,
-                                                link='#' + attribute)
+                    reports.extract_summary_rows(
+                        domain_table, summary, link='#' + attribute)
                 else:
-                    tables.append(('', 'Domain-wise reports only support numeric '
+                    tables.append((
+                        '',
+                        'Domain-wise reports only support numeric '
                         'attributes, but %s has type %s.' %
                         (attribute, self._all_attributes[attribute].__name__)))
             if self.resolution in ['problem', 'combined']:
@@ -138,7 +139,8 @@ class AbsoluteReport(PlanningReport):
         table = reports.Table(title='algorithm')
         for config, info in self.config_info.items():
             for attr in self.INFO_ATTRIBUTES:
-                table.add_cell(config, attr, markup.escape(info[attr]))
+                if info[attr]:
+                    table.add_cell(config, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
         return str(table)
 

@@ -19,7 +19,7 @@
 from lab import tools
 
 tools.show_deprecation_warning(
-    'The downward/configs.py module has been deprecated in version 1.8. '
+    'The downward/configs.py module has been deprecated in version 1.7. '
     'Please copy the module or the relevant functions, dictionaries and '
     'configurations directly into your experiment.')
 
@@ -48,24 +48,24 @@ def configs_optimal_core():
         'astar_merge_and_shrink_bisim': [
             '--search',
             'astar(merge_and_shrink('
-            + 'merge_strategy=merge_linear(variable_order=reverse_level),'
-            + 'shrink_strategy=shrink_bisimulation(max_states=200000,greedy=false,'
-            + 'group_by_h=true)))'],
+            'merge_strategy=merge_linear(variable_order=reverse_level),'
+            'shrink_strategy=shrink_bisimulation(max_states=200000,greedy=false,'
+            'group_by_h=true)))'],
         'astar_merge_and_shrink_greedy_bisim': [
             '--search',
             'astar(merge_and_shrink('
-            + 'merge_strategy=merge_linear(variable_order=reverse_level),'
-            + 'shrink_strategy=shrink_bisimulation(max_states=infinity,threshold=1,'
-            + 'greedy=true,group_by_h=false)))'],
+            'merge_strategy=merge_linear(variable_order=reverse_level),'
+            'shrink_strategy=shrink_bisimulation(max_states=infinity,threshold=1,'
+            'greedy=true,group_by_h=false)))'],
         'astar_merge_and_shrink_dfp_bisim': [
             '--search',
             'astar(merge_and_shrink(merge_strategy=merge_dfp,'
-            + 'shrink_strategy=shrink_bisimulation(max_states=50000,threshold=1,'
-            + 'greedy=false,group_by_h=true)))'],
+            'shrink_strategy=shrink_bisimulation(max_states=50000,threshold=1,'
+            'greedy=false,group_by_h=true)))'],
         'astar_selmax_lmcut_lmcount': [
             '--search',
             'astar(selmax([lmcut(),lmcount(lm_merged([lm_hm(m=1),lm_rhw()]),'
-            + 'admissible=true)],training_set=1000),mpd=true)'],
+            'admissible=true)],training_set=1000),mpd=true)'],
     }
 
 
@@ -191,14 +191,14 @@ def configs_satisficing_extended():
             'h=ff()',
             '--search',
             'iterated([lazy_wastar(h,w=10), lazy_wastar(h,w=5), lazy_wastar(h,w=3),'
-            + 'lazy_wastar(h,w=2), lazy_wastar(h,w=1)])'],
+            'lazy_wastar(h,w=2), lazy_wastar(h,w=1)])'],
         # pareto open list
         'pareto_ff': [
             '--heuristic',
             'h=ff()',
             '--search',
             'eager(pareto([sum([g(), h]), h]), reopen_closed=true, pathmax=false,'
-            + 'f_eval=sum([g(), h]))'],
+            'f_eval=sum([g(), h]))'],
         # bucket-based open list
         'bucket_lmcut': [
             '--heuristic',

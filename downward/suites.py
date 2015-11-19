@@ -161,6 +161,7 @@ def build_suite(benchmarks_dir, descriptions):
 def suite_alternative_formulations():
     return ['airport-adl', 'pathways', 'no-mprime', 'no-mystery']
 
+
 def suite_ipc_one_to_five():
     # All IPC1-5 domains, including the trivial Movie.
     return [
@@ -173,6 +174,7 @@ def suite_ipc_one_to_five():
         'schedule', 'storage', 'tpp', 'trucks', 'zenotravel',
     ]
 
+
 def suite_ipc06():
     return [
         'openstacks',
@@ -184,12 +186,14 @@ def suite_ipc06():
         'trucks',
     ]
 
+
 def suite_ipc08_common():
     return [
         'parcprinter-08-strips',
         'pegsol-08-strips',
         'scanalyzer-08-strips',
     ]
+
 
 def suite_ipc08_opt_only():
     return [
@@ -201,6 +205,7 @@ def suite_ipc08_opt_only():
         'woodworking-opt08-strips',
     ]
 
+
 def suite_ipc08_opt_only_strips():
     return [
         'elevators-opt08-strips',
@@ -209,6 +214,7 @@ def suite_ipc08_opt_only_strips():
         'transport-opt08-strips',
         'woodworking-opt08-strips',
     ]
+
 
 def suite_ipc08_sat_only():
     return [
@@ -221,6 +227,7 @@ def suite_ipc08_sat_only():
         # Note: cyber-security is missing
     ]
 
+
 def suite_ipc08_sat_only_strips():
     return [
         'elevators-sat08-strips',
@@ -231,27 +238,34 @@ def suite_ipc08_sat_only_strips():
         # Note: cyber-security is missing
     ]
 
+
 def suite_ipc08_opt():
     return suite_ipc08_common() + suite_ipc08_opt_only()
+
 
 def suite_ipc08_opt_strips():
     return suite_ipc08_common() + suite_ipc08_opt_only_strips()
 
+
 def suite_ipc08_sat():
     return suite_ipc08_common() + suite_ipc08_sat_only()
 
+
 def suite_ipc08_sat_strips():
     return suite_ipc08_common() + suite_ipc08_sat_only_strips()
+
 
 def suite_ipc08_all():
     return (suite_ipc08_common() +
             suite_ipc08_opt_only() +
             suite_ipc08_sat_only())
 
+
 def suite_ipc08_all_strips():
     return (suite_ipc08_common() +
             suite_ipc08_opt_only_strips() +
             suite_ipc08_sat_only_strips())
+
 
 def suite_ipc11_opt():
     return [
@@ -271,6 +285,7 @@ def suite_ipc11_opt():
         'woodworking-opt11-strips',
     ]
 
+
 def suite_ipc11_sat():
     return [
         'barman-sat11-strips',
@@ -289,8 +304,10 @@ def suite_ipc11_sat():
         'woodworking-sat11-strips',
     ]
 
+
 def suite_ipc11_all():
     return suite_ipc11_opt() + suite_ipc11_sat()
+
 
 def suite_interesting():
     # A domain is boring if all planners solve all tasks in < 1 sec.
@@ -298,6 +315,7 @@ def suite_interesting():
     # we merge its results with logistics98 (which doesn't).
     boring = set(['gripper', 'miconic', 'miconic-simpleadl', 'movie'])
     return [domain for domain in suite_all() if domain not in boring]
+
 
 def suite_unsolvable():
     # TODO: Add other unsolvable problems (Miconic-FullADL).
@@ -307,14 +325,17 @@ def suite_unsolvable():
              for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]] +
             ['miconic-fulladl:f21-3.pddl', 'miconic-fulladl:f30-2.pddl'])
 
+
 def suite_test():
     # Three smallish domains for quick tests.
     return ['grid', 'gripper', 'blocks']
+
 
 def suite_minitest():
     return ['gripper:prob01.pddl', 'gripper:prob02.pddl',
             'gripper:prob03.pddl', 'zenotravel:pfile1',
             'zenotravel:pfile2', 'zenotravel:pfile3', ]
+
 
 def suite_tinytest():
     return ['gripper:prob01.pddl', 'trucks-strips:p01.pddl',
@@ -347,31 +368,39 @@ def suite_lmcut_domains():
         'zenotravel',
     ]
 
+
 def suite_strips():
     return suite_lmcut_domains() + suite_ipc08_all_strips()
+
 
 def suite_strips_ipc12345():
     ipc08 = set(suite_ipc08_all())
     return [domain for domain in suite_strips() if domain not in ipc08]
 
+
 def suite_optimal():
     return suite_lmcut_domains() + suite_ipc08_opt_strips()
 
+
 def suite_optimal_with_ipc11():
     return suite_optimal() + suite_ipc11_opt()
+
 
 def suite_satisficing_with_ipc11():
     domains = suite_ipc_one_to_five() + suite_lmcut_domains()
     domains += suite_ipc08_sat() + suite_ipc11_sat()
     return list(sorted(set(domains) - set(suite_alternative_formulations())))
 
+
 def suite_all():
     domains = suite_ipc_one_to_five() + suite_lmcut_domains()
     domains += suite_ipc08_all() + suite_ipc11_all()
     return list(sorted(set(domains) - set(suite_alternative_formulations())))
 
+
 def suite_all_formulations():
     return list(sorted(suite_all() + suite_alternative_formulations()))
+
 
 def suite_unit_costs():
     return [
@@ -387,6 +416,7 @@ def suite_unit_costs():
         'tidybot-sat11-strips', 'tpp', 'trucks', 'trucks-strips',
         'visitall-opt11-strips', 'visitall-sat11-strips', 'zenotravel'
     ]
+
 
 def suite_diverse_costs():
     return [
@@ -409,6 +439,13 @@ def suite_diverse_costs():
         'woodworking-opt11-strips', 'woodworking-sat08-strips',
         'woodworking-sat11-strips'
     ]
+
+
+def suite_sat_strips():
+    return (
+        suite_lmcut_domains() +
+        suite_ipc08_sat_strips() +
+        suite_ipc11_sat())
 
 
 def suite_five_per_domain(benchmarks_dir):

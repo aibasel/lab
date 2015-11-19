@@ -26,6 +26,7 @@ from __future__ import division
 from collections import defaultdict
 import math
 import re
+import sys
 
 from lab.parser import Parser
 
@@ -65,31 +66,25 @@ PORTFOLIO_PATTERNS = [
 ]
 
 
-ITERATIVE_PATTERNS = PORTFOLIO_PATTERNS + [
+COMMON_PATTERNS = [
     _get_states_pattern('dead_ends', 'Dead ends:'),
-    _get_states_pattern('evaluations', 'Evaluated'),
+    _get_states_pattern('evaluated', 'Evaluated'),
+    ('evaluations', re.compile(r'^Evaluations: (.+)$'), int),
     _get_states_pattern('expansions', 'Expanded'),
     _get_states_pattern('generated', 'Generated'),
-    # We exclude heuristic values like "11/17." that stem
-    # from multi-heuristic search. We also do not look for
-    # "Initial state h value: " because this is only written
-    # for successful search runs.
-    ('initial_h_value',
-     re.compile(r'Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded'),
-     int),
+    _get_states_pattern('reopened', 'Reopened'),
+]
+
+
+ITERATIVE_PATTERNS = COMMON_PATTERNS + PORTFOLIO_PATTERNS + [
     # We cannot include " \[t=.+s\]" (global timer) in the regex, because
     # older versions don't print it.
     ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
 ]
 
 
-CUMULATIVE_PATTERNS = [
-    # This time we parse the cumulative values
-    _get_states_pattern('dead_ends', 'Dead ends:'),
-    _get_states_pattern('evaluations', 'Evaluated'),
-    _get_states_pattern('expansions', 'Expanded'),
-    _get_states_pattern('generated', 'Generated'),
-    _get_states_pattern('reopened', 'Reopened'),
+CUMULATIVE_PATTERNS = COMMON_PATTERNS + [
+    # TODO: Rename to evaluated_until_last_jump and expanded_until_last_jump.
     _get_states_pattern('evaluations_until_last_jump', 'Evaluated until last jump:'),
     _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
@@ -97,12 +92,6 @@ CUMULATIVE_PATTERNS = [
     ('search_time', re.compile(r'^Search time: (.+)s$'), float),
     ('total_time', re.compile(r'^Total time: (.+)s$'), float),
     ('raw_memory', re.compile(r'Peak memory: (.+) KB'), int),
-    # For iterated searches we discard all h values. Here we will not find
-    # anything before the "cumulative" line and stop the search. For single
-    # searches we will find the h value if it isn't a multi-heuristic search.
-    ('initial_h_value',
-     re.compile(r'Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded'),
-     int),
 ]
 
 
@@ -166,10 +155,11 @@ def get_iterative_results(content, props):
     if len(values['search_time']) > len(values['expansions']):
         values['search_time'].pop()
 
-    _update_props_with_iterative_values(props, values,
-            [('cost', 'plan_length'),
-             # TODO: add reopened, evaluated and dead ends.
-             ('expansions', 'generated', 'search_time')])
+    _update_props_with_iterative_values(
+        props, values, [
+            ('cost', 'plan_length'),
+            # TODO: add reopened, evaluated and dead ends.
+            ('expansions', 'generated', 'search_time')])
 
 
 def get_cumulative_results(content, props):
@@ -210,6 +200,14 @@ def unsolvable(content, props):
     props['unsolvable'] = int(props['search_returncode'] == EXIT_UNSOLVABLE)
 
 
+def invalid_solution(props):
+    if 'driver_options' in props:
+        # Catch invalid plans by examining the driver's exitcode below.
+        return False
+    else:
+        return props.get('validate_returncode') != 0
+
+
 def coverage(content, props):
     # TODO: Count runs as unsuccessful if they used more than the
     # alotted time. Currently this is not possible since we don't
@@ -217,16 +215,40 @@ def coverage(content, props):
     props['coverage'] = int(
         'plan_length' in props and
         'cost' in props and
-        props.get('validate_returncode') == 0)
+        not invalid_solution(props))
 
 
-def get_initial_h_value(content, props):
-    # Ignore logs from searches with multiple heuristics.
-    if 'initial_h_value' not in props:
-        pattern = r'^Best heuristic value: (\d+) \[g=0, 1 evaluated, 0 expanded, t=.+s\]$'
-        match = re.search(pattern, content, flags=re.M)
-        if match:
-            props['initial_h_value'] = int(match.group(1))
+def get_initial_h_values(content, props):
+    """
+    For each heuristic, collect the reported initial heuristic values in
+    a list. For iterative searches this list may contain more than one
+    value. Add a dictionary mapping from heuristics to initial heuristic
+    values to the properties. If exactly one initial heuristic value was
+    reported, add it to the properties under the name "initial_h_value".
+    """
+    heuristic_to_values = defaultdict(list)
+    matches = re.findall(
+        r'^Initial heuristic value for (.+): ([-]?\d+|infinity)$',
+        content, flags=re.M)
+    for heuristic, init_h in matches:
+        if init_h == "infinity":
+            init_h = sys.maxint
+        else:
+            init_h = int(init_h)
+        heuristic_to_values[heuristic].append(init_h)
+
+    props['initial_h_values'] = heuristic_to_values
+
+    if len(heuristic_to_values) == 1:
+        for heuristic, values in heuristic_to_values.items():
+            if len(values) == 1:
+                props['initial_h_value'] = values[0]
+
+
+def get_memory_limit_in_kb(props):
+    # TODO: Remove constant once we no longer want to support old
+    # planner revisions that don't output memory limits.
+    return props.get('limit_search_memory', 2048) * 1024
 
 
 def check_memory(content, props):
@@ -243,7 +265,7 @@ def check_memory(content, props):
         props['memory'] = raw_memory
         props['memory_capped'] = raw_memory
     elif props['search_returncode'] == EXIT_OUT_OF_MEMORY:
-        props['memory_capped'] = props['limit_search_memory'] * 1024
+        props['memory_capped'] = get_memory_limit_in_kb(props)
 
 
 def scores(content, props):
@@ -266,18 +288,26 @@ def scores(content, props):
         return round(score * 100, 2)
 
     # Maximum memory in KB
-    max_memory = (props.get('limit_search_memory') or 2048) * 1024
+    max_memory = get_memory_limit_in_kb(props)
 
-    props.update({'score_expansions': log_score(props.get('expansions'),
-                    min_bound=100, max_bound=1000000, min_score=0.0),
-            'score_evaluations': log_score(props.get('evaluations'),
-                    min_bound=100, max_bound=1000000, min_score=0.0),
-            'score_memory': log_score(props.get('memory'),
-                    min_bound=2000, max_bound=max_memory, min_score=0.0),
-            'score_total_time': log_score(props.get('total_time'),
-                    min_bound=1.0, max_bound=1800.0, min_score=0.0),
-            'score_search_time': log_score(props.get('search_time'),
-                    min_bound=1.0, max_bound=1800.0, min_score=0.0)})
+    # TODO: Remove constant once we no longer want to support old
+    # planner revisions that don't output time limits.
+    max_time = props.get('limit_search_time', 1800)
+
+    for attr in ('expansions', 'evaluations', 'generated'):
+        props['score_' + attr] = log_score(
+            props.get(attr), min_bound=100, max_bound=1e6, min_score=0.0)
+
+    props.update({
+        'score_memory': log_score(
+            props.get('memory'),
+            min_bound=2000, max_bound=max_memory, min_score=0.0),
+        'score_total_time': log_score(
+            props.get('total_time'),
+            min_bound=1.0, max_bound=max_time, min_score=0.0),
+        'score_search_time': log_score(
+            props.get('search_time'),
+            min_bound=1.0, max_bound=max_time, min_score=0.0)})
 
 
 def check_min_values(content, props):
@@ -294,12 +324,12 @@ def get_error(content, props):
     """If there was an error, store its source in props['error'].
 
     For unexplained errors please check the files run.log, run.err,
-    driver.log and driver.err manually to find the reason for the error.
+    driver.log and driver.err to find the reason for the error.
     """
     if props.get('error'):
         return
 
-    if props.get('validate_returncode') != 0:
+    if invalid_solution(props):
         props['error'] = 'unexplained-invalid-solution'
         return
 
@@ -342,15 +372,22 @@ class SingleSearchParser(SearchParser):
     def __init__(self):
         SearchParser.__init__(self)
 
-        self.add_pattern('landmarks', r'Discovered (\d+?) landmarks', type=int,
-                         required=False)
-        self.add_pattern('landmarks_generation_time',
-                         r'Landmarks generation time: (.+)s', type=float,
-                         required=False)
+        self.add_pattern(
+            'landmarks', 'Discovered (\d+?) landmarks',
+            type=int, required=False)
+        self.add_pattern(
+            'landmarks_generation_time', 'Landmarks generation time: (.+)s',
+            type=float, required=False)
+        self.add_pattern(
+            'limit_search_time', 'search time limit: (\d+)s',
+            type=int, required=True)
+        self.add_pattern(
+            'limit_search_memory', 'search memory limit: (\d+) MB',
+            type=int, required=True)
 
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
-        self.add_function(get_initial_h_value)
+        self.add_function(get_initial_h_values)
         self.add_function(set_search_time)
         self.add_function(scores)
         self.add_function(check_min_values)

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
 import colorsys
 import email.mime.text
 import functools
@@ -38,17 +39,23 @@ import traceback
 # (ujson_load: 2.49). cjson loads even slower than simplejson (cjson_load: 3.28).
 try:
     import simplejson as json
-    assert json  # Silence pyflakes
 except ImportError:
     import json
-
-# Never use argparse module from stdlib. Its implementation has changed.
-from external import argparse
 
 
 # TODO(v2.0): Use freedesktop specification.
 DEFAULT_USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
 LOG_LEVEL = None
+
+
+def get_script_path():
+    """Get absolute path to main script."""
+    return os.path.abspath(sys.argv[0])
+
+
+def get_script_dir():
+    """Get absolute path to directory of main script."""
+    return os.path.dirname(get_script_path())
 
 
 class ErrorAbortHandler(logging.StreamHandler):
@@ -162,10 +169,10 @@ def overwrite_dir(dir):
     os.makedirs(dir)
 
 
-def remove(path):
+def remove_path(path):
     if os.path.isfile(path):
         os.remove(path)
-    elif os.path.isdir(path):
+    else:
         shutil.rmtree(path)
 
 
@@ -260,7 +267,7 @@ class Properties(dict):
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, indent=2, separators=(',', ': '))
+        return json.dumps(self, indent=2, separators=(',', ': '), sort_keys=True)
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
@@ -325,8 +332,6 @@ class RunFilter(object):
             modified_run = self.apply_to_run(run)
             if modified_run:
                 new_props[run_id] = modified_run
-        # TODO: Warn if filter removed all runs. This may stem from a typo
-        # in a filter_* parameter (e.g. filter_configs).
         new_props.filename = props.filename
         return new_props
 
@@ -356,7 +361,7 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
         # Without this shutil.copy2 cannot override broken symbolic links and
         # it will override the file that the link points to if the link is valid.
         if os.path.islink(dstname):
-            remove(dstname)
+            os.remove(dstname)
         try:
             if symlinks and os.path.islink(srcname):
                 linkto = os.readlink(srcname)
@@ -524,39 +529,31 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
         return help
 
 
-class ArgParser(argparse.ArgumentParser):
-    def __init__(self, add_log_option=True, *args, **kwargs):
-        argparse.ArgumentParser.__init__(self, *args,
-                                formatter_class=RawAndDefaultsHelpFormatter,
-                                **kwargs)
-        if add_log_option:
-            try:
-                self.add_argument('-l', '--log-level', dest='log_level',
-                                  choices=['DEBUG', 'INFO', 'WARNING'],
-                                  default='INFO',
-                                  help='Logging verbosity')
-            except argparse.ArgumentError:
-                # The option may have already been added by a parent class.
-                pass
-
-    def parse_known_args(self, *args, **kwargs):
-        args, remaining = argparse.ArgumentParser.parse_known_args(self, *args,
-                                                                   **kwargs)
-
-        global LOG_LEVEL
-        # Set log level only once (May have already been deleted from sys.argv)
-        if getattr(args, 'log_level', None) and not LOG_LEVEL:
-            LOG_LEVEL = getattr(logging, args.log_level.upper())
-            setup_logging(LOG_LEVEL)
-
-        return (args, remaining)
-
-    def directory(self, string):
-        if not os.path.isdir(string):
-            msg = '%r is not an evaluation directory' % string
-            raise argparse.ArgumentTypeError(msg)
-        return string
+def get_parser(add_log_option=True, **kwargs):
+    kwargs.setdefault('formatter_class', RawAndDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(**kwargs)
+    if add_log_option:
+        parser.add_argument(
+            '-l', '--log-level',
+            dest='log_level',
+            choices=['DEBUG', 'INFO', 'WARNING'],
+            default='INFO',
+            help='Logging verbosity')
+    return parser
 
 
-# Parse the log level and set it.
-ArgParser(add_help=False).parse_known_args()
+def parse_and_set_log_level():
+    # Set log level only once.
+    global LOG_LEVEL
+    if LOG_LEVEL:
+        return
+
+    parser = get_parser(add_help=False)
+    args, remaining = parser.parse_known_args()
+
+    if getattr(args, 'log_level', None):
+        LOG_LEVEL = getattr(logging, args.log_level.upper())
+        setup_logging(LOG_LEVEL)
+
+
+parse_and_set_log_level()

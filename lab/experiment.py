@@ -17,22 +17,16 @@
 
 """Main module for creating experiments."""
 
+from collections import OrderedDict
+import logging
 import os
 import pkgutil
 import sys
-import logging
 
 from lab import environments
 from lab import tools
 from lab.fetcher import Fetcher
 from lab.steps import Step, Sequence
-
-try:
-    # Python 2.7, 3.1 and above.
-    from collections import OrderedDict
-    OrderedDict  # Silence pyflakes
-except ImportError:
-    from lab.external.ordereddict import OrderedDict
 
 
 DEFAULT_ABORT_ON_FAILURE = False
@@ -40,7 +34,7 @@ DEFAULT_ABORT_ON_FAILURE = False
 SHARD_SIZE = 100
 
 # Make argparser available globally so users can add custom arguments.
-ARGPARSER = tools.ArgParser()
+ARGPARSER = tools.get_parser()
 ARGPARSER.epilog = "The list of available steps will be added later."
 ARGPARSER.add_argument(
     'steps', metavar='step', nargs='*', default=[],
@@ -54,8 +48,9 @@ ARGPARSER.add_argument(
 class _Buildable(object):
     """Abstract base class for Experiment and Run."""
     def __init__(self):
-        self.resources = []
-        self.new_files = []
+        self.resources = OrderedDict()
+        self.new_files = OrderedDict()
+        self.commands = OrderedDict()
         # List of glob-style patterns used to exclude files (not full paths).
         self.ignores = []
         self.properties = tools.Properties()
@@ -76,12 +71,13 @@ class _Buildable(object):
         """
         self.properties[name] = value
 
-    @classmethod
-    def _check_alias(cls, name):
+    def _check_alias(self, name):
         if name and not (name[0].isalpha() and name.replace('_', '').isalnum()):
             logging.critical(
-                'Names for resources must start with a letter and consist '
-                'exclusively of letters, numbers and underscores: %s' % name)
+                'Resource names must start with a letter and consist '
+                'exclusively of letters, numbers and underscores: {}'.format(name))
+        if name in self.resources or name in self.new_files:
+            logging.critical('Resource names must be unique: {}'.format(name))
 
     def add_resource(self, name, source, dest='', required=True, symlink=False):
         """Include the file or directory *source* in the experiment or run.
@@ -113,11 +109,9 @@ class _Buildable(object):
         if dest is None:
             dest = os.path.abspath(source)
         self._check_alias(name)
-        resource = (name, source, dest, required, symlink)
-        if resource not in self.resources:
-            self.resources.append(resource)
+        self.resources[name] = (source, dest, required, symlink)
 
-    def add_new_file(self, name, dest, content):
+    def add_new_file(self, name, dest, content, permissions=0o644):
         """
         Write *content* to /path/to/exp-or-run/*dest* and make the new file
         available to the commands as *name*.
@@ -130,14 +124,61 @@ class _Buildable(object):
 
         """
         self._check_alias(name)
-        new_file = (name, dest, content)
-        if new_file not in self.new_files:
-            self.new_files.append(new_file)
+        self.new_files[name] = (dest, content, permissions)
+
+    def add_command(self, name, command, **kwargs):
+        """Call an executable.
+
+        If invoked on a *run*, this method adds the command to the
+        specific run. If invoked on the experiment, the command is
+        appended to the list of commands of each run.
+
+        *name* is a string describing the command.
+
+        *command* has to be a list of strings where the first item is
+        the executable.
+
+        Keyword arguments and default values:
+
+        *abort_on_failure=False*: If set to True and *command* does
+        not exit with code 0, subsequent commands of this run are
+        not executed.
+
+        *time_limit=None*: Abort *command* after *time_limit* seconds.
+
+        *mem_limit=None*: Allow *command* to use at most *mem_limit* MiB.
+
+        All other items in *kwargs* are passed to
+        `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
+
+        Examples::
+
+            # Add command to a specific run.
+            run.add_command('list-directory', ['ls', '-al'])
+            run.add_command(
+                'solver', [path-to-my-solver, 'input-file'], time_limit=60)
+            run.add_command(
+                'preprocess', ['path-to-preprocessor'], stdin='output.sas')
+
+            # Add parser to each run part of the experiment.
+            exp.add_command('parser', ['path-to-my-parser'])
+
+        """
+        if not isinstance(name, basestring):
+            logging.critical('name %s is not a string' % name)
+        if not isinstance(command, (list, tuple)):
+            logging.critical('%s is not a list' % command)
+        if not command:
+            logging.critical('command "%s" cannot be empty' % name)
+        name = name.replace(' ', '_')
+        if name in self.commands:
+            logging.critical('a command named "%s" has already been added' % name)
+        self.commands[name] = (command, kwargs)
 
     @property
     def _env_vars(self):
-        pairs = ([(name, dest) for name, dest, content in self.new_files] +
-                 [(name, dest) for name, source, dest, req, sym in self.resources])
+        pairs = ([(name, dest) for name, (dest, _, _) in self.new_files.items()] +
+                 [(name, dest) for name, (_, dest, _, _) in self.resources.items()])
         return dict((name, self._get_abs_path(dest)) for name, dest in pairs if name)
 
     def _get_abs_path(self, rel_path):
@@ -153,18 +194,15 @@ class _Buildable(object):
         combined_props.write()
 
     def _build_resources(self):
-        for name, dest, content in self.new_files:
+        for name, (dest, content, permissions) in self.new_files.items():
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
             with open(filename, 'w') as file:
                 logging.debug('Writing file "%s"' % filename)
                 file.write(content)
-                if dest == 'run':
-                    # Make run script executable.
-                    # TODO: Replace by adding an "executable" kwarg in add_new_file().
-                    os.chmod(filename, 0755)
+                os.chmod(filename, permissions)
 
-        for name, source, dest, required, symlink in self.resources:
+        for name, (source, dest, required, symlink) in self.resources.items():
             if required and not os.path.exists(source):
                 logging.critical('Required resource not found: %s' % source)
             dest = self._get_abs_path(dest)
@@ -223,6 +261,13 @@ class Experiment(_Buildable):
         self.runs = []
 
         self.set_property('experiment_file', self._script)
+
+        self.add_new_file(
+            "LAB_DEFAULT_PARSER",
+            "lab-default-parser.py",
+            pkgutil.get_data('lab', 'data/default-parser.py'),
+            permissions=0o755)
+        self.add_command("run-lab-default-parser", ["LAB_DEFAULT_PARSER"])
 
         self.steps = Sequence()
         self.add_step(Step('build', self.build))
@@ -433,9 +478,12 @@ class Experiment(_Buildable):
         self.set_property('runs', num_runs)
         logging.info('Building %d runs' % num_runs)
         for index, run in enumerate(self.runs, 1):
-            run.build()
             if index % 100 == 0:
-                logging.info('Built run %6d/%d' % (index, num_runs))
+                logging.info('Build run %6d/%d' % (index, num_runs))
+            for name, (command, kwargs) in self.commands.items():
+                run.add_command(name, command, **kwargs)
+            run.build()
+        logging.info('Finished building runs')
 
 
 class Run(_Buildable):
@@ -452,7 +500,6 @@ class Run(_Buildable):
 
         self.path = ''
         self.linked_resources = []
-        self.commands = OrderedDict()
 
     def require_resource(self, resource_name):
         """Make *resource_name* available for this run.
@@ -468,43 +515,6 @@ class Run(_Buildable):
 
         """
         self.linked_resources.append(resource_name)
-
-    def add_command(self, name, command, **kwargs):
-        """Add a command to the run.
-
-        *name* is a descriptive name for the command.
-
-        *command* has to be a list of strings where the first item is the
-        executable.
-
-        Keyword arguments and default values:
-
-        *abort_on_failure=False*: If set to True and *command* does
-        not exit with code 0, subsequent commands of this run are
-        not executed.
-
-        *time_limit=1800*: Abort *command* after *time_limit* seconds.
-
-        *mem_limit=2048*: Allow *command* to use at most *mem_limit* MiB.
-
-        All other items in *kwargs* are passed to
-        `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
-
-        Examples::
-
-            run.add_command('list-directory', ['ls', '-al'])
-            run.add_command('translate', [run.translator.shell_name,
-                                          'domain.pddl', 'problem.pddl'])
-            run.add_command('preprocess', [run.preprocessor.shell_name],
-                            {'stdin': 'output.sas'})
-            run.add_command('validate', ['VALIDATE', 'DOMAIN', 'PROBLEM',
-                                         'sas_plan'])
-        """
-        assert isinstance(name, basestring), 'name %s is not a string' % name
-        assert isinstance(command, (list, tuple)), '%s is not a list' % command
-        assert command, 'Command "%s" cannot be empty' % name
-        name = name.replace(' ', '_')
-        self.commands[name] = (command, kwargs)
 
     def build(self):
         """
@@ -581,7 +591,7 @@ class Run(_Buildable):
         for old, new in [('VARIABLES', env_vars_text), ('CALLS', calls_text)]:
             run_script = run_script.replace('"""%s"""' % old, new)
 
-        self.add_new_file('', 'run', run_script)
+        self.add_new_file('', 'run', run_script, permissions=0o755)
 
     def _build_linked_resources(self):
         """

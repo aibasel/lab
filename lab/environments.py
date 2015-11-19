@@ -17,6 +17,7 @@
 
 import logging
 import math
+import multiprocessing
 import os
 import pkgutil
 import random
@@ -60,14 +61,17 @@ class LocalEnvironment(Environment):
     """
     Environment for running experiments locally on a single machine.
     """
-    def __init__(self, processes=1):
+    def __init__(self, processes=None):
         """
-        *processes* must be between 1 and #CPUs.
+        If given, *processes* must be between 1 and #CPUs.
+        If omitted, it will be set to #CPUs.
         """
         Environment.__init__(self)
-        import multiprocessing
         cores = multiprocessing.cpu_count()
-        assert processes <= cores, cores
+        if processes is None:
+            processes = cores
+        if not 1 <= processes <= cores:
+            raise ValueError("processes must be in the range [1, ..., #CPUs].")
         self.processes = processes
 
     def write_main_script(self):
@@ -80,7 +84,7 @@ class LocalEnvironment(Environment):
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
-        self.exp.add_new_file('', self.main_script_file, script)
+        self.exp.add_new_file('', self.main_script_file, script, permissions=0o755)
 
     def start_exp(self):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)

@@ -65,8 +65,14 @@ class PlanningReport(Report):
         Attribute('score_*', min_wins=False, functions=[reports.avg, sum]),
     ])
 
-    INFO_ATTRIBUTES = ['translate_summary', 'preprocess_summary', 'search_summary',
-                       'config_nick', 'commandline_config']
+    INFO_ATTRIBUTES = [
+        # DownwardExperiment
+        'translate_summary', 'preprocess_summary', 'search_summary',
+        'config_nick', 'commandline_config',
+        # FastDownwardExperiment
+        'local_revision', 'global_revision', 'revision_summary',
+        'build_options', 'driver_options', 'component_options'
+    ]
 
     def __init__(self, derived_properties=None, **kwargs):
         """

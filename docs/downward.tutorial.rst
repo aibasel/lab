@@ -41,4 +41,4 @@ You can use this file as a basis for your own experiments.
 .. literalinclude:: ../examples/lmcut.py
 
 Have a look at other Fast Downward experiments in the ``examples`` directory
-and the `downward API <downward.experiments.html>`_.
+and the `downward API <downward.experiment.html>`_.

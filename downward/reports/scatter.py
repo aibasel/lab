@@ -24,7 +24,7 @@ import os
 from lab import tools
 
 from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
-    PlotReport, EPSILON
+    PlotReport, MIN_AXIS
 
 
 class ScatterMatplotlib(Matplotlib):
@@ -53,8 +53,8 @@ class ScatterMatplotlib(Matplotlib):
         axes.set_ylim(report.ylim_bottom or -1, report.ylim_top or plot_size)
 
         for axis in [axes.xaxis, axes.yaxis]:
-            MatplotlibPlot.change_axis_formatter(axis,
-                                report.missing_val if report.show_missing else None)
+            MatplotlibPlot.change_axis_formatter(
+                axis, report.missing_val if report.show_missing else None)
         return has_points
 
 
@@ -79,9 +79,10 @@ class ScatterPgfPlots(PgfPlots):
             c = category_style.get('c')
             plot['color'] = cls.COLORS.get(c, c)
             plot['mark options'] = '{draw=black}'
-            lines.append('\\addplot[%s] coordinates {\n%s\n};' %
-                    (cls._format_options(plot),
-                     ' '.join(cls._format_coord(c) for c in coords)))
+            lines.append(
+                '\\addplot[%s] coordinates {\n%s\n};' % (
+                    cls._format_options(plot),
+                    ' '.join(cls._format_coord(c) for c in coords)))
             if category:
                 lines.append('\\addlegendentry{%s}' % category)
         # Add black line.
@@ -154,9 +155,10 @@ class ScatterPlotReport(PlotReport):
                 'worse':  ('o','y'),
             }
 
-            PlotReport(attributes=['search_time'],
-                       get_category=improvement,
-                       category_styles=styles)
+            ScatterPlotReport(
+                attributes=['search_time'],
+                get_category=improvement,
+                category_styles=styles)
 
         """
         kwargs.setdefault('legend_location', (1.3, 0.5))
@@ -169,8 +171,8 @@ class ScatterPlotReport(PlotReport):
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
-        self.xlim_left = self.xlim_left or EPSILON
-        self.ylim_bottom = self.ylim_bottom or EPSILON
+        self.xlim_left = self.xlim_left or MIN_AXIS
+        self.ylim_bottom = self.ylim_bottom or MIN_AXIS
         if self.output_format == 'tex':
             self.writer = ScatterPgfPlots
         else:

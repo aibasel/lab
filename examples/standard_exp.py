@@ -8,9 +8,14 @@ import sys
 
 from lab.environments import LocalEnvironment, MaiaEnvironment
 from lab.steps import Step
+from lab import tools
 
 from downward.experiment import DownwardExperiment
 from downward.reports.absolute import AbsoluteReport
+
+tools.show_deprecation_warning(
+    'The standard_exp.py module has been deprecated in version 1.7. '
+    'Please copy the relevant parts into your own experiment.')
 
 
 NODE = platform.node()
@@ -74,10 +79,14 @@ class StandardDownwardExperiment(DownwardExperiment):
 
         # Add report steps
         abs_report_file = os.path.join(self.eval_dir, '%s-abs.html' % expname)
-        self.add_report(AbsoluteReport(attributes=attributes, colored=True, derived_properties=derived_properties),
-                        name='report-abs', outfile=abs_report_file)
+        self.add_report(AbsoluteReport(
+                attributes=attributes,
+                colored=True,
+                derived_properties=derived_properties),
+            name='report-abs', outfile=abs_report_file)
 
-        self.add_step(Step('remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
+        self.add_step(Step(
+            'remove-eval-dir', shutil.rmtree, self.eval_dir, ignore_errors=True))
 
         if not REMOTE:
             # Copy the results to local directory

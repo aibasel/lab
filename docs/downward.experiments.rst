@@ -1,5 +1,5 @@
-:mod:`downward.experiments` --- Fast Downward experiments
-=========================================================
+:mod:`downward.experiments` --- Fast Downward experiments (deprecated)
+======================================================================
 .. autoclass:: downward.experiments.DownwardExperiment
    :members:
 

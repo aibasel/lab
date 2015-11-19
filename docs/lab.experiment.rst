@@ -71,3 +71,6 @@
 .. autoclass:: lab.steps.Step
    :members:
    :undoc-members:
+
+.. autodata:: lab.__version__
+   :annotation:

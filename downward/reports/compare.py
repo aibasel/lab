@@ -115,8 +115,8 @@ class CompareRevisionsReport(CompareConfigsReport):
             self._compared_configs = []
             for config_nick in config_nicks:
                 col_names = ['%s-%s' % (r, config_nick) for r in self._revisions]
-                self._compared_configs.append((col_names[0], col_names[1],
-                                   'Diff - %s' % config_nick))
+                self._compared_configs.append(
+                    (col_names[0], col_names[1], 'Diff - %s' % config_nick))
         return self._compared_configs
 
 

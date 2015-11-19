@@ -1,25 +1,68 @@
 News
 ====
 
-v1.8 (unreleased)
+v1.9.1 (2015-11-12)
+-------------------
+
+downward
+^^^^^^^^
+* Always prepend build options with ``-j<num_cpus>``.
+* Fix: Use correct revisions in ``FastDownwardExperiment``.
+* Don't abort parser if resource limits can't be found (support old planner versions).
+
+
+v1.9 (2015-11-07)
+-----------------
+
+lab
+^^^
+* Add :func:`lab.experiment.Experiment.add_command()` method.
+* Add :py:data:`lab.__version__` string.
+* Explicitly remove support for Python 2.6.
+
+downward
+^^^^^^^^
+* Add :py:class:`downward.experiment.FastDownwardExperiment` class for whole-planner experiments.
+* Deprecate :py:class:`downward.experiments.DownwardExperiment` class.
+* Repeat headers between domains in :py:class:`downward.reports.taskwise.TaskwiseReport`.
+
+
+v1.8 (2015-10-02)
+-----------------
+
+lab
+^^^
+* Deprecate predefined experiment steps (``remove_exp_dir``,
+  ``zip_exp_dir``, ``unzip_exp_dir``).
+* Docs: add FAQs, update docs.
+* Add more regression and style tests.
+
+downward
+^^^^^^^^
+* Parse both evaluated states (evaluated) and evaluations (evaluations).
+* Add example experiment showing how to make reports for data obtained without lab.
+* Add suite_sat_strips().
+* Parse negative initial h values.
+* Support CMake builds.
+
+
+v1.7 (2015-08-19)
 -----------------
 
 lab
 ^^^
 * Automatically determine whether to queue steps sequentially on the grid.
-
-downward
-^^^^^^^^
-* ...
-
-
-v1.7
-----
-
-lab
-^^^
 * Reports: right-align headers (except the left-most one).
 * Reports: let :func:`lab.reports.gm` return 0 if any of the numbers is 0.
+* Add test that checks for dead code with vulture.
+* Remove Step.remove_exp_dir step.
+* Remove default time and memory limits for commands. You can now pass
+  ``mem_limit=None`` and ``time_limit=None`` to disable limits for a
+  command.
+* Pass ``extra_options`` kwarg to
+  :py:class:`lab.environments.OracleGridEngineEnvironment` to set
+  additional options like parallel environments.
+* Sort ``properties`` files by keys.
 
 downward
 ^^^^^^^^
@@ -30,6 +73,13 @@ downward
 * Allow fractional plan costs.
 * Set search_time and total_time to 0.01 instead of 0.1 if they are 0.0 in the log.
 * Parse initial h-value for aborted searches (Florian).
+* Use EXIT_UNSOLVABLE instead of logs to determine unsolvability.
+  Currently, this exit code is only returned by EHC.
+* Exit with warning if search parser is not executable.
+* Deprecate ``downward/configs.py`` module.
+* Deprecate ``examples/standard_exp.py`` module.
+* Remove ``preprocess-all.py`` script.
+* By default, use all CPUs for compiling Fast Downward.
 
 
 v1.6
