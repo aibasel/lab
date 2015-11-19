@@ -266,6 +266,13 @@ class Experiment(_Buildable):
 
         self.set_property('experiment_file', self._script)
 
+        self.add_new_file(
+            "LAB_DEFAULT_PARSER",
+            "lab-default-parser.py",
+            pkgutil.get_data('lab', 'data/default-parser.py'),
+            permissions=0o755)
+        self.add_command("run-lab-default-parser", ["LAB_DEFAULT_PARSER"])
+
         self.steps = Sequence()
         self.add_step(Step('build', self.build))
         self.add_step(Step('start', self.run))
