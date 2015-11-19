@@ -118,16 +118,15 @@ def suite_alternative_formulations():
     return ['airport-adl', 'pathways', 'no-mprime', 'no-mystery']
 
 
-def suite_ipc_one_to_five():
+def suite_ipc_one_to_four():
     # All IPC1-5 domains, including the trivial Movie.
     return [
         'airport', 'assembly', 'blocks', 'depot', 'driverlog',
         'freecell', 'grid', 'gripper', 'logistics00', 'logistics98',
-        'miconic', 'miconic-fulladl', 'miconic-simpleadl', 'movie', 'mprime',
-        'mystery', 'openstacks', 'optical-telegraphs', 'pathways',
-        'philosophers', 'pipesworld-notankage', 'pipesworld-tankage',
-        'psr-large', 'psr-middle', 'psr-small', 'rovers', 'satellite',
-        'schedule', 'storage', 'tpp', 'trucks', 'zenotravel',
+        'miconic', 'miconic-fulladl', 'miconic-simpleadl', 'movie',
+        'mprime', 'mystery', 'optical-telegraphs', 'philosophers',
+        'pipesworld-notankage', 'psr-large', 'psr-middle', 'psr-small',
+        'satellite', 'schedule', 'zenotravel',
     ]
 
 
@@ -319,14 +318,16 @@ def suite_optimal_with_ipc11():
 
 
 def suite_satisficing_with_ipc11():
-    domains = suite_ipc_one_to_five() + suite_lmcut_domains()
-    domains += suite_ipc08_sat() + suite_ipc11_sat()
+    domains = (
+        suite_ipc_one_to_four() + suite_ipc06() +
+        suite_lmcut_domains() + suite_ipc08_sat() + suite_ipc11_sat())
     return list(sorted(set(domains) - set(suite_alternative_formulations())))
 
 
 def suite_all():
-    domains = suite_ipc_one_to_five() + suite_lmcut_domains()
-    domains += suite_ipc08_all() + suite_ipc11_all()
+    domains = (
+        suite_ipc_one_to_four() + suite_ipc06() +
+        suite_lmcut_domains() + suite_ipc08_all() + suite_ipc11_all())
     return list(sorted(set(domains) - set(suite_alternative_formulations())))
 
 
