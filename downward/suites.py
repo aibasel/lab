@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 import os
 
 from lab import tools
@@ -86,29 +85,14 @@ class Problem(object):
 
 def generate_problems(benchmarks_dir, description):
     """
-    Descriptions have the form:
-
-    gripper:prob01.pddl
-    gripper
-    TEST
+    Descriptions are either domains (e.g., "gripper") or problems
+    (e.g., "gripper:prob01.pddl").
     """
-    module_dict = globals()
-
     if isinstance(description, Problem):
         yield description
     elif isinstance(description, Domain):
         for problem in description:
             yield problem
-    elif description.isupper() or description in module_dict:
-        suite_func = module_dict.get(description, None)
-        func_name = 'suite_%s' % description.lower()
-        if suite_func is None:
-            suite_func = module_dict.get(func_name, None)
-        if suite_func is None:
-            logging.critical('unknown suite: %s' % func_name)
-        for element in suite_func():
-            for problem in generate_problems(benchmarks_dir, element):
-                yield problem
     elif ':' in description:
         domain_name, problem_name = description.split(':', 1)
         yield Problem(benchmarks_dir, domain_name, problem_name)
