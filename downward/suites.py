@@ -83,7 +83,7 @@ class Problem(object):
         return tools.find_file(domain_basenames, domain_dir)
 
 
-def generate_problems(benchmarks_dir, description):
+def _generate_problems(benchmarks_dir, description):
     """
     Descriptions are either domains (e.g., "gripper") or problems
     (e.g., "gripper:prob01.pddl").
@@ -102,9 +102,15 @@ def generate_problems(benchmarks_dir, description):
 
 
 def build_suite(benchmarks_dir, descriptions):
+    """
+    *descriptions* must be a list of domain or problem descriptions::
+
+        build_suite(benchmarks_dir, ["gripper", "grid:prob01.pddl"])
+
+    """
     result = []
     for description in descriptions:
-        result.extend(generate_problems(benchmarks_dir, description))
+        result.extend(_generate_problems(benchmarks_dir, description))
     return result
 
 
