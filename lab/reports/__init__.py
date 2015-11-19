@@ -694,8 +694,6 @@ class Table(collections.defaultdict):
         def format_value(value, escape=True):
             if isinstance(value, float):
                 return '%.2f' % value
-            if isinstance(value, (list, tuple)):
-                result = '[%s]' % ', '.join(format_value(v, escape=False) for v in value)
             else:
                 result = str(value)
             if escape:
