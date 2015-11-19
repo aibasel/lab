@@ -50,7 +50,7 @@ class _Buildable(object):
     def __init__(self):
         # TODO: Make sure that a name is not used twice.
         self.resources = []
-        self.new_files = []
+        self.new_files = OrderedDict()
         self.commands = OrderedDict()
         # List of glob-style patterns used to exclude files (not full paths).
         self.ignores = []
@@ -113,7 +113,7 @@ class _Buildable(object):
         if resource not in self.resources:
             self.resources.append(resource)
 
-    def add_new_file(self, name, dest, content):
+    def add_new_file(self, name, dest, content, permissions=0o644):
         """
         Write *content* to /path/to/exp-or-run/*dest* and make the new file
         available to the commands as *name*.
@@ -126,9 +126,9 @@ class _Buildable(object):
 
         """
         self._check_alias(name)
-        new_file = (name, dest, content)
-        if new_file not in self.new_files:
-            self.new_files.append(new_file)
+        if name in self.new_files:
+            logging.critical('Resource names must be unique: {}'.format(name))
+        self.new_files[name] = (dest, content, permissions)
 
     def add_command(self, name, command, **kwargs):
         """Call an executable.
@@ -181,7 +181,7 @@ class _Buildable(object):
 
     @property
     def _env_vars(self):
-        pairs = ([(name, dest) for name, dest, content in self.new_files] +
+        pairs = ([(name, dest) for name, (dest, _, _) in self.new_files.items()] +
                  [(name, dest) for name, source, dest, req, sym in self.resources])
         return dict((name, self._get_abs_path(dest)) for name, dest in pairs if name)
 
@@ -198,16 +198,13 @@ class _Buildable(object):
         combined_props.write()
 
     def _build_resources(self):
-        for name, dest, content in self.new_files:
+        for name, (dest, content, permissions) in self.new_files.items():
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
             with open(filename, 'w') as file:
                 logging.debug('Writing file "%s"' % filename)
                 file.write(content)
-                if dest == 'run':
-                    # Make run script executable.
-                    # TODO: Replace by adding an "executable" kwarg in add_new_file().
-                    os.chmod(filename, 0755)
+                os.chmod(filename, permissions)
 
         for name, source, dest, required, symlink in self.resources:
             if required and not os.path.exists(source):
@@ -593,7 +590,7 @@ class Run(_Buildable):
         for old, new in [('VARIABLES', env_vars_text), ('CALLS', calls_text)]:
             run_script = run_script.replace('"""%s"""' % old, new)
 
-        self.add_new_file('', 'run', run_script)
+        self.add_new_file('', 'run', run_script, permissions=0o755)
 
     def _build_linked_resources(self):
         """
