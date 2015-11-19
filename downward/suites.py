@@ -18,7 +18,6 @@
 
 import logging
 import os
-import re
 
 from lab import tools
 
@@ -93,31 +92,9 @@ def generate_problems(benchmarks_dir, description):
     gripper
     TEST
     """
-    # Allow writing SUITE_NAME_FIRST
-    if description.endswith('_FIRST'):
-        description = description.replace('_FIRST', '_1TO1')
-    range_expr = re.compile(r'.+_([-]?\d+)TO([-]?\d+)', re.IGNORECASE)
-    range_result = range_expr.search(description)
     module_dict = globals()
 
-    if range_result:
-        # Allow writing SUITE_NAME_<NUMBER>TO<NUMBER>
-        # This will work for all suites that only list domains and will
-        # return the problems in that range of each domain
-        start = int(range_result.group(1))
-        end = int(range_result.group(2))
-        suite_name, numbers = description.rsplit('_', 1)
-        suite_func = module_dict.get(suite_name, None)
-        func_name = 'suite_%s' % suite_name.lower()
-        if suite_func is None:
-            suite_func = module_dict.get(func_name, None)
-        if not suite_func:
-            logging.critical('unknown suite: %s' % func_name)
-        for domain_name in suite_func():
-            domain = Domain(benchmarks_dir, domain_name)
-            for problem in domain.problems[start - 1:end]:
-                yield problem
-    elif isinstance(description, Problem):
+    if isinstance(description, Problem):
         yield description
     elif isinstance(description, Domain):
         for problem in description:
