@@ -541,7 +541,7 @@ class DownwardExperiment(Experiment):
 
         self.runs = []
         self.new_files = OrderedDict()
-        self.resources = OrderedDict()
+        self.resources = []
 
         self._adapt_path(stage)
         self._setup_ignores(stage)
