@@ -303,41 +303,17 @@ def suite_unsolvable():
             ['miconic-fulladl:f21-3.pddl', 'miconic-fulladl:f30-2.pddl'])
 
 
-def suite_lmcut_domains():
-    return [
-        'airport',
-        'blocks',
-        'depot',
-        'driverlog',
-        'freecell',
-        'grid',
-        'gripper',
-        'logistics00',
-        'logistics98',
-        'miconic',
-        'mprime',
-        'mystery',
-        'openstacks-strips',
-        'pathways-noneg',
-        'pipesworld-notankage',
-        'pipesworld-tankage',
-        'psr-small',
-        'rovers',
-        'satellite',
-        'tpp',
-        'trucks-strips',
-        'zenotravel',
-    ]
-
-
 def suite_strips():
-    return suite_lmcut_domains() + suite_ipc08_all_strips() + suite_ipc11_all()
+    return sorted(
+        suite_ipc_one_to_four_strips() + suite_ipc06_strips() +
+        suite_ipc06_strips_compilations() + suite_ipc08_all_strips() +
+        suite_ipc11_all())
 
 
 def suite_optimal():
     # In addition to the domains in the old "suite_optimal_with_ipc11"
     # suite, this suite also contains "movie" and "storage".
-    return (
+    return sorted(
         suite_ipc_one_to_four_strips() + suite_ipc06_strips() +
         suite_ipc06_strips_compilations() + suite_ipc08_opt_strips() +
         suite_ipc11_opt())
@@ -347,18 +323,26 @@ def suite_satisficing():
     domains = (
         suite_ipc_one_to_four() + suite_ipc06() +
         suite_ipc06_strips_compilations() + suite_ipc08_sat() + suite_ipc11_sat())
-    return list(sorted(set(domains) - set(suite_alternative_formulations())))
+    return sorted(set(domains) - set(suite_alternative_formulations()))
+
+
+def suite_sat_strips():
+    return sorted(
+        suite_ipc_one_to_four_strips() + suite_ipc06_strips() +
+        suite_ipc06_strips_compilations() + suite_ipc08_sat_strips() +
+        suite_ipc11_sat())
 
 
 def suite_all():
     domains = (
         suite_ipc_one_to_four() + suite_ipc06() +
-        suite_lmcut_domains() + suite_ipc08_all() + suite_ipc11_all())
-    return list(sorted(set(domains) - set(suite_alternative_formulations())))
+        suite_ipc06_strips_compilations() + suite_ipc08_all() +
+        suite_ipc11_all())
+    return sorted(set(domains) - set(suite_alternative_formulations()))
 
 
 def suite_all_formulations():
-    return list(sorted(suite_all() + suite_alternative_formulations()))
+    return sorted(suite_all() + suite_alternative_formulations())
 
 
 def suite_unit_costs():
@@ -398,10 +382,3 @@ def suite_diverse_costs():
         'woodworking-opt11-strips', 'woodworking-sat08-strips',
         'woodworking-sat11-strips'
     ]
-
-
-def suite_sat_strips():
-    return (
-        suite_lmcut_domains() +
-        suite_ipc08_sat_strips() +
-        suite_ipc11_sat())
