@@ -23,28 +23,17 @@ import re
 from lab import tools
 
 
-class Repository(object):
-    def __init__(self, benchmarks_dir):
-        domains = [d for d in os.listdir(benchmarks_dir)
-                   if not d.startswith('.')]
-        domains.sort()
-        self.domains = [Domain(domain) for domain in domains]
-
-    def __iter__(self):
-        return iter(self.domains)
-
-
 class Domain(object):
     def __init__(self, benchmarks_dir, domain):
         self.domain = domain
-        self.directory = os.path.join(benchmarks_dir, domain)
-        problems = os.listdir(self.directory)
-        problems = tools.natural_sort([p for p in problems
-                                       if 'domain' not in p and
-                                       not p.startswith('.')])
-        tools.natural_sort(problems)
-        self.problems = [Problem(benchmarks_dir, domain, problem)
-                         for problem in problems]
+        directory = os.path.join(benchmarks_dir, domain)
+        problem_files = tools.natural_sort([
+            p for p in os.listdir(directory)
+            if 'domain' not in p and
+            not p.startswith('.')])
+        self.problems = [
+            Problem(benchmarks_dir, domain, problem)
+            for problem in problem_files]
 
     def __str__(self):
         return self.domain
@@ -309,14 +298,6 @@ def suite_ipc11_all():
     return suite_ipc11_opt() + suite_ipc11_sat()
 
 
-def suite_interesting():
-    # A domain is boring if all planners solve all tasks in < 1 sec.
-    # We include logistics00 even though it has that property because
-    # we merge its results with logistics98 (which doesn't).
-    boring = set(['gripper', 'miconic', 'miconic-simpleadl', 'movie'])
-    return [domain for domain in suite_all() if domain not in boring]
-
-
 def suite_unsolvable():
     # TODO: Add other unsolvable problems (Miconic-FullADL).
     # TODO: Add 'fsc-grid-r:prize5x5_R.pddl' and 't0-uts:uts_r-02.pddl'
@@ -324,22 +305,6 @@ def suite_unsolvable():
     return (['mystery:prob%02d.pddl' % index
              for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]] +
             ['miconic-fulladl:f21-3.pddl', 'miconic-fulladl:f30-2.pddl'])
-
-
-def suite_test():
-    # Three smallish domains for quick tests.
-    return ['grid', 'gripper', 'blocks']
-
-
-def suite_minitest():
-    return ['gripper:prob01.pddl', 'gripper:prob02.pddl',
-            'gripper:prob03.pddl', 'zenotravel:pfile1',
-            'zenotravel:pfile2', 'zenotravel:pfile3', ]
-
-
-def suite_tinytest():
-    return ['gripper:prob01.pddl', 'trucks-strips:p01.pddl',
-            'trucks:p01.pddl', 'psr-middle:p01-s17-n2-l2-f30.pddl']
 
 
 def suite_lmcut_domains():
@@ -446,28 +411,3 @@ def suite_sat_strips():
         suite_lmcut_domains() +
         suite_ipc08_sat_strips() +
         suite_ipc11_sat())
-
-
-def suite_five_per_domain(benchmarks_dir):
-    for domain in Repository(benchmarks_dir):
-        problems = list(domain)
-        for item in select_evenly_spread(problems, 5):
-            yield item
-
-
-def select_evenly_spread(seq, num_items):
-    """Return num_items many items of seq, spread evenly.
-    If seq is shorter than num_items, include all items.
-    Otherwise, include first and last items and spread evenly in between.
-    (If num_items is 1, only include first item.)
-
-    >>> select_evenly_spread('abcdef', 3)
-    ['a', 'd', 'f']
-    """
-    if len(seq) <= num_items:
-        return seq
-    if num_items == 1:
-        return [seq[0]]
-    step_size = (len(seq) - 1) / float(num_items - 1)
-    float_indices = [i * step_size for i in range(num_items)]
-    return [seq[int(round(index))] for index in float_indices]
