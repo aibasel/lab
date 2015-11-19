@@ -49,7 +49,7 @@ class _Buildable(object):
     """Abstract base class for Experiment and Run."""
     def __init__(self):
         # TODO: Make sure that a name is not used twice.
-        self.resources = []
+        self.resources = OrderedDict()
         self.new_files = OrderedDict()
         self.commands = OrderedDict()
         # List of glob-style patterns used to exclude files (not full paths).
@@ -109,9 +109,8 @@ class _Buildable(object):
         if dest is None:
             dest = os.path.abspath(source)
         self._check_alias(name)
-        resource = (name, source, dest, required, symlink)
-        if resource not in self.resources:
-            self.resources.append(resource)
+        # TODO: Check for duplicates.
+        self.resources[name] = (source, dest, required, symlink)
 
     def add_new_file(self, name, dest, content, permissions=0o644):
         """
@@ -182,7 +181,7 @@ class _Buildable(object):
     @property
     def _env_vars(self):
         pairs = ([(name, dest) for name, (dest, _, _) in self.new_files.items()] +
-                 [(name, dest) for name, source, dest, req, sym in self.resources])
+                 [(name, dest) for name, (_, dest, _, _) in self.resources.items()])
         return dict((name, self._get_abs_path(dest)) for name, dest in pairs if name)
 
     def _get_abs_path(self, rel_path):
@@ -206,7 +205,7 @@ class _Buildable(object):
                 file.write(content)
                 os.chmod(filename, permissions)
 
-        for name, source, dest, required, symlink in self.resources:
+        for name, (source, dest, required, symlink) in self.resources.items():
             if required and not os.path.exists(source):
                 logging.critical('Required resource not found: %s' % source)
             dest = self._get_abs_path(dest)
