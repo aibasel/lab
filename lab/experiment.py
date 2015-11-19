@@ -48,7 +48,6 @@ ARGPARSER.add_argument(
 class _Buildable(object):
     """Abstract base class for Experiment and Run."""
     def __init__(self):
-        # TODO: Make sure that a name is not used twice.
         self.resources = OrderedDict()
         self.new_files = OrderedDict()
         self.commands = OrderedDict()
@@ -72,12 +71,13 @@ class _Buildable(object):
         """
         self.properties[name] = value
 
-    @classmethod
-    def _check_alias(cls, name):
+    def _check_alias(self, name):
         if name and not (name[0].isalpha() and name.replace('_', '').isalnum()):
             logging.critical(
-                'Names for resources must start with a letter and consist '
-                'exclusively of letters, numbers and underscores: %s' % name)
+                'Resource names must start with a letter and consist '
+                'exclusively of letters, numbers and underscores: {}'.format(name))
+        if name in self.resources or name in self.new_files:
+            logging.critical('Resource names must be unique: {}'.format(name))
 
     def add_resource(self, name, source, dest='', required=True, symlink=False):
         """Include the file or directory *source* in the experiment or run.
@@ -109,7 +109,6 @@ class _Buildable(object):
         if dest is None:
             dest = os.path.abspath(source)
         self._check_alias(name)
-        # TODO: Check for duplicates.
         self.resources[name] = (source, dest, required, symlink)
 
     def add_new_file(self, name, dest, content, permissions=0o644):
@@ -125,8 +124,6 @@ class _Buildable(object):
 
         """
         self._check_alias(name)
-        if name in self.new_files:
-            logging.critical('Resource names must be unique: {}'.format(name))
         self.new_files[name] = (dest, content, permissions)
 
     def add_command(self, name, command, **kwargs):
