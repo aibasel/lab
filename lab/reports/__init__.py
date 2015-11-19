@@ -691,14 +691,12 @@ class Table(collections.defaultdict):
 
         justify_right = isinstance(value, (float, int))
 
-        def format_value(value, escape=True):
+        def format_value(value):
             if isinstance(value, float):
                 return '%.2f' % value
             else:
                 result = str(value)
-            if escape:
-                result = markup.escape(result)
-            return result
+            return markup.escape(result)
 
         value_text = format_value(value)
 
