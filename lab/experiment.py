@@ -48,8 +48,9 @@ ARGPARSER.add_argument(
 class _Buildable(object):
     """Abstract base class for Experiment and Run."""
     def __init__(self):
-        self.resources = OrderedDict()
-        self.new_files = OrderedDict()
+        self.resources = []
+        self.new_files = []
+        self.env_vars_relative = {}
         self.commands = OrderedDict()
         # List of glob-style patterns used to exclude files (not full paths).
         self.ignores = []
@@ -76,8 +77,8 @@ class _Buildable(object):
             logging.critical(
                 'Resource names must start with a letter and consist '
                 'exclusively of letters, numbers and underscores: {}'.format(name))
-        if name in self.resources or name in self.new_files:
-            logging.critical('Resource names must be unique: {}'.format(name))
+        if name in self.env_vars_relative:
+            logging.critical('Resource names must be unique: {!r}'.format(name))
 
     def add_resource(self, name, source, dest='', required=True, symlink=False):
         """Include the file or directory *source* in the experiment or run.
@@ -109,7 +110,9 @@ class _Buildable(object):
         if dest is None:
             dest = os.path.abspath(source)
         self._check_alias(name)
-        self.resources[name] = (source, dest, required, symlink)
+        if name:
+            self.env_vars_relative[name] = dest
+        self.resources.append((source, dest, required, symlink))
 
     def add_new_file(self, name, dest, content, permissions=0o644):
         """
@@ -124,7 +127,9 @@ class _Buildable(object):
 
         """
         self._check_alias(name)
-        self.new_files[name] = (dest, content, permissions)
+        if name:
+            self.env_vars_relative[name] = dest
+        self.new_files.append((dest, content, permissions))
 
     def add_command(self, name, command, **kwargs):
         """Call an executable.
@@ -177,9 +182,9 @@ class _Buildable(object):
 
     @property
     def _env_vars(self):
-        pairs = ([(name, dest) for name, (dest, _, _) in self.new_files.items()] +
-                 [(name, dest) for name, (_, dest, _, _) in self.resources.items()])
-        return dict((name, self._get_abs_path(dest)) for name, dest in pairs if name)
+        return dict(
+            (name, self._get_abs_path(dest))
+            for name, dest in self.env_vars_relative.items())
 
     def _get_abs_path(self, rel_path):
         """Return absolute path by applying rel_path to the base dir."""
@@ -194,7 +199,7 @@ class _Buildable(object):
         combined_props.write()
 
     def _build_resources(self):
-        for name, (dest, content, permissions) in self.new_files.items():
+        for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
             with open(filename, 'w') as file:
@@ -202,7 +207,7 @@ class _Buildable(object):
                 file.write(content)
                 os.chmod(filename, permissions)
 
-        for name, (source, dest, required, symlink) in self.resources.items():
+        for source, dest, required, symlink in self.resources:
             if required and not os.path.exists(source):
                 logging.critical('Required resource not found: %s' % source)
             dest = self._get_abs_path(dest)
@@ -538,9 +543,15 @@ class Run(_Buildable):
         if not self.commands:
             logging.critical('Please add at least one command')
 
-        # Copy missing env_vars from experiment.
-        env_vars = self.experiment._env_vars
-        env_vars.update(self._env_vars)
+        exp_vars = self.experiment._env_vars
+        run_vars = self._env_vars
+        doubly_used_vars = set(exp_vars) & set(run_vars)
+        if doubly_used_vars:
+            logging.critical(
+                'Resource names cannot be shared between experiments '
+                'and runs, they must be unique: {}'.format(doubly_used_vars))
+        env_vars = exp_vars
+        env_vars.update(run_vars)
 
         run_script = pkgutil.get_data('lab', 'data/run-template.py')
 

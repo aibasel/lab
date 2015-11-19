@@ -83,6 +83,12 @@ class CachedRevision(object):
         self._path = None
         self._hashed_name = self._compute_hashed_name()
 
+    def __eq__(self, other):
+        return self._hashed_name == other._hashed_name
+
+    def __hash__(self):
+        return hash(self._hashed_name)
+
     @property
     def path(self):
         assert self._path is not None

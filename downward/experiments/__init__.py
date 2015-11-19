@@ -21,7 +21,7 @@ A module for cloning different revisions of the three
 components of Fast Downward (translate, preprocess, search) and performing
 experiments with them.
 """
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 import logging
 import multiprocessing
 import os
@@ -540,8 +540,8 @@ class DownwardExperiment(Experiment):
         self.set_property('default_limits', self.limits)
 
         self.runs = []
-        self.new_files = OrderedDict()
-        self.resources = OrderedDict()
+        self.new_files = []
+        self.resources = []
 
         self._adapt_path(stage)
         self._setup_ignores(stage)

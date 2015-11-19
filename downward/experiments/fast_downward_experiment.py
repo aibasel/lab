@@ -309,13 +309,19 @@ class FastDownwardExperiment(Experiment):
 
         Experiment.build(self, **kwargs)
 
+    def _get_unique_cached_revisions(self):
+        unique_cached_revs = set()
+        for algo in self._algorithms.values():
+            unique_cached_revs.add(algo.cached_revision)
+        return unique_cached_revs
+
     def _get_default_build_options(self):
         cores = multiprocessing.cpu_count()
         return ['-j{}'.format(cores)]
 
     def _cache_revisions(self):
-        for algo in self._algorithms.values():
-            algo.cached_revision.cache(self.revision_cache_dir)
+        for cached_rev in self._get_unique_cached_revisions():
+            cached_rev.cache(self.revision_cache_dir)
 
     def _add_code(self):
         """Add the compiled code to the experiment."""
@@ -325,8 +331,8 @@ class FastDownwardExperiment(Experiment):
         self.add_resource(
             'SEARCH_PARSER',
             os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
-        for algo in self._algorithms.values():
-            cached_rev = algo.cached_revision
+
+        for cached_rev in self._get_unique_cached_revisions():
             self.add_resource(
                 '',
                 cached_rev.get_cached_path(),
