@@ -41,21 +41,10 @@ class Fetcher(object):
         run_filter = run_filter or tools.RunFilter()
         parsers = parsers or []
         # Allow specyfing a list of multiple parsers or a single parser.
-        if not isinstance(parsers, (tuple, list)):
+        if not isinstance(parsers, list):
             parsers = [parsers]
-        # Make sure parsers is a list.
-        parsers = list(parsers)
 
         prop_file = os.path.join(run_dir, 'properties')
-
-        # Somehow '../..' gets inserted into sys.path and more strangely the
-        # system lab.tools module gets called.
-        # TODO: This HACK should be removed once the source of the error is clear.
-        props = tools.Properties(filename=prop_file)
-        if props.get('search_returncode') is not None and props.get("coverage") is None:
-            logging.warning('search_parser.py failed in %s. Will run it again now.' %
-                            run_dir)
-            parsers.append(os.path.join(run_dir, '../../search_parser.py'))
 
         for parser in parsers:
             rel_parser = os.path.relpath(parser, start=run_dir)
