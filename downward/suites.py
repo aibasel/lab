@@ -118,7 +118,7 @@ def suite_alternative_formulations():
     return ['airport-adl', 'pathways', 'no-mprime', 'no-mystery']
 
 
-def suite_ipc_one_to_four_adl():
+def suite_ipc98_to_ipc04_adl():
     return [
         'assembly', 'miconic-fulladl', 'miconic-simpleadl',
         'optical-telegraphs', 'philosophers', 'psr-large',
@@ -126,7 +126,7 @@ def suite_ipc_one_to_four_adl():
     ]
 
 
-def suite_ipc_one_to_four_strips():
+def suite_ipc98_to_ipc04_strips():
     return [
         'airport', 'blocks', 'depot', 'driverlog', 'freecell', 'grid',
         'gripper', 'logistics00', 'logistics98', 'miconic', 'movie',
@@ -135,10 +135,10 @@ def suite_ipc_one_to_four_strips():
     ]
 
 
-def suite_ipc_one_to_four():
+def suite_ipc98_to_ipc04():
     # All IPC1-4 domains, including the trivial Movie.
     return list(sorted(
-        suite_ipc_one_to_four_adl() + suite_ipc_one_to_four_strips()))
+        suite_ipc98_to_ipc04_adl() + suite_ipc98_to_ipc04_strips()))
 
 
 def suite_ipc06_adl():
@@ -178,17 +178,6 @@ def suite_ipc08_common():
     ]
 
 
-def suite_ipc08_opt_only():
-    return [
-        'elevators-opt08-strips',
-        'openstacks-opt08-adl',
-        'openstacks-opt08-strips',
-        'sokoban-opt08-strips',
-        'transport-opt08-strips',
-        'woodworking-opt08-strips',
-    ]
-
-
 def suite_ipc08_opt_only_strips():
     return [
         'elevators-opt08-strips',
@@ -199,27 +188,23 @@ def suite_ipc08_opt_only_strips():
     ]
 
 
-def suite_ipc08_sat_only():
-    return [
-        'elevators-sat08-strips',
-        'openstacks-sat08-strips',
-        'openstacks-sat08-adl',
-        'sokoban-sat08-strips',
-        'transport-sat08-strips',
-        'woodworking-sat08-strips',
-        # Note: cyber-security is missing
-    ]
+def suite_ipc08_opt_only():
+    return suite_ipc08_opt_only_strips() + ['openstacks-opt08-adl']
 
 
 def suite_ipc08_sat_only_strips():
     return [
+        # Note: cyber-security is missing.
         'elevators-sat08-strips',
         'openstacks-sat08-strips',
         'sokoban-sat08-strips',
         'transport-sat08-strips',
         'woodworking-sat08-strips',
-        # Note: cyber-security is missing
     ]
+
+
+def suite_ipc08_sat_only():
+    return suite_ipc08_sat_only_strips() + ['openstacks-sat08-adl']
 
 
 def suite_ipc08_opt():
@@ -305,7 +290,7 @@ def suite_unsolvable():
 
 def suite_strips():
     return sorted(
-        suite_ipc_one_to_four_strips() + suite_ipc06_strips() +
+        suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
         suite_ipc06_strips_compilations() + suite_ipc08_all_strips() +
         suite_ipc11_all())
 
@@ -314,35 +299,31 @@ def suite_optimal():
     # In addition to the domains in the old "suite_optimal_with_ipc11"
     # suite, this suite also contains "movie" and "storage".
     return sorted(
-        suite_ipc_one_to_four_strips() + suite_ipc06_strips() +
+        suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
         suite_ipc06_strips_compilations() + suite_ipc08_opt_strips() +
         suite_ipc11_opt())
 
 
 def suite_satisficing():
     domains = (
-        suite_ipc_one_to_four() + suite_ipc06() +
-        suite_ipc06_strips_compilations() + suite_ipc08_sat() + suite_ipc11_sat())
+        suite_ipc98_to_ipc04() + suite_ipc06() +
+        suite_ipc06_strips_compilations() + suite_ipc08_sat() +
+        suite_ipc11_sat())
     return sorted(set(domains) - set(suite_alternative_formulations()))
 
 
-def suite_sat_strips():
+def suite_satisficing_strips():
     return sorted(
-        suite_ipc_one_to_four_strips() + suite_ipc06_strips() +
+        suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
         suite_ipc06_strips_compilations() + suite_ipc08_sat_strips() +
         suite_ipc11_sat())
 
 
 def suite_all():
-    domains = (
-        suite_ipc_one_to_four() + suite_ipc06() +
+    return sorted(set(
+        suite_ipc98_to_ipc04() + suite_ipc06() +
         suite_ipc06_strips_compilations() + suite_ipc08_all() +
-        suite_ipc11_all())
-    return sorted(set(domains) - set(suite_alternative_formulations()))
-
-
-def suite_all_formulations():
-    return sorted(suite_all() + suite_alternative_formulations())
+        suite_ipc11_all() + suite_alternative_formulations()))
 
 
 def suite_unit_costs():
