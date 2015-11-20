@@ -97,7 +97,7 @@ class CompareRevisionsExperiment(DownwardExperiment):
         # ------ suites and configs ------------------------------------
 
         if opt_or_sat == 'opt':
-            self.add_suite(suites.suite_optimal())
+            self.add_suite(suites.suite_optimal_strips())
             configs = default_configs_optimal(use_core_configs,
                                               use_ipc_configs,
                                               use_extended_configs)
