@@ -63,14 +63,8 @@
    :undoc-members:
 
 
-.. _steps:
-
-:mod:`lab.steps` -- Run experiments
------------------------------------
-
-.. autoclass:: lab.steps.Step
-   :members:
-   :undoc-members:
+Various
+-------
 
 .. autodata:: lab.__version__
    :annotation:
