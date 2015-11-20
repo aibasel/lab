@@ -26,9 +26,7 @@ lab.steps.Step.unzip_exp_dir
 lab.steps.Step.remove_exp_dir
 
 [
-    suites.suite_ipc06,
     suites.suite_ipc08_opt,
-    suites.suite_ipc08_sat_strips,
     suites.suite_unsolvable,
     suites.suite_unit_costs,
     suites.suite_diverse_costs,

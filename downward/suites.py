@@ -295,7 +295,7 @@ def suite_strips():
         suite_ipc11_all())
 
 
-def suite_optimal():
+def suite_optimal_strips():
     # In addition to the domains in the old "suite_optimal_with_ipc11"
     # suite, this suite also contains "movie" and "storage".
     return sorted(
