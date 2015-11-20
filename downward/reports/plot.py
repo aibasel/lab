@@ -16,16 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from collections import defaultdict
 import logging
 import os
 import sys
-from collections import defaultdict
 
 try:
     import matplotlib
     from matplotlib import figure
     from matplotlib.backends import backend_agg
-except ImportError, err:
+except ImportError as err:
     logging.warning('matplotlib could not be found: %s' % err)
     logging.warning('You can\'t create any plots on this machine.')
 
@@ -333,6 +333,7 @@ class PlotReport(PlanningReport):
                 'savefig.dpi': 100,
             }
             ScatterPlotReport(attributes=['initial_h_value'], params=params)
+
         """
         kwargs.setdefault('format', 'png')
         PlanningReport.__init__(self, **kwargs)
