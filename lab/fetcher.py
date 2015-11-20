@@ -95,18 +95,18 @@ class Fetcher(object):
         Fetch all results and write a single combined properties file to the
         default evaluation directory (this step is added by default)::
 
-            exp.add_step(Step('fetch', Fetcher(), exp.path))
+            exp.add_step('fetch', Fetcher(), exp.path)
 
         Read the combined properties file at ``<eval_dir1>/properties`` and
         merge it into the combined properties file at
         ``<combined_eval_dir>/properties``::
 
-            exp.add_step(Step('combine', Fetcher(), eval_dir1, combined_eval_dir))
+            exp.add_step('combine', Fetcher(), eval_dir1, combined_eval_dir)
 
         Fetch only the runs for certain configuration from an older experiment::
 
-            exp.add_step(Step('fetch', Fetcher(), src_dir,
-                              filter_config_nick=['config_1', 'config_5']))
+            exp.add_step(
+                'fetch', Fetcher(), src_dir, filter_config=['config1', 'config5'])
         """
         if not os.path.isdir(src_dir):
             logging.critical('%s is not a valid directory' % src_dir)

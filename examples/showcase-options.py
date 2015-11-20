@@ -9,7 +9,6 @@ import shutil
 from subprocess import call
 
 from lab.environments import LocalEnvironment, MaiaEnvironment
-from lab.fetcher import Fetcher
 from lab.steps import Step
 from lab.reports.filter import FilterReport
 
@@ -94,39 +93,28 @@ def eval_dir(num):
     return os.path.join(exp.eval_dir, 'test%d' % num)
 
 
-exp.add_step(Step('fetcher-test1', Fetcher(), exp.path, eval_dir(1), copy_all=True))
-exp.add_step(Step(
-    'fetcher-test2', Fetcher(), exp.path, eval_dir(2),
-    copy_all=True, write_combined_props=True))
-exp.add_step(Step(
-    'fetcher-test3', Fetcher(), exp.path, eval_dir(3),
-    filter_config='lama11'))
-exp.add_step(Step('fetcher-test4', Fetcher(), exp.path, eval_dir(4),
-                  parsers=os.path.join(DIR, 'simple', 'simple-parser.py')))
+exp.add_fetcher(
+    dest=eval_dir(1), name='fetcher-test1', copy_all=True)
+exp.add_fetcher(
+    dest=eval_dir(2), name='fetcher-test2',
+    copy_all=True, write_combined_props=True)
+exp.add_fetcher(
+    dest=eval_dir(3), name='fetcher-test3', filter_config='lama11')
+exp.add_fetcher(
+    dest=eval_dir(4), name='fetcher-test4',
+    parsers=os.path.join(DIR, 'simple', 'simple-parser.py'))
 
 
 # Add report steps
-abs_domain_report_file = os.path.join(exp.eval_dir, '%s-abs-d.html' % EXPNAME)
-abs_problem_report_file = os.path.join(exp.eval_dir, '%s-abs-p.html' % EXPNAME)
-abs_combined_report_file = os.path.join(exp.eval_dir, '%s-abs-c.tex' % EXPNAME)
-exp.add_step(Step(
-    'report-abs-d',
+exp.add_report(
     AbsoluteReport('domain', attributes=ATTRIBUTES + ['expansions', 'cost']),
-    exp.eval_dir,
-    abs_domain_report_file))
-exp.add_step(Step(
-    'report-abs-p-filter',
-    AbsoluteReport(
-        'problem',
-        attributes=ATTRIBUTES,
-        filter=only_two_configs),
-    exp.eval_dir,
-    abs_problem_report_file))
-exp.add_step(Step(
-    'report-abs-combined',
+    name='report-abs-d')
+exp.add_report(
+    AbsoluteReport('problem', attributes=ATTRIBUTES, filter=only_two_configs),
+    name='report-abs-p-filter')
+exp.add_report(
     AbsoluteReport(attributes=None, format='tex'),
-    exp.eval_dir,
-    abs_combined_report_file))
+    name='report-abs-combined')
 exp.add_report(
     TimeoutReport([1, 2, 3]),
     outfile=os.path.join(exp.eval_dir, 'timeout-eval', 'properties'))
@@ -171,49 +159,45 @@ params = {
     'savefig.dpi': 100,
 }
 
-exp.add_step(Step(
-    'report-scatter-domain',
+exp.add_report(
     ScatterPlotReport(
         attributes=['expansions'],
         filter=only_two_configs,
-        get_category=get_domain, xscale='linear', yscale='linear',
+        get_category=get_domain,
+        xscale='linear',
+        yscale='linear',
         category_styles={'gripper': {'c': 'b', 'marker': '+'}},
         params=params,
         legend_location=None),
-    exp.eval_dir,
-    os.path.join(exp.eval_dir, 'plots', 'scatter-domain.png')))
+    name='report-scatter-domain',
+    outfile=os.path.join('plots', 'scatter-domain.png'))
 exp.add_report(
     ProblemPlotReport(
         attributes=['expansions'], yscale='symlog', params=params),
     name='report-plot-prob',
     outfile='plots')
-exp.add_step(Step(
-    'report-plot-cat',
+exp.add_report(
     ProblemPlotReport(get_points=sat_vs_opt),
-    exp.eval_dir,
-    os.path.join(exp.eval_dir, 'plots')))
-exp.add_step(Step(
-    'report-ipc',
+    name='report-plot-cat',
+    outfile='plots')
+exp.add_report(
     IpcReport(attributes=['quality']),
-    exp.eval_dir,
-    os.path.join(exp.eval_dir, 'ipc.tex')))
-exp.add_step(Step(
-    'report-relative-d',
+    name='report-ipc',
+    outfile='ipc.tex')
+exp.add_report(
     RelativeReport(
         'domain',
         attributes=['expansions'],
         filter_config=['lama11', 'iter-hadd'],
         rel_change=0.1,
         abs_change=20),
-    exp.eval_dir,
-    os.path.join(exp.eval_dir, 'relative.html')))
+    name='report-relative-d',)
 exp.add_report(
     RelativeReport(
         'problem',
         attributes=['quality', 'coverage', 'expansions'],
         filter_config=['lama11', 'iter-hadd']),
-    name='report-relative-p',
-    outfile='relative.html')
+    name='report-relative-p')
 exp.add_report(
     CompareConfigsReport(
         [('lama11', 'iter-hadd')],
@@ -222,8 +206,8 @@ exp.add_report(
     outfile='compare.html')
 
 # Write suite of solved problems
-suite_file = os.path.join(exp.eval_dir, '%s_solved_suite.py' % EXPNAME)
-exp.add_step(Step('report-suite', SuiteReport(filter=solved), exp.eval_dir, suite_file))
+exp.add_report(
+    SuiteReport(filter=solved), name='report-suite', outfile='solved.py')
 
 exp.add_report(
     TaskwiseReport(
@@ -238,10 +222,9 @@ exp.add_report(
             'coverage', 'evaluated', 'evaluations', 'search_time',
             'cost', 'memory', 'error', 'cost_all', 'limit_search_time',
             'initial_h_value', 'initial_h_values', 'run_dir']),
-    name='report-abs-p',
-    outfile=abs_problem_report_file)
+    name='report-abs-p')
 
-exp.add_step(Step('finished', call, ['echo', 'Experiment', 'finished.']))
+exp.add_step('finished', call, ['echo', 'Experiment', 'finished.'])
 
 
 if __name__ == '__main__':

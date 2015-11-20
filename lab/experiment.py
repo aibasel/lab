@@ -275,8 +275,8 @@ class Experiment(_Buildable):
         self.add_command("run-lab-default-parser", ["LAB_DEFAULT_PARSER"])
 
         self.steps = Sequence()
-        self.add_step(Step('build', self.build))
-        self.add_step(Step('start', self.run))
+        self.add_step('build', self.build)
+        self.add_step('start', self.run)
         self.add_fetcher(name='fetch')
 
     @property
@@ -299,16 +299,29 @@ class Experiment(_Buildable):
         """Return the filename of the experiment script."""
         return os.path.basename(sys.argv[0])
 
-    def add_step(self, step):
-        """Add :ref:`Step <steps>` *step* to the list of experiment steps.
+    def add_step(self, name, function, *args, **kwargs):
+        """Add a step to the list of experiment steps.
+
+        Use ``add_step()`` to add **custom** experiment steps like
+        removing directories and publishing results. To add fetch and
+        report steps, use the convenience methods ``add_fetcher()`` and
+        ``add_report()``.
+
+        *name* is a nickname for the step.
+
+        *function* is a callable Python object, i.e. a function or a
+        class implementing __call__.
+
+        *args* and *kwargs* will be passed to the *function* when it is
+        called.
 
         >>> import shutil
         >>> from lab.experiment import Experiment
         >>> exp = Experiment('/tmp/myexp')
-        >>> exp.add_step(Step('remove-exp-dir', shutil.rmtree, exp.path))
+        >>> exp.add_step('remove-eval-dir', shutil.rmtree, exp.eval_dir)
 
         """
-        self.steps.append(step)
+        self.steps.append(Step(name, function, *args, **kwargs))
 
     def add_fetcher(self, src=None, dest=None, name=None, **kwargs):
         """
@@ -361,13 +374,14 @@ class Experiment(_Buildable):
         src = src or self.path
         dest = dest or self.eval_dir
         name = name or 'fetch-%s' % os.path.basename(src)
-        self.add_step(Step(name, Fetcher(), src, dest, **kwargs))
+        self.add_step(name, Fetcher(), src, dest, **kwargs)
 
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.
 
-        This method is a shortcut for
-        ``add_step(Step(name, report, eval_dir, outfile))``.
+        This method is a shortcut for ``add_step(name, report,
+        eval_dir, outfile)`` and uses sensible defaults for omitted
+        arguments.
 
         If no *name* is given, use *outfile* or the *report*'s class name.
 
@@ -382,7 +396,7 @@ class Experiment(_Buildable):
         outfile = outfile or '%s.%s' % (name, report.output_format)
         if not os.path.isabs(outfile):
             outfile = os.path.join(eval_dir, outfile)
-        self.add_step(Step(name, report, eval_dir, outfile))
+        self.add_step(name, report, eval_dir, outfile)
 
     def add_run(self, run=None):
         """Schedule *run* to be part of the experiment.

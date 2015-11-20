@@ -9,10 +9,7 @@ calculated with increasing precision.
 This experiment builds on the basic pi.py experiment.
 """
 
-import os
-
 from lab.experiment import Experiment
-from lab.steps import Step
 from lab.reports import Report
 
 
@@ -43,11 +40,9 @@ def good(run):
     return run['diff'] <= 0.01
 
 
-exp.add_step(Step('report', Report(format='html', attributes=['pi', 'diff'],
-                  filter=good), exp.eval_dir,
-                  os.path.join(exp.eval_dir, 'report.html')))
+exp.add_report(
+    Report(format='html', attributes=['pi', 'diff'], filter=good))
 
-exp.add_step(Step('plot', PiReport(),
-                  exp.eval_dir, os.path.join(exp.eval_dir, 'plot.dat')))
+exp.add_report(PiReport(), outfile='plot.dat')
 
 exp()

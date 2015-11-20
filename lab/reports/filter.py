@@ -27,9 +27,10 @@ class FilterReport(Report):
         def remove_openstacks(run):
             return not 'openstacks' in run['domain']
 
-        exp.add_step(Step('filter-openstacks-runs',
-                          FilterReport(filter=remove_openstacks),
-                          exp.eval_dir, 'path/to/new/properties'))
+        exp.add_step(
+            'filter-openstacks-runs',
+            FilterReport(filter=remove_openstacks),
+            exp.eval_dir, 'path/to/new/properties')
     """
     def __init__(self, *args, **kwargs):
         Report.__init__(self, *args, **kwargs)

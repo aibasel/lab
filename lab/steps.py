@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import traceback
 
 from lab import tools
 
@@ -25,12 +26,11 @@ class Step(object):
     When the step is executed *args* and *kwargs* will be passed to the
     callable *func*. ::
 
-        exp.add_step(Step('show-disk-usage', subprocess.call, ['df']))
-        exp.add_step(Step('combine-results', Fetcher(), 'path/to/eval-dir',
-                          'path/to/new-eval-dir'))
+        exp.add_step('show-disk-usage', subprocess.call, ['df'])
 
     """
     def __init__(self, name, func, *args, **kwargs):
+        assert func is not None
         self.name = name
         self.func = func
         self.args = list(args)
@@ -49,7 +49,6 @@ class Step(object):
                                  (self.name, retval))
             return retval
         except (ValueError, TypeError):
-            import traceback
             traceback.print_exc()
             logging.critical('Could not run step: %s' % self)
 

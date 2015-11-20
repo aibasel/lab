@@ -6,7 +6,7 @@ Example downward experiment that runs h^FF and h^add on two tasks.
 The file planner.py contains the "basic" version of this experiment.
 """
 
-import os
+import os.path
 
 from lab import tools
 
