@@ -16,12 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Provide some classes for backwards compatibility.
-from downward.experiments import DownwardRun, PreprocessRun, SearchRun, \
-    DownwardExperiment
-
 from downward.experiments.fast_downward_experiment import FastDownwardExperiment
 
 # Silence pyflakes
-assert (DownwardRun and PreprocessRun and SearchRun and DownwardExperiment)
 assert FastDownwardExperiment

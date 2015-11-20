@@ -8,13 +8,7 @@
 .. autoclass:: downward.reports.suite.SuiteReport
 .. autoclass:: downward.reports.taskwise.TaskwiseReport
 .. autoclass:: downward.reports.timeout.TimeoutReport
-
-
-Comparative reports
--------------------
-
 .. autoclass:: downward.reports.compare.CompareConfigsReport
-.. autoclass:: downward.reports.compare.CompareRevisionsReport
 
 
 Plots

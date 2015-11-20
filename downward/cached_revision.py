@@ -25,7 +25,30 @@ import subprocess
 
 from lab import tools
 
-from downward.checkouts import get_global_rev, get_rev_id
+
+_HG_ID_CACHE = {}
+
+
+def hg_id(repo, args=None, rev=None):
+    args = args or []
+    if rev:
+        args.extend(['-r', str(rev)])
+    cmd = ('hg', 'id', '--repository', repo) + tuple(args)
+    if cmd not in _HG_ID_CACHE:
+        result = tools.get_command_output(cmd, quiet=True)
+        if not result:
+            logging.critical('Call failed: "%s". Check path and revision.' %
+                             ' '.join(cmd))
+        _HG_ID_CACHE[cmd] = result
+    return _HG_ID_CACHE[cmd]
+
+
+def get_global_rev(repo, rev=None):
+    return hg_id(repo, args=['-i'], rev=rev)
+
+
+def get_rev_id(repo, rev=None):
+    return hg_id(repo, rev=rev)
 
 
 def _get_options_relevant_for_cache_name(options):

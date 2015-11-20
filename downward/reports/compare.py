@@ -78,48 +78,6 @@ class CompareConfigsReport(AbsoluteReport):
         return table
 
 
-class CompareRevisionsReport(CompareConfigsReport):
-    """Allows to compare the same configurations in two revisions of the planner."""
-    def __init__(self, rev1, rev2, **kwargs):
-        """
-        See :py:class:`AbsoluteReport <downward.reports.absolute.AbsoluteReport>`
-        for inherited parameters.
-
-        *rev1* and *rev2* are the revisions that should be compared. All columns in the
-        report will be arranged such that the same configurations run for the given
-        revisions are next to each other. After those two columns a diff column is added
-        that shows the difference between the two values. All other columns are not
-        printed.
-        """
-        CompareConfigsReport.__init__(self, None, **kwargs)
-        self._revisions = [rev1, rev2]
-        # Built lazily when actual configs are available
-        self._compared_configs = None
-
-    def _get_compared_configs(self):
-        # Compared configs are cached to speed up access.
-        if self._compared_configs is None:
-            # Extract the config_nicks from the order of columns defined by the
-            # report. Maintain the order as good as possible by ordering each
-            # config nick at the relative position where it first occured.
-            config_nicks = []
-            for config in self.configs:
-                for rev in self._revisions:
-                    if config.startswith(rev + '-'):
-                        if any(config.startswith(r + '-')
-                               for r in self._revisions if r != rev):
-                            continue
-                        config_nick = config[len(rev + '-'):]
-                        if config_nick not in config_nicks:
-                            config_nicks.append(config_nick)
-            self._compared_configs = []
-            for config_nick in config_nicks:
-                col_names = ['%s-%s' % (r, config_nick) for r in self._revisions]
-                self._compared_configs.append(
-                    (col_names[0], col_names[1], 'Diff - %s' % config_nick))
-        return self._compared_configs
-
-
 class DiffColumnsModule(reports.DynamicDataModule):
     """Adds multiple columns each comparing the values in two configs."""
     def __init__(self, compared_configs, summary_functions):
