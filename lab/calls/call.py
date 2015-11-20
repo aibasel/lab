@@ -21,7 +21,6 @@ import sys
 import time
 
 from lab.calls.log import set_property
-from lab import tools
 
 
 def set_limit(kind, soft_limit, hard_limit=None):
@@ -51,13 +50,6 @@ class Call(subprocess.Popen):
         whether the process has finished. As a result the options
         *kill_delay* and *check_interval* are now ignored.
         """
-        for deprecated_arg in ['kill_delay', 'check_interval']:
-            if deprecated_arg in kwargs:
-                tools.show_deprecation_warning(
-                    'The "%s" argument has been deprecated in version 1.5 '
-                    'and will be ignored.' % deprecated_arg)
-                del kwargs[deprecated_arg]
-
         self.name = name
         if time_limit is None:
             self.wall_clock_time_limit = None
