@@ -343,24 +343,7 @@ class PlotReport(PlanningReport):
         self.title = title if title is not None else (self.attribute or '')
         self.legend_location = legend_location
 
-        # Convert the old (marker, color) tuples to the new dict format.
-        category_styles = category_styles or {}
-        used_old_format = False
-        for cat, style in category_styles.items():
-            if not isinstance(style, dict):
-                assert isinstance(style, (tuple, list)), style
-                used_old_format = True
-                marker, color = style
-                category_styles[cat] = {'marker': marker, 'c': color}
-                logging.info('Converted %s to %s' % (style, category_styles[cat]))
-        if used_old_format:
-            tools.show_deprecation_warning(
-                'The old category_styles tuple format has been deprecated '
-                'in version 1.3. You should use a dictionary mapping '
-                'category names to dictionaries of matplotlib params '
-                'instead.')
-
-        self.category_styles = category_styles
+        self.category_styles = category_styles or {}
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
         self.ylabel = ylabel
