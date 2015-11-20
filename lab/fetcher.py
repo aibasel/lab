@@ -66,7 +66,7 @@ class Fetcher(object):
 
         return run_id, props
 
-    def __call__(self, src_dir, eval_dir=None, copy_all=False, write_combined_props=True,
+    def __call__(self, src_dir, eval_dir=None, copy_all=False,
                  filter=None, parsers=None, **kwargs):
         """
         This method can be used to copy properties from an exp-dir or eval-dir
@@ -77,9 +77,6 @@ class Fetcher(object):
         If *copy_all* is True (default: False), copy all files from the run
         dirs to a new directory tree at *eval_dir*. Without this option only
         the combined properties file is written do disk.
-
-        If *write_combined_props* is True (default), write the combined
-        properties file.
 
         You can include only specific domains or configurations by using
         :py:class:`filters <.Report>`.
@@ -126,11 +123,10 @@ class Fetcher(object):
         logging.info('Fetching files from %s -> %s' % (src_dir, eval_dir))
         logging.info('Fetching from evaluation dir: %s' % fetch_from_eval_dir)
 
-        if write_combined_props:
-            # Load properties in the eval_dir if there are any already.
-            combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
-            if fetch_from_eval_dir:
-                combined_props.update(src_props)
+        # Load properties in the eval_dir if there are any already.
+        combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
+        if fetch_from_eval_dir:
+            combined_props.update(src_props)
 
         # Get all run_dirs. None will be found if we fetch from an eval dir.
         run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
@@ -146,8 +142,7 @@ class Fetcher(object):
                 continue
 
             assert run_id, 'Dir %s has no id' % props.get('run_dir')
-            if write_combined_props:
-                combined_props['-'.join(run_id)] = props
+            combined_props['-'.join(run_id)] = props
             if props.get('error', '').startswith('unexplained'):
                 logging.warning('Unexplained error in {run_dir}: {error}'.format(**props))
                 unxeplained_errors += 1
@@ -156,5 +151,4 @@ class Fetcher(object):
             logging.warning('There were %d runs with unexplained errors.'
                             % unxeplained_errors)
         tools.makedirs(eval_dir)
-        if write_combined_props:
-            combined_props.write()
+        combined_props.write()

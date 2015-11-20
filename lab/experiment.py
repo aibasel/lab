@@ -345,9 +345,6 @@ class Experiment(_Buildable):
         dirs to a new directory tree at *dest*. Without this option only
         the combined properties file is written do disk.
 
-        If *write_combined_props* is True (default), write the combined
-        properties file.
-
         You can include only specific domains or configurations by using
         :py:class:`filters <.Report>`.
 

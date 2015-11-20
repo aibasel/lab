@@ -96,12 +96,9 @@ def eval_dir(num):
 exp.add_fetcher(
     dest=eval_dir(1), name='fetcher-test1', copy_all=True)
 exp.add_fetcher(
-    dest=eval_dir(2), name='fetcher-test2',
-    copy_all=True, write_combined_props=True)
+    dest=eval_dir(2), name='fetcher-test2', filter_config='lama11')
 exp.add_fetcher(
-    dest=eval_dir(3), name='fetcher-test3', filter_config='lama11')
-exp.add_fetcher(
-    dest=eval_dir(4), name='fetcher-test4',
+    dest=eval_dir(3), name='fetcher-test3',
     parsers=os.path.join(DIR, 'simple', 'simple-parser.py'))
 
 
