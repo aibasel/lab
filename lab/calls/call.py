@@ -35,13 +35,13 @@ def set_limit(kind, soft_limit, hard_limit=None):
 
 
 class Call(subprocess.Popen):
-    def __init__(self, args, name='call', time_limit=None, mem_limit=None, **kwargs):
+    def __init__(self, args, name, time_limit=None, memory_limit=None, **kwargs):
         """Make system calls with time and memory constraints.
 
         *args* and *kwargs* are passed to the base class
         `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
 
-        *time_limit* and *mem_limit* are the time and memory contraints in
+        *time_limit* and *memory_limit* are the time and memory contraints in
         seconds and MiB. Pass None to enforce no limit.
 
         Previously, not only the main process, but also all spawned
@@ -72,9 +72,9 @@ class Call(subprocess.Popen):
             # padding between the two limits allows programs to handle SIGXCPU.
             if time_limit is not None:
                 set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
-            if mem_limit is not None:
+            if memory_limit is not None:
                 # Convert memory from MiB to Bytes.
-                set_limit(resource.RLIMIT_AS, mem_limit * 1024 * 1024)
+                set_limit(resource.RLIMIT_AS, memory_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
 
         subprocess.Popen.__init__(self, args, preexec_fn=prepare_call, **kwargs)
