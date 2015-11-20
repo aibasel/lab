@@ -8,6 +8,7 @@ from downward import suites
 
 
 ARGPARSER.epilog
+lab.tools.deprecated
 lab.tools.RawAndDefaultsHelpFormatter._fill_text
 lab.tools.RawAndDefaultsHelpFormatter._get_help_string
 GkiGridEnvironment()
@@ -17,9 +18,6 @@ log.driver_log
 log.driver_err
 log.print_
 log.save_returncode
-lab.steps.Step.zip_exp_dir
-lab.steps.Step.unzip_exp_dir
-lab.steps.Step.remove_exp_dir
 
 [
     suites.suite_optimal_with_ipc11,

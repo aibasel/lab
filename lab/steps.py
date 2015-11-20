@@ -16,11 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import os
-import shutil
-from subprocess import call
 
-import tools
+from lab import tools
 
 
 class Step(object):
@@ -72,63 +69,6 @@ class Step(object):
                                ', ' if self.args and self.kwargs else '',
                                ', '.join(['%s=%s' % (k, repr(v))
                                           for (k, v) in self.kwargs.items()]))
-
-    _predefined_steps_warning = (
-        'Predefined steps have been deprecated in version 1.8. '
-        'Please define your extra experiment steps manually.')
-
-    @classmethod
-    @tools.deprecated(_predefined_steps_warning)
-    def zip_exp_dir(cls, exp):
-        """
-        Return a Step that creates a compressed tarball containing the
-        experiment directory. For symbolic links this step stores the
-        referenced files, not the links themselves. ::
-
-            exp.add_step(Step.zip_exp_dir(exp))
-
-        .. deprecated:: 1.8
-
-            Please define your extra experiment steps manually.
-
-        """
-        return cls('zip-exp-dir', call,
-                   ['tar', '-cjf', exp.name + '.tar.bz2', exp.name],
-                   cwd=os.path.dirname(exp.path))
-
-    @classmethod
-    @tools.deprecated(_predefined_steps_warning)
-    def unzip_exp_dir(cls, exp):
-        """
-        Return a Step that unzips a compressed tarball containing the
-        experiment directory. ::
-
-            exp.add_step(Step.unzip_exp_dir(exp))
-
-        .. deprecated:: 1.8
-
-            Please define your extra experiment steps manually.
-
-        """
-        return cls('unzip-exp-dir', call,
-                   ['tar', '-xjf', exp.name + '.tar.bz2'],
-                   cwd=os.path.dirname(exp.path))
-
-    @classmethod
-    @tools.deprecated(_predefined_steps_warning)
-    def remove_exp_dir(cls, exp):
-        """Return a Step that removes the experiment directory.
-
-        ::
-
-            exp.add_step(Step.remove_exp_dir(exp))
-
-        .. deprecated:: 1.8
-
-            Please define your extra experiment steps manually.
-
-        """
-        return cls('remove-exp-dir', shutil.rmtree, exp.path)
 
 
 class Sequence(list):
