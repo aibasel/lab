@@ -17,14 +17,12 @@
 
 import argparse
 import colorsys
-import email.mime.text
 import functools
 import logging
 from numbers import Number
 import os
 import re
 import shutil
-import smtplib
 import subprocess
 import sys
 import traceback
@@ -404,29 +402,6 @@ def copy(src, dest, required=True, ignores=None):
     else:
         # Do not warn if an optional file cannot be copied.
         return
-
-
-def sendmail(from_, to, subject, text, smtp_host='localhost', port=25):
-    """Send an e-mail.
-
-    *from_* is the sender's email address.
-    *to* is the recipient's email address. ::
-
-        Step('mail', sendmail, 'john@xyz.com', 'jane@xyz.com', 'Hi!', 'Howdy!')
-
-    """
-    # Create a text/plain message
-    msg = email.mime.text.MIMEText(text)
-
-    msg['Subject'] = subject
-    msg['From'] = from_
-    msg['To'] = to
-
-    # Send the message via our own SMTP server, but don't include the
-    # envelope header.
-    s = smtplib.SMTP(smtp_host, port)
-    s.sendmail(from_, [to], msg.as_string())
-    s.quit()
 
 
 def get_color(fraction, min_wins):

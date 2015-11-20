@@ -17,7 +17,6 @@ also facilitates parsing results and creating reports.
 
    lab.experiment
    lab.reports
-   lab.tools
 
 
 downward
