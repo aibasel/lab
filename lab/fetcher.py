@@ -69,41 +69,16 @@ class Fetcher(object):
     def __call__(self, src_dir, eval_dir=None, copy_all=False,
                  filter=None, parsers=None, **kwargs):
         """
-        This method can be used to copy properties from an exp-dir or eval-dir
-        into an eval-dir. If the destination eval-dir already exist, the data
-        will be merged. This means *src_dir* can either be an exp-dir or an
-        eval-dir and *eval_dir* can be a new or existing directory.
+        This method can be used to copy properties from an exp-dir or
+        eval-dir into an eval-dir. If the destination eval-dir already
+        exist, the data will be merged. This means *src_dir* can either
+        be an exp-dir or an eval-dir and *eval_dir* can be a new or
+        existing directory.
 
-        If *copy_all* is True (default: False), copy all files from the run
-        dirs to a new directory tree at *eval_dir*. Without this option only
-        the combined properties file is written do disk.
+        We recommend using lab.Experiment.add_fetcher() to add fetchers
+        to an experiment. See the method's documentation for a
+        description of the parameters.
 
-        You can include only specific domains or configurations by using
-        :py:class:`filters <.Report>`.
-
-        *parsers* can be a list of paths to parser scripts. If given, each
-        parser is called in each run directory and the results are added to
-        the properties file which is fetched afterwards. This option is
-        useful if you haven't parsed all or some values already during the
-        experiment.
-
-        Examples:
-
-        Fetch all results and write a single combined properties file to the
-        default evaluation directory (this step is added by default)::
-
-            exp.add_step('fetch', Fetcher(), exp.path)
-
-        Read the combined properties file at ``<eval_dir1>/properties`` and
-        merge it into the combined properties file at
-        ``<combined_eval_dir>/properties``::
-
-            exp.add_step('combine', Fetcher(), eval_dir1, combined_eval_dir)
-
-        Fetch only the runs for certain configuration from an older experiment::
-
-            exp.add_step(
-                'fetch', Fetcher(), src_dir, filter_config=['config1', 'config5'])
         """
         if not os.path.isdir(src_dir):
             logging.critical('%s is not a valid directory' % src_dir)

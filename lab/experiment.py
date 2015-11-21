@@ -323,15 +323,18 @@ class Experiment(_Buildable):
         """
         self.steps.append(Step(name, function, *args, **kwargs))
 
-    def add_fetcher(self, src=None, dest=None, name=None, **kwargs):
+    def add_fetcher(self, src=None, dest=None, name=None,
+                    copy_all=False, filter=None, parsers=None,
+                    **kwargs):
         """
-        Add a step that fetches results from experiment or
-        evaluation directories into a new or existing evaluation
-        directory. Use this method to combine results from multiple
+        Add a step that fetches results from experiment or evaluation
+        directories into a new or existing evaluation directory.
+
+        You can use this method to combine results from multiple
         experiments.
 
-        *src* can be an experiment or evaluation directory. It defaults to
-        ``exp.path``.
+        *src* can be an experiment or evaluation directory. It defaults
+        to ``exp.path``.
 
         *dest* must be a new or existing evaluation directory. It
         defaults to ``exp.eval_dir``. If *dest* already contains
@@ -339,39 +342,50 @@ class Experiment(_Buildable):
 
         If no *name* is given, call this step "fetch-``basename(src)``".
 
-        Valid keyword args:
+        If *copy_all* is True, copy all files from the run dirs to a
+        new directory tree at *eval_dir*. By default, only the combined
+        properties file is written do disk.
 
-        If *copy_all* is True (default: False), copy all files from the run
-        dirs to a new directory tree at *dest*. Without this option only
-        the combined properties file is written do disk.
+        You can fetch only specific domains or configurations by passing
+        :py:class:`filters <.Report>` with the *filter* argument.
 
-        You can include only specific domains or configurations by using
-        :py:class:`filters <.Report>`.
-
-        *parsers* can be a list of paths to parser scripts. If given, each
-        parser is called in each run directory and the results are added to
-        the properties file which is fetched afterwards. This option is
-        useful if you forgot to parse some attributes during the experiment.
+        *parsers* can be a list of paths to parser scripts. If given,
+        each parser is called in each run directory and the results are
+        added to the properties file which is fetched afterwards. This
+        option is useful if you forgot to parse some attributes during
+        the experiment.
 
         Examples:
 
-        Merge the results from "other-exp" into this experiment's results::
+        Fetch all results and write a single combined properties file
+        to the default evaluation directory (this step is added by
+        default)::
+
+            exp.add_fetcher(name='fetch')
+
+        Merge the results from "other-exp" into this experiment's
+        results::
 
             exp.add_fetcher(src='/path/to/other-exp-eval')
 
-        Merge two evaluation directories at the location of the second one::
+        Fetch only the runs for certain configurations from another
+        experiment::
 
-            exp.add_fetcher(src=eval_dir1, dest=combined_eval_dir, name='merge')
+            exp.add_fetcher(
+                src='/path/to/eval-dir',
+                filter_config=['config_1', 'config_5'])
 
-        Fetch only the runs for certain configuration from an older experiment::
+        Parse additional attributes::
 
-            exp.add_fetcher(src='/path/to/eval-dir',
-                            filter_config_nick=['config_1', 'config_5'])
+            exp.add_fetcher(parsers=['path/to/myparser.py'])
+
         """
         src = src or self.path
         dest = dest or self.eval_dir
         name = name or 'fetch-%s' % os.path.basename(src)
-        self.add_step(name, Fetcher(), src, dest, **kwargs)
+        self.add_step(
+            name, Fetcher(), src, dest, copy_all=copy_all,
+            filter=filter, parsers=parsers, **kwargs)
 
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.
