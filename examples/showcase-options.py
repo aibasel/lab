@@ -21,7 +21,6 @@ from downward.reports.relative import RelativeReport
 from downward.reports.scatter import ScatterPlotReport
 from downward.reports.suite import SuiteReport
 from downward.reports.taskwise import TaskwiseReport
-from downward.reports.timeout import TimeoutReport
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -112,9 +111,6 @@ exp.add_report(
 exp.add_report(
     AbsoluteReport(attributes=None, format='tex'),
     name='report-abs-combined')
-exp.add_report(
-    TimeoutReport([1, 2, 3]),
-    outfile=os.path.join(exp.eval_dir, 'timeout-eval', 'properties'))
 exp.add_report(
     FilterReport(),
     outfile=os.path.join(exp.eval_dir, 'filter-eval', 'properties'))
