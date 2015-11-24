@@ -471,7 +471,7 @@ class Experiment(_Buildable):
         if paths:
             tools.confirm_overwrite_or_abort(self.path)
             for path in paths:
-                tools.remove(os.path.join(self.path, path))
+                tools.remove_path(os.path.join(self.path, path))
 
     def _set_run_dirs(self):
         """
