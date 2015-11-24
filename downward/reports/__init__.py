@@ -220,16 +220,14 @@ class PlanningReport(Report):
             traceback.print_exc(file=sys.stdout)
 
     def _scan_algorithm_info(self):
-        info = defaultdict(dict)
-        # TODO: Only scan first run.
+        info = {}
         for (domain, problem), runs in self.problem_runs.items():
             for run in runs:
-                info[run['algorithm']].update(
+                info[run['algorithm']] = dict(
                     (attr, run.get(attr, '?'))
                     for attr in self.INFO_ATTRIBUTES)
-            # Abort when we have found information for all algorithms.
-            if len(info) == len(self.algorithms):
-                break
+            # We only need to scan the algorithms for one task.
+            break
         return info
 
     def _perform_sanity_checks(self):
