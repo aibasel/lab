@@ -252,7 +252,7 @@ def get_memory_limit_in_kb(props):
 
 
 def check_memory(content, props):
-    """Add memory value if the run was successful."""
+    """Add "memory" attribute if the problem was solved."""
     raw_memory = props.get('raw_memory')
 
     if raw_memory is None or raw_memory < 0:
@@ -261,9 +261,6 @@ def check_memory(content, props):
 
     if solved(props):
         props['memory'] = raw_memory
-        props['memory_capped'] = raw_memory
-    elif props['fast-downward_returncode'] == EXIT_OUT_OF_MEMORY:
-        props['memory_capped'] = get_memory_limit_in_kb(props)
 
 
 def scores(content, props):
