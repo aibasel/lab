@@ -71,9 +71,8 @@ class FastDownwardRun(Run):
         self.add_resource(
             'PROBLEM', self.task.problem_file(), 'problem.pddl', symlink=True)
 
-        # TODO: After removing DownwardExperiment, use name "fast-downward".
         self.add_command(
-            'search',
+            'fast-downward',
             [algo.cached_revision.get_planner_resource_name()] +
             algo.driver_options + ['DOMAIN', 'PROBLEM'] + algo.component_options)
 
@@ -102,10 +101,7 @@ class FastDownwardRun(Run):
         self.set_property(
             'planner_type', 'portfolio' if self._is_portfolio() else 'single')
 
-        self._save_id([
-            self.algo.name,
-            self.task.domain,
-            self.task.problem])
+        self._save_id([self.algo.name, self.task.domain, self.task.problem])
 
     def _save_id(self, run_id):
         self.set_property('id', run_id)

@@ -197,7 +197,7 @@ def set_search_time(content, props):
 
 
 def unsolvable(content, props):
-    props['unsolvable'] = int(props['search_returncode'] == EXIT_UNSOLVABLE)
+    props['unsolvable'] = int(props['fast-downward_returncode'] == EXIT_UNSOLVABLE)
 
 
 def invalid_solution(props):
@@ -255,16 +255,14 @@ def check_memory(content, props):
     """Add memory value if the run was successful."""
     raw_memory = props.get('raw_memory')
 
-    # TODO: Add unexplained error if memory could not be determined once
-    # the signal handling code is fixed.
-    # if raw_memory is None or raw_memory < 0:
-    #     props['error'] = 'unexplained-could-not-determine-peak-memory'
-    #     return
+    if raw_memory is None or raw_memory < 0:
+        props['error'] = 'unexplained-could-not-determine-peak-memory'
+        return
 
     if solved(props):
         props['memory'] = raw_memory
         props['memory_capped'] = raw_memory
-    elif props['search_returncode'] == EXIT_OUT_OF_MEMORY:
+    elif props['fast-downward_returncode'] == EXIT_OUT_OF_MEMORY:
         props['memory_capped'] = get_memory_limit_in_kb(props)
 
 
@@ -326,7 +324,7 @@ def get_error(content, props):
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
     """
-    if props.get('error'):
+    if 'error' in props:
         return
 
     if invalid_solution(props):
@@ -351,7 +349,7 @@ def get_error(content, props):
         EXIT_PYTHON_SIGXCPU: 'timeout',
     }
 
-    exitcode = props['search_returncode']
+    exitcode = props['fast-downward_returncode']
     if exitcode in exitcode_to_error:
         props['error'] = exitcode_to_error[exitcode]
     else:

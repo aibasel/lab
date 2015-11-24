@@ -184,10 +184,8 @@ class PlanningReport(Report):
         domain_algorithm_runs = defaultdict(list)
         runs = {}
         for run_name, run in self.props.items():
-            if run.get('stage') == 'search' and 'coverage' not in run:
-                if 'search_returncode' in run:
-                    run['error'] = 'unexplained-search-parser-crash'
-                else:
+            if 'coverage' not in run:
+                if 'error' not in run:
                     run['error'] = 'unexplained-crash'
 
             domain, problem, algo = run['domain'], run['problem'], run['algorithm']
@@ -276,13 +274,13 @@ class PlanningReport(Report):
         """
         columns = [
             'domain', 'problem', 'algorithm', 'error',
-            'search_wall_clock_time', 'memory']
+            'fast-downward_wall_clock_time', 'memory']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
         for run in self.props.values():
             if run.get('error', '').startswith('unexplained'):
                 for column in columns:
-                    table.add_cell(run['run_dir'], column, run.get(column, '?'))
+                    table.add_cell(run['run_dir'], column, run[column])
         return table
 
     def _get_algorithm_order(self):
