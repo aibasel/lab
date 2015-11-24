@@ -152,7 +152,6 @@ def get_iterative_results(content, props):
     _update_props_with_iterative_values(
         props, values, [
             ('cost', 'plan_length'),
-            # TODO: add reopened, evaluated and dead ends.
             ('expansions', 'generated', 'search_time')])
 
 
