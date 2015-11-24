@@ -42,11 +42,6 @@ EXIT_OUT_OF_MEMORY = 6
 EXIT_TIMEOUT = 7
 EXIT_TIMEOUT_AND_MEMORY = 8
 
-# TODO: Remove once we no longer support the bash driver script.
-EXIT_BASH_SIGKILL = 128 + 9
-EXIT_BASH_SIGSEGV = 128 + 11
-EXIT_BASH_SIGXCPU = 128 + 24
-
 EXIT_PYTHON_SIGKILL = 256 - 9
 EXIT_PYTHON_SIGSEGV = 256 - 11
 EXIT_PYTHON_SIGXCPU = 256 - 24
@@ -338,11 +333,8 @@ def get_error(content, props):
         EXIT_OUT_OF_MEMORY: 'out-of-memory',
         EXIT_TIMEOUT: 'timeout',  # Currently only for portfolios.
         EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
-        EXIT_BASH_SIGKILL: 'unexplained-sigkill',
         EXIT_PYTHON_SIGKILL: 'unexplained-sigkill',
-        EXIT_BASH_SIGSEGV: 'unexplained-segfault',
         EXIT_PYTHON_SIGSEGV: 'unexplained-segfault',
-        EXIT_BASH_SIGXCPU: 'timeout',
         EXIT_PYTHON_SIGXCPU: 'timeout',
     }
 
