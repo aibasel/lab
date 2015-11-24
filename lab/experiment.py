@@ -36,13 +36,13 @@ SHARD_SIZE = 100
 # Make argparser available globally so users can add custom arguments.
 ARGPARSER = tools.get_parser()
 ARGPARSER.epilog = "The list of available steps will be added later."
-ARGPARSER.add_argument(
+steps_group = ARGPARSER.add_mutually_exclusive_group()
+steps_group.add_argument(
     'steps', metavar='step', nargs='*', default=[],
     help='Name or number of a step below. If none is given, print help.')
-ARGPARSER.add_argument(
+steps_group.add_argument(
     '--all', dest='run_all_steps', action='store_true',
-    help='Run all steps. If steps are listed explicitly, this option is '
-         'ignored for backwards compatibility.')
+    help='Run all steps.')
 
 
 class _Buildable(object):
