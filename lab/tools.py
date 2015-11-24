@@ -146,22 +146,24 @@ def makedirs(dir):
         pass
 
 
-def confirm(question):
+def confirm_or_abort(question):
     answer = raw_input('%s (y/N): ' % question).strip()
     if not answer.lower() == 'y':
         sys.exit('Aborted')
-    return True
 
 
-def overwrite_dir(path, overwrite=False):
-    if os.path.exists(path):
-        logging.info('The directory "%s" already exists.' % path)
-        if not overwrite:
-            confirm('Do you want to overwrite the existing directory?')
-        shutil.rmtree(path)
-    # We use the os.makedirs method instead of our own here to check if the dir
-    # has really been properly deleted.
-    os.makedirs(path)
+def confirm_overwrite_or_abort(path):
+    confirm_or_abort(
+        'The path "%s" already exists. Do you want to overwrite it?' % path)
+
+
+def overwrite_dir(dir):
+    if os.path.exists(dir):
+        confirm_overwrite_or_abort(dir)
+        shutil.rmtree(dir)
+    # Use os.makedirs() instead of tools.makedirs() to check if the dir
+    # has really been deleted.
+    os.makedirs(dir)
 
 
 def remove_path(path):

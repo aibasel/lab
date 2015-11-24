@@ -57,12 +57,9 @@ exp.add_algorithm(
         '--portfolio',
         os.path.join(REPO, 'driver', 'portfolios', 'seq_opt_fdss_1.py')])
 
-# Before we fetch the new results, delete the old ones.
+# Before we fetch the new results, delete the old ones
 exp.steps.insert(0, Step(
-    'delete-eval-dir', shutil.rmtree, exp.eval_dir, ignore_errors=True))
-
-# Before we build the experiment, delete the old experiment directory.
-exp.steps.insert(0, Step('delete-exp-dir', shutil.rmtree, exp.path, ignore_errors=True))
+    'delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
 
 
 # Define some filters

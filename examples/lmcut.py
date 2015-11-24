@@ -16,7 +16,7 @@ ATTRIBUTES = ['coverage', 'expansions']
 
 if 'cluster' in platform.node():
     REPO = os.path.expanduser('~/projects/downward')
-    ENV = MaiaEnvironment(priority=-10)
+    ENV = MaiaEnvironment(priority=0)
 else:
     REPO = os.path.expanduser('~/projects/Downward/downward')
     ENV = LocalEnvironment(processes=2)

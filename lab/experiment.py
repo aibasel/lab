@@ -23,10 +23,10 @@ import os
 import pkgutil
 import sys
 
+from lab import environments
 from lab import tools
 from lab.fetcher import Fetcher
 from lab.steps import Step, Sequence
-from lab.environments import LocalEnvironment
 
 
 DEFAULT_ABORT_ON_FAILURE = False
@@ -259,7 +259,7 @@ class Experiment(_Buildable):
         self.path = os.path.abspath(path)
         if any(char in self.path for char in (':', ',')):
             logging.critical('Path contains commas or colons: %s' % self.path)
-        self.environment = environment or LocalEnvironment()
+        self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
         self.cache_dir = cache_dir or tools.DEFAULT_USER_DIR
         tools.makedirs(self.cache_dir)
@@ -318,9 +318,11 @@ class Experiment(_Buildable):
         called.
 
         >>> import shutil
+        >>> import subprocess
         >>> from lab.experiment import Experiment
         >>> exp = Experiment('/tmp/myexp')
         >>> exp.add_step('remove-eval-dir', shutil.rmtree, exp.eval_dir)
+        >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello world'])
 
         """
         self.steps.append(Step(name, function, *args, **kwargs))
@@ -432,7 +434,7 @@ class Experiment(_Buildable):
         if self.args.run_all_steps or any(step._funcname == 'run' for step in steps):
             self.environment.run_steps(steps)
         else:
-            Sequence.run_steps(steps)
+            environments.LocalEnvironment().run_steps(steps)
 
     def run(self):
         """Start the experiment by running all runs that were added to it.
@@ -441,37 +443,35 @@ class Experiment(_Buildable):
         or on a computer cluster."""
         self.environment.start_exp()
 
-    def build(self, overwrite=False, only_main_script=False, no_main_script=False):
-        """Apply all the actions to the filesystem.
-
-        If *overwrite* is True and the experiment directory exists, it is
-        overwritten without prior confirmation.
+    def build(self, dry_run=False):
+        """Apply all actions to the filesystem.
         """
-        logging.info('Exp Dir: "%s"' % self.path)
+        self._create_exp_dir()
+        self._clean_exp_dir()
 
+        # Needed for building the main script.
         self._set_run_dirs()
 
-        # TODO: Currently no_main_script is always False.
-        if not no_main_script:
-            # This is the first part where we only write the main script.
-            # We only overwrite the exp dir in the first part.
-            if os.path.exists(self.path):
-                runs_exist = any(path.startswith('runs')
-                                 for path in os.listdir(self.path))
-                logging.info('The directory "%s" contains run directories: %s' %
-                             (self.path, runs_exist))
-                # Overwrite if overwrite is True or if no runs exist.
-                tools.overwrite_dir(self.path, overwrite or not runs_exist)
-            else:
-                tools.makedirs(self.path)
-            self._build_main_script()
-        if only_main_script:
+        if dry_run:
             return
 
-        # This is the second part where we write everything else
+        self._build_main_script()
         self._build_resources()
         self._build_runs()
         self._build_properties_file()
+
+    def _create_exp_dir(self):
+        logging.info('Exp Dir: "%s"' % self.path)
+        tools.makedirs(self.path)
+
+    def _clean_exp_dir(self):
+        job_prefix = environments.get_job_prefix(self.name)
+        paths = [path for path in os.listdir(self.path)
+                 if not path.startswith(job_prefix)]
+        if paths:
+            tools.confirm_overwrite_or_abort(self.path)
+            for path in paths:
+                tools.remove(os.path.join(self.path, path))
 
     def _set_run_dirs(self):
         """
