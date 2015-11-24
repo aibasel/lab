@@ -274,7 +274,7 @@ class PlanningReport(Report):
         """
         columns = [
             'domain', 'problem', 'algorithm', 'error',
-            'fast-downward_wall_clock_time', 'memory']
+            'fast-downward_wall_clock_time', 'raw_memory']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
         for run in self.props.values():
