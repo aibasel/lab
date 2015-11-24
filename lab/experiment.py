@@ -26,7 +26,7 @@ import sys
 from lab import environments
 from lab import tools
 from lab.fetcher import Fetcher
-from lab.steps import Step, Sequence
+from lab.steps import Step, get_step, get_steps_text
 
 
 DEFAULT_ABORT_ON_FAILURE = False
@@ -276,7 +276,7 @@ class Experiment(_Buildable):
             permissions=0o755)
         self.add_command("run-lab-default-parser", ["LAB_DEFAULT_PARSER"])
 
-        self.steps = Sequence()
+        self.steps = []
         self.add_step('build', self.build)
         self.add_step('run', self.run)
         self.add_fetcher(name='fetch')
@@ -423,13 +423,13 @@ class Experiment(_Buildable):
         return run
 
     def __call__(self):
-        ARGPARSER.epilog = self.steps.get_steps_text()
+        ARGPARSER.epilog = get_steps_text(self.steps)
         self.args = ARGPARSER.parse_args()
         if not self.args.steps and not self.args.run_all_steps:
             ARGPARSER.print_help()
             sys.exit(0)
         # If no steps were given on the commandline, run all exp steps.
-        steps = [self.steps.get_step(name) for name in self.args.steps] or self.steps
+        steps = [get_step(self.steps, name) for name in self.args.steps] or self.steps
         # If the main experiment step is present, we always run the jobs sequentially.
         if (self.args.run_all_steps or
                 any(environments.is_run_step(step) for step in steps)):

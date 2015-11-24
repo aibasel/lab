@@ -65,34 +65,34 @@ class Step(object):
                 for (k, v) in sorted(self.kwargs.items())]))
 
 
-class Sequence(list):
-    """This class holds all steps of an experiment."""
-    def _get_step_index(self, step_name):
-        for index, step in enumerate(self):
-            if step.name == step_name:
-                return index
-        logging.critical('There is no step called %s' % step_name)
+def _get_step_index(steps, step_name):
+    for index, step in enumerate(steps):
+        if step.name == step_name:
+            return index
+    logging.critical('There is no step called "{}"'.format(step_name))
 
-    def get_step(self, step_name):
-        """*step_name* can be a step's name or number."""
-        if step_name.isdigit():
-            try:
-                return self[int(step_name) - 1]
-            except IndexError:
-                logging.critical('There is no step number %s' % step_name)
-        return self[self._get_step_index(step_name)]
 
-    def get_steps_text(self):
-        # Use width 0 if no steps have been added.
-        name_width = min(max([len(step.name) for step in self] + [0]), 50)
-        terminal_width, terminal_height = tools.get_terminal_size()
-        terminal_width = terminal_width or 80
-        lines = ['Available steps:', '================']
-        for number, step in enumerate(self, start=1):
-            line = ' '.join([str(number).rjust(2), step.name.ljust(name_width)])
-            step_text = str(step)
-            if len(line) + len(step_text) < terminal_width:
-                lines.append(line + ' ' + step_text)
-            else:
-                lines.extend(['', line, step_text, ''])
-        return '\n'.join(lines)
+def get_step(steps, step_name):
+    """*step_name* can be a step's name or number."""
+    if step_name.isdigit():
+        try:
+            return steps[int(step_name) - 1]
+        except IndexError:
+            logging.critical('There is no step number {}'.format(step_name))
+    return steps[_get_step_index(steps, step_name)]
+
+
+def get_steps_text(steps):
+    # Use width 0 if no steps have been added.
+    name_width = min(max([len(step.name) for step in steps] + [0]), 50)
+    terminal_width, terminal_height = tools.get_terminal_size()
+    terminal_width = terminal_width or 80
+    lines = ['Available steps:', '================']
+    for number, step in enumerate(steps, start=1):
+        line = ' '.join([str(number).rjust(2), step.name.ljust(name_width)])
+        step_text = str(step)
+        if len(line) + len(step_text) < terminal_width:
+            lines.append(line + ' ' + step_text)
+        else:
+            lines.extend(['', line, step_text, ''])
+    return '\n'.join(lines)

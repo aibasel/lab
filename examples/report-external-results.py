@@ -18,7 +18,6 @@ import json
 import os.path
 
 from lab.experiment import Experiment
-from lab.steps import Sequence
 from lab import tools
 
 from downward.reports.absolute import AbsoluteReport
@@ -55,7 +54,7 @@ def write_properties(eval_dir):
 # Create new experiment. The file <EXP_DIR>-eval/properties must exist.
 exp = Experiment(EXP_DIR)
 # Remove all existing experiment steps.
-exp.steps = Sequence()
+exp.steps = []
 exp.add_report(AbsoluteReport(attributes=['coverage', 'expansions']))
 exp.add_report(ProblemPlotReport(attributes=['expansions']))
 
