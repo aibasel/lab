@@ -431,7 +431,8 @@ class Experiment(_Buildable):
         # If no steps were given on the commandline, run all exp steps.
         steps = [self.steps.get_step(name) for name in self.args.steps] or self.steps
         # If the main experiment step is present, we always run the jobs sequentially.
-        if self.args.run_all_steps or any(step._funcname == 'run' for step in steps):
+        if (self.args.run_all_steps or
+                any(environments.is_run_step(step) for step in steps)):
             self.environment.run_steps(steps)
         else:
             environments.LocalEnvironment().run_steps(steps)

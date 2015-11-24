@@ -32,6 +32,13 @@ def get_job_prefix(exp_name):
     return ''.join([escape_char, exp_name, '-'])
 
 
+def is_run_step(step):
+    """Return true iff the given step is the "run" step."""
+    return (
+        step.name == 'run' and step._funcname == 'run' and
+        not step.args and not step.kwargs)
+
+
 class Environment(object):
     def __init__(self):
         self.exp = None
@@ -47,6 +54,7 @@ class Environment(object):
         """
         pass
 
+    # TODO: Rename to run_exp().
     def start_exp(self):
         """
         Run main experiment step.
@@ -196,7 +204,7 @@ class OracleGridEngineEnvironment(Environment):
         return num_runs
 
     def _get_num_tasks(self, step):
-        if step._funcname == "run":
+        if is_run_step(step):
             return self._get_num_runs()
         else:
             return 1
@@ -230,7 +238,7 @@ class OracleGridEngineEnvironment(Environment):
         return pkgutil.get_data('lab', 'data/grid-job-body-template') % body_params
 
     def _get_job_body(self, step):
-        if step._funcname == 'run':
+        if is_run_step(step):
             return self._get_main_job_body()
         return 'cd %(cwd)s\n%(python)s %(script)s %(args)s %(step_name)s\n' % {
             'cwd': os.getcwd(),
@@ -259,7 +267,7 @@ class OracleGridEngineEnvironment(Environment):
         job_dir = self.exp.path
         tools.makedirs(job_dir)
         for number, step in enumerate(steps, start=1):
-            if step._funcname == 'run':
+            if is_run_step(step):
                 submitted_file = os.path.join(job_dir, 'submitted')
                 if os.path.exists(submitted_file):
                     tools.confirm_or_abort(
@@ -276,7 +284,7 @@ class OracleGridEngineEnvironment(Environment):
                 submit.extend(['-hold_jid', prev_job_name])
             submit.append(job_name)
             tools.run_command(submit, cwd=job_dir)
-            if step._funcname == 'run':
+            if is_run_step(step):
                 with open(submitted_file, 'w') as f:
                     f.write('This file is created when the experiment is submitted to '
                             'the queue.')
