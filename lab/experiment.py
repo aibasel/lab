@@ -445,8 +445,7 @@ class Experiment(_Buildable):
         self.environment.start_exp()
 
     def build(self, dry_run=False):
-        """Apply all actions to the filesystem.
-        """
+        """Apply all actions to the filesystem."""
         self._create_exp_dir()
         self._clean_exp_dir()
 
