@@ -278,7 +278,7 @@ class Experiment(_Buildable):
 
         self.steps = Sequence()
         self.add_step('build', self.build)
-        self.add_step('start', self.run)
+        self.add_step('run', self.run)
         self.add_fetcher(name='fetch')
 
     @property
