@@ -33,8 +33,11 @@ class Step(object):
         assert func is not None
         self.name = name
         self.func = func
-        self.args = list(args)
+        self.args = args
         self.kwargs = kwargs
+        self._funcname = (
+            getattr(func, '__name__', None) or
+            func.__class__.__name__.lower())
 
     def __call__(self):
         if self.func is None:
@@ -45,24 +48,21 @@ class Step(object):
             # Free memory
             self.func = None
             if retval:
-                logging.critical('An error occured in %s, the return value was %s' %
-                                 (self.name, retval))
+                logging.critical(
+                    'An error occured in step {}.'.format(self.name))
             return retval
         except (ValueError, TypeError):
             traceback.print_exc()
-            logging.critical('Could not run step: %s' % self)
-
-    @property
-    def _funcname(self):
-        return (getattr(self.func, '__name__', None) or
-                self.func.__class__.__name__.lower())
+            logging.critical('Could not run step {}'.format(self))
 
     def __str__(self):
-        return '%s(%s%s%s)' % (self._funcname,
-                               ', '.join([repr(arg) for arg in self.args]),
-                               ', ' if self.args and self.kwargs else '',
-                               ', '.join(['%s=%s' % (k, repr(v))
-                                          for (k, v) in self.kwargs.items()]))
+        return '{name}({args}{sep}{kwargs})'.format(
+            name=self._funcname,
+            args=', '.join(repr(arg) for arg in self.args),
+            sep=', ' if self.args and self.kwargs else '',
+            kwargs=', '.join([
+                '{}={!r}'.format(k, v)
+                for (k, v) in sorted(self.kwargs.items())]))
 
 
 class Sequence(list):
