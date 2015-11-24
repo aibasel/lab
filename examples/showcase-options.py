@@ -52,20 +52,10 @@ exp.add_algorithm(
     driver_options=['--alias', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
 exp.add_algorithm(
     'sat-fdss-1', REPO, REV, [], driver_options=['--alias', 'seq-sat-fdss-1'])
-
-portfolio_paths = [
-    os.path.join(REPO, 'src', 'search', 'downward-seq-opt-fdss-1.py'),
-    os.path.join(REPO, 'src', 'driver', 'portfolios', 'seq_opt_fdss_1.py'),
-    os.path.join(REPO, 'driver', 'portfolios', 'seq_opt_fdss_1.py'),
-]
-portfolio_found = False
-for path in portfolio_paths:
-    if os.path.exists(path):
-        exp.add_algorithm(
-            'opt-fdss-1', REPO, REV, [], driver_options=['--portfolio', path])
-        portfolio_found = True
-if not portfolio_found:
-    raise SystemExit('Error: portfolio not found')
+exp.add_algorithm(
+    'opt-fdss-1', REPO, REV, [], driver_options=[
+        '--portfolio',
+        os.path.join(REPO, 'driver', 'portfolios', 'seq_opt_fdss_1.py')])
 
 # Before we fetch the new results, delete the old ones.
 exp.steps.insert(0, Step(
