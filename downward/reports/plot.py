@@ -438,7 +438,7 @@ class ProblemPlotReport(PlotReport):
         function *get_points*.
 
         If get_points is None (default), *attributes* must contain
-        exactly one attribute. Then we will plot the config names on
+        exactly one attribute. Then we will plot the algorithm names on
         the x-axis and the corresponding values for *attribute* on the
         y-axis. Otherwise *attributes* will be ignored.
 
@@ -460,18 +460,18 @@ class ProblemPlotReport(PlotReport):
 
         Examples::
 
-            # Plot number of node expansions for all configs.
+            # Plot number of node expansions for all algorithms.
             ProblemPlotReport(attributes=['expansions'])
 
-            # Compare different ipdb and m&s configurations.
-            # configs: 'ipdb-1000', 'ipdb-2000', 'mas-1000', 'mas-2000'
-            def config_and_states(run):
-                nick, states = run['config_nick'].split('-')
-                return {nick: [(states, run.get('expansions'))]}
+            # Compare different iPDB and M&S configurations.
+            # Algorithms: 'ipdb-1000', 'ipdb-2000', 'mas-1000', 'mas-2000'
+            def name_and_states(run):
+                name, states = run['algorithm'].split('-')
+                return {name: [(states, run.get('expansions'))]}
 
             ProblemPlotReport(
                 attributes=['expansions'],
-                get_points=config_and_states)
+                get_points=name_and_states)
 
         """
         PlotReport.__init__(self, **kwargs)
@@ -484,10 +484,10 @@ class ProblemPlotReport(PlotReport):
 
     def get_points(self, run):
         """
-        By default plot the configs on the x-axis and the attribute values on
-        the y-axis. All values are in the same category.
+        By default plot the algorithms on the x-axis and the attribute
+        values on the y-axis. All values are in the same category.
         """
-        return [(run.get('config'), run.get(self.attribute))]
+        return [(run.get('algorithm'), run.get(self.attribute))]
 
     def _fill_categories(self, runs):
         categories = defaultdict(list)

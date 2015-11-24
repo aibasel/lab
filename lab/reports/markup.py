@@ -73,7 +73,7 @@ def _get_config(target):
 
     config = {}
 
-    # Set the configuration on the 'config' dict.
+    # Set the configuration on the "config" dict.
     config = txt2tags.ConfigMaster()._get_defaults()
 
     # The Pre (and Post) processing config is a list of lists:

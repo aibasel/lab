@@ -82,8 +82,8 @@ def solved(run):
     return run['coverage'] == 1
 
 
-def only_two_configs(run):
-    return run['config'] in ['lama11', 'iter-hadd']
+def only_two_algorithms(run):
+    return run['algorithm'] in ['lama11', 'iter-hadd']
 
 
 # Showcase some fetcher options.
@@ -95,7 +95,7 @@ def eval_dir(num):
 exp.add_fetcher(
     dest=eval_dir(1), name='fetcher-test1', copy_all=True)
 exp.add_fetcher(
-    dest=eval_dir(2), name='fetcher-test2', filter_config='lama11')
+    dest=eval_dir(2), name='fetcher-test2', filter_algorithm='lama11')
 exp.add_fetcher(
     dest=eval_dir(3), name='fetcher-test3',
     parsers=os.path.join(DIR, 'simple', 'simple-parser.py'))
@@ -106,7 +106,7 @@ exp.add_report(
     AbsoluteReport('domain', attributes=ATTRIBUTES + ['expansions', 'cost']),
     name='report-abs-d')
 exp.add_report(
-    AbsoluteReport('problem', attributes=ATTRIBUTES, filter=only_two_configs),
+    AbsoluteReport('problem', attributes=ATTRIBUTES, filter=only_two_algorithms),
     name='report-abs-p-filter')
 exp.add_report(
     AbsoluteReport(attributes=None, format='tex'),
@@ -121,18 +121,18 @@ def get_domain(run1, run2):
 
 
 def sat_vs_opt(run):
-    config = run['config']
+    algo = run['algorithm']
     categories = {
         'lama11': 'sat', 'iter-hadd': 'sat', 'sat-fdss-1': 'sat',
         'ipdb': 'opt', 'opt-fdss-1': 'opt'
     }
-    return {categories[config]: [(config, run.get('expansions'))]}
+    return {categories[algo]: [(algo, run.get('expansions'))]}
 
 
 exp.add_report(
     ScatterPlotReport(
         attributes=['expansions'],
-        filter_config=['iter-hadd', 'lama11']),
+        filter_algorithm=['iter-hadd', 'lama11']),
     name='report-scatter',
     outfile=os.path.join('plots', 'scatter.png'))
 
@@ -155,7 +155,7 @@ params = {
 exp.add_report(
     ScatterPlotReport(
         attributes=['expansions'],
-        filter=only_two_configs,
+        filter=only_two_algorithms,
         get_category=get_domain,
         xscale='linear',
         yscale='linear',
@@ -181,7 +181,7 @@ exp.add_report(
     RelativeReport(
         'domain',
         attributes=['expansions'],
-        filter_config=['lama11', 'iter-hadd'],
+        filter_algorithm=['lama11', 'iter-hadd'],
         rel_change=0.1,
         abs_change=20),
     name='report-relative-d',)
@@ -189,7 +189,7 @@ exp.add_report(
     RelativeReport(
         'problem',
         attributes=['quality', 'coverage', 'expansions'],
-        filter_config=['lama11', 'iter-hadd']),
+        filter_algorithm=['lama11', 'iter-hadd']),
     name='report-relative-p')
 exp.add_report(
     CompareConfigsReport(
@@ -205,7 +205,7 @@ exp.add_report(
 exp.add_report(
     TaskwiseReport(
         attributes=['coverage', 'expansions'],
-        filter_config=['ipdb']),
+        filter_algorithm=['ipdb']),
     name='report-taskwise',
     outfile='taskwise.html')
 

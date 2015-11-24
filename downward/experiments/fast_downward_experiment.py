@@ -84,7 +84,7 @@ class FastDownwardRun(Run):
             'compress-output-files', ['xz', 'output.sas', 'output'])
 
     def _set_properties(self):
-        self.set_property('algorithm_nick', self.algo.nick)
+        self.set_property('algorithm', self.algo.name)
         self.set_property('repo', self.algo.cached_revision.repo)
         self.set_property('local_revision', self.algo.cached_revision.local_rev)
         self.set_property('global_revision', self.algo.cached_revision.global_rev)
@@ -98,14 +98,12 @@ class FastDownwardRun(Run):
 
         self.set_property('experiment_name', self.experiment.name)
 
-        self.set_property('config', self.algo.nick)
-
         # TODO: Remove planner_type property. Let portfolios output token instead.
         self.set_property(
             'planner_type', 'portfolio' if self._is_portfolio() else 'single')
 
         self._save_id([
-            self.algo.nick,
+            self.algo.name,
             self.task.domain,
             self.task.problem])
 
@@ -121,8 +119,8 @@ class FastDownwardRun(Run):
 
 
 class _DownwardAlgorithm(object):
-    def __init__(self, nick, cached_revision, driver_options, component_options):
-        self.nick = nick
+    def __init__(self, name, cached_revision, driver_options, component_options):
+        self.name = name
         self.cached_revision = cached_revision
         self.driver_options = driver_options
         self.component_options = component_options
@@ -131,9 +129,9 @@ class _DownwardAlgorithm(object):
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
-    Experiments can be customized by adding the desired
-    configurations, benchmarks and reports. See
-    :class:`lab.experiment.Experiment` for inherited methods.
+    Experiments can be customized by adding the desired algorithms,
+    benchmarks and reports. See :class:`lab.experiment.Experiment` for
+    inherited methods.
 
     Fast Downward experiments consist of the following steps:
 
@@ -178,7 +176,7 @@ class FastDownwardExperiment(Experiment):
 
         self._suites = defaultdict(list)
 
-        # Use OrderedDict to ensure that nicks are unique and ordered.
+        # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
 
     def _get_tasks(self):
@@ -217,14 +215,14 @@ class FastDownwardExperiment(Experiment):
                 'Benchmarks directory {} not found.'.format(benchmarks_dir))
         self._suites[benchmarks_dir].extend(suite)
 
-    def add_algorithm(self, nick, repo, rev, component_options,
+    def add_algorithm(self, name, repo, rev, component_options,
                       build_options=None, driver_options=None):
         """
         Add a Fast Downward algorithm to the experiment, i.e., a
         planner configuration in a given repository at a given
         revision.
 
-        *nick* is a string describing the algorithm (e.g.
+        *name* is a string describing the algorithm (e.g.
         "issue123-lmcut").
 
         *repo* must be a path to a Fast Downward repository.
@@ -282,17 +280,17 @@ class FastDownwardExperiment(Experiment):
                     "--search-time-limit", "5m"])
 
         """
-        if not isinstance(nick, basestring):
-            logging.critical('Algorithm nick must be a string: {}'.format(nick))
-        if nick in self._algorithms:
-            logging.critical('Algorithm nicks must be unique: {}'.format(nick))
+        if not isinstance(name, basestring):
+            logging.critical('Algorithm name must be a string: {}'.format(name))
+        if name in self._algorithms:
+            logging.critical('Algorithm names must be unique: {}'.format(name))
         build_options = self._get_default_build_options() + (build_options or [])
         driver_options = ([
             '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
             '--search-memory-limit', self.DEFAULT_SEARCH_MEMORY_LIMIT] +
             (driver_options or []))
-        self._algorithms[nick] = _DownwardAlgorithm(
-            nick, CachedRevision(repo, rev, build_options),
+        self._algorithms[name] = _DownwardAlgorithm(
+            name, CachedRevision(repo, rev, build_options),
             driver_options, component_options)
 
     def build(self, **kwargs):
@@ -301,7 +299,7 @@ class FastDownwardExperiment(Experiment):
             logging.critical('You must add at least one algorithm.')
 
         self.set_property('suite', self._suites)
-        self.set_property('algorithm_nicks', self._algorithms.keys())
+        self.set_property('algorithms', self._algorithms.keys())
 
         self._cache_revisions()
         self._add_code()

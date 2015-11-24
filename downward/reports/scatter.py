@@ -121,7 +121,7 @@ class ScatterPlotReport(PlotReport):
         """
         ``kwargs['attributes']`` must contain exactly one attribute.
 
-        If only one of the two configurations has a value for a run, only
+        If only one of the two algorithms has a value for a run, only
         add a coordinate if *show_missing* is True.
 
         *get_category* can be a function that takes **two** runs (dictionaries of
@@ -212,8 +212,8 @@ class ScatterPlotReport(PlotReport):
             if len(runs) != 2:
                 continue
             run1, run2 = runs
-            assert (run1['config'] == self.configs[0] and
-                    run2['config'] == self.configs[1])
+            assert (run1['algorithm'] == self.algorithms[0] and
+                    run2['algorithm'] == self.algorithms[1])
             val1 = run1.get(self.attribute)
             val2 = run2.get(self.attribute)
             if val1 is None and val2 is None:
@@ -237,10 +237,11 @@ class ScatterPlotReport(PlotReport):
         return new_categories
 
     def write(self):
-        if not len(self.configs) == 2:
-            logging.critical('Scatterplots need exactly 2 configs: %s' % self.configs)
-        self.xlabel = self.xlabel or self.configs[0]
-        self.ylabel = self.ylabel or self.configs[1]
+        if not len(self.algorithms) == 2:
+            logging.critical(
+                'Scatterplots need exactly 2 algorithms: %s' % self.algorithms)
+        self.xlabel = self.xlabel or self.algorithms[0]
+        self.ylabel = self.ylabel or self.algorithms[1]
 
         suffix = '.' + self.output_format
         if not self.outfile.endswith(suffix):

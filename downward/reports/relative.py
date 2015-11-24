@@ -19,7 +19,6 @@
 from __future__ import division
 
 import logging
-import sys
 
 from lab import reports
 
@@ -31,7 +30,7 @@ NOT_AVAILABLE = None
 class RelativeReport(AbsoluteReport):
     def __init__(self, resolution, rel_change=0.0, abs_change=0, **kwargs):
         """
-        Compare exactly two configurations. For each problem and attribute
+        Compare exactly two algorithms. For each problem and attribute
         add a table row with the two absolute values and their quotient.
 
         *resolution* must be one of "domain" or "problem".
@@ -39,21 +38,22 @@ class RelativeReport(AbsoluteReport):
         Only include pairs of attribute values x and y if
         abs(y/x - 1) >= *rel_change*.
 
-        Only add pairs of values to the result if their absolute difference is
-        bigger than *abs_change*.
+        Only add pairs of values to the result if their absolute
+        difference is bigger than *abs_change*.
 
-        If neither *rel_change* nor *abs_change* are given, no problem rows are
-        filtered out.
+        If neither *rel_change* nor *abs_change* are given, no problem
+        rows are filtered out.
+
         """
         AbsoluteReport.__init__(self, resolution, **kwargs)
         self.rel_change = rel_change
         self.abs_change = abs_change
 
     def write(self):
-        if not len(self.configs) == 2:
-            logging.error('Relative reports are only possible for 2 configs. '
-                          'Selected configs: "%s"' % self.configs)
-            sys.exit(1)
+        if not len(self.algorithms) == 2:
+            logging.critical(
+                'Relative reports are only possible for 2 algorithms. '
+                'Selected algorithms: "%s"' % self.algorithms)
         AbsoluteReport.write(self)
 
     def _get_table(self, attribute, domain=None):

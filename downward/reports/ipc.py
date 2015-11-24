@@ -77,8 +77,8 @@ class IpcReport(PlanningReport):
 
     def _compute_total_scores(self):
         scores = {}
-        for (domain, config), runs in self.domain_config_runs.items():
-            scores[config, domain] = sum(run.get(self.score, 0) for run in runs)
+        for (domain, algo), runs in self.domain_algorithm_runs.items():
+            scores[algo, domain] = sum(run.get(self.score, 0) for run in runs)
         return scores
 
     def write(self):
@@ -144,14 +144,14 @@ class IpcReport(PlanningReport):
             escape(self.attribute_name), escape(domain), get_date_and_time())
         print r"\tablehead{\hline"
         print r"\textbf{prob}"
-        for config in self.configs:
-            print r"& %s\textbf{%s}" % (self._tiny_if_squeeze(),
-                                        escape(config))
+        for algo in self.algorithms:
+            print r"& %s\textbf{%s}" % (
+                self._tiny_if_squeeze(), escape(algo))
         if self.best_value_column:
             print r"& %s\textbf{BEST}" % self._tiny_if_squeeze()
         print r"\\ \hline}"
         print r"\tabletail{\hline}"
-        column_desc = "|l|%s|" % ("r" * len(self.configs))
+        column_desc = "|l|%s|" % ("r" * len(self.algorithms))
         if self.best_value_column:
             column_desc += "r|"
         print r"\begin{supertabular}{%s}" % column_desc
@@ -175,8 +175,8 @@ class IpcReport(PlanningReport):
             print r"\\"
         print r"\hline"
         print r"\textbf{total}"
-        for config in self.configs:
-            print r"& \textbf{%.2f}" % self.total_scores[config, domain]
+        for algo in self.algorithms:
+            print r"& \textbf{%.2f}" % self.total_scores[algo, domain]
         if self.best_value_column:
             print r"&"
         print r"\\"
@@ -198,27 +198,27 @@ class IpcReport(PlanningReport):
             escape(self.attribute_name), escape(title), get_date_and_time())
         print r"\tablehead{\hline"
         print r"\textbf{domain}"
-        for config in self.configs:
-            print r"& %s\textbf{%s}" % (self._tiny_if_squeeze(),
-                                        escape(config))
+        for algo in self.algorithms:
+            print r"& %s\textbf{%s}" % (
+                self._tiny_if_squeeze(), escape(algo))
         print r"\\ \hline}"
         print r"\tabletail{\hline}"
-        print r"\begin{supertabular}{|l|%s|}" % ("r" * len(self.configs))
+        print r"\begin{supertabular}{|l|%s|}" % ("r" * len(self.algorithms))
         for domain, problems in self.domains.items():
             num_instances = len(problems)
             print r"\textbf{%s} {\scriptsize(%s)}" % (domain, num_instances)
-            for config in self.configs:
-                score = self.total_scores[config, domain]
+            for algo in self.algorithms:
+                score = self.total_scores[algo, domain]
                 if normalize:
                     score = float(score) * 100 / num_instances
-                overall[config] += score
+                overall[algo] += score
                 entry = "%.2f" % score
                 print r"& %s" % entry
             print r"\\"
         print r"\hline"
         print r"\textbf{overall}"
-        for config in self.configs:
-            overall_score = overall[config]
+        for algo in self.algorithms:
+            overall_score = overall[algo]
             if normalize:
                 overall_score = float(overall_score) / len(self.domains)
             print r"& \textbf{%.2f}" % overall_score

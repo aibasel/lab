@@ -59,15 +59,17 @@ class _Buildable(object):
     def set_property(self, name, value):
         """Add a key-value property. These can be used later for evaluation. ::
 
-            exp.set_property('compact', True)
-            run.set_property('domain', 'gripper')
+            exp.set_property('suite', ['gripper', 'grid'])
 
-        Each run must have the property *id* which must be a *unique* list of
-        strings. They determine where the results for this run will land on
-        disk and in the combined properties file. ::
+            run.set_property('domain', 'gripper')
+            run.set_property('problem', 'prob01.pddl')
+
+        Each run must have the property *id* which must be a *unique*
+        list of strings. They determine where the results for this run
+        will land in the combined properties file. ::
 
             run.set_property('id', [algorithm, benchmark])
-            run.set_property('id', [config, domain, problem])
+            run.set_property('id', [algorithm, domain, problem])
 
         """
         self.properties[name] = value
@@ -307,7 +309,7 @@ class Experiment(_Buildable):
         report steps, use the convenience methods ``add_fetcher()`` and
         ``add_report()``.
 
-        *name* is a nickname for the step.
+        *name* is a descriptive name for the step.
 
         *function* is a callable Python object, i.e. a function or a
         class implementing __call__.
@@ -346,8 +348,9 @@ class Experiment(_Buildable):
         new directory tree at *eval_dir*. By default, only the combined
         properties file is written do disk.
 
-        You can fetch only specific domains or configurations by passing
-        :py:class:`filters <.Report>` with the *filter* argument.
+        You can fetch only a subset of runs (e.g., runs for specific
+        domains or algorithms) by passing :py:class:`filters <.Report>`
+        with the *filter* argument.
 
         *parsers* can be a list of paths to parser scripts. If given,
         each parser is called in each run directory and the results are
@@ -368,12 +371,9 @@ class Experiment(_Buildable):
 
             exp.add_fetcher(src='/path/to/other-exp-eval')
 
-        Fetch only the runs for certain configurations from another
-        experiment::
+        Fetch only the runs for certain algorithms::
 
-            exp.add_fetcher(
-                src='/path/to/eval-dir',
-                filter_config=['config_1', 'config_5'])
+            exp.add_fetcher(filter_algorithm=['algo_1', 'algo_5'])
 
         Parse additional attributes::
 

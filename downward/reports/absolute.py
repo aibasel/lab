@@ -111,7 +111,7 @@ class AbsoluteReport(PlanningReport):
                     if table:
                         parts.append('%(table)s\n' % locals())
                     else:
-                        parts.append('No task was found where all configurations '
+                        parts.append('No task was found where all algorithms '
                                      'have a value for "%s". Therefore no '
                                      'domain-wise table can be generated.\n' %
                                      attribute)
@@ -137,10 +137,10 @@ class AbsoluteReport(PlanningReport):
 
     def _get_general_info(self):
         table = reports.Table(title='algorithm')
-        for config, info in self.config_info.items():
+        for algo, info in self.algorithm_info.items():
             for attr in self.INFO_ATTRIBUTES:
                 if info[attr]:
-                    table.add_cell(config, attr, info[attr])
+                    table.add_cell(algo, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
         return str(table)
 
@@ -153,7 +153,7 @@ class AbsoluteReport(PlanningReport):
         Add some information to the table for attributes where data is missing.
         """
         if not attribute.absolute:
-            table.info.append('Only instances where all configurations have a '
+            table.info.append('Only instances where all algorithms have a '
                               'value for "%s" are considered.' % attribute)
             table.info.append('Each table entry gives the %s of "%s" for that '
                               'domain.' % (func_name, attribute))
@@ -174,7 +174,7 @@ class AbsoluteReport(PlanningReport):
         func_name, func = self._get_group_functions(attribute)[0]
         num_probs = 0
         self._add_table_info(attribute, func_name, table)
-        domain_config_values = defaultdict(list)
+        domain_algo_values = defaultdict(list)
         for domain, problems in self.domains.items():
             for problem in problems:
                 runs = self.problem_runs[(domain, problem)]
@@ -185,18 +185,18 @@ class AbsoluteReport(PlanningReport):
                 for run in runs:
                     value = run.get(attribute)
                     if value is not None:
-                        domain_config_values[(domain, run['config'])].append(value)
+                        domain_algo_values[(domain, run['algorithm'])].append(value)
 
         # If the attribute is absolute (e.g. coverage) we may have
-        # added problems for which not all configs have a value. Therefore, we
+        # added problems for which not all algorithms have a value. Therefore, we
         # can only print the number of instances (in brackets after the domain
-        # name) if that number is the same for all configs. If not all configs
+        # name) if that number is the same for all algorithms. If not all algorithms
         # have values for the same number of problems, we write the full list of
         # different problem numbers.
         num_values_lists = defaultdict(list)
         for domain in self.domains:
-            for config in self.configs:
-                values = domain_config_values.get((domain, config), [])
+            for algo in self.algorithms:
+                values = domain_algo_values.get((domain, algo), [])
                 num_values_lists[domain].append(str(len(values)))
         for domain, num_values_list in num_values_lists.items():
             if len(set(num_values_list)) == 1:
@@ -209,8 +209,8 @@ class AbsoluteReport(PlanningReport):
             formatter = reports.CellFormatter(link=link, count=count)
             table.cell_formatters[domain][table.header_column] = formatter
 
-        for (domain, config), values in domain_config_values.items():
-            table.add_cell(domain, config, func(values))
+        for (domain, algo), values in domain_algo_values.items():
+            table.add_cell(domain, algo, func(values))
 
         table.num_values = num_probs
         return table
@@ -218,9 +218,9 @@ class AbsoluteReport(PlanningReport):
     def _get_domain_table(self, attribute, domain):
         table = self._get_empty_table(attribute)
 
-        for config in self.configs:
-            for run in self.domain_config_runs[domain, config]:
-                table.add_cell(run['problem'], config, run.get(attribute))
+        for algo in self.algorithms:
+            for run in self.domain_algorithm_runs[domain, algo]:
+                table.add_cell(run['problem'], algo, run.get(attribute))
         return table
 
     def _get_table(self, attribute, domain=None):
@@ -236,7 +236,7 @@ class AbsoluteReport(PlanningReport):
             if self.output_format == 'tex':
                 title = title.capitalize().replace('_', ' ')
         if columns is None:
-            columns = self.configs
+            columns = self.algorithms
         if attribute is not None and self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
             min_wins = attribute.min_wins

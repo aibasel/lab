@@ -66,10 +66,6 @@ class PlanningReport(Report):
     ])
 
     INFO_ATTRIBUTES = [
-        # DownwardExperiment
-        'translate_summary', 'preprocess_summary', 'search_summary',
-        'config_nick', 'commandline_config',
-        # FastDownwardExperiment
         'local_revision', 'global_revision', 'revision_summary',
         'build_options', 'driver_options', 'component_options'
     ]
@@ -80,7 +76,7 @@ class PlanningReport(Report):
 
         *derived_properties* must be a function or a list of functions taking a
         single argument. This argument is a list of problem runs i.e. it contains
-        one run-dictionary for each config in the experiment. The function is
+        one run-dictionary for each algorithm in the experiment. The function is
         called for every problem in the suite. A function that computes the
         IPC score based on the results of the experiment is added automatically
         to the *derived_properties* list and serves as an example here:
@@ -88,22 +84,21 @@ class PlanningReport(Report):
         .. literalinclude:: ../downward/reports/__init__.py
            :pyobject: quality
 
-        You can include only specific domains or configurations by using
-        :py:class:`filters <.Report>`.
-        If you provide a list for *filter_config* or *filter_config_nick*, it
-        will be used to determine the order of configurations in the report. ::
+        You can include only specific domains or algorithms by
+        using :py:class:`filters <.Report>`. If you provide a list for
+        *filter_algorithm*, it will be used to determine the order of
+        algorithms in the report. ::
 
-            # Use a filter function.
+            # Use a filter function: algorithms sorted alphabetically.
             def only_blind_and_lmcut(run):
-                return run['config'] in ['WORK-blind', 'WORK-lmcut']
+                return run['algorithm'] in ['blind', 'lmcut']
             PlanningReport(filter=only_blind_and_lmcut)
 
-            # Filter with a list and set the order of the configs.
-            PlanningReport(filter_config=['WORK-lmcut', 'WORK-blind'])
-            PlanningReport(filter_config_nick=['lmcut', 'blind'])
+            # Filter with "filter_algorithm": list orders algorithms.
+            PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
         Tip: When you append ``_relative`` to an attribute, you will get a table
-        containing the attribute's values of each configuration relative to the
+        containing the attribute's values of each algorithm relative to the
         leftmost column.
 
         """
@@ -118,9 +113,8 @@ class PlanningReport(Report):
 
         self._handle_relative_attributes(kwargs['attributes'])
 
-        # Remember the order of the configs if it is given as a key word argument filter.
-        self.filter_config = tools.make_list(kwargs.get('filter_config') or [])
-        self.filter_config_nick = tools.make_list(kwargs.get('filter_config_nick') or [])
+        # Remember the order of algorithms if it is given as a keyword argument filter.
+        self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
 
         Report.__init__(self, **kwargs)
         self.derived_properties.append(quality)
@@ -187,7 +181,7 @@ class PlanningReport(Report):
         problems = set()
         domains = defaultdict(list)
         problem_runs = defaultdict(list)
-        domain_config_runs = defaultdict(list)
+        domain_algorithm_runs = defaultdict(list)
         runs = {}
         for run_name, run in self.props.items():
             if run.get('stage') == 'search' and 'coverage' not in run:
@@ -196,28 +190,29 @@ class PlanningReport(Report):
                 else:
                     run['error'] = 'unexplained-crash'
 
-            domain, problem, config = run['domain'], run['problem'], run['config']
+            domain, problem, algo = run['domain'], run['problem'], run['algorithm']
             problems.add((domain, problem))
             problem_runs[(domain, problem)].append(run)
-            domain_config_runs[(domain, config)].append(run)
-            runs[(domain, problem, config)] = run
+            domain_algorithm_runs[(domain, algo)].append(run)
+            runs[(domain, problem, algo)] = run
         for domain, problem in problems:
             domains[domain].append(problem)
-        self.configs = self._get_config_order()
+        self.algorithms = self._get_algorithm_order()
         self.problems = list(sorted(problems))
         self.domains = domains
 
-        # Sort each entry in problem_runs by their config values.
+        # Sort each entry in problem_runs by algorithm.
+        # TODO: Remove O(n) lookup.
         def run_key(run):
-            return self.configs.index(run['config'])
+            return self.algorithms.index(run['algorithm'])
 
         for key, run_list in problem_runs.items():
             problem_runs[key] = sorted(run_list, key=run_key)
 
         self.problem_runs = problem_runs
-        self.domain_config_runs = domain_config_runs
+        self.domain_algorithm_runs = domain_algorithm_runs
         self.runs = runs
-        self.config_info = self._scan_config_info()
+        self.algorithm_info = self._scan_algorithm_info()
         try:
             self._perform_sanity_checks()
         except AssertionError:
@@ -226,41 +221,43 @@ class PlanningReport(Report):
                 'Are there old properties in the eval-dir you don\'t want to merge?')
             traceback.print_exc(file=sys.stdout)
 
-    def _scan_config_info(self):
+    def _scan_algorithm_info(self):
         info = defaultdict(dict)
+        # TODO: Only scan first run.
         for (domain, problem), runs in self.problem_runs.items():
             for run in runs:
-                info[run['config']].update((attr, run.get(attr, ''))
-                                           for attr in self.INFO_ATTRIBUTES)
-            # Abort when we have found info for all configs.
-            if len(info) == len(self.configs):
+                info[run['algorithm']].update(
+                    (attr, run.get(attr, '?'))
+                    for attr in self.INFO_ATTRIBUTES)
+            # Abort when we have found information for all algorithms.
+            if len(info) == len(self.algorithms):
                 break
         return info
 
     def _perform_sanity_checks(self):
         # Sanity checks
-        assert len(self.problems) * len(self.configs) == len(self.runs), (
-            'Every problem must be run for all configs\n'
-            'Configs (%d):\n%s\nProblems: %d\nDomains (%d):\n%s\nRuns: %d' %
-            (len(self.configs), self.configs, len(self.problems), len(self.domains),
+        assert len(self.problems) * len(self.algorithms) == len(self.runs), (
+            'Every problem must be run for all algorithms\n'
+            'Algorithms (%d):\n%s\nProblems: %d\nDomains (%d):\n%s\nRuns: %d' %
+            (len(self.algorithms), self.algorithms, len(self.problems), len(self.domains),
              self.domains.keys(), len(self.runs)))
         assert sum(len(probs) for probs in self.domains.values()) == len(self.problems)
         assert len(self.problem_runs) == len(self.problems)
         for (domain, problem), runs in self.problem_runs.items():
-            if len(runs) != len(self.configs):
-                prob_configs = [run['config'] for run in runs]
-                print 'Error:          Problem configs (%d) != Configs (%d)' % (
-                    len(prob_configs), len(self.configs))
+            if len(runs) != len(self.algorithms):
+                prob_algos = [run['algorithm'] for run in runs]
+                print 'Error: Algorithms for problem (%d) != Total algorithms (%d)' % (
+                    len(prob_algos), len(self.algorithms))
                 times = defaultdict(int)
-                for config in prob_configs:
-                    times[config] += 1
-                print 'The problem is run more than once for the configs:',
-                print ', '.join(['%s: %dx' % (config, num_runs)
-                                 for (config, num_runs) in times.items() if num_runs > 1])
+                for algo in prob_algos:
+                    times[algo] += 1
+                print 'The problem is run more than once for the algorithms:',
+                print ', '.join(['%s: %dx' % (algo, num_runs)
+                                 for (algo, num_runs) in times.items() if num_runs > 1])
                 logging.critical('Sanity check failed')
         assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
-        assert len(self.domains) * len(self.configs) == len(self.domain_config_runs)
-        assert (sum(len(runs) for runs in self.domain_config_runs.values()) ==
+        assert len(self.domains) * len(self.algorithms) == len(self.domain_algorithm_runs)
+        assert (sum(len(runs) for runs in self.domain_algorithm_runs.values()) ==
                 len(self.runs))
 
     def _compute_derived_properties(self):
@@ -269,16 +266,17 @@ class PlanningReport(Report):
                 func(runs)
                 # Update the data with the new properties.
                 for run in runs:
-                    run_id = '-'.join((run['config'], run['domain'], run['problem']))
+                    run_id = '-'.join((run['algorithm'], run['domain'], run['problem']))
                     self.props[run_id] = run
 
     def _get_warnings_table(self):
         """
-        Returns a :py:class:`Table <lab.reports.Table>` containing one line for
+        Return a :py:class:`Table <lab.reports.Table>` containing one line for
         each run where an unexpected error occured.
         """
-        columns = ['domain', 'problem', 'config', 'error',
-                   'search_wall_clock_time', 'memory']
+        columns = [
+            'domain', 'problem', 'algorithm', 'error',
+            'search_wall_clock_time', 'memory']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
         for run in self.props.values():
@@ -287,39 +285,28 @@ class PlanningReport(Report):
                     table.add_cell(run['run_dir'], column, run.get(column, '?'))
         return table
 
-    def _get_config_order(self):
-        """ Returns a list of configs in the order that was determined by the user.
-
-        You can use the order of configs in your own custom report subclasses
-        by accessing self.configs which is calculated in self._scan_planning_data.
-
-        In order of decreasing priority these are the three ways to determine the order:
-        1. A filter for 'config' is given with filter_config.
-        2. A filter for 'config_nick' is given with filter_config_nick.
-           In this case all configs that are represented by the same nick are sorted
-           alphabetically.
-        3. If no explicit order is given, the configs will be sorted alphabetically.
+    def _get_algorithm_order(self):
         """
-        all_configs = set()
-        config_nicks_to_config = defaultdict(set)
-        for run in self.props.values():
-            config = run['config']
-            all_configs.add(config)
-            # For preprocess experiments config_nick is not set.
-            nick = run.get('config_nick', config)
-            config_nicks_to_config[nick].add(config)
-        if self.filter_config_nick and not self.filter_config:
-            for nick in self.filter_config_nick:
-                self.filter_config += sorted(config_nicks_to_config[nick])
-        if self.filter_config:
-            # Other filters may have changed the set of available configs by either
-            # removing all runs from one config or changing the run['config'] for a run.
-            # Maintain the original order of configs and only keep configs that still
-            # have available runs after filtering. Then add all new configs sorted
-            # naturally at the end.
-            config_order = [c for c in self.filter_config if c in all_configs]
-            config_order += list(tools.natural_sort(all_configs -
-                                                    set(self.filter_config)))
+        Return a list of algorithms in the order determined by the user.
+
+        If 'filter_algorithm' is given, algorithms are sorted in that
+        order. Otherwise, they are sorted alphabetically.
+
+        You can use the order of algorithms in your own custom report
+        subclasses by accessing self.algorithms which is calculated in
+        self._scan_planning_data.
+
+        """
+        all_algos = set(run['algorithm'] for run in self.props.values())
+        if self.filter_algorithm:
+            # Other filters may have changed the set of available algorithms by either
+            # removing all runs for one algorithm or changing run['algorithm'] for a run.
+            # Maintain the original order of algorithms and only keep algorithms that
+            # still have runs after filtering. Then add all new algorithms
+            # sorted naturally at the end.
+            algo_order = (
+                [c for c in self.filter_algorithm if c in all_algos] +
+                tools.natural_sort(all_algos - set(self.filter_algorithm)))
         else:
-            config_order = list(tools.natural_sort(all_configs))
-        return config_order
+            algo_order = tools.natural_sort(all_algos)
+        return algo_order

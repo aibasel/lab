@@ -22,8 +22,10 @@ from lab import reports
 from downward.reports.absolute import AbsoluteReport
 
 
+# TODO: CompareConfigsReport -> CompareAlgorithmsReport
 class CompareConfigsReport(AbsoluteReport):
-    """Allows to compare pairs of configurations."""
+    """Allows to compare pairs of algorithms."""
+    # TODO: compared_configs -> compared_algorithms
     def __init__(self, compared_configs, **kwargs):
         """
         See :py:class:`AbsoluteReport <downward.reports.absolute.AbsoluteReport>`
@@ -50,17 +52,18 @@ class CompareConfigsReport(AbsoluteReport):
             exp.add_report(CompareConfigsReport(compared_configs))
 
         """
-        if 'filter_config' in kwargs or 'filter_config_nick' in kwargs:
-            logging.critical('Filtering config(nicks) is not supported in '
-                             'CompareConfigsReport. Use the parameter '
-                             '"compared_configs" to define which configs are shown '
-                             'and in what order they should appear.')
+        if 'filter_algorithm' in kwargs:
+            logging.critical(
+                'Filtering algorithms is not supported by '
+                'CompareConfigsReport. Use the parameter '
+                '"compared_configs" to define which algorithms are '
+                'shown and in what order they should appear.')
         if compared_configs:
-            configs = set()
-            for t in compared_configs:
-                for config in t[0:2]:
-                    configs.add(config)
-            kwargs['filter_config'] = configs
+            algos = set()
+            for tup in compared_configs:
+                for config in tup[:2]:
+                    algos.add(config)
+            kwargs['filter_algorithm'] = algos
         AbsoluteReport.__init__(self, **kwargs)
         self._compared_configs = compared_configs
 
@@ -68,8 +71,8 @@ class CompareConfigsReport(AbsoluteReport):
         return self._compared_configs
 
     def _get_empty_table(self, attribute=None, title=None, columns=None):
-        table = AbsoluteReport._get_empty_table(self, attribute=attribute,
-                                                title=title, columns=columns)
+        table = AbsoluteReport._get_empty_table(
+            self, attribute=attribute, title=title, columns=columns)
         summary_functions = [sum, reports.avg]
         if title == 'summary':
             summary_functions = []

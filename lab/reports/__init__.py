@@ -114,7 +114,7 @@ class Attribute(str):
 
         * *absolute*: If False, only include tasks for which all task runs have
           values in a domain-wise table (e.g. ``coverage`` is absolute, whereas
-          ``expansions`` is not, because we can't compare configurations A and B
+          ``expansions`` is not, because we can't compare algorithms A and B
           for task X if B has no value for ``expansions``).
         * *min_wins*: Set to True if a smaller value for this attribute is
           better and to False otherwise (e.g. for ``coverage`` *min_wins* is
@@ -193,30 +193,30 @@ class Report(object):
             report = Report(filter_coverage=1)
             report(path_to_eval_dir, 'myreport.html')
 
-        Only include runs in the report where the time score is better than the
-        memory score::
+        Only include runs in the report where the time score is better
+        than the memory score::
 
             def better_time_than_memory_score(run):
                 return run['score_search_time'] > run['score_memory']
             report = Report(filter=better_time_than_memory_score)
             report(path_to_eval_dir, 'myreport.html')
 
-        Filter function that filters and renames configs with additional sorting::
+        Rename, filter and sort algorithms::
 
-            def rename_configs(run):
-                config = run['config'].replace('WORK-', '')
-                paper_names = {'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1',
-                               'fdss_sat2': 'FDSS 2'}
-                run['config'] = paper_names.get(config, 'unknown')
+            def rename_algorithms(run):
+                name = run['algorithm']
+                paper_names = {
+                    'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1'}
+                run['algorithm'] = paper_names[name]
                 return run
 
             # We want LAMA 2011 to be the leftmost column.
             # Filters defined with key word arguments are evaluated last,
-            # so we use the updated config names here.
-            configs = ['LAMA 2011', 'FDSS 1', 'FDSS 2']
-            Report(filter=rename_configs, filter_config=configs)
+            # so we use the updated algorithm names here.
+            algorithms = ['LAMA 2011', 'FDSS 1']
+            Report(filter=rename_algorithms, filter_algorithm=algorithms)
 
-        Filter function that only allows runs with a timeout in one of two domains::
+        Only allow runs with a timeout in one of two domains::
 
             report = Report(attributes=['coverage'],
                             filter_domain=['blocks', 'barman'],
@@ -344,7 +344,7 @@ class Report(object):
             'No tables were generated. '
             'This happens when no significant changes occured or '
             'if for all attributes and all problems never all '
-            'configs had a value for this attribute in a '
+            'algorithms had a value for this attribute in a '
             'domain-wise report.')
 
         doc.add_text(text)
