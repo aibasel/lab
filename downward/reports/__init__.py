@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module that permits generating downward reports by reading properties files
+Module that permits generating downward reports by reading properties files.
 """
 
 from __future__ import with_statement, division
@@ -45,7 +45,7 @@ def quality(problem_runs):
             quality = 1.0
         else:
             quality = min_cost / cost
-        run['quality'] = round(quality, 4)
+        run['quality'] = quality
 
 
 class PlanningReport(Report):

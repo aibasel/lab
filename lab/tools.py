@@ -19,7 +19,6 @@ import argparse
 import colorsys
 import functools
 import logging
-from numbers import Number
 import os
 import re
 import shutil
@@ -116,7 +115,7 @@ def remove_none_values(func):
         values = [val for val in values if val is not None]
         if not values:
             return None
-        return round(func(values), 4)
+        return func(values)
     return new_func
 
 
@@ -436,9 +435,7 @@ def get_colors(cells, min_wins):
 
     for col, val in cells.items():
         if val is not None:
-            val = round(val, 2)
             if diff == 0:
-                assert val - min_value == 0, (val, min_value)
                 fraction = 0
             else:
                 fraction = (val - min_value) / diff
@@ -449,10 +446,11 @@ def get_colors(cells, min_wins):
 def get_min_max(items):
     """Return min and max of all values in *items* that are not None.
 
-    Floats are rounded to two decimal places. If no maximum and minimum is
-    defined (e.g. all values None) None is returned for both min and max.
+    If no maximum and minimum is defined (i.e., when all values are
+    None), return (None, None).
+
     """
-    numbers = [round(val, 2) for val in items if isinstance(val, Number)]
+    numbers = [val for val in items if val is not None]
     if numbers:
         return min(numbers), max(numbers)
     else:

@@ -39,7 +39,7 @@ from lab.reports.markup import Document, ESCAPE_WORDBREAK
 def prod(values):
     """Computes the product of a list of numbers.
 
-    >>> print prod([2, 3, 7])
+    >>> round(prod([2, 3, 7]), 2)
     42.0
     """
     prod = 1
@@ -55,18 +55,18 @@ def avg(values):
     >>> avg([20, 30, 70])
     40.0
     """
-    return round(math.fsum(values) / len(values), 4)
+    return math.fsum(values) / len(values)
 
 
 @tools.remove_none_values
 def gm(values):
     """Compute the geometric mean of a list of numbers.
 
-    >>> gm([2, 8])
+    >>> round(gm([2, 8]), 2)
     4.0
     """
     exp = 1.0 / len(values)
-    return round(prod([val ** exp for val in values]), 4)
+    return prod([val ** exp for val in values])
 
 
 @tools.remove_none_values

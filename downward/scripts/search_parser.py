@@ -273,7 +273,7 @@ def scores(content, props):
         raw_score = math.log(value) - math.log(max_bound)
         best_raw_score = math.log(min_bound) - math.log(max_bound)
         score = min_score + (1 - min_score) * (raw_score / best_raw_score)
-        return round(score * 100, 2)
+        return score * 100
 
     # Maximum memory in KB
     max_memory = get_memory_limit_in_kb(props)
