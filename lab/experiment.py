@@ -29,7 +29,6 @@ from lab.fetcher import Fetcher
 from lab.steps import Step, get_step, get_steps_text
 
 
-DEFAULT_ABORT_ON_FAILURE = False
 # How many tasks to group into one top-level directory.
 SHARD_SIZE = 100
 
@@ -145,10 +144,6 @@ class _Buildable(object):
         the executable.
 
         Keyword arguments and default values:
-
-        *abort_on_failure=False*: If set to True and *command* does
-        not exit with code 0, subsequent commands of this run are
-        not executed.
 
         *time_limit=None*: Abort *command* after *time_limit* seconds.
 
@@ -567,10 +562,7 @@ class Run(_Buildable):
         run_script = pkgutil.get_data('lab', 'data/run-template.py')
 
         def make_call(name, cmd, kwargs):
-            abort_on_failure = kwargs.pop('abort_on_failure',
-                                          DEFAULT_ABORT_ON_FAILURE)
-
-            # Support running globally installed binaries
+            # Support running globally installed binaries.
             def format_arg(arg):
                 return arg if arg in env_vars else '"%s"' % arg
 
@@ -590,10 +582,6 @@ class Run(_Buildable):
             call = ('retcode = Call(%s, name="%s", **redirects).wait()\n'
                     'save_returncode("%s", retcode)\n' %
                     (', '.join(parts), name, name))
-            if abort_on_failure:
-                call += ('if not retcode == 0:\n'
-                         '    print_(driver_err, "%s returned %%s" %% retcode)\n'
-                         '    sys.exit(1)\n' % name)
             return call
 
         calls_text = '\n'.join(make_call(name, cmd, kwargs)
