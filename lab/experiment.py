@@ -152,7 +152,7 @@ class _Buildable(object):
 
         *time_limit=None*: Abort *command* after *time_limit* seconds.
 
-        *mem_limit=None*: Allow *command* to use at most *mem_limit* MiB.
+        *memory_limit=None*: Allow *command* to use at most *memory_limit* MiB.
 
         All other items in *kwargs* are passed to
         `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
@@ -237,11 +237,12 @@ class Experiment(_Buildable):
         provided by :ref:`Environment <environments>` *environment*. If
         *environment* is None, ``LocalEnvironment`` is used (default).
 
-        Lab will use the *cache_dir* for storing temporary files.
-        In case you run :py:class:`Fast Downward experiments
-        <downward.experiments.DownwardExperiment>` this directory can become
-        very large (tens of GB) since it is used to cache revisions and
-        preprocessed tasks. By default *cache_dir* points to ``~/lab``.
+        Lab will use the *cache_dir* for storing temporary files. In
+        case you run :py:class:`Fast Downward experiments
+        <downward.experiments.DownwardExperiment>` this directory can
+        become very large since it is used to cache Fast Downward
+        revisions (each revision uses about 30 MB). By default
+        *cache_dir* points to ``~/lab``.
 
         An experiment consists of multiple steps. Every experiment will need at
         least the following steps:

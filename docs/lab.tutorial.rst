@@ -19,11 +19,11 @@ at ``examples/simple/simple-exp.py``. You can see the available steps with ::
     ./simple-exp.py
 
 
-Run the individual steps with ::
+Select steps by name or index::
 
-    ./simple-exp.py 1
-    ./simple-exp.py {2..4}
-    ./simple-exp.py zip-exp-dir
+    ./simple-exp.py build
+    ./simple-exp.py 2
+    ./simple-exp.py 3 4
 
 
 You can use this file as a basis for your own experiments.
