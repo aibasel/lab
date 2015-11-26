@@ -413,8 +413,8 @@ class Experiment(_Buildable):
     def add_run(self, run=None):
         """Schedule *run* to be part of the experiment.
 
-        If *run* is None, create a new run, add it to the experiment and return
-        it.
+        If *run* is None, create a new run, add it to the experiment
+        and return it.
 
         """
         run = run or Run(self)
@@ -522,23 +522,23 @@ class Experiment(_Buildable):
 
 class Run(_Buildable):
     """
-    An experiment consists of one or multiple runs. If you run various
-    algrithms on a set of benchmarks, there should be one run for each
-    (algorithm, benchmark) pair.
+    An experiment consists of multiple runs. There should be one run
+    for each (algorithm, benchmark) pair.
 
     A run consists of one or more commands.
     """
     def __init__(self, experiment):
+        """
+        *experiment* is a lab :py:class:`Experiment
+        <lab.experiment.Experiment>` object.
+        """
         _Buildable.__init__(self)
         self.experiment = experiment
 
         self.path = ''
 
     def build(self):
-        """
-        After having made all the necessary adjustments with the methods above,
-        this method can be used to write everything to the disk.
-        """
+        """Write the run's files to disk."""
         assert self.path
         tools.overwrite_dir(self.path)
 
@@ -606,7 +606,7 @@ class Run(_Buildable):
                     filename = self._get_rel_path(filename)
                 env_vars_text += ('%s = "%s"\n' % (var, filename))
         else:
-            env_vars_text = '"Here you would find variable declarations"'
+            env_vars_text = '"Placeholder for resource names"'
 
         for old, new in [('VARIABLES', env_vars_text), ('CALLS', calls_text)]:
             run_script = run_script.replace('"""%s"""' % old, new)
@@ -619,7 +619,7 @@ class Run(_Buildable):
         if run_id is None:
             logging.critical('Each run must have an id')
         if not isinstance(run_id, (list, tuple)):
-            logging.critical('id must be a list, but %s is not' % run_id)
+            logging.critical('id must be a list: {}'.format(run_id))
         run_id = [str(item) for item in run_id]
         self.properties['id'] = run_id
         # Save the id as a string as well to allow for easier grepping
