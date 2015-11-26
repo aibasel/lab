@@ -171,8 +171,9 @@ class _Buildable(object):
             logging.critical('%s is not a list' % command)
         if not command:
             logging.critical('command "%s" cannot be empty' % name)
-        # TODO: Replace by proper name check.
-        name = name.replace(' ', '_')
+        if '"' in name:
+            logging.critical(
+                'command name mustn\'t contain double-quotes: {}'.format(name))
         if name in self.commands:
             logging.critical('a command named "%s" has already been added' % name)
         kwargs['time_limit'] = time_limit
