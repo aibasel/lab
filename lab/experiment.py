@@ -131,7 +131,7 @@ class _Buildable(object):
             self.env_vars_relative[name] = dest
         self.new_files.append((dest, content, permissions))
 
-    def add_command(self, name, command, **kwargs):
+    def add_command(self, name, command, time_limit=None, memory_limit=None, **kwargs):
         """Call an executable.
 
         If invoked on a *run*, this method adds the command to the
@@ -143,11 +143,9 @@ class _Buildable(object):
         *command* has to be a list of strings where the first item is
         the executable.
 
-        Keyword arguments and default values:
-
-        *time_limit=None*: Abort *command* after *time_limit* seconds.
-
-        *memory_limit=None*: Allow *command* to use at most *memory_limit* MiB.
+        The command is aborted after *time_limit* seconds or when it
+        uses more than *memory_limit* MiB. By default no limits are
+        enforced.
 
         All other items in *kwargs* are passed to
         `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
@@ -171,9 +169,12 @@ class _Buildable(object):
             logging.critical('%s is not a list' % command)
         if not command:
             logging.critical('command "%s" cannot be empty' % name)
+        # TODO: Replace by proper name check.
         name = name.replace(' ', '_')
         if name in self.commands:
             logging.critical('a command named "%s" has already been added' % name)
+        kwargs['time_limit'] = time_limit
+        kwargs['memory_limit'] = memory_limit
         self.commands[name] = (command, kwargs)
 
     @property
