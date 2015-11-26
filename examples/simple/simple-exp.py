@@ -35,7 +35,6 @@ run = exp.add_run()
 run.add_command('list-dir', ['ls', '-l'])
 # Every run has to have an id in the form of a list.
 run.set_property('id', ['current-dir'])
-run.require_resource('SIMPLE_PARSER')
 run.add_command('parse', ['SIMPLE_PARSER'])
 
 # Make a default report.

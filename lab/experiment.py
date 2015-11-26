@@ -101,7 +101,6 @@ class _Buildable(object):
         includes "planner" in the experiment directory. The name "PLANNER" can
         be used to reference it in a run's commands::
 
-            run.require_resource('PLANNER')
             run.add_resource('DOMAIN', 'benchmarks/gripper/domain.pddl')
             run.add_resource('PROBLEM', 'benchmarks/gripper/prob01.pddl')
             run.add_command('find-plan', ['PLANNER', 'DOMAIN', 'PROBLEM'])
@@ -531,22 +530,6 @@ class Run(_Buildable):
         self.experiment = experiment
 
         self.path = ''
-        self.linked_resources = []
-
-    def require_resource(self, resource_name):
-        """Make *resource_name* available for this run.
-
-        In environments like the argo cluster, this implies
-        copying the resource into each run. For other environments, we merely
-        need to set up the PLANNER environment variable.
-
-        Currently, this method is not needed, because we always make all aliases
-        available for the commands and the argo cluster is not yet supported. ::
-
-            run.require_resource('PLANNER')
-
-        """
-        self.linked_resources.append(resource_name)
 
     def build(self):
         """
@@ -556,12 +539,8 @@ class Run(_Buildable):
         assert self.path
         tools.overwrite_dir(self.path)
 
-        # We need to build the linked resources before the run script.
-        # Only this way we have all resources in self.resources
-        # (linked ones too).
-        # We need to build the run script before the resources, because the run
-        # script is a resource.
-        self._build_linked_resources()
+        # We need to build the run script before the resources, because
+        # the run script is added as a resource.
         self._build_run_script()
         self._build_resources()
         self._build_properties_file()
@@ -630,13 +609,6 @@ class Run(_Buildable):
             run_script = run_script.replace('"""%s"""' % old, new)
 
         self.add_new_file('', 'run', run_script, permissions=0o755)
-
-    def _build_linked_resources(self):
-        """
-        If we are building an argo experiment, add all linked resources to
-        the resources list.
-        """
-        self.experiment.environment.build_linked_resources(self)
 
     def _build_properties_file(self):
         # Check correctness of id property
