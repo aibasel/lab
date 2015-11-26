@@ -47,8 +47,7 @@ class Environment(object):
     def write_main_script(self):
         raise NotImplementedError
 
-    # TODO: Rename to run_exp().
-    def start_exp(self):
+    def run_experiment(self):
         """
         Run main experiment step.
         """
@@ -89,7 +88,7 @@ class LocalEnvironment(Environment):
 
         self.exp.add_new_file('', self.main_script_file, script, permissions=0o755)
 
-    def start_exp(self):
+    def run_experiment(self):
         tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)
 
     def run_steps(self, steps):
@@ -163,7 +162,7 @@ class OracleGridEngineEnvironment(Environment):
         self.randomize_task_order = randomize_task_order
         self.extra_options = extra_options or '## (not used)'
 
-    def start_exp(self):
+    def run_experiment(self):
         # The queue will start the experiment by itself.
         pass
 

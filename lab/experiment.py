@@ -437,11 +437,13 @@ class Experiment(_Buildable):
             environments.LocalEnvironment().run_steps(steps)
 
     def run(self):
-        """Start the experiment by running all runs that were added to it.
+        """Execute all runs that were added to the experiment.
 
-        Depending on the selected environment this may start the runs locally
-        or on a computer cluster."""
-        self.environment.start_exp()
+        Depending on the selected environment this method will start
+        the runs locally or on a computer cluster.
+
+        """
+        self.environment.run_experiment()
 
     def build(self, dry_run=False):
         """Apply all actions to the filesystem."""
