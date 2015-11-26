@@ -53,16 +53,6 @@
 .. autoclass:: lab.environments.MaiaEnvironment
 
 
-.. _parser:
-
-:class:`Parser` -- Parse log output
------------------------------------
-
-.. autoclass:: lab.parser.Parser
-   :members:
-   :undoc-members:
-
-
 Various
 -------
 

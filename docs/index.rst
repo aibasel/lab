@@ -16,6 +16,7 @@ also facilitates parsing results and creating reports.
    :maxdepth: 1
 
    lab.experiment
+   lab.parser
    lab.reports
 
 
