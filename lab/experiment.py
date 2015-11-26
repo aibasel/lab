@@ -546,6 +546,7 @@ class Run(_Buildable):
         # the run script is added as a resource.
         self._build_run_script()
         self._build_resources()
+        self._check_id()
         self._build_properties_file()
 
     def _build_run_script(self):
@@ -613,15 +614,12 @@ class Run(_Buildable):
 
         self.add_new_file('', 'run', run_script, permissions=0o755)
 
-    def _build_properties_file(self):
-        # Check correctness of id property
+    def _check_id(self):
         run_id = self.properties.get('id')
         if run_id is None:
             logging.critical('Each run must have an id')
         if not isinstance(run_id, (list, tuple)):
             logging.critical('id must be a list: {}'.format(run_id))
-        run_id = [str(item) for item in run_id]
-        self.properties['id'] = run_id
-        # Save the id as a string as well to allow for easier grepping
-        self.properties['id_string'] = ':'.join(run_id)
-        _Buildable._build_properties_file(self)
+        for id_part in run_id:
+            if not isinstance(id_part, basestring):
+                logging.critical('run IDs must be a list of strings: {}'.format(run_id))

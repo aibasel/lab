@@ -101,11 +101,7 @@ class FastDownwardRun(Run):
         self.set_property(
             'planner_type', 'portfolio' if self._is_portfolio() else 'single')
 
-        self._save_id([self.algo.name, self.task.domain, self.task.problem])
-
-    def _save_id(self, run_id):
-        self.set_property('id', run_id)
-        self.set_property('id_string', ':'.join(run_id))
+        self.set_property('id', [self.algo.name, self.task.domain, self.task.problem])
 
     def _is_portfolio(self):
         built_in = [
