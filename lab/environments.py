@@ -118,10 +118,10 @@ class OracleGridEngineEnvironment(Environment):
 
             For correct sequential execution, this class writes job
             files to the experiment directory and makes them depend on
-            one another. The driver.{log,err} files in this directory
-            can be inspected if something goes wrong. Since the job
-            files call the experiment script during execution, it
-            mustn't be changed during the experiment.
+            one another. The driver.log and driver.err files in this
+            directory can be inspected if something goes wrong. Since
+            the job files call the experiment script during execution,
+            it mustn't be changed during the experiment.
 
         *queue* must be a valid queue name on the grid.
 
@@ -139,10 +139,11 @@ class OracleGridEngineEnvironment(Environment):
         directories may be pristine while the experiment is running
         even though the grid engine marks the runs as finished.
 
-        Use *extra_options* to pass additional options. Example that
+        Use *extra_options* to pass additional options. The
+        *extra_options* string may contain newlines. Example that
         allocates 16 cores per run on maia::
 
-            MaiaEnvironment(extra_options='#$ -pe smp 16')
+            extra_options='#$ -pe smp 16'
 
         """
         Environment.__init__(self)

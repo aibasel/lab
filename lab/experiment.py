@@ -149,8 +149,8 @@ class _Buildable(object):
 
         All *kwargs* are passed to `subprocess.Popen
         <http://docs.python.org/library/subprocess.html>`_. Instead of
-        file handles you can also pass filenames for the `stdin`,
-        `stdout` and `stderr` keyword arguments.
+        file handles you can also pass filenames for the ``stdin``,
+        ``stdout`` and ``stderr`` keyword arguments.
 
         Examples::
 
@@ -282,7 +282,7 @@ class Experiment(_Buildable):
 
     @property
     def name(self):
-        """Return the directory name of the experiment's path."""
+        """Return the directory name of the experiment's ``path``."""
         return os.path.basename(self.path)
 
     @property
@@ -303,18 +303,18 @@ class Experiment(_Buildable):
     def add_step(self, name, function, *args, **kwargs):
         """Add a step to the list of experiment steps.
 
-        Use ``add_step()`` to add **custom** experiment steps like
+        Use this method to add **custom** experiment steps like
         removing directories and publishing results. To add fetch and
         report steps, use the convenience methods ``add_fetcher()`` and
         ``add_report()``.
 
         *name* is a descriptive name for the step.
 
-        *function* is a callable Python object, i.e. a function or a
-        class implementing __call__.
+        *function* must be a callable Python object, e.g., a function
+        or a class implementing `__call__`.
 
-        *args* and *kwargs* will be passed to the *function* when it is
-        called.
+        *args* and *kwargs* will be passed to the *function* when the
+        step is executed.
 
         >>> import shutil
         >>> import subprocess
@@ -449,11 +449,19 @@ class Experiment(_Buildable):
         Depending on the selected environment this method will start
         the runs locally or on a computer cluster.
 
+        By default, the second experiment step calls this method. You
+        don't have to call it manually.
+
         """
         self.environment.run_experiment()
 
     def build(self, dry_run=False):
-        """Apply all actions to the filesystem."""
+        """Write all files needed for the experiment to disk.
+
+        By default, the first experiment step calls this method. You
+        don't have to call it manually.
+
+        """
         self._create_exp_dir()
         self._clean_exp_dir()
 
@@ -544,7 +552,11 @@ class Run(_Buildable):
         self.path = ''
 
     def build(self):
-        """Write the run's files to disk."""
+        """Write the run's files to disk.
+
+        This method is called automatically by the experiment.
+
+        """
         assert self.path
         tools.overwrite_dir(self.path)
 
