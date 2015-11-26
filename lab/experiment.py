@@ -147,10 +147,10 @@ class _Buildable(object):
         uses more than *memory_limit* MiB. By default no limits are
         enforced.
 
-        All other items in *kwargs* are passed to `subprocess.Popen
-        <http://docs.python.org/library/subprocess.html>`_. If `stdin`,
-        `stdout` or `stderr` are given as strings, we will open the
-        corresponding file before dispatching to the subprocess call.
+        All *kwargs* are passed to `subprocess.Popen
+        <http://docs.python.org/library/subprocess.html>`_. Instead of
+        file handles you can also pass filenames for the `stdin`,
+        `stdout` and `stderr` keyword arguments.
 
         Examples::
 
@@ -402,6 +402,12 @@ class Experiment(_Buildable):
         If *outfile* is omitted, compose a filename from *name* and the
         *report*'s format. If *outfile* is a relative path, put it under
         *eval_dir*.
+
+        ::
+
+            from downward.reports.absolute import AbsoluteReport
+            exp.add_report(AbsoluteReport(attributes=["coverage"]))
+
         """
         name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
         eval_dir = eval_dir or self.eval_dir
