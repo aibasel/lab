@@ -147,8 +147,10 @@ class _Buildable(object):
         uses more than *memory_limit* MiB. By default no limits are
         enforced.
 
-        All other items in *kwargs* are passed to
-        `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
+        All other items in *kwargs* are passed to `subprocess.Popen
+        <http://docs.python.org/library/subprocess.html>`_. If `stdin`,
+        `stdout` or `stderr` are given as strings, we will open the
+        corresponding file before dispatching to the subprocess call.
 
         Examples::
 
