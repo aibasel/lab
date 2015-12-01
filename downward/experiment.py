@@ -155,10 +155,9 @@ class FastDownwardExperiment(Experiment):
         ``<scriptdir>/data/``. Compiled Fast Downward revisions are
         cached under ``<cache_dir>/revision-cache/``.
 
-        Example::
-
-            env = MaiaEnvironment(priority=-2)
-            exp = FastDownwardExperiment(environment=env)
+        >>> from lab.environments import MaiaEnvironment
+        >>> env = MaiaEnvironment(priority=-2)
+        >>> exp = FastDownwardExperiment(environment=env)
 
         """
         path = path or _get_default_experiment_dir()
@@ -184,19 +183,21 @@ class FastDownwardExperiment(Experiment):
         must contain domain directories, which in turn hold PDDL files.
 
         *suite* can either be a string or a list of strings. The
-        strings can be tasks or domains. ::
+        strings can be tasks or domains.
 
-            benchmarks_dir = os.path.join(myrepo, "benchmarks")
-            exp.add_suite("gripper:prob01.pddl", benchmarks_dir)
-            exp.add_suite("gripper", benchmarks_dir)
-            exp.add_suite(
-                ["miconic", "trucks", "grid", "gripper:prob01.pddl"],
-                benchmarks_dir)
+        >>> repo = os.path.expanduser('~/projects/Downward/downward')
+        >>> benchmarks_dir = os.path.join(repo, "benchmarks")
+        >>> exp = FastDownwardExperiment()
+        >>> exp.add_suite(benchmarks_dir, "gripper:prob01.pddl")
+        >>> exp.add_suite(benchmarks_dir, "gripper")
+        >>> exp.add_suite(
+        ...     benchmarks_dir,
+        ...     ["miconic", "trucks", "grid", "gripper:prob01.pddl"])
 
         There are some predefined suites in ``suites.py``. ::
 
-            exp.add_suite(suites.suite_strips(), benchmarks_dir)
-            exp.add_suite(suites.suite_ipc_all(), benchmarks_dir)
+        >>> exp.add_suite(benchmarks_dir, suites.suite_all())
+        >>> exp.add_suite(benchmarks_dir, suites.suite_optimal())
 
         """
         if isinstance(suite, basestring):
@@ -244,32 +245,39 @@ class FastDownwardExperiment(Experiment):
         "--search-memory-limit', "2G"]``. Specifying custom limits will
         override these default limits.
 
-        Examples::
+        Example experiment setup:
 
-            # Test iPDB in the latest revision on the default branch.
-            exp.add_algorithm(
-                "ipdb", "path/to/repo", "default",
-                ["--search", "astar(ipdb())"])
+        >>> import os.path
+        >>> exp = FastDownwardExperiment()
+        >>> repo = os.path.expanduser("~/projects/Downward/downward")
 
-            # Test LM-cut in an issue experiment.
-            exp.add_algorithm(
-                "issue123-v1-lmcut", "path/to/repo", "issue123-v1",
-                ["--search", "astar(lmcut())"])
+        Test iPDB in the latest revision on the default branch:
 
-            # Run blind search in debug mode.
-            exp.add_algorithm(
-                "blind", "path/to/repo", "default",
-                ["--search", "astar(blind())"],
-                build_options=["--debug"],
-                driver_options=["--debug"])
+        >>> exp.add_algorithm(
+        ...     "ipdb", repo, "default", ["--search", "astar(ipdb())"])
 
-            # Run LAMA-2011 with custom search time limit.
-            exp.add_algorithm(
-                "lama", "path/to/repo", "default",
-                [],
-                driver_options=[
-                    "--alias", "seq-saq-lama-2011",
-                    "--search-time-limit", "5m"])
+        Test LM-Cut in an issue experiment:
+
+        >>> exp.add_algorithm(
+        ...     "issue123-v1-lmcut", repo, "issue123-v1",
+        ...     ["--search", "astar(lmcut())"])
+
+        Run blind search in debug mode:
+
+        >>> exp.add_algorithm(
+        ...     "blind", repo, "default",
+        ...     ["--search", "astar(blind())"],
+        ...     build_options=["--debug"],
+        ...     driver_options=["--debug"])
+
+        Run LAMA-2011 with custom search time limit:
+
+        >>> exp.add_algorithm(
+        ...     "lama", repo, "default",
+        ...     [],
+        ...     driver_options=[
+        ...         "--alias", "seq-saq-lama-2011",
+        ...         "--search-time-limit", "5m"])
 
         """
         if not isinstance(name, basestring):

@@ -39,6 +39,7 @@ py.test tests
 # Run doctests.
 cd lab
 python -m doctest reports/__init__.py experiment.py tools.py
+python -m doctest downward/experiment.py
 cd ..
 cd downward
 python -m doctest downward/suites.py
