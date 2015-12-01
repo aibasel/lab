@@ -24,11 +24,11 @@ from lab import tools
 
 
 class _Pattern(object):
-    def __init__(self, attribute, regex, group, required, type_, flags):
+    def __init__(self, attribute, regex, required, type_, flags):
         self.attribute = attribute
-        self.group = group
         self.type_ = type_
         self.required = required
+        self.group = 1
 
         flag = 0
 
@@ -45,6 +45,8 @@ class _Pattern(object):
                 flag |= re.U
             elif char == 'X':
                 flag |= re.X
+            else:
+                logging.critical('Unknown regex flag: {}'.format(char))
 
         self.regex = re.compile(regex, flag)
 
@@ -140,19 +142,23 @@ class Parser(object):
         self.props = tools.Properties(filename=prop_file)
 
     def add_pattern(
-            self, name, regex, group=1, file='run.log', required=True,
+            self, attribute, regex, file='run.log', required=True,
             type=int, flags=''):
         """
-        Look for *regex* in *file* and add what is found in *group* to
-        the properties dictionary under *name*. During runtime roughly
-        the following code will be executed::
+        Look for *regex* in *file*, cast what is found in brackets to
+        *type* and store it in the properties dictionary under
+        *attribute*. During parsing roughly the following code will be
+        executed::
 
             contents = open(file).read()
             match = re.compile(regex).search(contents)
-            properties[name] = type(match.group(group))
+            properties[attribute] = type(match.group(1))
 
-        If *required* is True and the pattern is not found in file, an
-        error message is printed.
+        If *required* is True and the pattern is not found in *file*,
+        an error message is printed.
+
+        If given, *flags* must be a string of Python regular expression
+        flags (e.g. ``flags='UM'``).
 
         >>> parser = Parser()
         >>> parser.add_pattern('variables', r'Variables: (\d+)')
@@ -162,7 +168,7 @@ class Parser(object):
             logging.warning('Casting any non-empty string to boolean will always '
                             'evaluate to true. Are you sure you want to use type=bool?')
         self.file_parsers[file].add_pattern(
-            _Pattern(name, regex, group, required, type, flags))
+            _Pattern(attribute, regex, required, type, flags))
 
     def add_function(self, function, file='run.log'):
         """Call ``function(open(file), properties)`` during parsing.
