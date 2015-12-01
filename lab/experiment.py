@@ -359,26 +359,28 @@ class Experiment(_Buildable):
         option is useful if you forgot to parse some attributes during
         the experiment.
 
-        Examples:
+        Example setup:
+
+        >>> exp = Experiment('/tmp/exp')
 
         Fetch all results and write a single combined properties file
         to the default evaluation directory (this step is added by
-        default)::
+        default):
 
-            exp.add_fetcher(name='fetch')
+        >>> exp.add_fetcher(name='fetch')
 
         Merge the results from "other-exp" into this experiment's
-        results::
+        results:
 
-            exp.add_fetcher(src='/path/to/other-exp-eval')
+        >>> exp.add_fetcher(src='/path/to/other-exp-eval')
 
-        Fetch only the runs for certain algorithms::
+        Fetch only the runs for certain algorithms:
 
-            exp.add_fetcher(filter_algorithm=['algo_1', 'algo_5'])
+        >>> exp.add_fetcher(filter_algorithm=['algo_1', 'algo_5'])
 
-        Parse additional attributes::
+        Parse additional attributes:
 
-            exp.add_fetcher(parsers=['path/to/myparser.py'])
+        >>> exp.add_fetcher(parsers=['path/to/myparser.py'])
 
         """
         src = src or self.path
@@ -403,10 +405,9 @@ class Experiment(_Buildable):
         *report*'s format. If *outfile* is a relative path, put it under
         *eval_dir*.
 
-        ::
-
-            from downward.reports.absolute import AbsoluteReport
-            exp.add_report(AbsoluteReport(attributes=["coverage"]))
+        >>> from downward.reports.absolute import AbsoluteReport
+        >>> exp = Experiment("/tmp/exp")
+        >>> exp.add_report(AbsoluteReport(attributes=["coverage"]))
 
         """
         name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
