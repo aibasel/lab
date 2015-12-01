@@ -28,7 +28,8 @@ example:
 
 .. literalinclude:: ../examples/simple/simple-parser.py
 
-You can add your parser to a run by using ``run.add_command()``::
+You can add your parser to a run by using :py:func:`add_command
+<lab.experiment.Run.add_command>`::
 
     run.add_command('solve', ['path/to/my-solver', 'path/to/benchmark'])
     run.add_command('parse-output', ['path/to/my-parser.py'])
@@ -39,8 +40,8 @@ solver.
 A single run can have multiple parsing commands.
 
 Instead of adding a parser to individual runs, you can use
-``exp.add_command`` to append your parser to the list of commands of
-each run.
+:py:func:`add_command <lab.experiment.Experiment.add_command>` to
+append your parser to the list of commands of each run.
 
 """
 
@@ -151,8 +152,8 @@ class Parser(object):
         self.props = tools.Properties(filename=prop_file)
 
     def add_pattern(
-            self, attribute, regex, file='run.log', required=True,
-            type=int, flags=''):
+            self, attribute, regex, file='run.log', type=int, flags='',
+            required=True):
         """
         Look for *regex* in *file*, cast what is found in brackets to
         *type* and store it in the properties dictionary under
@@ -163,11 +164,11 @@ class Parser(object):
             match = re.compile(regex).search(contents)
             properties[attribute] = type(match.group(1))
 
-        If *required* is True and the pattern is not found in *file*,
-        an error message is printed.
-
         If given, *flags* must be a string of Python regular expression
         flags (e.g. ``flags='UM'``).
+
+        If *required* is True and the pattern is not found in *file*,
+        an error message is printed.
 
         >>> parser = Parser()
         >>> parser.add_pattern('variables', r'Variables: (\d+)')
@@ -183,8 +184,11 @@ class Parser(object):
         """Call ``function(open(file), properties)`` during parsing.
 
         Functions are applied **after** all patterns have been
-        evaluated. The function must directly manipulate the passed
-        properties dictionary *properties*.
+        evaluated.
+
+        The function is passed the file contents and the properties
+        dictionary. It must manipulate the passed properties
+        dictionary. The return value is ignored.
 
         Example:
 
