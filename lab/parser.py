@@ -15,6 +15,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Module for parsing logs and files.
+
+A parser can be any program that analyzes files in the run's
+directory (e.g. ``run.log``) and manipulates the ``properties``
+file in the same directory.
+
+To make parsing easier, however, you can use the ``Parser`` class.
+The parser ``examples/simple/simple-parser.py`` serves as an
+example:
+
+.. literalinclude:: ../examples/simple/simple-parser.py
+
+You can add your parser to a run by using ``run.add_command()``::
+
+    run.add_command('solve', ['path/to/my-solver', 'path/to/benchmark'])
+    run.add_command('parse-output', ['path/to/my-parser.py'])
+
+This calls ``my-parser.py`` in the run's directory after running the
+solver.
+
+A single run can have multiple parsing commands.
+
+Instead of adding a parser to individual runs, you can use
+``exp.add_command`` to append your parser to the list of commands of
+each run.
+
+"""
+
 import os
 import re
 from collections import defaultdict
@@ -112,26 +141,6 @@ class Parser(object):
     """
     Parse files in the current directory and write results into the
     run's ``properties`` file.
-
-    Parsing is done as just another run command. After the main command
-    has been added to the run, we can add the parsing command::
-
-        run.add_command('solve', ['path/to/my-solver', 'path/to/benchmark'])
-        run.add_command('parse-output', ['path/to/my-parser.py'])
-
-    This calls ``my-parser.py`` in the run's directory. In principle, a
-    parser can be any program that analyzes the files in the run's
-    directory (e.g. ``run.log``) and manipulates the ``properties``
-    file in the same directory.
-
-    To make parsing easier, however, you can use the ``Parser`` class.
-    The parser ``examples/simple/simple-parser.py`` serves as an
-    example:
-
-    .. literalinclude:: ../examples/simple/simple-parser.py
-
-    A single run can have multiple parsing commands.
-
     """
     def __init__(self):
         self.file_parsers = defaultdict(_FileParser)
@@ -204,7 +213,7 @@ class Parser(object):
                 file_parser.load_file(path)
             except (IOError, MemoryError) as err:
                 logging.error('File "%s" could not be read: %s' % (path, err))
-                self.props['error'] = 'unexplained-parser-failed-to-read-file'
+                self.props['error'] = 'unexplained-error:parser-failed-to-read-file'
             else:
                 # Subclasses directly modify the properties during parsing
                 file_parser.parse(self.props)

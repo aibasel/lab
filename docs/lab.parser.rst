@@ -1,8 +1,10 @@
 :mod:`lab.parser` --- Parse logs
 ================================
 
-.. module:: lab.parser
-.. _parser:
+.. automodule:: lab.parser
+
+Parser API
+----------
 
 .. autoclass:: lab.parser.Parser
    :members:
