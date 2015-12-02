@@ -246,6 +246,7 @@ class Experiment(_Buildable):
 
         In the "Run it" step all runs that have been added to the experiment
         will be executed. Each run consists of one or multiple commands.
+
         """
         _Buildable.__init__(self)
         self.path = os.path.abspath(path)
@@ -432,18 +433,6 @@ class Experiment(_Buildable):
     # TODO: Remove backwards compatibility.
     __call__ = run_steps
 
-    def run(self):
-        """Execute all runs that were added to the experiment.
-
-        Depending on the selected environment this method will start
-        the runs locally or on a computer cluster.
-
-        By default, the second experiment step calls this method. You
-        don't have to call it manually.
-
-        """
-        self.environment.run_experiment()
-
     def build(self, dry_run=False):
         """Write all files needed for the experiment to disk.
 
@@ -464,6 +453,18 @@ class Experiment(_Buildable):
         self._build_resources()
         self._build_runs()
         self._build_properties_file()
+
+    def run(self):
+        """Execute all runs that were added to the experiment.
+
+        Depending on the selected environment this method will start
+        the runs locally or on a computer cluster.
+
+        By default, the second experiment step calls this method. You
+        don't have to call it manually.
+
+        """
+        self.environment.run_experiment()
 
     def _create_exp_dir(self):
         logging.info('Exp Dir: "%s"' % self.path)
