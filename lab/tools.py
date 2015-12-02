@@ -40,7 +40,7 @@ except ImportError:
     import json
 
 
-LOG_LEVEL = None
+_LOG_LEVEL = None
 
 
 def get_script_path():
@@ -70,7 +70,7 @@ def setup_logging(level):
     for handler in root_logger.handlers:
         root_logger.removeHandler(handler)
 
-    # Handler which writes LOG_LEVEL messages or higher to stdout
+    # Handler which writes _LOG_LEVEL messages or higher to stdout
     console = ErrorAbortHandler(sys.stdout)
     # set a format which is simpler for console use
     format = '%(asctime)-s %(levelname)-8s %(message)s'
@@ -515,16 +515,16 @@ def get_parser(add_log_option=True, **kwargs):
 
 def parse_and_set_log_level():
     # Set log level only once.
-    global LOG_LEVEL
-    if LOG_LEVEL:
+    global _LOG_LEVEL
+    if _LOG_LEVEL:
         return
 
     parser = get_parser(add_help=False)
     args, remaining = parser.parse_known_args()
 
     if getattr(args, 'log_level', None):
-        LOG_LEVEL = getattr(logging, args.log_level.upper())
-        setup_logging(LOG_LEVEL)
+        _LOG_LEVEL = getattr(logging, args.log_level.upper())
+        setup_logging(_LOG_LEVEL)
 
 
 parse_and_set_log_level()
