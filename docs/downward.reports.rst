@@ -1,6 +1,9 @@
 :mod:`downward.reports` --- Fast Downward reports
 =================================================
 
+Tables
+------
+
 .. autoclass:: downward.reports.PlanningReport
 .. autoclass:: downward.reports.absolute.AbsoluteReport
 .. autoclass:: downward.reports.relative.RelativeReport

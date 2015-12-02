@@ -1,5 +1,5 @@
-:mod:`lab` --- Create experiments
-=================================
+:mod:`lab.experiment` --- Create experiments
+============================================
 
 .. module:: lab.experiment
 
