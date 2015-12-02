@@ -433,7 +433,7 @@ class Experiment(_Buildable):
     # TODO: Remove backwards compatibility.
     __call__ = run_steps
 
-    def build(self, dry_run=False):
+    def build(self):
         """Write all files needed for the experiment to disk.
 
         By default, the first experiment step calls this method. You
@@ -445,9 +445,6 @@ class Experiment(_Buildable):
 
         # Needed for building the main script.
         self._set_run_dirs()
-
-        if dry_run:
-            return
 
         self._build_main_script()
         self._build_resources()
