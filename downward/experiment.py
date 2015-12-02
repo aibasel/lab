@@ -153,7 +153,8 @@ class FastDownwardExperiment(Experiment):
 
         *cache_dir* is used to cache temporary data. It defaults to
         ``<scriptdir>/data/``. Compiled Fast Downward revisions are
-        cached under ``<cache_dir>/revision-cache/``.
+        cached under ``<cache_dir>/revision-cache/``. This directory can
+        become very large since each revision uses about 30 MB.
 
         >>> from lab.environments import MaiaEnvironment
         >>> env = MaiaEnvironment(priority=-2)
@@ -161,9 +162,11 @@ class FastDownwardExperiment(Experiment):
 
         """
         path = path or _get_default_experiment_dir()
+        Experiment.__init__(self, path, environment=environment)
+
         cache_dir = cache_dir or _get_default_data_dir()
-        Experiment.__init__(self, path, environment=environment, cache_dir=cache_dir)
-        self.revision_cache_dir = os.path.join(self.cache_dir, 'revision-cache')
+        tools.makedirs(cache_dir)
+        self.revision_cache_dir = os.path.join(cache_dir, 'revision-cache')
 
         self._suites = defaultdict(list)
 
