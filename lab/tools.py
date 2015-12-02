@@ -40,8 +40,6 @@ except ImportError:
     import json
 
 
-# TODO(v2.0): Use freedesktop specification.
-DEFAULT_USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
 LOG_LEVEL = None
 
 

@@ -31,7 +31,7 @@ if REMOTE:
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     ENV = LocalEnvironment(processes=4)
-CACHE_DIR = os.path.expanduser('~/lab/')
+CACHE_DIR = os.path.expanduser('~/lab')
 BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
 REV = 'tip'
 ATTRIBUTES = ['coverage']
