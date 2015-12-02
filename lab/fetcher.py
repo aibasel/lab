@@ -37,7 +37,7 @@ class Fetcher(object):
         is more convenient.
 
     """
-    def fetch_dir(self, run_dir, eval_dir, copy_all=False, run_filter=None, parsers=None):
+    def fetch_dir(self, run_dir, eval_dir, run_filter=None, parsers=None):
         run_filter = run_filter or tools.RunFilter()
         parsers = parsers or []
         # Allow specyfing a list of multiple parsers or a single parser.
@@ -59,15 +59,9 @@ class Fetcher(object):
         if not run_id:
             logging.critical('id is not set in %s.' % prop_file)
 
-        if copy_all:
-            dest_dir = os.path.join(eval_dir, *run_id)
-            tools.makedirs(dest_dir)
-            tools.fast_updatetree(run_dir, dest_dir, symlinks=True)
-
         return run_id, props
 
-    def __call__(self, src_dir, eval_dir=None, copy_all=False,
-                 filter=None, parsers=None, **kwargs):
+    def __call__(self, src_dir, eval_dir=None, filter=None, parsers=None, **kwargs):
         """
         This method can be used to copy properties from an exp-dir or
         eval-dir into an eval-dir. If the destination eval-dir already
@@ -111,8 +105,8 @@ class Fetcher(object):
         for index, run_dir in enumerate(run_dirs, start=1):
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, 'Scanning: %6d/%d' % (index, total_dirs))
-            run_id, props = self.fetch_dir(run_dir, eval_dir, copy_all=copy_all,
-                                           run_filter=run_filter, parsers=parsers)
+            run_id, props = self.fetch_dir(
+                run_dir, eval_dir, run_filter=run_filter, parsers=parsers)
             if props is None:
                 continue
 

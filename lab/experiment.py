@@ -317,9 +317,8 @@ class Experiment(_Buildable):
         """
         self.steps.append(Step(name, function, *args, **kwargs))
 
-    def add_fetcher(self, src=None, dest=None, name=None,
-                    copy_all=False, filter=None, parsers=None,
-                    **kwargs):
+    def add_fetcher(self, src=None, dest=None, name=None, filter=None,
+                    parsers=None, **kwargs):
         """
         Add a step that fetches results from experiment or evaluation
         directories into a new or existing evaluation directory.
@@ -335,10 +334,6 @@ class Experiment(_Buildable):
         data, the old and new data will be merged, not replaced.
 
         If no *name* is given, call this step "fetch-``basename(src)``".
-
-        If *copy_all* is True, copy all files from the run dirs to a
-        new directory tree at *eval_dir*. By default, only the combined
-        properties file is written do disk.
 
         You can fetch only a subset of runs (e.g., runs for specific
         domains or algorithms) by passing :py:class:`filters <.Report>`
@@ -378,8 +373,7 @@ class Experiment(_Buildable):
         dest = dest or self.eval_dir
         name = name or 'fetch-%s' % os.path.basename(src)
         self.add_step(
-            name, Fetcher(), src, dest, copy_all=copy_all,
-            filter=filter, parsers=parsers, **kwargs)
+            name, Fetcher(), src, dest, filter=filter, parsers=parsers, **kwargs)
 
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.

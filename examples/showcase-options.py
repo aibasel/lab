@@ -80,7 +80,7 @@ def eval_dir(num):
 
 
 exp.add_fetcher(
-    dest=eval_dir(1), name='fetcher-test1', copy_all=True)
+    dest=eval_dir(1), name='fetcher-test1', filter=only_two_algorithms)
 exp.add_fetcher(
     dest=eval_dir(2), name='fetcher-test2', filter_algorithm='lama11')
 exp.add_fetcher(
