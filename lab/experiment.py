@@ -413,7 +413,8 @@ class Experiment(_Buildable):
         self.runs.append(run)
         return run
 
-    def __call__(self):
+    def run_steps(self):
+        """Parse the commandline and run selected steps."""
         ARGPARSER.epilog = get_steps_text(self.steps)
         self.args = ARGPARSER.parse_args()
         if not self.args.steps and not self.args.run_all_steps:
@@ -428,6 +429,8 @@ class Experiment(_Buildable):
         else:
             env = environments.LocalEnvironment()
         env.run_steps(steps)
+    # TODO: Remove backwards compatibility.
+    __call__ = run_steps
 
     def run(self):
         """Execute all runs that were added to the experiment.

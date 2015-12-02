@@ -41,6 +41,7 @@
    :members:
    :undoc-members:
    :inherited-members:
+   :exclude-members: build
 
 
 .. _environments:
