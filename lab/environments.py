@@ -256,9 +256,10 @@ class OracleGridEngineEnvironment(Environment):
         pass
 
     def run_steps(self, steps):
-        prev_job_name = None
+        self.exp.build(write_to_disk=False)
         job_dir = self.exp.path
         tools.makedirs(job_dir)
+        prev_job_name = None
         for number, step in enumerate(steps, start=1):
             if is_run_step(step):
                 submitted_file = os.path.join(job_dir, 'submitted')
@@ -268,7 +269,7 @@ class OracleGridEngineEnvironment(Environment):
                         'experiment has already been submitted. Are you '
                         'sure you want to submit it again?' % submitted_file)
             job_name = self._get_job_name(step)
-            # We cannot submit jobs from within the grid, so we submit
+            # We can't submit jobs from within the grid, so we submit
             # them all at once with dependencies.
             with open(os.path.join(job_dir, job_name), 'w') as f:
                 f.write(self._get_job(step, is_last=(number == len(steps))))

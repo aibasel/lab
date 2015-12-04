@@ -433,18 +433,29 @@ class Experiment(_Buildable):
     # TODO: Remove backwards compatibility.
     __call__ = run_steps
 
-    def build(self):
-        """Write all files needed for the experiment to disk.
+    def build(self, write_to_disk=True):
+        """
+        Finalize the internal data structures, then write all files
+        needed for the experiment to disk.
+
+        If *write_to_disk* is False, only compute the internal data
+        structures. This is only needed internally for
+        FastDownwardExperiments on grids, where we need to turn the
+        added algorithms and benchmarks into Runs.
 
         By default, the first experiment step calls this method. You
         don't have to call it manually.
 
         """
-        self._create_exp_dir()
-        self._clean_exp_dir()
-
         # Needed for building the main script.
+        # TODO: Really needed?
         self._set_run_dirs()
+
+        if not write_to_disk:
+            return
+
+        self._create_exp_dir()
+        self._clean_exp_dir()  # TODO: Still needed?
 
         self._build_main_script()
         self._build_resources()
