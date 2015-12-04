@@ -5,17 +5,14 @@ import os
 import multiprocessing
 import subprocess
 
+from lab.experiment import get_run_dir
+
+
 # make sure we're in the run directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 num_tasks = """NUM_TASKS"""
-
-
-def get_run_dir(task_id):
-    lower = ((task_id - 1) / 100) * 100 + 1
-    upper = ((task_id + 99) / 100) * 100
-    return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
 
 
 def process_dir(task_id):

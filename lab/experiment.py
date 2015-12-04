@@ -44,6 +44,12 @@ steps_group.add_argument(
     help='Run all steps.')
 
 
+def get_run_dir(task_id):
+    lower = ((task_id - 1) / 100) * 100 + 1
+    upper = ((task_id + 99) / 100) * 100
+    return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
+
+
 class _Buildable(object):
     """Abstract base class for Experiment and Run."""
     def __init__(self):
@@ -539,6 +545,7 @@ class Run(_Buildable):
         _Buildable.__init__(self)
         self.experiment = experiment
 
+        # TODO: Don't store path member.
         self.path = None
 
     def build(self):
