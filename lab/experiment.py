@@ -452,9 +452,6 @@ class Experiment(_Buildable):
         self._create_exp_dir()
         self._clean_exp_dir()  # TODO: Still needed?
 
-        # Needed for building LocalEnvironment's main script.
-        self._set_run_dirs()
-
         self.environment.write_main_script()
         self._build_resources()
         self._build_runs()
@@ -514,6 +511,7 @@ class Experiment(_Buildable):
         """
         if not self.runs:
             logging.critical('No runs have been added to the experiment.')
+        self._set_run_dirs()
         num_runs = len(self.runs)
         self.set_property('runs', num_runs)
         logging.info('Building %d runs' % num_runs)
@@ -541,7 +539,7 @@ class Run(_Buildable):
         _Buildable.__init__(self)
         self.experiment = experiment
 
-        self.path = ''
+        self.path = None
 
     def build(self):
         """Write the run's files to disk.
