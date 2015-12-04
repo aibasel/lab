@@ -125,14 +125,6 @@ def make_list(value):
     return [value]
 
 
-def divide_list(seq, size):
-    """
-    >>> divide_list(range(10), 4)
-    [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]
-    """
-    return [seq[i:i + size] for i in range(0, len(seq), size)]
-
-
 def makedirs(dir):
     """
     makedirs variant that does not complain when the dir already exists

@@ -45,8 +45,8 @@ steps_group.add_argument(
 
 
 def get_run_dir(task_id):
-    lower = ((task_id - 1) / 100) * 100 + 1
-    upper = ((task_id + 99) / 100) * 100
+    lower = ((task_id - 1) / SHARD_SIZE) * SHARD_SIZE + 1
+    upper = ((task_id + SHARD_SIZE - 1) / SHARD_SIZE) * SHARD_SIZE
     return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
 
 
@@ -259,7 +259,6 @@ class Experiment(_Buildable):
             logging.critical('Path contains commas or colons: %s' % self.path)
         self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
-        self.shard_size = SHARD_SIZE
 
         self.runs = []
 
@@ -488,36 +487,12 @@ class Experiment(_Buildable):
             for path in paths:
                 tools.remove_path(os.path.join(self.path, path))
 
-    def _set_run_dirs(self):
-        """
-        Sets the relative run directories as instance variables for all runs.
-        """
-        def run_number(number):
-            return str(number).zfill(5)
-
-        def get_shard_dir(shard_number):
-            first_run = self.shard_size * (shard_number - 1) + 1
-            last_run = self.shard_size * (shard_number)
-            return 'runs-%s-%s' % (run_number(first_run), run_number(last_run))
-
-        current_run = 0
-        shards = tools.divide_list(self.runs, self.shard_size)
-
-        for shard_number, shard in enumerate(shards, start=1):
-            for run in shard:
-                current_run += 1
-                rel_dir = os.path.join(get_shard_dir(shard_number),
-                                       run_number(current_run))
-                run.path = self._get_abs_path(rel_dir)
-                run.set_property('run_dir', os.path.relpath(run.path, self.path))
-
     def _build_runs(self):
         """
         Uses the relative directory information and writes all runs to disc.
         """
         if not self.runs:
             logging.critical('No runs have been added to the experiment.')
-        self._set_run_dirs()
         num_runs = len(self.runs)
         self.set_property('runs', num_runs)
         logging.info('Building %d runs' % num_runs)
@@ -526,7 +501,7 @@ class Experiment(_Buildable):
                 logging.info('Build run %6d/%d' % (index, num_runs))
             for name, (command, kwargs) in self.commands.items():
                 run.add_command(name, command, **kwargs)
-            run.build()
+            run.build(index)
         logging.info('Finished building runs')
 
 
@@ -544,17 +519,17 @@ class Run(_Buildable):
         """
         _Buildable.__init__(self)
         self.experiment = experiment
-
-        # TODO: Don't store path member.
         self.path = None
 
-    def build(self):
+    def build(self, run_id):
         """Write the run's files to disk.
 
         This method is called automatically by the experiment.
 
         """
-        assert self.path
+        rel_run_dir = get_run_dir(run_id)
+        self.set_property('run_dir', rel_run_dir)
+        self.path = os.path.join(self.experiment.path, rel_run_dir)
         tools.overwrite_dir(self.path)
 
         # We need to build the run script before the resources, because
