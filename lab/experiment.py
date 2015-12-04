@@ -439,22 +439,21 @@ class Experiment(_Buildable):
 
         If *write_to_disk* is False, only compute the internal data
         structures. This is only needed internally for
-        FastDownwardExperiments on grids, where we need to turn the
-        added algorithms and benchmarks into Runs.
+        FastDownwardExperiments on grids, where build() turns the added
+        algorithms and benchmarks into Runs.
 
         By default, the first experiment step calls this method. You
         don't have to call it manually.
 
         """
-        # Needed for building the main script.
-        # TODO: Really needed?
-        self._set_run_dirs()
-
         if not write_to_disk:
             return
 
         self._create_exp_dir()
         self._clean_exp_dir()  # TODO: Still needed?
+
+        # Needed for building LocalEnvironment's main script.
+        self._set_run_dirs()
 
         self.environment.write_main_script()
         self._build_resources()
