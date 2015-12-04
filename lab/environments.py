@@ -77,11 +77,8 @@ class LocalEnvironment(Environment):
         self.processes = processes
 
     def write_main_script(self):
-        dirs = [
-            repr(os.path.relpath(run.path, self.exp.path))
-            for run in self.exp.runs]
         replacements = {
-            'DIRS': ',\n'.join(dirs),
+            'NUM_TASKS': str(len(self.exp.runs)),
             'PROCESSES': str(self.processes)}
 
         script = pkgutil.get_data('lab', 'data/local-job-template.py')

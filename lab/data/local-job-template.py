@@ -9,15 +9,21 @@ import subprocess
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-dirs = [
-"""DIRS"""
-]
+num_tasks = """NUM_TASKS"""
 
 
-def process_dir(dir):
-    number = dir.split('/')[-1]
-    print 'Starting run %s/%s' % (number, str(len(dirs)).zfill(5))
-    run = subprocess.Popen(['./run'], cwd=dir, stdout=sys.stdout, stderr=sys.stderr)
+def get_run_dir(task_id):
+    lower = ((task_id - 1) / 100) * 100 + 1
+    upper = ((task_id + 99) / 100) * 100
+    return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
+
+
+def process_dir(task_id):
+    print 'Starting run {:>5}/{}'.format(task_id, num_tasks)
+    run = subprocess.Popen(
+        ['./run'],
+        cwd=get_run_dir(task_id),
+        stdout=sys.stdout, stderr=sys.stderr)  # TODO: Remove redirections?
     try:
         run.wait()
     except KeyboardInterrupt:
@@ -30,7 +36,7 @@ def process_dir(dir):
 def main():
     pool = multiprocessing.Pool(processes="""PROCESSES""")
     try:
-        pool.map(process_dir, dirs, chunksize=1)
+        pool.map(process_dir, range(1, num_tasks + 1))
     except KeyboardInterrupt:
         print 'Main script interrupted'
         pool.terminate()
