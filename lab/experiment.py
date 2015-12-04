@@ -202,10 +202,9 @@ class _Buildable(object):
         for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
-            with open(filename, 'w') as file:
-                logging.debug('Writing file "%s"' % filename)
-                file.write(content)
-                os.chmod(filename, permissions)
+            logging.debug('Writing file "%s"' % filename)
+            tools.write_file(filename, content)
+            os.chmod(filename, permissions)
 
         for source, dest, required, symlink in self.resources:
             if required and not os.path.exists(source):

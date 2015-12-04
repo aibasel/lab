@@ -204,8 +204,7 @@ class PgfPlots(object):
         lines.extend(cls._get_plot(report))
         lines.append('\\end{tikzpicture}')
         tools.makedirs(os.path.dirname(filename))
-        with open(filename, 'w') as f:
-            f.write('\n'.join(lines))
+        tools.write_file(filename, '\n'.join(lines))
         logging.info('Wrote file://%s' % filename)
 
     @classmethod

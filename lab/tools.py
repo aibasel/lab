@@ -171,9 +171,9 @@ def remove_path(path):
         shutil.rmtree(path)
 
 
-def touch(filename):
-    with open(filename, 'a'):
-        os.utime(filename, None)
+def write_file(filename, content):
+    with open(filename, 'w') as f:
+        f.write(content)
 
 
 def natural_sort(alist):
@@ -276,8 +276,7 @@ class Properties(dict):
     def write(self):
         """Write the properties to disk."""
         assert self.filename
-        with open(self.filename, 'w') as f:
-            f.write(str(self))
+        write_file(self.filename, str(self))
 
 
 class RunFilter(object):

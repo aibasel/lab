@@ -273,17 +273,19 @@ class OracleGridEngineEnvironment(Environment):
             job_name = self._get_job_name(step)
             # We can't submit jobs from within the grid, so we submit
             # them all at once with dependencies.
-            with open(os.path.join(job_dir, job_name), 'w') as f:
-                f.write(self._get_job(step, is_last=(number == len(steps))))
+            tools.write_file(
+                os.path.join(job_dir, job_name),
+                self._get_job(step, is_last=(number == len(steps))))
             submit = ['qsub']
             if prev_job_name:
                 submit.extend(['-hold_jid', prev_job_name])
             submit.append(job_name)
             tools.run_command(submit, cwd=job_dir)
             if is_run_step(step):
-                with open(submitted_file, 'w') as f:
-                    f.write('This file is created when the experiment is submitted to '
-                            'the queue.')
+                tools.write_file(
+                    submitted_file,
+                    'This file is created when the experiment is submitted to '
+                    'the queue.')
             prev_job_name = job_name
 
 

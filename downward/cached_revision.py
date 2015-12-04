@@ -163,7 +163,7 @@ class CachedRevision(object):
         retcode = tools.run_command(
             ['./build.py'] + self.build_options, cwd=self.path)
         if retcode == 0:
-            tools.touch(self._get_sentinel_file())
+            tools.write_file(self._get_sentinel_file(), '')
         else:
             logging.critical('Build failed in {}'.format(self.path))
 

@@ -360,9 +360,8 @@ class Report(object):
         """
         content = self.get_text()
         tools.makedirs(os.path.dirname(self.outfile))
-        with open(self.outfile, 'w') as file:
-            file.write(content)
-            logging.info('Wrote file://%s' % self.outfile)
+        tools.write_file(self.outfile, content)
+        logging.info('Wrote file://%s' % self.outfile)
 
     def _get_type(self, attribute):
         for run_id, run in self.props.iteritems():
