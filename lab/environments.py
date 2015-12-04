@@ -42,7 +42,6 @@ def is_run_step(step):
 class Environment(object):
     def __init__(self):
         self.exp = None
-        self.main_script_file = 'run'
 
     def write_main_script(self):
         raise NotImplementedError
@@ -61,6 +60,9 @@ class LocalEnvironment(Environment):
     """
     Environment for running experiments locally on a single machine.
     """
+
+    EXP_RUN_SCRIPT = 'run'
+
     def __init__(self, processes=None):
         """
         If given, *processes* must be between 1 and #CPUs.
@@ -86,10 +88,10 @@ class LocalEnvironment(Environment):
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
-        self.exp.add_new_file('', self.main_script_file, script, permissions=0o755)
+        self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
     def run_experiment(self):
-        tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)
+        tools.run_command(['./' + self.EXP_RUN_SCRIPT], cwd=self.exp.path)
 
     def run_steps(self, steps):
         for step in steps:

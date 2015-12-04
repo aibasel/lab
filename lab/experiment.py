@@ -457,7 +457,7 @@ class Experiment(_Buildable):
         self._create_exp_dir()
         self._clean_exp_dir()  # TODO: Still needed?
 
-        self._build_main_script()
+        self.environment.write_main_script()
         self._build_resources()
         self._build_runs()
         self._build_properties_file()
@@ -509,10 +509,6 @@ class Experiment(_Buildable):
                                        run_number(current_run))
                 run.path = self._get_abs_path(rel_dir)
                 run.set_property('run_dir', os.path.relpath(run.path, self.path))
-
-    def _build_main_script(self):
-        """Generates the main script."""
-        self.environment.write_main_script()
 
     def _build_runs(self):
         """
