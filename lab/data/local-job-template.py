@@ -17,10 +17,7 @@ num_tasks = """NUM_TASKS"""
 
 def process_dir(task_id):
     print 'Starting run {:>5}/{}'.format(task_id, num_tasks)
-    run = subprocess.Popen(
-        ['./run'],
-        cwd=get_run_dir(task_id),
-        stdout=sys.stdout, stderr=sys.stderr)  # TODO: Remove redirections?
+    run = subprocess.Popen(['./run'], cwd=get_run_dir(task_id))
     try:
         run.wait()
     except KeyboardInterrupt:
