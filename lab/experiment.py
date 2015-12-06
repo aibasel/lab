@@ -457,7 +457,13 @@ class Experiment(_Buildable):
         self._create_exp_dir()
         self._clean_exp_dir()  # TODO: Still needed?
 
+        self.add_new_file(
+            'LAB_RUN_DISPATCHER',
+            'run-dispatcher.py',
+            pkgutil.get_data('lab', 'data/run-dispatcher.py'),
+            permissions=0o755)
         self.environment.write_main_script()
+
         self._build_resources()
         self._build_runs()
         self._build_properties_file()

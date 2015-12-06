@@ -1,11 +1,9 @@
 #! /usr/bin/env python
 
-import sys
 import os
 import multiprocessing
 import subprocess
-
-from lab.experiment import get_run_dir
+import sys
 
 
 # make sure we're in the run directory
@@ -16,21 +14,17 @@ num_tasks = """NUM_TASKS"""
 
 
 def process_dir(task_id):
-    print 'Starting run {:>5}/{}'.format(task_id, num_tasks)
-    run = subprocess.Popen(['./run'], cwd=get_run_dir(task_id))
-    try:
-        run.wait()
-    except KeyboardInterrupt:
-        print 'Call to run %s interrupted' % number
-        run.terminate()
-    except OSError, err:
-        print err
+    print 'Started {:>5}/{} runs'.format(task_id, num_tasks)
+    subprocess.check_call(['./run-dispatcher.py', str(task_id)])
 
 
 def main():
     pool = multiprocessing.Pool(processes="""PROCESSES""")
+    result = pool.map_async(process_dir, range(1, num_tasks + 1))
     try:
-        pool.map(process_dir, range(1, num_tasks + 1))
+        # Use "timeout" to fix passing KeyboardInterrupts from children
+        # (see https://stackoverflow.com/questions/1408356).
+        result.wait(timeout=sys.maxint)
     except KeyboardInterrupt:
         print 'Main script interrupted'
         pool.terminate()
