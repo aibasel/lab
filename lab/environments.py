@@ -194,7 +194,7 @@ class OracleGridEngineEnvironment(Environment):
         Remove everything except the job files.
         """
         tools.makedirs(self.exp.path)
-        job_prefix = get_job_prefix(self.name)
+        job_prefix = get_job_prefix(self.exp.name)
         paths = [
             path for path in os.listdir(self.exp.path)
             if not path.startswith(job_prefix) and not path == 'submitted']
