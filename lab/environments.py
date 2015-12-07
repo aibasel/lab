@@ -26,6 +26,7 @@ import sys
 from lab import tools
 
 
+# TODO: Make private.
 def get_job_prefix(exp_name):
     assert exp_name
     escape_char = 'j' if exp_name[0].isdigit() else ''
@@ -52,6 +53,9 @@ class Environment(object):
             '"""TASK_ORDER"""', str(task_order))
         self.exp.add_new_file(
             '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
+
+    def create_or_cleanup_experiment_dir(self):
+        raise NotImplementedError
 
     def write_main_script(self):
         raise NotImplementedError
@@ -93,6 +97,12 @@ class LocalEnvironment(Environment):
         if not 1 <= processes <= cores:
             raise ValueError("processes must be in the range [1, ..., #CPUs].")
         self.processes = processes
+
+    def create_or_cleanup_experiment_dir(self):
+        if os.path.exists(self.exp.path):
+            tools.confirm_overwrite_or_abort(self.exp.path)
+            tools.remove_path(self.exp.path)
+        tools.makedirs(self.exp.path)
 
     def write_main_script(self):
         self._write_run_dispatcher()
@@ -178,6 +188,20 @@ class OracleGridEngineEnvironment(Environment):
         self.runs_per_task = 1
         self.email = email
         self.extra_options = extra_options or '## (not used)'
+
+    def create_or_cleanup_experiment_dir(self):
+        """
+        Remove everything except the job files.
+        """
+        tools.makedirs(self.exp.path)
+        job_prefix = get_job_prefix(self.name)
+        paths = [
+            path for path in os.listdir(self.exp.path)
+            if not path.startswith(job_prefix) and not path == 'submitted']
+        if paths:
+            tools.confirm_overwrite_or_abort(self.exp.path)
+            for path in paths:
+                tools.remove_path(os.path.join(self.exp.path, path))
 
     def run_experiment(self):
         # The queue will start the experiment by itself.
@@ -269,7 +293,6 @@ class OracleGridEngineEnvironment(Environment):
     def run_steps(self, steps):
         self.exp.build(write_to_disk=False)
         job_dir = self.exp.path
-        tools.makedirs(job_dir)
         prev_job_name = None
         for number, step in enumerate(steps, start=1):
             if is_run_step(step):
