@@ -26,8 +26,7 @@ import sys
 from lab import tools
 
 
-# TODO: Make private.
-def get_job_prefix(exp_name):
+def _get_job_prefix(exp_name):
     assert exp_name
     escape_char = 'j' if exp_name[0].isdigit() else ''
     return ''.join([escape_char, exp_name, '-'])
@@ -194,7 +193,7 @@ class OracleGridEngineEnvironment(Environment):
         Remove everything except the job files.
         """
         tools.makedirs(self.exp.path)
-        job_prefix = get_job_prefix(self.exp.name)
+        job_prefix = _get_job_prefix(self.exp.name)
         paths = [
             path for path in os.listdir(self.exp.path)
             if not path.startswith(job_prefix) and not path == 'submitted']
@@ -224,7 +223,7 @@ class OracleGridEngineEnvironment(Environment):
 
     def _get_job_name(self, step):
         return '%s%02d-%s' % (
-            get_job_prefix(self.exp.name),
+            _get_job_prefix(self.exp.name),
             self.exp.steps.index(step) + 1,
             step.name)
 
