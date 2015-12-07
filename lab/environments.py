@@ -238,7 +238,7 @@ class OracleGridEngineEnvironment(Environment):
         return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
 
     def _get_main_job_body(self):
-        params = dict(num_tasks=self._get_num_runs())
+        params = dict(num_tasks=self._get_num_runs(), errfile='driver.err')
         return pkgutil.get_data('lab', 'data/grid-job-body-template') % params
 
     def _get_job_body(self, step):

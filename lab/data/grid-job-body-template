@@ -3,5 +3,5 @@ RUN=$(SGE_TASK_ID)
 ./run-dispatcher.py "$NUM_TASKS" "$RUN"
 RETCODE=$?
 if (( $RETCODE != 0 )); then
-    echo "Run $RUN returned $RETCODE" >> driver.err
+    echo "Run $RUN returned $RETCODE" >> %(errfile)s
 fi
