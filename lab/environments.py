@@ -40,8 +40,18 @@ def is_run_step(step):
 
 
 class Environment(object):
-    def __init__(self):
+    def __init__(self, randomize_task_order=True):
         self.exp = None
+        self.randomize_task_order = randomize_task_order
+
+    def _write_run_dispatcher(self):
+        task_order = range(1, len(self.exp.runs) + 1)
+        if self.randomize_task_order:
+            random.shuffle(task_order)
+        dispatcher_content = pkgutil.get_data('lab', 'data/run-dispatcher.py').replace(
+            '"""TASK_ORDER"""', str(task_order))
+        self.exp.add_new_file(
+            '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
 
     def write_main_script(self):
         raise NotImplementedError
@@ -63,10 +73,18 @@ class LocalEnvironment(Environment):
 
     EXP_RUN_SCRIPT = 'run'
 
-    def __init__(self, processes=None):
+    def __init__(self, processes=None, randomize_task_order=True):
         """
-        If given, *processes* must be between 1 and #CPUs.
-        If omitted, it will be set to #CPUs.
+        If given, *processes* must be between 1 and #CPUs. If omitted,
+        it will be set to #CPUs.
+
+        If *randomize_task_order* is True (default), tasks for runs are
+        started in a random order. This is useful to avoid systematic
+        noise due to, e.g., one of the algorithms being run on a
+        machine with heavy load. Note that due to the randomization,
+        run directories may be pristine while the experiment is running
+        even though the logs say the runs are finished.
+
         """
         Environment.__init__(self)
         cores = multiprocessing.cpu_count()
@@ -77,11 +95,11 @@ class LocalEnvironment(Environment):
         self.processes = processes
 
     def write_main_script(self):
+        self._write_run_dispatcher()
+        script = pkgutil.get_data('lab', 'data/local-job-template.py')
         replacements = {
             'NUM_TASKS': str(len(self.exp.runs)),
             'PROCESSES': str(self.processes)}
-
-        script = pkgutil.get_data('lab', 'data/local-job-template.py')
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
@@ -133,10 +151,10 @@ class OracleGridEngineEnvironment(Environment):
 
         If *randomize_task_order* is True (default), tasks for runs are
         started in a random order. This is useful to avoid systematic
-        noise due to e.g. one of the algorithms being run on a machine
-        with heavy load. Note that due to the randomization, run
-        directories may be pristine while the experiment is running
-        even though the grid engine marks the runs as finished.
+        noise due to, e.g., one of the algorithms being run on a
+        machine with heavy load. Note that due to the randomization,
+        run directories may be pristine while the experiment is running
+        even though the logs say the runs are finished.
 
         Use *extra_options* to pass additional options. The
         *extra_options* string may contain newlines. Example that
@@ -145,7 +163,7 @@ class OracleGridEngineEnvironment(Environment):
             extra_options='#$ -pe smp 16'
 
         """
-        Environment.__init__(self)
+        Environment.__init__(self, randomize_task_order=randomize_task_order)
         if queue is None:
             queue = self.DEFAULT_QUEUE
         if priority is None:
@@ -159,7 +177,6 @@ class OracleGridEngineEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
         self.email = email
-        self.randomize_task_order = randomize_task_order
         self.extra_options = extra_options or '## (not used)'
 
     def run_experiment(self):
@@ -221,13 +238,8 @@ class OracleGridEngineEnvironment(Environment):
         return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
 
     def _get_main_job_body(self):
-        num_tasks = self._get_num_runs()
-        body_params = dict(num_tasks=num_tasks, run_ids='')
-        if self.randomize_task_order:
-            run_ids = [str(i + 1) for i in xrange(num_tasks)]
-            random.shuffle(run_ids)
-            body_params['run_ids'] = ' '.join(run_ids)
-        return pkgutil.get_data('lab', 'data/grid-job-body-template') % body_params
+        params = dict(num_tasks=self._get_num_runs())
+        return pkgutil.get_data('lab', 'data/grid-job-body-template') % params
 
     def _get_job_body(self, step):
         if is_run_step(step):
@@ -252,7 +264,7 @@ class OracleGridEngineEnvironment(Environment):
 
     def write_main_script(self):
         # The main script is written by the run_steps() method.
-        pass
+        self._write_run_dispatcher()
 
     def run_steps(self, steps):
         self.exp.build(write_to_disk=False)

@@ -15,7 +15,7 @@ num_tasks = """NUM_TASKS"""
 
 def process_dir(task_id):
     print 'Started {:>5}/{} runs'.format(task_id, num_tasks)
-    subprocess.check_call(['./run-dispatcher.py', str(task_id)])
+    subprocess.check_call(['./run-dispatcher.py', str(num_tasks), str(task_id)])
 
 
 def main():
