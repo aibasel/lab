@@ -451,11 +451,11 @@ class Experiment(_Buildable):
         don't have to call it manually.
 
         """
+        self._create_exp_dir()
+        self._clean_exp_dir()
+
         if not write_to_disk:
             return
-
-        self._create_exp_dir()
-        self._clean_exp_dir()  # TODO: Still needed?
 
         self.environment.write_main_script()
 
@@ -480,9 +480,13 @@ class Experiment(_Buildable):
         tools.makedirs(self.path)
 
     def _clean_exp_dir(self):
+        """
+        Remove everything except the grid job files from the exp dir.
+        """
         job_prefix = environments.get_job_prefix(self.name)
-        paths = [path for path in os.listdir(self.path)
-                 if not path.startswith(job_prefix)]
+        paths = [
+            path for path in os.listdir(self.path)
+            if not path.startswith(job_prefix)]
         if paths:
             tools.confirm_overwrite_or_abort(self.path)
             for path in paths:
