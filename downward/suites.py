@@ -273,6 +273,13 @@ def suite_optimal_strips():
         suite_ipc11_opt())
 
 
+@tools.deprecated(
+    'suite_optimal_with_ipc11 is deprecated since version 1.10, please use '
+    'suite_optimal_strips instead.')
+def suite_optimal_with_ipc11():
+    return suite_optimal_strips()
+
+
 def suite_satisficing():
     domains = sorted(
         suite_ipc98_to_ipc04() + suite_ipc06() +
@@ -281,6 +288,13 @@ def suite_satisficing():
     # Use pathways-noneg instead of pathways.
     domains.remove('pathways')
     return domains
+
+
+@tools.deprecated(
+    'suite_satisficing_with_ipc11 is deprecated since version 1.10, please use '
+    'suite_satisficing instead.')
+def suite_satisficing_with_ipc11():
+    return suite_satisficing()
 
 
 def suite_satisficing_strips():

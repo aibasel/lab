@@ -28,6 +28,8 @@ lab.steps.Step.remove_exp_dir
 [
     suites.suite_ipc08_opt,
     suites.suite_unsolvable,
+    suites.suite_optimal_with_ipc11,
+    suites.suite_satisficing_with_ipc11,
     suites.suite_satisficing_strips,
     suites.suite_all,
 ]
