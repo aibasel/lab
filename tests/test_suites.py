@@ -1,4 +1,7 @@
+from collections import Counter
+
 from downward import suites
+
 
 def test_for_duplicates():
     for funcname in dir(suites):
@@ -7,4 +10,4 @@ def test_for_duplicates():
         print 'Test', funcname
         func = getattr(suites, funcname)
         domains = func()
-        assert len(set(domains)) == len(domains)
+        assert len(set(domains)) == len(domains), Counter(domains)

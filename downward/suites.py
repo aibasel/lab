@@ -110,7 +110,7 @@ def build_suite(benchmarks_dir, descriptions):
 
 
 def suite_alternative_formulations():
-    return ['airport-adl', 'pathways', 'no-mprime', 'no-mystery']
+    return ['airport-adl', 'no-mprime', 'no-mystery']
 
 
 def suite_ipc98_to_ipc04_adl():
@@ -132,8 +132,7 @@ def suite_ipc98_to_ipc04_strips():
 
 def suite_ipc98_to_ipc04():
     # All IPC1-4 domains, including the trivial Movie.
-    return list(sorted(
-        suite_ipc98_to_ipc04_adl() + suite_ipc98_to_ipc04_strips()))
+    return sorted(suite_ipc98_to_ipc04_adl() + suite_ipc98_to_ipc04_strips())
 
 
 def suite_ipc06_adl():
@@ -275,11 +274,13 @@ def suite_optimal_strips():
 
 
 def suite_satisficing():
-    domains = (
+    domains = sorted(
         suite_ipc98_to_ipc04() + suite_ipc06() +
         suite_ipc06_strips_compilations() + suite_ipc08_sat() +
         suite_ipc11_sat())
-    return sorted(set(domains) - set(suite_alternative_formulations()))
+    # Use pathways-noneg instead of pathways.
+    domains.remove('pathways')
+    return domains
 
 
 def suite_satisficing_strips():
@@ -290,7 +291,7 @@ def suite_satisficing_strips():
 
 
 def suite_all():
-    return sorted(set(
+    return sorted(
         suite_ipc98_to_ipc04() + suite_ipc06() +
         suite_ipc06_strips_compilations() + suite_ipc08_all() +
-        suite_ipc11() + suite_alternative_formulations()))
+        suite_ipc11() + suite_alternative_formulations())
