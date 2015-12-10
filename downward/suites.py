@@ -26,9 +26,7 @@ class Domain(object):
         self.domain = domain
         directory = os.path.join(benchmarks_dir, domain)
         problem_files = tools.natural_sort([
-            p for p in os.listdir(directory)
-            if 'domain' not in p and
-            not p.startswith('.')])
+            p for p in os.listdir(directory) if 'domain' not in p])
         self.problems = [
             Problem(benchmarks_dir, domain, problem)
             for problem in problem_files]
@@ -73,11 +71,8 @@ class Problem(object):
     def domain_file(self):
         domain_basenames = [
             'domain.pddl',
-            self.problem[:4] + 'domain.pddl',
             self.problem[:3] + '-domain.pddl',
             'domain_' + self.problem,
-            'domain-' + self.problem,
-            self.problem.replace('problem.pddl', 'domain.pddl'),
         ]
         domain_dir = os.path.join(self.benchmarks_dir, self.domain)
         return tools.find_file(domain_basenames, domain_dir)
