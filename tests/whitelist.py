@@ -31,7 +31,6 @@ lab.steps.Step.remove_exp_dir
     suites.suite_unit_costs,
     suites.suite_diverse_costs,
     suites.suite_satisficing_strips,
-    suites.suite_strips,
     suites.suite_all,
 ]
 

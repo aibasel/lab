@@ -165,7 +165,7 @@ def suite_ipc06():
     return suite_ipc06_adl() + suite_ipc06_strips()
 
 
-def suite_ipc08_common():
+def suite_ipc08_common_strips():
     return [
         'parcprinter-08-strips',
         'pegsol-08-strips',
@@ -173,8 +173,8 @@ def suite_ipc08_common():
     ]
 
 
-def suite_ipc08_opt_only_strips():
-    return [
+def suite_ipc08_opt_strips():
+    return suite_ipc08_common_strips() + [
         'elevators-opt08-strips',
         'openstacks-opt08-strips',
         'sokoban-opt08-strips',
@@ -183,12 +183,16 @@ def suite_ipc08_opt_only_strips():
     ]
 
 
-def suite_ipc08_opt_only():
-    return suite_ipc08_opt_only_strips() + ['openstacks-opt08-adl']
+def suite_ipc08_opt_adl():
+    return ['openstacks-opt08-adl']
 
 
-def suite_ipc08_sat_only_strips():
-    return [
+def suite_ipc08_opt():
+    return suite_ipc08_opt_strips() + suite_ipc08_opt_adl()
+
+
+def suite_ipc08_sat_strips():
+    return suite_ipc08_common_strips() + [
         # Note: cyber-security is missing.
         'elevators-sat08-strips',
         'openstacks-sat08-strips',
@@ -198,38 +202,16 @@ def suite_ipc08_sat_only_strips():
     ]
 
 
-def suite_ipc08_sat_only():
-    return suite_ipc08_sat_only_strips() + ['openstacks-sat08-adl']
-
-
-def suite_ipc08_opt():
-    return suite_ipc08_common() + suite_ipc08_opt_only()
-
-
-def suite_ipc08_opt_strips():
-    return suite_ipc08_common() + suite_ipc08_opt_only_strips()
+def suite_ipc08_sat_adl():
+    return ['openstacks-sat08-adl']
 
 
 def suite_ipc08_sat():
-    return suite_ipc08_common() + suite_ipc08_sat_only()
-
-
-def suite_ipc08_sat_strips():
-    return suite_ipc08_common() + suite_ipc08_sat_only_strips()
+    return suite_ipc08_sat_strips() + suite_ipc08_sat_adl()
 
 
 def suite_ipc08_all():
-    return (
-        suite_ipc08_common() +
-        suite_ipc08_opt_only() +
-        suite_ipc08_sat_only())
-
-
-def suite_ipc08_all_strips():
-    return (
-        suite_ipc08_common() +
-        suite_ipc08_opt_only_strips() +
-        suite_ipc08_sat_only_strips())
+    return sorted(set(suite_ipc08_opt() + suite_ipc08_sat()))
 
 
 def suite_ipc11_opt():
@@ -270,7 +252,7 @@ def suite_ipc11_sat():
     ]
 
 
-def suite_ipc11_all():
+def suite_ipc11():
     return suite_ipc11_opt() + suite_ipc11_sat()
 
 
@@ -281,13 +263,6 @@ def suite_unsolvable():
     return (['mystery:prob%02d.pddl' % index
              for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]] +
             ['miconic-fulladl:f21-3.pddl', 'miconic-fulladl:f30-2.pddl'])
-
-
-def suite_strips():
-    return sorted(
-        suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
-        suite_ipc06_strips_compilations() + suite_ipc08_all_strips() +
-        suite_ipc11_all())
 
 
 def suite_optimal_strips():
@@ -318,7 +293,7 @@ def suite_all():
     return sorted(set(
         suite_ipc98_to_ipc04() + suite_ipc06() +
         suite_ipc06_strips_compilations() + suite_ipc08_all() +
-        suite_ipc11_all() + suite_alternative_formulations()))
+        suite_ipc11() + suite_alternative_formulations()))
 
 
 def suite_unit_costs():
