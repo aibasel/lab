@@ -172,6 +172,10 @@ def suite_ipc08_common_strips():
     ]
 
 
+def suite_ipc08_opt_adl():
+    return ['openstacks-opt08-adl']
+
+
 def suite_ipc08_opt_strips():
     return sorted(suite_ipc08_common_strips() + [
         'elevators-opt08-strips',
@@ -182,12 +186,12 @@ def suite_ipc08_opt_strips():
     ])
 
 
-def suite_ipc08_opt_adl():
-    return ['openstacks-opt08-adl']
-
-
 def suite_ipc08_opt():
     return sorted(suite_ipc08_opt_strips() + suite_ipc08_opt_adl())
+
+
+def suite_ipc08_sat_adl():
+    return ['openstacks-sat08-adl']
 
 
 def suite_ipc08_sat_strips():
@@ -199,10 +203,6 @@ def suite_ipc08_sat_strips():
         'transport-sat08-strips',
         'woodworking-sat08-strips',
     ])
-
-
-def suite_ipc08_sat_adl():
-    return ['openstacks-sat08-adl']
 
 
 def suite_ipc08_sat():
