@@ -255,6 +255,127 @@ def suite_ipc11():
     return sorted(suite_ipc11_opt() + suite_ipc11_sat())
 
 
+def suite_ipc14_agl_adl():
+    return [
+        'cavediving-agl14-adl',
+        'citycar-agl14-adl',
+        'maintenance-agl14-adl',
+    ]
+
+    
+def suite_ipc14_agl_strips():
+    return [
+        'barman-agl14-strips',
+        'childsnack-agl14-strips',
+        'floortile-agl14-strips',
+        'ged-agl14-strips',
+        'hiking-agl14-strips',
+        'openstacks-agl14-strips',
+        'parking-agl14-strips',
+        'tetris-agl14-strips',
+        'thoughtful-agl14-strips',
+        'transport-agl14-strips',
+        'visitall-agl14-strips',
+    ]
+
+
+def suite_ipc14_agl():
+    return sorted(suite_ipc14_agl_adl() + suite_ipc14_agl_strips())
+
+
+def suite_ipc14_mco_adl():
+    return [
+        'cavediving-mco14-adl',
+        'citycar-mco14-adl',
+        'maintenance-mco14-adl',
+    ]
+
+    
+def suite_ipc14_mco_strips():
+    return [
+        'barman-mco14-strips',
+        'childsnack-mco14-strips',
+        'floortile-mco14-strips',
+        'ged-mco14-strips',
+        'hiking-mco14-strips',
+        'openstacks-mco14-strips',
+        'parking-mco14-strips',
+        'tetris-mco14-strips',
+        'thoughtful-mco14-strips',
+        'transport-mco14-strips',
+        'visitall-mco14-strips',
+    ]
+
+
+def suite_ipc14_mco():
+    return sorted(suite_ipc14_mco_adl() + suite_ipc14_mco_strips())
+
+
+def suite_ipc14_opt_adl():
+    return [
+        'cavediving-opt14-adl',
+        'citycar-opt14-adl',
+        # Note: all five instances of maintenance can be translated and
+        # preprocessed such that the result does not contain
+        # conditional effects and hence falls in the categorie strips.
+        'maintenance-opt14-adl',
+    ]
+
+    
+def suite_ipc14_opt_strips():
+    return [
+        'barman-opt14-strips',
+        'childsnack-opt14-strips',
+        'floortile-opt14-strips',
+        'ged-opt14-strips',
+        'hiking-opt14-strips',
+        'openstacks-opt14-strips',
+        'parking-opt14-strips',
+        'tetris-opt14-strips',
+        'tidybot-opt14-strips',
+        'transport-opt14-strips',
+        'visitall-opt14-strips',
+    ]
+
+
+def suite_ipc14_opt():
+    return sorted(suite_ipc14_opt_adl() + suite_ipc14_opt_strips())
+
+
+def suite_ipc14_sat_adl():
+    return [
+        'cavediving-sat14-adl',
+        'citycar-sat14-adl',
+        'maintenance-sat14-adl',
+    ]
+
+    
+def suite_ipc14_sat_strips():
+    return [
+        'barman-sat14-strips',
+        'childsnack-sat14-strips',
+        'floortile-sat14-strips',
+        'ged-sat14-strips',
+        'hiking-sat14-strips',
+        'openstacks-sat14-strips',
+        'parking-sat14-strips',
+        'tetris-sat14-strips',
+        'thoughtful-sat14-strips',
+        'transport-sat14-strips',
+        'visitall-sat14-strips',
+    ]
+
+
+def suite_ipc14_sat():
+    return sorted(suite_ipc14_sat_adl() + suite_ipc14_sat_strips())
+
+
+def suite_ipc14():
+    return sorted(
+        suite_ipc14_agl() + suite_ipc14_mco() +
+        suite_ipc14_opt() + suite_ipc14_sat())
+
+
 def suite_unsolvable():
     # TODO: Add other unsolvable problems (Miconic-FullADL).
     # TODO: Add 'fsc-grid-r:prize5x5_R.pddl' and 't0-uts:uts_r-02.pddl'
