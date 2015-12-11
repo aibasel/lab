@@ -26,8 +26,8 @@ lab.steps.Step.unzip_exp_dir
 lab.steps.Step.remove_exp_dir
 
 [
-    suites.suite_ipc08_opt,
     suites.suite_unsolvable,
+    suites.suite_optimal,
     suites.suite_optimal_with_ipc11,
     suites.suite_satisficing_with_ipc11,
     suites.suite_satisficing_strips,

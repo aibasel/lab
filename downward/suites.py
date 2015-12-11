@@ -265,6 +265,12 @@ def suite_unsolvable():
         ['miconic-fulladl:f21-3.pddl', 'miconic-fulladl:f30-2.pddl'])
 
 
+def suite_optimal_adl():
+    return sorted(
+        suite_ipc98_to_ipc04_adl() + suite_ipc06_adl() +
+        suite_ipc08_opt_adl())
+
+
 def suite_optimal_strips():
     # In addition to the domains in the old "suite_optimal_with_ipc11"
     # suite, this suite also contains "movie" and "storage".
@@ -281,13 +287,30 @@ def suite_optimal_with_ipc11():
     return suite_optimal_strips()
 
 
+def suite_optimal():
+    return sorted(suite_optimal_adl() + suite_optimal_strips())
+
+
+def suite_satisficing_adl():
+    return sorted(
+        suite_ipc98_to_ipc04_adl() + suite_ipc06_adl() +
+        suite_ipc08_sat_adl())
+
+
+def suite_satisficing_strips():
+    return sorted(
+        suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
+        suite_ipc06_strips_compilations() + suite_ipc08_sat_strips() +
+        suite_ipc11_sat())
+
+
 def suite_satisficing():
     domains = sorted(
-        suite_ipc98_to_ipc04() + suite_ipc06() +
-        suite_ipc06_strips_compilations() + suite_ipc08_sat() +
-        suite_ipc11_sat())
-    # Use pathways-noneg instead of pathways.
+        suite_satisficing_adl() + suite_satisficing_strips())
+    # Since pathways and pathways-noneg are very similar, we use only
+    # pathways-noneg (mainly for historical reasons).
     domains.remove('pathways')
+    assert 'pathways-noneg' in domains
     return domains
 
 
@@ -296,13 +319,6 @@ def suite_satisficing():
     'suite_satisficing instead.')
 def suite_satisficing_with_ipc11():
     return suite_satisficing()
-
-
-def suite_satisficing_strips():
-    return sorted(
-        suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
-        suite_ipc06_strips_compilations() + suite_ipc08_sat_strips() +
-        suite_ipc11_sat())
 
 
 def suite_all():
