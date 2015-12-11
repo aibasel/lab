@@ -272,8 +272,6 @@ def suite_optimal_adl():
 
 
 def suite_optimal_strips():
-    # In addition to the domains in the old "suite_optimal_with_ipc11"
-    # suite, this suite also contains "movie" and "storage".
     return sorted(
         suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
         suite_ipc06_strips_compilations() + suite_ipc08_opt_strips() +
@@ -281,8 +279,10 @@ def suite_optimal_strips():
 
 
 @tools.deprecated(
-    'suite_optimal_with_ipc11 is deprecated since version 1.10, please use '
-    'suite_optimal_strips instead.')
+    'suite_optimal_with_ipc11 is deprecated since version 1.10, using '
+    'suite_optimal_strips instead. In addition to the domains in the old '
+    'suite_optimal_with_ipc11 suite, suite_optimal_strips also contains '
+    '"movie" and "storage".')
 def suite_optimal_with_ipc11():
     return suite_optimal_strips()
 
@@ -309,8 +309,9 @@ def suite_satisficing():
 
 
 @tools.deprecated(
-    'suite_satisficing_with_ipc11 is deprecated since version 1.10, please use '
-    'suite_satisficing instead.')
+    'suite_satisficing_with_ipc11 is deprecated since version 1.10, using '
+    'suite_satisficing instead. Note that suite_satisficing contains both '
+    'pathways and pathways-noneg.')
 def suite_satisficing_with_ipc11():
     return suite_satisficing()
 
