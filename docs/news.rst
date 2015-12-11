@@ -1,6 +1,29 @@
 News
 ====
 
+.. module :: lab.experiment
+.. module :: downward.experiments
+
+v1.10 (2015-12-11)
+------------------
+
+lab
+^^^
+* Add ``permissions`` parameter to :func:`Experiment.add_new_file()`.
+* Add default parser which checks that log files are not bigger than 100 MB. Maybe we'll make this configurable in the future.
+* Ensure that resource names are not shared between runs and experiment.
+* Show error message if resource names are not unique.
+* Table: don't format list items. This allows us to keep the quotes for configuration lists.
+
+downward
+^^^^^^^^
+* Cleanup :py:mod:`downward.suites`: update suite names, add STRIPS and
+  ADL versions of all IPCs. We recommend selecting a subset of domains
+  manually to only run your code on "interesting" benchmarks. As a
+  starting point you can use the suites ``suite_optimal_strips`` or
+  ``suite_satisficing``.
+
+
 v1.9.1 (2015-11-12)
 -------------------
 
@@ -114,8 +137,6 @@ v1.5
 
 lab
 ^^^
-.. module :: lab.experiment
-
 * Add :func:`Experiment.add_fetcher()` method.
 * If all columns have the same value in an uncolored table row, make all values bold, not grey.
 * In :func:`Experiment.add_resource()` and :func:`Run.add_resource()` set ``dest=None`` if you don't want to copy or link the resource, but only need an alias to reference it in a command.
@@ -128,8 +149,6 @@ lab
 
 downward
 ^^^^^^^^
-.. module :: downward.experiments
-
 * Add optional *nick* parameter to Translator, Preprocessor and Planner classes. It defaults to the revision name *rev*.
 * Save ``hg id`` output for each checkout and include it in reports.
 * Add *timeout* parameter to :func:`DownwardExperiment.add_config()`.
