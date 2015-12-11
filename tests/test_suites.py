@@ -11,6 +11,7 @@ def test_for_duplicates():
         print 'Test', funcname
         func = getattr(suites, funcname)
         domains = func()
+        assert domains == sorted(domains)
         assert len(set(domains)) == len(domains), Counter(domains)
 
 

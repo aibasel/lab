@@ -305,13 +305,7 @@ def suite_satisficing_strips():
 
 
 def suite_satisficing():
-    domains = sorted(
-        suite_satisficing_adl() + suite_satisficing_strips())
-    # Since pathways and pathways-noneg are very similar, we use only
-    # pathways-noneg (mainly for historical reasons).
-    domains.remove('pathways')
-    assert 'pathways-noneg' in domains
-    return domains
+    return sorted(suite_satisficing_adl() + suite_satisficing_strips())
 
 
 @tools.deprecated(
