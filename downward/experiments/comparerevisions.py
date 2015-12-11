@@ -23,7 +23,7 @@ from lab.tools import deprecated
 from downward.experiment import DownwardExperiment
 from downward import checkouts
 from downward.checkouts import Translator, Preprocessor, Planner
-from downward.suites import suite_optimal_with_ipc11, suite_satisficing_with_ipc11
+from downward import suites
 from downward.configs import default_configs_optimal, default_configs_satisficing
 from downward.reports.compare import CompareRevisionsReport
 from downward.reports.scatter import ScatterPlotReport
@@ -97,12 +97,12 @@ class CompareRevisionsExperiment(DownwardExperiment):
         # ------ suites and configs ------------------------------------
 
         if opt_or_sat == 'opt':
-            self.add_suite(suite_optimal_with_ipc11())
+            self.add_suite(suites.suite_optimal_strips())
             configs = default_configs_optimal(use_core_configs,
                                               use_ipc_configs,
                                               use_extended_configs)
         elif opt_or_sat == 'sat':
-            self.add_suite(suite_satisficing_with_ipc11())
+            self.add_suite(suites.suite_satisficing())
             configs = default_configs_satisficing(use_core_configs,
                                                   use_ipc_configs,
                                                   use_extended_configs)
