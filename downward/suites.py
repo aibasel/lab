@@ -161,7 +161,7 @@ def suite_ipc06_strips():
 
 
 def suite_ipc06():
-    return suite_ipc06_adl() + suite_ipc06_strips()
+    return sorted(suite_ipc06_adl() + suite_ipc06_strips())
 
 
 def suite_ipc08_common_strips():
@@ -173,13 +173,13 @@ def suite_ipc08_common_strips():
 
 
 def suite_ipc08_opt_strips():
-    return suite_ipc08_common_strips() + [
+    return sorted(suite_ipc08_common_strips() + [
         'elevators-opt08-strips',
         'openstacks-opt08-strips',
         'sokoban-opt08-strips',
         'transport-opt08-strips',
         'woodworking-opt08-strips',
-    ]
+    ])
 
 
 def suite_ipc08_opt_adl():
@@ -187,18 +187,18 @@ def suite_ipc08_opt_adl():
 
 
 def suite_ipc08_opt():
-    return suite_ipc08_opt_strips() + suite_ipc08_opt_adl()
+    return sorted(suite_ipc08_opt_strips() + suite_ipc08_opt_adl())
 
 
 def suite_ipc08_sat_strips():
-    return suite_ipc08_common_strips() + [
+    return sorted(suite_ipc08_common_strips() + [
         # Note: cyber-security is missing.
         'elevators-sat08-strips',
         'openstacks-sat08-strips',
         'sokoban-sat08-strips',
         'transport-sat08-strips',
         'woodworking-sat08-strips',
-    ]
+    ])
 
 
 def suite_ipc08_sat_adl():
@@ -206,10 +206,10 @@ def suite_ipc08_sat_adl():
 
 
 def suite_ipc08_sat():
-    return suite_ipc08_sat_strips() + suite_ipc08_sat_adl()
+    return sorted(suite_ipc08_sat_strips() + suite_ipc08_sat_adl())
 
 
-def suite_ipc08_all():
+def suite_ipc08():
     return sorted(set(suite_ipc08_opt() + suite_ipc08_sat()))
 
 
@@ -252,16 +252,17 @@ def suite_ipc11_sat():
 
 
 def suite_ipc11():
-    return suite_ipc11_opt() + suite_ipc11_sat()
+    return sorted(suite_ipc11_opt() + suite_ipc11_sat())
 
 
 def suite_unsolvable():
     # TODO: Add other unsolvable problems (Miconic-FullADL).
     # TODO: Add 'fsc-grid-r:prize5x5_R.pddl' and 't0-uts:uts_r-02.pddl'
     #       if the extra-domains branch is merged.
-    return (['mystery:prob%02d.pddl' % index
-             for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]] +
-            ['miconic-fulladl:f21-3.pddl', 'miconic-fulladl:f30-2.pddl'])
+    return sorted(
+        ['mystery:prob%02d.pddl' % index
+         for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]] +
+        ['miconic-fulladl:f21-3.pddl', 'miconic-fulladl:f30-2.pddl'])
 
 
 def suite_optimal_strips():
@@ -307,5 +308,5 @@ def suite_satisficing_strips():
 def suite_all():
     return sorted(
         suite_ipc98_to_ipc04() + suite_ipc06() +
-        suite_ipc06_strips_compilations() + suite_ipc08_all() +
+        suite_ipc06_strips_compilations() + suite_ipc08() +
         suite_ipc11() + suite_alternative_formulations())
