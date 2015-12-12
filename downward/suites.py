@@ -262,7 +262,7 @@ def suite_ipc14_agl_adl():
         'maintenance-agl14-adl',
     ]
 
-    
+
 def suite_ipc14_agl_strips():
     return [
         'barman-agl14-strips',
@@ -290,7 +290,7 @@ def suite_ipc14_mco_adl():
         'maintenance-mco14-adl',
     ]
 
-    
+
 def suite_ipc14_mco_strips():
     return [
         'barman-mco14-strips',
@@ -321,7 +321,7 @@ def suite_ipc14_opt_adl():
         'maintenance-opt14-adl',
     ]
 
-    
+
 def suite_ipc14_opt_strips():
     return [
         'barman-opt14-strips',
@@ -349,7 +349,7 @@ def suite_ipc14_sat_adl():
         'maintenance-sat14-adl',
     ]
 
-    
+
 def suite_ipc14_sat_strips():
     return [
         'barman-sat14-strips',
@@ -389,14 +389,14 @@ def suite_unsolvable():
 def suite_optimal_adl():
     return sorted(
         suite_ipc98_to_ipc04_adl() + suite_ipc06_adl() +
-        suite_ipc08_opt_adl())
+        suite_ipc08_opt_adl() + suite_ipc14_opt_adl())
 
 
 def suite_optimal_strips():
     return sorted(
         suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
         suite_ipc06_strips_compilations() + suite_ipc08_opt_strips() +
-        suite_ipc11_opt())
+        suite_ipc11_opt() + suite_ipc14_opt_strips())
 
 
 @tools.deprecated(
@@ -415,14 +415,14 @@ def suite_optimal():
 def suite_satisficing_adl():
     return sorted(
         suite_ipc98_to_ipc04_adl() + suite_ipc06_adl() +
-        suite_ipc08_sat_adl())
+        suite_ipc08_sat_adl() + suite_ipc14_sat_adl())
 
 
 def suite_satisficing_strips():
     return sorted(
         suite_ipc98_to_ipc04_strips() + suite_ipc06_strips() +
         suite_ipc06_strips_compilations() + suite_ipc08_sat_strips() +
-        suite_ipc11_sat())
+        suite_ipc11_sat() + suite_ipc14_sat_strips())
 
 
 def suite_satisficing():
@@ -441,4 +441,5 @@ def suite_all():
     return sorted(
         suite_ipc98_to_ipc04() + suite_ipc06() +
         suite_ipc06_strips_compilations() + suite_ipc08() +
-        suite_ipc11() + suite_alternative_formulations())
+        suite_ipc11() + suite_alternative_formulations() +
+        suite_ipc14())
