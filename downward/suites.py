@@ -315,9 +315,6 @@ def suite_ipc14_opt_adl():
     return [
         'cavediving-opt14-adl',
         'citycar-opt14-adl',
-        # Note: all five instances of maintenance can be translated and
-        # preprocessed such that the result does not contain
-        # conditional effects and hence falls in the categorie strips.
         'maintenance-opt14-adl',
     ]
 
