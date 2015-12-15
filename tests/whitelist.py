@@ -27,6 +27,7 @@ lab.steps.Step.remove_exp_dir
 
 [
     suites.suite_unsolvable,
+    suites.suite_ipc14,
     suites.suite_optimal,
     suites.suite_optimal_with_ipc11,
     suites.suite_satisficing_with_ipc11,
