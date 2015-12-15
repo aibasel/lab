@@ -62,6 +62,7 @@ class PlanningReport(Report):
         Attribute('evaluations', functions=reports.gm),
         Attribute('expansions', functions=reports.gm),
         Attribute('generated', functions=reports.gm),
+        Attribute('dead_ends', min_wins=False),
         Attribute('score_*', min_wins=False, functions=[reports.avg, sum]),
     ])
 
