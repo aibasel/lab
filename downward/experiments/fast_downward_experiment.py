@@ -278,7 +278,7 @@ class FastDownwardExperiment(Experiment):
                 "lama", "path/to/repo", "default",
                 [],
                 driver_options=[
-                    "--alias", "seq-saq-lama-2011",
+                    "--alias", "seq-sat-lama-2011",
                     "--search-time-limit", "5m"])
 
         """
