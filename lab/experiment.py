@@ -57,8 +57,6 @@ class _Buildable(object):
         self.new_files = []
         self.env_vars_relative = {}
         self.commands = OrderedDict()
-        # List of glob-style patterns used to exclude files (not full paths).
-        self.ignores = []
         self.properties = tools.Properties()
 
     def set_property(self, name, value):
@@ -231,7 +229,7 @@ class _Buildable(object):
             # Even if the directory containing a resource has already been added,
             # we copy the resource since we might want to overwrite it.
             logging.debug('Copying %s to %s' % (source, dest))
-            tools.copy(source, dest, required, self.ignores)
+            tools.copy(source, dest, required)
 
 
 class Experiment(_Buildable):
