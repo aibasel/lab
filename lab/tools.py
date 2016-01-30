@@ -24,7 +24,6 @@ import re
 import shutil
 import subprocess
 import sys
-import traceback
 
 # Use simplejson where it's available, because it is compatible (just separately
 # maintained), puts no blanks at line endings and loads json much faster:
@@ -194,38 +193,6 @@ def find_file(filenames, dir='.'):
         if os.path.exists(path):
             return path
     raise IOError('none found in %r: %r' % (dir, filenames))
-
-
-def _get_module_name(filename):
-    basename = os.path.basename(filename)
-    if basename.endswith('.py'):
-        return basename[:-3]
-    elif basename.endswith('.pyc'):
-        return basename[:-4]
-    else:
-        return basename
-
-
-def import_python_file(filename):
-    filename = os.path.abspath(filename)
-    original_sys_path = sys.path[:]
-    sys.path = [os.path.dirname(filename)] + sys.path
-    module_name = _get_module_name(filename)
-
-    # If we have already loaded a file with the same basename, we need
-    # to delete the cached module before loading the new one.
-    if module_name in sys.modules:
-        del sys.modules[module_name]
-
-    try:
-        module = __import__(module_name)
-    except ImportError as err:
-        print traceback.format_exc()
-        logging.critical('File "%s" could not be imported: %s' % (filename, err))
-    else:
-        return module
-    finally:
-        sys.path = original_sys_path
 
 
 def _log_command(cmd, kwargs):
