@@ -63,8 +63,9 @@ class ErrorAbortHandler(logging.StreamHandler):
 
 
 def setup_logging(level):
-    # Python adds a default handler if some log is written before now
-    # Remove all handlers that have been added automatically
+    # Python adds a default handler if some log is written before this
+    # function is called. We therefore remove all handlers that have
+    # been added automatically.
     root_logger = logging.getLogger('')
     for handler in root_logger.handlers:
         root_logger.removeHandler(handler)

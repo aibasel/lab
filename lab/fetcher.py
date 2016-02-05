@@ -117,7 +117,7 @@ class Fetcher(object):
                 unxeplained_errors += 1
 
         if unxeplained_errors:
-            logging.warning('There were %d runs with unexplained errors.'
-                            % unxeplained_errors)
+            logging.warning(
+                'There were {} runs with unexplained errors.'.format(unxeplained_errors))
         tools.makedirs(eval_dir)
         combined_props.write()
