@@ -26,7 +26,8 @@ class Domain(object):
         self.domain = domain
         directory = os.path.join(benchmarks_dir, domain)
         problem_files = tools.natural_sort([
-            p for p in os.listdir(directory) if 'domain' not in p])
+            p for p in os.listdir(directory)
+            if 'domain' not in p and not p.endswith('.py')])
         self.problems = [
             Problem(benchmarks_dir, domain, problem)
             for problem in problem_files]
