@@ -28,7 +28,7 @@ NOT_AVAILABLE = None
 
 
 class RelativeReport(AbsoluteReport):
-    def __init__(self, resolution, rel_change=0.0, abs_change=0, **kwargs):
+    def __init__(self, resolution='combined', rel_change=0.0, abs_change=0, **kwargs):
         """
         Compare exactly two algorithms. For each problem and attribute
         add a table row with the two absolute values and their quotient.
@@ -38,8 +38,8 @@ class RelativeReport(AbsoluteReport):
         Only include pairs of attribute values x and y if
         abs(y/x - 1) >= *rel_change*.
 
-        Only add pairs of values to the result if their absolute
-        difference is bigger than *abs_change*.
+        Only include pairs of values if their absolute difference is
+        bigger than *abs_change*.
 
         If neither *rel_change* nor *abs_change* are given, no problem
         rows are filtered out.
@@ -52,7 +52,7 @@ class RelativeReport(AbsoluteReport):
     def write(self):
         if not len(self.algorithms) == 2:
             logging.critical(
-                'Relative reports are only possible for 2 algorithms. '
+                'Relative reports need exactly 2 algorithms. '
                 'Selected algorithms: "%s"' % self.algorithms)
         AbsoluteReport.write(self)
 
@@ -106,6 +106,7 @@ class RelativeReport(AbsoluteReport):
         return table
 
     def _add_summary_functions(self, table, attribute):
-        for funcname, func in [('avg', reports.avg), ('min', reports.minimum),
-                               ('max', reports.maximum), ('StdDev', reports.stddev)]:
+        for funcname, func in [
+                ('avg', reports.avg), ('min', reports.minimum),
+                ('max', reports.maximum), ('StdDev', reports.stddev)]:
             table.add_summary_function(funcname.capitalize(), func)

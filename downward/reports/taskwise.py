@@ -25,7 +25,7 @@ from downward.reports import PlanningReport
 
 class TaskwiseReport(PlanningReport):
     """
-    For each task, report all attributes in a single row.
+    For each task report all selected attributes in a single row.
 
     If the experiment contains more than one algorithm, use
     ``filter_algorithm='my_algorithm'`` to select exactly one algorithm
