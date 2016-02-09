@@ -16,7 +16,6 @@ from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import CompareConfigsReport
 from downward.reports.plot import ProblemPlotReport
-from downward.reports.relative import RelativeReport
 from downward.reports.scatter import ScatterPlotReport
 from downward.reports.suite import SuiteReport
 from downward.reports.taskwise import TaskwiseReport
@@ -159,20 +158,6 @@ exp.add_report(
     ProblemPlotReport(get_points=sat_vs_opt),
     name='report-plot-cat',
     outfile='plots')
-exp.add_report(
-    RelativeReport(
-        'domain',
-        attributes=['expansions'],
-        filter_algorithm=['lama11', 'iter-hadd'],
-        rel_change=0.1,
-        abs_change=20),
-    name='report-relative-d',)
-exp.add_report(
-    RelativeReport(
-        'problem',
-        attributes=['quality', 'coverage', 'expansions'],
-        filter_algorithm=['lama11', 'iter-hadd']),
-    name='report-relative-p')
 exp.add_report(
     CompareConfigsReport(
         [('lama11', 'iter-hadd')],
