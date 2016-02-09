@@ -37,7 +37,7 @@ from lab.reports.markup import Document, ESCAPE_WORDBREAK
 
 @tools.remove_none_values
 def prod(values):
-    """Computes the product of a list of numbers.
+    """Filter None values and compute the product.
 
     >>> round(prod([2, 3, 7]), 2)
     42.0
@@ -50,7 +50,7 @@ def prod(values):
 
 @tools.remove_none_values
 def avg(values):
-    """Compute the arithmetic mean of a list of numbers.
+    """Filter None values and compute the arithmetic mean.
 
     >>> avg([20, 30, 70])
     40.0
@@ -60,7 +60,7 @@ def avg(values):
 
 @tools.remove_none_values
 def gm(values):
-    """Compute the geometric mean of a list of numbers.
+    """Filter None values and compute the geometric mean.
 
     >>> round(gm([2, 8]), 2)
     4.0
@@ -116,10 +116,11 @@ class Attribute(str):
           values in a domain-wise table (e.g. ``coverage`` is absolute, whereas
           ``expansions`` is not, because we can't compare algorithms A and B
           for task X if B has no value for ``expansions``).
-        * *min_wins*: Set to True if a smaller value for this attribute is
-          better and to False otherwise (e.g. for ``coverage`` *min_wins* is
-          False, whereas it is True for ``expansions``).
-        * *functions*: Set the function or functions that are used to group values
+        * *min_wins*: Set to True if a smaller value for this attribute
+          is better, to False if a higher value is better and to None
+          if values can't be compared. (E.g. *min_wins* is False for
+          ``coverage``, but it is True for ``expansions``).
+        * *functions*: Set the function or functions used to group values
           of multiple runs for this attribute. The first entry is used to aggregate
           values for domain-wise reports (e.g. for ``coverage`` this is
           :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`). This can be a
@@ -129,12 +130,14 @@ class Attribute(str):
         most attributes. ::
 
             from lab.reports import minimum, maximum
-            avg_h = Attribute('average_h', min_wins=False,
-                              functions=[sum, minimum, maximum])
-            abstraction_done = Attribute('abstraction_done', absolute=True,
-                                         min_wins=False)
+            avg_h = Attribute(
+                'average_h', min_wins=False,
+                functions=[sum, minimum, maximum])
+            abstraction_done = Attribute(
+                'abstraction_done', absolute=True, min_wins=False)
 
-            Report(attributes=[avg_g, abstraction_done, 'coverage', 'expansions'])
+            Report(attributes=[
+                avg_h, abstraction_done, 'coverage', 'expansions'])
 
         """
         self.absolute = absolute
@@ -144,8 +147,9 @@ class Attribute(str):
         self.functions = functions
 
     def copy(self, name):
-        return Attribute(name, absolute=self.absolute, min_wins=self.min_wins,
-                         functions=self.functions)
+        return Attribute(
+            name, absolute=self.absolute, min_wins=self.min_wins,
+            functions=self.functions)
 
 
 class Report(object):
@@ -154,52 +158,57 @@ class Report(object):
     """
     def __init__(self, attributes=None, format='html', filter=None, **kwargs):
         """
-        *attributes* is a list of the attributes you want to include in your
-        report. If omitted, use all found numerical attributes. Globbing
+        Inherit from this or a child class to implement a custom report.
+
+        Depending on the type of output you want to make, you will have
+        to overwrite the :func:`write() <lab.reports.Report.write()>`,
+        :func:`get_text() <lab.reports.Report.get_text()>` or
+        :func:`get_markup() <lab.reports.Report.get_markup()>` methods.
+
+        *attributes* is the list of attributes you want to include in
+        your report. If omitted, use all numerical attributes. Globbing
         characters * and ? are allowed. Example: ::
 
-            Report(attributes=['translator_time_*'])
+            Report(attributes=['expansions', 'translator_time_*'])
 
-        When a report is made, both the available and the selected attributes
-        are printed on the commandline.
+        When a report is made, both the available and the selected
+        attributes are printed on the commandline.
 
-        *format* can be one of e.g. html, tex, wiki (MediaWiki),
-        gwiki (Google Code Wiki), doku (DokuWiki), pmw (PmWiki),
-        moin (MoinMoin), txt (Plain text) and art (ASCII art). Subclasses may
-        allow additional formats.
+        *format* can be one of e.g. html, tex, wiki (MediaWiki), gwiki
+        (Google Code Wiki), doku (DokuWiki), pmw (PmWiki), moin
+        (MoinMoin), txt (Plain text) and art (ASCII art). Subclasses
+        may allow additional formats.
 
-        If given, *filter* must be a function or a list of functions that
-        are passed a dictionary of a run's keys and values and return
-        True or False. Depending on the returned value, the run is included
-        or excluded from the report.
-        Alternatively, the function can return a dictionary that will overwrite
-        the old run's dictionary for the report.
+        If given, *filter* must be a function or a list of functions
+        that are passed a dictionary of a run's attribute keys and
+        values and return True or False. Depending on the returned
+        value, the run is included or excluded from the report.
+        Alternatively, the function can return a dictionary that will
+        overwrite the old run's dictionary for the report.
 
-        Filters for properties can be given in shorter form without defining a function
-        To include only runs where property p has value v, use *filter_p=v*.
-        To include only runs where property p has value v1, v2 or v3, use
-        *filter_p=[v1, v2, v3]*.
+        Filters for properties can be given in shorter form without
+        defining a function. To include only runs where attribute
+        ``foo`` has value v, use ``filter_foo=v``. To include only runs
+        where attribute ``foo`` has value v1, v2 or v3, use
+        ``filter_foo=[v1, v2, v3]``.
 
         Examples:
 
-        Include only *coverage* and *expansions* in the report and write a
-        LaTeX file at ``myreport.tex``::
+        Include only *coverage* and *expansions* in a LaTeX report::
 
-            report = Report(attributes=['coverage', 'expansions'], format='tex')
-            report(path_to_eval_dir, 'myreport.tex')
+            exp.add_report(Report(
+                attributes=['coverage', 'expansions'], format='tex'))
 
         Only include successful runs in the report::
 
-            report = Report(filter_coverage=1)
-            report(path_to_eval_dir, 'myreport.html')
+            exp.add_report(Report(filter_coverage=1))
 
         Only include runs in the report where the time score is better
         than the memory score::
 
             def better_time_than_memory_score(run):
                 return run['score_search_time'] > run['score_memory']
-            report = Report(filter=better_time_than_memory_score)
-            report(path_to_eval_dir, 'myreport.html')
+            exp.add_report(Report(filter=better_time_than_memory_score))
 
         Rename, filter and sort algorithms::
 
@@ -214,13 +223,15 @@ class Report(object):
             # Filters defined with key word arguments are evaluated last,
             # so we use the updated algorithm names here.
             algorithms = ['LAMA 2011', 'FDSS 1']
-            Report(filter=rename_algorithms, filter_algorithm=algorithms)
+            exp.add_report(Report(
+                filter=rename_algorithms, filter_algorithm=algorithms))
 
-        Only allow runs with a timeout in one of two domains::
+        Only include runs from blocks and barman with a timeout::
 
-            report = Report(attributes=['coverage'],
-                            filter_domain=['blocks', 'barman'],
-                            filter_search_timeout=1)
+            exp.add_report(Report(
+                filter_domain=['blocks', 'barman'],
+                filter_search_timeout=1))
+
         """
         if isinstance(attributes, basestring):
             attributes = [attributes]
@@ -233,8 +244,12 @@ class Report(object):
     def __call__(self, eval_dir, outfile):
         """Make the report.
 
-        *eval_dir* must be a path to an evaluation directory containing a
-        ``properties`` file.
+        This method is called automatically when the report step is
+        executed. It loads the data and calls :func:`write()
+        <lab.reports.Report.write()>`.
+
+        *eval_dir* must be a path to an evaluation directory containing
+        a ``properties`` file.
 
         The report will be written to *outfile*.
         """
@@ -244,7 +259,7 @@ class Report(object):
         self.eval_dir = os.path.abspath(eval_dir)
         # It would be nice if we could infer "format" from "outfile", but the
         # former is needed before the latter is available.
-        # Also we cannot add the extension ".format" to "outfile" in case it's
+        # Also we can't add the extension ".format" to "outfile" in case it's
         # missing, because "outfile" might be a directory.
         self.outfile = os.path.abspath(outfile)
 
@@ -312,10 +327,8 @@ class Report(object):
 
     def get_markup(self):
         """
-        If ``get_text()`` is not overwritten, this method can be overwritten in
-        subclasses that want to return the report as
-        `txt2tags <http://txt2tags.org/>`_ markup. The default ``get_text()``
-        method converts that markup into *format*.
+        Return `txt2tags <http://txt2tags.org/>`_ markup for the report.
+
         """
         table = Table()
         for run_id, run in self.props.items():
@@ -331,9 +344,12 @@ class Report(object):
 
     def get_text(self):
         """
-        This method should be overwritten in subclasses that want to produce
-        e.g. HTML or LaTeX markup or programming code directly instead of
-        creating `txt2tags <http://txt2tags.org/>`_ markup.
+        Return text (e.g., HTML, LaTeX, etc.) for the report.
+
+        By default this method calls :func:`get_markup()
+        <lab.reports.Report.get_markup()>` and converts the markup to
+        the desired output *format*.
+
         """
         name, ext = os.path.splitext(os.path.basename(self.outfile))
         doc = Document(title=name)
@@ -355,8 +371,15 @@ class Report(object):
 
     def write(self):
         """
-        Overwrite this method if you want to write the report directly. You
-        should write the report to *self.outfile*.
+        Write the report files.
+
+        By default this method calls :func:`get_text()
+        <lab.reports.Report.get_text()>` and writes the obtained text
+        to *outfile*.
+
+        Overwrite this method if you want to write the report file(s)
+        directly. You should write them to *self.outfile*.
+
         """
         content = self.get_text()
         tools.makedirs(os.path.dirname(self.outfile))
