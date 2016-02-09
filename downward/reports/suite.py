@@ -24,24 +24,22 @@ from downward.reports import PlanningReport
 class SuiteReport(PlanningReport):
     """Write a list of problems to a python file.
 
-    The data can be filtered by the filter functions passed to the constructor.
-    All the runs are checked whether they pass the filters and the remaining
-    runs are sorted, the duplicates are removed and the resulting list of
-    problems is written to the output file.
+    The data can be filtered by the filter functions passed to the
+    constructor. All the runs are checked whether they pass the filters
+    and the remaining runs are sorted, the duplicates are removed and
+    the resulting list of problems is written to the output file.
 
-    Write a suite with solved problems: ::
+    Write a suite with solved problems::
 
-        exp.add_report(SuiteReport(filter_coverage=1), outfile='solved.py')
+        exp.add_report(
+            SuiteReport(filter_coverage=1), outfile='solved.py')
+
     """
     def __init__(self, **kwargs):
         kwargs.setdefault('format', 'py')
         PlanningReport.__init__(self, **kwargs)
 
     def get_text(self):
-        """
-        We do not need any markup processing or loop over attributes here,
-        so the get_text() method is implemented right here.
-        """
         tasks = ['%s:%s' % task for task in self.problems]
         lines = ['        "%s",' % task for task in tools.natural_sort(tasks)]
         return 'def suite():\n    return [\n%s\n]\n' % '\n'.join(lines)
