@@ -15,7 +15,6 @@ from lab.reports.filter import FilterReport
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import CompareConfigsReport
-from downward.reports.ipc import IpcReport
 from downward.reports.plot import ProblemPlotReport
 from downward.reports.relative import RelativeReport
 from downward.reports.scatter import ScatterPlotReport
@@ -160,10 +159,6 @@ exp.add_report(
     ProblemPlotReport(get_points=sat_vs_opt),
     name='report-plot-cat',
     outfile='plots')
-exp.add_report(
-    IpcReport(attributes=['quality']),
-    name='report-ipc',
-    outfile='ipc.tex')
 exp.add_report(
     RelativeReport(
         'domain',
