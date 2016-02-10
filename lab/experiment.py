@@ -106,7 +106,7 @@ class _Buildable(object):
 
             run.add_resource('DOMAIN', 'benchmarks/gripper/domain.pddl')
             run.add_resource('PROBLEM', 'benchmarks/gripper/prob01.pddl')
-            run.add_command('find-plan', ['PLANNER', 'DOMAIN', 'PROBLEM'])
+            run.add_command('solve', ['PLANNER', 'DOMAIN', 'PROBLEM'])
 
         """
         if dest == '':
@@ -161,9 +161,9 @@ class _Buildable(object):
             # Add command to a specific run.
             run.add_command('list-directory', ['ls', '-al'])
             run.add_command(
-                'solver', [path-to-my-solver, 'input-file'], time_limit=60)
+                'solver', [path-to-solver, 'input-file'], time_limit=60)
             run.add_command(
-                'preprocess', ['path-to-preprocessor'], stdin='output.sas')
+                'preprocess', ['preprocessor-path'], stdin='output.sas')
 
             # Add parser to each run part of the experiment.
             exp.add_command('parser', ['path-to-my-parser'])
@@ -314,8 +314,8 @@ class Experiment(_Buildable):
         >>> import subprocess
         >>> from lab.experiment import Experiment
         >>> exp = Experiment('/tmp/myexp')
-        >>> exp.add_step('remove-eval-dir', shutil.rmtree, exp.eval_dir)
-        >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello world'])
+        >>> exp.add_step('rm-eval-dir', shutil.rmtree, exp.eval_dir)
+        >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
         self.steps.append(Step(name, function, *args, **kwargs))
