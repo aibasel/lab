@@ -247,8 +247,9 @@ class PgfPlots(object):
         elif isinstance(location, (list, tuple)):
             return {'at': location}
         else:
-            logging.critical('Legend location "%s" is unavailable in pgfplots' %
-                             str(location))
+            logging.critical(
+                'Legend location "{}" is unavailable in pgfplots'.format(
+                    location))
 
     @classmethod
     def _format_options(cls, options):
@@ -276,42 +277,46 @@ class PlotReport(PlanningReport):
                  'right', 'center left', 'center right', 'lower center',
                  'upper center', 'center']
 
-    def __init__(self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
-                 xlim_left=None, xlim_right=None, ylim_bottom=None, ylim_top=None,
-                 legend_location='upper right', category_styles=None, params=None,
-                 **kwargs):
+    def __init__(
+            self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
+            xlim_left=None, xlim_right=None, ylim_bottom=None, ylim_top=None,
+            legend_location='upper right', category_styles=None, params=None,
+            **kwargs):
         """
-        The inherited *format* parameter can be set to 'png' (default), 'eps',
-        'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the latter a pgfplots
-        plot is created.
+        The inherited *format* parameter can be set to 'png' (default),
+        'eps', 'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the
+        latter a pgfplots plot is created.
 
         If *title* is given it will be used for the name of the plot.
-        Otherwise, the only given attribute will be the title. If none is given,
-        there will be no title.
+        Otherwise, the only given attribute will be the title. If none
+        is given, there will be no title.
 
-        *xscale* and *yscale* can have the values 'linear', 'log' or 'symlog'.
-        If omitted sensible defaults will be used.
+        *xscale* and *yscale* can have the values 'linear', 'log' or
+        'symlog'. If omitted sensible defaults will be used.
 
-        *legend_location* must be a (x, y) pair or one of the following:
-        'upper right', 'upper left', 'lower left', 'lower right', 'right',
-        'center left', 'center right', 'lower center', 'upper center',
-        'center'. If *legend_location* is None, no legend will be added. ::
+        *legend_location* must be a (x, y) pair or one of the
+        following: 'upper right', 'upper left', 'lower left', 'lower
+        right', 'right', 'center left', 'center right', 'lower center',
+        'upper center', 'center'. If *legend_location* is None, no
+        legend will be added. ::
 
             # Some example positions.
-            legend_location='lower left'  # Lower left corner *inside* the plot
-            legend_location=(1.1, 0.5)    # Right of the plot
-            legend_location=(0.5, 1.1)    # Above the plot
-            legend_location=(0.5, -0.1)   # Below the plot
+            'lower left'  # Lower left corner *inside* the plot
+            (1.1, 0.5)    # Right of the plot
+            (0.5, 1.1)    # Above the plot
+            (0.5, -0.1)   # Below the plot
 
-        Subclasses may group the data points into categories. These categories
-        are separated visually by drawing them with different styles. You can
-        set the styles manually by providing a dictionary *category_styles* that
-        maps category names to dictionaries of matplotlib drawing parameters
-        (see http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot).
-        For example to change the default style to blue stars use::
+        Subclasses may group the data points into categories. These
+        categories are separated visually by drawing them with
+        different styles. You can set the styles manually by providing
+        a dictionary *category_styles* that maps category names to
+        dictionaries of matplotlib drawing parameters (see
+        http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot).
+        For example, to change the default style to blue stars use::
 
-            ScatterPlotReport(attributes=['expansions'],
-                              category_styles={None: {'marker': '*', 'c': 'b'}})
+            ScatterPlotReport(
+                attributes=['expansions'],
+                category_styles={None: {'marker': '*', 'c': 'b'}})
 
         *params* may be a dictionary of matplotlib rc parameters
         (see http://matplotlib.org/users/customizing.html)::
@@ -319,7 +324,7 @@ class PlotReport(PlanningReport):
             params = {
                 'font.family': 'serif',
                 'font.weight': 'normal',
-                'font.size': 20,  # Used if the more specific sizes are not set.
+                'font.size': 20,  # Used if more specific sizes not set.
                 'axes.labelsize': 20,
                 'axes.titlesize': 30,
                 'legend.fontsize': 22,
@@ -331,7 +336,8 @@ class PlotReport(PlanningReport):
                 'figure.figsize': [8, 8],  # Width and height in inches.
                 'savefig.dpi': 100,
             }
-            ScatterPlotReport(attributes=['initial_h_value'], params=params)
+            ScatterPlotReport(
+                attributes=['initial_h_value'], params=params)
 
         """
         kwargs.setdefault('format', 'png')
@@ -463,7 +469,7 @@ class ProblemPlotReport(PlotReport):
             ProblemPlotReport(attributes=['expansions'])
 
             # Compare different iPDB and M&S configurations.
-            # Algorithms: 'ipdb-1000', 'ipdb-2000', 'mas-1000', 'mas-2000'
+            # Algorithms: 'ipdb-100', 'ipdb-200', 'mas-100', 'mas-200'
             def name_and_states(run):
                 name, states = run['algorithm'].split('-')
                 return {name: [(states, run.get('expansions'))]}
