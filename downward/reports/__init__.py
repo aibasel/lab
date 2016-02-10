@@ -110,7 +110,9 @@ class PlanningReport(Report):
             PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
         The constructor automatically adds two filters that together
-        compute and store IPC scores in the "quality" attribute.
+        compute and store IPC scores in the "quality" attribute. The
+        first caches the costs and the second computes and adds the IPC
+        score to each run.
 
         """
         # Set non-default options for some attributes.
