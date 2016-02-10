@@ -21,9 +21,10 @@ def get_shuffled_task_id(num_tasks, task_id):
 
 
 def run(num_tasks, task_id):
-    print 'Starting run {:>5}'.format(task_id)
-    task_id = get_shuffled_task_id(num_tasks, task_id)
-    subprocess.check_call(['./run'], cwd=get_run_dir(task_id))
+    shuffled_task_id = get_shuffled_task_id(num_tasks, task_id)
+    print 'Starting task {} ({}/{})'.format(
+        shuffled_task_id, task_id, num_tasks)
+    subprocess.check_call(['./run'], cwd=get_run_dir(shuffled_task_id))
 
 
 def main():
