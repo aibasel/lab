@@ -91,14 +91,10 @@ class PlanningReport(Report):
         'build_options', 'driver_options', 'component_options'
     ]
 
-    def __init__(self, derived_properties=None, **kwargs):
+    def __init__(self, **kwargs):
         """
-        See :py:class:`Report <lab.reports.Report>` for inherited parameters.
-
-        *derived_properties* must be a function or a list of functions taking a
-        single argument. This argument is a list of problem runs i.e. it contains
-        one run-dictionary for each algorithm in the experiment. The function is
-        called for every problem in the suite.
+        See :py:class:`Report <lab.reports.Report>` for inherited
+        parameters.
 
         You can include only specific domains or algorithms by
         using :py:class:`filters <.Report>`. If you provide a list for
@@ -110,15 +106,13 @@ class PlanningReport(Report):
                 return run['algorithm'] in ['blind', 'lmcut']
             PlanningReport(filter=only_blind_and_lmcut)
 
-            # Filter with "filter_algorithm": list orders algorithms.
+            # Use "filter_algorithm": list orders algorithms.
             PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
-        """
-        # Allow specifying a single property or a list of properties.
-        if hasattr(derived_properties, '__call__'):
-            derived_properties = [derived_properties]
-        self.derived_properties = derived_properties or []
+        The constructor automatically adds two filters that together
+        compute and store IPC scores in the "quality" attribute.
 
+        """
         # Set non-default options for some attributes.
         attributes = tools.make_list(kwargs.get('attributes') or [])
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
@@ -160,7 +154,6 @@ class PlanningReport(Report):
 
     def _scan_data(self):
         self._scan_planning_data()
-        self._compute_derived_properties()
         Report._scan_data(self)
 
     def _scan_planning_data(self):
@@ -242,15 +235,6 @@ class PlanningReport(Report):
         assert len(self.domains) * len(self.algorithms) == len(self.domain_algorithm_runs)
         assert (sum(len(runs) for runs in self.domain_algorithm_runs.values()) ==
                 len(self.runs))
-
-    def _compute_derived_properties(self):
-        for func in self.derived_properties:
-            for (domain, problem), runs in self.problem_runs.items():
-                func(runs)
-                # Update the data with the new properties.
-                for run in runs:
-                    run_id = '-'.join((run['algorithm'], run['domain'], run['problem']))
-                    self.props[run_id] = run
 
     def _get_warnings_table(self):
         """
