@@ -109,8 +109,7 @@ class FastDownwardExperiment(Experiment):
     * Step 2: run experiment
     * Step 3: fetch results and save them in ``<path>-eval``
 
-    You can add report steps with
-    :meth:`~.FastDownwardExperiment.add_report`.
+    You can add report steps with :meth:`.add_report`.
 
     """
 
