@@ -97,10 +97,6 @@ class PlanningReport(Report):
             # Filter with "filter_algorithm": list orders algorithms.
             PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
-        Tip: When you append ``_relative`` to an attribute, you will get a table
-        containing the attribute's values of each algorithm relative to the
-        leftmost column.
-
         """
         # Allow specifying a single property or a list of properties.
         if hasattr(derived_properties, '__call__'):
@@ -110,8 +106,6 @@ class PlanningReport(Report):
         # Set non-default options for some attributes.
         attributes = tools.make_list(kwargs.get('attributes') or [])
         kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
-
-        self._handle_relative_attributes(kwargs['attributes'])
 
         # Remember the order of algorithms if it is given as a keyword argument filter.
         self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
@@ -124,12 +118,13 @@ class PlanningReport(Report):
         unxeplained_errors = 0
         for run in self.runs.values():
             if run.get('error', '').startswith('unexplained'):
-                logging.warning('Unexplained error in \'%s\': %s' %
-                                (run.get('run_dir'), run.get('error')))
+                logging.warning(
+                    'Unexplained error in "{run_dir}": {error}'.format(**run))
                 unxeplained_errors += 1
         if unxeplained_errors:
-            logging.warning('There were %s runs with unexplained errors.' %
-                            unxeplained_errors)
+            logging.warning(
+                'There were {} runs with unexplained errors.'.format(
+                    unxeplained_errors))
         return markup
 
     def _prepare_attribute(self, attr):
@@ -137,39 +132,9 @@ class PlanningReport(Report):
             if attr in self.ATTRIBUTES:
                 return self.ATTRIBUTES[attr]
             for pattern in self.ATTRIBUTES.values():
-                if (fnmatch(attr, pattern) or fnmatch(attr, pattern + '_relative')):
+                if (fnmatch(attr, pattern)):
                     return pattern.copy(attr)
         return Report._prepare_attribute(self, attr)
-
-    def _get_relative_attribute_function(self, attr):
-        def get_ratio(v1, v2):
-            try:
-                return v2 / v1
-            except (TypeError, ZeroDivisionError):
-                pass
-            return None
-
-        def relative_attr(runs):
-            relname = '%s_relative' % attr
-            first_val = runs[0].get(attr)
-            for run in runs:
-                val = run.get(attr)
-                if (all(isinstance(v, (list, tuple)) for v in [first_val, val]) and
-                        len(first_val) == len(val)):
-                    run[relname] = [get_ratio(v1, v2) for v1, v2 in zip(first_val, val)]
-                else:
-                    run[relname] = get_ratio(first_val, val)
-
-        return relative_attr
-
-    def _handle_relative_attributes(self, attributes):
-        for attr in attributes:
-            if attr.endswith('_relative'):
-                # Change name, but keep parameters.
-                abs_attr = attr.copy(attr[:-len('_relative')])
-                attr.functions = [reports.gm, reports.avg]
-                self.derived_properties.append(
-                    self._get_relative_attribute_function(abs_attr))
 
     def _scan_data(self):
         self._scan_planning_data()
