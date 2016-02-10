@@ -26,7 +26,6 @@ import multiprocessing
 import os.path
 
 from lab.experiment import Run, Experiment, get_default_data_dir
-from lab import tools
 
 from downward.cached_revision import CachedRevision
 from downward import suites
@@ -118,15 +117,15 @@ class FastDownwardExperiment(Experiment):
     DEFAULT_SEARCH_TIME_LIMIT = "30m"
     DEFAULT_SEARCH_MEMORY_LIMIT = "2G"
 
-    def __init__(self, path=None, environment=None, cache_dir=None):
+    def __init__(self, path=None, environment=None, revision_cache=None):
         """
         See :class:`lab.experiment.Experiment` for an explanation of
         the *path* and *environment* parameters.
 
-        *cache_dir* is used to cache temporary data. It defaults to
-        ``<scriptdir>/data/``. Compiled Fast Downward revisions are
-        cached under ``<cache_dir>/revision-cache/``. This directory can
-        become very large since each revision uses about 30 MB.
+        *revision_cache* is the directory for caching Fast Downward
+        revisions. It defaults to ``<scriptdir>/data/revision-cache``.
+        This directory can become very large since each revision uses
+        about 30 MB.
 
         >>> from lab.environments import MaiaEnvironment
         >>> env = MaiaEnvironment(priority=-2)
@@ -135,9 +134,8 @@ class FastDownwardExperiment(Experiment):
         """
         Experiment.__init__(self, path=path, environment=environment)
 
-        cache_dir = cache_dir or get_default_data_dir()
-        tools.makedirs(cache_dir)
-        self.revision_cache_dir = os.path.join(cache_dir, 'revision-cache')
+        self.revision_cache = revision_cache or os.path.join(
+            get_default_data_dir(), 'revision-cache')
 
         self._suites = defaultdict(list)
 
@@ -293,7 +291,7 @@ class FastDownwardExperiment(Experiment):
 
     def _cache_revisions(self):
         for cached_rev in self._get_unique_cached_revisions():
-            cached_rev.cache(self.revision_cache_dir)
+            cached_rev.cache(self.revision_cache)
 
     def _add_code(self):
         """Add the compiled code to the experiment."""

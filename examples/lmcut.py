@@ -21,9 +21,9 @@ else:
     REPO = os.path.expanduser('~/projects/Downward/downward')
     ENV = LocalEnvironment(processes=2)
 BENCHMARKS = os.path.join(REPO, 'benchmarks')
-CACHE_DIR = os.path.expanduser('~/lab')
+REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 
-exp = FastDownwardExperiment(environment=ENV, cache_dir=CACHE_DIR)
+exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 exp.add_suite(BENCHMARKS, SUITE)
 exp.add_algorithm(
     'lmcut', REPO, 'tip', ['--search', 'astar(lmcut())'])

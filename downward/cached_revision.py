@@ -124,8 +124,8 @@ class CachedRevision(object):
         else:
             return self.global_rev
 
-    def cache(self, revision_cache_dir):
-        self._path = os.path.join(revision_cache_dir, self._hashed_name)
+    def cache(self, revision_cache):
+        self._path = os.path.join(revision_cache, self._hashed_name)
         if os.path.exists(self.path):
             logging.info('Revision is already cached: "%s"' % self.path)
             if not os.path.exists(self._get_sentinel_file()):

@@ -28,13 +28,13 @@ if REMOTE:
 else:
     REPO = '/home/jendrik/projects/Downward/downward'
     ENV = LocalEnvironment(processes=4)
-CACHE_DIR = os.path.expanduser('~/lab')
+REV_CACHE = os.path.expanduser('~/lab/revision-cache')
 BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
 REV = 'tip'
 ATTRIBUTES = ['coverage']
 EXPNAME = 'showcase-options'
 
-exp = FastDownwardExperiment(environment=ENV, cache_dir=CACHE_DIR)
+exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
 
 exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'mystery:prob07.pddl'])
 exp.add_suite(BENCHMARKS_DIR, 'zenotravel:pfile1')
