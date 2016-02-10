@@ -187,27 +187,27 @@ class FastDownwardExperiment(Experiment):
         revision.
 
         *name* is a string describing the algorithm (e.g.
-        "issue123-lmcut").
+        ``"issue123-lmcut"``).
 
         *repo* must be a path to a Fast Downward repository.
 
-        *rev* must be a valid revision in the given repository (e.g.
-        "default", "tip", "issue123").
+        *rev* must be a valid revision in the given repository (e.g.,
+        ``"default"``, ``"tip"``, ``"issue123"``).
 
         *component_options* must be a list of strings. By default these
         options are passed to the search component. Use
-        "--translate-options", "--preprocess-options" or
-        "--search-options" within the component options to override the
-        default for the following options, until overridden again.
+        ``"--translate-options"``, ``"--preprocess-options"`` or
+        ``"--search-options"`` within the component options to override
+        the default for the following options, until overridden again.
 
         If given, *build_options* must be a list of strings. They will
         be passed to the ``build.py`` script. Options can be build
-        names (e.g., "release32", "debug64"), ``build.py`` options
-        (e.g., "--debug") or options for Make. The list is always
-        prepended with ``["-j<num_cpus>"]``. This setting can be
+        names (e.g., ``"release32"``, ``"debug64"``), ``build.py``
+        options (e.g., ``"--debug"``) or options for Make. The list is
+        always prepended with ``["-j<num_cpus>"]``. This setting can be
         overriden, e.g., ``driver_options=["-j1"]`` builds the planner
         using a single CPU. If *build_options* is omitted, the
-        "release32" version is built using all CPUs.
+        ``"release32"`` version is built using all CPUs.
 
         If given, *driver_options* must be a list of strings. They will
         be passed to the ``fast-downward.py`` script. See
@@ -225,7 +225,8 @@ class FastDownwardExperiment(Experiment):
         Test iPDB in the latest revision on the default branch:
 
         >>> exp.add_algorithm(
-        ...     "ipdb", repo, "default", ["--search", "astar(ipdb())"])
+        ...     "ipdb", repo, "default",
+        ...     ["--search", "astar(ipdb())"])
 
         Test LM-Cut in an issue experiment:
 

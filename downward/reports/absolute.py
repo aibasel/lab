@@ -26,7 +26,9 @@ from downward.reports import PlanningReport
 
 class AbsoluteReport(PlanningReport):
     """
-    Write an absolute report about the attribute attribute, e.g.
+    Report absolute values for the selected attributes.
+
+    Example output:
 
         +------------+--------+--------+
         | expansions | hFF    | hCEA   |
@@ -36,20 +38,25 @@ class AbsoluteReport(PlanningReport):
         | zenotravel | 21     | 17     |
         +------------+--------+--------+
 
-    This report should be part of all your Fast Downward experiments as it
-    automatically generates a table of unexplained errors, e.g. invalid solutions,
-    unexpected timeouts and memory overflows. You should make sure that you
-    check where the errors come from.
+    This report should be part of all your Fast Downward experiments as
+    it includes a table of unexplained errors, e.g. invalid solutions,
+    segmentation faults, etc.
+
     """
     def __init__(self, resolution='combined', colored=True, **kwargs):
         """
-        *resolution* must be one of "domain" or "problem" or "combined" (default).
+        *resolution* must be one of "domain", "problem" or "combined"
+        (default).
 
-        If *colored* is True, the values of each row will be given colors from a
-        colormap. Only HTML reports can be colored currently.
+        If *colored* is True, the values of each row will be given
+        colors from a colormap. Currently, only HTML reports can be
+        colored.
+
         """
         PlanningReport.__init__(self, **kwargs)
-        assert resolution in ['domain', 'problem', 'combined']
+        resolutions = ['domain', 'problem', 'combined']
+        if resolution not in resolutions:
+            logging.critical("resolution must be one of {}".format(resolutions))
         self.resolution = resolution
         if colored and 'html' not in self.output_format:
             logging.info('Only HTML reports can be colored. Setting colored=False.')
