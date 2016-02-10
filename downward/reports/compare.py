@@ -19,56 +19,60 @@
 import logging
 
 from lab import reports
+
 from downward.reports.absolute import AbsoluteReport
 
 
-# TODO: CompareConfigsReport -> CompareAlgorithmsReport
-class CompareConfigsReport(AbsoluteReport):
-    """Allows to compare pairs of algorithms."""
-    # TODO: compared_configs -> compared_algorithms
-    def __init__(self, compared_configs, **kwargs):
+class ComparativeReport(AbsoluteReport):
+    """Compare pairs of algorithms."""
+    def __init__(self, algorithm_pairs, **kwargs):
         """
         See :py:class:`AbsoluteReport <downward.reports.absolute.AbsoluteReport>`
         for inherited parameters.
 
-        *compared_configs* is a list of tuples of 2 or 3 elements. The first two entries
-        in each tuple are configs that should be compared. If a third entry is present it
-        is used as the name of the column showing the difference between the two configs.
-        Otherwise the column will be named 'Diff'.
-        All columns in the report will be arranged such that the configurations that are
-        compared are next to each other. After those two columns a diff column is added
-        that shows the difference between the two values. If a config occurs in more than
-        one comparison it is repeated every time. Configs that are in the original data
-        but are not mentioned in compared_configs are not printed.
-        For example if the data contains configs A, B, C and D and *compared_configs* is
-        ``[('A', 'B', 'Diff BA'), ('A', 'C')]`` the resulting columns will be
-        A, B, Diff BA (contains B - A), A, C , Diff (contains C - A).
+        *algorithm_pairs* is the list of algorithm pairs you want to
+        compare.
+
+        All columns in the report will be arranged such that the
+        compared algorithms appear next to each other. After the two
+        columns containing absolute values for the compared algorithms,
+        a third column ("Diff") is added showing the difference between
+        the two values.
+
+        Algorithms may appear in multiple comparisons. Algorithms not
+        mentioned in *algorithm_pairs* are not included in the report.
+
+        If you want to compare algorithms A and B, instead of a pair
+        ``('A', 'B')`` you may pass a triple ``('A', 'B', 'A vs.
+        B')``. The third entry of the triple will be used as the name
+        of the corresponding "Diff" column.
+
+        For example, if the properties file contains algorithms A, B, C
+        and D and *algorithm_pairs* is ``[('A', 'B', 'Diff BA'), ('A',
+        'C')]`` the resulting columns will be A, B, Diff BA (contains B
+        - A), A, C , Diff (contains C - A).
 
         Example::
 
-            compared_configs = [
-                ('c406c4f77e13-astar_lmcut', '6e09db9b3003-astar_lmcut', 'Diff (lmcut)'),
-                ('c406c4f77e13-astar_ff', '6e09db9b3003-astar_ff', 'Diff (ff)')]
-            exp.add_report(CompareConfigsReport(compared_configs))
+            algorithm_pairs = [
+                ('default-lmcut', 'issue123-lmcut'),
+                ('default-ff', 'default-cea')]
+            exp.add_report(ComparativeReport(
+                algorithm_pairs, attributes=['expansions']))
 
         """
         if 'filter_algorithm' in kwargs:
             logging.critical(
-                'Filtering algorithms is not supported by '
-                'CompareConfigsReport. Use the parameter '
-                '"compared_configs" to define which algorithms are '
-                'shown and in what order they should appear.')
-        if compared_configs:
+                'ComparativeReport doesn\'t support "filter_algorithm". '
+                'Use "algorithm_pairs" to select and order algorithms.')
+        if algorithm_pairs:
             algos = set()
-            for tup in compared_configs:
-                for config in tup[:2]:
-                    algos.add(config)
+            for tup in algorithm_pairs:
+                for algo in tup[:2]:
+                    algos.add(algo)
             kwargs['filter_algorithm'] = algos
         AbsoluteReport.__init__(self, **kwargs)
-        self._compared_configs = compared_configs
-
-    def _get_compared_configs(self):
-        return self._compared_configs
+        self._algorithm_pairs = algorithm_pairs
 
     def _get_empty_table(self, attribute=None, title=None, columns=None):
         table = AbsoluteReport._get_empty_table(
@@ -76,37 +80,39 @@ class CompareConfigsReport(AbsoluteReport):
         summary_functions = [sum, reports.avg]
         if title == 'summary':
             summary_functions = []
-        diff_module = DiffColumnsModule(self._get_compared_configs(), summary_functions)
+        diff_module = DiffColumnsModule(self._algorithm_pairs, summary_functions)
         table.dynamic_data_modules.append(diff_module)
         return table
 
 
 class DiffColumnsModule(reports.DynamicDataModule):
-    """Adds multiple columns each comparing the values in two configs."""
-    def __init__(self, compared_configs, summary_functions):
+    """
+    Add multiple columns, each comparing the values of two algorithms.
+    """
+    def __init__(self, algorithm_pairs, summary_functions):
         """
-        See :py:class:`.CompareConfigsReport` for an explanation of how to set
-        the configs to compare with *compared_configs*.
+        See :py:class:`.ComparativeReport` for how to choose the
+        compared algorithms.
 
-        *summary_functions* is a list of functions that will be calculated for all
-        entries in the diff columns.
+        *summary_functions* is a list of functions that will be
+        calculated for all entries in the diff columns.
 
         Example::
 
-            compared_configs = [
-                ('c406c4f77e13-astar_lmcut', '6e09db9b3003-astar_lmcut', 'Diff (lmcut)'),
-                ('c406c4f77e13-astar_ff', '6e09db9b3003-astar_ff', 'Diff (ff)')]
+            algorithm_pairs = [
+                ('default-lmcut', 'issue123-lmcut', 'Diff (lmcut)'),
+                ('default-ff', 'issue123-ff', 'Diff (ff)')]
             summary_functions = [sum, reports.avg]
-            diff_module = DiffColumnsModule(compared_configs, summary_functions)
+            diff_module = DiffColumnsModule(algorithm_pairs, summary_functions)
             table.dynamic_data_modules.append(diff_module)
 
         """
-        self.compared_configs = []
+        self.header_names = []
         diff_column_names = set()
-        for t in compared_configs:
+        for tup in algorithm_pairs:
             diff_name = 'Diff'
-            if len(t) == 3:
-                diff_name = t[2]
+            if len(tup) == 3:
+                diff_name = tup[2]
             # diff_name is printed in the column header and does not have to be unique.
             # To identify the column we thus calculate a uniqe name.
             uniq_count = 0
@@ -115,7 +121,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
                 uniq_count += 1
                 col_name = 'diff_column_%s' % uniq_count
             diff_column_names.add(col_name)
-            self.compared_configs.append(((t[0], t[1]), diff_name, col_name))
+            self.header_names.append(((tup[0], tup[1]), diff_name, col_name))
         self.summary_functions = summary_functions
 
     def collect(self, table, cells):
@@ -126,7 +132,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
         columns have a value. Also add an empty header for a dummy column after every diff
         column.
         """
-        for col_names, diff_col_header, diff_col_name in self.compared_configs:
+        for col_names, diff_col_header, diff_col_name in self.header_names:
             non_none_values = []
             cells[table.header_row][diff_col_name] = diff_col_header
             for row_name in table.row_names:
@@ -152,7 +158,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
         each row.
         Do not format dummy columns and summary functions.
         """
-        for col_names, diff_col_header, diff_col_name in self.compared_configs:
+        for col_names, diff_col_header, diff_col_name in self.header_names:
             for row_name in table.row_names:
                 formatted_value = formatted_cells[row_name].get(diff_col_name)
                 try:
@@ -172,10 +178,11 @@ class DiffColumnsModule(reports.DynamicDataModule):
 
     def modify_printable_column_order(self, table, column_order):
         """
-        Reorder configs in the order defined by compared_configs. Hide all other columns.
+        Reorder algorithms in the order defined by algorithm_pairs.
+        Hide all other columns.
         """
         new_column_order = [table.header_column]
-        for col_names, diff_col_header, diff_col_name in self.compared_configs:
+        for col_names, diff_col_header, diff_col_name in self.header_names:
             if len(new_column_order) >= 4:
                 new_column_order.append('DiffDummy')
             for col_name in col_names:

@@ -14,7 +14,7 @@ from lab.reports.filter import FilterReport
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
-from downward.reports.compare import CompareConfigsReport
+from downward.reports.compare import ComparativeReport
 from downward.reports.plot import ProblemPlotReport
 from downward.reports.scatter import ScatterPlotReport
 from downward.reports.taskwise import TaskwiseReport
@@ -158,7 +158,7 @@ exp.add_report(
     name='report-plot-cat',
     outfile='plots')
 exp.add_report(
-    CompareConfigsReport(
+    ComparativeReport(
         [('lama11', 'iter-hadd')],
         attributes=['quality', 'coverage', 'expansions']),
     name='report-compare',

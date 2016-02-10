@@ -7,7 +7,7 @@ Tables
 .. autoclass:: downward.reports.PlanningReport
 .. autoclass:: downward.reports.absolute.AbsoluteReport
 .. autoclass:: downward.reports.taskwise.TaskwiseReport
-.. autoclass:: downward.reports.compare.CompareConfigsReport
+.. autoclass:: downward.reports.compare.ComparativeReport
 
 
 Plots
