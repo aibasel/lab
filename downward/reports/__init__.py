@@ -33,19 +33,40 @@ from lab import tools
 from lab.reports import Attribute, Report
 
 
-def quality(problem_runs):
-    """IPC score."""
-    min_cost = reports.minimum(run.get('cost') for run in problem_runs)
-    for run in problem_runs:
-        cost = run.get('cost')
-        if cost is None or not run.get('coverage'):
-            quality = 0.0
-        elif cost == 0:
+class QualityFilters(object):
+    """Compute the IPC score.
+
+    This class provide two filters. The first stores costs, the second
+    computes IPC scores.
+
+    """
+    def __init__(self):
+        self.tasks_to_costs = defaultdict(list)
+
+    def _get_task(self, run):
+        return (run['domain'], run['problem'])
+
+    def _compute_quality(self, cost, all_costs):
+        if cost is None:
+            return 0.0
+        min_cost = reports.minimum(all_costs)
+        if min_cost is None:
+            return 0.0
+        if cost == 0:
             assert min_cost == 0
-            quality = 1.0
-        else:
-            quality = min_cost / cost
-        run['quality'] = quality
+            return 1.0
+        return min_cost / cost
+
+    def store_costs(self, run):
+        cost = run.get('cost')
+        if cost is not None and run.get('coverage'):
+            self.tasks_to_costs[self._get_task(run)].append(cost)
+        return True
+
+    def add_quality(self, run):
+        run['quality'] = self._compute_quality(
+            run.get('cost'), self.tasks_to_costs[self._get_task(run)])
+        return run
 
 
 class PlanningReport(Report):
@@ -77,12 +98,7 @@ class PlanningReport(Report):
         *derived_properties* must be a function or a list of functions taking a
         single argument. This argument is a list of problem runs i.e. it contains
         one run-dictionary for each algorithm in the experiment. The function is
-        called for every problem in the suite. A function that computes the
-        IPC score based on the results of the experiment is added automatically
-        to the *derived_properties* list and serves as an example here:
-
-        .. literalinclude:: ../downward/reports/__init__.py
-           :pyobject: quality
+        called for every problem in the suite.
 
         You can include only specific domains or algorithms by
         using :py:class:`filters <.Report>`. If you provide a list for
@@ -110,8 +126,14 @@ class PlanningReport(Report):
         # Remember the order of algorithms if it is given as a keyword argument filter.
         self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
 
+        # Compute IPC scores.
+        quality_filters = QualityFilters()
+        filters = tools.make_list(kwargs.get('filter', []))
+        filters.append(quality_filters.store_costs)
+        filters.append(quality_filters.add_quality)
+        kwargs['filter'] = filters
+
         Report.__init__(self, **kwargs)
-        self.derived_properties.append(quality)
 
     def get_text(self):
         markup = Report.get_text(self)
