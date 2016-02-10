@@ -348,22 +348,15 @@ class Report(object):
         the markup to the desired output *format*.
 
         """
-        name, ext = os.path.splitext(os.path.basename(self.outfile))
+        name, _ = os.path.splitext(os.path.basename(self.outfile))
         doc = Document(title=name)
-        text = self.get_markup()
-
-        text = (
-            text or
+        doc.add_text(
+            self.get_markup() or
             'No tables were generated. '
             'This happens when no significant changes occured or '
             'if for all attributes and all problems never all '
             'algorithms had a value for this attribute in a '
             'domain-wise report.')
-
-        doc.add_text(text)
-        if len(text) < 100000:
-            print 'REPORT MARKUP:\n'
-            print doc
         return doc.render(self.output_format, {'toc': self.toc})
 
     def write(self):
