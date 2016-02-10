@@ -43,4 +43,4 @@ exp.add_report(
 
 exp.add_report(PiReport(), outfile='plot.dat')
 
-exp()
+exp.run_steps()

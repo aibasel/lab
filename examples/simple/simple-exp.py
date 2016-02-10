@@ -43,4 +43,4 @@ exp.add_report(
     outfile=reportfile)
 
 # Parse the commandline and run the specified steps.
-exp()
+exp.run_steps()

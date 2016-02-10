@@ -27,4 +27,4 @@ exp.add_algorithm('add', REPO, 'tip', ['--search', 'lazy_greedy(add())'])
 exp.add_report(AbsoluteReport('problem'), outfile='report-abs-p.html')
 exp.add_report(ScatterPlotReport(attributes='expansions'))
 
-exp()
+exp.run_steps()

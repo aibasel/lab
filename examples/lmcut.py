@@ -33,4 +33,4 @@ exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES), outfile='report.html')
 
 # Parse the commandline and show or run experiment steps.
-exp()
+exp.run_steps()

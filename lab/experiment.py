@@ -432,8 +432,6 @@ class Experiment(_Buildable):
         else:
             env = environments.LocalEnvironment()
         env.run_steps(steps)
-    # TODO: Remove backwards compatibility.
-    __call__ = run_steps
 
     def build(self, write_to_disk=True):
         """

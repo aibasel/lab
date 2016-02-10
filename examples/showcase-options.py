@@ -183,8 +183,4 @@ exp.add_step('finished', call, ['echo', 'Experiment', 'finished.'])
 
 
 if __name__ == '__main__':
-    # This method parses the commandline. We assume this file is called exp.py.
-    # Supported styles:
-    # ./exp.py 1
-    # ./exp.py 4 5 6
-    exp()
+    exp.run_steps()

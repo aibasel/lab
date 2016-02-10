@@ -59,4 +59,4 @@ exp.add_report(AbsoluteReport(attributes=['coverage', 'expansions']))
 exp.add_report(ProblemPlotReport(attributes=['expansions']))
 
 write_properties(exp.eval_dir)
-exp()
+exp.run_steps()

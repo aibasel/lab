@@ -26,4 +26,4 @@ exp.add_algorithm('ff', REPO, 'tip', ['--search', 'lazy_greedy(ff())'])
 
 exp.add_report(AbsoluteReport())
 
-exp()
+exp.run_steps()
