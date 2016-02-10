@@ -25,7 +25,7 @@ import logging
 import multiprocessing
 import os.path
 
-from lab.experiment import Run, Experiment
+from lab.experiment import Run, Experiment, get_default_data_dir
 from lab import tools
 
 from downward.cached_revision import CachedRevision
@@ -34,26 +34,6 @@ from downward import suites
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
-
-
-def _get_default_experiment_name():
-    """Get default name for experiment.
-
-    Derived from the filename of the main script, e.g.
-    "ham/spam/eggs.py" => "eggs".
-    """
-    return os.path.splitext(os.path.basename(tools.get_script_path()))[0]
-
-
-def _get_default_data_dir():
-    """E.g. "ham/spam/eggs.py" => "ham/spam/data/"."""
-    return os.path.join(tools.get_script_dir(), "data")
-
-
-def _get_default_experiment_dir():
-    """E.g. "ham/spam/eggs.py" => "ham/spam/data/eggs"."""
-    return os.path.join(
-        _get_default_data_dir(), _get_default_experiment_name())
 
 
 class FastDownwardRun(Run):
@@ -121,9 +101,8 @@ class _DownwardAlgorithm(object):
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
-    Experiments can be customized by adding the desired algorithms,
-    benchmarks and reports. See :class:`lab.experiment.Experiment` for
-    inherited methods.
+    You can customize an experiment by adding the desired algorithms,
+    benchmarks and reports.
 
     Fast Downward experiments consist of the following steps:
 
@@ -131,8 +110,8 @@ class FastDownwardExperiment(Experiment):
     * Step 2: run experiment
     * Step 3: fetch results and save them in ``<path>-eval``
 
-    You can add report steps with :py:func:`add_report()
-    <downward.experiment.FastDownwardExperiment.add_report>`.
+    You can add report steps with
+    :meth:`~.FastDownwardExperiment.add_report`.
 
     """
 
@@ -141,15 +120,8 @@ class FastDownwardExperiment(Experiment):
 
     def __init__(self, path=None, environment=None, cache_dir=None):
         """
-        The experiment will be built at *path*. It defaults to
-        ``<scriptdir>/data/<scriptname>/``. E.g., if your script is at
-        ``experiments/myexp.py``, *path* will be
-        ``experiments/data/myexp/``.
-
-        *environment* must be an :ref:`Environment <environments>`
-        instance. By default a :py:class:`LocalEnvironment
-        <lab.environments.LocalEnvironment>` is used and the experiment
-        is run locally.
+        See :class:`lab.experiment.Experiment` for an explanation of
+        the *path* and *environment* parameters.
 
         *cache_dir* is used to cache temporary data. It defaults to
         ``<scriptdir>/data/``. Compiled Fast Downward revisions are
@@ -161,10 +133,9 @@ class FastDownwardExperiment(Experiment):
         >>> exp = FastDownwardExperiment(environment=env)
 
         """
-        path = path or _get_default_experiment_dir()
-        Experiment.__init__(self, path, environment=environment)
+        Experiment.__init__(self, path=path, environment=environment)
 
-        cache_dir = cache_dir or _get_default_data_dir()
+        cache_dir = cache_dir or get_default_data_dir()
         tools.makedirs(cache_dir)
         self.revision_cache_dir = os.path.join(cache_dir, 'revision-cache')
 

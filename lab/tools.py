@@ -47,11 +47,6 @@ def get_script_path():
     return os.path.abspath(sys.argv[0])
 
 
-def get_script_dir():
-    """Get absolute path to directory of main script."""
-    return os.path.dirname(get_script_path())
-
-
 class ErrorAbortHandler(logging.StreamHandler):
     """
     Custom logging Handler that exits when a critical error is encountered.

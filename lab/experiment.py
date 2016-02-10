@@ -44,6 +44,26 @@ steps_group.add_argument(
     help='Run all steps.')
 
 
+def get_default_data_dir():
+    """E.g. "ham/spam/eggs.py" => "ham/spam/data/"."""
+    return os.path.join(os.path.dirname(tools.get_script_path()), "data")
+
+
+def _get_default_experiment_name():
+    """Get default name for experiment.
+
+    Derived from the filename of the main script, e.g.
+    "ham/spam/eggs.py" => "eggs".
+    """
+    return os.path.splitext(os.path.basename(tools.get_script_path()))[0]
+
+
+def _get_default_experiment_dir():
+    """E.g. "ham/spam/eggs.py" => "ham/spam/data/eggs"."""
+    return os.path.join(
+        get_default_data_dir(), _get_default_experiment_name())
+
+
 def get_run_dir(task_id):
     lower = ((task_id - 1) / SHARD_SIZE) * SHARD_SIZE + 1
     upper = ((task_id + SHARD_SIZE - 1) / SHARD_SIZE) * SHARD_SIZE
@@ -233,25 +253,54 @@ class _Buildable(object):
 
 
 class Experiment(_Buildable):
-    def __init__(self, path, environment=None):
+    """Base class for lab experiments.
+
+    An **experiment** consists of multiple **runs**. Each run consists
+    of multiple **commands**.
+
+    Here is a simple example:
+
+    >>> exp = Experiment()
+    >>> run = exp.add_run()
+    >>> run.add_command('greet', ['echo', 'hello world'])
+    >>> run.set_property('id', ['1'])  # Runs need unique IDs.
+
+    An **experiment** also has multiple **steps**. By default the
+    following ones are present:
+
+    * Build the experiment.
+    * Execute all runs.
+    * Fetch the results.
+
+    You can add report steps with :meth:`.add_report`.
+
+    You can start an experiment's steps by calling ::
+
+        exp.run_steps()
+
+    This will parse the commandline and execute the selected steps.
+
+    """
+    def __init__(self, path=None, environment=None):
         """
-        Create a new experiment that will be built at *path* using the methods
-        provided by :ref:`Environment <environments>` *environment*. If
-        *environment* is None, ``LocalEnvironment`` is used (default).
+        The experiment will be built at *path*. It defaults to
+        ``<scriptdir>/data/<scriptname>/``. E.g., for the script
+        ``experiments/myexp.py``, the default *path* will be
+        ``experiments/data/myexp/``.
 
-        An experiment consists of multiple steps. Every experiment will need at
-        least the following steps:
-
-        * Build the experiment.
-        * Run it.
-        * Fetch the results.
-        * Make a report.
-
-        In the "Run it" step all runs that have been added to the experiment
-        will be executed. Each run consists of one or multiple commands.
+        *environment* must be an :ref:`Environment <environments>`
+        instance. You can use
+        :class:`~lab.environments.LocalEnvironment` to run your
+        experiment on a single computer (default). If you have access
+        to the computer grids in Basel or Freiburg you can use the
+        predefined grid environments
+        :class:`~lab.environments.MaiaEnvironment` or
+        :class:`~lab.environments.GkiGridEnvironment`. Alternatively,
+        you can write your own :ref:`Environment <environments>` class.
 
         """
         _Buildable.__init__(self)
+        path = path or _get_default_experiment_dir()
         self.path = os.path.abspath(path)
         if any(char in self.path for char in (':', ',')):
             logging.critical('Path contains commas or colons: %s' % self.path)
