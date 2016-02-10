@@ -17,7 +17,6 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import CompareConfigsReport
 from downward.reports.plot import ProblemPlotReport
 from downward.reports.scatter import ScatterPlotReport
-from downward.reports.suite import SuiteReport
 from downward.reports.taskwise import TaskwiseReport
 
 
@@ -164,10 +163,6 @@ exp.add_report(
         attributes=['quality', 'coverage', 'expansions']),
     name='report-compare',
     outfile='compare.html')
-
-# Write suite of solved problems
-exp.add_report(
-    SuiteReport(filter=solved), name='report-suite', outfile='solved.py')
 
 exp.add_report(
     TaskwiseReport(

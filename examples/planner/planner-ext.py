@@ -10,7 +10,6 @@ import os.path
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
-from downward.reports.suite import SuiteReport
 from downward.reports.scatter import ScatterPlotReport
 
 
@@ -26,14 +25,6 @@ exp.add_algorithm('ff', REPO, 'tip', ['--search', 'lazy_greedy(ff())'])
 exp.add_algorithm('add', REPO, 'tip', ['--search', 'lazy_greedy(add())'])
 
 exp.add_report(AbsoluteReport('problem'), outfile='report-abs-p.html')
-
-
-def solved(run):
-    return run['coverage'] == 1
-
-
-exp.add_report(SuiteReport(filter=solved), outfile='suite.py')
-
 exp.add_report(ScatterPlotReport(attributes='expansions'))
 
 exp()
