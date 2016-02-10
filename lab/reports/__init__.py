@@ -161,9 +161,8 @@ class Report(object):
         Inherit from this or a child class to implement a custom report.
 
         Depending on the type of output you want to make, you will have
-        to overwrite the :func:`write() <lab.reports.Report.write()>`,
-        :func:`get_text() <lab.reports.Report.get_text()>` or
-        :func:`get_markup() <lab.reports.Report.get_markup()>` methods.
+        to overwrite the :meth:`.write`, :meth:`.get_text` or
+        :meth:`.get_markup` method.
 
         *attributes* is the list of attributes you want to include in
         your report. If omitted, use all numerical attributes. Globbing
@@ -245,8 +244,7 @@ class Report(object):
         """Make the report.
 
         This method is called automatically when the report step is
-        executed. It loads the data and calls :func:`write()
-        <lab.reports.Report.write()>`.
+        executed. It loads the data and calls :meth:`.write`.
 
         *eval_dir* must be a path to an evaluation directory containing
         a ``properties`` file.
@@ -346,9 +344,8 @@ class Report(object):
         """
         Return text (e.g., HTML, LaTeX, etc.) for the report.
 
-        By default this method calls :func:`get_markup()
-        <lab.reports.Report.get_markup()>` and converts the markup to
-        the desired output *format*.
+        By default this method calls :meth:`.get_markup` and converts
+        the markup to the desired output *format*.
 
         """
         name, ext = os.path.splitext(os.path.basename(self.outfile))
@@ -373,9 +370,8 @@ class Report(object):
         """
         Write the report files.
 
-        By default this method calls :func:`get_text()
-        <lab.reports.Report.get_text()>` and writes the obtained text
-        to *outfile*.
+        By default this method calls :meth:`.get_text` and writes the
+        obtained text to *outfile*.
 
         Overwrite this method if you want to write the report file(s)
         directly. You should write them to *self.outfile*.
