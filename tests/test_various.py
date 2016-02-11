@@ -56,7 +56,7 @@ def test_copy_dir_to_dir():
 
 
 def gm_old(values):
-    return reports.prod(values) ** (1 / len(values))
+    return tools.product(values) ** (1 / len(values))
 
 
 def test_gm1():

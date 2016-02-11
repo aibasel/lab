@@ -35,19 +35,6 @@ from lab.reports import markup
 from lab.reports.markup import Document, ESCAPE_WORDBREAK
 
 
-def prod(values):
-    """Compute the product of a sequence of numbers.
-
-    >>> round(prod([2, 3, 7]), 2)
-    42.0
-    """
-    assert None not in values
-    prod = 1
-    for value in values:
-        prod *= value
-    return prod
-
-
 def avg(values):
     """Compute the arithmetic mean of a sequence of numbers.
 
@@ -66,7 +53,7 @@ def gm(values):
     """
     assert None not in values
     exp = 1.0 / len(values)
-    return prod([val ** exp for val in values])
+    return tools.product([val ** exp for val in values])
 
 
 def function_name(f):

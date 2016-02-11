@@ -398,6 +398,19 @@ def get_min_max(items):
         return None, None
 
 
+def product(values):
+    """Compute the product of a sequence of numbers.
+
+    >>> round(product([2, 3, 7]), 2)
+    42.0
+    """
+    assert None not in values
+    prod = 1
+    for value in values:
+        prod *= value
+    return prod
+
+
 def rgb_fractions_to_html_color(r, g, b):
     return 'rgb(%d,%d,%d)' % (r * 255, g * 255, b * 255)
 
