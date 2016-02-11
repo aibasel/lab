@@ -69,12 +69,6 @@ def gm(values):
     return prod([val ** exp for val in values])
 
 
-def minimum(values):
-    """Compute the minimum of a sequence of numbers."""
-    assert None not in values
-    return min(values)
-
-
 def maximum(values):
     """Compute the maximum of a sequence of numbers."""
     assert None not in values

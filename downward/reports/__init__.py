@@ -49,9 +49,8 @@ class QualityFilters(object):
     def _compute_quality(self, cost, all_costs):
         if cost is None:
             return 0.0
-        min_cost = reports.minimum(all_costs)
-        if min_cost is None:
-            return 0.0
+        assert all_costs
+        min_cost = min(all_costs)
         if cost == 0:
             assert min_cost == 0
             return 1.0
