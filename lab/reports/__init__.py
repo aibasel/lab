@@ -69,12 +69,6 @@ def gm(values):
     return prod([val ** exp for val in values])
 
 
-def maximum(values):
-    """Compute the maximum of a sequence of numbers."""
-    assert None not in values
-    return max(values)
-
-
 def stddev(values):
     """Compute the standard deviation of a sequence of numbers.
 
@@ -117,10 +111,9 @@ class Attribute(str):
         The ``downward`` package automatically uses appropriate settings for
         most attributes. ::
 
-            from lab.reports import minimum, maximum
             avg_h = Attribute(
                 'average_h', min_wins=False,
-                functions=[sum, minimum, maximum])
+                functions=[sum, min, max])
             abstraction_done = Attribute(
                 'abstraction_done', absolute=True, min_wins=False)
 
