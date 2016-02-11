@@ -99,19 +99,6 @@ class deprecated(object):
         return new_func
 
 
-def remove_none_values(func):
-    """
-    Remove all None values from the input list and call the original function.
-    """
-    @functools.wraps(func)
-    def new_func(values):
-        values = [val for val in values if val is not None]
-        if not values:
-            return None
-        return func(values)
-    return new_func
-
-
 def make_list(value):
     if isinstance(value, list):
         return value

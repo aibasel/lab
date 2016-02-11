@@ -35,65 +35,59 @@ from lab.reports import markup
 from lab.reports.markup import Document, ESCAPE_WORDBREAK
 
 
-@tools.remove_none_values
 def prod(values):
-    """Filter None values and compute the product.
+    """Compute the product of a sequence of numbers.
 
     >>> round(prod([2, 3, 7]), 2)
     42.0
     """
+    assert None not in values
     prod = 1
     for value in values:
         prod *= value
     return prod
 
 
-@tools.remove_none_values
 def avg(values):
-    """Filter None values and compute the arithmetic mean.
+    """Compute the arithmetic mean of a sequence of numbers.
 
     >>> avg([20, 30, 70])
     40.0
     """
+    assert None not in values
     return math.fsum(values) / len(values)
 
 
-@tools.remove_none_values
 def gm(values):
-    """Filter None values and compute the geometric mean.
+    """Compute the geometric mean of a sequence of numbers.
 
     >>> round(gm([2, 8]), 2)
     4.0
     """
+    assert None not in values
     exp = 1.0 / len(values)
     return prod([val ** exp for val in values])
 
 
-@tools.remove_none_values
 def minimum(values):
-    """Filter out None values and return the minimum.
-
-    If there are only None values, return None.
-    """
+    """Compute the minimum of a sequence of numbers."""
+    assert None not in values
     return min(values)
 
 
-@tools.remove_none_values
 def maximum(values):
-    """Filter out None values and return the maximum.
-
-    If there are only None values, return None.
-    """
+    """Compute the maximum of a sequence of numbers."""
+    assert None not in values
     return max(values)
 
 
-@tools.remove_none_values
 def stddev(values):
-    """Compute the standard deviation of a list of numbers.
+    """Compute the standard deviation of a sequence of numbers.
 
     >>> stddev([2, 4, 4, 4, 5, 5, 7, 9])
     2.0
     """
+    assert None not in values
     n = len(values)
     mu = avg(values)
     return math.sqrt((sum((v - mu) ** 2 for v in values) / n))

@@ -65,16 +65,6 @@ def test_gm1():
         assert round(gm_old(l), 2) == round(gm(l), 2)
 
 
-def test_none_removal():
-    @tools.remove_none_values
-    def minimum(values):
-        return min(values)
-
-    assert minimum([1, 2]) == 1
-    assert minimum([1, 2, None]) == 1
-    assert minimum([None, None]) == None
-
-
 def test_colors():
     row = {'col 1' : 0, 'col 2' : 0.5, 'col 3' : 1}
     expected_min_wins = {'col 1' : (0.0, 0.7, 0.0), 'col 2' : (0.0, 0.7, 0.7), 'col 3' : (0.0, 0.0, 0.7)}
