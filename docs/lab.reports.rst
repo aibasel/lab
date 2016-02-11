@@ -1,7 +1,7 @@
 :mod:`lab.reports` -- Make reports
 ==================================
 
-.. autofunction:: lab.reports.avg
+.. autofunction:: lab.reports.arithmetic_mean
 .. autofunction:: lab.reports.geometric_mean
 
 .. autoclass:: lab.reports.Attribute

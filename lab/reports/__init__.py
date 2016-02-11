@@ -35,10 +35,10 @@ from lab.reports import markup
 from lab.reports.markup import Document, ESCAPE_WORDBREAK
 
 
-def avg(values):
+def arithmetic_mean(values):
     """Compute the arithmetic mean of a sequence of numbers.
 
-    >>> avg([20, 30, 70])
+    >>> arithmetic_mean([20, 30, 70])
     40.0
     """
     assert None not in values
@@ -57,7 +57,9 @@ def geometric_mean(values):
 
 
 def function_name(f):
-    names = {'avg': 'average', 'geometric_mean': 'geometric mean'}
+    names = {
+        'arithmetic_mean': 'arithmetic mean',
+        'geometric_mean': 'geometric mean'}
     return names.get(f.__name__, f.__name__)
 
 
@@ -519,8 +521,8 @@ class Table(collections.defaultdict):
     def add_summary_function(self, name, func):
         """
         Add a bottom row with the values ``func(column_values)`` for
-        each column. *func* can be e.g. :func:`sum`, :func:`avg` or
-        :func:`geometric_mean`.
+        each column. *func* can be e.g. :func:`sum`,
+        :func:`arithmetic_mean` or :func:`geometric_mean`.
 
         """
         self.summary_funcs[name] = func

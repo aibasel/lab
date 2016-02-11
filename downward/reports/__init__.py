@@ -83,7 +83,8 @@ class PlanningReport(Report):
         Attribute('expansions', functions=geometric_mean),
         Attribute('generated', functions=geometric_mean),
         Attribute('dead_ends', min_wins=False),
-        Attribute('score_*', min_wins=False, functions=[reports.avg, sum]),
+        Attribute(
+            'score_*', min_wins=False, functions=[reports.arithmetic_mean, sum]),
     ])
 
     INFO_ATTRIBUTES = [
@@ -93,8 +94,7 @@ class PlanningReport(Report):
 
     def __init__(self, **kwargs):
         """
-        See :py:class:`Report <lab.reports.Report>` for inherited
-        parameters.
+        See :class:`~lab.reports.Report` for inherited parameters.
 
         You can include only specific domains or algorithms by
         using :py:class:`filters <.Report>`. If you provide a list for

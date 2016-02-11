@@ -77,7 +77,7 @@ class ComparativeReport(AbsoluteReport):
     def _get_empty_table(self, attribute=None, title=None, columns=None):
         table = AbsoluteReport._get_empty_table(
             self, attribute=attribute, title=title, columns=columns)
-        summary_functions = [sum, reports.avg]
+        summary_functions = [sum, reports.arithmetic_mean]
         if title == 'summary':
             summary_functions = []
         diff_module = DiffColumnsModule(self._algorithm_pairs, summary_functions)
@@ -102,7 +102,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
             algorithm_pairs = [
                 ('default-lmcut', 'issue123-lmcut', 'Diff (lmcut)'),
                 ('default-ff', 'issue123-ff', 'Diff (ff)')]
-            summary_functions = [sum, reports.avg]
+            summary_functions = [sum, reports.arithmetic_mean]
             diff_module = DiffColumnsModule(algorithm_pairs, summary_functions)
             table.dynamic_data_modules.append(diff_module)
 
