@@ -9,7 +9,6 @@ from downward import suites
 
 
 ARGPARSER.epilog
-reports.stddev
 reports.Table.add_col
 reports.Table.get_row
 lab.tools.deprecated

@@ -69,18 +69,6 @@ def gm(values):
     return prod([val ** exp for val in values])
 
 
-def stddev(values):
-    """Compute the standard deviation of a sequence of numbers.
-
-    >>> stddev([2, 4, 4, 4, 5, 5, 7, 9])
-    2.0
-    """
-    assert None not in values
-    n = len(values)
-    mu = avg(values)
-    return math.sqrt((sum((v - mu) ** 2 for v in values) / n))
-
-
 def function_name(f):
     names = {'avg': 'average', 'gm': 'geometric mean'}
     return names.get(f.__name__, f.__name__)
