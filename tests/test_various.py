@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG,
 from lab.tools import copy
 from lab import tools
 from lab import reports
-from lab.reports import gm
+from lab.reports import geometric_mean
 from lab import tools
 from lab.calls.log import LazyFile
 
@@ -55,14 +55,14 @@ def test_copy_dir_to_dir():
                                        'nested_src_file'))
 
 
-def gm_old(values):
+def geometric_mean_old(values):
     return tools.product(values) ** (1 / len(values))
 
 
-def test_gm1():
+def test_geometric_mean1():
     lists = [1, 2, 4, 5], [0.4, 0.8], [2, 8], [10 ** (-5), 5000]
     for l in lists:
-        assert round(gm_old(l), 2) == round(gm(l), 2)
+        assert round(geometric_mean_old(l), 2) == round(geometric_mean(l), 2)
 
 
 def test_colors():

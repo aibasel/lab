@@ -45,10 +45,10 @@ def avg(values):
     return math.fsum(values) / len(values)
 
 
-def gm(values):
+def geometric_mean(values):
     """Compute the geometric mean of a sequence of numbers.
 
-    >>> round(gm([2, 8]), 2)
+    >>> round(geometric_mean([2, 8]), 2)
     4.0
     """
     assert None not in values
@@ -57,7 +57,7 @@ def gm(values):
 
 
 def function_name(f):
-    names = {'avg': 'average', 'gm': 'geometric mean'}
+    names = {'avg': 'average', 'geometric_mean': 'geometric mean'}
     return names.get(f.__name__, f.__name__)
 
 
@@ -67,24 +67,29 @@ class Attribute(str):
         return str.__new__(cls, name)
 
     def __init__(self, name, absolute=False, min_wins=True, functions=sum):
-        """Use this class if your **own** attribute needs a non-default value for:
+        """
+        Use this class if your **own** attribute needs a non-default
+        value for:
 
-        * *absolute*: If False, only include tasks for which all task runs have
-          values in a domain-wise table (e.g. ``coverage`` is absolute, whereas
-          ``expansions`` is not, because we can't compare algorithms A and B
-          for task X if B has no value for ``expansions``).
+        * *absolute*: If False, only include tasks for which all task
+          runs have values in a domain-wise table (e.g. ``coverage`` is
+          absolute, whereas ``expansions`` is not, because we can't
+          compare algorithms A and B for task X if B has no value for
+          ``expansions``).
         * *min_wins*: Set to True if a smaller value for this attribute
           is better, to False if a higher value is better and to None
           if values can't be compared. (E.g. *min_wins* is False for
           ``coverage``, but it is True for ``expansions``).
-        * *functions*: Set the function or functions used to group values
-          of multiple runs for this attribute. The first entry is used to aggregate
-          values for domain-wise reports (e.g. for ``coverage`` this is
-          :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`). This can be a
-          single function or a list of functions and defaults to :py:func:`sum`.
+        * *functions*: Set the function or functions used to group
+          values of multiple runs for this attribute. The first entry
+          is used to aggregate values for domain-wise reports (e.g. for
+          ``coverage`` this is :py:func:`sum`, whereas ``expansions``
+          uses :py:func:`geometric_mean`). This can be a single
+          function or a list of functions and defaults to
+          :py:func:`sum`.
 
-        The ``downward`` package automatically uses appropriate settings for
-        most attributes. ::
+        The ``downward`` package automatically uses appropriate
+        settings for most attributes. ::
 
             avg_h = Attribute(
                 'average_h', min_wins=False,
@@ -513,8 +518,10 @@ class Table(collections.defaultdict):
 
     def add_summary_function(self, name, func):
         """
-        Add a bottom row with the values ``func(column_values)`` for each column.
-        *func* can be e.g. ``sum``, ``reports.avg`` or ``reports.gm``.
+        Add a bottom row with the values ``func(column_values)`` for
+        each column. *func* can be e.g. :func:`sum`, :func:`avg` or
+        :func:`geometric_mean`.
+
         """
         self.summary_funcs[name] = func
         self.summary_row_order.append(name)
@@ -525,9 +532,11 @@ class Table(collections.defaultdict):
 
     def get_min_wins(self, row_name=None):
         """
-        The table class can store information on whether higher or lower values are better
-        for each row or globally. If no row specific setting for *row_name* is found, the
-        global setting is returned.
+        The table class can store information on whether higher or
+        lower values are better for each row or globally. If no row
+        specific setting for *row_name* is found, the global setting is
+        returned.
+
         """
         return self.row_min_wins.get(row_name, self.min_wins)
 

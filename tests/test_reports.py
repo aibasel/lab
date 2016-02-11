@@ -3,6 +3,6 @@ from __future__ import division
 from lab import reports
 
 
-def test_gm():
+def test_geometric_mean():
     for numbers, mean in [([2, 8], 4), ([4, 1, 1 / 32], 0.5), ([0], 0)]:
-        assert round(reports.gm(numbers), 2) == mean
+        assert round(reports.geometric_mean(numbers), 2) == mean

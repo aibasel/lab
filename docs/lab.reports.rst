@@ -2,7 +2,7 @@
 ==================================
 
 .. autofunction:: lab.reports.avg
-.. autofunction:: lab.reports.gm
+.. autofunction:: lab.reports.geometric_mean
 
 .. autoclass:: lab.reports.Attribute
    :members: __new__
