@@ -153,22 +153,16 @@ class FastDownwardExperiment(Experiment):
         *benchmarks_dir* must be a path to a benchmark directory. It
         must contain domain directories, which in turn hold PDDL files.
 
-        *suite* can either be a string or a list of strings. The
-        strings can be tasks or domains.
+        *suite* must be a list of domain or domain:task names.
 
         >>> repo = os.path.expanduser('~/projects/Downward/downward')
         >>> benchmarks_dir = os.path.join(repo, "benchmarks")
         >>> exp = FastDownwardExperiment()
-        >>> exp.add_suite(benchmarks_dir, "gripper:prob01.pddl")
-        >>> exp.add_suite(benchmarks_dir, "gripper")
+        >>> exp.add_suite(benchmarks_dir, ["gripper:prob01.pddl"])
+        >>> exp.add_suite(benchmarks_dir, ["gripper"])
         >>> exp.add_suite(
         ...     benchmarks_dir,
         ...     ["miconic", "trucks", "grid", "gripper:prob01.pddl"])
-
-        There are some predefined suites in ``suites.py``. ::
-
-        >>> exp.add_suite(benchmarks_dir, suites.suite_all())
-        >>> exp.add_suite(benchmarks_dir, suites.suite_optimal())
 
         """
         if isinstance(suite, basestring):

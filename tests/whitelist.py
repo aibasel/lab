@@ -5,8 +5,6 @@ from lab.calls import call
 from lab.calls import log
 from lab import reports
 
-from downward import suites
-
 
 ARGPARSER.epilog
 reports.Table.add_col
@@ -22,12 +20,3 @@ log.driver_err
 log.print_
 log.save_returncode
 
-[
-    suites.suite_unsolvable,
-    suites.suite_ipc14,
-    suites.suite_optimal,
-    suites.suite_optimal_with_ipc11,
-    suites.suite_satisficing_with_ipc11,
-    suites.suite_satisficing_strips,
-    suites.suite_all,
-]

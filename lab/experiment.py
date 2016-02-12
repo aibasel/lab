@@ -80,7 +80,9 @@ class _Buildable(object):
         self.properties = tools.Properties()
 
     def set_property(self, name, value):
-        """Add a key-value property. These can be used later for evaluation. ::
+        """Add a key-value property.
+
+        These can be used later, for example, in reports. ::
 
             exp.set_property('suite', ['gripper', 'grid'])
 
