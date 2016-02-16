@@ -340,6 +340,12 @@ class PlotReport(PlanningReport):
             ScatterPlotReport(
                 attributes=['initial_h_value'], params=params)
 
+        You can see the full list of matplotlib rc parameters and their
+        defaults by executing ::
+
+            import matplotlib
+            print matplotlib.rcParamsDefault
+
         """
         kwargs.setdefault('format', 'png')
         PlanningReport.__init__(self, **kwargs)
