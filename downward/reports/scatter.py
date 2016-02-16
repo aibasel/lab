@@ -120,6 +120,8 @@ class ScatterPlotReport(PlotReport):
     """
     def __init__(self, show_missing=True, get_category=None, **kwargs):
         """
+        See :class:`.PlotReport` for inherited arguments.
+
         The keyword argument *attributes* must contain exactly one
         attribute.
 
@@ -141,23 +143,22 @@ class ScatterPlotReport(PlotReport):
                 # compare two runs of the same problem.
                 return run1['domain']
 
-        *get_category* and *category_styles* (see
-        :class:`~downward.reports.plot.PlotReport`) are best used
-        together, e.g. to distinguish between different levels of
-        difficulty::
+        *get_category* and *category_styles* (see :class:`.PlotReport`)
+        are best used together, e.g. to distinguish between different
+        levels of difficulty::
 
             def improvement(run1, run2):
                 time1 = run1.get('search_time', 1800)
                 time2 = run2.get('search_time', 1800)
-                if time1 > 10 * time2:
-                    return 'strong'
-                if time1 >= time2:
-                    return 'small'
+                if time1 > time2:
+                    return 'better'
+                if time1 == time2:
+                    return 'equal'
                 return 'worse'
 
             styles = {
-                'strong': ('x','r'),
-                'small':  ('*','b'),
+                'better': ('x','r'),
+                'equal':  ('*','b'),
                 'worse':  ('o','y'),
             }
 
