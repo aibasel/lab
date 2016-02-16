@@ -21,7 +21,6 @@ from lab.experiment import Experiment
 from lab import tools
 
 from downward.reports.absolute import AbsoluteReport
-from downward.reports.plot import ProblemPlotReport
 
 
 EXP_DIR = "data/custom"
@@ -56,7 +55,6 @@ exp = Experiment(EXP_DIR)
 # Remove all existing experiment steps.
 exp.steps = []
 exp.add_report(AbsoluteReport(attributes=['coverage', 'expansions']))
-exp.add_report(ProblemPlotReport(attributes=['expansions']))
 
 write_properties(exp.eval_dir)
 exp.run_steps()

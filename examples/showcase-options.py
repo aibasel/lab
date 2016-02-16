@@ -15,7 +15,6 @@ from lab.reports.filter import FilterReport
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import ComparativeReport
-from downward.reports.plot import ProblemPlotReport
 from downward.reports.scatter import ScatterPlotReport
 from downward.reports.taskwise import TaskwiseReport
 
@@ -104,15 +103,6 @@ def get_domain(run1, run2):
     return run1['domain']
 
 
-def sat_vs_opt(run):
-    algo = run['algorithm']
-    categories = {
-        'lama11': 'sat', 'iter-hadd': 'sat', 'sat-fdss-1': 'sat',
-        'ipdb': 'opt', 'opt-fdss-1': 'opt'
-    }
-    return {categories[algo]: [(algo, run.get('expansions'))]}
-
-
 exp.add_report(
     ScatterPlotReport(
         attributes=['expansions'],
@@ -148,15 +138,6 @@ exp.add_report(
         legend_location=None),
     name='report-scatter-domain',
     outfile=os.path.join('plots', 'scatter-domain.png'))
-exp.add_report(
-    ProblemPlotReport(
-        attributes=['expansions'], yscale='symlog', params=params),
-    name='report-plot-prob',
-    outfile='plots')
-exp.add_report(
-    ProblemPlotReport(get_points=sat_vs_opt),
-    name='report-plot-cat',
-    outfile='plots')
 exp.add_report(
     ComparativeReport(
         [('lama11', 'iter-hadd')],
