@@ -168,10 +168,10 @@ class ScatterPlotReport(PlotReport):
                 category_styles=styles)
 
         """
-        kwargs.setdefault('legend_location', (1.3, 0.5))
         # If the size has not been set explicitly, make it a square.
         params = kwargs.get('params', {})
         params.setdefault('figure.figsize', [8, 8])
+        params.setdefault('legend.loc', (1.3, 0.5))
         kwargs['params'] = params
         PlotReport.__init__(self, **kwargs)
         if not self.attribute:

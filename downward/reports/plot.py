@@ -278,9 +278,8 @@ class PlotReport(PlanningReport):
                  'upper center', 'center']
 
     def __init__(
-            self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
-            legend_location='upper right', category_styles=None, params=None,
-            **kwargs):
+            self, title=None, xscale=None, yscale=None, xlabel='',
+            ylabel='', category_styles=None, params=None, **kwargs):
         """
         The inherited *format* parameter can be set to 'png' (default),
         'eps', 'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the
@@ -294,18 +293,6 @@ class PlotReport(PlanningReport):
         'symlog'. If omitted sensible defaults will be used.
 
         *xlabel* and *ylabel* are the axis labels.
-
-        *legend_location* must be a (x, y) pair or one of the
-        following: 'upper right', 'upper left', 'lower left', 'lower
-        right', 'right', 'center left', 'center right', 'lower center',
-        'upper center', 'center'. If *legend_location* is None, no
-        legend will be added. ::
-
-            # Some example positions.
-            'lower left'  # Lower left corner *inside* the plot
-            (1.1, 0.5)    # Right of the plot
-            (0.5, 1.1)    # Above the plot
-            (0.5, -0.1)   # Below the plot
 
         Subclasses may group the data points into categories. These
         categories are separated visually by drawing them with
@@ -328,6 +315,7 @@ class PlotReport(PlanningReport):
                 'font.size': 20,  # Used if more specific sizes not set.
                 'axes.labelsize': 20,
                 'axes.titlesize': 30,
+                'legend.loc': 'upper right',
                 'legend.fontsize': 22,
                 'xtick.labelsize': 10,
                 'ytick.labelsize': 10,
@@ -346,6 +334,18 @@ class PlotReport(PlanningReport):
             import matplotlib
             print matplotlib.rcParamsDefault
 
+        The rc parameter *legend.loc* can be an (x, y) tuple or one of
+        the following strings: 'upper right' (default), 'upper left',
+        'lower left', 'lower right', 'right', 'center left', 'center
+        right', 'lower center', 'upper center', 'center'. If it is
+        None, no legend will be added. ::
+
+            # Some example legend locations.
+            'lower left'  # Lower left corner *inside* the plot
+            (1.1, 0.5)    # Right of the plot
+            (0.5, 1.1)    # Above the plot
+            (0.5, -0.1)   # Below the plot
+
         """
         kwargs.setdefault('format', 'png')
         PlanningReport.__init__(self, **kwargs)
@@ -354,7 +354,6 @@ class PlotReport(PlanningReport):
         if self.attributes:
             self.attribute = self.attributes[0]
         self.title = title if title is not None else (self.attribute or '')
-        self.legend_location = legend_location
 
         self.category_styles = category_styles or {}
         self._set_scales(xscale, yscale)
@@ -365,6 +364,8 @@ class PlotReport(PlanningReport):
         self.ylim_bottom = None
         self.ylim_top = None
         self.params = params or {}
+        self.params.setdefault('legend.loc', 'upper right')
+        self.legend_location = self.params.get('legend.loc')
         if self.output_format == 'tex':
             self.writer = PgfPlots
         else:

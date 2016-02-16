@@ -134,8 +134,7 @@ exp.add_report(
         xscale='linear',
         yscale='linear',
         category_styles={'gripper': {'c': 'b', 'marker': '+'}},
-        params=params,
-        legend_location=None),
+        params=params),
     name='report-scatter-domain',
     outfile=os.path.join('plots', 'scatter-domain.png'))
 exp.add_report(
