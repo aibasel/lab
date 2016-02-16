@@ -271,6 +271,7 @@ class PlotReport(PlanningReport):
     """
     Abstract base class for Plot classes.
     """
+    # TODO: Move this info to downward.reports.PlanningReport.
     LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
     LOCATIONS = ['upper right', 'upper left', 'lower left', 'lower right',
                  'right', 'center left', 'center right', 'lower center',
@@ -278,7 +279,6 @@ class PlotReport(PlanningReport):
 
     def __init__(
             self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
-            xlim_left=None, xlim_right=None, ylim_bottom=None, ylim_top=None,
             legend_location='upper right', category_styles=None, params=None,
             **kwargs):
         """
@@ -292,6 +292,8 @@ class PlotReport(PlanningReport):
 
         *xscale* and *yscale* can have the values 'linear', 'log' or
         'symlog'. If omitted sensible defaults will be used.
+
+        *xlabel* and *ylabel* are the axis labels.
 
         *legend_location* must be a (x, y) pair or one of the
         following: 'upper right', 'upper left', 'lower left', 'lower
@@ -352,10 +354,10 @@ class PlotReport(PlanningReport):
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
         self.ylabel = ylabel
-        self.xlim_left = xlim_left
-        self.xlim_right = xlim_right
-        self.ylim_bottom = ylim_bottom
-        self.ylim_top = ylim_top
+        self.xlim_left = None
+        self.xlim_right = None
+        self.ylim_bottom = None
+        self.ylim_top = None
         self.params = params or {}
         if self.output_format == 'tex':
             self.writer = PgfPlots
