@@ -34,7 +34,6 @@ exp = DownwardExperiment(
     EXPPATH, REPO, combinations=COMBOS, limits={'search_time': 60})
 
 exp.add_suite(['gripper:prob01.pddl'])
-exp.add_suite('zenotravel:pfile2')
 exp.add_config('ff', ['--search', 'lazy(single(ff()))'])
 exp.add_config('add', ['--search', 'lazy(single(add()))'])
 

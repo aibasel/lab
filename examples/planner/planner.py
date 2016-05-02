@@ -18,11 +18,16 @@ from downward.reports.absolute import AbsoluteReport
 
 
 REPO = os.path.expanduser('~/projects/Downward/downward')
-BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
+OLD_BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
+NEW_BENCHMARKS_DIR = os.path.join(REPO, 'misc', 'tests', 'benchmarks')
+if os.path.exists(NEW_BENCHMARKS_DIR):
+    BENCHMARKS_DIR = NEW_BENCHMARKS_DIR
+else:
+    BENCHMARKS_DIR = OLD_BENCHMARKS_DIR
 
 exp = FastDownwardExperiment(cache_dir=tools.DEFAULT_USER_DIR)
 
-exp.add_suite(BENCHMARKS_DIR, 'gripper:prob01.pddl')
+exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl'])
 exp.add_algorithm('ff', REPO, 'tip', ['--search', 'lazy_greedy(ff())'])
 
 exp.add_report(AbsoluteReport())

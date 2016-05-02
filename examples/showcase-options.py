@@ -34,15 +34,19 @@ else:
     REPO = '/home/jendrik/projects/Downward/downward'
     ENV = LocalEnvironment(processes=4)
 CACHE_DIR = os.path.expanduser('~/lab/')
-BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
+OLD_BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
+NEW_BENCHMARKS_DIR = os.path.join(REPO, 'misc', 'tests', 'benchmarks')
+if os.path.exists(NEW_BENCHMARKS_DIR):
+    BENCHMARKS_DIR = NEW_BENCHMARKS_DIR
+else:
+    BENCHMARKS_DIR = OLD_BENCHMARKS_DIR
 REV = 'tip'
 ATTRIBUTES = ['coverage']
 EXPNAME = 'showcase-options'
 
 exp = FastDownwardExperiment(environment=ENV, cache_dir=CACHE_DIR)
 
-exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'mystery:prob07.pddl'])
-exp.add_suite(BENCHMARKS_DIR, 'zenotravel:pfile1')
+exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'miconic:s1-0.pddl'])
 exp.add_algorithm('iter-hadd', REPO, REV, [
     '--heuristic', 'hadd=add()',
     '--search', 'iterated([lazy_greedy([hadd]),lazy_wastar([hadd])],repeat_last=true)'])

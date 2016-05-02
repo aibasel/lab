@@ -11,7 +11,7 @@ from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 
 
-SUITE = ['gripper:prob01.pddl', 'zenotravel:pfile1']
+SUITE = ['gripper:prob01.pddl']
 ATTRIBUTES = ['coverage', 'expansions']
 
 if 'cluster' in platform.node():
@@ -20,11 +20,16 @@ if 'cluster' in platform.node():
 else:
     REPO = os.path.expanduser('~/projects/Downward/downward')
     ENV = LocalEnvironment(processes=2)
-BENCHMARKS = os.path.join(REPO, 'benchmarks')
+OLD_BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
+NEW_BENCHMARKS_DIR = os.path.join(REPO, 'misc', 'tests', 'benchmarks')
+if os.path.exists(NEW_BENCHMARKS_DIR):
+    BENCHMARKS_DIR = NEW_BENCHMARKS_DIR
+else:
+    BENCHMARKS_DIR = OLD_BENCHMARKS_DIR
 CACHE_DIR = os.path.expanduser('~/lab')
 
 exp = FastDownwardExperiment(environment=ENV, cache_dir=CACHE_DIR)
-exp.add_suite(BENCHMARKS, SUITE)
+exp.add_suite(BENCHMARKS_DIR, SUITE)
 exp.add_algorithm(
     'lmcut', REPO, 'tip', ['--search', 'astar(lmcut())'])
 
