@@ -100,8 +100,8 @@ class _Buildable(object):
         be used to reference it in a run's commands::
 
             run.require_resource('PLANNER')
-            run.add_resource('DOMAIN', 'benchmarks/gripper/domain.pddl')
-            run.add_resource('PROBLEM', 'benchmarks/gripper/prob01.pddl')
+            run.add_resource('DOMAIN', 'path-to/gripper/domain.pddl')
+            run.add_resource('PROBLEM', 'path-to/gripper/prob01.pddl')
             run.add_command('find-plan', ['PLANNER', 'DOMAIN', 'PROBLEM'])
 
         """

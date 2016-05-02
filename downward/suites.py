@@ -376,8 +376,6 @@ def suite_ipc14():
 
 def suite_unsolvable():
     # TODO: Add other unsolvable problems (Miconic-FullADL).
-    # TODO: Add 'fsc-grid-r:prize5x5_R.pddl' and 't0-uts:uts_r-02.pddl'
-    #       if the extra-domains branch is merged.
     return sorted(
         ['mystery:prob%02d.pddl' % index
          for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]] +

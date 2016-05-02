@@ -141,8 +141,8 @@ class FastDownwardExperiment(Experiment):
     * Step 2: run experiment
     * Step 3: fetch results and save them in ``<path>-eval``
 
-    You can add report steps with :py:func:`add_report()
-    <downward.experiment.FastDownwardExperiment.add_report>`.
+    You can add report steps with
+    :py:func:`~lab.experiment.Experiment.add_report`.
 
     """
 
@@ -196,17 +196,30 @@ class FastDownwardExperiment(Experiment):
         *suite* can either be a string or a list of strings. The
         strings can be tasks or domains. ::
 
-            benchmarks_dir = os.path.join(myrepo, "benchmarks")
-            exp.add_suite("gripper:prob01.pddl", benchmarks_dir)
-            exp.add_suite("gripper", benchmarks_dir)
+            benchmarks_dir = "path-to-benchmarks-dir"
+            exp.add_suite(benchmarks_dir, "gripper:prob01.pddl")
+            exp.add_suite(benchmarks_dir, "gripper")
             exp.add_suite(
-                ["miconic", "trucks", "grid", "gripper:prob01.pddl"],
-                benchmarks_dir)
+                benchmarks_dir,
+                ["miconic", "trucks", "grid", "gripper:prob01.pddl"])
 
-        There are some predefined suites in ``suites.py``. ::
+        There is a collection of IPC benchmarks at
+        https://bitbucket.org/aibasel/downward-benchmarks. This repo
+        also includes a script with predefined benchmark suites. The
+        following example shows how to convert a suite name to a list
+        of domains for
+        :func:`~downward.experiment.FastDownwardExperiment.add_suite`::
 
-            exp.add_suite(suites.suite_strips(), benchmarks_dir)
-            exp.add_suite(suites.suite_ipc_all(), benchmarks_dir)
+            # In a terminal:
+            $ hg clone https://bitbucket.org/aibasel/downward-benchmarks
+            $ cd downward-benchmarks
+            $ ./suites.py optimal_strips
+            ['airport', ..., 'zenotravel']
+
+            # In the experiment script:
+            exp.add_suite(
+                "path/to/downward-benchmarks",
+                ['airport', ..., 'zenotravel'])
 
         """
         if isinstance(suite, basestring):
