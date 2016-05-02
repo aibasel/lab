@@ -162,7 +162,7 @@ class PlanningReport(Report):
         self.problem_runs = defaultdict(list)
         self.domain_algorithm_runs = defaultdict(list)
         self.runs = {}
-        for run_name, run in self.props.items():
+        for run in self.props.values():
             if 'coverage' not in run:
                 if 'error' not in run:
                     run['error'] = 'unexplained-crash'
@@ -183,6 +183,16 @@ class PlanningReport(Report):
         # Turn into list.
         self.problems = sorted(self.problems)
 
+        if len(self.problems) * len(self.algorithms) != len(self.runs):
+            logging.warning(
+                'Not every algorithm has been run on every task. '
+                'However, if you applied a filter this is to be '
+                'expected. If not, there might be old properties in the '
+                'eval-dir that got included in the report. '
+                'Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)' %
+                (len(self.algorithms), self.algorithms, len(self.problems),
+                 len(self.domains), self.domains.keys(), len(self.runs)))
+
         # Sort each entry in problem_runs by algorithm.
         # TODO: Remove O(n) lookup.
         def run_key(run):
@@ -192,7 +202,6 @@ class PlanningReport(Report):
             self.problem_runs[key] = sorted(run_list, key=run_key)
 
         self.algorithm_info = self._scan_algorithm_info()
-        self._perform_sanity_check()
 
     def _scan_algorithm_info(self):
         info = {}
@@ -204,17 +213,6 @@ class PlanningReport(Report):
             # We only need to scan the algorithms for one task.
             break
         return info
-
-    def _perform_sanity_check(self):
-        if len(self.problems) * len(self.algorithms) != len(self.runs) or True:
-            logging.warning(
-                'Not every algorithm has been run on every task. '
-                'However, if you applied a filter this is to be '
-                'expected. If not, there might be old properties in the '
-                'eval-dir that got included in the report. '
-                'Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)' %
-                (len(self.algorithms), self.algorithms, len(self.problems),
-                 len(self.domains), self.domains.keys(), len(self.runs)))
 
     def _get_warnings_table(self):
         """
