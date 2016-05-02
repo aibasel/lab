@@ -157,43 +157,39 @@ class PlanningReport(Report):
         Report._scan_data(self)
 
     def _scan_planning_data(self):
-        # Use local variables first to avoid lookups.
-        problems = set()
-        domains = defaultdict(list)
-        problem_runs = defaultdict(list)
-        domain_algorithm_runs = defaultdict(list)
-        runs = {}
+        self.problems = set()
+        self.domains = defaultdict(list)
+        self.problem_runs = defaultdict(list)
+        self.domain_algorithm_runs = defaultdict(list)
+        self.runs = {}
         for run_name, run in self.props.items():
             if 'coverage' not in run:
                 if 'error' not in run:
                     run['error'] = 'unexplained-crash'
 
             domain, problem, algo = run['domain'], run['problem'], run['algorithm']
-            problems.add((domain, problem))
-            problem_runs[(domain, problem)].append(run)
-            domain_algorithm_runs[(domain, algo)].append(run)
-            runs[(domain, problem, algo)] = run
-        for domain, problem in problems:
-            domains[domain].append(problem)
+            self.problems.add((domain, problem))
+            self.problem_runs[(domain, problem)].append(run)
+            self.domain_algorithm_runs[(domain, algo)].append(run)
+            self.runs[(domain, problem, algo)] = run
+        for domain, problem in self.problems:
+            self.domains[domain].append(problem)
+
+        assert sum(len(probs) for probs in self.domains.values()) == len(self.problems)
+        assert len(self.problem_runs) == len(self.problems)
+        assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
+
         self.algorithms = self._get_algorithm_order()
-        self.problems = list(sorted(problems))
-        self.domains = domains
+        # Turn into list.
+        self.problems = sorted(self.problems)
 
         # Sort each entry in problem_runs by algorithm.
         # TODO: Remove O(n) lookup.
         def run_key(run):
             return self.algorithms.index(run['algorithm'])
 
-        for key, run_list in problem_runs.items():
-            problem_runs[key] = sorted(run_list, key=run_key)
-
-        self.problem_runs = problem_runs
-        self.domain_algorithm_runs = domain_algorithm_runs
-        self.runs = runs
-
-        assert sum(len(probs) for probs in self.domains.values()) == len(self.problems)
-        assert len(self.problem_runs) == len(self.problems)
-        assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
+        for key, run_list in self.problem_runs.items():
+            self.problem_runs[key] = sorted(run_list, key=run_key)
 
         self.algorithm_info = self._scan_algorithm_info()
         self._perform_sanity_check()
