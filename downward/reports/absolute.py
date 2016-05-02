@@ -182,9 +182,7 @@ class AbsoluteReport(PlanningReport):
         num_probs = 0
         self._add_table_info(attribute, func_name, table)
         domain_algo_values = defaultdict(list)
-        for domain, problems in self.domains.items():
-            for problem in problems:
-                runs = self.problem_runs[(domain, problem)]
+        for (domain, problem), runs in self.problem_runs.items():
                 if (not attribute.absolute and
                         any(run.get(attribute) is None for run in runs)):
                     continue
