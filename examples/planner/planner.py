@@ -14,12 +14,17 @@ from downward.reports.scatter import ScatterPlotReport
 
 
 REPO = os.path.expanduser('~/projects/Downward/downward')
-BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
+OLD_BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
+NEW_BENCHMARKS_DIR = os.path.join(REPO, 'misc', 'tests', 'benchmarks')
+if os.path.exists(NEW_BENCHMARKS_DIR):
+    BENCHMARKS_DIR = NEW_BENCHMARKS_DIR
+else:
+    BENCHMARKS_DIR = OLD_BENCHMARKS_DIR
 REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 
 exp = FastDownwardExperiment(revision_cache=REVISION_CACHE)
 
-exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'zenotravel:pfile2'])
+exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl'])
 exp.add_algorithm('ff', REPO, 'tip', ['--search', 'lazy_greedy(ff())'])
 exp.add_algorithm('add', REPO, 'tip', ['--search', 'lazy_greedy(add())'])
 
