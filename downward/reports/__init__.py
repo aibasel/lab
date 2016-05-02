@@ -157,40 +157,33 @@ class PlanningReport(Report):
         Report._scan_data(self)
 
     def _scan_planning_data(self):
-        self.problems = set()
+        problems = set()
         self.domains = defaultdict(list)
         self.problem_runs = defaultdict(list)
         self.domain_algorithm_runs = defaultdict(list)
         self.runs = {}
         for run in self.props.values():
-            if 'coverage' not in run:
-                if 'error' not in run:
-                    run['error'] = 'unexplained-crash'
+            if 'coverage' not in run and 'error' not in run:
+                run['error'] = 'unexplained-crash'
 
             domain, problem, algo = run['domain'], run['problem'], run['algorithm']
-            self.problems.add((domain, problem))
+            problems.add((domain, problem))
             self.problem_runs[(domain, problem)].append(run)
             self.domain_algorithm_runs[(domain, algo)].append(run)
             self.runs[(domain, problem, algo)] = run
-        for domain, problem in self.problems:
+        for domain, problem in problems:
             self.domains[domain].append(problem)
 
-        assert sum(len(probs) for probs in self.domains.values()) == len(self.problems)
-        assert len(self.problem_runs) == len(self.problems)
-        assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
-
         self.algorithms = self._get_algorithm_order()
-        # Turn into list.
-        self.problems = sorted(self.problems)
 
-        if len(self.problems) * len(self.algorithms) != len(self.runs):
+        if len(problems) * len(self.algorithms) != len(self.runs):
             logging.warning(
                 'Not every algorithm has been run on every task. '
                 'However, if you applied a filter this is to be '
                 'expected. If not, there might be old properties in the '
                 'eval-dir that got included in the report. '
                 'Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)' %
-                (len(self.algorithms), self.algorithms, len(self.problems),
+                (len(self.algorithms), self.algorithms, len(problems),
                  len(self.domains), self.domains.keys(), len(self.runs)))
 
         # Sort each entry in problem_runs by algorithm.
