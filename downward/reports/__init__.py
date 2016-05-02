@@ -25,8 +25,6 @@ from __future__ import with_statement, division
 from collections import defaultdict
 from fnmatch import fnmatch
 import logging
-import sys
-import traceback
 
 from lab import reports
 from lab import tools
@@ -192,14 +190,13 @@ class PlanningReport(Report):
         self.problem_runs = problem_runs
         self.domain_algorithm_runs = domain_algorithm_runs
         self.runs = runs
+
+        assert sum(len(probs) for probs in self.domains.values()) == len(self.problems)
+        assert len(self.problem_runs) == len(self.problems)
+        assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
+
         self.algorithm_info = self._scan_algorithm_info()
-        try:
-            self._perform_sanity_checks()
-        except AssertionError:
-            logging.warning(
-                'The following sanity check failed. Did you filter the intended runs? '
-                'Are there old properties in the eval-dir you don\'t want to merge?')
-            traceback.print_exc(file=sys.stdout)
+        self._perform_sanity_check()
 
     def _scan_algorithm_info(self):
         info = {}
@@ -212,31 +209,16 @@ class PlanningReport(Report):
             break
         return info
 
-    def _perform_sanity_checks(self):
-        # Sanity checks
-        assert len(self.problems) * len(self.algorithms) == len(self.runs), (
-            'Every problem must be run for all algorithms\n'
-            'Algorithms (%d):\n%s\nProblems: %d\nDomains (%d):\n%s\nRuns: %d' %
-            (len(self.algorithms), self.algorithms, len(self.problems), len(self.domains),
-             self.domains.keys(), len(self.runs)))
-        assert sum(len(probs) for probs in self.domains.values()) == len(self.problems)
-        assert len(self.problem_runs) == len(self.problems)
-        for (domain, problem), runs in self.problem_runs.items():
-            if len(runs) != len(self.algorithms):
-                prob_algos = [run['algorithm'] for run in runs]
-                print 'Error: Algorithms for problem (%d) != Total algorithms (%d)' % (
-                    len(prob_algos), len(self.algorithms))
-                times = defaultdict(int)
-                for algo in prob_algos:
-                    times[algo] += 1
-                print 'The problem is run more than once for the algorithms:',
-                print ', '.join(['%s: %dx' % (algo, num_runs)
-                                 for (algo, num_runs) in times.items() if num_runs > 1])
-                logging.critical('Sanity check failed')
-        assert sum(len(runs) for runs in self.problem_runs.values()) == len(self.runs)
-        assert len(self.domains) * len(self.algorithms) == len(self.domain_algorithm_runs)
-        assert (sum(len(runs) for runs in self.domain_algorithm_runs.values()) ==
-                len(self.runs))
+    def _perform_sanity_check(self):
+        if len(self.problems) * len(self.algorithms) != len(self.runs) or True:
+            logging.warning(
+                'Not every algorithm has been run on every task. '
+                'However, if you applied a filter this is to be '
+                'expected. If not, there might be old properties in the '
+                'eval-dir that got included in the report. '
+                'Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)' %
+                (len(self.algorithms), self.algorithms, len(self.problems),
+                 len(self.domains), self.domains.keys(), len(self.runs)))
 
     def _get_warnings_table(self):
         """
