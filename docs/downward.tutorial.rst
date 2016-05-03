@@ -9,6 +9,16 @@ Install lab and downward
 .. include:: ../INSTALL.txt
 
 
+Download benchmarks
+-------------------
+.. highlight:: bash
+
+::
+
+    BENCHMARKS=/path/to/downward-benchmarks
+    hg clone http://bitbucket.org/aibasel/downward-benchmarks ${BENCHMARKS}
+
+
 Install Fast Downward
 ---------------------
 (see also http://www.fast-downward.org/ObtainingAndRunningFastDownward
@@ -22,16 +32,10 @@ and http://www.fast-downward.org/LPBuildInstructions)
     sudo apt-get install mercurial g++ make python flex bison gawk
     sudo apt-get install g++-multilib  # 64-bit
     hg clone http://hg.fast-downward.org ${FAST_DOWNWARD}
-
-
-Download benchmarks
--------------------
-.. highlight:: bash
-
-::
-
-    BENCHMARKS=/path/to/downward-benchmarks
-    hg clone http://bitbucket.org/aibasel/downward-benchmarks ${BENCHMARKS}
+    # Optional: Check that Fast Downward works:
+    cd ${FAST_DOWNWARD}
+    ./build.py
+    ./fast-downward.py ${BENCHMARKS}/grid/prob01.pddl --search "astar(lmcut())"
 
 
 Install VAL
@@ -51,9 +55,9 @@ Run tutorial experiment
 .. highlight:: python
 
 The script below is an example Fast Downward experiment. It is located
-at ``examples/lmcut.py``. After setting ``REPO`` to ``FAST_DOWNWARD``
-and ``BENCHMARKS_DIR`` to ``BENCHMARKS``, you can see the available
-steps with ::
+at ``${LAB}/examples/lmcut.py``. After setting ``REPO`` to
+``FAST_DOWNWARD`` and ``BENCHMARKS_DIR`` to ``BENCHMARKS``, you can see
+the available steps with ::
 
     ./lmcut.py
 
