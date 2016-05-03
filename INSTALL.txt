@@ -13,12 +13,7 @@ Notes about requirements:
 
 Append to your ``.bashrc`` to make lab available on the ``PYTHONPATH``::
 
-    LAB=~/path/to/lab
-    if [ -z "$PYTHONPATH" ]; then
-        export PYTHONPATH=${LAB}
-    else
-        export PYTHONPATH=${PYTHONPATH}:${LAB}
-    fi
+    export PYTHONPATH=/path/to/lab
 
 Update shell configuration::
 
