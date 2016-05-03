@@ -21,7 +21,7 @@ Download benchmarks
 
 Install Fast Downward
 ---------------------
-(see also http://www.fast-downward.org/ObtainingAndRunningFastDownward
+(See also http://www.fast-downward.org/ObtainingAndRunningFastDownward
 and http://www.fast-downward.org/LPBuildInstructions)
 
 .. highlight:: bash
@@ -32,7 +32,7 @@ and http://www.fast-downward.org/LPBuildInstructions)
     sudo apt-get install mercurial g++ make python flex bison gawk
     sudo apt-get install g++-multilib  # 64-bit
     hg clone http://hg.fast-downward.org ${FAST_DOWNWARD}
-    # Optional: Check that Fast Downward works:
+    # Optionally check that Fast Downward works:
     cd ${FAST_DOWNWARD}
     ./build.py
     ./fast-downward.py ${BENCHMARKS}/grid/prob01.pddl --search "astar(lmcut())"
@@ -61,8 +61,12 @@ the available steps with ::
 
     ./lmcut.py
 
+Run all steps with ::
 
-Run the individual steps with ::
+    ./lmcut.py --all
+
+
+Run individual steps with ::
 
     ./lmcut.py 1
     ./lmcut.py {2..4}
