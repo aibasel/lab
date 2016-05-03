@@ -5,6 +5,7 @@ Downward tutorial
 
 Install lab and downward
 ------------------------
+.. highlight:: bash
 .. include:: ../INSTALL.txt
 
 
