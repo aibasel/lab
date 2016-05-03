@@ -16,16 +16,12 @@ ATTRIBUTES = ['coverage', 'expansions']
 
 if 'cluster' in platform.node():
     REPO = os.path.expanduser('~/projects/downward')
+    BENCHMARKS_DIR = os.path.expanduser('~/projects/benchmarks')
     ENV = MaiaEnvironment(priority=-10)
 else:
     REPO = os.path.expanduser('~/projects/Downward/downward')
+    BENCHMARKS_DIR = os.path.expanduser('~/projects/Downward/benchmarks')
     ENV = LocalEnvironment(processes=2)
-OLD_BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
-NEW_BENCHMARKS_DIR = os.path.join(REPO, 'misc', 'tests', 'benchmarks')
-if os.path.exists(NEW_BENCHMARKS_DIR):
-    BENCHMARKS_DIR = NEW_BENCHMARKS_DIR
-else:
-    BENCHMARKS_DIR = OLD_BENCHMARKS_DIR
 CACHE_DIR = os.path.expanduser('~/lab')
 
 exp = FastDownwardExperiment(environment=ENV, cache_dir=CACHE_DIR)

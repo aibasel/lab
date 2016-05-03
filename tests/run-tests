@@ -78,7 +78,6 @@ if [ -d "$REPO" ]; then
 
     cd planner
     ./planner.py --all
-    ./planner-ext.py --all
     cd ..
 
     ./showcase-options.py --all

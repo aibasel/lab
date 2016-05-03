@@ -3,10 +3,10 @@
 """
 Example downward experiment that runs FF on a single problem.
 
-Please adapt EXPPATH and REPO to be the path where the experiment shall be put
-and the location of your Fast Downward repository.
+Please adapt REPO and BENCHMARKS_DIR.
 
-The file planner-ext.py contains an "advanced" version of this basic experiment.
+The file planner-ext.py contains an "advanced" version of this basic
+experiment.
 """
 
 import os.path
@@ -18,12 +18,7 @@ from downward.reports.absolute import AbsoluteReport
 
 
 REPO = os.path.expanduser('~/projects/Downward/downward')
-OLD_BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
-NEW_BENCHMARKS_DIR = os.path.join(REPO, 'misc', 'tests', 'benchmarks')
-if os.path.exists(NEW_BENCHMARKS_DIR):
-    BENCHMARKS_DIR = NEW_BENCHMARKS_DIR
-else:
-    BENCHMARKS_DIR = OLD_BENCHMARKS_DIR
+BENCHMARKS_DIR = os.path.expanduser('~/projects/Downward/benchmarks')
 
 exp = FastDownwardExperiment(cache_dir=tools.DEFAULT_USER_DIR)
 
