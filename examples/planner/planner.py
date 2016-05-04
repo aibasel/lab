@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 
 """
-Example downward experiment that runs h^FF and h^add on two tasks.
+Example downward experiment that runs h^FF and h^add.
 
-Please adapt REPO to point to your Fast Downward repository.
+Please adapt REPO and BENCHMARKS_DIR.
 """
 
 import os.path
@@ -14,12 +14,7 @@ from downward.reports.scatter import ScatterPlotReport
 
 
 REPO = os.path.expanduser('~/projects/Downward/downward')
-OLD_BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
-NEW_BENCHMARKS_DIR = os.path.join(REPO, 'misc', 'tests', 'benchmarks')
-if os.path.exists(NEW_BENCHMARKS_DIR):
-    BENCHMARKS_DIR = NEW_BENCHMARKS_DIR
-else:
-    BENCHMARKS_DIR = OLD_BENCHMARKS_DIR
+BENCHMARKS_DIR = os.path.expanduser('~/projects/Downward/benchmarks')
 REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 
 exp = FastDownwardExperiment(revision_cache=REVISION_CACHE)

@@ -22,18 +22,14 @@ from downward.reports.taskwise import TaskwiseReport
 DIR = os.path.dirname(os.path.abspath(__file__))
 REMOTE = 'cluster' in platform.node()
 if REMOTE:
-    REPO = '/infai/seipp/projects/downward'
+    REPO = os.path.expanduser('~/projects/downward')
+    BENCHMARKS_DIR = os.path.expanduser('~/projects/benchmarks')
     ENV = MaiaEnvironment()
 else:
-    REPO = '/home/jendrik/projects/Downward/downward'
+    REPO = os.path.expanduser('~/projects/Downward/downward')
+    BENCHMARKS_DIR = os.path.expanduser('~/projects/Downward/benchmarks')
     ENV = LocalEnvironment(processes=4)
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
-OLD_BENCHMARKS_DIR = os.path.join(REPO, 'benchmarks')
-NEW_BENCHMARKS_DIR = os.path.join(REPO, 'misc', 'tests', 'benchmarks')
-if os.path.exists(NEW_BENCHMARKS_DIR):
-    BENCHMARKS_DIR = NEW_BENCHMARKS_DIR
-else:
-    BENCHMARKS_DIR = OLD_BENCHMARKS_DIR
 REV = 'tip'
 ATTRIBUTES = ['coverage']
 EXPNAME = 'showcase-options'
