@@ -43,14 +43,10 @@ class AbsoluteReport(PlanningReport):
     segmentation faults, etc.
 
     """
-    def __init__(self, resolution='combined', colored=True, **kwargs):
+    def __init__(self, resolution='combined', **kwargs):
         """
         *resolution* must be one of "domain", "problem" or "combined"
         (default).
-
-        If *colored* is True, the values of each row will be given
-        colors from a colormap. Currently, only HTML reports can be
-        colored.
 
         """
         PlanningReport.__init__(self, **kwargs)
@@ -58,10 +54,7 @@ class AbsoluteReport(PlanningReport):
         if resolution not in resolutions:
             logging.critical("resolution must be one of {}".format(resolutions))
         self.resolution = resolution
-        if colored and 'html' not in self.output_format:
-            logging.info('Only HTML reports can be colored. Setting colored=False.')
-            colored = False
-        self.colored = colored
+        self.colored = 'html' in self.output_format
         self.toc = False
 
     def get_markup(self):

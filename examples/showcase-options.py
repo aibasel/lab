@@ -92,8 +92,11 @@ exp.add_report(
     AbsoluteReport('problem', attributes=ATTRIBUTES, filter=only_two_algorithms),
     name='report-abs-p-filter')
 exp.add_report(
-    AbsoluteReport(attributes=None, format='tex'),
-    name='report-abs-combined')
+    AbsoluteReport(attributes=['coverage'], format='tex'),
+    outfile='report-abs-combined.tex')
+exp.add_report(
+    AbsoluteReport(attributes=['coverage'], format='html'),
+    outfile='report-abs-combined.html')
 exp.add_report(
     FilterReport(),
     outfile=os.path.join(exp.eval_dir, 'filter-eval', 'properties'))
@@ -153,7 +156,7 @@ exp.add_report(
 
 exp.add_report(
     AbsoluteReport(
-        'problem', colored=True, attributes=[
+        'problem', attributes=[
             'coverage', 'evaluated', 'evaluations', 'search_time',
             'cost', 'memory', 'error', 'cost_all', 'limit_search_time',
             'initial_h_value', 'initial_h_values', 'run_dir']),
