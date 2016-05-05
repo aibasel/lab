@@ -70,10 +70,10 @@ class AbsoluteReport(PlanningReport):
 
         warnings = self._get_warnings_table()
         if warnings:
-            toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
+            toc_lines.append('- **[''Unexplained Errors'' #unexplained-errors]**')
             sections.append(('unexplained-errors', warnings))
 
-        toc_lines.append('- **[""Info"" #info]**')
+        toc_lines.append('- **[Info #info]**')
         sections.append(('info', self._get_general_info()))
 
         # Index of summary section.
@@ -83,8 +83,8 @@ class AbsoluteReport(PlanningReport):
         # The actual section is added at position summary_index after creating
         # all other tables.
         if self.resolution in ['domain', 'combined']:
-            summary = self._get_empty_table(title='summary')
-            toc_lines.append('- **[""Summary"" #summary]**')
+            summary = self._get_empty_table(title='Summary')
+            toc_lines.append('- **[Summary #summary]**')
 
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
@@ -110,7 +110,7 @@ class AbsoluteReport(PlanningReport):
             for (domain, table) in tables:
                 if domain:
                     assert table
-                    toc_line.append('[""%(domain)s"" #%(attribute)s-%(domain)s]' %
+                    toc_line.append("[''%(domain)s'' #%(attribute)s-%(domain)s]" %
                                     locals())
                     parts.append('== %(domain)s ==[%(attribute)s-%(domain)s]\n'
                                  '%(table)s\n' % locals())
@@ -123,7 +123,7 @@ class AbsoluteReport(PlanningReport):
                                      'domain-wise table can be generated.\n' %
                                      attribute)
 
-            toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
+            toc_lines.append("- **[''%s'' #%s]**" % (attribute, attribute))
             toc_lines.append('  - ' + ' '.join(toc_line))
             sections.append((attribute, '\n'.join(parts)))
 
@@ -133,7 +133,7 @@ class AbsoluteReport(PlanningReport):
             sections.insert(summary_index, ('summary', summary))
 
         if self.resolution == 'domain':
-            toc = '- ' + ' '.join('[""%s"" #%s]' % (attr, attr)
+            toc = '- ' + ' '.join("[''%s'' #%s]" % (attr, attr)
                                   for (attr, section) in sections)
         else:
             toc = '\n'.join(toc_lines)

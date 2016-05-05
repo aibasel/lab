@@ -383,7 +383,7 @@ class CellFormatter(object):
     def format_value(self, value):
         result = str(value)
         if self.link:
-            result = '[""%s"" %s]' % (result, self.link)
+            result = "[''%s'' %s]" % (result, self.link)
         if self.count:
             result = '%s (%s)' % (result, self.count)
         if self.bold:
