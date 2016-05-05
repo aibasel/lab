@@ -55,6 +55,7 @@ class AbsoluteReport(PlanningReport):
             logging.critical("resolution must be one of {}".format(resolutions))
         self.resolution = resolution
         self.colored = 'html' in self.output_format
+        self.use_domain_links = 'html' in self.output_format
         self.toc = False
 
     def get_markup(self):
@@ -202,7 +203,7 @@ class AbsoluteReport(PlanningReport):
             else:
                 count = ','.join(num_values_list)
             link = None
-            if self.resolution == 'combined':
+            if self.resolution == 'combined' and self.use_domain_links:
                 link = '#%s-%s' % (attribute, domain)
             formatter = reports.CellFormatter(link=link, count=count)
             table.cell_formatters[domain][table.header_column] = formatter
