@@ -43,17 +43,8 @@ class AbsoluteReport(PlanningReport):
     segmentation faults, etc.
 
     """
-    def __init__(self, resolution='combined', **kwargs):
-        """
-        *resolution* must be one of "domain", "problem" or "combined"
-        (default).
-
-        """
+    def __init__(self, **kwargs):
         PlanningReport.__init__(self, **kwargs)
-        resolutions = ['domain', 'problem', 'combined']
-        if resolution not in resolutions:
-            logging.critical("resolution must be one of {}".format(resolutions))
-        self.resolution = resolution
         self.colored = 'html' in self.output_format
         self.use_domain_links = 'html' in self.output_format
         self.toc = False
@@ -76,28 +67,25 @@ class AbsoluteReport(PlanningReport):
         # Build a table containing summary functions of all other tables.
         # The actual section is added at position summary_index after creating
         # all other tables.
-        if self.resolution in ['domain', 'combined']:
-            summary = self._get_empty_table(title='Summary')
-            toc_lines.append('- **[Summary #summary]**')
+        summary = self._get_empty_table(title='Summary')
+        toc_lines.append('- **[Summary #summary]**')
 
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
-            if self.resolution in ['domain', 'combined']:
-                if self.attribute_is_numeric(attribute):
-                    domain_table = self._get_table(attribute)
-                    tables.append(('', domain_table))
-                    reports.extract_summary_rows(
-                        domain_table, summary, link='#' + attribute)
-                else:
-                    tables.append((
-                        '',
-                        'Domain-wise reports only support numeric '
-                        'attributes, but %s has type %s.' %
-                        (attribute, self._all_attributes[attribute].__name__)))
-            if self.resolution in ['problem', 'combined']:
-                for domain in sorted(self.domains.keys()):
-                    tables.append((domain, self._get_table(attribute, domain)))
+            if self.attribute_is_numeric(attribute):
+                domain_table = self._get_table(attribute)
+                tables.append(('', domain_table))
+                reports.extract_summary_rows(
+                    domain_table, summary, link='#' + attribute)
+            else:
+                tables.append((
+                    '',
+                    'Domain-wise reports only support numeric '
+                    'attributes, but %s has type %s.' %
+                    (attribute, self._all_attributes[attribute].__name__)))
+            for domain in sorted(self.domains.keys()):
+                tables.append((domain, self._get_table(attribute, domain)))
 
             parts = []
             toc_line = []
@@ -123,14 +111,9 @@ class AbsoluteReport(PlanningReport):
 
         # Add summary before main content. This is done after creating the main content
         # because the summary table is extracted from all other tables.
-        if self.resolution in ['domain', 'combined']:
-            sections.insert(summary_index, ('summary', summary))
+        sections.insert(summary_index, ('summary', summary))
 
-        if self.resolution == 'domain':
-            toc = '- ' + ' '.join("[''%s'' #%s]" % (attr, attr)
-                                  for (attr, section) in sections)
-        else:
-            toc = '\n'.join(toc_lines)
+        toc = '\n'.join(toc_lines)
 
         content = '\n'.join('= %s =[%s]\n\n%s' % (attr, attr, section)
                             for (attr, section) in sections)
@@ -203,7 +186,7 @@ class AbsoluteReport(PlanningReport):
             else:
                 count = ','.join(num_values_list)
             link = None
-            if self.resolution == 'combined' and self.use_domain_links:
+            if self.use_domain_links:
                 link = '#%s-%s' % (attribute, domain)
             formatter = reports.CellFormatter(link=link, count=count)
             table.cell_formatters[domain][table.header_column] = formatter
@@ -246,10 +229,9 @@ class AbsoluteReport(PlanningReport):
             colored = False
         table = reports.Table(title=title, min_wins=min_wins, colored=colored)
         table.set_column_order(columns)
-        if self.resolution == 'combined':
-            link = '#%s' % title
-            formatter = reports.CellFormatter(link=link)
-            table.cell_formatters[table.header_row][table.header_column] = formatter
+        link = '#%s' % title
+        formatter = reports.CellFormatter(link=link)
+        table.cell_formatters[table.header_row][table.header_column] = formatter
         return table
 
     def _add_summary_functions(self, table, attribute):

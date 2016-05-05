@@ -86,10 +86,10 @@ exp.add_fetcher(
 
 # Add report steps
 exp.add_report(
-    AbsoluteReport('domain', attributes=ATTRIBUTES + ['expansions', 'cost']),
+    AbsoluteReport(attributes=ATTRIBUTES + ['expansions', 'cost']),
     name='report-abs-d')
 exp.add_report(
-    AbsoluteReport('problem', attributes=ATTRIBUTES, filter=only_two_algorithms),
+    AbsoluteReport(attributes=ATTRIBUTES, filter=only_two_algorithms),
     name='report-abs-p-filter')
 exp.add_report(
     AbsoluteReport(attributes=['coverage'], format='tex'),
@@ -155,11 +155,10 @@ exp.add_report(
     outfile='taskwise.html')
 
 exp.add_report(
-    AbsoluteReport(
-        'problem', attributes=[
-            'coverage', 'evaluated', 'evaluations', 'search_time',
-            'cost', 'memory', 'error', 'cost_all', 'limit_search_time',
-            'initial_h_value', 'initial_h_values', 'run_dir']),
+    AbsoluteReport(attributes=[
+        'coverage', 'evaluated', 'evaluations', 'search_time',
+        'cost', 'memory', 'error', 'cost_all', 'limit_search_time',
+        'initial_h_value', 'initial_h_values', 'run_dir']),
     name='report-abs-p')
 
 exp.add_step('finished', call, ['echo', 'Experiment', 'finished.'])
