@@ -49,6 +49,7 @@
 :class:`Environment`
 --------------------
 
+.. autoclass:: lab.environments.Environment
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.GkiGridEnvironment
 .. autoclass:: lab.environments.MaiaEnvironment

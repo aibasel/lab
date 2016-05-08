@@ -40,7 +40,17 @@ def is_run_step(step):
 
 
 class Environment(object):
+    """Abstract base class for all environments."""
     def __init__(self, randomize_task_order=True):
+        """
+        If *randomize_task_order* is True (default), tasks for runs are
+        started in a random order. This is useful to avoid systematic
+        noise due to, e.g., one of the algorithms being run on a
+        machine with heavy load. Note that due to the randomization,
+        run directories may be pristine while the experiment is running
+        even though the logs say the runs are finished.
+
+        """
         self.exp = None
         self.randomize_task_order = randomize_task_order
 
@@ -76,20 +86,16 @@ class LocalEnvironment(Environment):
 
     EXP_RUN_SCRIPT = 'run'
 
-    def __init__(self, processes=None, randomize_task_order=True):
+    def __init__(self, processes=None, **kwargs):
         """
         If given, *processes* must be between 1 and #CPUs. If omitted,
         it will be set to #CPUs.
 
-        If *randomize_task_order* is True (default), tasks for runs are
-        started in a random order. This is useful to avoid systematic
-        noise due to, e.g., one of the algorithms being run on a
-        machine with heavy load. Note that due to the randomization,
-        run directories may be pristine while the experiment is running
-        even though the logs say the runs are finished.
+        See :py:class:`~lab.environments.Environment` for inherited
+        parameters.
 
         """
-        Environment.__init__(self)
+        Environment.__init__(self, **kwargs)
         cores = multiprocessing.cpu_count()
         if processes is None:
             processes = cores
@@ -133,7 +139,7 @@ class OracleGridEngineEnvironment(Environment):
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, host_restriction=None,
-                 email=None, randomize_task_order=True, extra_options=None):
+                 email=None, extra_options=None, **kwargs):
         """
 
         If the main experiment step ('run') is part of the selected
@@ -158,21 +164,17 @@ class OracleGridEngineEnvironment(Environment):
         If *email* is provided and the steps run on the grid, a message
         will be sent when the last experiment step finishes.
 
-        If *randomize_task_order* is True (default), tasks for runs are
-        started in a random order. This is useful to avoid systematic
-        noise due to, e.g., one of the algorithms being run on a
-        machine with heavy load. Note that due to the randomization,
-        run directories may be pristine while the experiment is running
-        even though the logs say the runs are finished.
-
         Use *extra_options* to pass additional options. The
         *extra_options* string may contain newlines. Example that
         allocates 16 cores per run on maia::
 
             extra_options='#$ -pe smp 16'
 
+        See :py:class:`~lab.environments.Environment` for inherited
+        parameters.
+
         """
-        Environment.__init__(self, randomize_task_order=randomize_task_order)
+        Environment.__init__(self, **kwargs)
         if queue is None:
             queue = self.DEFAULT_QUEUE
         if priority is None:
