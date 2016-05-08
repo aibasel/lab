@@ -322,7 +322,7 @@ class Experiment(_Buildable):
 
         self.steps = []
         self.add_step('build', self.build)
-        self.add_step('run', self.run)
+        self.add_step('run', self.start_runs)
         self.add_fetcher(name='fetch')
 
     @property
@@ -494,8 +494,7 @@ class Experiment(_Buildable):
         FastDownwardExperiments on grids, where build() turns the added
         algorithms and benchmarks into Runs.
 
-        By default, the first experiment step calls this method. You
-        don't have to call it manually.
+        By default, the first experiment step calls this method.
 
         """
         logging.info('Experiment path: "%s"' % self.path)
@@ -510,17 +509,16 @@ class Experiment(_Buildable):
         self._build_runs()
         self._build_properties_file()
 
-    def run(self):
+    def start_runs(self):
         """Execute all runs that were added to the experiment.
 
         Depending on the selected environment this method will start
         the runs locally or on a computer cluster.
 
-        By default, the second experiment step calls this method. You
-        don't have to call it manually.
+        By default, the second experiment step calls this method.
 
         """
-        self.environment.run_experiment()
+        self.environment.start_runs()
 
     def _build_runs(self):
         """

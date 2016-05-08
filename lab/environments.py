@@ -59,9 +59,9 @@ class Environment(object):
     def write_main_script(self):
         raise NotImplementedError
 
-    def run_experiment(self):
+    def start_runs(self):
         """
-        Run main experiment step.
+        Execute all runs that are part of the experiment.
         """
         raise NotImplementedError
 
@@ -114,7 +114,7 @@ class LocalEnvironment(Environment):
 
         self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
-    def run_experiment(self):
+    def start_runs(self):
         tools.run_command(['./' + self.EXP_RUN_SCRIPT], cwd=self.exp.path)
 
     def run_steps(self, steps):
@@ -202,7 +202,7 @@ class OracleGridEngineEnvironment(Environment):
             for path in paths:
                 tools.remove_path(os.path.join(self.exp.path, path))
 
-    def run_experiment(self):
+    def start_runs(self):
         # The queue will start the experiment by itself.
         pass
 
