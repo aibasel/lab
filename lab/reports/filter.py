@@ -31,8 +31,8 @@ class FilterReport(Report):
             FilterReport(filter=remove_openstacks),
             outfile='path/to/new/properties')
     """
-    def __init__(self, *args, **kwargs):
-        Report.__init__(self, *args, **kwargs)
+    def __init__(self, **kwargs):
+        Report.__init__(self, **kwargs)
 
     def get_text(self):
         if not self.outfile.endswith('properties'):
