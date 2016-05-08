@@ -260,7 +260,11 @@ class FastDownwardExperiment(Experiment):
             driver_options, component_options)
 
     def build(self, **kwargs):
-        """Write the experiment to disk. Called internally by lab."""
+        """Add Fast Downward code, runs and write everything to disk.
+
+        This method is called by the second experiment step.
+
+        """
         if not self._algorithms:
             logging.critical('You must add at least one algorithm.')
 
