@@ -136,10 +136,9 @@ class Report(object):
         When a report is made, both the available and the selected
         attributes are printed on the commandline.
 
-        *format* can be one of e.g. html, tex, wiki (MediaWiki), gwiki
-        (Google Code Wiki), doku (DokuWiki), pmw (PmWiki), moin
-        (MoinMoin), txt (Plain text) and art (ASCII art). Subclasses
-        may allow additional formats.
+        *format* can be one of e.g. html, tex, wiki (MediaWiki), doku
+        (DokuWiki), pmw (PmWiki), moin (MoinMoin) and txt (Plain text).
+        Subclasses may allow additional formats.
 
         If given, *filter* must be a function or a list of functions
         that are passed a dictionary of a run's attribute keys and
