@@ -95,7 +95,7 @@ exp.add_report(
     AbsoluteReport(attributes=['coverage'], format='tex'),
     outfile='report-abs-combined.tex')
 exp.add_report(
-    AbsoluteReport(attributes=['coverage'], format='html'),
+    AbsoluteReport(attributes=['coverage', 'error'], format='html'),
     outfile='report-abs-combined.html')
 exp.add_report(
     FilterReport(),

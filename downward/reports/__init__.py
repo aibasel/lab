@@ -68,7 +68,7 @@ class QualityFilters(object):
 
 class PlanningReport(Report):
     """
-    This is the base class for all Downward reports.
+    This is the base class for Fast Downward reports.
     """
     ATTRIBUTES = dict((str(attr), attr) for attr in [
         Attribute('coverage', absolute=True, min_wins=False),
