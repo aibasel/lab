@@ -305,7 +305,8 @@ class OracleGridEngineEnvironment(Environment):
                         'sure you want to submit it again?' % submitted_file)
             job_name = self._get_job_name(step)
             # We can't submit jobs from within the grid, so we submit
-            # them all at once with dependencies.
+            # them all at once with dependencies. We also can't rewrite
+            # the job files after they have been submitted.
             tools.write_file(
                 os.path.join(job_dir, job_name),
                 self._get_job(step, is_last=(number == len(steps))))
