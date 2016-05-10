@@ -46,6 +46,7 @@ Install VAL
 
     git clone https://github.com/KCL-Planning/VAL.git
     cd VAL
+    make clean  # Remove old object files and binaries.
     make
     # Add "validate" executable to your PATH environment variable.
 
