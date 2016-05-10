@@ -29,8 +29,7 @@ and http://www.fast-downward.org/LPBuildInstructions)
 ::
 
     FAST_DOWNWARD=/path/to/fast-downward/repo
-    sudo apt-get install mercurial g++ make python flex bison gawk
-    sudo apt-get install g++-multilib  # 64-bit
+    sudo apt-get install mercurial g++ cmake make python g++-multilib
     hg clone http://hg.fast-downward.org ${FAST_DOWNWARD}
     # Optionally check that Fast Downward works:
     cd ${FAST_DOWNWARD}
@@ -44,6 +43,7 @@ Install VAL
 
 ::
 
+    sudo apt-get install g++ make flex bison
     git clone https://github.com/KCL-Planning/VAL.git
     cd VAL
     make clean  # Remove old object files and binaries.
