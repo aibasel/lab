@@ -196,6 +196,7 @@ class OracleGridEngineEnvironment(Environment):
         """
         tools.makedirs(self.exp.path)
         job_prefix = _get_job_prefix(self.exp.name)
+        # TODO: Include driver.err and driver.log.
         paths = [
             path for path in os.listdir(self.exp.path)
             if not path.startswith(job_prefix) and not path == 'submitted']
