@@ -48,7 +48,7 @@ Install VAL
     cd VAL
     make clean  # Remove old object files and binaries.
     make
-    # Add "validate" executable to your PATH environment variable.
+    # Add "validate" binary to a directory on your PATH.
 
 
 Run tutorial experiment
