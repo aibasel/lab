@@ -35,7 +35,7 @@ def _get_job_prefix(exp_name):
 def is_run_step(step):
     """Return true iff the given step is the "run" step."""
     return (
-        step.name == 'run' and step._funcname == 'run' and
+        step.name == 'run' and step._funcname == 'start_runs' and
         not step.args and not step.kwargs)
 
 
