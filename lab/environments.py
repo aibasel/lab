@@ -197,7 +197,9 @@ class OracleGridEngineEnvironment(Environment):
         tools.makedirs(self.exp.path)
 
         for name in ['driver.log', 'driver.err', 'submitted']:
-            tools.remove_path(os.path.join(self.exp.path, name))
+            path = os.path.join(self.exp.path, name)
+            if os.path.exists(path):
+                tools.remove_path(path)
 
         job_prefix = _get_job_prefix(self.exp.name)
         paths = [
