@@ -206,9 +206,9 @@ class FastDownwardExperiment(Experiment):
         If given, *driver_options* must be a list of strings. They will
         be passed to the ``fast-downward.py`` script. See
         ``fast-downward.py --help`` for available options. The list is
-        always prepended with ``["--search-time-limit", "30m",
-        "--search-memory-limit', "2G"]``. Specifying custom limits will
-        override these default limits.
+        always prepended with ``["--validate", "--search-time-limit",
+        "30m", "--search-memory-limit', "2G"]``. Specifying custom
+        limits will override the default limits.
 
         Example experiment setup:
 
@@ -252,6 +252,7 @@ class FastDownwardExperiment(Experiment):
             logging.critical('Algorithm names must be unique: {}'.format(name))
         build_options = self._get_default_build_options() + (build_options or [])
         driver_options = ([
+            '--validate',
             '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
             '--search-memory-limit', self.DEFAULT_SEARCH_MEMORY_LIMIT] +
             (driver_options or []))
