@@ -298,10 +298,17 @@ class OracleGridEngineEnvironment(Environment):
         # The main script is written by the run_steps() method.
         self._write_run_dispatcher()
 
+    def _remove_existing_job_files(self):
+        job_prefix = _get_job_prefix(self.exp.name)
+        for name in os.listdir(self.exp.path):
+            if name.startswith(job_prefix):
+                tools.remove_path(os.path.join(self.exp.path, name))
+
     def run_steps(self, steps):
         self.exp.build(write_to_disk=False)
         job_dir = self.exp.path
         tools.makedirs(job_dir)
+        self._remove_existing_job_files()
         prev_job_name = None
         for number, step in enumerate(steps, start=1):
             if is_run_step(step):
