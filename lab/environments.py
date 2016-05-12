@@ -195,13 +195,16 @@ class OracleGridEngineEnvironment(Environment):
         Remove everything except the grid helper files.
         """
         tools.makedirs(self.exp.path)
+
+        for name in ['driver.log', 'driver.err', 'submitted']:
+            tools.remove_path(os.path.join(self.exp.path, name))
+
         job_prefix = _get_job_prefix(self.exp.name)
         paths = [
             path for path in os.listdir(self.exp.path)
-            if not path.startswith(job_prefix) and
-            not path in ('driver.log', 'driver.err', 'submitted')]
-        logging.info('Experiment directory is not empty: {}'.format(paths))
+            if not path.startswith(job_prefix)]
         if paths:
+            logging.info('Experiment directory is not empty: {}'.format(paths))
             tools.confirm_overwrite_or_abort(self.exp.path)
             for path in paths:
                 tools.remove_path(os.path.join(self.exp.path, path))

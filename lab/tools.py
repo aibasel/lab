@@ -140,7 +140,10 @@ def overwrite_dir(dir):
 
 def remove_path(path):
     if os.path.isfile(path):
-        os.remove(path)
+        try:
+            os.remove(path)
+        except OSError:
+            pass
     else:
         shutil.rmtree(path)
 
