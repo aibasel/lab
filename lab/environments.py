@@ -210,8 +210,8 @@ class OracleGridEngineEnvironment(Environment):
 
         job_prefix = _get_job_prefix(self.exp.name)
         paths = [
-            path for path in os.listdir(self.exp.path)
-            if not path.startswith(job_prefix)]
+            name for name in os.listdir(self.exp.path)
+            if not name.startswith(job_prefix)]
         if paths:
             logging.info('Experiment directory is not empty: {}'.format(paths))
             tools.confirm_overwrite_or_abort(self.exp.path)
