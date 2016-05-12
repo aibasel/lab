@@ -267,6 +267,12 @@ class FastDownwardExperiment(Experiment):
         "--search-memory-limit', "2G"]``. Specifying custom limits will
         override these default limits.
 
+        .. note::
+
+            Old Fast Downward revisions automatically validate plans.
+            You can validate plans for newer revisions by passing
+            ``driver_options=["--validate"]``.
+
         Examples::
 
             # Test iPDB in the latest revision on the default branch.
