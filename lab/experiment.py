@@ -497,12 +497,11 @@ class Experiment(_Buildable):
         By default, the first experiment step calls this method.
 
         """
-        logging.info('Experiment path: "%s"' % self.path)
-        self.environment.create_or_cleanup_experiment_dir()
-
         if not write_to_disk:
             return
 
+        logging.info('Experiment path: "%s"' % self.path)
+        self.environment.prepare_experiment_dir()
         self.environment.write_main_script()
 
         self._build_resources()

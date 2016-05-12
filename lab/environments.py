@@ -63,7 +63,7 @@ class Environment(object):
         self.exp.add_new_file(
             '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
 
-    def create_or_cleanup_experiment_dir(self):
+    def prepare_experiment_dir(self):
         raise NotImplementedError
 
     def write_main_script(self):
@@ -103,7 +103,7 @@ class LocalEnvironment(Environment):
             raise ValueError("processes must be in the range [1, ..., #CPUs].")
         self.processes = processes
 
-    def create_or_cleanup_experiment_dir(self):
+    def prepare_experiment_dir(self):
         if os.path.exists(self.exp.path):
             tools.confirm_overwrite_or_abort(self.exp.path)
             tools.remove_path(self.exp.path)
@@ -190,16 +190,17 @@ class OracleGridEngineEnvironment(Environment):
         self.email = email
         self.extra_options = extra_options or '## (not used)'
 
-    def create_or_cleanup_experiment_dir(self):
+    def prepare_experiment_dir(self):
         """
-        Remove everything except the job files.
+        Remove everything except the grid helper files.
         """
         tools.makedirs(self.exp.path)
         job_prefix = _get_job_prefix(self.exp.name)
-        # TODO: Include driver.err and driver.log.
         paths = [
             path for path in os.listdir(self.exp.path)
-            if not path.startswith(job_prefix) and not path == 'submitted']
+            if not path.startswith(job_prefix) and
+            not path in ('driver.log', 'driver.err', 'submitted')]
+        logging.info('Experiment directory is not empty: {}'.format(paths))
         if paths:
             tools.confirm_overwrite_or_abort(self.exp.path)
             for path in paths:
@@ -295,6 +296,7 @@ class OracleGridEngineEnvironment(Environment):
     def run_steps(self, steps):
         self.exp.build(write_to_disk=False)
         job_dir = self.exp.path
+        tools.makedirs(job_dir)
         prev_job_name = None
         for number, step in enumerate(steps, start=1):
             if is_run_step(step):
