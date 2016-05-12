@@ -32,6 +32,13 @@ def _get_job_prefix(exp_name):
     return ''.join([escape_char, exp_name, '-'])
 
 
+def is_build_step(step):
+    """Return true iff the given step is the "build" step."""
+    return (
+        step.name == 'build' and step._funcname == 'build' and
+        not step.args and not step.kwargs)
+
+
 def is_run_step(step):
     """Return true iff the given step is the "run" step."""
     return (
@@ -311,11 +318,13 @@ class OracleGridEngineEnvironment(Environment):
         self._remove_existing_job_files()
         prev_job_name = None
         for number, step in enumerate(steps, start=1):
+            if is_build_step(step):
+                self.prepare_experiment_dir()
             if is_run_step(step):
                 submitted_file = os.path.join(job_dir, 'submitted')
                 if os.path.exists(submitted_file):
                     tools.confirm_or_abort(
-                        'The file "%s" already exists so it seems the '
+                        'The file "%s" already exists so probably the '
                         'experiment has already been submitted. Are you '
                         'sure you want to submit it again?' % submitted_file)
             job_name = self._get_job_name(step)
