@@ -22,7 +22,7 @@ if REMOTE:
 else:
     BENCHMARKS_DIR = os.path.expanduser('~/projects/Downward/benchmarks')
     ENV = LocalEnvironment(processes=4)
-SUITE = ['grid', 'gripper:prob01.pddl', 'mystery:prob07.pddl']
+SUITE = ['grid', 'gripper:prob01.pddl', 'miconic:s1-0.pddl', 'mystery:prob07.pddl']
 ATTRIBUTES = ['coverage', 'evaluations', 'plan', 'times', 'trivially_unsolvable']
 
 
@@ -44,8 +44,9 @@ for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     run.set_property('domain', task.domain)
     run.set_property('problem', task.problem)
     run.set_property('algorithm', 'ff')
-    # Every run has to have an id in the form of a list.
-    run.set_property('id', [task.domain, task.problem])
+    # Every run has to have a unique id in the form of a list.
+    # The algorithm name is only really needed when there are multiple algorithms.
+    run.set_property('id', ['ff', task.domain, task.problem])
     # Schedule parser.
     run.add_command('parse', ['PARSER'])
 
