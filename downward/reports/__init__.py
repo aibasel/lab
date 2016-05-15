@@ -220,7 +220,7 @@ class PlanningReport(Report):
         for run in self.props.values():
             if run.get('error', '').startswith('unexplained'):
                 for column in columns:
-                    table.add_cell(run['run_dir'], column, run[column])
+                    table.add_cell(run['run_dir'], column, run.get(column, '?'))
         return table
 
     def _get_algorithm_order(self):
