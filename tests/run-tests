@@ -7,10 +7,12 @@
 
 set -euo pipefail
 
-REPO='/home/jendrik/projects/Downward/downward'
+BENCHMARKS="$HOME/projects/Downward/benchmarks"
+REPO="$HOME/projects/Downward/downward"
 
 function cleanup {
     rm -rf examples/data
+    rm -rf examples/ff/data
     rm -rf examples/pi/data
     rm -rf examples/planner/data
     rm -rf examples/simple/data
@@ -62,6 +64,13 @@ echo "Docs: file://$(pwd)/_build/html/index.html"
 cd ..
 
 cd examples
+
+# FF experiment needs benchmarks.
+if [ -d "$REPO" ]; then
+    cd ff
+    ./ff.py --all
+    cd ..
+fi
 
 cd simple
 ./simple-exp.py --all
