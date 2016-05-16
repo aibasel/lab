@@ -66,9 +66,11 @@ class Problem(object):
     def __cmp__(self, other):
         return cmp((self.domain, self.problem), (other.domain, other.problem))
 
+    @property
     def problem_file(self):
         return os.path.join(self.benchmarks_dir, self.domain, self.problem)
 
+    @property
     def domain_file(self):
         domain_basenames = [
             'domain.pddl',

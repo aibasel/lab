@@ -36,8 +36,8 @@ for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
     # Create symbolic links and aliases. This is optional. We could
     # also use absolute paths in add_command().
-    run.add_resource('DOMAIN', task.domain_file(), symlink=True)
-    run.add_resource('PROBLEM', task.problem_file(), symlink=True)
+    run.add_resource('DOMAIN', task.domain_file, symlink=True)
+    run.add_resource('PROBLEM', task.problem_file, symlink=True)
     # 'ff' binary has to be on the PATH. We could also use exp.add_resource().
     run.add_command('run-planner', ['ff', '-o', 'DOMAIN', '-f', 'PROBLEM'])
     # AbsoluteReport needs properties 'domain', 'problem', 'algorithm', 'coverage'.

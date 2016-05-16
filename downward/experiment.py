@@ -46,9 +46,9 @@ class FastDownwardRun(Run):
         # Linking to instead of copying the PDDL files makes building
         # the experiment twice as fast.
         self.add_resource(
-            'DOMAIN', self.task.domain_file(), 'domain.pddl', symlink=True)
+            'DOMAIN', self.task.domain_file, 'domain.pddl', symlink=True)
         self.add_resource(
-            'PROBLEM', self.task.problem_file(), 'problem.pddl', symlink=True)
+            'PROBLEM', self.task.problem_file, 'problem.pddl', symlink=True)
 
         self.add_command(
             'fast-downward',
