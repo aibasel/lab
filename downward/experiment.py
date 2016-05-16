@@ -76,17 +76,7 @@ class FastDownwardRun(Run):
 
         self.set_property('experiment_name', self.experiment.name)
 
-        # TODO: Remove planner_type property. Let portfolios output token instead.
-        self.set_property(
-            'planner_type', 'portfolio' if self._is_portfolio() else 'single')
-
         self.set_property('id', [self.algo.name, self.task.domain, self.task.problem])
-
-    def _is_portfolio(self):
-        built_in = [
-            'seq-opt-fdss-1', 'seq-opt-fdss-2', 'seq-opt-merge-and-shrink'
-            'seq-sat-fdss-1', 'seq-sat-fdss-2']
-        return any(x in self.algo.driver_options for x in built_in + ['--portfolio'])
 
 
 class _DownwardAlgorithm(object):

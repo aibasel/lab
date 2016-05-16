@@ -377,16 +377,32 @@ class PortfolioParser(SearchParser):
         self.add_function(get_iterative_portfolio_results)
 
 
-if __name__ == '__main__':
-    parser = SingleSearchParser()
+def parse_planner_type(content, props):
+    match = re.search(r'^INFO     search portfolio:', content, re.M)
+    if match:
+        props['planner_type'] = 'portfolio'
+    else:
+        props['planner_type'] = 'single'
 
-    # Change parser type if we are parsing a portfolio.
-    planner_type = parser.props['planner_type']
+
+def get_planner_type():
+    planner_type_parser = Parser()
+    planner_type_parser.add_function(parse_planner_type)
+    planner_type_parser.parse()
+    return planner_type_parser.props['planner_type']
+
+
+def main():
+    planner_type = get_planner_type()
     if planner_type == 'single':
         print 'Running single search parser'
+        parser = SingleSearchParser()
     else:
         assert planner_type == 'portfolio', planner_type
-        parser = PortfolioParser()
         print 'Running portfolio parser'
+        parser = PortfolioParser()
 
     parser.parse()
+
+
+main()
