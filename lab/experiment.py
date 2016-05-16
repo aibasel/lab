@@ -484,6 +484,12 @@ class Experiment(_Buildable):
             env = environments.LocalEnvironment()
         env.run_steps(steps)
 
+    @tools.deprecated(
+        "Using exp() has been deprecated in lab 2.0, please use the more "
+        "speaking exp.run_steps() instead.")
+    def __call__(self):
+        return self.run_steps()
+
     def _prepare_experiment_dir(self):
         if os.path.exists(self.path):
             tools.confirm_overwrite_or_abort(self.path)
