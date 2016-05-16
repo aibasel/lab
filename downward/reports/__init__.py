@@ -187,12 +187,15 @@ class PlanningReport(Report):
                  len(self.domains), self.domains.keys(), len(self.runs)))
 
         # Sort each entry in problem_runs by algorithm.
-        # TODO: Remove O(n) lookup.
-        def run_key(run):
-            return self.algorithms.index(run['algorithm'])
+        algo_to_index = dict(
+            (algorithm, index)
+            for index, algorithm in enumerate(self.algorithms))
 
-        for key, run_list in self.problem_runs.items():
-            self.problem_runs[key] = sorted(run_list, key=run_key)
+        def run_key(run):
+            return algo_to_index[run['algorithm']]
+
+        for problem_runs in self.problem_runs.values():
+            problem_runs.sort(key=run_key)
 
         self.algorithm_info = self._scan_algorithm_info()
 
