@@ -292,7 +292,7 @@ class OracleGridEngineEnvironment(Environment):
             tools.confirm_or_abort(
                 'The path "%s" already exists, so the experiment has '
                 'already been submitted. Are you sure you want to '
-                'submit it again?' % job_dir)
+                'delete the grid-steps and submit it again?' % job_dir)
             tools.remove_path(job_dir)
         tools.makedirs(job_dir)
 
