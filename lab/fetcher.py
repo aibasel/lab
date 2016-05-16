@@ -39,11 +39,8 @@ class Fetcher(object):
     """
     def fetch_dir(self, run_dir, eval_dir, run_filter=None, parsers=None):
         run_filter = run_filter or tools.RunFilter()
-        parsers = parsers or []
         # Allow specyfing a list of multiple parsers or a single parser.
-        if not isinstance(parsers, list):
-            parsers = [parsers]
-
+        parsers = tools.make_list(parsers or [])
         prop_file = os.path.join(run_dir, 'properties')
 
         for parser in parsers:
@@ -52,14 +49,7 @@ class Fetcher(object):
 
         props = tools.Properties(filename=prop_file)
         props = run_filter.apply_to_run(props)
-        if not props:
-            return None, None
-        run_id = props.get('id')
-        # Abort if an id cannot be read.
-        if not run_id:
-            logging.critical('id is not set in {}.'.format(prop_file))
-
-        return run_id, props
+        return props
 
     def __call__(self, src_dir, eval_dir=None, filter=None, parsers=None, **kwargs):
         """
@@ -98,10 +88,11 @@ class Fetcher(object):
             for index, run_dir in enumerate(run_dirs, start=1):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, 'Scanning: {:06d}/{:d}'.format(index, total_dirs))
-                run_id, props = self.fetch_dir(
+                props = self.fetch_dir(
                     run_dir, eval_dir, run_filter=run_filter, parsers=parsers)
-                if props is None:
+                if not props:
                     continue
+                run_id = props.get('id')
                 if not run_id:
                     logging.critical('Dir {run_dir} has no id'.format(**props))
                 combined_props['-'.join(run_id)] = props
