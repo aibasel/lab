@@ -129,15 +129,6 @@ def confirm_overwrite_or_abort(path):
         'The path "%s" already exists. Do you want to overwrite it?' % path)
 
 
-def overwrite_dir(dir):
-    if os.path.exists(dir):
-        confirm_overwrite_or_abort(dir)
-        shutil.rmtree(dir)
-    # Use os.makedirs() instead of tools.makedirs() to check if the dir
-    # has really been deleted.
-    os.makedirs(dir)
-
-
 def remove_path(path):
     if os.path.isfile(path):
         try:
