@@ -107,14 +107,14 @@ def make_list(value):
     return [value]
 
 
-def makedirs(dir):
+def makedirs(path):
     """
-    makedirs variant that does not complain when the dir already exists
+    os.makedirs() variant that doesn't complain if the path already exists.
     """
     try:
-        os.makedirs(dir)
+        os.makedirs(path)
     except OSError:
-        # directory probably exists
+        # Directory probably already exists.
         pass
 
 

@@ -568,7 +568,7 @@ class Run(_Buildable):
         rel_run_dir = get_run_dir(run_id)
         self.set_property('run_dir', rel_run_dir)
         self.path = os.path.join(self.experiment.path, rel_run_dir)
-        tools.overwrite_dir(self.path)
+        os.makedirs(self.path)
 
         # We need to build the run script before the resources, because
         # the run script is added as a resource.
