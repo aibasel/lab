@@ -1,3 +1,4 @@
+cd %(exp_path)s
 NUM_TASKS=%(num_tasks)d
 RUN=$(SGE_TASK_ID)
 ./run-dispatcher.py "$NUM_TASKS" "$RUN"

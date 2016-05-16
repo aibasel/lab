@@ -484,6 +484,12 @@ class Experiment(_Buildable):
             env = environments.LocalEnvironment()
         env.run_steps(steps)
 
+    def _prepare_experiment_dir(self):
+        if os.path.exists(self.path):
+            tools.confirm_overwrite_or_abort(self.path)
+            tools.remove_path(self.path)
+        tools.makedirs(self.path)
+
     def build(self, write_to_disk=True):
         """
         Finalize the internal data structures, then write all files
@@ -501,7 +507,7 @@ class Experiment(_Buildable):
             return
 
         logging.info('Experiment path: "%s"' % self.path)
-        self.environment.prepare_experiment_dir()
+        self._prepare_experiment_dir()
         self.environment.write_main_script()
 
         self._build_resources()

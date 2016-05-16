@@ -70,9 +70,6 @@ class Environment(object):
         self.exp.add_new_file(
             '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
 
-    def prepare_experiment_dir(self):
-        raise NotImplementedError
-
     def write_main_script(self):
         raise NotImplementedError
 
@@ -109,12 +106,6 @@ class LocalEnvironment(Environment):
         if not 1 <= processes <= cores:
             raise ValueError("processes must be in the range [1, ..., #CPUs].")
         self.processes = processes
-
-    def prepare_experiment_dir(self):
-        if os.path.exists(self.exp.path):
-            tools.confirm_overwrite_or_abort(self.exp.path)
-            tools.remove_path(self.exp.path)
-        tools.makedirs(self.exp.path)
 
     def write_main_script(self):
         self._write_run_dispatcher()
@@ -197,27 +188,6 @@ class OracleGridEngineEnvironment(Environment):
         self.email = email
         self.extra_options = extra_options or '## (not used)'
 
-    def prepare_experiment_dir(self):
-        """
-        Remove everything except the grid helper files.
-        """
-        tools.makedirs(self.exp.path)
-
-        for name in ['driver.log', 'driver.err', 'submitted']:
-            path = os.path.join(self.exp.path, name)
-            if os.path.exists(path):
-                tools.remove_path(path)
-
-        job_prefix = _get_job_prefix(self.exp.name)
-        paths = [
-            name for name in os.listdir(self.exp.path)
-            if not name.startswith(job_prefix)]
-        if paths:
-            logging.info('Experiment directory is not empty: {}'.format(paths))
-            tools.confirm_overwrite_or_abort(self.exp.path)
-            for path in paths:
-                tools.remove_path(os.path.join(self.exp.path, path))
-
     def start_runs(self):
         # The queue will start the experiment by itself.
         pass
@@ -277,7 +247,10 @@ class OracleGridEngineEnvironment(Environment):
         return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
 
     def _get_main_job_body(self):
-        params = dict(num_tasks=self._get_num_runs(), errfile='driver.err')
+        params = dict(
+            num_tasks=self._get_num_runs(),
+            errfile='driver.err',
+            exp_path='../' + self.exp.name)
         return pkgutil.get_data('lab', 'data/grid-job-body-template') % params
 
     def _get_job_body(self, step):
@@ -305,32 +278,31 @@ class OracleGridEngineEnvironment(Environment):
         # The main script is written by the run_steps() method.
         self._write_run_dispatcher()
 
-    def _remove_existing_job_files(self):
-        job_prefix = _get_job_prefix(self.exp.name)
-        for name in os.listdir(self.exp.path):
-            if name.startswith(job_prefix):
-                tools.remove_path(os.path.join(self.exp.path, name))
-
     def run_steps(self, steps):
+        """
+        We can't submit jobs from within the grid, so we submit them
+        all at once with dependencies. We also can't rewrite the job
+        files after they have been submitted.
+        """
         self.exp.build(write_to_disk=False)
-        job_dir = self.exp.path
+
+        # Prepare job dir.
+        job_dir = self.exp.path + '-grid-steps'
+        if os.path.exists(job_dir):
+            tools.confirm_or_abort(
+                'The path "%s" already exists, so the experiment has '
+                'already been submitted. Are you sure you want to '
+                'submit it again?' % job_dir)
+            tools.remove_path(job_dir)
         tools.makedirs(job_dir)
-        self._remove_existing_job_files()
+
+        # Overwrite exp dir if it exists.
+        if any(is_build_step(step) for step in steps):
+            self.exp._prepare_experiment_dir()
+
         prev_job_name = None
         for number, step in enumerate(steps, start=1):
-            if is_build_step(step):
-                self.prepare_experiment_dir()
-            if is_run_step(step):
-                submitted_file = os.path.join(job_dir, 'submitted')
-                if os.path.exists(submitted_file):
-                    tools.confirm_or_abort(
-                        'The file "%s" already exists so probably the '
-                        'experiment has already been submitted. Are you '
-                        'sure you want to submit it again?' % submitted_file)
             job_name = self._get_job_name(step)
-            # We can't submit jobs from within the grid, so we submit
-            # them all at once with dependencies. We also can't rewrite
-            # the job files after they have been submitted.
             tools.write_file(
                 os.path.join(job_dir, job_name),
                 self._get_job(step, is_last=(number == len(steps))))
@@ -339,11 +311,6 @@ class OracleGridEngineEnvironment(Environment):
                 submit.extend(['-hold_jid', prev_job_name])
             submit.append(job_name)
             tools.run_command(submit, cwd=job_dir)
-            if is_run_step(step):
-                tools.write_file(
-                    submitted_file,
-                    'This file is created when the experiment is submitted to '
-                    'the queue.')
             prev_job_name = job_name
 
 
