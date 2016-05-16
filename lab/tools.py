@@ -183,14 +183,6 @@ def run_command(cmd, **kwargs):
     return subprocess.call(cmd, **kwargs)
 
 
-def get_command_output(cmd, quiet=False, **kwargs):
-    if not quiet:
-        _log_command(cmd, kwargs)
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, **kwargs)
-    stdout, _ = p.communicate()
-    return stdout.strip()
-
-
 class Properties(dict):
     def __init__(self, filename=None):
         self.filename = filename
