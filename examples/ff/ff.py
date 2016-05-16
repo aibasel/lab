@@ -11,6 +11,8 @@ import platform
 from lab.environments import LocalEnvironment, MaiaEnvironment
 from lab.experiment import Experiment
 
+# We use downward's module for generating suites and its AbsoluteReport.
+# In the future, these should live in a separate "planning" package.
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
 
