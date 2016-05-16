@@ -187,11 +187,7 @@ class ScatterPlotReport(PlotReport):
             self.writer = ScatterMatplotlib
 
     def _set_scales(self, xscale, yscale):
-        # ScatterPlots use log-scaling on the x-axis by default.
-        default_xscale = 'log'
-        if self.attribute and self.attribute in self.LINEAR:
-            default_xscale = 'linear'
-        PlotReport._set_scales(self, xscale or default_xscale, yscale)
+        PlotReport._set_scales(self, xscale or self.attribute.scale or 'log', yscale)
         if self.xscale != self.yscale:
             logging.critical('Scatterplots must use the same scale on both axes.')
 

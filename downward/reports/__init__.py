@@ -71,18 +71,20 @@ class PlanningReport(Report):
     This is the base class for Fast Downward reports.
     """
     ATTRIBUTES = dict((str(attr), attr) for attr in [
-        Attribute('coverage', absolute=True, min_wins=False),
-        Attribute('initial_h_value', min_wins=False),
-        Attribute('quality', absolute=True, min_wins=False),
-        Attribute('unsolvable', absolute=True, min_wins=False),
-        Attribute('search_time', functions=geometric_mean),
-        Attribute('total_time', functions=geometric_mean),
+        Attribute('cost', scale='linear'),
+        Attribute('coverage', absolute=True, min_wins=False, scale='linear'),
+        Attribute('dead_ends', min_wins=False),
         Attribute('evaluations', functions=geometric_mean),
         Attribute('expansions', functions=geometric_mean),
         Attribute('generated', functions=geometric_mean),
-        Attribute('dead_ends', min_wins=False),
+        Attribute('initial_h_value', min_wins=False, scale='linear'),
+        Attribute('plan_length', scale='linear'),
+        Attribute('quality', absolute=True, min_wins=False),
         Attribute(
             'score_*', min_wins=False, functions=[reports.arithmetic_mean, sum]),
+        Attribute('search_time', functions=geometric_mean),
+        Attribute('total_time', functions=geometric_mean),
+        Attribute('unsolvable', absolute=True, min_wins=False),
     ])
 
     INFO_ATTRIBUTES = [

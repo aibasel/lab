@@ -68,7 +68,9 @@ class Attribute(str):
     def __new__(cls, name, **kwargs):
         return str.__new__(cls, name)
 
-    def __init__(self, name, absolute=False, min_wins=True, functions=sum):
+    def __init__(
+            self, name, absolute=False, min_wins=True, functions=sum,
+            scale=None):
         """
         Use this class if your **own** attribute needs a non-default
         value for:
@@ -89,6 +91,9 @@ class Attribute(str):
           uses :py:func:`geometric_mean`). This can be a single
           function or a list of functions and defaults to
           :py:func:`sum`.
+        * *scale*: Default scaling. Can be one of "linear", "log" and
+          "symlog". If *scale* is None (default), the reports will
+          choose the scaling.
 
         The ``downward`` package automatically uses appropriate
         settings for most attributes. ::
@@ -108,6 +113,7 @@ class Attribute(str):
         if not isinstance(functions, collections.Iterable):
             functions = [functions]
         self.functions = functions
+        self.scale = scale
 
     def copy(self, name):
         return Attribute(

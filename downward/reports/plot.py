@@ -271,8 +271,6 @@ class PlotReport(PlanningReport):
     """
     Abstract base class for Plot classes.
     """
-    # TODO: Move this info to downward.reports.PlanningReport.
-    LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
     LOCATIONS = ['upper right', 'upper left', 'lower left', 'lower right',
                  'right', 'center left', 'center right', 'lower center',
                  'upper center', 'center']
@@ -372,16 +370,13 @@ class PlotReport(PlanningReport):
             self.writer = Matplotlib
 
     def _set_scales(self, xscale, yscale):
-        self.xscale = xscale or 'linear'
-        if yscale:
-            self.yscale = yscale
-        elif self.attribute and self.attribute in self.LINEAR:
-            self.yscale = 'linear'
-        else:
-            self.yscale = 'log'
+        attribute_scale = self.attribute.scale if self.attribute else None
+        self.xscale = xscale or attribute_scale or 'linear'
+        self.yscale = yscale or attribute_scale or 'log'
         scales = ['linear', 'log', 'symlog']
-        assert self.xscale in scales, self.xscale
-        assert self.yscale in scales, self.yscale
+        for scale in [self.xscale, self.yscale]:
+            if scale not in scales:
+                raise ValueError("{} not in {}".format(scale, scales))
 
     def _get_category_styles(self, categories):
         # Pick any style for categories for which no style is defined.
