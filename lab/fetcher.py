@@ -27,15 +27,17 @@ from lab import tools
 def _check_eval_dir(eval_dir):
     if os.path.exists(eval_dir):
         answer = raw_input(
-            '{} already exists. Do you want to (O)verwrite it (default), '
+            '{} already exists. Do you want to (o)verwrite it, '
             '(m)erge the results, or (c)ancel? '.format(eval_dir)).strip().lower()
-        if answer in ['', 'o']:
+        if answer == 'o':
             tools.remove_path(eval_dir)
         elif answer == 'm':
             pass
+        elif answer == 'c':
+            sys.exit()
         else:
             # Abort for "cancel" and invalid answers.
-            sys.exit('Aborted')
+            logging.critical('Invalid answer: "{}"'.format(answer))
 
 
 class Fetcher(object):
