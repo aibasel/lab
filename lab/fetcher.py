@@ -92,10 +92,7 @@ class Fetcher(object):
                     run_dir, eval_dir, run_filter=run_filter, parsers=parsers)
                 if not props:
                     continue
-                run_id = props.get('id')
-                if not run_id:
-                    logging.critical('Dir {run_dir} has no id'.format(**props))
-                combined_props['-'.join(run_id)] = props
+                combined_props['-'.join(props['id'])] = props
 
         unxeplained_errors = 0
         for props in combined_props.values():
