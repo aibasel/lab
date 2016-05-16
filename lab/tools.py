@@ -172,14 +172,9 @@ def find_file(filenames, dir='.'):
     raise IOError('none found in %r: %r' % (dir, filenames))
 
 
-def _log_command(cmd, kwargs):
-    assert isinstance(cmd, list)
-    logging.info('Running command: %s %s' % (' '.join(cmd), kwargs))
-
-
 def run_command(cmd, **kwargs):
     """Run command cmd and return the output."""
-    _log_command(cmd, kwargs)
+    logging.info('Executing %s %s' % (' '.join(cmd), kwargs))
     return subprocess.call(cmd, **kwargs)
 
 

@@ -42,7 +42,7 @@ class Step(object):
     def __call__(self):
         if self.func is None:
             logging.critical('You cannot run the same step more than once')
-        logging.info('Running %s: %s' % (self.name, self))
+        logging.info('Running step %s: %s' % (self.name, self))
         try:
             retval = self.func(*self.args, **self.kwargs)
             # Free memory
