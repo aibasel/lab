@@ -294,11 +294,20 @@ class OracleGridEngineEnvironment(Environment):
                 'already been submitted. Are you sure you want to '
                 'delete the grid-steps and submit it again?' % job_dir)
             tools.remove_path(job_dir)
-        tools.makedirs(job_dir)
 
         # Overwrite exp dir if it exists.
         if any(is_build_step(step) for step in steps):
-            self.exp._prepare_experiment_dir()
+            self.exp._remove_experiment_dir()
+
+        # Remove eval dir if it exists.
+        if os.path.exists(self.exp.eval_dir):
+            tools.confirm_or_abort(
+                'The evalution directory "%s" already exists. '
+                'Do you want to remove it?' % self.exp.eval_dir)
+            tools.remove_path(self.exp.eval_dir)
+
+        # Create job dir only when we need it.
+        tools.makedirs(job_dir)
 
         prev_job_name = None
         for number, step in enumerate(steps, start=1):

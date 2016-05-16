@@ -490,11 +490,10 @@ class Experiment(_Buildable):
     def __call__(self):
         return self.run_steps()
 
-    def _prepare_experiment_dir(self):
+    def _remove_experiment_dir(self):
         if os.path.exists(self.path):
             tools.confirm_overwrite_or_abort(self.path)
             tools.remove_path(self.path)
-        tools.makedirs(self.path)
 
     def build(self, write_to_disk=True):
         """
@@ -513,7 +512,8 @@ class Experiment(_Buildable):
             return
 
         logging.info('Experiment path: "%s"' % self.path)
-        self._prepare_experiment_dir()
+        self._remove_experiment_dir()
+        tools.makedirs(self.path)
         self.environment.write_main_script()
 
         self._build_resources()
