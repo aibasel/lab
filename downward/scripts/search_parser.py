@@ -202,9 +202,6 @@ def invalid_solution(props):
 
 
 def coverage(content, props):
-    # TODO: Count runs as unsuccessful if they used more than the
-    # alotted time. Currently this is not possible since we don't
-    # have timing information for portfolios and iterated searches.
     props['coverage'] = int(
         'plan_length' in props and
         'cost' in props and
@@ -239,9 +236,7 @@ def get_initial_h_values(content, props):
 
 
 def get_memory_limit_in_kb(props):
-    # TODO: Remove constant once we no longer want to support old
-    # planner revisions that don't output memory limits.
-    return props.get('limit_search_memory', 2048) * 1024
+    return props['limit_search_memory'] * 1024
 
 
 def check_memory(content, props):
@@ -278,9 +273,7 @@ def scores(content, props):
     # Maximum memory in KB
     max_memory = get_memory_limit_in_kb(props)
 
-    # TODO: Remove constant once we no longer want to support old
-    # planner revisions that don't output time limits.
-    max_time = props.get('limit_search_time', 1800)
+    max_time = props['limit_search_time']
 
     for attr in ('expansions', 'evaluations', 'generated'):
         props['score_' + attr] = log_score(
