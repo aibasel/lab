@@ -109,7 +109,12 @@ class Fetcher(object):
                     run_dir, eval_dir, run_filter=run_filter, parsers=parsers)
                 if not props:
                     continue
-                combined_props['-'.join(props['id'])] = props
+                id_string = '-'.join(props['id'])
+                if id_string in combined_props:
+                    logging.critical(
+                        'The destination already contains {}. '
+                        'Aborting to avoid data corruption.'.format(id_string))
+                combined_props[id_string] = props
 
         unxeplained_errors = 0
         for props in combined_props.values():
