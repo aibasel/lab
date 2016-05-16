@@ -19,8 +19,23 @@ from glob import glob
 import logging
 import os
 import subprocess
+import sys
 
 from lab import tools
+
+
+def _check_eval_dir(eval_dir):
+    if os.path.exists(eval_dir):
+        answer = raw_input(
+            '{} already exists. Do you want to (O)verwrite it (default), '
+            '(m)erge the results, or (c)ancel? '.format(eval_dir)).strip().lower()
+        if answer in ['', 'o']:
+            tools.remove_path(eval_dir)
+        elif answer == 'm':
+            pass
+        else:
+            # Abort for "cancel" and invalid answers.
+            sys.exit('Aborted')
 
 
 class Fetcher(object):
@@ -74,6 +89,8 @@ class Fetcher(object):
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching files from {} -> {}'.format(src_dir, eval_dir))
         logging.info('Fetching from evaluation dir: {}'.format(fetch_from_eval_dir))
+
+        _check_eval_dir(eval_dir)
 
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
