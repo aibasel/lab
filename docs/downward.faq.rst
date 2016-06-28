@@ -37,3 +37,11 @@ How can I make reports and plots for results obtained without lab?
 ------------------------------------------------------------------
 
 See ``examples/report-external-results.py`` for an example.
+
+
+Which experiment class should I use for which Fast Downward revision?
+---------------------------------------------------------------------
+
+* Before CMake: Use DownwardExperiment in lab 1.x
+* With CMake and mandatory validation: Use FastDownwardExperiment in lab 1.x
+* With CMake and optional validation: Use FastDownwardExperiment in lab 2.x
