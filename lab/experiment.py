@@ -596,6 +596,7 @@ class Run(_Buildable):
                 'and runs, they must be unique: {}'.format(doubly_used_vars))
         env_vars = exp_vars
         env_vars.update(run_vars)
+        env_vars = self._prepare_env_vars(env_vars)
 
         run_script = pkgutil.get_data('lab', 'data/run-template.py')
 
@@ -630,12 +631,8 @@ class Run(_Buildable):
 
         if env_vars:
             env_vars_text = ''
-            for var, filename in sorted(env_vars.items()):
-                filename = self._get_abs_path(filename)
-                # Only use relative filename for paths in the experiment dir.
-                if filename.startswith(self.experiment.path):
-                    filename = self._get_rel_path(filename)
-                env_vars_text += ('%s = "%s"\n' % (var, filename))
+            for var, path in sorted(env_vars.items()):
+                env_vars_text += ('{var} = "{path}"\n'.format(**locals()))
         else:
             env_vars_text = '"Placeholder for resource names"'
 
@@ -643,6 +640,17 @@ class Run(_Buildable):
             run_script = run_script.replace('"""%s"""' % old, new)
 
         self.add_new_file('', 'run', run_script, permissions=0o755)
+
+    def _prepare_env_vars(self, env_vars):
+        """Use relative filenames for paths in the experiment dir."""
+        new_env_vars = {}
+        for var, path in env_vars.items():
+            abspath = self._get_abs_path(path)
+            if abspath.startswith(self.experiment.path):
+                new_env_vars[var] = self._get_rel_path(path)
+            else:
+                new_env_vars[var] = abspath
+        return new_env_vars
 
     def _check_id(self):
         run_id = self.properties.get('id')
