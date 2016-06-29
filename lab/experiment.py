@@ -606,7 +606,10 @@ class Run(_Buildable):
             # Support running globally installed binaries.
             def format_arg(arg):
                 if isinstance(arg, basestring):
-                    return repr(arg.format(**env_vars))
+                    try:
+                        return repr(arg.format(**env_vars))
+                    except KeyError as err:
+                        logging.critical('Resource {} is undefined.'.format(err))
                 else:
                     return repr(str(arg))
 
