@@ -152,7 +152,7 @@ class CachedRevision(object):
         return os.path.join('code-' + self._hashed_name, *rel_path)
 
     def get_planner_resource_name(self):
-        return 'FAST_DOWNWARD_' + self._hashed_name
+        return 'fast_downward_' + self._hashed_name
 
     def _get_sentinel_file(self):
         return self.get_cached_path('build_successful')

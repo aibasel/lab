@@ -38,19 +38,21 @@ ATTRIBUTES = [
 exp = Experiment(environment=ENV)
 # Copy parser into experiment dir and make it available as
 # "PARSER". Parsers have to be executable.
-exp.add_resource('PARSER', 'ff-parser.py')
+exp.add_resource('parser', 'ff-parser.py')
 
 for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
     # Create symbolic links and aliases. This is optional. We
     # could also use absolute paths in add_command().
-    run.add_resource('DOMAIN', task.domain_file, symlink=True)
-    run.add_resource('PROBLEM', task.problem_file, symlink=True)
+    run.add_resource('domain', task.domain_file, symlink=True)
+    run.add_resource('problem', task.problem_file, symlink=True)
     # 'ff' binary has to be on the PATH.
     # We could also use exp.add_resource().
     run.add_command(
         'run-planner',
-        ['ff', '-o', 'DOMAIN', '-f', 'PROBLEM'])
+        ['ff', '-o', '{domain}', '-f', '{problem}'],
+        time_limit=1800,
+        memory_limit=2048)
     # AbsoluteReport needs the following properties:
     # 'domain', 'problem', 'algorithm', 'coverage'.
     run.set_property('domain', task.domain)
@@ -61,7 +63,7 @@ for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     # multiple algorithms.
     run.set_property('id', ['ff', task.domain, task.problem])
     # Schedule parser.
-    run.add_command('parse', ['PARSER'])
+    run.add_command('parse', ['{parser}'])
 
 # Make a report.
 exp.add_report(

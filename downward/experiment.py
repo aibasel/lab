@@ -46,18 +46,19 @@ class FastDownwardRun(Run):
         # Linking to instead of copying the PDDL files makes building
         # the experiment twice as fast.
         self.add_resource(
-            'DOMAIN', self.task.domain_file, 'domain.pddl', symlink=True)
+            'domain', self.task.domain_file, 'domain.pddl', symlink=True)
         self.add_resource(
-            'PROBLEM', self.task.problem_file, 'problem.pddl', symlink=True)
+            'problem', self.task.problem_file, 'problem.pddl', symlink=True)
 
         self.add_command(
             'fast-downward',
-            [algo.cached_revision.get_planner_resource_name()] +
-            algo.driver_options + ['DOMAIN', 'PROBLEM'] + algo.component_options)
+            ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
+            algo.driver_options + ['{domain}', '{problem}'] + algo.component_options)
 
-        self.add_command('parse-preprocess', ['PREPROCESS_PARSER'])
-        self.add_command('parse-search', ['SEARCH_PARSER'])
+        self.add_command('parse-preprocess', ['{preprocess_parser}'])
+        self.add_command('parse-search', ['{search_parser}'])
 
+        # TODO: Remove 'output'.
         self.add_command(
             'compress-output-files', ['xz', 'output.sas', 'output'])
 
@@ -285,10 +286,10 @@ class FastDownwardExperiment(Experiment):
     def _add_code(self):
         """Add the compiled code to the experiment."""
         self.add_resource(
-            'PREPROCESS_PARSER',
+            'preprocess_parser',
             os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
         self.add_resource(
-            'SEARCH_PARSER',
+            'search_parser',
             os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
 
         for cached_rev in self._get_unique_cached_revisions():

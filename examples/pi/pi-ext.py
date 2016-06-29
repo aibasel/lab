@@ -24,13 +24,13 @@ class PiReport(Report):
         return '\n'.join(lines)
 
 exp = Experiment(EXPPATH)
-exp.add_resource('PARSER', 'pi-parser-ext.py', 'pi-parser.py')
-exp.add_resource('CALC', 'calculate.py', 'calculate.py')
+exp.add_resource('parser', 'pi-parser-ext.py', 'pi-parser.py')
+exp.add_resource('calc', 'calculate.py', 'calculate.py')
 
 for rounds in [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]:
     run = exp.add_run()
-    run.add_command('calc-pi', ['CALC', rounds], time_limit=10, mem_limit=1024)
-    run.add_command('parse-pi', ['PARSER'])
+    run.add_command('calc-pi', ['{calc}', rounds], time_limit=10, mem_limit=1024)
+    run.add_command('parse-pi', ['{parser}'])
     run.set_property('id', ['calc-%d' % rounds])
 
 

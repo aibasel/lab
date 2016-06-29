@@ -121,14 +121,14 @@ class _Buildable(object):
 
         Example::
 
-            exp.add_resource('PLANNER', 'path/to/my-planner', 'planner')
+            exp.add_resource('planner', 'path/to/my-planner', dest='planner')
 
-        includes "planner" in the experiment directory. The name "PLANNER" can
-        be used to reference it in a run's commands::
+        includes my-planner in the experiment directory. You can use
+        ``{planner}`` to reference my-planner in a run's commands::
 
-            run.add_resource('DOMAIN', 'path-to/gripper/domain.pddl')
-            run.add_resource('PROBLEM', 'path-to/gripper/prob01.pddl')
-            run.add_command('solve', ['PLANNER', 'DOMAIN', 'PROBLEM'])
+            run.add_resource('domain', 'path-to/gripper/domain.pddl')
+            run.add_resource('problem', 'path-to/gripper/prob01.pddl')
+            run.add_command('solve', ['{planner}', '{domain}', '{problem}'])
 
         """
         if dest == '':
@@ -148,8 +148,8 @@ class _Buildable(object):
         *name* is an alias for the resource in commands. It must start with a
         letter and consist exclusively of letters, numbers and underscores. ::
 
-            run.add_new_file('LEARN', 'learn.txt', 'a = 5; b = 2; c = 5')
-            run.add_command('print-trainingset', ['cat', 'LEARN'])
+            run.add_new_file('learn', 'learn.txt', 'a = 5; b = 2; c = 5')
+            run.add_command('print-trainingset', ['cat', '{learn}'])
 
         """
         self._check_alias(name)
@@ -161,8 +161,8 @@ class _Buildable(object):
         """Call an executable.
 
         If invoked on a *run*, this method adds the command to the
-        specific run. If invoked on the experiment, the command is
-        appended to the list of commands of each run.
+        **specific** run. If invoked on the experiment, the command is
+        appended to the list of commands of **all** runs.
 
         *name* is a string describing the command.
 
@@ -180,14 +180,14 @@ class _Buildable(object):
 
         Examples::
 
-            # Add command to a specific run.
+            # Add command to a *specific* run.
             run.add_command('list-directory', ['ls', '-al'])
             run.add_command(
                 'solver', [path-to-solver, 'input-file'], time_limit=60)
             run.add_command(
                 'preprocess', ['preprocessor-path'], stdin='output.sas')
 
-            # Add parser to each run part of the experiment.
+            # Add parser to *all* runs.
             exp.add_command('parser', ['path-to-my-parser'])
 
         """
@@ -314,11 +314,11 @@ class Experiment(_Buildable):
         self.set_property('experiment_file', self._script)
 
         self.add_new_file(
-            "LAB_DEFAULT_PARSER",
+            "lab_default_parser",
             "lab-default-parser.py",
             pkgutil.get_data('lab', 'data/default-parser.py'),
             permissions=0o755)
-        self.add_command("run-lab-default-parser", ["LAB_DEFAULT_PARSER"])
+        self.add_command("run-lab-default-parser", ["{lab_default_parser}"])
 
         self.steps = []
         self.add_step('build', self.build)
@@ -605,11 +605,14 @@ class Run(_Buildable):
 
             # Support running globally installed binaries.
             def format_arg(arg):
-                return arg if arg in env_vars else "'{}'".format(arg)
+                if isinstance(arg, basestring):
+                    return repr(arg.format(**env_vars))
+                else:
+                    return repr(str(arg))
 
             def format_key_value_pair(key, val):
-                if isinstance(val, basestring) and val in env_vars:
-                    formatted_value = val
+                if isinstance(val, basestring):
+                    formatted_value = format_arg(val)
                 else:
                     formatted_value = repr(val)
                 return '{}={}'.format(key, formatted_value)
@@ -621,22 +624,15 @@ class Run(_Buildable):
             if kwargs_string:
                 parts.append(kwargs_string)
             call = ('retcode = Call({}, **redirects).wait()\n'
-                    'save_returncode("{}", retcode)\n'.format(
-                        ', '.join(parts), name))
+                    'save_returncode({name!r}, retcode)\n'.format(
+                        ', '.join(parts), **locals()))
             return call
 
         calls_text = '\n'.join(
             make_call(name, cmd, kwargs)
             for name, (cmd, kwargs) in self.commands.items())
 
-        if env_vars:
-            env_vars_text = ''
-            for var, path in sorted(env_vars.items()):
-                env_vars_text += ('{var} = "{path}"\n'.format(**locals()))
-        else:
-            env_vars_text = '"Placeholder for resource names"'
-
-        for old, new in [('VARIABLES', env_vars_text), ('CALLS', calls_text)]:
+        for old, new in [('CALLS', calls_text)]:
             run_script = run_script.replace('"""%s"""' % old, new)
 
         self.add_new_file('', 'run', run_script, permissions=0o755)
