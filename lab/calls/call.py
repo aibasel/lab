@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import errno
 import resource
 import subprocess
 import sys
@@ -77,7 +78,15 @@ class Call(subprocess.Popen):
                 set_limit(resource.RLIMIT_AS, memory_limit * 1024 * 1024)
             set_limit(resource.RLIMIT_CORE, 0)
 
-        subprocess.Popen.__init__(self, args, preexec_fn=prepare_call, **kwargs)
+        try:
+            subprocess.Popen.__init__(
+                self, args, preexec_fn=prepare_call, **kwargs)
+        except OSError as err:
+            if err.errno == errno.ENOENT:
+                sys.exit("Error: Call {name} failed. File {path} not found".format(
+                    path=args[0], **locals()))
+            else:
+                raise
 
     def wait(self):
         wall_clock_start_time = time.time()

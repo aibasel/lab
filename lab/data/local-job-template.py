@@ -14,7 +14,11 @@ num_tasks = """NUM_TASKS"""
 
 
 def process_task(task_id):
-    subprocess.check_call(['./run-dispatcher.py', str(num_tasks), str(task_id)])
+    try:
+        subprocess.check_call(
+            ['./run-dispatcher.py', str(num_tasks), str(task_id)])
+    except subprocess.CalledProcessError as err:
+        return True
 
 
 def main():
@@ -31,6 +35,9 @@ def main():
         pool.close()
         print 'Joining pool processes'
         pool.join()
+
+    if any(result.get()):
+        sys.exit("Error: At least one run failed.")
 
 
 if __name__ == '__main__':
