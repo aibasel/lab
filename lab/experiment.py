@@ -600,30 +600,33 @@ class Run(_Buildable):
         run_script = pkgutil.get_data('lab', 'data/run-template.py')
 
         def make_call(name, cmd, kwargs):
+            kwargs['name'] = name
+
             # Support running globally installed binaries.
             def format_arg(arg):
-                return arg if arg in env_vars else '"%s"' % arg
+                return arg if arg in env_vars else "'{}'".format(arg)
 
             def format_key_value_pair(key, val):
                 if isinstance(val, basestring) and val in env_vars:
                     formatted_value = val
                 else:
                     formatted_value = repr(val)
-                return '%s=%s' % (key, formatted_value)
+                return '{}={}'.format(key, formatted_value)
 
-            cmd_string = '[%s]' % ', '.join([format_arg(arg) for arg in cmd])
+            cmd_string = '[{}]'.format(', '.join([format_arg(arg) for arg in cmd]))
             kwargs_string = ', '.join(format_key_value_pair(key, value)
-                                      for key, value in kwargs.items())
+                                      for key, value in sorted(kwargs.items()))
             parts = [cmd_string]
             if kwargs_string:
                 parts.append(kwargs_string)
-            call = ('retcode = Call(%s, name="%s", **redirects).wait()\n'
-                    'save_returncode("%s", retcode)\n' %
-                    (', '.join(parts), name, name))
+            call = ('retcode = Call({}, **redirects).wait()\n'
+                    'save_returncode("{}", retcode)\n'.format(
+                        ', '.join(parts), name))
             return call
 
-        calls_text = '\n'.join(make_call(name, cmd, kwargs)
-                               for name, (cmd, kwargs) in self.commands.items())
+        calls_text = '\n'.join(
+            make_call(name, cmd, kwargs)
+            for name, (cmd, kwargs) in self.commands.items())
 
         if env_vars:
             env_vars_text = ''
