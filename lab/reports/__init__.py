@@ -768,10 +768,10 @@ class DynamicDataModule(object):
         """
         return cells
 
-    def format(self, table, formated_cells):
+    def format(self, table, formatted_cells):
         """
         Called after the formatting in the table. Subclasses can
-        (re-)format all values in **formated_cells**. Specifically all new
+        (re-)format all values in **formatted_cells**. Specifically all new
         values added by the **collect** method should be formatted.
         """
         pass
