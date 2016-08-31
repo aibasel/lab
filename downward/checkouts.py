@@ -255,8 +255,6 @@ class HgCheckout(Checkout):
             ('search', planner_name),
             ('preprocess', 'preprocess'),
             ('validate',)]]
-        for binary in binaries:
-            assert os.path.exists(binary), binary
         tools.run_command(['strip'] + binaries)
 
         # Remove unneeded files from "src" dir if they exist.
