@@ -34,8 +34,8 @@ from lab import tools
 from downward.reports import PlanningReport
 
 
-MIN_AXIS = 0.005
-MIN_VALUE = 0.01
+MIN_AXIS = 0.05
+MIN_VALUE = 0.1
 
 
 def handle_zero(number):
