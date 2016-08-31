@@ -542,6 +542,7 @@ class DownwardExperiment(Experiment):
         self.runs = []
         self.new_files = []
         self.resources = []
+        self.commands = []
 
         self._adapt_path(stage)
         self._setup_ignores(stage)
