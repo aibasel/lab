@@ -4,7 +4,7 @@ pipelines:
         script:
           # Install dependencies.
           - sudo apt-get update
-          - sudo apt-get -y install python
+          - sudo apt-get -y install python realpath
           - sudo apt-get -y install python-pip
           - sudo pip install -U pep8 pyflakes pytest sphinx vulture
 
