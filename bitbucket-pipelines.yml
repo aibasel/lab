@@ -10,6 +10,5 @@ pipelines:
 
           # Print information about environment.
           - python --version
-          - python -c "import multiprocessing; print 'CPUs:', multiprocessing.cpu_count()"
 
           - ./tests/run-tests
