@@ -54,7 +54,7 @@ class PlanningReport(Report):
     """
     ATTRIBUTES = dict((str(attr), attr) for attr in [
         Attribute('coverage', absolute=True, min_wins=False),
-        Attribute('initial_h_value', min_wins=False),
+        Attribute('initial_h_value', min_wins=False, functions=reports.finite_sum),
         Attribute('quality', absolute=True, min_wins=False),
         Attribute('unsolvable', absolute=True, min_wins=False),
         Attribute('search_time', functions=reports.gm),
