@@ -99,12 +99,14 @@ def stddev(values):
     mu = avg(values)
     return math.sqrt((sum((v - mu) ** 2 for v in values) / n))
 
+
 @tools.remove_none_values
 def finite_sum(values):
     """Compute the sum of a list of numbers, excluding values of
     None and 'infinity'.
     """
     return sum([x for x in values if x != sys.maxint])
+
 
 def function_name(f):
     names = {'avg': 'average',
