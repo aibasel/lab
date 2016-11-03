@@ -1,0 +1,15 @@
+pipelines:
+  default:
+    - step:
+        script:
+          # Install dependencies.
+          - sudo apt-get update
+          - sudo apt-get -y install python
+          - sudo apt-get -y install python-pip
+          - sudo pip install -U pep8 pyflakes pytest sphinx vulture
+
+          # Print information about environment.
+          - python --version
+          - python -c "import multiprocessing; print 'CPUs:', multiprocessing.cpu_count()"
+
+          - ./tests/run-tests

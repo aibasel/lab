@@ -3,7 +3,7 @@
 # Test setup:
 #
 # $ sudo apt-get install pip
-# $ sudo pip install -U pytest pep8 pyflakes sphinx
+# $ sudo pip install -U pytest pep8 pyflakes sphinx vulture
 
 set -euo pipefail
 
