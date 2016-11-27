@@ -199,6 +199,7 @@ class Properties(dict):
     def write(self):
         """Write the properties to disk."""
         assert self.filename
+        makedirs(os.path.dirname(self.filename))
         write_file(self.filename, str(self))
 
 

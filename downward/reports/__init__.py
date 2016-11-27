@@ -77,7 +77,9 @@ class PlanningReport(Report):
         Attribute('evaluations', functions=geometric_mean),
         Attribute('expansions', functions=geometric_mean),
         Attribute('generated', functions=geometric_mean),
-        Attribute('initial_h_value', min_wins=False, scale='linear'),
+        Attribute(
+            'initial_h_value', min_wins=False, scale='linear',
+            functions=reports.finite_sum),
         Attribute('plan_length', scale='linear'),
         Attribute('quality', absolute=True, min_wins=False),
         Attribute(

@@ -1,0 +1,14 @@
+pipelines:
+  default:
+    - step:
+        script:
+          # Install dependencies.
+          - sudo apt-get update
+          - sudo apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
+          - sudo apt-get -y install python-pip
+          - sudo pip install -U pep8 pyflakes pytest sphinx vulture
+
+          # Print information about environment.
+          - python --version
+
+          - ./tests/run-tests

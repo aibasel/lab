@@ -28,6 +28,7 @@ import logging
 import math
 import numbers
 import os
+import sys
 
 from lab import tools
 from lab.external import txt2tags
@@ -56,9 +57,17 @@ def geometric_mean(values):
     return tools.product([val ** exp for val in values])
 
 
+def finite_sum(values):
+    """Compute the sum of a list of numbers, excluding values of
+    None and 'infinity'.
+    """
+    return sum([x for x in values if x is not None and x != sys.maxint])
+
+
 def function_name(f):
     names = {
         'arithmetic_mean': 'arithmetic mean',
+        'finite_sum': 'finite sum',
         'geometric_mean': 'geometric mean'}
     return names.get(f.__name__, f.__name__)
 
@@ -751,10 +760,10 @@ class DynamicDataModule(object):
         """
         return cells
 
-    def format(self, table, formated_cells):
+    def format(self, table, formatted_cells):
         """
         Called after the formatting in the table. Subclasses can
-        (re-)format all values in **formated_cells**. Specifically all new
+        (re-)format all values in **formatted_cells**. Specifically all new
         values added by the **collect** method should be formatted.
         """
         pass

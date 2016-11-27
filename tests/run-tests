@@ -3,7 +3,7 @@
 # Test setup:
 #
 # $ sudo apt-get install pip
-# $ sudo pip install -U pytest pep8 pyflakes sphinx
+# $ sudo pip install -U pytest pep8 pyflakes sphinx vulture
 
 set -euo pipefail
 
@@ -25,13 +25,7 @@ cd ..
 # Make lab available on the PYTHONPATH.
 LAB=`realpath .`
 echo "Checking lab at $LAB"
-if [ -z "$PYTHONPATH" ]; then
-    # PYTHONPATH is empty.
-    export PYTHONPATH=${LAB}
-elif [[ "$PYTHONPATH" != *"$LAB"* ]]; then
-    # LAB is NOT on the PYTHONPATH.
-    export PYTHONPATH=${LAB}:${PYTHONPATH}
-fi
+export PYTHONPATH=${LAB}
 echo "PYTHONPATH: $PYTHONPATH"
 
 cleanup

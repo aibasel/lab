@@ -44,7 +44,7 @@ class ScatterMatplotlib(Matplotlib):
         if report.xscale == 'linear' or report.yscale == 'linear':
             plot_size = report.missing_val * 1.01
         else:
-            plot_size = report.missing_val * 1.25
+            plot_size = report.missing_val * 1.5
 
         # Plot a diagonal black line. Starting at (0,0) often raises errors.
         axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
