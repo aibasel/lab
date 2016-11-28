@@ -345,7 +345,7 @@ class Experiment(_Buildable):
         """Return the filename of the experiment script."""
         return os.path.basename(sys.argv[0])
 
-    def add_step(self, name, function, *args, **kwargs):
+    def add_step(self, name, function=None, *args, **kwargs):
         """Add a step to the list of experiment steps.
 
         Use this method to add **custom** experiment steps like
@@ -356,7 +356,8 @@ class Experiment(_Buildable):
         *name* is a descriptive name for the step.
 
         *function* must be a callable Python object, e.g., a function
-        or a class implementing `__call__`.
+        or a class implementing `__call__`. We allow function to be
+        None only for backwards compatibility.
 
         *args* and *kwargs* will be passed to the *function* when the
         step is executed.
@@ -369,7 +370,18 @@ class Experiment(_Buildable):
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
-        self.steps.append(Step(name, function, *args, **kwargs))
+        # Backwards compatibility.
+        if isinstance(name, Step):
+            tools.show_deprecation_warning(
+                'Passing a Step object to add_step() has been deprecated. '
+                'Please see the documentation of add_step().')
+            if function or args or kwargs:
+                raise ValueError(
+                    'When passing a Step object to add_step(), no other '
+                    'parameters must be given.')
+            self.steps.append(name)
+        else:
+            self.steps.append(Step(name, function, *args, **kwargs))
 
     def add_fetcher(self, src=None, dest=None, name=None, filter=None,
                     parsers=None, **kwargs):
