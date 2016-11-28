@@ -1,8 +1,8 @@
 import lab
 from lab.environments import GkiGridEnvironment
 from lab.experiment import ARGPARSER
-from lab.calls import call
-from lab.calls import log
+from lab.calls.call import Call
+from lab.calls.log import redirects, driver_log, driver_err, print_, save_returncode
 from lab import reports
 
 
@@ -13,10 +13,11 @@ lab.tools.deprecated
 lab.tools.RawAndDefaultsHelpFormatter._fill_text
 lab.tools.RawAndDefaultsHelpFormatter._get_help_string
 GkiGridEnvironment()
-call.Call
-log.redirects
-log.driver_log
-log.driver_err
-log.print_
-log.save_returncode
 
+Call
+
+redirects
+driver_log
+driver_err
+print_
+save_returncode
