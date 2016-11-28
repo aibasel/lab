@@ -9,9 +9,9 @@ pipelines:
           - sudo pip install -U pep8 pyflakes pytest sphinx
           - sudo pip install -U hg+https://bitbucket.org/jendrikseipp/vulture#egg=vulture
 
-          # The docker container uses the encoding "ANSI_X3.4-1968" by default.
+          # The docker container uses ASCII encoding "ANSI_X3.4-1968" by default.
           - export LANG="C.UTF-8"
-          #- export LC_ALL="C.UTF-8"
+          - export LC_ALL="C.UTF-8"
 
           # Print information about environment.
           - python --version
