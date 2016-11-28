@@ -6,9 +6,12 @@ pipelines:
           - sudo apt-get update
           - sudo apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
           - sudo apt-get -y install python-pip
-          - sudo pip install -U pep8 pyflakes pytest sphinx vulture
+          - sudo pip install -U pep8 pyflakes pytest sphinx
+          - sudo pip install -U hg+https://bitbucket.org/jendrikseipp/vulture#egg=vulture
 
           # Print information about environment.
           - python --version
+          - python -c "import sys; print(sys.getfilesystemencoding())"
+          - python -c "import locale; print(locale.getlocale())"
 
           - ./tests/run-tests
