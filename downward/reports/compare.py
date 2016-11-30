@@ -147,7 +147,8 @@ class DiffColumnsModule(reports.DynamicDataModule):
             for func in self.summary_functions:
                 func_name = reports.function_name(func)
                 cells[func_name][table.header_column] = func_name.capitalize()
-                cells[func_name][diff_col_name] = func(non_none_values)
+                cells[func_name][diff_col_name] = (
+                    func(non_none_values) if non_none_values else None)
         return cells
 
     def format(self, table, formatted_cells):
