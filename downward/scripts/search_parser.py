@@ -79,8 +79,9 @@ ITERATIVE_PATTERNS = COMMON_PATTERNS + PORTFOLIO_PATTERNS + [
 
 
 CUMULATIVE_PATTERNS = COMMON_PATTERNS + [
-    _get_states_pattern('evaluated_until_last_jump', 'Evaluated until last jump:'),
-    _get_states_pattern('expanded_until_last_jump', 'Expanded until last jump:'),
+    # Keep old names for backwards compatibility.
+    _get_states_pattern('evaluations_until_last_jump', 'Evaluated until last jump:'),
+    _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
     _get_states_pattern('reopened_until_last_jump', 'Reopened until last jump:'),
     ('search_time', re.compile(r'^Search time: (.+)s$'), float),
