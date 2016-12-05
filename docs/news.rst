@@ -4,6 +4,24 @@ News
 .. module :: lab.experiment
 .. module :: downward.experiments
 
+
+v1.11 (unreleased)
+------------------
+
+lab
+^^^
+* Add bitbucket-pipelines.yml for continuous integration testing.
+
+downward
+^^^^^^^^
+* Add IPC 2014 benchmark suites (Silvan).
+* Set ``min_wins=False`` for ``dead_ends`` attribute.
+* Fit coordinates better into plots.
+* Add finite_sum() function and use it for ``initial_h_value`` (Silvan).
+* Update example scripts for repos without benchmarks.
+* Update docs.
+
+
 v1.10 (2015-12-11)
 ------------------
 
