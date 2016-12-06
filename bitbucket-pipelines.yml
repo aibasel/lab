@@ -8,7 +8,13 @@ pipelines:
           - sudo apt-get -y install python-pip
           - sudo pip install -U pep8 pyflakes pytest sphinx vulture
 
+          # The docker container uses ASCII encoding "ANSI_X3.4-1968" by default.
+          - export LANG="C.UTF-8"
+          - export LC_ALL="C.UTF-8"
+
           # Print information about environment.
           - python --version
+          - python -c "import sys; print(sys.getfilesystemencoding())"
+          - python -c "import locale; print(locale.getlocale())"
 
           - ./tests/run-tests
