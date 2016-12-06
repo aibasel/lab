@@ -58,7 +58,7 @@ class FastDownwardRun(Run):
         self.add_command('parse-preprocess', ['{preprocess_parser}'])
         self.add_command('parse-search', ['{search_parser}'])
 
-        # TODO: Remove 'output'.
+        # TODO: Remove 'output' once preprocessor is removed.
         self.add_command(
             'compress-output-files', ['xz', 'output.sas', 'output'])
 
