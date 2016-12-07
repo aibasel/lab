@@ -94,7 +94,7 @@ class Fetcher(object):
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
         if fetch_from_eval_dir:
-            src_props = run_filter.apply(src_props)
+            run_filter.apply(src_props)
             combined_props.update(src_props)
         else:
             new_props = tools.Properties()
@@ -108,7 +108,7 @@ class Fetcher(object):
                 props = self.fetch_dir(run_dir, eval_dir, parsers=parsers)
                 id_string = '-'.join(props['id'])
                 new_props[id_string] = props
-            new_props = run_filter.apply(new_props)
+            run_filter.apply(new_props)
             combined_props.update(new_props)
 
         unxeplained_errors = 0

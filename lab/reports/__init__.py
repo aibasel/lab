@@ -387,7 +387,7 @@ class Report(object):
             logging.critical('properties file in evaluation dir is empty.')
 
     def _apply_filter(self):
-        self.props = self.run_filter.apply(self.props)
+        self.run_filter.apply(self.props)
         if not self.props:
             logging.critical('All runs have been filtered -> Nothing to report.')
 

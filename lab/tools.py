@@ -243,19 +243,13 @@ class RunFilter(object):
         return modified_run
 
     def apply(self, props):
-        """
-        Run filter i on all tasks before running filter i+1.
-        """
-        if not self.filters:
-            return props
-        new_props = Properties()
         for filter_ in self.filters:
             for run_id, run in props.items():
                 modified_run = self.apply_filter_to_run(filter_, run)
                 if modified_run:
-                    new_props[run_id] = modified_run
-        new_props.filename = props.filename
-        return new_props
+                    props[run_id] = modified_run
+                else:
+                    del props[run_id]
 
 
 def fast_updatetree(src, dst, symlinks=False, ignore=None):
