@@ -50,6 +50,9 @@ Install VAL
     make
     # Add "validate" binary to a directory on your PATH.
 
+**MacOS**: clone the repo, add ``VAL/bin/MacOSExecutables/validate`` to
+your ``PATH`` and make it executable (``chmod + x``).
+
 
 Run tutorial experiment
 -----------------------
