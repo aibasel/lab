@@ -254,7 +254,7 @@ class ScatterPlotReport(PlotReport):
     def write(self):
         if not len(self.algorithms) == 2:
             logging.critical(
-                'Scatterplots need exactly 2 algorithms: %s' % self.algorithms)
+                'Scatter plots need exactly 2 algorithms: %s' % self.algorithms)
         self.xlabel = self.xlabel or self.algorithms[0]
         self.ylabel = self.ylabel or self.algorithms[1]
 
