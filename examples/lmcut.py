@@ -27,7 +27,9 @@ REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 exp.add_suite(BENCHMARKS_DIR, SUITE)
 exp.add_algorithm(
-    'lmcut', REPO, 'tip', ['--search', 'astar(lmcut())'])
+    'blind', REPO, 'default', ['--search', 'astar(blind())'])
+exp.add_algorithm(
+    'lmcut', REPO, 'default', ['--search', 'astar(lmcut())'])
 
 # Make a report (AbsoluteReport is the standard report).
 exp.add_report(
