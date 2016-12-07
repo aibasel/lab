@@ -28,6 +28,14 @@ class AbsoluteReport(PlanningReport):
     """
     Report absolute values for the selected attributes.
 
+    This report should be part of all your Fast Downward experiments as
+    it includes a table of unexplained errors, e.g. invalid solutions,
+    segmentation faults, etc. ::
+
+        exp.add_report(
+            AbsoluteReport(attributes=["expansions"]),
+            outfile='report.html')
+
     Example output:
 
         +------------+--------+--------+
@@ -37,10 +45,6 @@ class AbsoluteReport(PlanningReport):
         +------------+--------+--------+
         | zenotravel | 21     | 17     |
         +------------+--------+--------+
-
-    This report should be part of all your Fast Downward experiments as
-    it includes a table of unexplained errors, e.g. invalid solutions,
-    segmentation faults, etc.
 
     """
     def __init__(self, **kwargs):

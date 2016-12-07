@@ -29,7 +29,21 @@ class TaskwiseReport(PlanningReport):
 
     If the experiment contains more than one algorithm, use
     ``filter_algorithm='my_algorithm'`` to select exactly one algorithm
-    for the report.
+    for the report. ::
+
+        exp.add_report(TaskwiseReport(
+            attributes=["expansions", "search_time"],
+            filter_algorithm=["lmcut"]))
+
+    Example output:
+
+        +---------------------+------------+-------------+
+        |                     | expansions | search_time |
+        +=====================+============+=============+
+        | grid:prob01.pddl    | 118234     |       20.02 |
+        +---------------------+------------+-------------+
+        | gripper:prob01.pddl |  21938     |       17.58 |
+        +---------------------+------------+-------------+
 
     """
     def __init__(self, **kwargs):

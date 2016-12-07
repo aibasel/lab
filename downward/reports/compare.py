@@ -55,10 +55,19 @@ class ComparativeReport(AbsoluteReport):
         Example::
 
             algorithm_pairs = [
-                ('default-lmcut', 'issue123-lmcut'),
-                ('default-ff', 'default-cea')]
+                ('default-lmcut', 'issue123-lmcut', 'Diff lmcut')]
             exp.add_report(ComparativeReport(
-                algorithm_pairs, attributes=['expansions']))
+                algorithm_pairs, attributes=['coverage']))
+
+        Example output:
+
+            +----------+---------------+----------------+------------+
+            | coverage | default-lmcut | issue123-lmcut | Diff lmcut |
+            +==========+===============+================+============+
+            | depot    |            15 |             17 |          2 |
+            +----------+---------------+----------------+------------+
+            | gripper  |             7 |              6 |         -1 |
+            +----------+---------------+----------------+------------+
 
         """
         if 'filter_algorithm' in kwargs:
