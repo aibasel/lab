@@ -168,6 +168,11 @@ class Report(object):
         where attribute ``foo`` has value v1, v2 or v3, use
         ``filter_foo=[v1, v2, v3]``.
 
+        Filters are applied sequentially, i.e., the first filter is
+        applied to all runs before the second filter is executed.
+        Filters given as ``filter_*`` kwargs are applied *after* all
+        filters passed via the ``filter`` kwarg.
+
         Examples:
 
         Include only *coverage* and *expansions* in a LaTeX report::
@@ -196,8 +201,8 @@ class Report(object):
                 return run
 
             # We want LAMA 2011 to be the leftmost column.
-            # Filters defined with key word arguments are evaluated last,
-            # so we use the updated algorithm names here.
+            # filter_* filters are evaluated last, so we use the updated
+            # algorithm names here.
             algorithms = ['LAMA 2011', 'FDSS 1']
             exp.add_report(Report(
                 filter=rename_algorithms, filter_algorithm=algorithms))
