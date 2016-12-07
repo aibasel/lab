@@ -225,31 +225,34 @@ class RunFilter(object):
                 return run.get(prop) == value
         return property_filter
 
-    def apply_to_run(self, run):
-        # No need to copy the run as the original run is only needed if all
-        # filters return True. In this case modified_run is never changed.
+    def apply_to_run(self, run, filter_):
+        # No need to copy the run as the original run is only needed if
+        # the filter returns True. In this case modified_run is not changed.
         modified_run = run
-        for filter in self.filters:
-            result = filter(modified_run)
-            if not isinstance(result, (dict, bool)):
-                logging.critical('Filters must return a dictionary or boolean')
-            # If a dict is returned, use it as the new run,
-            # otherwise take the old one.
-            if isinstance(result, dict):
-                modified_run = result
-            if not result:
-                # Discard runs that returned False or an empty dictionary.
-                return False
+        result = filter_(modified_run)
+        if not isinstance(result, (dict, bool)):
+            logging.critical('Filters must return a dictionary or boolean')
+        # If a dict is returned, use it as the new run,
+        # otherwise take the old one.
+        if isinstance(result, dict):
+            modified_run = result
+        if not result:
+            # Discard runs that returned False or an empty dictionary.
+            return False
         return modified_run
 
     def apply(self, props):
+        """
+        Run filter i on all tasks before switching to filter i+1.
+        """
         if not self.filters:
             return props
         new_props = Properties()
-        for run_id, run in props.items():
-            modified_run = self.apply_to_run(run)
-            if modified_run:
-                new_props[run_id] = modified_run
+        for filter_ in self.filters:
+            for run_id, run in props.items():
+                modified_run = self.apply_to_run(run, filter_)
+                if modified_run:
+                    new_props[run_id] = modified_run
         new_props.filename = props.filename
         return new_props
 
