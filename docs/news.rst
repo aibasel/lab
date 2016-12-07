@@ -55,7 +55,10 @@ downward
 * Remove IpcReport, ProblemPlotReport, RelativeReport, SuiteReport and TimeoutReport.
 * Rename CompareConfigsReport to ComparativeReport.
 * Remove possibility to add ``_relative`` to an attribute to obtain relative results.
-* PlanningReport: remove ``derived_properties`` parameter.
+* Apply filters sequentially instead of interleaved.
+* PlanningReport: remove ``derived_properties`` parameter. Use two filters
+  instead: one for caching results, the other for adding new properties
+  (see ``QualityFilters`` in ``downward/reports/__init__.py``).
 * PlotReport: remove ``legend_location`` parameter. Use ``params={legend.loc}`` instead.
 * AbsoluteReport: remove ``colored`` parameter and always color HTML reports.
 * Don't use domain links in Latex reports.
