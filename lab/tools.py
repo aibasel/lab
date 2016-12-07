@@ -225,7 +225,8 @@ class RunFilter(object):
                 return run.get(prop) == value
         return property_filter
 
-    def apply_to_run(self, run, filter_):
+    @staticmethod
+    def apply_filter_to_run(filter_, run):
         # No need to copy the run as the original run is only needed if
         # the filter returns True. In this case modified_run is not changed.
         modified_run = run
@@ -243,14 +244,14 @@ class RunFilter(object):
 
     def apply(self, props):
         """
-        Run filter i on all tasks before switching to filter i+1.
+        Run filter i on all tasks before running filter i+1.
         """
         if not self.filters:
             return props
         new_props = Properties()
         for filter_ in self.filters:
             for run_id, run in props.items():
-                modified_run = self.apply_to_run(run, filter_)
+                modified_run = self.apply_filter_to_run(filter_, run)
                 if modified_run:
                     new_props[run_id] = modified_run
         new_props.filename = props.filename
