@@ -9,9 +9,10 @@ from lab.environments import LocalEnvironment, MaiaEnvironment
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
+from downward.reports.scatter import ScatterPlotReport
 
 
-SUITE = ['gripper:prob01.pddl']
+SUITE = ['gripper:prob01.pddl', 'depot:p01.pddl']
 ATTRIBUTES = ['coverage', 'expansions']
 
 if 'cluster' in platform.node():
@@ -34,6 +35,12 @@ exp.add_algorithm(
 # Make a report (AbsoluteReport is the standard report).
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES), outfile='report.html')
+
+# Compare the number of expansions in a scatter plot.
+exp.add_report(
+    ScatterPlotReport(
+        attributes=["expansions"], filter_algorithm=["blind", "lmcut"]),
+    outfile='scatterplot.png')
 
 # Parse the commandline and show or run experiment steps.
 exp.run_steps()
