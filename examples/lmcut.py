@@ -12,16 +12,18 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
 
 
-SUITE = ['gripper:prob01.pddl', 'depot:p01.pddl']
 ATTRIBUTES = ['coverage', 'expansions']
 
 if 'cluster' in platform.node():
     REPO = os.path.expanduser('~/projects/downward')
     BENCHMARKS_DIR = os.path.expanduser('~/projects/benchmarks')
+    # Create bigger suites with ~/projects/benchmarks/suites.py
+    SUITE = ['depot', 'freecell', 'gripper', 'zenotravel']
     ENV = MaiaEnvironment(priority=0)
 else:
     REPO = os.path.expanduser('~/projects/Downward/downward')
     BENCHMARKS_DIR = os.path.expanduser('~/projects/Downward/benchmarks')
+    SUITE = ['depot:p01.pddl', 'gripper:prob01.pddl']
     ENV = LocalEnvironment(processes=2)
 REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 

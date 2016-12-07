@@ -144,16 +144,28 @@ class FastDownwardExperiment(Experiment):
         *benchmarks_dir* must be a path to a benchmark directory. It
         must contain domain directories, which in turn hold PDDL files.
 
-        *suite* must be a list of domain or domain:task names.
+        *suite* must be a list of domain or domain:task names. ::
 
-        >>> repo = os.path.expanduser('~/projects/Downward/downward')
-        >>> benchmarks_dir = os.path.join(repo, "benchmarks")
-        >>> exp = FastDownwardExperiment()
-        >>> exp.add_suite(benchmarks_dir, ["gripper:prob01.pddl"])
-        >>> exp.add_suite(benchmarks_dir, ["gripper"])
-        >>> exp.add_suite(
-        ...     benchmarks_dir,
-        ...     ["miconic", "trucks", "grid", "gripper:prob01.pddl"])
+            exp.add_suite(benchmarks_dir, ["depot", "gripper"])
+            exp.add_suite(benchmarks_dir, ["gripper:prob01.pddl"])
+
+        One source for benchmarks is
+        http://bitbucket.org/aibasel/downward-benchmarks. After cloning
+        the repo, you can generate suites with the ``suites.py``
+        script. We recommend using the suite ``optimal_strips`` for
+        optimal planning and ``satisficing`` for satisifing planning::
+
+            # Create standard optimal planning suite.
+            $ ~/projects/Downward/benchmarks/suites.py optimal_strips
+            ['airport', ..., 'zenotravel']
+
+        You can copy the generated list into your experiment script::
+
+            >>> repo = os.path.expanduser('~/projects/Downward/downward')
+            >>> benchmarks_dir = os.path.expanduser(
+            ...     '~/projects/Downward/benchmarks')
+            >>> exp = FastDownwardExperiment()
+            >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
 
         """
         if isinstance(suite, basestring):
