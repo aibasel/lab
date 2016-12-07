@@ -54,8 +54,7 @@ class Fetcher(object):
         is more convenient.
 
     """
-    def fetch_dir(self, run_dir, eval_dir, run_filter=None, parsers=None):
-        run_filter = run_filter or tools.RunFilter()
+    def fetch_dir(self, run_dir, eval_dir, parsers=None):
         # Allow specyfing a list of multiple parsers or a single parser.
         parsers = tools.make_list(parsers or [])
         prop_file = os.path.join(run_dir, 'properties')
@@ -64,9 +63,7 @@ class Fetcher(object):
             rel_parser = os.path.relpath(parser, start=run_dir)
             subprocess.call([rel_parser], cwd=run_dir)
 
-        props = tools.Properties(filename=prop_file)
-        props = run_filter.apply_to_run(props)
-        return props
+        return tools.Properties(filename=prop_file)
 
     def __call__(self, src_dir, eval_dir=None, filter=None, parsers=None, **kwargs):
         """
@@ -100,6 +97,7 @@ class Fetcher(object):
             src_props = run_filter.apply(src_props)
             combined_props.update(src_props)
         else:
+            new_props = tools.Properties()
             run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
             total_dirs = len(run_dirs)
             logging.info(
@@ -107,16 +105,11 @@ class Fetcher(object):
             for index, run_dir in enumerate(run_dirs, start=1):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, 'Scanning: {:06d}/{:d}'.format(index, total_dirs))
-                props = self.fetch_dir(
-                    run_dir, eval_dir, run_filter=run_filter, parsers=parsers)
-                if not props:
-                    continue
+                props = self.fetch_dir(run_dir, eval_dir, parsers=parsers)
                 id_string = '-'.join(props['id'])
-                if id_string in combined_props:
-                    logging.critical(
-                        'The destination already contains {}. '
-                        'Aborting to avoid data corruption.'.format(id_string))
-                combined_props[id_string] = props
+                new_props[id_string] = props
+            new_props = run_filter.apply(new_props)
+            combined_props.update(new_props)
 
         unxeplained_errors = 0
         for props in combined_props.values():
