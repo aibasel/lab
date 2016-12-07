@@ -17,8 +17,5 @@ Plots
 
 .. autoclass:: downward.reports.scatter.ScatterPlotReport
 
-Example ScatterPlot comparing the total translator time of two
-different revisions:
-
 .. image:: images/example-scatter-plot.png
-   :scale: 40 %
+   :scale: 60 %

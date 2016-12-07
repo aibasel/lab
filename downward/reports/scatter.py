@@ -167,6 +167,17 @@ class ScatterPlotReport(PlotReport):
                 get_category=improvement,
                 category_styles=styles)
 
+        Example comparing the number of expanded states for two
+        algorithms::
+
+            exp.add_report(ScatterPlotReport(
+                    attributes=["expansions_until_last_jump"],
+                    filter_config=["algorithm-1", "algorithm-2"],
+                    get_category=domain_as_category,
+                    format="png",  # Use "tex" for pgfplots output.
+                    ),
+                name="scatterplot-expansions")
+
         """
         # If the size has not been set explicitly, make it a square.
         params = kwargs.get('params', {})
