@@ -35,11 +35,15 @@ def hg_id(repo, args=None, rev=None):
         args.extend(['-r', str(rev)])
     cmd = ('hg', 'id', '--repository', repo) + tuple(args)
     if cmd not in _HG_ID_CACHE:
-        result = subprocess.check_output(cmd).strip()
-        if not result:
-            logging.critical('Call failed: "%s". Check path and revision.' %
-                             ' '.join(cmd))
-        _HG_ID_CACHE[cmd] = result
+        try:
+            result = subprocess.check_output(cmd).strip()
+        except subprocess.CalledProcessError:
+            logging.critical(
+                'Call failed: "{}". Please check path and revision.'.format(
+                    ' '.join(cmd)))
+        else:
+            assert result
+            _HG_ID_CACHE[cmd] = result
     return _HG_ID_CACHE[cmd]
 
 
