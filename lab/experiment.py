@@ -497,8 +497,8 @@ class Experiment(_Buildable):
         env.run_steps(steps)
 
     @tools.deprecated(
-        "Using exp() has been deprecated in lab 2.0, please use the more "
-        "speaking exp.run_steps() instead.")
+        "Using exp() has been deprecated in lab 2.0, please use "
+        "exp.run_steps() instead.")
     def __call__(self):
         return self.run_steps()
 
