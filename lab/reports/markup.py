@@ -83,18 +83,18 @@ function find_next(element, classname) {
 
 function toggle_table(toggle_button) {
     toggle_element(find_next(toggle_button, "TABLE"));
-    if (toggle_button.innerHTML == "(show table)") {
-        toggle_button.innerHTML = "(hide table)";
+    if (toggle_button.innerHTML == "Show table") {
+        toggle_button.innerHTML = "Hide table";
     } else {
-        toggle_button.innerHTML = "(show table)";
+        toggle_button.innerHTML = "Show table";
     }
 }
 
 function show_table(link) {
-    var toggle_button = find_next(link, "A");
+    var toggle_button = find_next(link, "BUTTON");
     var table = find_next(toggle_button, "TABLE");
     table.style.display = "";
-    toggle_button.innerHTML = "(hide table)";
+    toggle_button.innerHTML = "Hide table";
 }
 
 function show_overview_tables() {
@@ -156,8 +156,9 @@ def _get_config(target):
         # Hide tables by default.
         config['postproc'].append([
             r'<table border="1">',
-            r'<a class="toggle-table" onclick="toggle_table(this)">(show table)</a>\n\n'
-             '<table border="1" style="display:none">'])
+            r'<button type="button" class="toggle-table" '
+            'onclick="toggle_table(this)">Show table</button><p></p>\n\n'
+            '<table border="1" style="display:none">'])
         # Automatically show tables when their links are clicked.
         config['postproc'].append([
             r'<a href="#(.+?)">',
