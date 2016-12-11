@@ -64,6 +64,47 @@ CSS = """\
 </style>
 """ % globals()
 
+JAVASCRIPT = """\
+<script type="text/javascript">
+function toggle_element(element) {
+    if (element.style.display == "none") {
+        element.style.display = "";
+    } else {
+        element.style.display = "none";
+    }
+}
+
+function find_next(element, classname) {
+    element = element.nextSibling;
+    while(element.nodeName != classname)
+        element = element.nextSibling;
+    return element;
+}
+
+function toggle_table(element) {
+    toggle_element(find_next(element, "TABLE"));
+    if (element.innerHTML == "(show table)") {
+        element.innerHTML = "(hide table)";
+    } else {
+        element.innerHTML = "(show table)";
+    }
+}
+
+function show_overview_tables() {
+    var names = ["unexplained-errors", "info", "summary"];
+    for (var i = 0; i < names.length; i++) {
+        var link = document.getElementById(names[i]);
+        if (link) {
+            var button = find_next(link, "A");
+            button.click();
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", show_overview_tables);
+</script>
+"""
+
 
 def escape(text):
     return '""%s""' % text
@@ -93,6 +134,9 @@ def _get_config(target):
         # Custom css
         config['postproc'].append([r'</head>', CSS + '</head>'])
 
+        # Add javascript.
+        config['postproc'].append([r'</head>', JAVASCRIPT + '</head>'])
+
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\\\\', r'<br />'])
 
@@ -102,6 +146,12 @@ def _get_config(target):
 
         # Allow line-breaking at additional places.
         config['postproc'].append([ESCAPE_WORDBREAK, r'<wbr>'])
+
+        # Hide tables by default.
+        config['postproc'].append([
+            r'<table border="1">',
+            r'<a class="toggle-table" onclick="toggle_table(this)">(show table)</a>\n\n'
+             '<table border="1" style="display:none">'])
 
     elif target == 'tex':
         # AUtomatically add \usepackage directives.
