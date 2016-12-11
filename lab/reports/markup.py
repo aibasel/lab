@@ -81,13 +81,20 @@ function find_next(element, classname) {
     return element;
 }
 
-function toggle_table(element) {
-    toggle_element(find_next(element, "TABLE"));
-    if (element.innerHTML == "(show table)") {
-        element.innerHTML = "(hide table)";
+function toggle_table(toggle_button) {
+    toggle_element(find_next(toggle_button, "TABLE"));
+    if (toggle_button.innerHTML == "(show table)") {
+        toggle_button.innerHTML = "(hide table)";
     } else {
-        element.innerHTML = "(show table)";
+        toggle_button.innerHTML = "(show table)";
     }
+}
+
+function show_table(link) {
+    var toggle_button = find_next(link, "A");
+    var table = find_next(toggle_button, "TABLE");
+    table.style.display = "";
+    toggle_button.innerHTML = "(hide table)";
 }
 
 function show_overview_tables() {
@@ -95,8 +102,7 @@ function show_overview_tables() {
     for (var i = 0; i < names.length; i++) {
         var link = document.getElementById(names[i]);
         if (link) {
-            var button = find_next(link, "A");
-            button.click();
+            show_table(link);
         }
     }
 }
@@ -152,6 +158,10 @@ def _get_config(target):
             r'<table border="1">',
             r'<a class="toggle-table" onclick="toggle_table(this)">(show table)</a>\n\n'
              '<table border="1" style="display:none">'])
+        # Automatically show tables when their links are clicked.
+        config['postproc'].append([
+            r'<a href="#(.+?)">',
+            r'''<a href="#\1" onclick="show_table(document.getElementById('\1'));">'''])
 
     elif target == 'tex':
         # AUtomatically add \usepackage directives.
