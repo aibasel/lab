@@ -133,6 +133,10 @@ class DiffColumnsModule(reports.DynamicDataModule):
             self.header_names.append(((tup[0], tup[1]), diff_name, col_name))
         self.summary_functions = summary_functions
 
+    @staticmethod
+    def _get_function_name(function):
+        return reports.function_name(function) + " of diffs"
+
     def collect(self, table, cells):
         """
         Add cells for the specified diff columns and dynamically compute their values
@@ -154,7 +158,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
                     non_none_values.append(diff)
                     cells[row_name][diff_col_name] = diff
             for func in self.summary_functions:
-                func_name = reports.function_name(func)
+                func_name = self._get_function_name(func)
                 cells[func_name][table.header_column] = func_name.capitalize()
                 cells[func_name][diff_col_name] = (
                     func(non_none_values) if non_none_values else None)
@@ -205,7 +209,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
         Append lines for all summary functions that are not already used to the row order.
         """
         for func in self.summary_functions:
-            func_name = reports.function_name(func)
+            func_name = self._get_function_name(func)
             if func_name not in row_order:
                 row_order.append(func_name)
         return row_order
