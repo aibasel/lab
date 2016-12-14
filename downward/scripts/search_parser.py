@@ -257,7 +257,7 @@ def scores(content, props):
     Some reported results are measured via scores from the
     range 0-1, where best possible performance in a task is
     counted as 1, while failure to solve a task and worst
-    performance are counted as 0
+    performance are counted as 0.
     """
     def log_score(value, min_bound, max_bound, min_score):
         if value is None:
@@ -269,7 +269,7 @@ def scores(content, props):
         raw_score = math.log(value) - math.log(max_bound)
         best_raw_score = math.log(min_bound) - math.log(max_bound)
         score = min_score + (1 - min_score) * (raw_score / best_raw_score)
-        return score * 100
+        return score
 
     # Maximum memory in KB
     max_memory = get_memory_limit_in_kb(props)
