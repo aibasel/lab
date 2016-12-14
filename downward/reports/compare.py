@@ -87,7 +87,7 @@ class ComparativeReport(AbsoluteReport):
         table = AbsoluteReport._get_empty_table(
             self, attribute=attribute, title=title, columns=columns)
         summary_functions = [sum, reports.arithmetic_mean]
-        if title == 'summary':
+        if title == 'Summary':
             summary_functions = []
         diff_module = DiffColumnsModule(self._algorithm_pairs, summary_functions)
         table.dynamic_data_modules.append(diff_module)
