@@ -83,7 +83,8 @@ class PlanningReport(Report):
         Attribute('plan_length', scale='linear'),
         Attribute('quality', absolute=True, min_wins=False),
         Attribute(
-            'score_*', min_wins=False, functions=[reports.arithmetic_mean, sum]),
+            'score_*', min_wins=False, functions=[reports.arithmetic_mean, sum],
+            digits=4),
         Attribute('search_time', functions=geometric_mean),
         Attribute('total_time', functions=geometric_mean),
         Attribute('unsolvable', absolute=True, min_wins=False),

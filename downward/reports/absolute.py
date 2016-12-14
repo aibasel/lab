@@ -223,15 +223,17 @@ class AbsoluteReport(PlanningReport):
                 title = title.capitalize().replace('_', ' ')
         if columns is None:
             columns = self.algorithms
+
         if attribute is not None and self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
-            min_wins = attribute.min_wins
-            colored = self.colored and min_wins is not None
+            kwargs = dict(
+                min_wins=attribute.min_wins,
+                colored=self.colored and attribute.min_wins is not None,
+                digits=attribute.digits)
         else:
             # Do not highlight anything.
-            min_wins = None
-            colored = False
-        table = reports.Table(title=title, min_wins=min_wins, colored=colored)
+            kwargs = {}
+        table = reports.Table(title=title, **kwargs)
         table.set_column_order(columns)
         link = '#%s' % title
         formatter = reports.CellFormatter(link=link)

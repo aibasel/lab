@@ -79,7 +79,7 @@ class Attribute(str):
 
     def __init__(
             self, name, absolute=False, min_wins=True, functions=sum,
-            scale=None):
+            scale=None, digits=2):
         """
         Use this class if your **own** attribute needs a non-default
         value for:
@@ -103,6 +103,7 @@ class Attribute(str):
         * *scale*: Default scaling. Can be one of "linear", "log" and
           "symlog". If *scale* is None (default), the reports will
           choose the scaling.
+        * *digits*: Number of digits after the decimal point.
 
         The ``downward`` package automatically uses appropriate
         settings for most attributes. ::
@@ -123,11 +124,12 @@ class Attribute(str):
             functions = [functions]
         self.functions = functions
         self.scale = scale
+        self.digits = digits
 
     def copy(self, name):
         return Attribute(
             name, absolute=self.absolute, min_wins=self.min_wins,
-            functions=self.functions)
+            functions=self.functions, scale=self.scale, digits=self.digits)
 
 
 class Report(object):
@@ -411,7 +413,7 @@ class CellFormatter(object):
 
 
 class Table(collections.defaultdict):
-    def __init__(self, title='', min_wins=None, colored=False):
+    def __init__(self, title='', min_wins=None, colored=False, digits=2):
         """
         The *Table* class can be useful for `Report` subclasses that want to
         return a table as txt2tags markup. It is realized as a dictionary of
@@ -426,6 +428,8 @@ class Table(collections.defaultdict):
 
         If *colored* is True, the values of each row will be given colors from a
         colormap.
+
+        Numbers are rounded to *digits* positions after the decimal point.
 
         >>> t = Table(title='expansions')
         >>> t.add_cell('prob1', 'cfg1', 10)
@@ -464,6 +468,7 @@ class Table(collections.defaultdict):
         self.min_wins = min_wins
         self.row_min_wins = {}
         self.colored = colored
+        self.digits = digits
 
         self.summary_funcs = {}
         self.info = []
@@ -690,7 +695,7 @@ class Table(collections.defaultdict):
 
         def format_value(value):
             if isinstance(value, float):
-                return '%.2f' % value
+                return '{0:.{1}f}'.format(value, self.digits)
             else:
                 result = str(value)
             return markup.escape(result)

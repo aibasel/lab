@@ -12,6 +12,7 @@ lab
 ^^^
 * Show warning and ask for action when evaluation dir already exists.
 * Add ``scale`` parameter to Attribute. It is used by the plot reports.
+* Add ``digits`` parameter to Attribute for specifying the number of digits after the decimal point.
 * Pass name, function, args and kwargs to ``exp.add_step()``. Deprecate passing Step objects.
 * Call: make ``name`` parameter mandatory, rename ``mem_limit`` kwarg to ``memory_limit``.
 * Store grid job files in ``<exp-dir>-grid-steps``.
