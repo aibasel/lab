@@ -259,17 +259,14 @@ def scores(content, props):
     counted as 1, while failure to solve a task and worst
     performance are counted as 0.
     """
-    def log_score(value, min_bound, max_bound, min_score):
+    def log_score(value, min_bound, max_bound):
         if value is None:
             return 0
-        if value < min_bound:
-            value = min_bound
-        if value > max_bound:
-            value = max_bound
+        value = max(value, min_bound)
+        value = min(value, max_bound)
         raw_score = math.log(value) - math.log(max_bound)
         best_raw_score = math.log(min_bound) - math.log(max_bound)
-        score = min_score + (1 - min_score) * (raw_score / best_raw_score)
-        return score
+        return raw_score / best_raw_score
 
     # Maximum memory in KB
     max_memory = get_memory_limit_in_kb(props)
@@ -278,18 +275,15 @@ def scores(content, props):
 
     for attr in ('expansions', 'evaluations', 'generated'):
         props['score_' + attr] = log_score(
-            props.get(attr), min_bound=100, max_bound=1e6, min_score=0.0)
+            props.get(attr), min_bound=100, max_bound=1e6)
 
     props.update({
         'score_memory': log_score(
-            props.get('memory'),
-            min_bound=2000, max_bound=max_memory, min_score=0.0),
+            props.get('memory'), min_bound=2000, max_bound=max_memory),
         'score_total_time': log_score(
-            props.get('total_time'),
-            min_bound=1.0, max_bound=max_time, min_score=0.0),
+            props.get('total_time'), min_bound=1.0, max_bound=max_time),
         'score_search_time': log_score(
-            props.get('search_time'),
-            min_bound=1.0, max_bound=max_time, min_score=0.0)})
+            props.get('search_time'), min_bound=1.0, max_bound=max_time)})
 
 
 def check_min_values(content, props):
