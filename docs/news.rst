@@ -42,6 +42,9 @@ downward
 ^^^^^^^^
 * Always validate plans. Previous lab versions don't add ``--validate``
   since older Fast Downward versions don't support it.
+* HTML reports: hide tables by default, add buttons for toggling visibility.
+* Unify "score_*", "quality" and "coverage" attributes: assign values in range [0, 1]
+  and compute only sum and no average.
 * Don't print tables on commandline.
 * Remove DownwardExperiment and other deprecated code.
 * Move ``FastDownwardExperiment`` into ``downward/experiment.py``.
