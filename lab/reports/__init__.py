@@ -216,9 +216,7 @@ class Report(object):
                 filter_search_timeout=1))
 
         """
-        if isinstance(attributes, basestring):
-            attributes = [attributes]
-        self.attributes = attributes or []
+        self.attributes = tools.make_list(attributes or [])
         assert format in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png', 'py']
         self.output_format = format
         self.toc = True
