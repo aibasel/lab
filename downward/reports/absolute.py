@@ -230,6 +230,8 @@ class AbsoluteReport(PlanningReport):
                 min_wins=attribute.min_wins,
                 colored=self.colored and attribute.min_wins is not None,
                 digits=attribute.digits)
+        elif attribute is None and title == "Summary":
+            kwargs = dict(colored=self.colored)
         else:
             # Do not highlight anything.
             kwargs = {}
