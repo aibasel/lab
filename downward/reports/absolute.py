@@ -72,6 +72,7 @@ class AbsoluteReport(PlanningReport):
         # The actual section is added at position summary_index after creating
         # all other tables.
         summary = self._get_empty_table(title='Summary')
+        summary.colored = self.colored
         toc_lines.append('- **[Summary #summary]**')
 
         for attribute in self.attributes:
@@ -230,8 +231,6 @@ class AbsoluteReport(PlanningReport):
                 min_wins=attribute.min_wins,
                 colored=self.colored and attribute.min_wins is not None,
                 digits=attribute.digits)
-        elif attribute is None and title == "Summary":
-            kwargs = dict(colored=self.colored)
         else:
             # Do not highlight anything.
             kwargs = {}
