@@ -129,17 +129,18 @@ params = {
     'savefig.dpi': 100,
 }
 
-exp.add_report(
-    ScatterPlotReport(
-        attributes=['expansions'],
-        filter=only_two_algorithms,
-        get_category=get_domain,
-        xscale='linear',
-        yscale='linear',
-        category_styles={'gripper': {'c': 'b', 'marker': '+'}},
-        params=params),
-    name='report-scatter-domain',
-    outfile=os.path.join('plots', 'scatter-domain.png'))
+for format in ["png", "tex"]:
+    exp.add_report(
+        ScatterPlotReport(
+            attributes=['expansions'],
+            format=format,
+            filter=only_two_algorithms,
+            get_category=get_domain,
+            xscale='linear',
+            yscale='linear',
+            category_styles={'gripper': {'c': 'b', 'marker': '+'}},
+            params=params),
+        outfile=os.path.join('plots', 'scatter-domain.' + format))
 exp.add_report(
     ComparativeReport(
         [('lama11', 'iter-hadd')],

@@ -76,18 +76,9 @@ class MatplotlibPlot(object):
 
         formatter.__call__ = new_format_call
 
-    def create_legend(self, categories, location):
-        # Only print a legend if there is at least one non-default category.
-        if location is not None and any(key is not None for key in categories.keys()):
-            kwargs = {}
-            if isinstance(location, (int, basestring)):
-                kwargs['loc'] = location
-            else:
-                if not isinstance(location, (tuple, list)):
-                    logging.critical('location must be a string or a (x, y) pair')
-                kwargs['bbox_to_anchor'] = location
-                kwargs['loc'] = 'center'
-            self.legend = self.axes.legend(scatterpoints=1, **kwargs)
+    def create_legend(self):
+        self.legend = self.axes.legend(
+            scatterpoints=1, loc='center', bbox_to_anchor=(1.3, 0.5))
 
     def print_figure(self, filename):
         # Save the generated scatter plot to a file.
@@ -170,7 +161,8 @@ class Matplotlib(object):
             logging.info('Found no valid points for plot %s' % filename)
             return
 
-        plot.create_legend(report.categories, report.legend_location)
+        if report.has_multiple_categories():
+            plot.create_legend()
         plot.print_figure(filename)
 
 
@@ -181,9 +173,6 @@ class PgfPlots(object):
     MARKERS = {'o': '*', 'x': 'x', '+': '+', 's': 'square*',
                '^': 'triangle*', 'v': 'halfsquare*', '<': 'halfsquare left*',
                '>': 'halfsquare right*', 'D': 'diamond*'}
-    LOCATIONS = {'upper left': 'north west', 'upper right': 'north east',
-                 'lower left': 'south west', 'lower right': 'south east',
-                 'right': 'outer north east'}
 
     @classmethod
     def _get_plot(cls, report):
@@ -229,26 +218,11 @@ class PgfPlots(object):
             axis['width'] = '%.2fin' % width
             axis['height'] = '%.2fin' % height
 
-        if report.legend_location:
+        if report.has_multiple_categories():
             axis['legend style'] = cls._format_options(
-                cls._get_legend_options(report.legend_location))
+                {'legend pos': 'outer north east'})
 
         return axis
-
-    @classmethod
-    def _get_legend_options(cls, location):
-        if location in cls.LOCATIONS.values():
-            # Found valid pgfplots location.
-            return {'legend pos': location}
-        elif location in cls.LOCATIONS:
-            # Convert matplotlib location to pgfplots location.
-            return {'legend pos': cls.LOCATIONS[location]}
-        elif isinstance(location, (list, tuple)):
-            return {'at': location}
-        else:
-            logging.critical(
-                'Legend location "{}" is unavailable in pgfplots'.format(
-                    location))
 
     @classmethod
     def _format_options(cls, options):
@@ -271,10 +245,6 @@ class PlotReport(PlanningReport):
     """
     Abstract base class for Plot classes.
     """
-    LOCATIONS = ['upper right', 'upper left', 'lower left', 'lower right',
-                 'right', 'center left', 'center right', 'lower center',
-                 'upper center', 'center']
-
     def __init__(
             self, title=None, xscale=None, yscale=None, xlabel='',
             ylabel='', category_styles=None, params=None, **kwargs):
@@ -304,6 +274,9 @@ class PlotReport(PlanningReport):
                 attributes=['expansions'],
                 category_styles={None: {'marker': '*', 'c': 'b'}})
 
+        If there is more than one category, a legend is automatically
+        added.
+
         *params* may be a dictionary of matplotlib rc parameters
         (see http://matplotlib.org/users/customizing.html)::
 
@@ -313,7 +286,6 @@ class PlotReport(PlanningReport):
                 'font.size': 20,  # Used if more specific sizes not set.
                 'axes.labelsize': 20,
                 'axes.titlesize': 30,
-                'legend.loc': 'upper right',
                 'legend.fontsize': 22,
                 'xtick.labelsize': 10,
                 'ytick.labelsize': 10,
@@ -331,18 +303,6 @@ class PlotReport(PlanningReport):
 
             import matplotlib
             print matplotlib.rcParamsDefault
-
-        The rc parameter *legend.loc* can be an (x, y) tuple or one of
-        the following strings: 'upper right' (default), 'upper left',
-        'lower left', 'lower right', 'right', 'center left', 'center
-        right', 'lower center', 'upper center', 'center'. If it is
-        None, no legend will be added. ::
-
-            # Some example legend locations.
-            'lower left'  # Lower left corner *inside* the plot
-            (1.1, 0.5)    # Right of the plot
-            (0.5, 1.1)    # Above the plot
-            (0.5, -0.1)   # Below the plot
 
         """
         kwargs.setdefault('format', 'png')
@@ -362,8 +322,9 @@ class PlotReport(PlanningReport):
         self.ylim_bottom = None
         self.ylim_top = None
         self.params = params or {}
-        self.params.setdefault('legend.loc', 'upper right')
-        self.legend_location = self.params.get('legend.loc')
+        if 'legend.loc' in self.params:
+            logging.warning('The "legend.loc" parameter is ignored.')
+        # TODO: Rename params to parameters
         if self.output_format == 'tex':
             self.writer = PgfPlots
         else:
@@ -424,6 +385,9 @@ class PlotReport(PlanningReport):
         min_x = max(min_x, MIN_VALUE)
         min_y = max(min_y, MIN_VALUE)
         self.min_x, self.min_y, self.max_x, self.max_y = min_x, min_y, max_x, max_y
+
+    def has_multiple_categories(self):
+        return any(key is not None for key in self.categories.keys())
 
     def _write_plot(self, runs, filename):
         # Map category names to coord tuples
