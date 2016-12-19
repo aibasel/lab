@@ -179,11 +179,15 @@ class PgfPlots(object):
         return lines
 
     @classmethod
-    def write(cls, report, filename, scatter=False):
-        lines = []
-        lines.append('\\begin{tikzpicture}')
-        lines.extend(cls._get_plot(report))
-        lines.append('\\end{tikzpicture}')
+    def write(cls, report, filename):
+        lines = ([
+            r'\documentclass[tikz]{standalone}',
+            r'\usepackage{pgfplots}',
+            r'\begin{document}',
+            r'\begin{tikzpicture}'] +
+            cls._get_plot(report) + [
+            r'\end{tikzpicture}',
+            r'\end{document}'])
         tools.makedirs(os.path.dirname(filename))
         tools.write_file(filename, '\n'.join(lines))
         logging.info('Wrote file://%s' % filename)
