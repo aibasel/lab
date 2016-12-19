@@ -167,13 +167,6 @@ class Matplotlib(object):
 
 
 class PgfPlots(object):
-    COLORS = dict((color[0], color) for color in
-                  ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow'])
-    COLORS['k'] = 'black'
-    MARKERS = {'o': '*', 'x': 'x', '+': '+', 's': 'square*',
-               '^': 'triangle*', 'v': 'halfsquare*', '<': 'halfsquare left*',
-               '>': 'halfsquare right*', 'D': 'diamond*'}
-
     @classmethod
     def _get_plot(cls, report):
         lines = []

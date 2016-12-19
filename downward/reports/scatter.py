@@ -71,16 +71,9 @@ class ScatterPgfPlots(PgfPlots):
         options = cls._get_axis_options(report)
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
-            category_style = report.styles[category]
-            plot = {}
-            plot['only marks'] = True
-            m = category_style.get('marker')
-            plot['mark'] = cls.MARKERS.get(m, m)
-            c = category_style.get('c')
-            plot['color'] = cls.COLORS.get(c, c)
-            plot['mark options'] = '{draw=black}'
+            plot = {'only marks': True}
             lines.append(
-                '\\addplot[%s] coordinates {\n%s\n};' % (
+                '\\addplot+[%s] coordinates {\n%s\n};' % (
                     cls._format_options(plot),
                     ' '.join(cls._format_coord(c) for c in coords)))
             if category:
