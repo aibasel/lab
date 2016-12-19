@@ -318,7 +318,15 @@ class PlotReport(PlanningReport):
                 raise ValueError("{} not in {}".format(scale, scales))
 
     def _get_category_styles(self, categories):
-        # Pick any style for categories for which no style is defined.
+        """
+        Create dictionary mapping from category name to marker style.
+        Pick random style for categories for which no style is defined.
+
+        Note: Matplotlib 2.0 will gain the option to automatically
+        cycle through marker styles. We might want to use that feature
+        in the future.
+
+        """
         styles = self.category_styles.copy()
         unused_styles = [{'marker': m, 'c': c} for m in 'ox+s^v<>D' for c in 'rgbcmyk'
                          if not any(s.get('marker') == m and
