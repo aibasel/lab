@@ -247,7 +247,7 @@ class PlotReport(PlanningReport):
     """
     def __init__(
             self, title=None, xscale=None, yscale=None, xlabel='',
-            ylabel='', category_styles=None, params=None, **kwargs):
+            ylabel='', params=None, **kwargs):
         """
         The inherited *format* parameter can be set to 'png' (default),
         'eps', 'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the
@@ -261,21 +261,6 @@ class PlotReport(PlanningReport):
         'symlog'. If omitted sensible defaults will be used.
 
         *xlabel* and *ylabel* are the axis labels.
-
-        Subclasses may group the data points into categories. These
-        categories are separated visually by drawing them with
-        different styles. You can set the styles manually by providing
-        a dictionary *category_styles* that maps category names to
-        dictionaries of matplotlib drawing parameters (see
-        http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot).
-        For example, to change the default style to blue stars use::
-
-            ScatterPlotReport(
-                attributes=['expansions'],
-                category_styles={None: {'marker': '*', 'c': 'b'}})
-
-        If there is more than one category, a legend is automatically
-        added.
 
         *params* may be a dictionary of matplotlib rc parameters
         (see http://matplotlib.org/users/customizing.html)::
@@ -313,7 +298,7 @@ class PlotReport(PlanningReport):
             self.attribute = self.attributes[0]
         self.title = title if title is not None else (self.attribute or '')
 
-        self.category_styles = category_styles or {}
+        self.category_styles = {}
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
         self.ylabel = ylabel

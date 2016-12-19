@@ -133,7 +133,8 @@ class ScatterPlotReport(PlotReport):
 
         *get_category* can be a function that takes **two** runs
         (dictionaries of properties) and returns a category name. This
-        name is used to group the points in the plot. Runs for which
+        name is used to group the points in the plot. If there is more
+        than one group, a legend is automatically added. Runs for which
         this function returns None are shown in a default category and
         are not contained in the legend. For example, to group by
         domain::
@@ -143,9 +144,7 @@ class ScatterPlotReport(PlotReport):
                 # compare two runs of the same problem.
                 return run1['domain']
 
-        *get_category* and *category_styles* (see :class:`.PlotReport`)
-        are best used together, e.g. to distinguish between different
-        levels of difficulty::
+        Example grouping by difficulty::
 
             def improvement(run1, run2):
                 time1 = run1.get('search_time', 1800)
@@ -156,16 +155,9 @@ class ScatterPlotReport(PlotReport):
                     return 'equal'
                 return 'worse'
 
-            styles = {
-                'better': ('x','r'),
-                'equal':  ('*','b'),
-                'worse':  ('o','y'),
-            }
-
             ScatterPlotReport(
                 attributes=['search_time'],
-                get_category=improvement,
-                category_styles=styles)
+                get_category=improvement)
 
         Example comparing the number of expanded states for two
         algorithms::

@@ -138,7 +138,6 @@ for format in ["png", "tex"]:
             get_category=get_domain,
             xscale='linear',
             yscale='linear',
-            category_styles={'gripper': {'c': 'b', 'marker': '+'}},
             params=params),
         outfile=os.path.join('plots', 'scatter-domain.' + format))
 exp.add_report(
