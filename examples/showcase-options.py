@@ -113,7 +113,7 @@ exp.add_report(
     name='report-scatter',
     outfile=os.path.join('plots', 'scatter.png'))
 
-params = {
+matplotlib_options = {
     'font.family': 'serif',
     'font.weight': 'normal',
     'font.size': 20,  # Only used if the more specific sizes are not set.
@@ -138,7 +138,7 @@ for format in ["png", "tex"]:
             get_category=get_domain,
             xscale='linear',
             yscale='linear',
-            params=params),
+            matplotlib_options=matplotlib_options),
         outfile=os.path.join('plots', 'scatter-domain.' + format))
 exp.add_report(
     ComparativeReport(

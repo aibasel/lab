@@ -57,12 +57,12 @@ class MatplotlibPlot(object):
         self.axes = fig.add_subplot(111)
 
     @staticmethod
-    def set_rc_params(params):
-        # Reset params from rc file if matplotlib installation supports it.
+    def set_rc_params(matplotlib_options):
+        # Reset options from rc file if matplotlib installation supports it.
         if hasattr(matplotlib, 'rc_file_defaults'):
             matplotlib.rc_file_defaults()
-        if params:
-            matplotlib.rcParams.update(params)
+        if matplotlib_options:
+            matplotlib.rcParams.update(matplotlib_options)
 
     @staticmethod
     def change_axis_formatter(axis, missing_val=None):
@@ -144,7 +144,7 @@ class Matplotlib(object):
 
     @classmethod
     def write(cls, report, filename, scatter=False):
-        MatplotlibPlot.set_rc_params(report.params)
+        MatplotlibPlot.set_rc_params(report.matplotlib_options)
         plot = MatplotlibPlot()
         if report.title:
             plot.axes.set_title(report.title)
@@ -205,7 +205,7 @@ class PgfPlots(object):
         axis['ymode'] = convert_scale[report.yscale]
 
         # Height is set in inches.
-        figsize = report.params.get('figure.figsize')
+        figsize = report.matplotlib_options.get('figure.figsize')
         if figsize:
             width, height = figsize
             axis['width'] = '%.2fin' % width
@@ -240,7 +240,7 @@ class PlotReport(PlanningReport):
     """
     def __init__(
             self, title=None, xscale=None, yscale=None, xlabel='',
-            ylabel='', params=None, **kwargs):
+            ylabel='', matplotlib_options=None, **kwargs):
         """
         The inherited *format* parameter can be set to 'png' (default),
         'eps', 'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the
@@ -255,10 +255,10 @@ class PlotReport(PlanningReport):
 
         *xlabel* and *ylabel* are the axis labels.
 
-        *params* may be a dictionary of matplotlib rc parameters
-        (see http://matplotlib.org/users/customizing.html)::
+        *matplotlib_options* may be a dictionary of matplotlib rc
+        parameters (see http://matplotlib.org/users/customizing.html)::
 
-            params = {
+            matplotlib_options = {
                 'font.family': 'serif',
                 'font.weight': 'normal',
                 'font.size': 20,  # Used if more specific sizes not set.
@@ -274,9 +274,10 @@ class PlotReport(PlanningReport):
                 'savefig.dpi': 100,
             }
             ScatterPlotReport(
-                attributes=['initial_h_value'], params=params)
+                attributes=['initial_h_value'],
+                matplotlib_options=matplotlib_options)
 
-        You can see the full list of matplotlib rc parameters and their
+        You can see the full list of matplotlib options and their
         defaults by executing ::
 
             import matplotlib
@@ -299,10 +300,9 @@ class PlotReport(PlanningReport):
         self.xlim_right = None
         self.ylim_bottom = None
         self.ylim_top = None
-        self.params = params or {}
-        if 'legend.loc' in self.params:
+        self.matplotlib_options = matplotlib_options or {}
+        if 'legend.loc' in self.matplotlib_options:
             logging.warning('The "legend.loc" parameter is ignored.')
-        # TODO: Rename params to parameters
         if self.output_format == 'tex':
             self.writer = PgfPlots
         else:

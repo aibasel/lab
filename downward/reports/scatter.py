@@ -165,9 +165,9 @@ class ScatterPlotReport(PlotReport):
 
         """
         # If the size has not been set explicitly, make it a square.
-        params = kwargs.get('params', {})
-        params.setdefault('figure.figsize', [8, 8])
-        kwargs['params'] = params
+        matplotlib_options = kwargs.get('matplotlib_options', {})
+        matplotlib_options.setdefault('figure.figsize', [8, 8])
+        kwargs['matplotlib_options'] = matplotlib_options
         PlotReport.__init__(self, **kwargs)
         if not self.attribute:
             logging.critical('ScatterPlotReport needs exactly one attribute')
