@@ -239,6 +239,14 @@ class FastDownwardExperiment(Experiment):
         ...     build_options=["--debug"],
         ...     driver_options=["--debug"])
 
+        Run FF in 64-bit mode:
+
+        >>> exp.add_algorithm(
+        ...     "ff", repo, "default",
+        ...     ["--search", "lazy_greedy(ff())"],
+        ...     build_options=["release64"],
+        ...     driver_options=["--build", "release64"])
+
         Run LAMA-2011 with custom search time limit:
 
         >>> exp.add_algorithm(
