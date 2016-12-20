@@ -64,7 +64,7 @@ downward
 * PlanningReport: remove ``derived_properties`` parameter. Use two filters
   instead: one for caching results, the other for adding new properties
   (see ``QualityFilters`` in ``downward/reports/__init__.py``).
-* PlotReport: use fixed legend location.
+* PlotReport: use fixed legend location, remove ``category_styles`` option.
 * AbsoluteReport: remove ``colored`` parameter and always color HTML reports.
 * Don't use domain links in Latex reports.
 * AbsoluteReport: Remove ``resolution`` parameter and always use ``combined`` resolution.
