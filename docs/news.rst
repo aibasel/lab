@@ -71,7 +71,7 @@ downward
 * Rewrite docs.
 
 
-v1.11 (unreleased)
+v1.11 (2016-12-15)
 ------------------
 
 lab
