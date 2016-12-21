@@ -74,7 +74,13 @@ class PreprocessParser(Parser):
         self.add_preprocess_functions()
 
     def add_preprocess_parsing(self):
-        self.add_pattern('preprocessor_variables', r'(\d+) variables of \d+ necessary')
+        # These logs were part of the preprocessor. The latter two are
+        # now printed by the translator. We keep them for backwards
+        # compatibility.
+        self.add_pattern(
+            'preprocessor_variables',
+            r'(\d+) variables of \d+ necessary',
+            required=False)
         self.add_pattern('preprocessor_operators', r'(\d+) of \d+ operators necessary')
         self.add_pattern('preprocessor_axioms', r'(\d+) of \d+ axiom rules necessary')
 
