@@ -81,7 +81,10 @@ class FastDownwardRun(Run):
         self.add_command('parse-search', ['SEARCH_PARSER'])
 
         self.add_command(
-            'compress-output-files', ['xz', 'output.sas', 'output'])
+            'compress-legacy-output-file',
+            ['bash', '-c', 'if [ -e output ]; then xz output; fi'])
+        self.add_command(
+            'compress-output-sas', ['xz', 'output.sas'])
 
     def _set_properties(self):
         self.set_property('algorithm_nick', self.algo.nick)
