@@ -171,7 +171,7 @@ class Parser(object):
         an error message is printed.
 
         >>> parser = Parser()
-        >>> parser.add_pattern('variables', r'Variables: (\d+)')
+        >>> parser.add_pattern('facts', r'Facts: (\d+)', type=int)
 
         """
         if type == bool:
