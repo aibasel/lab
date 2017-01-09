@@ -13,22 +13,24 @@ Run tutorial experiment
 -----------------------
 .. highlight:: python
 
-The script below is a simple experiment. It is located
-at ``examples/simple/simple-exp.py``. You can see the available steps with ::
+The script below shows how to run the `FF planner
+<http://fai.cs.uni-saarland.de/hoffmann/ff.html>`_ on a number of
+classical planning benchmarks. It is located at ``examples/ff/ff.py``.
+You can see the available steps with ::
 
-    ./simple-exp.py
+    ./ff.py
 
 
-Run the individual steps with ::
+Select steps by name or index::
 
-    ./simple-exp.py 1
-    ./simple-exp.py {2..4}
-    ./simple-exp.py zip-exp-dir
+    ./ff.py build
+    ./ff.py 2
+    ./ff.py 3 4
 
 
 You can use this file as a basis for your own experiments.
 
-.. literalinclude:: ../examples/simple/simple-exp.py
+.. literalinclude:: ../examples/ff/ff.py
 
-Have a look at another example lab experiment in the ``example/pi`` directory
-and the `lab API <lab.experiment.html>`_.
+Have a look at other example experiments under ``examples/simple`` and
+``examples/pi`` or go directly to the `lab API <lab.experiment.html>`_.

@@ -16,8 +16,8 @@ also facilitates parsing results and creating reports.
    :maxdepth: 1
 
    lab.experiment
+   lab.parser
    lab.reports
-   lab.tools
 
 
 downward
@@ -38,5 +38,4 @@ for the `Fast Downward planning system <http://www.fast-downward.org>`_.
    :maxdepth: 1
 
    downward.experiment
-   downward.experiments
    downward.reports

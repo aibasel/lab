@@ -28,15 +28,14 @@ ENV = LocalEnvironment()
 # Create a new experiment.
 exp = Experiment(path=EXPPATH, environment=ENV)
 exp.add_resource(
-    'SIMPLE_PARSER', 'simple-parser.py', 'simple-parser.py')
+    'simple_parser', 'simple-parser.py', 'simple-parser.py')
 reportfile = os.path.join(exp.eval_dir, EXPNAME + '.html')
 
 run = exp.add_run()
 run.add_command('list-dir', ['ls', '-l'])
 # Every run has to have an id in the form of a list.
 run.set_property('id', ['current-dir'])
-run.require_resource('SIMPLE_PARSER')
-run.add_command('parse', ['SIMPLE_PARSER'])
+run.add_command('parse', ['{simple_parser}'])
 
 # Make a default report.
 exp.add_report(
@@ -44,4 +43,4 @@ exp.add_report(
     outfile=reportfile)
 
 # Parse the commandline and run the specified steps.
-exp()
+exp.run_steps()

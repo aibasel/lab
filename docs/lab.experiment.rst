@@ -1,5 +1,5 @@
-:mod:`lab` --- Create experiments
-=================================
+:mod:`lab.experiment` --- Create experiments
+============================================
 
 .. module:: lab.experiment
 
@@ -41,6 +41,7 @@
    :members:
    :undoc-members:
    :inherited-members:
+   :exclude-members: build
 
 
 .. _environments:
@@ -48,29 +49,14 @@
 :class:`Environment`
 --------------------
 
+.. autoclass:: lab.environments.Environment
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.GkiGridEnvironment
 .. autoclass:: lab.environments.MaiaEnvironment
 
 
-.. _parser:
-
-:class:`Parser` -- Parse log output
------------------------------------
-
-.. autoclass:: lab.parser.Parser
-   :members:
-   :undoc-members:
-
-
-.. _steps:
-
-:mod:`lab.steps` -- Run experiments
------------------------------------
-
-.. autoclass:: lab.steps.Step
-   :members:
-   :undoc-members:
+Various
+-------
 
 .. autodata:: lab.__version__
    :annotation:

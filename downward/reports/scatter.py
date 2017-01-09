@@ -71,16 +71,9 @@ class ScatterPgfPlots(PgfPlots):
         options = cls._get_axis_options(report)
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
-            category_style = report.styles[category]
-            plot = {}
-            plot['only marks'] = True
-            m = category_style.get('marker')
-            plot['mark'] = cls.MARKERS.get(m, m)
-            c = category_style.get('c')
-            plot['color'] = cls.COLORS.get(c, c)
-            plot['mark options'] = '{draw=black}'
+            plot = {'only marks': True}
             lines.append(
-                '\\addplot[%s] coordinates {\n%s\n};' % (
+                '\\addplot+[%s] coordinates {\n%s\n};' % (
                     cls._format_options(plot),
                     ' '.join(cls._format_coord(c) for c in coords)))
             if category:
@@ -98,8 +91,9 @@ class ScatterPgfPlots(PgfPlots):
             end = max(end, report.ylim_top)
         if report.show_missing:
             end = max(end, report.missing_val)
-        lines.append('\\addplot[color=black] coordinates {(%f, %f) (%d, %d)};' %
-                     (start, start, end, end))
+        lines.append(
+            '\\addplot[color=black] coordinates {(%f, %f) (%d, %d)};' %
+            (start, start, end, end))
         lines.append('\\end{axis}')
         return lines
 
@@ -119,55 +113,64 @@ class ScatterPlotReport(PlotReport):
     """
     def __init__(self, show_missing=True, get_category=None, **kwargs):
         """
-        ``kwargs['attributes']`` must contain exactly one attribute.
+        See :class:`.PlotReport` for inherited arguments.
 
-        If only one of the two configurations has a value for a run, only
+        The keyword argument *attributes* must contain exactly one
+        attribute.
+
+        Use the *filter_algorithm* keyword argument to select exactly
+        two algorithms.
+
+        If only one of the two algorithms has a value for a run, only
         add a coordinate if *show_missing* is True.
 
-        *get_category* can be a function that takes **two** runs (dictionaries of
-        properties) and returns a category name. This name is used to group the
-        points in the plot.
-        Runs for which this function returns None are shown in a default category
-        and are not contained in the legend.
-        For example, to group by domain use::
+        *get_category* can be a function that takes **two** runs
+        (dictionaries of properties) and returns a category name. This
+        name is used to group the points in the plot. If there is more
+        than one group, a legend is automatically added. Runs for which
+        this function returns None are shown in a default category and
+        are not contained in the legend. For example, to group by
+        domain::
 
             def domain_as_category(run1, run2):
                 # run2['domain'] has the same value, because we always
-                # compare two runs of the same problem
+                # compare two runs of the same problem.
                 return run1['domain']
 
-        *get_category* and *category_styles*
-        (see :py:class:`PlotReport <downward.reports.plot.PlotReport>`) are best
-        used together, e.g. to distinguish between different levels of difficulty::
+        Example grouping by difficulty::
 
             def improvement(run1, run2):
                 time1 = run1.get('search_time', 1800)
                 time2 = run2.get('search_time', 1800)
-                if time1 > 10 * time2:
-                    return 'strong'
-                if time1 >= time2:
-                    return 'small'
+                if time1 > time2:
+                    return 'better'
+                if time1 == time2:
+                    return 'equal'
                 return 'worse'
-
-            styles = {
-                'strong': ('x','r'),
-                'small':  ('*','b'),
-                'worse':  ('o','y'),
-            }
 
             ScatterPlotReport(
                 attributes=['search_time'],
-                get_category=improvement,
-                category_styles=styles)
+                get_category=improvement)
+
+        Example comparing the number of expanded states for two
+        algorithms::
+
+            exp.add_report(ScatterPlotReport(
+                    attributes=["expansions_until_last_jump"],
+                    filter_config=["algorithm-1", "algorithm-2"],
+                    get_category=domain_as_category,
+                    format="png",  # Use "tex" for pgfplots output.
+                    ),
+                name="scatterplot-expansions")
 
         """
-        kwargs.setdefault('legend_location', (1.3, 0.5))
         # If the size has not been set explicitly, make it a square.
-        params = kwargs.get('params', {})
-        params.setdefault('figure.figsize', [8, 8])
-        kwargs['params'] = params
+        matplotlib_options = kwargs.get('matplotlib_options', {})
+        matplotlib_options.setdefault('figure.figsize', [8, 8])
+        kwargs['matplotlib_options'] = matplotlib_options
         PlotReport.__init__(self, **kwargs)
-        assert self.attribute, 'ScatterPlotReport needs exactly one attribute'
+        if not self.attribute:
+            logging.critical('ScatterPlotReport needs exactly one attribute')
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
@@ -179,18 +182,14 @@ class ScatterPlotReport(PlotReport):
             self.writer = ScatterMatplotlib
 
     def _set_scales(self, xscale, yscale):
-        # ScatterPlots use log-scaling on the x-axis by default.
-        default_xscale = 'log'
-        if self.attribute and self.attribute in self.LINEAR:
-            default_xscale = 'linear'
-        PlotReport._set_scales(self, xscale or default_xscale, yscale)
+        PlotReport._set_scales(self, xscale or self.attribute.scale or 'log', yscale)
         if self.xscale != self.yscale:
             logging.critical('Scatterplots must use the same scale on both axes.')
 
     def _get_missing_val(self, max_value):
         """
-        Separate the missing values by plotting them at (max_value * 10) rounded
-        to the next power of 10.
+        Separate the missing values by plotting them at (max_value * 10)
+        rounded to the next power of 10.
         """
         assert max_value is not None
         if self.yscale == 'linear':
@@ -212,8 +211,8 @@ class ScatterPlotReport(PlotReport):
             if len(runs) != 2:
                 continue
             run1, run2 = runs
-            assert (run1['config'] == self.configs[0] and
-                    run2['config'] == self.configs[1])
+            assert (run1['algorithm'] == self.algorithms[0] and
+                    run2['algorithm'] == self.algorithms[1])
             val1 = run1.get(self.attribute)
             val2 = run2.get(self.attribute)
             if val1 is None and val2 is None:
@@ -237,10 +236,11 @@ class ScatterPlotReport(PlotReport):
         return new_categories
 
     def write(self):
-        if not len(self.configs) == 2:
-            logging.critical('Scatterplots need exactly 2 configs: %s' % self.configs)
-        self.xlabel = self.xlabel or self.configs[0]
-        self.ylabel = self.ylabel or self.configs[1]
+        if not len(self.algorithms) == 2:
+            logging.critical(
+                'Scatter plots need exactly 2 algorithms: %s' % self.algorithms)
+        self.xlabel = self.xlabel or self.algorithms[0]
+        self.ylabel = self.ylabel or self.algorithms[1]
 
         suffix = '.' + self.output_format
         if not self.outfile.endswith(suffix):

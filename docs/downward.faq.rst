@@ -1,20 +1,10 @@
-Frequently Asked Questions
+Frequently asked questions
 ==========================
 
 How can I parse and report my own attributes?
 ---------------------------------------------
 
-You will have to write a parser that is executed at the end of run
-and manipulates the ``properties`` file in the run directory. The
-simplest way for this is to write a Python script that uses the
-:py:class:`Parser <lab.parser.Parser>` class. Here is the example
-parser from ``examples/simple/simple-parser.py``:
-
-.. literalinclude:: ../examples/simple/simple-parser.py
-
-You can add your parser to all experiment runs with::
-
-    exp.add_command('myparser', ['path/to/myparser.py'])
+See the `parsing documentation <lab.parser.html>`_.
 
 
 How can I combine the results from multiple experiments?
@@ -26,14 +16,6 @@ How can I combine the results from multiple experiments?
     exp.add_fetcher('path/to/second/eval/dir')
     exp.add_fetcher('path/to/experiment/dir')
     exp.add_report(AbsoluteReport())
-
-
-How can I run multiple steps sequentially on a computer grid?
--------------------------------------------------------------
-
-Previously, you had to use the ``--all`` commandline option for this.
-Since version 1.8 lab will automatically run steps sequentially on the
-grid engine if one of the steps itself submits runs to the grid engine.
 
 
 I forgot to parse something. How can I run only the parser again?
@@ -55,3 +37,11 @@ How can I make reports and plots for results obtained without lab?
 ------------------------------------------------------------------
 
 See ``examples/report-external-results.py`` for an example.
+
+
+Which experiment class should I use for which Fast Downward revision?
+---------------------------------------------------------------------
+
+* Before CMake: Use DownwardExperiment in lab 1.x
+* With CMake and mandatory validation: Use FastDownwardExperiment in lab 1.x
+* With CMake and optional validation: Use FastDownwardExperiment in lab 2.x

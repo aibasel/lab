@@ -42,11 +42,6 @@ EXIT_OUT_OF_MEMORY = 6
 EXIT_TIMEOUT = 7
 EXIT_TIMEOUT_AND_MEMORY = 8
 
-# TODO: Remove once we no longer support the bash driver script.
-EXIT_BASH_SIGKILL = 128 + 9
-EXIT_BASH_SIGSEGV = 128 + 11
-EXIT_BASH_SIGXCPU = 128 + 24
-
 EXIT_PYTHON_SIGKILL = 256 - 9
 EXIT_PYTHON_SIGSEGV = 256 - 11
 EXIT_PYTHON_SIGXCPU = 256 - 24
@@ -84,7 +79,7 @@ ITERATIVE_PATTERNS = COMMON_PATTERNS + PORTFOLIO_PATTERNS + [
 
 
 CUMULATIVE_PATTERNS = COMMON_PATTERNS + [
-    # TODO: Rename to evaluated_until_last_jump and expanded_until_last_jump.
+    # Keep old names for backwards compatibility.
     _get_states_pattern('evaluations_until_last_jump', 'Evaluated until last jump:'),
     _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
@@ -158,7 +153,6 @@ def get_iterative_results(content, props):
     _update_props_with_iterative_values(
         props, values, [
             ('cost', 'plan_length'),
-            # TODO: add reopened, evaluated and dead ends.
             ('expansions', 'generated', 'search_time')])
 
 
@@ -197,7 +191,7 @@ def set_search_time(content, props):
 
 
 def unsolvable(content, props):
-    props['unsolvable'] = int(props['search_returncode'] == EXIT_UNSOLVABLE)
+    props['unsolvable'] = int(props['fast-downward_returncode'] == EXIT_UNSOLVABLE)
 
 
 def invalid_solution(props):
@@ -209,9 +203,6 @@ def invalid_solution(props):
 
 
 def coverage(content, props):
-    # TODO: Count runs as unsuccessful if they used more than the
-    # alotted time. Currently this is not possible since we don't
-    # have timing information for portfolios and iterated searches.
     props['coverage'] = int(
         'plan_length' in props and
         'cost' in props and
@@ -246,26 +237,19 @@ def get_initial_h_values(content, props):
 
 
 def get_memory_limit_in_kb(props):
-    # TODO: Remove constant once we no longer want to support old
-    # planner revisions that don't output memory limits.
-    return props.get('limit_search_memory', 2048) * 1024
+    return props['limit_search_memory'] * 1024
 
 
 def check_memory(content, props):
-    """Add memory value if the run was successful."""
+    """Add "memory" attribute if the problem was solved."""
     raw_memory = props.get('raw_memory')
 
-    # TODO: Add unexplained error if memory could not be determined once
-    # the signal handling code is fixed.
-    # if raw_memory is None or raw_memory < 0:
-    #     props['error'] = 'unexplained-could-not-determine-peak-memory'
-    #     return
+    if raw_memory is None or raw_memory < 0:
+        props['error'] = 'unexplained-could-not-determine-peak-memory'
+        return
 
     if solved(props):
         props['memory'] = raw_memory
-        props['memory_capped'] = raw_memory
-    elif props['search_returncode'] == EXIT_OUT_OF_MEMORY:
-        props['memory_capped'] = get_memory_limit_in_kb(props)
 
 
 def scores(content, props):
@@ -273,41 +257,33 @@ def scores(content, props):
     Some reported results are measured via scores from the
     range 0-1, where best possible performance in a task is
     counted as 1, while failure to solve a task and worst
-    performance are counted as 0
+    performance are counted as 0.
     """
-    def log_score(value, min_bound, max_bound, min_score):
+    def log_score(value, min_bound, max_bound):
         if value is None:
             return 0
-        if value < min_bound:
-            value = min_bound
-        if value > max_bound:
-            value = max_bound
+        value = max(value, min_bound)
+        value = min(value, max_bound)
         raw_score = math.log(value) - math.log(max_bound)
         best_raw_score = math.log(min_bound) - math.log(max_bound)
-        score = min_score + (1 - min_score) * (raw_score / best_raw_score)
-        return round(score * 100, 2)
+        return raw_score / best_raw_score
 
     # Maximum memory in KB
     max_memory = get_memory_limit_in_kb(props)
 
-    # TODO: Remove constant once we no longer want to support old
-    # planner revisions that don't output time limits.
-    max_time = props.get('limit_search_time', 1800)
+    max_time = props['limit_search_time']
 
     for attr in ('expansions', 'evaluations', 'generated'):
         props['score_' + attr] = log_score(
-            props.get(attr), min_bound=100, max_bound=1e6, min_score=0.0)
+            props.get(attr), min_bound=100, max_bound=1e6)
 
     props.update({
         'score_memory': log_score(
-            props.get('memory'),
-            min_bound=2000, max_bound=max_memory, min_score=0.0),
+            props.get('memory'), min_bound=2000, max_bound=max_memory),
         'score_total_time': log_score(
-            props.get('total_time'),
-            min_bound=1.0, max_bound=max_time, min_score=0.0),
+            props.get('total_time'), min_bound=1.0, max_bound=max_time),
         'score_search_time': log_score(
-            props.get('search_time'),
-            min_bound=1.0, max_bound=max_time, min_score=0.0)})
+            props.get('search_time'), min_bound=1.0, max_bound=max_time)})
 
 
 def check_min_values(content, props):
@@ -326,7 +302,7 @@ def get_error(content, props):
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
     """
-    if props.get('error'):
+    if 'error' in props:
         return
 
     if invalid_solution(props):
@@ -343,15 +319,12 @@ def get_error(content, props):
         EXIT_OUT_OF_MEMORY: 'out-of-memory',
         EXIT_TIMEOUT: 'timeout',  # Currently only for portfolios.
         EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
-        EXIT_BASH_SIGKILL: 'unexplained-sigkill',
         EXIT_PYTHON_SIGKILL: 'unexplained-sigkill',
-        EXIT_BASH_SIGSEGV: 'unexplained-segfault',
         EXIT_PYTHON_SIGSEGV: 'unexplained-segfault',
-        EXIT_BASH_SIGXCPU: 'timeout',
         EXIT_PYTHON_SIGXCPU: 'timeout',
     }
 
-    exitcode = props['search_returncode']
+    exitcode = props['fast-downward_returncode']
     if exitcode in exitcode_to_error:
         props['error'] = exitcode_to_error[exitcode]
     else:
@@ -399,16 +372,32 @@ class PortfolioParser(SearchParser):
         self.add_function(get_iterative_portfolio_results)
 
 
-if __name__ == '__main__':
-    parser = SingleSearchParser()
+def parse_planner_type(content, props):
+    match = re.search(r'^INFO     search portfolio:', content, re.M)
+    if match:
+        props['planner_type'] = 'portfolio'
+    else:
+        props['planner_type'] = 'single'
 
-    # Change parser type if we are parsing a portfolio.
-    planner_type = parser.props['planner_type']
+
+def get_planner_type():
+    planner_type_parser = Parser()
+    planner_type_parser.add_function(parse_planner_type)
+    planner_type_parser.parse()
+    return planner_type_parser.props['planner_type']
+
+
+def main():
+    planner_type = get_planner_type()
     if planner_type == 'single':
         print 'Running single search parser'
+        parser = SingleSearchParser()
     else:
         assert planner_type == 'portfolio', planner_type
-        parser = PortfolioParser()
         print 'Running portfolio parser'
+        parser = PortfolioParser()
 
     parser.parse()
+
+
+main()

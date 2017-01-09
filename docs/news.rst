@@ -5,6 +5,72 @@ News
 .. module :: downward.experiments
 
 
+v2.0 (2017-01-09)
+-----------------
+
+lab
+^^^
+* Show warning and ask for action when evaluation dir already exists.
+* Add ``scale`` parameter to Attribute. It is used by the plot reports.
+* Add ``digits`` parameter to Attribute for specifying the number of digits after the decimal point.
+* Pass name, function, args and kwargs to ``exp.add_step()``. Deprecate passing Step objects.
+* After calling ``add_resource("mynick", ...)``, use resource in commands with "{mynick}".
+* Call: make ``name`` parameter mandatory, rename ``mem_limit`` kwarg to ``memory_limit``.
+* Store grid job files in ``<exp-dir>-grid-steps``.
+* Use common ``run-dispatcher`` script for local and remote experiments.
+* LocalEnvironment: support randomizing task order (enabled by default).
+* Make ``path`` parameter optional for all experiments.
+* Warn if steps are listed explicitly and ``--all`` is used.
+* Change main experiment step name from "start" to "run".
+* Deprecate ``exp()``. Use ``exp.run_steps()`` instead.
+* Don't filter ``None`` values in ``lab.reports`` helper functions.
+* Make logging clearer.
+* Add example FF experiment.
+* Remove deprecated code (e.g. predefined Step objects, ``tools.sendmail()``).
+* Remove ``Run.require_resource()``. All resources have always been available for all runs.
+* Fetcher: remove ``write_combined_props`` parameter.
+* Remove ``Sequence`` class.
+* Parser: remove ``key_value_patterns`` parameter. A better solution is in the works.
+* Remove ``tools.overwrite_dir()`` and ``tools.get_command_output()``.
+* Remove ``lab.reports.minimum()``, ``lab.reports.maximum()``, ``lab.reports.stddev()``.
+* Move ``lab.reports.prod()`` to ``lab.tools.product()``.
+* Rename ``lab.reports.gm()`` to ``lab.reports.geometric_mean()`` and
+  ``lab.reports.avg()`` to ``lab.reports.arithmetic_mean()``.
+* Many speed improvements and better error messages.
+* Rewrite docs.
+
+downward
+^^^^^^^^
+* Always validate plans. Previous lab versions don't add ``--validate``
+  since older Fast Downward versions don't support it.
+* HTML reports: hide tables by default, add buttons for toggling visibility.
+* Unify "score_*", "quality" and "coverage" attributes: assign values in range [0, 1]
+  and compute only sum and no average.
+* Don't print tables on commandline.
+* Remove DownwardExperiment and other deprecated code.
+* Move ``FastDownwardExperiment`` into ``downward/experiment.py``.
+* Rename ``config`` attribute to ``algorithm``. Remove ``config_nick`` attribute.
+* Change call name from "search" to "fast-downward".
+* Remove "memory_capped", and "id_string" attributes.
+* Report raw memory in "unexplained errors" table.
+* Parser: remove ``group`` argument from ``add_pattern()``, and always use group 1.
+* Remove ``cache_dir`` parameter. Add ``revision_cache`` parameter to ``FastDownwardExperiment``.
+* Fetcher: remove ``copy_all`` option.
+* Remove predefined benchmark suites.
+* Remove IpcReport, ProblemPlotReport, RelativeReport, SuiteReport and TimeoutReport.
+* Rename CompareConfigsReport to ComparativeReport.
+* Remove possibility to add ``_relative`` to an attribute to obtain relative results.
+* Apply filters sequentially instead of interleaved.
+* PlanningReport: remove ``derived_properties`` parameter. Use two filters
+  instead: one for caching results, the other for adding new properties
+  (see ``QualityFilters`` in ``downward/reports/__init__.py``).
+* PlotReport: use fixed legend location, remove ``category_styles`` option.
+* AbsoluteReport: remove ``colored`` parameter and always color HTML reports.
+* Don't use domain links in Latex reports.
+* AbsoluteReport: Remove ``resolution`` parameter and always use ``combined`` resolution.
+* Rewrite docs.
+
+
 v1.12 (2017-01-09)
 ------------------
 

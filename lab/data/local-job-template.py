@@ -1,36 +1,33 @@
 #! /usr/bin/env python
 
-import sys
 import os
 import multiprocessing
 import subprocess
+import sys
+
 
 # make sure we're in the run directory
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-dirs = [
-"""DIRS"""
-]
+num_tasks = """NUM_TASKS"""
 
 
-def process_dir(dir):
-    number = dir.split('/')[-1]
-    print 'Starting run %s/%s' % (number, str(len(dirs)).zfill(5))
-    run = subprocess.Popen(['./run'], cwd=dir, stdout=sys.stdout, stderr=sys.stderr)
+def process_task(task_id):
     try:
-        run.wait()
-    except KeyboardInterrupt:
-        print 'Call to run %s interrupted' % number
-        run.terminate()
-    except OSError, err:
-        print err
+        subprocess.check_call(
+            ['./run-dispatcher.py', str(num_tasks), str(task_id)])
+    except subprocess.CalledProcessError as err:
+        return True
 
 
 def main():
     pool = multiprocessing.Pool(processes="""PROCESSES""")
+    result = pool.map_async(process_task, range(1, num_tasks + 1))
     try:
-        pool.map(process_dir, dirs, chunksize=1)
+        # Use "timeout" to fix passing KeyboardInterrupts from children
+        # (see https://stackoverflow.com/questions/1408356).
+        result.wait(timeout=sys.maxint)
     except KeyboardInterrupt:
         print 'Main script interrupted'
         pool.terminate()
@@ -38,6 +35,9 @@ def main():
         pool.close()
         print 'Joining pool processes'
         pool.join()
+
+    if any(result.get()):
+        sys.exit("Error: At least one run failed.")
 
 
 if __name__ == '__main__':

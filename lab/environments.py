@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
 import logging
 import math
 import multiprocessing
@@ -25,27 +24,58 @@ import random
 import sys
 
 from lab import tools
-from lab.steps import Sequence
+
+
+def _get_job_prefix(exp_name):
+    assert exp_name
+    escape_char = 'j' if exp_name[0].isdigit() else ''
+    return ''.join([escape_char, exp_name, '-'])
+
+
+def is_build_step(step):
+    """Return true iff the given step is the "build" step."""
+    return (
+        step.name == 'build' and step._funcname == 'build' and
+        not step.args and not step.kwargs)
+
+
+def is_run_step(step):
+    """Return true iff the given step is the "run" step."""
+    return (
+        step.name == 'run' and step._funcname == 'start_runs' and
+        not step.args and not step.kwargs)
 
 
 class Environment(object):
-    def __init__(self):
+    """Abstract base class for all environments."""
+    def __init__(self, randomize_task_order=True):
+        """
+        If *randomize_task_order* is True (default), tasks for runs are
+        started in a random order. This is useful to avoid systematic
+        noise due to, e.g., one of the algorithms being run on a
+        machine with heavy load. Note that due to the randomization,
+        run directories may be pristine while the experiment is running
+        even though the logs say the runs are finished.
+
+        """
         self.exp = None
-        self.main_script_file = 'run'
+        self.randomize_task_order = randomize_task_order
+
+    def _write_run_dispatcher(self):
+        task_order = range(1, len(self.exp.runs) + 1)
+        if self.randomize_task_order:
+            random.shuffle(task_order)
+        dispatcher_content = pkgutil.get_data('lab', 'data/run-dispatcher.py').replace(
+            '"""TASK_ORDER"""', str(task_order))
+        self.exp.add_new_file(
+            '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
 
     def write_main_script(self):
         raise NotImplementedError
 
-    def build_linked_resources(self, run):
+    def start_runs(self):
         """
-        Only if we are building an argo experiment, we need to add all linked
-        resources to the resources list.
-        """
-        pass
-
-    def start_exp(self):
-        """
-        Run main experiment step.
+        Execute all runs that are part of the experiment.
         """
         raise NotImplementedError
 
@@ -57,12 +87,19 @@ class LocalEnvironment(Environment):
     """
     Environment for running experiments locally on a single machine.
     """
-    def __init__(self, processes=None):
+
+    EXP_RUN_SCRIPT = 'run'
+
+    def __init__(self, processes=None, **kwargs):
         """
-        If given, *processes* must be in the range [1, ..., #CPUs].
-        If omitted, it will be set to #CPUs.
+        If given, *processes* must be between 1 and #CPUs. If omitted,
+        it will be set to #CPUs.
+
+        See :py:class:`~lab.environments.Environment` for inherited
+        parameters.
+
         """
-        Environment.__init__(self)
+        Environment.__init__(self, **kwargs)
         cores = multiprocessing.cpu_count()
         if processes is None:
             processes = cores
@@ -71,22 +108,22 @@ class LocalEnvironment(Environment):
         self.processes = processes
 
     def write_main_script(self):
-        dirs = [repr(os.path.relpath(run.path, self.exp.path))
-                for run in self.exp.runs]
-        replacements = {'DIRS': ',\n'.join(dirs),
-                        'PROCESSES': str(self.processes)}
-
+        self._write_run_dispatcher()
         script = pkgutil.get_data('lab', 'data/local-job-template.py')
+        replacements = {
+            'NUM_TASKS': str(len(self.exp.runs)),
+            'PROCESSES': str(self.processes)}
         for orig, new in replacements.items():
             script = script.replace('"""' + orig + '"""', new)
 
-        self.exp.add_new_file('', self.main_script_file, script, permissions=0o755)
+        self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
-    def start_exp(self):
-        tools.run_command(['./' + self.main_script_file], cwd=self.exp.path)
+    def start_runs(self):
+        tools.run_command(['./' + self.EXP_RUN_SCRIPT], cwd=self.exp.path)
 
     def run_steps(self, steps):
-        Sequence.run_steps(steps)
+        for step in steps:
+            step()
 
 
 class OracleGridEngineEnvironment(Environment):
@@ -100,47 +137,42 @@ class OracleGridEngineEnvironment(Environment):
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, host_restriction=None,
-                 email=None, randomize_task_order=True, extra_options=None):
+                 email=None, extra_options=None, **kwargs):
         """
+
+        If the main experiment step ('run') is part of the selected
+        steps, the selected steps are submitted to the grid engine.
+        Otherwise, the selected steps are run locally.
+
         .. note::
 
-            Previously, you had to provide the ``--all`` option on the
-            commandline to queue steps sequentially on the grid engine.
-            Now, the selected steps will be queued sequentially if at
-            least one of them itself submits runs to the queue.
-
             For correct sequential execution, this class writes job
-            files to <cache_dir>/grid-steps/<timestamp>-<exp-name> and
-            makes them depend on one another. The driver.{log,err}
-            files in this directory can be inspected if something goes
-            wrong. Since the job files call the main experiment script
-            during execution, it mustn't be changed during the
-            experiment.
+            files to the experiment directory and makes them depend on
+            one another. The driver.log and driver.err files in this
+            directory can be inspected if something goes wrong. Since
+            the job files call the experiment script during execution,
+            it mustn't be changed during the experiment.
 
         *queue* must be a valid queue name on the grid.
 
-        *priority* must be in the range [-1023, 0] where 0 is the highest
-        priority. If you're a superuser the value can be in the range
-        [-1023, 1024].
+        *priority* must be in the range [-1023, 0] where 0 is the
+        highest priority. If you're a superuser the value can be in the
+        range [-1023, 1024].
 
         If *email* is provided and the steps run on the grid, a message
-        will be sent when the experiment finishes.
+        will be sent when the last experiment step finishes.
 
-        If *randomize_task_order* is True (this is the default since
-        version 1.5), tasks for runs are started in a random order.
-        This is useful to avoid systematic noise due to e.g. one of
-        the configs being run on a machine with heavy load. Note
-        that due to the randomization, run directories may be
-        pristine while the experiment is running even though the
-        grid engine marks the runs as finished.
-
-        Use *extra_options* to pass additional options. Example that
+        Use *extra_options* to pass additional options. The
+        *extra_options* string may contain newlines. Example that
         allocates 16 cores per run on maia::
 
-            MaiaEnvironment(extra_options='#$ -pe smp 16')
+            extra_options='#$ -pe smp 16'
+
+        See :py:class:`~lab.environments.Environment` for inherited
+        parameters.
 
         """
-        Environment.__init__(self)
+        Environment.__init__(self, **kwargs)
         if queue is None:
             queue = self.DEFAULT_QUEUE
         if priority is None:
@@ -154,71 +186,11 @@ class OracleGridEngineEnvironment(Environment):
         self.priority = priority
         self.runs_per_task = 1
         self.email = email
-        self.randomize_task_order = randomize_task_order
         self.extra_options = extra_options or '## (not used)'
 
-        # When submitting an experiment job, wait for this job name.
-        self.__wait_for_job_name = None
-        self._job_name = None
-
-    @classmethod
-    def _escape_job_name(cls, name):
-        if name[0].isdigit():
-            name = 'j' + name
-        return name
-
-    def _get_common_job_params(self):
-        return {
-            'logfile': 'driver.log',
-            'errfile': 'driver.err',
-            'priority': self.priority,
-            'queue': self.queue,
-            'host_spec': self.host_spec,
-            'notification': '#$ -m n',
-            'extra_options': self.extra_options,
-        }
-
-    def write_main_script(self):
-        num_tasks = int(math.ceil(len(self.exp.runs) / float(self.runs_per_task)))
-        if num_tasks > self.MAX_TASKS:
-            logging.critical('You are trying to submit a job with %d tasks, '
-                             'but only %d are allowed.' %
-                             (num_tasks, self.MAX_TASKS))
-        job_params = self._get_common_job_params()
-        job_params.update(name=self._escape_job_name(self.exp.name),
-                          num_tasks=num_tasks)
-        header = pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
-
-        body_params = dict(num_tasks=num_tasks, run_ids='')
-        if self.randomize_task_order:
-            run_ids = [str(i + 1) for i in xrange(num_tasks)]
-            random.shuffle(run_ids)
-            body_params['run_ids'] = ' '.join(run_ids)
-        body = pkgutil.get_data('lab', 'data/grid-job-body-template') % body_params
-
-        filename = self.exp._get_abs_path(self.main_script_file)
-        with open(filename, 'w') as file:
-            logging.debug('Writing file "%s"' % filename)
-            file.write('%s\n\n%s' % (header, body))
-
-    def start_exp(self):
-        submitted_file = os.path.join(self.exp.path, 'submitted')
-        if os.path.exists(submitted_file):
-            tools.confirm('The file "%s" already exists so it seems the '
-                          'experiment has already been submitted. Are you '
-                          'sure you want to submit it again?' % submitted_file)
-        submit = ['qsub']
-        if self.__wait_for_job_name:
-            submit.extend(['-hold_jid', self.__wait_for_job_name])
-        if self._job_name:
-            # The name set in the job file will be ignored.
-            submit.extend(['-N', self._job_name])
-        submit.append(self.main_script_file)
-        tools.run_command(submit, cwd=self.exp.path)
-        # Write "submitted" file.
-        with open(submitted_file, 'w') as f:
-            f.write('This file is created when the experiment is submitted to '
-                    'the queue.')
+    def start_runs(self):
+        # The queue will start the experiment by itself.
+        pass
 
     def _get_script_args(self):
         """
@@ -236,37 +208,64 @@ class OracleGridEngineEnvironment(Environment):
         return list(reversed(commandline))
 
     def _get_job_name(self, step):
-        return self._escape_job_name(
-            '%s-%02d-%s' % (self.exp.name, self.exp.steps.index(step) + 1,
-                            step.name))
+        return '%s%02d-%s' % (
+            _get_job_prefix(self.exp.name),
+            self.exp.steps.index(step) + 1,
+            step.name)
 
-    def _get_job_header(self, step):
-        job_params = self._get_common_job_params()
-        job_params.update(name=self._get_job_name(step), num_tasks=1)
-        if step.is_last_step and self.email:
+    def _get_num_runs(self):
+        num_runs = int(math.ceil(len(self.exp.runs) / float(self.runs_per_task)))
+        if num_runs > self.MAX_TASKS:
+            logging.critical('You are trying to submit a job with %d tasks, '
+                             'but only %d are allowed.' %
+                             (num_runs, self.MAX_TASKS))
+        return num_runs
+
+    def _get_num_tasks(self, step):
+        if is_run_step(step):
+            return self._get_num_runs()
+        else:
+            return 1
+
+    def _get_job_params(self, step):
+        return {
+            'errfile': 'driver.err',
+            'extra_options': self.extra_options,
+            'host_spec': self.host_spec,
+            'logfile': 'driver.log',
+            'name': self._get_job_name(step),
+            'notification': '#$ -m n',
+            'num_tasks': self._get_num_tasks(step),
+            'priority': self.priority,
+            'queue': self.queue,
+        }
+
+    def _get_job_header(self, step, is_last):
+        job_params = self._get_job_params(step)
+        if is_last and self.email:
             job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
         return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
 
-    def _get_job(self, step):
-        # Abort if one step fails.
-        template = """\
-%(job_header)s
-if [ -s "%(stderr)s" ]; then
-    echo "There was output on stderr. Please check %(stderr)s. Aborting."
-    exit 1
-fi
+    def _get_main_job_body(self):
+        params = dict(
+            num_tasks=self._get_num_runs(),
+            errfile='driver.err',
+            exp_path='../' + self.exp.name)
+        return pkgutil.get_data('lab', 'data/grid-job-body-template') % params
 
-cd %(cwd)s
-%(python)s %(script)s %(args)s %(step_name)s
-"""
-        return template % {
+    def _get_job_body(self, step):
+        if is_run_step(step):
+            return self._get_main_job_body()
+        return 'cd %(cwd)s\n%(python)s %(script)s %(args)s %(step_name)s\n' % {
             'cwd': os.getcwd(),
             'python': sys.executable or 'python',
             'script': sys.argv[0],
             'args': ' '.join(self._get_script_args()),
-            'step_name': step.name,
-            'stderr': 'driver.err',
-            'job_header': self._get_job_header(step)}
+            'step_name': step.name}
+
+    def _get_job(self, step, is_last):
+        return '%s\n\n%s' % (self._get_job_header(step, is_last),
+                             self._get_job_body(step))
 
     def _get_host_spec(self, host_restriction):
         if not host_restriction:
@@ -275,39 +274,52 @@ cd %(cwd)s
             hosts = self.HOST_RESTRICTIONS[host_restriction]
             return '#$ -l hostname="%s"' % '|'.join(hosts)
 
-    def run_steps(self, steps):
-        timestamp = datetime.datetime.now().isoformat()
-        job_dir = os.path.join(self.exp.cache_dir,
-                               'grid-steps',
-                               timestamp + '-' + self.exp.name)
-        tools.overwrite_dir(job_dir)
+    def write_main_script(self):
+        # The main script is written by the run_steps() method.
+        self._write_run_dispatcher()
 
-        # Build the job files before submitting the other jobs.
-        logging.info('Building job scripts')
-        for step in steps:
-            if step._funcname == 'build':
-                script_step = step.copy()
-                script_step.kwargs['only_main_script'] = True
-                script_step()
+    def run_steps(self, steps):
+        """
+        We can't submit jobs from within the grid, so we submit them
+        all at once with dependencies. We also can't rewrite the job
+        files after they have been submitted.
+        """
+        self.exp.build(write_to_disk=False)
+
+        # Prepare job dir.
+        job_dir = self.exp.path + '-grid-steps'
+        if os.path.exists(job_dir):
+            tools.confirm_or_abort(
+                'The path "%s" already exists, so the experiment has '
+                'already been submitted. Are you sure you want to '
+                'delete the grid-steps and submit it again?' % job_dir)
+            tools.remove_path(job_dir)
+
+        # Overwrite exp dir if it exists.
+        if any(is_build_step(step) for step in steps):
+            self.exp._remove_experiment_dir()
+
+        # Remove eval dir if it exists.
+        if os.path.exists(self.exp.eval_dir):
+            tools.confirm_or_abort(
+                'The evalution directory "%s" already exists. '
+                'Do you want to remove it?' % self.exp.eval_dir)
+            tools.remove_path(self.exp.eval_dir)
+
+        # Create job dir only when we need it.
+        tools.makedirs(job_dir)
 
         prev_job_name = None
         for number, step in enumerate(steps, start=1):
             job_name = self._get_job_name(step)
-            # We cannot submit a job from within the grid, so we submit it
-            # directly.
-            if step._funcname == 'run':
-                self.__wait_for_job_name = prev_job_name
-                self._job_name = job_name
-                step()
-            else:
-                step.is_last_step = (number == len(steps))
-                with open(os.path.join(job_dir, job_name), 'w') as f:
-                    f.write(self._get_job(step))
-                submit = ['qsub']
-                if prev_job_name:
-                    submit.extend(['-hold_jid', prev_job_name])
-                submit.append(job_name)
-                tools.run_command(submit, cwd=job_dir)
+            tools.write_file(
+                os.path.join(job_dir, job_name),
+                self._get_job(step, is_last=(number == len(steps))))
+            submit = ['qsub']
+            if prev_job_name:
+                submit.extend(['-hold_jid', prev_job_name])
+            submit.append(job_name)
+            tools.run_command(submit, cwd=job_dir)
             prev_job_name = job_name
 
 

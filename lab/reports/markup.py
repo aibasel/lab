@@ -64,6 +64,53 @@ CSS = """\
 </style>
 """ % globals()
 
+JAVASCRIPT = """\
+<script type="text/javascript">
+function toggle_element(element) {
+    if (element.style.display == "none") {
+        element.style.display = "";
+    } else {
+        element.style.display = "none";
+    }
+}
+
+function find_next(element, classname) {
+    element = element.nextSibling;
+    while(element.nodeName != classname)
+        element = element.nextSibling;
+    return element;
+}
+
+function toggle_table(toggle_button) {
+    toggle_element(find_next(toggle_button, "TABLE"));
+    if (toggle_button.innerHTML == "Show table") {
+        toggle_button.innerHTML = "Hide table";
+    } else {
+        toggle_button.innerHTML = "Show table";
+    }
+}
+
+function show_table(link) {
+    var toggle_button = find_next(link, "BUTTON");
+    var table = find_next(toggle_button, "TABLE");
+    table.style.display = "";
+    toggle_button.innerHTML = "Hide table";
+}
+
+function show_overview_tables() {
+    var names = ["unexplained-errors", "info", "summary"];
+    for (var i = 0; i < names.length; i++) {
+        var link = document.getElementById(names[i]);
+        if (link) {
+            show_table(link);
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", show_overview_tables);
+</script>
+"""
+
 
 def escape(text):
     return '""%s""' % text
@@ -73,7 +120,7 @@ def _get_config(target):
 
     config = {}
 
-    # Set the configuration on the 'config' dict.
+    # Set the configuration on the "config" dict.
     config = txt2tags.ConfigMaster()._get_defaults()
 
     # The Pre (and Post) processing config is a list of lists:
@@ -93,6 +140,9 @@ def _get_config(target):
         # Custom css
         config['postproc'].append([r'</head>', CSS + '</head>'])
 
+        # Add javascript.
+        config['postproc'].append([r'</head>', JAVASCRIPT + '</head>'])
+
         # Allow line breaks, r'\\\\' are 2 \ for regexes
         config['postproc'].append([r'\\\\', r'<br />'])
 
@@ -102,6 +152,17 @@ def _get_config(target):
 
         # Allow line-breaking at additional places.
         config['postproc'].append([ESCAPE_WORDBREAK, r'<wbr>'])
+
+        # Hide tables by default.
+        config['postproc'].append([
+            r'<table border="1">',
+            r'<button type="button" class="toggle-table" '
+            'onclick="toggle_table(this)">Show table</button><p></p>\n\n'
+            '<table border="1" style="display:none">'])
+        # Automatically show tables when their links are clicked.
+        config['postproc'].append([
+            r'<a href="#(.+?)">',
+            r'''<a href="#\1" onclick="show_table(document.getElementById('\1'));">'''])
 
     elif target == 'tex':
         # AUtomatically add \usepackage directives.

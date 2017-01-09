@@ -26,7 +26,17 @@ from downward.reports import PlanningReport
 
 class AbsoluteReport(PlanningReport):
     """
-    Write an absolute report about the attribute attribute, e.g.
+    Report absolute values for the selected attributes.
+
+    This report should be part of all your Fast Downward experiments as
+    it includes a table of unexplained errors, e.g. invalid solutions,
+    segmentation faults, etc. ::
+
+        exp.add_report(
+            AbsoluteReport(attributes=["expansions"]),
+            outfile='report.html')
+
+    Example output:
 
         +------------+--------+--------+
         | expansions | hFF    | hCEA   |
@@ -36,25 +46,11 @@ class AbsoluteReport(PlanningReport):
         | zenotravel | 21     | 17     |
         +------------+--------+--------+
 
-    This report should be part of all your Fast Downward experiments as it
-    automatically generates a table of unexplained errors, e.g. invalid solutions,
-    unexpected timeouts and memory overflows. You should make sure that you
-    check where the errors come from.
     """
-    def __init__(self, resolution='combined', colored=True, **kwargs):
-        """
-        *resolution* must be one of "domain" or "problem" or "combined" (default).
-
-        If *colored* is True, the values of each row will be given colors from a
-        colormap. Only HTML reports can be colored currently.
-        """
+    def __init__(self, **kwargs):
         PlanningReport.__init__(self, **kwargs)
-        assert resolution in ['domain', 'problem', 'combined']
-        self.resolution = resolution
-        if colored and 'html' not in self.output_format:
-            logging.info('Only HTML reports can be colored. Setting colored=False.')
-            colored = False
-        self.colored = colored
+        self.colored = 'html' in self.output_format
+        self.use_domain_links = 'html' in self.output_format
         self.toc = False
 
     def get_markup(self):
@@ -63,10 +59,10 @@ class AbsoluteReport(PlanningReport):
 
         warnings = self._get_warnings_table()
         if warnings:
-            toc_lines.append('- **[""Unexplained Errors"" #unexplained-errors]**')
+            toc_lines.append('- **[''Unexplained Errors'' #unexplained-errors]**')
             sections.append(('unexplained-errors', warnings))
 
-        toc_lines.append('- **[""Info"" #info]**')
+        toc_lines.append('- **[Info #info]**')
         sections.append(('info', self._get_general_info()))
 
         # Index of summary section.
@@ -75,35 +71,33 @@ class AbsoluteReport(PlanningReport):
         # Build a table containing summary functions of all other tables.
         # The actual section is added at position summary_index after creating
         # all other tables.
-        if self.resolution in ['domain', 'combined']:
-            summary = self._get_empty_table(title='summary')
-            toc_lines.append('- **[""Summary"" #summary]**')
+        summary = self._get_empty_table(title='Summary')
+        summary.colored = self.colored
+        toc_lines.append('- **[Summary #summary]**')
 
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
-            if self.resolution in ['domain', 'combined']:
-                if self.attribute_is_numeric(attribute):
-                    domain_table = self._get_table(attribute)
-                    tables.append(('', domain_table))
-                    reports.extract_summary_rows(
-                        domain_table, summary, link='#' + attribute)
-                else:
-                    tables.append((
-                        '',
-                        'Domain-wise reports only support numeric '
-                        'attributes, but %s has type %s.' %
-                        (attribute, self._all_attributes[attribute].__name__)))
-            if self.resolution in ['problem', 'combined']:
-                for domain in sorted(self.domains.keys()):
-                    tables.append((domain, self._get_table(attribute, domain)))
+            if self.attribute_is_numeric(attribute):
+                domain_table = self._get_table(attribute)
+                tables.append(('', domain_table))
+                reports.extract_summary_rows(
+                    domain_table, summary, link='#' + attribute)
+            else:
+                tables.append((
+                    '',
+                    'Domain-wise reports only support numeric '
+                    'attributes, but %s has type %s.' %
+                    (attribute, self._all_attributes[attribute].__name__)))
+            for domain in sorted(self.domains.keys()):
+                tables.append((domain, self._get_table(attribute, domain)))
 
             parts = []
             toc_line = []
             for (domain, table) in tables:
                 if domain:
                     assert table
-                    toc_line.append('[""%(domain)s"" #%(attribute)s-%(domain)s]' %
+                    toc_line.append("[''%(domain)s'' #%(attribute)s-%(domain)s]" %
                                     locals())
                     parts.append('== %(domain)s ==[%(attribute)s-%(domain)s]\n'
                                  '%(table)s\n' % locals())
@@ -111,25 +105,20 @@ class AbsoluteReport(PlanningReport):
                     if table:
                         parts.append('%(table)s\n' % locals())
                     else:
-                        parts.append('No task was found where all configurations '
+                        parts.append('No task was found where all algorithms '
                                      'have a value for "%s". Therefore no '
                                      'domain-wise table can be generated.\n' %
                                      attribute)
 
-            toc_lines.append('- **[""%s"" #%s]**' % (attribute, attribute))
+            toc_lines.append("- **[''%s'' #%s]**" % (attribute, attribute))
             toc_lines.append('  - ' + ' '.join(toc_line))
             sections.append((attribute, '\n'.join(parts)))
 
         # Add summary before main content. This is done after creating the main content
         # because the summary table is extracted from all other tables.
-        if self.resolution in ['domain', 'combined']:
-            sections.insert(summary_index, ('summary', summary))
+        sections.insert(summary_index, ('summary', summary))
 
-        if self.resolution == 'domain':
-            toc = '- ' + ' '.join('[""%s"" #%s]' % (attr, attr)
-                                  for (attr, section) in sections)
-        else:
-            toc = '\n'.join(toc_lines)
+        toc = '\n'.join(toc_lines)
 
         content = '\n'.join('= %s =[%s]\n\n%s' % (attr, attr, section)
                             for (attr, section) in sections)
@@ -137,10 +126,10 @@ class AbsoluteReport(PlanningReport):
 
     def _get_general_info(self):
         table = reports.Table(title='algorithm')
-        for config, info in self.config_info.items():
+        for algo, info in self.algorithm_info.items():
             for attr in self.INFO_ATTRIBUTES:
                 if info[attr]:
-                    table.add_cell(config, attr, info[attr])
+                    table.add_cell(algo, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
         return str(table)
 
@@ -153,7 +142,7 @@ class AbsoluteReport(PlanningReport):
         Add some information to the table for attributes where data is missing.
         """
         if not attribute.absolute:
-            table.info.append('Only instances where all configurations have a '
+            table.info.append('Only instances where all algorithms have a '
                               'value for "%s" are considered.' % attribute)
             table.info.append('Each table entry gives the %s of "%s" for that '
                               'domain.' % (func_name, attribute))
@@ -174,10 +163,8 @@ class AbsoluteReport(PlanningReport):
         func_name, func = self._get_group_functions(attribute)[0]
         num_probs = 0
         self._add_table_info(attribute, func_name, table)
-        domain_config_values = defaultdict(list)
-        for domain, problems in self.domains.items():
-            for problem in problems:
-                runs = self.problem_runs[(domain, problem)]
+        domain_algo_values = defaultdict(list)
+        for (domain, problem), runs in self.problem_runs.items():
                 if (not attribute.absolute and
                         any(run.get(attribute) is None for run in runs)):
                     continue
@@ -185,18 +172,18 @@ class AbsoluteReport(PlanningReport):
                 for run in runs:
                     value = run.get(attribute)
                     if value is not None:
-                        domain_config_values[(domain, run['config'])].append(value)
+                        domain_algo_values[(domain, run['algorithm'])].append(value)
 
         # If the attribute is absolute (e.g. coverage) we may have
-        # added problems for which not all configs have a value. Therefore, we
+        # added problems for which not all algorithms have a value. Therefore, we
         # can only print the number of instances (in brackets after the domain
-        # name) if that number is the same for all configs. If not all configs
+        # name) if that number is the same for all algorithms. If not all algorithms
         # have values for the same number of problems, we write the full list of
         # different problem numbers.
         num_values_lists = defaultdict(list)
         for domain in self.domains:
-            for config in self.configs:
-                values = domain_config_values.get((domain, config), [])
+            for algo in self.algorithms:
+                values = domain_algo_values.get((domain, algo), [])
                 num_values_lists[domain].append(str(len(values)))
         for domain, num_values_list in num_values_lists.items():
             if len(set(num_values_list)) == 1:
@@ -204,13 +191,13 @@ class AbsoluteReport(PlanningReport):
             else:
                 count = ','.join(num_values_list)
             link = None
-            if self.resolution == 'combined':
+            if self.use_domain_links:
                 link = '#%s-%s' % (attribute, domain)
             formatter = reports.CellFormatter(link=link, count=count)
             table.cell_formatters[domain][table.header_column] = formatter
 
-        for (domain, config), values in domain_config_values.items():
-            table.add_cell(domain, config, func(values))
+        for (domain, algo), values in domain_algo_values.items():
+            table.add_cell(domain, algo, func(values))
 
         table.num_values = num_probs
         return table
@@ -218,9 +205,9 @@ class AbsoluteReport(PlanningReport):
     def _get_domain_table(self, attribute, domain):
         table = self._get_empty_table(attribute)
 
-        for config in self.configs:
-            for run in self.domain_config_runs[domain, config]:
-                table.add_cell(run['problem'], config, run.get(attribute))
+        for algo in self.algorithms:
+            for run in self.domain_algorithm_runs[domain, algo]:
+                table.add_cell(run['problem'], algo, run.get(attribute))
         return table
 
     def _get_table(self, attribute, domain=None):
@@ -236,21 +223,22 @@ class AbsoluteReport(PlanningReport):
             if self.output_format == 'tex':
                 title = title.capitalize().replace('_', ' ')
         if columns is None:
-            columns = self.configs
+            columns = self.algorithms
+
         if attribute is not None and self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
-            min_wins = attribute.min_wins
-            colored = self.colored and min_wins is not None
+            kwargs = dict(
+                min_wins=attribute.min_wins,
+                colored=self.colored and attribute.min_wins is not None,
+                digits=attribute.digits)
         else:
             # Do not highlight anything.
-            min_wins = None
-            colored = False
-        table = reports.Table(title=title, min_wins=min_wins, colored=colored)
+            kwargs = {}
+        table = reports.Table(title=title, **kwargs)
         table.set_column_order(columns)
-        if self.resolution == 'combined':
-            link = '#%s' % title
-            formatter = reports.CellFormatter(link=link)
-            table.cell_formatters[table.header_row][table.header_column] = formatter
+        link = '#%s' % title
+        formatter = reports.CellFormatter(link=link)
+        table.cell_formatters[table.header_row][table.header_column] = formatter
         return table
 
     def _add_summary_functions(self, table, attribute):

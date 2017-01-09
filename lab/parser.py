@@ -15,6 +15,36 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Module for parsing logs and files.
+
+A parser can be any program that analyzes files in the run's
+directory (e.g. ``run.log``) and manipulates the ``properties``
+file in the same directory.
+
+To make parsing easier, however, you can use the ``Parser`` class.
+The parser ``examples/simple/simple-parser.py`` serves as an
+example:
+
+.. literalinclude:: ../examples/simple/simple-parser.py
+
+You can add your parser to a run by using :py:func:`add_command
+<lab.experiment.Run.add_command>`::
+
+    run.add_command('solve', ['path/to/my-solver', 'path/to/benchmark'])
+    run.add_command('parse-output', ['path/to/my-parser.py'])
+
+This calls ``my-parser.py`` in the run's directory after running the
+solver.
+
+A single run can have multiple parsing commands.
+
+Instead of adding a parser to individual runs, you can use
+:py:func:`add_command <lab.experiment.Experiment.add_command>` to
+append your parser to the list of commands of each run.
+
+"""
+
 import os
 import re
 from collections import defaultdict
@@ -24,11 +54,11 @@ from lab import tools
 
 
 class _Pattern(object):
-    def __init__(self, attribute, regex, group, required, typ, flags):
+    def __init__(self, attribute, regex, required, type_, flags):
         self.attribute = attribute
-        self.group = group
-        self.typ = typ
+        self.type_ = type_
         self.required = required
+        self.group = 1
 
         flag = 0
 
@@ -45,6 +75,8 @@ class _Pattern(object):
                 flag |= re.U
             elif char == 'X':
                 flag |= re.X
+            else:
+                logging.critical('Unknown regex flag: {}'.format(char))
 
         self.regex = re.compile(regex, flag)
 
@@ -54,11 +86,12 @@ class _Pattern(object):
         if match:
             try:
                 value = match.group(self.group)
-                value = self.typ(value)
-                found_props[self.attribute] = value
             except IndexError:
                 logging.error('Attribute %s not found for pattern %s in '
                               'file %s' % (self.attribute, self, filename))
+            else:
+                value = self.type_(value)
+                found_props[self.attribute] = value
         elif self.required:
             logging.error('Pattern %s not found in %s' % (self, filename))
         return found_props
@@ -80,8 +113,8 @@ class _FileParser(object):
 
     def load_file(self, filename):
         self.filename = filename
-        with open(filename, 'rb') as file:
-            self.content = file.read()
+        with open(filename, 'rb') as f:
+            self.content = f.read()
 
     def add_pattern(self, pattern):
         self.patterns.append(pattern)
@@ -105,104 +138,77 @@ class _FileParser(object):
             function(self.content, props)
 
 
-def parse_key_value_patterns(content, props):
-    regex = re.compile(r'^(\D+): (\d+)$')
-    for line in content.splitlines():
-        match = regex.match(line)
-        if match:
-            props[match.group(1).replace(' ', '_').lower()] = int(match.group(2))
-
-
 class Parser(object):
     """
-    Parse files in the current directory and write results into the run's
-    properties file.
-
-    Parsing is done as just another run command. After the main command has been
-    added to the run, we can add the parsing command::
-
-        run.add_command('parse-output', ['path/to/myparser.py'])
-
-    This calls *myparser.py* in the run directory. Principally a parser can be any
-    program that analyzes any of the files in the run dir (e.g. ``run.log``) and
-    manipulates the ``properties`` file in the same directory.
-
-    To make parsing easier however, you should use the ``Parser`` class like in
-    the simple-parser.py example (``examples/simple/simple-parser.py``):
-
-    .. literalinclude:: ../examples/simple/simple-parser.py
-
-    A single run can have multiple parsing commands.
-
+    Parse files in the current directory and write results into the
+    run's ``properties`` file.
     """
-    def __init__(self, key_value_patterns=False):
-        """
-        If *key_value_patterns* is True, the parser will parse all lines with the
-        following format automatically (underlying regex: r'^(.+): (\d+)$')::
-
-            My attribute: 89            --> props['my_attribute'] = 89
-            other attribute name: 1234  --> props['other_attribute_name'] = 1234
-
-        """
+    def __init__(self):
         self.file_parsers = defaultdict(_FileParser)
         self.run_dir = os.path.abspath('.')
         prop_file = os.path.join(self.run_dir, 'properties')
         if not os.path.exists(prop_file):
             logging.critical('No properties file found at "%s"' % prop_file)
         self.props = tools.Properties(filename=prop_file)
-        if key_value_patterns:
-            self.add_function(parse_key_value_patterns)
 
-    def add_pattern(self, name, regex, group=1, file='run.log', required=True,
-                    type=int, flags=''):
+    def add_pattern(
+            self, attribute, regex, file='run.log', type=int, flags='',
+            required=True):
         """
-        Look for *regex* in *file* and add what is found in *group* to the
-        properties dictionary under *name*, i.e. ::
+        Look for *regex* in *file*, cast what is found in brackets to
+        *type* and store it in the properties dictionary under
+        *attribute*. During parsing roughly the following code will be
+        executed::
 
             contents = open(file).read()
             match = re.compile(regex).search(contents)
-            properties[name] = type(match.group(group))
+            properties[attribute] = type(match.group(1))
 
-        If *required* is True and the pattern is not found in file, an error
-        message is printed.
+        If given, *flags* must be a string of Python regular expression
+        flags (e.g. ``flags='UM'``).
+
+        If *required* is True and the pattern is not found in *file*,
+        an error message is printed.
 
         >>> parser = Parser()
         >>> parser.add_pattern('variables', r'Variables: (\d+)')
+
         """
         if type == bool:
             logging.warning('Casting any non-empty string to boolean will always '
                             'evaluate to true. Are you sure you want to use type=bool?')
-        self.file_parsers[file].add_pattern(_Pattern(name, regex, group,
-                                                     required, type, flags))
+        self.file_parsers[file].add_pattern(
+            _Pattern(attribute, regex, required, type, flags))
 
     def add_function(self, function, file='run.log'):
-        """
-        After all patterns have been evaluated and the found values have been
-        inserted into ``props``, call ``function(content, props)`` for each
-        added function where content is the content in *file*. The function must
-        directly manipulate the properties dictionary *props*.
+        """Call ``function(open(file), properties)`` during parsing.
 
-        >>> # Define a function and check that it works correctly.
+        Functions are applied **after** all patterns have been
+        evaluated.
+
+        The function is passed the file contents and the properties
+        dictionary. It must manipulate the passed properties
+        dictionary. The return value is ignored.
+
+        Example:
+
         >>> import re
+        >>> from lab.parser import Parser
+        >>> # Example content: f=14, f=12, f=10
         >>> def find_f_values(content, props):
-        ...     props['f_values'] = re.findall(r'f: (\d+)', content)
+        ...     props['f_values'] = re.findall(r'f=(\d+)', content)
         ...
-        >>> properties = {}
-        >>> find_f_values('f: 14, f: 12, f: 10', properties)
-        >>> print properties
-        {'f_values': ['14', '12', '10']}
-
-        >>> # Add the function to the parser.
         >>> parser = Parser()
         >>> parser.add_function(find_f_values)
+
         """
         self.file_parsers[file].add_function(function)
 
     def parse(self):
         """Search all patterns and apply all functions.
 
-        The found values are written to the properties file at
-        ``<run_dir>/properties``.
+        The found values are written to the run's ``properties`` file.
+
         """
         for filename, file_parser in self.file_parsers.items():
             # If filename is absolute it will not be changed here
@@ -211,7 +217,7 @@ class Parser(object):
                 file_parser.load_file(path)
             except (IOError, MemoryError) as err:
                 logging.error('File "%s" could not be read: %s' % (path, err))
-                self.props['error'] = 'unexplained-parser-failed-to-read-file'
+                self.props['error'] = 'unexplained-error:parser-failed-to-read-file'
             else:
                 # Subclasses directly modify the properties during parsing
                 file_parser.parse(self.props)

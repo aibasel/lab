@@ -1,29 +1,8 @@
-declare -a RUN_IDS=(%(run_ids)s)
-NUM_TASKS=%(num_tasks)d
-
-function format {
-    printf "%%05d" $1
-}
-
-function get_run_id {
-    if (( $1 < 1 || $1 > $NUM_TASKS )); then
-        echo "error: SGE_TASK_ID must be in range 1..$NUM_TASKS but is '$1'" 1>&2
-        exit 2
-    fi
-    if (( ${#RUN_IDS[@]} == $NUM_TASKS )); then
-        echo ${RUN_IDS[$(($1-1))]}
-    else
-        echo $1
-    fi
-}
-
-RUN=$(get_run_id $SGE_TASK_ID)
-let "LOWER = ((RUN - 1) / 100) * 100 + 1"
-let "UPPER = (((RUN + 99) / 100) * 100)"
-DIR="runs-$(format $LOWER)-$(format $UPPER)/$(format $RUN)"
-
-./$DIR/run
+cd %(exp_path)s
+NUM_TASKS="%(num_tasks)d"
+RUN="$SGE_TASK_ID"
+./run-dispatcher.py "$NUM_TASKS" "$RUN"
 RETCODE=$?
 if (( $RETCODE != 0 )); then
-    echo Run $RUN returned $RETCODE >> driver.err
+    echo "Run $RUN returned $RETCODE" >> %(errfile)s
 fi

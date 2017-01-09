@@ -19,13 +19,12 @@
 import logging
 import os
 import sys
-from collections import defaultdict
 
 try:
     import matplotlib
     from matplotlib import figure
     from matplotlib.backends import backend_agg
-except ImportError, err:
+except ImportError as err:
     logging.warning('matplotlib could not be found: %s' % err)
     logging.warning('You can\'t create any plots on this machine.')
 
@@ -58,12 +57,12 @@ class MatplotlibPlot(object):
         self.axes = fig.add_subplot(111)
 
     @staticmethod
-    def set_rc_params(params):
-        # Reset params from rc file if matplotlib installation supports it.
+    def set_rc_params(matplotlib_options):
+        # Reset options from rc file if matplotlib installation supports it.
         if hasattr(matplotlib, 'rc_file_defaults'):
             matplotlib.rc_file_defaults()
-        if params:
-            matplotlib.rcParams.update(params)
+        if matplotlib_options:
+            matplotlib.rcParams.update(matplotlib_options)
 
     @staticmethod
     def change_axis_formatter(axis, missing_val=None):
@@ -77,18 +76,9 @@ class MatplotlibPlot(object):
 
         formatter.__call__ = new_format_call
 
-    def create_legend(self, categories, location):
-        # Only print a legend if there is at least one non-default category.
-        if location is not None and any(key is not None for key in categories.keys()):
-            kwargs = {}
-            if isinstance(location, (int, basestring)):
-                kwargs['loc'] = location
-            else:
-                if not isinstance(location, (tuple, list)):
-                    logging.critical('location must be a string or a (x, y) pair')
-                kwargs['bbox_to_anchor'] = location
-                kwargs['loc'] = 'center'
-            self.legend = self.axes.legend(scatterpoints=1, **kwargs)
+    def create_legend(self):
+        self.legend = self.axes.legend(
+            scatterpoints=1, loc='center', bbox_to_anchor=(1.3, 0.5))
 
     def print_figure(self, filename):
         # Save the generated scatter plot to a file.
@@ -154,7 +144,7 @@ class Matplotlib(object):
 
     @classmethod
     def write(cls, report, filename, scatter=False):
-        MatplotlibPlot.set_rc_params(report.params)
+        MatplotlibPlot.set_rc_params(report.matplotlib_options)
         plot = MatplotlibPlot()
         if report.title:
             plot.axes.set_title(report.title)
@@ -171,21 +161,12 @@ class Matplotlib(object):
             logging.info('Found no valid points for plot %s' % filename)
             return
 
-        plot.create_legend(report.categories, report.legend_location)
+        if report.has_multiple_categories():
+            plot.create_legend()
         plot.print_figure(filename)
 
 
 class PgfPlots(object):
-    COLORS = dict((color[0], color) for color in
-                  ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow'])
-    COLORS['k'] = 'black'
-    MARKERS = {'o': '*', 'x': 'x', '+': '+', 's': 'square*',
-               '^': 'triangle*', 'v': 'halfsquare*', '<': 'halfsquare left*',
-               '>': 'halfsquare right*', 'D': 'diamond*'}
-    LOCATIONS = {'upper left': 'north west', 'upper right': 'north east',
-                 'lower left': 'south west', 'lower right': 'south east',
-                 'right': 'outer north east'}
-
     @classmethod
     def _get_plot(cls, report):
         lines = []
@@ -198,14 +179,17 @@ class PgfPlots(object):
         return lines
 
     @classmethod
-    def write(cls, report, filename, scatter=False):
-        lines = []
-        lines.append('\\begin{tikzpicture}')
-        lines.extend(cls._get_plot(report))
-        lines.append('\\end{tikzpicture}')
+    def write(cls, report, filename):
+        lines = ([
+            r'\documentclass[tikz]{standalone}',
+            r'\usepackage{pgfplots}',
+            r'\begin{document}',
+            r'\begin{tikzpicture}'] +
+            cls._get_plot(report) + [
+            r'\end{tikzpicture}',
+            r'\end{document}'])
         tools.makedirs(os.path.dirname(filename))
-        with open(filename, 'w') as f:
-            f.write('\n'.join(lines))
+        tools.write_file(filename, '\n'.join(lines))
         logging.info('Wrote file://%s' % filename)
 
     @classmethod
@@ -225,31 +209,17 @@ class PgfPlots(object):
         axis['ymode'] = convert_scale[report.yscale]
 
         # Height is set in inches.
-        figsize = report.params.get('figure.figsize')
+        figsize = report.matplotlib_options.get('figure.figsize')
         if figsize:
             width, height = figsize
             axis['width'] = '%.2fin' % width
             axis['height'] = '%.2fin' % height
 
-        if report.legend_location:
+        if report.has_multiple_categories():
             axis['legend style'] = cls._format_options(
-                cls._get_legend_options(report.legend_location))
+                {'legend pos': 'outer north east'})
 
         return axis
-
-    @classmethod
-    def _get_legend_options(cls, location):
-        if location in cls.LOCATIONS.values():
-            # Found valid pgfplots location.
-            return {'legend pos': location}
-        elif location in cls.LOCATIONS:
-            # Convert matplotlib location to pgfplots location.
-            return {'legend pos': cls.LOCATIONS[location]}
-        elif isinstance(location, (list, tuple)):
-            return {'at': location}
-        else:
-            logging.critical('Legend location "%s" is unavailable in pgfplots' %
-                             str(location))
 
     @classmethod
     def _format_options(cls, options):
@@ -272,55 +242,30 @@ class PlotReport(PlanningReport):
     """
     Abstract base class for Plot classes.
     """
-    LINEAR = ['cost', 'coverage', 'plan_length', 'initial_h_value']
-    LOCATIONS = ['upper right', 'upper left', 'lower left', 'lower right',
-                 'right', 'center left', 'center right', 'lower center',
-                 'upper center', 'center']
-
-    def __init__(self, title=None, xscale=None, yscale=None, xlabel='', ylabel='',
-                 xlim_left=None, xlim_right=None, ylim_bottom=None, ylim_top=None,
-                 legend_location='upper right', category_styles=None, params=None,
-                 **kwargs):
+    def __init__(
+            self, title=None, xscale=None, yscale=None, xlabel='',
+            ylabel='', matplotlib_options=None, **kwargs):
         """
-        The inherited *format* parameter can be set to 'png' (default), 'eps',
-        'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the latter a pgfplots
-        plot is created.
+        The inherited *format* parameter can be set to 'png' (default),
+        'eps', 'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the
+        latter a pgfplots plot is created.
 
         If *title* is given it will be used for the name of the plot.
-        Otherwise, the only given attribute will be the title. If none is given,
-        there will be no title.
+        Otherwise, the only given attribute will be the title. If none
+        is given, there will be no title.
 
-        *xscale* and *yscale* can have the values 'linear', 'log' or 'symlog'.
-        If omitted sensible defaults will be used.
+        *xscale* and *yscale* can have the values 'linear', 'log' or
+        'symlog'. If omitted sensible defaults will be used.
 
-        *legend_location* must be a (x, y) pair or one of the following:
-        'upper right', 'upper left', 'lower left', 'lower right', 'right',
-        'center left', 'center right', 'lower center', 'upper center',
-        'center'. If *legend_location* is None, no legend will be added. ::
+        *xlabel* and *ylabel* are the axis labels.
 
-            # Some example positions.
-            legend_location='lower left'  # Lower left corner *inside* the plot
-            legend_location=(1.1, 0.5)    # Right of the plot
-            legend_location=(0.5, 1.1)    # Above the plot
-            legend_location=(0.5, -0.1)   # Below the plot
+        *matplotlib_options* may be a dictionary of matplotlib rc
+        parameters (see http://matplotlib.org/users/customizing.html)::
 
-        Subclasses may group the data points into categories. These categories
-        are separated visually by drawing them with different styles. You can
-        set the styles manually by providing a dictionary *category_styles* that
-        maps category names to dictionaries of matplotlib drawing parameters
-        (see http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot).
-        For example to change the default style to blue stars use::
-
-            ScatterPlotReport(attributes=['expansions'],
-                              category_styles={None: {'marker': '*', 'c': 'b'}})
-
-        *params* may be a dictionary of matplotlib rc parameters
-        (see http://matplotlib.org/users/customizing.html)::
-
-            params = {
+            matplotlib_options = {
                 'font.family': 'serif',
                 'font.weight': 'normal',
-                'font.size': 20,  # Used if the more specific sizes are not set.
+                'font.size': 20,  # Used if more specific sizes not set.
                 'axes.labelsize': 20,
                 'axes.titlesize': 30,
                 'legend.fontsize': 22,
@@ -332,7 +277,16 @@ class PlotReport(PlanningReport):
                 'figure.figsize': [8, 8],  # Width and height in inches.
                 'savefig.dpi': 100,
             }
-            ScatterPlotReport(attributes=['initial_h_value'], params=params)
+            ScatterPlotReport(
+                attributes=['initial_h_value'],
+                matplotlib_options=matplotlib_options)
+
+        You can see the full list of matplotlib options and their
+        defaults by executing ::
+
+            import matplotlib
+            print matplotlib.rcParamsDefault
+
         """
         kwargs.setdefault('format', 'png')
         PlanningReport.__init__(self, **kwargs)
@@ -341,53 +295,42 @@ class PlotReport(PlanningReport):
         if self.attributes:
             self.attribute = self.attributes[0]
         self.title = title if title is not None else (self.attribute or '')
-        self.legend_location = legend_location
 
-        # Convert the old (marker, color) tuples to the new dict format.
-        category_styles = category_styles or {}
-        used_old_format = False
-        for cat, style in category_styles.items():
-            if not isinstance(style, dict):
-                assert isinstance(style, (tuple, list)), style
-                used_old_format = True
-                marker, color = style
-                category_styles[cat] = {'marker': marker, 'c': color}
-                logging.info('Converted %s to %s' % (style, category_styles[cat]))
-        if used_old_format:
-            tools.show_deprecation_warning(
-                'The old category_styles tuple format has been deprecated '
-                'in version 1.3. You should use a dictionary mapping '
-                'category names to dictionaries of matplotlib params '
-                'instead.')
-
-        self.category_styles = category_styles
+        self.category_styles = {}
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
         self.ylabel = ylabel
-        self.xlim_left = xlim_left
-        self.xlim_right = xlim_right
-        self.ylim_bottom = ylim_bottom
-        self.ylim_top = ylim_top
-        self.params = params or {}
+        self.xlim_left = None
+        self.xlim_right = None
+        self.ylim_bottom = None
+        self.ylim_top = None
+        self.matplotlib_options = matplotlib_options or {}
+        if 'legend.loc' in self.matplotlib_options:
+            logging.warning('The "legend.loc" parameter is ignored.')
         if self.output_format == 'tex':
             self.writer = PgfPlots
         else:
             self.writer = Matplotlib
 
     def _set_scales(self, xscale, yscale):
-        self.xscale = xscale or 'linear'
-        if yscale:
-            self.yscale = yscale
-        elif self.attribute and self.attribute in self.LINEAR:
-            self.yscale = 'linear'
-        else:
-            self.yscale = 'log'
+        attribute_scale = self.attribute.scale if self.attribute else None
+        self.xscale = xscale or attribute_scale or 'linear'
+        self.yscale = yscale or attribute_scale or 'log'
         scales = ['linear', 'log', 'symlog']
-        assert self.xscale in scales, self.xscale
-        assert self.yscale in scales, self.yscale
+        for scale in [self.xscale, self.yscale]:
+            if scale not in scales:
+                raise ValueError("{} not in {}".format(scale, scales))
 
     def _get_category_styles(self, categories):
-        # Pick any style for categories for which no style is defined.
+        """
+        Create dictionary mapping from category name to marker style.
+        Pick random style for categories for which no style is defined.
+
+        Note: Matplotlib 2.0 will gain the option to automatically
+        cycle through marker styles. We might want to use that feature
+        in the future.
+
+        """
         styles = self.category_styles.copy()
         unused_styles = [{'marker': m, 'c': c} for m in 'ox+s^v<>D' for c in 'rgbcmyk'
                          if not any(s.get('marker') == m and
@@ -433,6 +376,9 @@ class PlotReport(PlanningReport):
         min_y = max(min_y, MIN_VALUE)
         self.min_x, self.min_y, self.max_x, self.max_y = min_x, min_y, max_x, max_y
 
+    def has_multiple_categories(self):
+        return any(key is not None for key in self.categories.keys())
+
     def _write_plot(self, runs, filename):
         # Map category names to coord tuples
         categories = self._fill_categories(runs)
@@ -443,105 +389,3 @@ class PlotReport(PlanningReport):
 
     def write(self):
         raise NotImplementedError
-
-
-class ProblemPlotReport(PlotReport):
-    """Generate a separate plot for each task."""
-    def __init__(self, get_points=None, **kwargs):
-        """
-        The coordinates for each task plot are computed from either the
-        values of a single attribute in *attributes* or with the
-        function *get_points*.
-
-        If get_points is None (default), *attributes* must contain
-        exactly one attribute. Then we will plot the config names on
-        the x-axis and the corresponding values for *attribute* on the
-        y-axis. Otherwise *attributes* will be ignored.
-
-        If *get_points* is not None, it must be a function that takes a
-        **single** run (dictionary of properties) and returns the
-        points that should be drawn for this run. The return value can
-        be a list of (x,y) coordinates or a dictionary mapping category
-        names to lists of (x,y) coordinates, i.e.::
-
-            get_points(run) == [(1, 1), (2, 4), (3, 9)]
-            or
-            get_points(run) == {'x^2': [(1, 1), (2, 4), (3, 9)],
-                                'x^3': [(1, 1), (2, 8), (3, 27)]}
-
-        Internally all coordinates of a category are combined and drawn
-        in the same style (e.g. red circles). Returned lists without a
-        category are assigned to a default category that does not
-        appear in the legend.
-
-        Examples::
-
-            # Plot number of node expansions for all configs.
-            ProblemPlotReport(attributes=['expansions'])
-
-            # Compare different ipdb and m&s configurations.
-            # configs: 'ipdb-1000', 'ipdb-2000', 'mas-1000', 'mas-2000'
-            def config_and_states(run):
-                nick, states = run['config_nick'].split('-')
-                return {nick: [(states, run.get('expansions'))]}
-
-            ProblemPlotReport(
-                attributes=['expansions'],
-                get_points=config_and_states)
-
-        """
-        PlotReport.__init__(self, **kwargs)
-        if get_points:
-            if self.attribute:
-                logging.critical('Either pass "get_points" or "attributes".')
-            self.get_points = get_points
-        elif not self.attribute:
-            logging.critical('Need exactly one attribute without "get_points".')
-
-    def get_points(self, run):
-        """
-        By default plot the configs on the x-axis and the attribute values on
-        the y-axis. All values are in the same category.
-        """
-        return [(run.get('config'), run.get(self.attribute))]
-
-    def _fill_categories(self, runs):
-        categories = defaultdict(list)
-        for run in runs:
-            new_categories = self.get_points(run)
-            if isinstance(new_categories, dict):
-                for category, points in new_categories.items():
-                    categories[category].extend(points)
-            elif isinstance(new_categories, (list, tuple)):
-                for x, y in new_categories:
-                    categories[None].append((x, y))
-            else:
-                logging.critical('get_points() returned the wrong format.')
-        return categories
-
-    def _prepare_categories(self, categories):
-        categories = PlotReport._prepare_categories(self, categories)
-        new_categories = {}
-        for category, coords in categories.items():
-            # Do not include missing values in plot, but reserve spot on x-axis.
-            coords = [(x, y) for (x, y) in coords if y is not None]
-            # Make sure that values are sorted by x, otherwise the wrong points
-            # may be connected.
-            coords.sort(key=lambda (x, y): x)
-            new_categories[category] = coords
-        return new_categories
-
-    def _write_plots(self, directory):
-        for (domain, problem), runs in sorted(self.problem_runs.items()):
-            parts = [self.title.lower().replace(' ', '-')] if self.title else []
-            if problem.endswith('.pddl'):
-                problem = problem[:-len('.pddl')]
-            parts += [domain, problem]
-            path = os.path.join(directory, '-'.join(parts) + '.' + self.output_format)
-            self._write_plot(runs, path)
-
-    def write(self):
-        if os.path.isfile(self.outfile):
-            logging.critical('outfile must be a directory for this report.')
-        tools.makedirs(self.outfile)
-        self._write_plots(self.outfile)

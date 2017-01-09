@@ -19,20 +19,20 @@ from lab.reports import Report
 
 
 class FilterReport(Report):
-    """Use this report class to filter properties files.
+    """Filter properties files.
 
-    This report only applies the given filter and writes a new properties file
-    to the output destination. ::
+    This report only applies the given filter and writes a new
+    properties file to the output destination. ::
 
         def remove_openstacks(run):
             return not 'openstacks' in run['domain']
 
-        exp.add_step(Step('filter-openstacks-runs',
-                          FilterReport(filter=remove_openstacks),
-                          exp.eval_dir, 'path/to/new/properties'))
+        exp.add_report(
+            FilterReport(filter=remove_openstacks),
+            outfile='path/to/new/properties')
     """
-    def __init__(self, *args, **kwargs):
-        Report.__init__(self, *args, **kwargs)
+    def __init__(self, **kwargs):
+        Report.__init__(self, **kwargs)
 
     def get_text(self):
         if not self.outfile.endswith('properties'):

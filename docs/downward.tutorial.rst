@@ -50,6 +50,9 @@ Install VAL
     make
     # Add "validate" binary to a directory on your PATH.
 
+**MacOS**: clone the repo, add ``VAL/bin/MacOSExecutables/validate`` to
+your ``PATH`` and make it executable (``chmod + x``).
+
 
 Run tutorial experiment
 -----------------------
@@ -69,9 +72,9 @@ Run all steps with ::
 
 Run individual steps with ::
 
-    ./lmcut.py 1
-    ./lmcut.py {2..4}
-    ./lmcut.py run-search-exp
+    ./lmcut.py build
+    ./lmcut.py 2
+    ./lmcut.py 3 4
 
 
 You can use this file as a basis for your own experiments.

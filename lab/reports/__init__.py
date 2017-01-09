@@ -36,82 +36,39 @@ from lab.reports import markup
 from lab.reports.markup import Document, ESCAPE_WORDBREAK
 
 
-@tools.remove_none_values
-def prod(values):
-    """Computes the product of a list of numbers.
+def arithmetic_mean(values):
+    """Compute the arithmetic mean of a sequence of numbers.
 
-    >>> print prod([2, 3, 7])
-    42.0
-    """
-    prod = 1
-    for value in values:
-        prod *= value
-    return prod
-
-
-@tools.remove_none_values
-def avg(values):
-    """Compute the arithmetic mean of a list of numbers.
-
-    >>> avg([20, 30, 70])
+    >>> arithmetic_mean([20, 30, 70])
     40.0
     """
-    return round(math.fsum(values) / len(values), 4)
+    assert None not in values
+    return math.fsum(values) / len(values)
 
 
-@tools.remove_none_values
-def gm(values):
-    """Compute the geometric mean of a list of numbers.
+def geometric_mean(values):
+    """Compute the geometric mean of a sequence of numbers.
 
-    >>> gm([2, 8])
+    >>> round(geometric_mean([2, 8]), 2)
     4.0
     """
+    assert None not in values
     exp = 1.0 / len(values)
-    return round(prod([val ** exp for val in values]), 4)
+    return tools.product([val ** exp for val in values])
 
 
-@tools.remove_none_values
-def minimum(values):
-    """Filter out None values and return the minimum.
-
-    If there are only None values, return None.
-    """
-    return min(values)
-
-
-@tools.remove_none_values
-def maximum(values):
-    """Filter out None values and return the maximum.
-
-    If there are only None values, return None.
-    """
-    return max(values)
-
-
-@tools.remove_none_values
-def stddev(values):
-    """Compute the standard deviation of a list of numbers.
-
-    >>> stddev([2, 4, 4, 4, 5, 5, 7, 9])
-    2.0
-    """
-    n = len(values)
-    mu = avg(values)
-    return math.sqrt((sum((v - mu) ** 2 for v in values) / n))
-
-
-@tools.remove_none_values
 def finite_sum(values):
     """Compute the sum of a list of numbers, excluding values of
     None and 'infinity'.
     """
-    return sum([x for x in values if x != sys.maxint])
+    return sum([x for x in values if x is not None and x != sys.maxint])
 
 
 def function_name(f):
-    names = {'avg': 'average',
-             'gm': 'geometric mean',
-             'finite_sum': 'finite sum'}
+    names = {
+        'arithmetic_mean': 'arithmetic mean',
+        'finite_sum': 'finite sum',
+        'geometric_mean': 'geometric mean'}
     return names.get(f.__name__, f.__name__)
 
 
@@ -120,32 +77,45 @@ class Attribute(str):
     def __new__(cls, name, **kwargs):
         return str.__new__(cls, name)
 
-    def __init__(self, name, absolute=False, min_wins=True, functions=sum):
-        """Use this class if your **own** attribute needs a non-default value for:
+    def __init__(
+            self, name, absolute=False, min_wins=True, functions=sum,
+            scale=None, digits=2):
+        """
+        Use this class if your **own** attribute needs a non-default
+        value for:
 
-        * *absolute*: If False, only include tasks for which all task runs have
-          values in a domain-wise table (e.g. ``coverage`` is absolute, whereas
-          ``expansions`` is not, because we can't compare configurations A and B
-          for task X if B has no value for ``expansions``).
-        * *min_wins*: Set to True if a smaller value for this attribute is
-          better and to False otherwise (e.g. for ``coverage`` *min_wins* is
-          False, whereas it is True for ``expansions``).
-        * *functions*: Set the function or functions that are used to group values
-          of multiple runs for this attribute. The first entry is used to aggregate
-          values for domain-wise reports (e.g. for ``coverage`` this is
-          :py:func:`sum`, whereas ``expansions`` uses :py:func:`gm`). This can be a
-          single function or a list of functions and defaults to :py:func:`sum`.
+        * *absolute*: If False, only include tasks for which all task
+          runs have values in a domain-wise table (e.g. ``coverage`` is
+          absolute, whereas ``expansions`` is not, because we can't
+          compare algorithms A and B for task X if B has no value for
+          ``expansions``).
+        * *min_wins*: Set to True if a smaller value for this attribute
+          is better, to False if a higher value is better and to None
+          if values can't be compared. (E.g. *min_wins* is False for
+          ``coverage``, but it is True for ``expansions``).
+        * *functions*: Set the function or functions used to group
+          values of multiple runs for this attribute. The first entry
+          is used to aggregate values for domain-wise reports (e.g. for
+          ``coverage`` this is :py:func:`sum`, whereas ``expansions``
+          uses :py:func:`geometric_mean`). This can be a single
+          function or a list of functions and defaults to
+          :py:func:`sum`.
+        * *scale*: Default scaling. Can be one of "linear", "log" and
+          "symlog". If *scale* is None (default), the reports will
+          choose the scaling.
+        * *digits*: Number of digits after the decimal point.
 
-        The ``downward`` package automatically uses appropriate settings for
-        most attributes. ::
+        The ``downward`` package automatically uses appropriate
+        settings for most attributes. ::
 
-            from lab.reports import minimum, maximum
-            avg_h = Attribute('average_h', min_wins=False,
-                              functions=[sum, minimum, maximum])
-            abstraction_done = Attribute('abstraction_done', absolute=True,
-                                         min_wins=False)
+            avg_h = Attribute(
+                'average_h', min_wins=False,
+                functions=[sum, min, max])
+            abstraction_done = Attribute(
+                'abstraction_done', absolute=True, min_wins=False)
 
-            Report(attributes=[avg_g, abstraction_done, 'coverage', 'expansions'])
+            Report(attributes=[
+                avg_h, abstraction_done, 'coverage', 'expansions'])
 
         """
         self.absolute = absolute
@@ -153,10 +123,13 @@ class Attribute(str):
         if not isinstance(functions, collections.Iterable):
             functions = [functions]
         self.functions = functions
+        self.scale = scale
+        self.digits = digits
 
     def copy(self, name):
-        return Attribute(name, absolute=self.absolute, min_wins=self.min_wins,
-                         functions=self.functions)
+        return Attribute(
+            name, absolute=self.absolute, min_wins=self.min_wins,
+            functions=self.functions, scale=self.scale, digits=self.digits)
 
 
 class Report(object):
@@ -165,77 +138,85 @@ class Report(object):
     """
     def __init__(self, attributes=None, format='html', filter=None, **kwargs):
         """
-        *attributes* is a list of the attributes you want to include in your
-        report. If omitted, use all found numerical attributes. Globbing
+        Inherit from this or a child class to implement a custom report.
+
+        Depending on the type of output you want to make, you will have
+        to overwrite the :meth:`.write`, :meth:`.get_text` or
+        :meth:`.get_markup` method.
+
+        *attributes* is the list of attributes you want to include in
+        your report. If omitted, use all numerical attributes. Globbing
         characters * and ? are allowed. Example: ::
 
-            Report(attributes=['translator_time_*'])
+            Report(attributes=['expansions', 'translator_time_*'])
 
-        When a report is made, both the available and the selected attributes
-        are printed on the commandline.
+        When a report is made, both the available and the selected
+        attributes are printed on the commandline.
 
-        *format* can be one of e.g. html, tex, wiki (MediaWiki),
-        gwiki (Google Code Wiki), doku (DokuWiki), pmw (PmWiki),
-        moin (MoinMoin), txt (Plain text) and art (ASCII art). Subclasses may
-        allow additional formats.
+        *format* can be one of e.g. html, tex, wiki (MediaWiki), doku
+        (DokuWiki), pmw (PmWiki), moin (MoinMoin) and txt (Plain text).
+        Subclasses may allow additional formats.
 
-        If given, *filter* must be a function or a list of functions that
-        are passed a dictionary of a run's keys and values and return
-        True or False. Depending on the returned value, the run is included
-        or excluded from the report.
-        Alternatively, the function can return a dictionary that will overwrite
-        the old run's dictionary for the report.
+        If given, *filter* must be a function or a list of functions
+        that are passed a dictionary of a run's attribute keys and
+        values and return True or False. Depending on the returned
+        value, the run is included or excluded from the report.
+        Alternatively, the function can return a dictionary that will
+        overwrite the old run's dictionary for the report.
 
-        Filters for properties can be given in shorter form without defining a function
-        To include only runs where property p has value v, use *filter_p=v*.
-        To include only runs where property p has value v1, v2 or v3, use
-        *filter_p=[v1, v2, v3]*.
+        Filters for properties can be given in shorter form without
+        defining a function. To include only runs where attribute
+        ``foo`` has value v, use ``filter_foo=v``. To include only runs
+        where attribute ``foo`` has value v1, v2 or v3, use
+        ``filter_foo=[v1, v2, v3]``.
+
+        Filters are applied sequentially, i.e., the first filter is
+        applied to all runs before the second filter is executed.
+        Filters given as ``filter_*`` kwargs are applied *after* all
+        filters passed via the ``filter`` kwarg.
 
         Examples:
 
-        Include only *coverage* and *expansions* in the report and write a
-        LaTeX file at ``myreport.tex``::
+        Include only *coverage* and *expansions* in a LaTeX report::
 
-            report = Report(attributes=['coverage', 'expansions'], format='tex')
-            report(path_to_eval_dir, 'myreport.tex')
+            exp.add_report(Report(
+                attributes=['coverage', 'expansions'], format='tex'))
 
         Only include successful runs in the report::
 
-            report = Report(filter_coverage=1)
-            report(path_to_eval_dir, 'myreport.html')
+            exp.add_report(Report(filter_coverage=1))
 
-        Only include runs in the report where the time score is better than the
-        memory score::
+        Only include runs in the report where the time score is better
+        than the memory score::
 
             def better_time_than_memory_score(run):
                 return run['score_search_time'] > run['score_memory']
-            report = Report(filter=better_time_than_memory_score)
-            report(path_to_eval_dir, 'myreport.html')
+            exp.add_report(Report(filter=better_time_than_memory_score))
 
-        Filter function that filters and renames configs with additional sorting::
+        Rename, filter and sort algorithms::
 
-            def rename_configs(run):
-                config = run['config'].replace('WORK-', '')
-                paper_names = {'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1',
-                               'fdss_sat2': 'FDSS 2'}
-                run['config'] = paper_names.get(config, 'unknown')
+            def rename_algorithms(run):
+                name = run['algorithm']
+                paper_names = {
+                    'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1'}
+                run['algorithm'] = paper_names[name]
                 return run
 
             # We want LAMA 2011 to be the leftmost column.
-            # Filters defined with key word arguments are evaluated last,
-            # so we use the updated config names here.
-            configs = ['LAMA 2011', 'FDSS 1', 'FDSS 2']
-            Report(filter=rename_configs, filter_config=configs)
+            # filter_* filters are evaluated last, so we use the updated
+            # algorithm names here.
+            algorithms = ['LAMA 2011', 'FDSS 1']
+            exp.add_report(Report(
+                filter=rename_algorithms, filter_algorithm=algorithms))
 
-        Filter function that only allows runs with a timeout in one of two domains::
+        Only include runs from blocks and barman with a timeout::
 
-            report = Report(attributes=['coverage'],
-                            filter_domain=['blocks', 'barman'],
-                            filter_search_timeout=1)
+            exp.add_report(Report(
+                filter_domain=['blocks', 'barman'],
+                filter_search_timeout=1))
+
         """
-        if isinstance(attributes, basestring):
-            attributes = [attributes]
-        self.attributes = attributes or []
+        self.attributes = tools.make_list(attributes or [])
         assert format in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png', 'py']
         self.output_format = format
         self.toc = True
@@ -244,8 +225,11 @@ class Report(object):
     def __call__(self, eval_dir, outfile):
         """Make the report.
 
-        *eval_dir* must be a path to an evaluation directory containing a
-        ``properties`` file.
+        This method is called automatically when the report step is
+        executed. It loads the data and calls :meth:`.write`.
+
+        *eval_dir* must be a path to an evaluation directory containing
+        a ``properties`` file.
 
         The report will be written to *outfile*.
         """
@@ -255,7 +239,7 @@ class Report(object):
         self.eval_dir = os.path.abspath(eval_dir)
         # It would be nice if we could infer "format" from "outfile", but the
         # former is needed before the latter is available.
-        # Also we cannot add the extension ".format" to "outfile" in case it's
+        # Also we can't add the extension ".format" to "outfile" in case it's
         # missing, because "outfile" might be a directory.
         self.outfile = os.path.abspath(outfile)
 
@@ -323,10 +307,8 @@ class Report(object):
 
     def get_markup(self):
         """
-        If ``get_text()`` is not overwritten, this method can be overwritten in
-        subclasses that want to return the report as
-        `txt2tags <http://txt2tags.org/>`_ markup. The default ``get_text()``
-        method converts that markup into *format*.
+        Return `txt2tags <http://txt2tags.org/>`_ markup for the report.
+
         """
         table = Table()
         for run_id, run in self.props.items():
@@ -342,38 +324,38 @@ class Report(object):
 
     def get_text(self):
         """
-        This method should be overwritten in subclasses that want to produce
-        e.g. HTML or LaTeX markup or programming code directly instead of
-        creating `txt2tags <http://txt2tags.org/>`_ markup.
-        """
-        name, ext = os.path.splitext(os.path.basename(self.outfile))
-        doc = Document(title=name)
-        text = self.get_markup()
+        Return text (e.g., HTML, LaTeX, etc.) for the report.
 
-        text = (
-            text or
+        By default this method calls :meth:`.get_markup` and converts
+        the markup to the desired output *format*.
+
+        """
+        name, _ = os.path.splitext(os.path.basename(self.outfile))
+        doc = Document(title=name)
+        doc.add_text(
+            self.get_markup() or
             'No tables were generated. '
             'This happens when no significant changes occured or '
             'if for all attributes and all problems never all '
-            'configs had a value for this attribute in a '
+            'algorithms had a value for this attribute in a '
             'domain-wise report.')
-
-        doc.add_text(text)
-        if len(text) < 100000:
-            print 'REPORT MARKUP:\n'
-            print doc
         return doc.render(self.output_format, {'toc': self.toc})
 
     def write(self):
         """
-        Overwrite this method if you want to write the report directly. You
-        should write the report to *self.outfile*.
+        Write the report files.
+
+        By default this method calls :meth:`.get_text` and writes the
+        obtained text to *outfile*.
+
+        Overwrite this method if you want to write the report file(s)
+        directly. You should write them to *self.outfile*.
+
         """
         content = self.get_text()
         tools.makedirs(os.path.dirname(self.outfile))
-        with open(self.outfile, 'w') as file:
-            file.write(content)
-            logging.info('Wrote file://%s' % self.outfile)
+        tools.write_file(self.outfile, content)
+        logging.info('Wrote file://%s' % self.outfile)
 
     def _get_type(self, attribute):
         for run_id, run in self.props.iteritems():
@@ -405,7 +387,7 @@ class Report(object):
             logging.critical('properties file in evaluation dir is empty.')
 
     def _apply_filter(self):
-        self.props = self.run_filter.apply(self.props)
+        self.run_filter.apply(self.props)
         if not self.props:
             logging.critical('All runs have been filtered -> Nothing to report.')
 
@@ -420,7 +402,7 @@ class CellFormatter(object):
     def format_value(self, value):
         result = str(value)
         if self.link:
-            result = '[""%s"" %s]' % (result, self.link)
+            result = "[''%s'' %s]" % (result, self.link)
         if self.count:
             result = '%s (%s)' % (result, self.count)
         if self.bold:
@@ -429,7 +411,7 @@ class CellFormatter(object):
 
 
 class Table(collections.defaultdict):
-    def __init__(self, title='', min_wins=None, colored=False):
+    def __init__(self, title='', min_wins=None, colored=False, digits=2):
         """
         The *Table* class can be useful for `Report` subclasses that want to
         return a table as txt2tags markup. It is realized as a dictionary of
@@ -444,6 +426,8 @@ class Table(collections.defaultdict):
 
         If *colored* is True, the values of each row will be given colors from a
         colormap.
+
+        Numbers are rounded to *digits* positions after the decimal point.
 
         >>> t = Table(title='expansions')
         >>> t.add_cell('prob1', 'cfg1', 10)
@@ -482,6 +466,7 @@ class Table(collections.defaultdict):
         self.min_wins = min_wins
         self.row_min_wins = {}
         self.colored = colored
+        self.digits = digits
 
         self.summary_funcs = {}
         self.info = []
@@ -557,8 +542,10 @@ class Table(collections.defaultdict):
 
     def add_summary_function(self, name, func):
         """
-        Add a bottom row with the values ``func(column_values)`` for each column.
-        *func* can be e.g. ``sum``, ``reports.avg`` or ``reports.gm``.
+        Add a bottom row with the values ``func(column_values)`` for
+        each column. *func* can be e.g. :func:`sum`,
+        :func:`arithmetic_mean` or :func:`geometric_mean`.
+
         """
         self.summary_funcs[name] = func
         self.summary_row_order.append(name)
@@ -569,9 +556,11 @@ class Table(collections.defaultdict):
 
     def get_min_wins(self, row_name=None):
         """
-        The table class can store information on whether higher or lower values are better
-        for each row or globally. If no row specific setting for *row_name* is found, the
-        global setting is returned.
+        The table class can store information on whether higher or
+        lower values are better for each row or globally. If no row
+        specific setting for *row_name* is found, the global setting is
+        returned.
+
         """
         return self.row_min_wins.get(row_name, self.min_wins)
 
@@ -670,16 +659,19 @@ class Table(collections.defaultdict):
         highlight = min_wins is not None
         colors = tools.get_colors(row_slice, min_wins) if self.colored else None
 
+        def is_close(a, b, rel_tol=1e-09, abs_tol=0.0):
+            return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
         for col_name, value in row.items():
             color = None
             bold = False
             # Format data columns
             if col_name in row_slice:
-                rounded_value = round(value, 2) if isinstance(value, float) else value
                 if self.colored:
                     color = tools.rgb_fractions_to_html_color(*colors[col_name])
-                elif highlight and (rounded_value == min_value and min_wins or
-                                    rounded_value == max_value and not min_wins):
+                elif highlight and value is not None and (
+                        (is_close(value, min_value) and min_wins) or
+                        (is_close(value, max_value) and not min_wins)):
                     bold = True
             row[col_name] = self._format_cell(row_name, col_name, value,
                                               color=color, bold=bold)
@@ -704,7 +696,7 @@ class Table(collections.defaultdict):
 
         def format_value(value):
             if isinstance(value, float):
-                return '%.2f' % value
+                return '{0:.{1}f}'.format(value, self.digits)
             else:
                 result = str(value)
             return markup.escape(result)

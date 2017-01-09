@@ -19,4 +19,4 @@ run = exp.add_run()
 run.add_command('calc-pi', ['echo', 'Pi:', '3.14'])
 run.set_property('id', ['echo-1'])
 
-exp()
+exp.run_steps()

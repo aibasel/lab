@@ -25,7 +25,34 @@ import subprocess
 
 from lab import tools
 
-from downward.checkouts import get_global_rev, get_rev_id
+
+_HG_ID_CACHE = {}
+
+
+def hg_id(repo, args=None, rev=None):
+    args = args or []
+    if rev:
+        args.extend(['-r', str(rev)])
+    cmd = ('hg', 'id', '--repository', repo) + tuple(args)
+    if cmd not in _HG_ID_CACHE:
+        try:
+            result = subprocess.check_output(cmd).strip()
+        except subprocess.CalledProcessError:
+            logging.critical(
+                'Call failed: "{}". Please check path and revision.'.format(
+                    ' '.join(cmd)))
+        else:
+            assert result
+            _HG_ID_CACHE[cmd] = result
+    return _HG_ID_CACHE[cmd]
+
+
+def get_global_rev(repo, rev=None):
+    return hg_id(repo, args=['-i'], rev=rev)
+
+
+def get_rev_id(repo, rev=None):
+    return hg_id(repo, rev=rev)
 
 
 def _get_options_relevant_for_cache_name(options):
@@ -101,8 +128,8 @@ class CachedRevision(object):
         else:
             return self.global_rev
 
-    def cache(self, revision_cache_dir):
-        self._path = os.path.join(revision_cache_dir, self._hashed_name)
+    def cache(self, revision_cache):
+        self._path = os.path.join(revision_cache, self._hashed_name)
         if os.path.exists(self.path):
             logging.info('Revision is already cached: "%s"' % self.path)
             if not os.path.exists(self._get_sentinel_file()):
@@ -112,6 +139,7 @@ class CachedRevision(object):
                     'it and try again.'.format(self.path))
         else:
             tools.makedirs(self.path)
+            # TODO: Remove "benchmarks".
             excludes = ['-X{}'.format(d) for d in ['benchmarks', 'experiments', 'misc']]
             retcode = tools.run_command(
                 ['hg', 'archive', '-r', self.global_rev] + excludes + [self.path],
@@ -129,7 +157,7 @@ class CachedRevision(object):
         return os.path.join('code-' + self._hashed_name, *rel_path)
 
     def get_planner_resource_name(self):
-        return 'FAST_DOWNWARD_' + self._hashed_name
+        return 'fast_downward_' + self._hashed_name
 
     def _get_sentinel_file(self):
         return self.get_cached_path('build_successful')
@@ -140,7 +168,7 @@ class CachedRevision(object):
         retcode = tools.run_command(
             ['./build.py'] + self.build_options, cwd=self.path)
         if retcode == 0:
-            tools.touch(self._get_sentinel_file())
+            tools.write_file(self._get_sentinel_file(), '')
         else:
             logging.critical('Build failed in {}'.format(self.path))
 

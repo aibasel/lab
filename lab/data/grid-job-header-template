@@ -22,3 +22,8 @@
 %(notification)s
 ### Extra options.
 %(extra_options)s
+
+if [ -s "%(errfile)s" ]; then
+    echo "There was output on stderr. Please check '%(errfile)s'. Aborting."
+    exit 1
+fi

@@ -17,17 +17,13 @@
 
 import argparse
 import colorsys
-import email.mime.text
 import functools
 import logging
-from numbers import Number
 import os
 import re
 import shutil
-import smtplib
 import subprocess
 import sys
-import traceback
 
 # Use simplejson where it's available, because it is compatible (just separately
 # maintained), puts no blanks at line endings and loads json much faster:
@@ -43,19 +39,12 @@ except ImportError:
     import json
 
 
-# TODO(v2.0): Use freedesktop specification.
-DEFAULT_USER_DIR = os.path.join(os.path.expanduser('~'), 'lab')
-LOG_LEVEL = None
+_LOG_LEVEL = None
 
 
 def get_script_path():
     """Get absolute path to main script."""
     return os.path.abspath(sys.argv[0])
-
-
-def get_script_dir():
-    """Get absolute path to directory of main script."""
-    return os.path.dirname(get_script_path())
 
 
 class ErrorAbortHandler(logging.StreamHandler):
@@ -69,13 +58,14 @@ class ErrorAbortHandler(logging.StreamHandler):
 
 
 def setup_logging(level):
-    # Python adds a default handler if some log is written before now
-    # Remove all handlers that have been added automatically
+    # Python adds a default handler if some log is written before this
+    # function is called. We therefore remove all handlers that have
+    # been added automatically.
     root_logger = logging.getLogger('')
     for handler in root_logger.handlers:
         root_logger.removeHandler(handler)
 
-    # Handler which writes LOG_LEVEL messages or higher to stdout
+    # Handler which writes _LOG_LEVEL messages or higher to stdout
     console = ErrorAbortHandler(sys.stdout)
     # set a format which is simpler for console use
     format = '%(asctime)-s %(levelname)-8s %(message)s'
@@ -109,19 +99,6 @@ class deprecated(object):
         return new_func
 
 
-def remove_none_values(func):
-    """
-    Remove all None values from the input list and call the original function.
-    """
-    @functools.wraps(func)
-    def new_func(values):
-        values = [val for val in values if val is not None]
-        if not values:
-            return None
-        return round(func(values), 4)
-    return new_func
-
-
 def make_list(value):
     if isinstance(value, list):
         return value
@@ -130,53 +107,41 @@ def make_list(value):
     return [value]
 
 
-def divide_list(seq, size):
+def makedirs(path):
     """
-    >>> divide_list(range(10), 4)
-    [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]
-    """
-    return [seq[i:i + size] for i in range(0, len(seq), size)]
-
-
-def makedirs(dir):
-    """
-    makedirs variant that does not complain when the dir already exists
+    os.makedirs() variant that doesn't complain if the path already exists.
     """
     try:
-        os.makedirs(dir)
+        os.makedirs(path)
     except OSError:
-        # directory probably exists
+        # Directory probably already exists.
         pass
 
 
-def confirm(question):
+def confirm_or_abort(question):
     answer = raw_input('%s (y/N): ' % question).strip()
     if not answer.lower() == 'y':
         sys.exit('Aborted')
-    return True
 
 
-def overwrite_dir(path, overwrite=False):
-    if os.path.exists(path):
-        logging.info('The directory "%s" already exists.' % path)
-        if not overwrite:
-            confirm('Do you want to overwrite the existing directory?')
-        shutil.rmtree(path)
-    # We use the os.makedirs method instead of our own here to check if the dir
-    # has really been properly deleted.
-    os.makedirs(path)
+def confirm_overwrite_or_abort(path):
+    confirm_or_abort(
+        'The path "%s" already exists. Do you want to overwrite it?' % path)
 
 
 def remove_path(path):
     if os.path.isfile(path):
-        os.remove(path)
+        try:
+            os.remove(path)
+        except OSError:
+            pass
     else:
         shutil.rmtree(path)
 
 
-def touch(filename):
-    with open(filename, 'a'):
-        os.utime(filename, None)
+def write_file(filename, content):
+    with open(filename, 'w') as f:
+        f.write(content)
 
 
 def natural_sort(alist):
@@ -207,55 +172,10 @@ def find_file(filenames, dir='.'):
     raise IOError('none found in %r: %r' % (dir, filenames))
 
 
-def _get_module_name(filename):
-    basename = os.path.basename(filename)
-    if basename.endswith('.py'):
-        return basename[:-3]
-    elif basename.endswith('.pyc'):
-        return basename[:-4]
-    else:
-        return basename
-
-
-def import_python_file(filename):
-    filename = os.path.abspath(filename)
-    original_sys_path = sys.path[:]
-    sys.path = [os.path.dirname(filename)] + sys.path
-    module_name = _get_module_name(filename)
-
-    # If we have already loaded a file with the same basename, we need
-    # to delete the cached module before loading the new one.
-    if module_name in sys.modules:
-        del sys.modules[module_name]
-
-    try:
-        module = __import__(module_name)
-    except ImportError as err:
-        print traceback.format_exc()
-        logging.critical('File "%s" could not be imported: %s' % (filename, err))
-    else:
-        return module
-    finally:
-        sys.path = original_sys_path
-
-
-def _log_command(cmd, kwargs):
-    assert isinstance(cmd, list)
-    logging.info('Running command: %s %s' % (' '.join(cmd), kwargs))
-
-
 def run_command(cmd, **kwargs):
     """Run command cmd and return the output."""
-    _log_command(cmd, kwargs)
+    logging.info('Executing %s %s' % (' '.join(cmd), kwargs))
     return subprocess.call(cmd, **kwargs)
-
-
-def get_command_output(cmd, quiet=False, **kwargs):
-    if not quiet:
-        _log_command(cmd, kwargs)
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, **kwargs)
-    stdout, _ = p.communicate()
-    return stdout.strip()
 
 
 class Properties(dict):
@@ -280,8 +200,7 @@ class Properties(dict):
         """Write the properties to disk."""
         assert self.filename
         makedirs(os.path.dirname(self.filename))
-        with open(self.filename, 'w') as f:
-            f.write(str(self))
+        write_file(self.filename, str(self))
 
 
 class RunFilter(object):
@@ -306,33 +225,31 @@ class RunFilter(object):
                 return run.get(prop) == value
         return property_filter
 
-    def apply_to_run(self, run):
-        # No need to copy the run as the original run is only needed if all
-        # filters return True. In this case modified_run is never changed.
+    @staticmethod
+    def apply_filter_to_run(filter_, run):
+        # No need to copy the run as the original run is only needed if
+        # the filter returns True. In this case modified_run is not changed.
         modified_run = run
-        for filter in self.filters:
-            result = filter(modified_run)
-            if not isinstance(result, (dict, bool)):
-                logging.critical('Filters must return a dictionary or boolean')
-            # If a dict is returned, use it as the new run,
-            # otherwise take the old one.
-            if isinstance(result, dict):
-                modified_run = result
-            if not result:
-                # Discard runs that returned False or an empty dictionary.
-                return False
+        result = filter_(modified_run)
+        if not isinstance(result, (dict, bool)):
+            logging.critical('Filters must return a dictionary or boolean')
+        # If a dict is returned, use it as the new run,
+        # otherwise take the old one.
+        if isinstance(result, dict):
+            modified_run = result
+        if not result:
+            # Discard runs that returned False or an empty dictionary.
+            return False
         return modified_run
 
     def apply(self, props):
-        if not self.filters:
-            return props
-        new_props = Properties()
-        for run_id, run in props.items():
-            modified_run = self.apply_to_run(run)
-            if modified_run:
-                new_props[run_id] = modified_run
-        new_props.filename = props.filename
-        return new_props
+        for filter_ in self.filters:
+            for run_id, run in props.items():
+                modified_run = self.apply_filter_to_run(filter_, run)
+                if modified_run:
+                    props[run_id] = modified_run
+                else:
+                    del props[run_id]
 
 
 def fast_updatetree(src, dst, symlinks=False, ignore=None):
@@ -407,29 +324,6 @@ def copy(src, dest, required=True, ignores=None):
         return
 
 
-def sendmail(from_, to, subject, text, smtp_host='localhost', port=25):
-    """Send an e-mail.
-
-    *from_* is the sender's email address.
-    *to* is the recipient's email address. ::
-
-        Step('mail', sendmail, 'john@xyz.com', 'jane@xyz.com', 'Hi!', 'Howdy!')
-
-    """
-    # Create a text/plain message
-    msg = email.mime.text.MIMEText(text)
-
-    msg['Subject'] = subject
-    msg['From'] = from_
-    msg['To'] = to
-
-    # Send the message via our own SMTP server, but don't include the
-    # envelope header.
-    s = smtplib.SMTP(smtp_host, port)
-    s.sendmail(from_, [to], msg.as_string())
-    s.quit()
-
-
 def get_color(fraction, min_wins):
     assert 0 <= fraction <= 1, fraction
     if min_wins:
@@ -462,9 +356,7 @@ def get_colors(cells, min_wins):
 
     for col, val in cells.items():
         if val is not None:
-            val = round(val, 2)
             if diff == 0:
-                assert val - min_value == 0, (val, min_value)
                 fraction = 0
             else:
                 fraction = (val - min_value) / diff
@@ -475,14 +367,28 @@ def get_colors(cells, min_wins):
 def get_min_max(items):
     """Return min and max of all values in *items* that are not None.
 
-    Floats are rounded to two decimal places. If no maximum and minimum is
-    defined (e.g. all values None) None is returned for both min and max.
+    If no maximum and minimum is defined (i.e., when all values are
+    None), return (None, None).
+
     """
-    numbers = [round(val, 2) for val in items if isinstance(val, Number)]
+    numbers = [val for val in items if val is not None]
     if numbers:
         return min(numbers), max(numbers)
     else:
         return None, None
+
+
+def product(values):
+    """Compute the product of a sequence of numbers.
+
+    >>> round(product([2, 3, 7]), 2)
+    42.0
+    """
+    assert None not in values
+    prod = 1
+    for value in values:
+        prod *= value
+    return prod
 
 
 def rgb_fractions_to_html_color(r, g, b):
@@ -543,16 +449,16 @@ def get_parser(add_log_option=True, **kwargs):
 
 def parse_and_set_log_level():
     # Set log level only once.
-    global LOG_LEVEL
-    if LOG_LEVEL:
+    global _LOG_LEVEL
+    if _LOG_LEVEL:
         return
 
     parser = get_parser(add_help=False)
     args, remaining = parser.parse_known_args()
 
     if getattr(args, 'log_level', None):
-        LOG_LEVEL = getattr(logging, args.log_level.upper())
-        setup_logging(LOG_LEVEL)
+        _LOG_LEVEL = getattr(logging, args.log_level.upper())
+        setup_logging(_LOG_LEVEL)
 
 
 parse_and_set_log_level()

@@ -16,11 +16,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import os
-import shutil
-from subprocess import call
+import traceback
 
-import tools
+from lab import tools
 
 
 class Step(object):
@@ -28,142 +26,73 @@ class Step(object):
     When the step is executed *args* and *kwargs* will be passed to the
     callable *func*. ::
 
-        exp.add_step(Step('show-disk-usage', subprocess.call, ['df']))
-        exp.add_step(Step('combine-results', Fetcher(), 'path/to/eval-dir',
-                          'path/to/new-eval-dir'))
+        exp.add_step('show-disk-usage', subprocess.call, ['df'])
 
     """
     def __init__(self, name, func, *args, **kwargs):
+        assert func is not None
         self.name = name
         self.func = func
-        self.args = list(args)
+        self.args = args
         self.kwargs = kwargs
+        self._funcname = (
+            getattr(func, '__name__', None) or
+            func.__class__.__name__.lower())
 
     def __call__(self):
         if self.func is None:
             logging.critical('You cannot run the same step more than once')
-        logging.info('Running %s: %s' % (self.name, self))
+        logging.info('Running step %s: %s' % (self.name, self))
         try:
             retval = self.func(*self.args, **self.kwargs)
             # Free memory
             self.func = None
             if retval:
-                logging.critical('An error occured in %s, the return value was %s' %
-                                 (self.name, retval))
+                logging.critical(
+                    'An error occured in step {}.'.format(self.name))
             return retval
         except (ValueError, TypeError):
-            import traceback
             traceback.print_exc()
-            logging.critical('Could not run step: %s' % self)
-
-    @property
-    def _funcname(self):
-        return (getattr(self.func, '__name__', None) or
-                self.func.__class__.__name__.lower())
-
-    # TODO: Can we remove this after cleaning up the environments module?
-    def copy(self):
-        """Return a copy of this Step."""
-        return Step(self.name, self.func, *self.args[:], **self.kwargs.copy())
+            logging.critical('Could not run step {}'.format(self))
 
     def __str__(self):
-        return '%s(%s%s%s)' % (self._funcname,
-                               ', '.join([repr(arg) for arg in self.args]),
-                               ', ' if self.args and self.kwargs else '',
-                               ', '.join(['%s=%s' % (k, repr(v))
-                                          for (k, v) in self.kwargs.items()]))
-
-    _predefined_steps_warning = (
-        'Predefined steps have been deprecated in version 1.8. '
-        'Please define your extra experiment steps manually.')
-
-    @classmethod
-    @tools.deprecated(_predefined_steps_warning)
-    def zip_exp_dir(cls, exp):
-        """
-        Return a Step that creates a compressed tarball containing the
-        experiment directory. For symbolic links this step stores the
-        referenced files, not the links themselves. ::
-
-            exp.add_step(Step.zip_exp_dir(exp))
-
-        .. deprecated:: 1.8
-
-            Please define your extra experiment steps manually.
-
-        """
-        return cls('zip-exp-dir', call,
-                   ['tar', '-cjf', exp.name + '.tar.bz2', exp.name],
-                   cwd=os.path.dirname(exp.path))
-
-    @classmethod
-    @tools.deprecated(_predefined_steps_warning)
-    def unzip_exp_dir(cls, exp):
-        """
-        Return a Step that unzips a compressed tarball containing the
-        experiment directory. ::
-
-            exp.add_step(Step.unzip_exp_dir(exp))
-
-        .. deprecated:: 1.8
-
-            Please define your extra experiment steps manually.
-
-        """
-        return cls('unzip-exp-dir', call,
-                   ['tar', '-xjf', exp.name + '.tar.bz2'],
-                   cwd=os.path.dirname(exp.path))
-
-    @classmethod
-    @tools.deprecated(_predefined_steps_warning)
-    def remove_exp_dir(cls, exp):
-        """Return a Step that removes the experiment directory.
-
-        ::
-
-            exp.add_step(Step.remove_exp_dir(exp))
-
-        .. deprecated:: 1.8
-
-            Please define your extra experiment steps manually.
-
-        """
-        return cls('remove-exp-dir', shutil.rmtree, exp.path)
+        return '{name}({args}{sep}{kwargs})'.format(
+            name=self._funcname,
+            args=', '.join(repr(arg) for arg in self.args),
+            sep=', ' if self.args and self.kwargs else '',
+            kwargs=', '.join([
+                '{}={!r}'.format(k, v)
+                for (k, v) in sorted(self.kwargs.items())]))
 
 
-class Sequence(list):
-    """This class holds all steps of an experiment."""
-    def _get_step_index(self, step_name):
-        for index, step in enumerate(self):
-            if step.name == step_name:
-                return index
-        logging.critical('There is no step called %s' % step_name)
+def _get_step_index(steps, step_name):
+    for index, step in enumerate(steps):
+        if step.name == step_name:
+            return index
+    logging.critical('There is no step called "{}"'.format(step_name))
 
-    def get_step(self, step_name):
-        """*step_name* can be a step's name or number."""
-        if step_name.isdigit():
-            try:
-                return self[int(step_name) - 1]
-            except IndexError:
-                logging.critical('There is no step number %s' % step_name)
-        return self[self._get_step_index(step_name)]
 
-    def get_steps_text(self):
-        # Use width 0 if no steps have been added.
-        name_width = min(max([len(step.name) for step in self] + [0]), 50)
-        terminal_width, terminal_height = tools.get_terminal_size()
-        terminal_width = terminal_width or 80
-        lines = ['Available steps:', '================']
-        for number, step in enumerate(self, start=1):
-            line = ' '.join([str(number).rjust(2), step.name.ljust(name_width)])
-            step_text = str(step)
-            if len(line) + len(step_text) < terminal_width:
-                lines.append(line + ' ' + step_text)
-            else:
-                lines.extend(['', line, step_text, ''])
-        return '\n'.join(lines)
+def get_step(steps, step_name):
+    """*step_name* can be a step's name or number."""
+    if step_name.isdigit():
+        try:
+            return steps[int(step_name) - 1]
+        except IndexError:
+            logging.critical('There is no step number {}'.format(step_name))
+    return steps[_get_step_index(steps, step_name)]
 
-    @staticmethod
-    def run_steps(steps):
-        for step in steps:
-            step()
+
+def get_steps_text(steps):
+    # Use width 0 if no steps have been added.
+    name_width = min(max([len(step.name) for step in steps] + [0]), 50)
+    terminal_width, terminal_height = tools.get_terminal_size()
+    terminal_width = terminal_width or 80
+    lines = ['Available steps:', '================']
+    for number, step in enumerate(steps, start=1):
+        line = ' '.join([str(number).rjust(2), step.name.ljust(name_width)])
+        step_text = str(step)
+        if len(line) + len(step_text) < terminal_width:
+            lines.append(line + ' ' + step_text)
+        else:
+            lines.extend(['', line, step_text, ''])
+    return '\n'.join(lines)
