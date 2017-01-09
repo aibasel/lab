@@ -256,11 +256,11 @@ class OracleGridEngineEnvironment(Environment):
     def _get_job_body(self, step):
         if is_run_step(step):
             return self._get_main_job_body()
-        return 'cd %(cwd)s\n%(python)s %(script)s %(args)s %(step_name)s\n' % {
+        return 'cd "%(cwd)s"\n"%(python)s" "%(script)s" %(args)s "%(step_name)s"\n' % {
             'cwd': os.getcwd(),
             'python': sys.executable or 'python',
             'script': sys.argv[0],
-            'args': ' '.join(self._get_script_args()),
+            'args': ' '.join(repr(arg) for arg in self._get_script_args()),
             'step_name': step.name}
 
     def _get_job(self, step, is_last):
