@@ -5,6 +5,15 @@ News
 .. module :: downward.experiments
 
 
+v1.12 (2017-01-09)
+------------------
+
+downward
+^^^^^^^^
+* Only compress "output" file if it exists.
+* Preprocess parser: make legacy preprocessor output optional.
+
+
 v1.11 (2016-12-15)
 ------------------
 
