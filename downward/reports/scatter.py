@@ -157,7 +157,7 @@ class ScatterPlotReport(PlotReport):
 
             exp.add_report(ScatterPlotReport(
                     attributes=["expansions_until_last_jump"],
-                    filter_config=["algorithm-1", "algorithm-2"],
+                    filter_algorithm=["algorithm-1", "algorithm-2"],
                     get_category=domain_as_category,
                     format="png",  # Use "tex" for pgfplots output.
                     ),
