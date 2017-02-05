@@ -194,19 +194,8 @@ def unsolvable(content, props):
     props['unsolvable'] = int(props['fast-downward_returncode'] == EXIT_UNSOLVABLE)
 
 
-def invalid_solution(props):
-    if 'driver_options' in props:
-        # Catch invalid plans by examining the driver's exitcode below.
-        return False
-    else:
-        return props.get('validate_returncode') != 0
-
-
 def coverage(content, props):
-    props['coverage'] = int(
-        'plan_length' in props and
-        'cost' in props and
-        not invalid_solution(props))
+    props['coverage'] = int('plan_length' in props and 'cost' in props)
 
 
 def get_initial_h_values(content, props):
@@ -305,9 +294,8 @@ def get_error(content, props):
     if 'error' in props:
         return
 
-    if invalid_solution(props):
-        props['error'] = 'unexplained-invalid-solution'
-        return
+    # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
+    # TODO: Check that a plan file exists if coverage=1.
 
     exitcode_to_error = {
         EXIT_PLAN_FOUND: 'none',
