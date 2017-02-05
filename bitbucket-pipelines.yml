@@ -5,14 +5,10 @@ pipelines:
           # Install dependencies.
           - sudo apt-get update
           - sudo apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
+          # Use new pip version since Ubuntu's pip version causes problems.
           - wget https://bootstrap.pypa.io/get-pip.py
           - sudo python get-pip.py
-          - sudo python -m pip install -U pep8 pyflakes pytest sphinx
-          - sudo pip install -U vulture
-
-          # The docker container uses ASCII encoding "ANSI_X3.4-1968" by default.
-          - export LANG="C.UTF-8"
-          - export LC_ALL="C.UTF-8"
+          - sudo pip install -U pep8 pyflakes pytest sphinx vulture
 
           # Print information about environment.
           - python --version
