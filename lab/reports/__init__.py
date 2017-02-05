@@ -159,10 +159,10 @@ class Report(object):
 
         If given, *filter* must be a function or a list of functions
         that are passed a dictionary of a run's attribute keys and
-        values and return True or False. Depending on the returned
-        value, the run is included or excluded from the report.
-        Alternatively, the function can return a dictionary that will
-        overwrite the old run's dictionary for the report.
+        values. Filters must return True, False or a new dictionary.
+        Depending on the returned value, the run is included or excluded
+        from the report, or replaced by the new dictionary,
+        respectively.
 
         Filters for properties can be given in shorter form without
         defining a function. To include only runs where attribute
@@ -192,6 +192,19 @@ class Report(object):
             def better_time_than_memory_score(run):
                 return run['score_search_time'] > run['score_memory']
             exp.add_report(Report(filter=better_time_than_memory_score))
+
+        Add a new attribute::
+
+            def add_expansions_per_time(run):
+                expansions = run.get('expansions')
+                time = run.get('search_time')
+                if expansions is not None and time:
+                    run['expansions_per_time'] = expansions / time
+                return run
+
+            exp.add_report(Report(
+                attributes=['expansions_per_time'],
+                filter=[add_expansions_per_time]))
 
         Rename, filter and sort algorithms::
 
