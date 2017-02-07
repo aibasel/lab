@@ -166,9 +166,6 @@ class PlanningReport(Report):
         self.domain_algorithm_runs = defaultdict(list)
         self.runs = {}
         for run in self.props.values():
-            if 'coverage' not in run and 'error' not in run:
-                run['error'] = 'unexplained-crash'
-
             domain, problem, algo = run['domain'], run['problem'], run['algorithm']
             problems.add((domain, problem))
             self.problem_runs[(domain, problem)].append(run)

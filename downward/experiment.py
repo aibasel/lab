@@ -55,9 +55,6 @@ class FastDownwardRun(Run):
             ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
             algo.driver_options + ['{domain}', '{problem}'] + algo.component_options)
 
-        self.add_command('parse-preprocess', ['{preprocess_parser}'])
-        self.add_command('parse-search', ['{search_parser}'])
-
         self.add_command(
             'compress-output-sas', ['xz', 'output.sas'])
 
@@ -120,6 +117,10 @@ class FastDownwardExperiment(Experiment):
         >>> env = MaiaEnvironment(priority=-2)
         >>> exp = FastDownwardExperiment(environment=env)
 
+        If running a translator-only experiment, i.e. all algorithms use the
+        driver option --translate but not --search, then use
+        ``del exp.commands['parse-search']`` to avoid errors due to
+        running the default search parser without running the search.
         """
         Experiment.__init__(self, path=path, environment=environment)
 
@@ -130,6 +131,12 @@ class FastDownwardExperiment(Experiment):
 
         # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
+
+        # Add default parsing for preprocessor and search for the entire
+        # experiment to allow users to delete these steps if the components
+        # are not run.
+        self.add_command('parse-preprocess', ['{preprocess_parser}'])
+        self.add_command('parse-search', ['{search_parser}'])
 
     def _get_tasks(self):
         tasks = []
