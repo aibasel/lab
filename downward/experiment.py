@@ -117,6 +117,10 @@ class FastDownwardExperiment(Experiment):
         >>> env = MaiaEnvironment(priority=-2)
         >>> exp = FastDownwardExperiment(environment=env)
 
+        If running a translator-only experiment, i.e. all algorithms use the
+        driver option --translate but not --search, then use
+        ``del exp.commands['parse-search']`` to avoid errors due to
+        running the default search parser without running the search.
         """
         Experiment.__init__(self, path=path, environment=environment)
 
