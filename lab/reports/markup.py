@@ -292,18 +292,15 @@ class Document(object):
                 # Remove \hlines in latex output. Use booktabs commands instead.
                 if line.startswith(hline):
                     table_row += 1
-                    if table_row == 1:
-                        new_lines.append('\\toprule')
-                    elif table_row == 2:
+                    if table_row == 2:
                         new_lines.append('\\midrule')
                     new_lines.append(line[len(hline):])
                 else:
                     # Reinsert the last line (or two if the last row is a
                     # summary row).
                     if table_row >= 3:
-                        new_lines.insert(-1, '\\bottomrule')
-                        if new_lines[-3].startswith('\\textbf'):
-                            new_lines.insert(-3, '\\midrule')
+                        if new_lines[-2].startswith('\\textbf'):
+                            new_lines.insert(-2, '\\midrule')
                     table_row = 0
                     new_lines.append(line)
             result = '\n'.join(new_lines)
