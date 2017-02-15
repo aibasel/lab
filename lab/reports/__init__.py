@@ -493,6 +493,7 @@ class Table(collections.defaultdict):
         self.header_row = 'column names (never printed)'
         self.header_column = 'row names (never printed)'
         self.cell_formatters = collections.defaultdict(dict)
+        self.row_order = None
         self.column_order = None
         self.summary_row_order = []
 
@@ -521,7 +522,7 @@ class Table(collections.defaultdict):
     @property
     def row_names(self):
         """Return all data row names in sorted order."""
-        return tools.natural_sort(self.keys())
+        return self.row_order or tools.natural_sort(self.keys())
 
     @property
     def col_names(self):
@@ -563,6 +564,9 @@ class Table(collections.defaultdict):
         """
         self.summary_funcs[name] = func
         self.summary_row_order.append(name)
+
+    def set_row_order(self, order):
+        self.row_order = order
 
     def set_column_order(self, order):
         self.column_order = order
