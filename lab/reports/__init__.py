@@ -230,7 +230,8 @@ class Report(object):
 
         """
         self.attributes = tools.make_list(attributes or [])
-        assert format in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png', 'py']
+        if format not in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png', 'py']:
+            raise ValueError('invalid format: {}'.format(format))
         self.output_format = format
         self.toc = True
         self.run_filter = tools.RunFilter(filter, **kwargs)
