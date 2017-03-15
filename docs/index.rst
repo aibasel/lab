@@ -4,7 +4,7 @@
    :maxdepth: 1
 
    news
-   downward.faq
+   faq
 
 
 Documentation for lab
