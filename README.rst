@@ -11,9 +11,21 @@ benchmarks. Experiments can be conducted on a single machine or on a
 cluster. The package also facilitates parsing results and creating
 reports.
 
-
 **Documentation**: https://lab.readthedocs.io
-
 
 **Contact**: for questions and comments please get in touch with Jendrik
 Seipp.
+
+.. highlight:: bash
+
+**Cite**: you can cite downward-lab in your publications by using ::
+
+    @Misc{seipp-et-al-misc2017,
+      author =       "Jendrik Seipp and Florian Pommerening and
+                      Silvan Sievers and Malte Helmert",
+      title =        "downward-lab 2.0",
+      year =         "2017",
+      doi =          "10.5281/zenodo.399255",
+      url =          "https://doi.org/10.5281/zenodo.399255",
+      howpublished = "\url{https://doi.org/10.5281/zenodo.399255}"
+    }
