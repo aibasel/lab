@@ -243,7 +243,15 @@ class OracleGridEngineEnvironment(Environment):
     def _get_job_header(self, step, is_last):
         job_params = self._get_job_params(step)
         if is_last and self.email:
-            job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
+            if is_run_step(step):
+                logging.warning(
+                    "The cluster sends mails per run, not per step."
+                    " Since the last of the submitted steps would send"
+                    " too many mails, we disable the notification."
+                    " We recommend submitting the 'run' step together"
+                    " with the 'fetch' step.")
+            else:
+                job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
         return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
 
     def _get_main_job_body(self):
