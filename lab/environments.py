@@ -318,11 +318,11 @@ class OracleGridEngineEnvironment(Environment):
         tools.makedirs(job_dir)
 
         prev_job_name = None
-        for number, step in enumerate(steps, start=1):
+        for step in steps:
             job_name = self._get_job_name(step)
             tools.write_file(
                 os.path.join(job_dir, job_name),
-                self._get_job(step, is_last=(number == len(steps))))
+                self._get_job(step, is_last=(step == steps[-1])))
             submit = ['qsub']
             if prev_job_name:
                 submit.extend(['-hold_jid', prev_job_name])
