@@ -30,7 +30,7 @@ echo "PYTHONPATH: $PYTHONPATH"
 
 cleanup
 
-py.test tests
+python2 -m py.test tests
 
 # Run doctests.
 cd lab
