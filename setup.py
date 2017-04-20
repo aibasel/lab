@@ -17,7 +17,7 @@ setup(
     url='https://bitbucket.org/jendrikseipp/lab',
     license='GPL3+',
     packages=['downward', 'downward.reports','lab','lab.calls','lab.external','lab.reports'],
-    package_data={'downward': ['scripts/*']},
+    package_data={'downward': ['scripts/*'], 'lab' : ['data/*']},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
