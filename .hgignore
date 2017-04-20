@@ -11,3 +11,6 @@
 ^examples/pi/data/
 ^examples/planner/data/
 ^examples/simple/data/
+build
+dist/lab-2.0-py2.7.egg
+lab.egg-info
