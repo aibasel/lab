@@ -16,7 +16,8 @@ setup(
     author_email='jendrikseipp@web.de',
     url='https://bitbucket.org/jendrikseipp/lab',
     license='GPL3+',
-    packages=['downward', 'downward.reports','lab','lab.calls','lab.data','lab.external','lab.reports'],
+    packages=['downward', 'downward.reports','lab','lab.calls','lab.external','lab.reports'],
+    package_data={'downward': ['scripts/*']},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
