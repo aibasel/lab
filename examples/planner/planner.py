@@ -20,8 +20,8 @@ REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 exp = FastDownwardExperiment(revision_cache=REVISION_CACHE)
 
 exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl'])
-exp.add_algorithm('ff', REPO, 'tip', ['--search', 'lazy_greedy(ff())'])
-exp.add_algorithm('add', REPO, 'tip', ['--search', 'lazy_greedy(add())'])
+exp.add_algorithm('ff', REPO, 'tip', ['--search', 'lazy_greedy([ff()])'])
+exp.add_algorithm('add', REPO, 'tip', ['--search', 'lazy_greedy([add()])'])
 
 exp.add_report(AbsoluteReport(), outfile='report-abs.html')
 exp.add_report(ScatterPlotReport(attributes='expansions'))

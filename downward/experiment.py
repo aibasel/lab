@@ -249,7 +249,7 @@ class FastDownwardExperiment(Experiment):
 
         >>> exp.add_algorithm(
         ...     "ff", repo, "default",
-        ...     ["--search", "lazy_greedy(ff())"],
+        ...     ["--search", "lazy_greedy([ff()])"],
         ...     build_options=["release64"],
         ...     driver_options=["--build", "release64"])
 
