@@ -19,11 +19,12 @@ pipelines:
 
           # Clone Fast Downward.
           - sudo apt-get -y install mercurial g++ cmake make python g++-multilib
-          - export DOWNWARD_REPO=`realpath fast-downward`
+          - ls
+          - export DOWNWARD_REPO=`realpath fast-downward-repo`
           - hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
 
           # Clone benchmarks.
-          - export DOWNWARD_BENCHMARKS=`realpath downward_benchmarks`
+          - export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
           - hg clone https://bitbucket.org/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
           # Download and compile FF (used by example experiment).
