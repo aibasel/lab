@@ -18,11 +18,11 @@ pipelines:
           # Install test dependencies.
           # Use new pip version since Ubuntu's pip version causes problems.
           - wget https://bootstrap.pypa.io/get-pip.py
-          - sudo python get-pip.py
-          - sudo pip install -U pep8 pyflakes pytest sphinx vulture
+          - python get-pip.py
+          - pip install -U pep8 pyflakes pytest sphinx vulture
 
           # Clone Fast Downward.
-          - sudo apt-get -y install mercurial g++ cmake make python g++-multilib
+          - apt-get -y install mercurial g++ cmake make python g++-multilib
           - ls
           - export DOWNWARD_REPO=`realpath fast-downward-repo`
           - echo ${DOWNWARD_REPO}
@@ -33,7 +33,7 @@ pipelines:
           - hg clone https://bitbucket.org/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
           # Download and compile FF (used by example experiment).
-          - sudo apt-get -y install g++ make flex bison
+          - apt-get -y install g++ make flex bison
           - wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
           - tar -xzvf FF-v2.3.tgz
           - cd FF-v2.3/
