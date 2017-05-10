@@ -32,13 +32,14 @@ and http://www.fast-downward.org/LPBuildInstructions)
 
 ::
 
-    FAST_DOWNWARD=/path/to/fast-downward/repo
+    DOWNWARD_REPO=/path/to/fast-downward-repo
     sudo apt-get install mercurial g++ cmake make python g++-multilib
-    hg clone http://hg.fast-downward.org ${FAST_DOWNWARD}
+    hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
     # Optionally check that Fast Downward works:
-    cd ${FAST_DOWNWARD}
-    ./build.py
-    ./fast-downward.py ${BENCHMARKS}/grid/prob01.pddl --search "astar(lmcut())"
+    cd ${DOWNWARD_REPO}
+    ./build.py -j4  # Use 4 cores for compilation.
+    ./fast-downward.py ${DOWNWARD_BENCHMARKS}/grid/prob01.pddl \
+        --search "astar(lmcut())"
 
 
 Install VAL
