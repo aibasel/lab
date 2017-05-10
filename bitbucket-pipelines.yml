@@ -34,8 +34,20 @@ pipelines:
           - make
           - cp ff ../
           - cd ..
+          - rm -rf FF-v2.3/
 
-          # Add FF to PATH.
+          # Setup VAL.
+          - sudo apt-get -y install g++ git make flex bison
+          - git clone https://github.com/KCL-Planning/VAL.git
+          - cd VAL
+          - git checkout a5565396007eee73ac36527fbf904142b3077c74
+          - make clean  # Remove old build artifacts and binaries.
+          - make -j8
+          - mv validate ../
+          - cd ../
+          - rm -rf VAL
+
+          # Add binaries to PATH.
           - export PATH="$(pwd):$PATH"
 
           # Add downward-lab to PYTHONPATH.
