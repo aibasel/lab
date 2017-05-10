@@ -38,10 +38,16 @@ pipelines:
           # Add FF to PATH.
           - export PATH="$(pwd):$PATH"
 
-          - ./tests/run-tests
+          - cd examples
+          - ./lmcut.py --all
+          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/driver.log || true
+          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/driver.err || true
+          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/driver.err || true
+          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/driver.log || true
+          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.log || true
+          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.err || true
 
-          - find .
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/driver.err
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/driver.log
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.log
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.err
+          #- ./tests/run-tests
+
+          #- find .
+
