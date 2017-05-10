@@ -4,6 +4,7 @@ pipelines:
     - step:
         script:
           - apt-get update
+          - apt-get upgrade
 
           # Install downward-lab dependencies.
           - apt-get -y install mercurial python2.7 python-matplotlib python-simplejson
@@ -38,3 +39,6 @@ pipelines:
           - export PATH="$(pwd):$PATH"
 
           - ./tests/run-tests
+
+          - less /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.log
+          - less /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.err
