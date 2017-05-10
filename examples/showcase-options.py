@@ -23,11 +23,10 @@ from downward.reports.taskwise import TaskwiseReport
 DIR = os.path.dirname(os.path.abspath(__file__))
 REMOTE = 'cluster' in platform.node()
 if REMOTE:
-    REPO = os.path.expanduser('~/projects/downward')
     ENV = MaiaEnvironment()
 else:
-    REPO = os.path.expanduser('~/projects/Downward/downward')
     ENV = LocalEnvironment(processes=4)
+REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
 REV = 'tip'

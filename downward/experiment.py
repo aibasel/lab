@@ -162,14 +162,12 @@ class FastDownwardExperiment(Experiment):
         optimal planning and ``satisficing`` for satisifing planning::
 
             # Create standard optimal planning suite.
-            $ ~/projects/Downward/benchmarks/suites.py optimal_strips
+            $ path/to/downward-benchmarks/suites.py optimal_strips
             ['airport', ..., 'zenotravel']
 
         You can copy the generated list into your experiment script::
 
-            >>> repo = os.path.expanduser('~/projects/Downward/downward')
-            >>> benchmarks_dir = os.path.expanduser(
-            ...     '~/projects/Downward/benchmarks')
+            >>> benchmarks_dir = REPO = os.environ["DOWNWARD_BENCHMARKS"]
             >>> exp = FastDownwardExperiment()
             >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
 
@@ -223,7 +221,7 @@ class FastDownwardExperiment(Experiment):
 
         >>> import os.path
         >>> exp = FastDownwardExperiment()
-        >>> repo = os.path.expanduser("~/projects/Downward/downward")
+        >>> repo = os.environ["DOWNWARD_REPO"]
 
         Test iPDB in the latest revision on the default branch:
 

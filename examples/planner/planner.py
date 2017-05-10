@@ -13,7 +13,7 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
 
 
-REPO = os.path.expanduser('~/projects/Downward/downward')
+REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ['DOWNWARD_BENCHMARKS']
 REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 

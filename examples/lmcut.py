@@ -16,14 +16,14 @@ from downward.reports.scatter import ScatterPlotReport
 ATTRIBUTES = ['coverage', 'expansions']
 
 if 'cluster' in platform.node():
-    REPO = os.path.expanduser('~/projects/downward')
-    # Create bigger suites with ~/projects/benchmarks/suites.py
+    # Create bigger suites with suites.py from the downward-benchmarks repo.
     SUITE = ['depot', 'freecell', 'gripper', 'zenotravel']
     ENV = MaiaEnvironment(priority=0)
 else:
-    REPO = os.path.expanduser('~/projects/Downward/downward')
     SUITE = ['depot:p01.pddl', 'gripper:prob01.pddl']
     ENV = LocalEnvironment(processes=2)
+# Change to path to your Fast Downward repository.
+REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 

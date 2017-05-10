@@ -1,14 +1,11 @@
 #! /bin/bash
 
-# Test setup:
-#
-# $ sudo apt-get install pip
-# $ sudo pip install -U pytest pep8 pyflakes sphinx vulture
+# Test setup: see bitbucket-pipelines.yml
 
 set -euo pipefail
 
 BENCHMARKS="$DOWNWARD_BENCHMARKS"
-REPO="$HOME/projects/Downward/downward"
+REPO="$DOWNWARD_REPO"
 
 function cleanup {
     rm -rf examples/data
@@ -57,12 +54,10 @@ cd ..
 
 cd examples
 
-# FF experiment needs benchmarks.
-if [ -d "$REPO" ]; then
-    cd ff
-    ./ff.py --all
-    cd ..
-fi
+# TODO: Test FF experiment.
+cd ff
+#./ff.py --all
+cd ..
 
 cd simple
 ./simple-exp.py --all
