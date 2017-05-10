@@ -40,5 +40,7 @@ pipelines:
 
           - ./tests/run-tests
 
+          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/driver.err
+          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/driver.log
           - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.log
           - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.err
