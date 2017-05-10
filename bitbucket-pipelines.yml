@@ -6,20 +6,16 @@ pipelines:
           - sudo apt-get update
           - sudo apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
 
+          # Print information about environment.
+          - python --version
+          - python -c "import sys; print(sys.getfilesystemencoding())"
+          - python -c "import locale; print(locale.getlocale())"
+
           # Install test dependencies.
           # Use new pip version since Ubuntu's pip version causes problems.
           - wget https://bootstrap.pypa.io/get-pip.py
           - sudo python get-pip.py
           - sudo pip install -U pep8 pyflakes pytest sphinx vulture
-
-          # Download and compile FF (used by example experiment).
-          - sudo apt-get -y install g++ make flex bison
-          - wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
-          - tar -xzvf FF-v2.3.tgz
-          - cd FF-v2.3/
-          - make
-          - cp ff ../
-          - cd ..
 
           # Clone Fast Downward.
           - sudo apt-get -y install mercurial g++ cmake make python g++-multilib
@@ -30,12 +26,16 @@ pipelines:
           - export DOWNWARD_BENCHMARKS=`realpath downward_benchmarks`
           - hg clone https://bitbucket.org/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
+          # Download and compile FF (used by example experiment).
+          - sudo apt-get -y install g++ make flex bison
+          - wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+          - tar -xzvf FF-v2.3.tgz
+          - cd FF-v2.3/
+          - make
+          - cp ff ../
+          - cd ..
+
           # Add FF to PATH.
           - export PATH="$(pwd):$PATH"
-
-          # Print information about environment.
-          - python --version
-          - python -c "import sys; print(sys.getfilesystemencoding())"
-          - python -c "import locale; print(locale.getlocale())"
 
           - ./tests/run-tests
