@@ -31,13 +31,13 @@ pipelines:
           - wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
           - tar -xzvf FF-v2.3.tgz
           - cd FF-v2.3/
-          - make
+          - make -j8
           - cp ff ../
           - cd ..
           - rm -rf FF-v2.3/
 
           # Setup VAL.
-          - sudo apt-get -y install g++ git make flex bison
+          - apt-get -y install g++ git make flex bison
           - git clone https://github.com/KCL-Planning/VAL.git
           - cd VAL
           - git checkout a5565396007eee73ac36527fbf904142b3077c74
