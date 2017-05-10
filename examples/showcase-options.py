@@ -3,6 +3,7 @@
 This experiment demonstrates most of the available options.
 """
 
+import os
 import os.path
 import platform
 import shutil
@@ -23,12 +24,11 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 REMOTE = 'cluster' in platform.node()
 if REMOTE:
     REPO = os.path.expanduser('~/projects/downward')
-    BENCHMARKS_DIR = os.path.expanduser('~/projects/benchmarks')
     ENV = MaiaEnvironment()
 else:
     REPO = os.path.expanduser('~/projects/Downward/downward')
-    BENCHMARKS_DIR = os.path.expanduser('~/projects/Downward/benchmarks')
     ENV = LocalEnvironment(processes=4)
+BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
 REV = 'tip'
 ATTRIBUTES = ['coverage']

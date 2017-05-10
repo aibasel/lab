@@ -2,6 +2,7 @@
 
 """Solve some tasks with A* and the LM-Cut heuristic."""
 
+import os
 import os.path
 import platform
 
@@ -16,15 +17,14 @@ ATTRIBUTES = ['coverage', 'expansions']
 
 if 'cluster' in platform.node():
     REPO = os.path.expanduser('~/projects/downward')
-    BENCHMARKS_DIR = os.path.expanduser('~/projects/benchmarks')
     # Create bigger suites with ~/projects/benchmarks/suites.py
     SUITE = ['depot', 'freecell', 'gripper', 'zenotravel']
     ENV = MaiaEnvironment(priority=0)
 else:
     REPO = os.path.expanduser('~/projects/Downward/downward')
-    BENCHMARKS_DIR = os.path.expanduser('~/projects/Downward/benchmarks')
     SUITE = ['depot:p01.pddl', 'gripper:prob01.pddl']
     ENV = LocalEnvironment(processes=2)
+BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)

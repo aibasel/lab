@@ -5,7 +5,7 @@ Example experiment for the FF planner
 (http://fai.cs.uni-saarland.de/hoffmann/ff.html).
 """
 
-import os.path
+import os
 import platform
 
 from lab.environments import LocalEnvironment, MaiaEnvironment
@@ -18,13 +18,10 @@ from downward.reports.absolute import AbsoluteReport
 
 
 REMOTE = 'cluster' in platform.node()
+BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 if REMOTE:
-    BENCHMARKS_DIR = os.path.expanduser(
-        '~/projects/benchmarks')
     ENV = MaiaEnvironment()
 else:
-    BENCHMARKS_DIR = os.path.expanduser(
-        '~/projects/Downward/benchmarks')
     ENV = LocalEnvironment(processes=4)
 SUITE = [
     'grid', 'gripper:prob01.pddl',

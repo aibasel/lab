@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-BENCHMARKS="$HOME/projects/Downward/benchmarks"
+BENCHMARKS="$DOWNWARD_BENCHMARKS"
 REPO="$HOME/projects/Downward/downward"
 
 function cleanup {
@@ -37,9 +37,7 @@ cd lab
 python -m doctest reports/__init__.py experiment.py tools.py
 cd ..
 cd downward
-if [ -d "$BENCHMARKS" ]; then
-    python -m doctest experiment.py
-fi
+python -m doctest experiment.py
 cd ..
 
 # Check imports and unused/missing variables.
