@@ -3,29 +3,22 @@ pipelines:
   default:
     - step:
         script:
-          # Install downward-lab dependencies.
           - apt-get update
-          - apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
 
-          - export DOWNWARD_REPO=`realpath fast-downward-repo`
-          - echo a${DOWNWARD_REPO}b
+          # Install downward-lab dependencies.
+          - apt-get -y install mercurial python2.7 python-matplotlib python-simplejson
+
+          # Install dependencies of this script and downward-lab tests.
+          - apt-get -y install realpath wget
+          - python -m pip install -U pep8 pyflakes pytest sphinx vulture
 
           # Print information about environment.
           - python --version
-          - python -c "import sys; print(sys.getfilesystemencoding())"
-          - python -c "import locale; print(locale.getlocale())"
-
-          # Install test dependencies.
-          # Use new pip version since Ubuntu's pip version causes problems.
-          - wget https://bootstrap.pypa.io/get-pip.py
-          - python get-pip.py
-          - pip install -U pep8 pyflakes pytest sphinx vulture
 
           # Clone Fast Downward.
           - apt-get -y install mercurial g++ cmake make python g++-multilib
           - ls
-          - export DOWNWARD_REPO=`realpath fast-downward-repo`
-          - echo ${DOWNWARD_REPO}
+          - export DOWNWARD_REPO=`realpath fast-downward`
           - hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
 
           # Clone benchmarks.
