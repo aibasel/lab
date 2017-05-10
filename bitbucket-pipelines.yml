@@ -63,7 +63,4 @@ pipelines:
           - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.log || true
           - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.err || true
 
-          #- ./tests/run-tests
-
-          #- find .
-
+          - ./tests/run-tests
