@@ -10,6 +10,10 @@ pipelines:
           - sudo python get-pip.py
           - sudo pip install -U pep8 pyflakes pytest sphinx vulture
 
+          # Download and store environment variable for benchmarks.
+          - export DOWNWARD_BENCHMARKS=`realpath downward_benchmarks`
+          - hg clone https://bitbucket.org/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+
           # Print information about environment.
           - python --version
           - python -c "import sys; print(sys.getfilesystemencoding())"
