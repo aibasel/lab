@@ -5,13 +5,15 @@ pipelines:
           # Install downward-lab dependencies.
           - sudo apt-get update
           - sudo apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
+
+          # Install test dependencies.
           # Use new pip version since Ubuntu's pip version causes problems.
           - wget https://bootstrap.pypa.io/get-pip.py
           - sudo python get-pip.py
           - sudo pip install -U pep8 pyflakes pytest sphinx vulture
 
           # Clone Fast Downward.
-          - sudo apt-get install mercurial g++ cmake make python g++-multilib
+          - sudo apt-get -y install mercurial g++ cmake make python g++-multilib
           - export DOWNWARD_REPO=`realpath fast-downward`
           - hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
 
