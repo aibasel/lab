@@ -9,8 +9,8 @@ pipelines:
           - apt-get -y install mercurial python2.7 python-matplotlib python-simplejson
 
           # Install dependencies of this script and downward-lab tests.
-          - apt-get -y install realpath wget
-          - python -m pip install -U pep8 pyflakes pytest sphinx vulture
+          - apt-get -y install python-pip realpath wget
+          - pip install -U pep8 pyflakes pytest sphinx vulture
 
           # Print information about environment.
           - python --version
