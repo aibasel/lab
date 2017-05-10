@@ -4,8 +4,8 @@ pipelines:
     - step:
         script:
           # Install downward-lab dependencies.
-          - sudo apt-get update
-          - sudo apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
+          - apt-get update
+          - apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
 
           - export DOWNWARD_REPO=`realpath fast-downward-repo`
           - echo a${DOWNWARD_REPO}b
