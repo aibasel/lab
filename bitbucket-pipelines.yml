@@ -6,6 +6,9 @@ pipelines:
           - sudo apt-get update
           - sudo apt-get -y install mercurial python2.7 python-matplotlib python-simplejson realpath
 
+          - export DOWNWARD_REPO=`realpath fast-downward-repo`
+          - echo a${DOWNWARD_REPO}b
+
           # Print information about environment.
           - python --version
           - python -c "import sys; print(sys.getfilesystemencoding())"
@@ -21,6 +24,7 @@ pipelines:
           - sudo apt-get -y install mercurial g++ cmake make python g++-multilib
           - ls
           - export DOWNWARD_REPO=`realpath fast-downward-repo`
+          - echo ${DOWNWARD_REPO}
           - hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
 
           # Clone benchmarks.
