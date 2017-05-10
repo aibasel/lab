@@ -54,9 +54,8 @@ cd ..
 
 cd examples
 
-# TODO: Test FF experiment.
 cd ff
-#./ff.py --all
+./ff.py --all
 cd ..
 
 cd simple

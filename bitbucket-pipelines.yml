@@ -12,6 +12,14 @@ pipelines:
           - sudo python get-pip.py
           - sudo pip install -U pep8 pyflakes pytest sphinx vulture
 
+          # Download and compile FF (used by example experiment).
+          - wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+          - tar -xzvf FF-v2.3.tgz
+          - cd FF-v2.3/
+          - make
+          - cp ff ../
+          - cd ..
+
           # Clone Fast Downward.
           - sudo apt-get -y install mercurial g++ cmake make python g++-multilib
           - export DOWNWARD_REPO=`realpath fast-downward`
@@ -20,6 +28,9 @@ pipelines:
           # Download and store environment variable for benchmarks.
           - export DOWNWARD_BENCHMARKS=`realpath downward_benchmarks`
           - hg clone https://bitbucket.org/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+
+          # Add FF to PATH.
+          - export PATH="$(pwd):$PATH"
 
           # Print information about environment.
           - python --version
