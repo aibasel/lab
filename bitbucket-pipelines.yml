@@ -18,7 +18,6 @@ pipelines:
 
           # Clone Fast Downward.
           - apt-get -y install mercurial g++ cmake make python g++-multilib
-          - ls
           - export DOWNWARD_REPO=`realpath fast-downward`
           - hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
 
