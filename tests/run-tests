@@ -85,7 +85,4 @@ else
     echo "Repo $REPO is missing. Could not run downward tests."
 fi
 
-# TODO: Clean up
-#cleanup
-
 echo "TESTS PASSED"

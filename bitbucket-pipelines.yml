@@ -50,18 +50,4 @@ pipelines:
           # Add binaries to PATH.
           - export PATH="$(pwd):$PATH"
 
-          # Add downward-lab to PYTHONPATH.
-          - export PYTHONPATH="$(pwd):$PYTHONPATH"
-          - echo $PYTHONPATH
-
-          - cd examples
-          - ./lmcut.py --all
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/driver.log || true
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/driver.err || true
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/driver.err || true
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/driver.log || true
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.log || true
-          - cat /opt/atlassian/pipelines/agent/build/examples/data/lmcut/runs-00001-00100/00001/run.err || true
-          - cd ../
-
           - ./tests/run-tests
