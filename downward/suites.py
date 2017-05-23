@@ -51,7 +51,6 @@ class Domain(object):
 class Problem(object):
     def __init__(self, benchmarks_dir, domain, problem,
             domain_file=None, problem_file=None, properties=None):
-        self.benchmarks_dir = benchmarks_dir
         self.domain = domain
         self.problem = problem
 
@@ -62,11 +61,11 @@ class Problem(object):
                 self.problem[:3] + '-domain.pddl',
                 'domain_' + self.problem,
             ]
-            domain_dir = os.path.join(self.benchmarks_dir, self.domain)
+            domain_dir = os.path.join(benchmarks_dir, self.domain)
             self.domain_file = tools.find_file(domain_basenames, domain_dir)
 
         self.problem_file = problem_file or os.path.join(
-                self.benchmarks_dir, self.domain, self.problem)
+                benchmarks_dir, self.domain, self.problem)
 
         self.properties = properties or {}
 
