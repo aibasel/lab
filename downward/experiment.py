@@ -69,8 +69,8 @@ class FastDownwardRun(Run):
         self.set_property('driver_options', self.algo.driver_options)
         self.set_property('component_options', self.algo.component_options)
 
-        self.set_property('domain', self.task.domain)
-        self.set_property('problem', self.task.problem)
+        for key, value in self.task.properties.items():
+            self.set_property(key, value)
 
         self.set_property('experiment_name', self.experiment.name)
 
@@ -285,7 +285,14 @@ class FastDownwardExperiment(Experiment):
         if not self._algorithms:
             logging.critical('You must add at least one algorithm.')
 
-        self.set_property('suite', self._suites)
+        # We convert the problems in suites to strings to avoid errors when converting
+        # properties to JSON later. The clean but more complex solution would be to add
+        # a method to the JSONEncoder that recognizes and correctly serializes the class
+        # Problem.
+        serialized_suites = {
+            benchmarks_dir: [str(problem) for problem in benchmarks]
+            for benchmarks_dir, benchmarks in self._suites.items()}
+        self.set_property('suite', serialized_suites)
         self.set_property('algorithms', self._algorithms.keys())
 
         self._cache_revisions()

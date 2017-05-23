@@ -29,7 +29,7 @@ class Domain(object):
             p for p in os.listdir(directory)
             if 'domain' not in p and not p.endswith('.py')])
         self.problems = [
-            Problem(benchmarks_dir, domain, problem)
+            Problem(domain, problem, benchmarks_dir=benchmarks_dir)
             for problem in problem_files]
 
     def __str__(self):
@@ -49,36 +49,59 @@ class Domain(object):
 
 
 class Problem(object):
-    def __init__(self, benchmarks_dir, domain, problem):
-        self.benchmarks_dir = benchmarks_dir
+    def __init__(self, domain, problem, benchmarks_dir='',
+                 domain_file=None, problem_file=None, properties=None):
+        """
+        *domain* and *problem* are the display names of the domain and
+        problem, *domain_file* and *problem_file* are paths to the
+        respective files on the disk. If the latter are not specified,
+        they will be automatically generated according to the following
+        naming conventions: both files are searched in the directory
+        *benchmarks_dir*/*domain*. The default filename of the problem
+        is *problem* and the domain file is searched for under the
+        names 'domain.pddl', 'pXX-domain.pddl', or the full problem
+        name preceeded by 'domain_'.
+
+        *properties* may be a dictionary of entries that should be
+        added to the properties file of each run that uses this
+        problem. ::
+
+            suite = [
+                Problem('gripper-original', 'prob01.pddl',
+                    domain_file='/path/to/original/domain.pddl',
+                    problem_file='/path/to/original/problem.pddl',
+                    properties={'relaxed': False}),
+                Problem('gripper-relaxed', 'prob01.pddl',
+                    domain_file='/path/to/relaxed/domain.pddl',
+                    problem_file='/path/to/relaxed/problem.pddl',
+                    properties={'relaxed': True}),
+                Problem('gripper', 'prob01.pddl',
+                    benchmarks_dir='/path/to/benchmarks',
+            ]
+        """
         self.domain = domain
         self.problem = problem
 
+        self.domain_file = domain_file
+        if self.domain_file is None:
+            domain_basenames = [
+                'domain.pddl',
+                self.problem[:3] + '-domain.pddl',
+                'domain_' + self.problem,
+            ]
+            domain_dir = os.path.join(benchmarks_dir, self.domain)
+            self.domain_file = tools.find_file(domain_basenames, domain_dir)
+
+        self.problem_file = problem_file or os.path.join(
+                benchmarks_dir, self.domain, self.problem)
+
+        self.properties = properties or {}
+        self.properties.setdefault('domain', self.domain)
+        self.properties.setdefault('problem', self.problem)
+
     def __str__(self):
-        return '%s:%s' % (self.domain, self.problem)
-
-    def __repr__(self):
-        return '<Problem %s:%s>' % (self.domain, self.problem)
-
-    def __hash__(self):
-        return hash((self.domain, self.problem))
-
-    def __cmp__(self, other):
-        return cmp((self.domain, self.problem), (other.domain, other.problem))
-
-    @property
-    def problem_file(self):
-        return os.path.join(self.benchmarks_dir, self.domain, self.problem)
-
-    @property
-    def domain_file(self):
-        domain_basenames = [
-            'domain.pddl',
-            self.problem[:3] + '-domain.pddl',
-            'domain_' + self.problem,
-        ]
-        domain_dir = os.path.join(self.benchmarks_dir, self.domain)
-        return tools.find_file(domain_basenames, domain_dir)
+        return ('<Problem {domain}({domain_file}):{problem}({problem_file}):'
+                '{properties}>'.format(**self.__dict__))
 
 
 def _generate_problems(benchmarks_dir, description):
@@ -93,7 +116,7 @@ def _generate_problems(benchmarks_dir, description):
             yield problem
     elif ':' in description:
         domain_name, problem_name = description.split(':', 1)
-        yield Problem(benchmarks_dir, domain_name, problem_name)
+        yield Problem(domain_name, problem_name, benchmarks_dir=benchmarks_dir)
     else:
         for problem in Domain(benchmarks_dir, description):
             yield problem
