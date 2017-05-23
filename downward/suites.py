@@ -49,7 +49,8 @@ class Domain(object):
 
 
 class Problem(object):
-    def __init__(self, benchmarks_dir, domain, problem, domain_file=None, problem_file=None):
+    def __init__(self, benchmarks_dir, domain, problem,
+            domain_file=None, problem_file=None, properties=None):
         self.benchmarks_dir = benchmarks_dir
         self.domain = domain
         self.problem = problem
@@ -66,6 +67,8 @@ class Problem(object):
 
         self.problem_file = problem_file or os.path.join(
                 self.benchmarks_dir, self.domain, self.problem)
+
+        self.properties = properties or {}
 
     def __str__(self):
         return '%s:%s' % (self.domain, self.problem)
