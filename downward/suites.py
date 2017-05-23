@@ -59,8 +59,8 @@ class Problem(object):
         naming conventions: both files are searched in the directory
         *benchmarks_dir*/*domain*. The default filename of the problem
         is *problem* and the domain file is searched for under the
-        names 'domain.pddl', the base problem name followed by
-        '-domain.pddl' or the full problem name preceeded by 'domain_'.
+        names 'domain.pddl', 'pXX-domain.pddl', or the full problem
+        name preceeded by 'domain_'.
 
         *properties* may be a dictionary of entries that should be
         added to the properties file of each run that uses this
