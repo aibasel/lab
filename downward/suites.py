@@ -49,7 +49,7 @@ class Domain(object):
 
 
 class Problem(object):
-    def __init__(self, domain, problem, benchmarks_dir=None,
+    def __init__(self, domain, problem, benchmarks_dir='',
                  domain_file=None, problem_file=None, properties=None):
         """
         *domain* and *problem* are the display names of the domain and
@@ -81,7 +81,6 @@ class Problem(object):
         """
         self.domain = domain
         self.problem = problem
-        benchmarks_dir = benchmarks_dir or ''
 
         self.domain_file = domain_file
         if self.domain_file is None:
