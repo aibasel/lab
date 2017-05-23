@@ -51,6 +51,17 @@ class Domain(object):
 class Problem(object):
     def __init__(self, benchmarks_dir, domain, problem,
             domain_file=None, problem_file=None, properties=None):
+        """
+        *domain* and *problem* are the display names of the domain and
+        problem, *domain_file* and *problem_file* are paths to the
+        respective files on the disk. If the latter are not specified,
+        they will be automatically generated according to the following
+        naming conventions: both files are searched in the directory
+        *benchmarks_dir*/*domain*. The default filename of the problem
+        is *problem* and the domain file is search for under the names
+        'domain.pddl', the base problem name followed by '-domain.pddl'
+        or the full problem name preceeded by 'domain_'.
+        """
         self.domain = domain
         self.problem = problem
 
