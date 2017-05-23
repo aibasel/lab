@@ -96,18 +96,8 @@ class Problem(object):
         self.properties.setdefault('problem', self.problem)
 
     def __str__(self):
-        return '%s:%s' % (self.domain, self.problem)
-
-    def __repr__(self):
         return ('<Problem {domain}({domain_file}):{problem}({problem_file}):'
                 '{properties}>'.format(**self.__dict__))
-
-    def __hash__(self):
-        return hash((self.domain_file, self.problem_file))
-
-    def __cmp__(self, other):
-        return cmp((self.domain_file, self.problem_file),
-                   (other.domain_file, other.problem_file))
 
 
 def _generate_problems(benchmarks_dir, description):
