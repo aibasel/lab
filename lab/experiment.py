@@ -319,7 +319,7 @@ class Experiment(_Buildable):
             pkgutil.get_data('lab', 'data/default-parser.py'),
             permissions=0o755)
         self.add_command(
-                "run-lab-default-parser", [sys.executable, "{lab_default_parser}"])
+            "run-lab-default-parser", [sys.executable, "{lab_default_parser}"])
 
         self.steps = []
         self.add_step('build', self.build)
