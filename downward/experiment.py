@@ -290,7 +290,7 @@ class FastDownwardExperiment(Experiment):
         # Problem.
         serialized_suites = {
             benchmarks_dir: [str(problem) for problem in benchmarks]
-                for benchmarks_dir, benchmarks in self._suites.items()}
+            for benchmarks_dir, benchmarks in self._suites.items()}
         self.set_property('suite', serialized_suites)
         self.set_property('algorithms', self._algorithms.keys())
 
