@@ -71,13 +71,14 @@ class Problem(object):
         return '%s:%s' % (self.domain, self.problem)
 
     def __repr__(self):
-        return '<Problem %s:%s>' % (self.domain, self.problem)
+        return '<Problem %s:%s>' % (self.domain_file, self.problem_file)
 
     def __hash__(self):
-        return hash((self.domain, self.problem))
+        return hash((self.domain_file, self.problem_file))
 
     def __cmp__(self, other):
-        return cmp((self.domain, self.problem), (other.domain, other.problem))
+        return cmp((self.domain_file, self.problem_file),
+                   (other.domain_file, other.problem_file))
 
 
 def _generate_problems(benchmarks_dir, description):
