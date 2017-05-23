@@ -24,6 +24,7 @@ from collections import defaultdict, OrderedDict
 import logging
 import multiprocessing
 import os.path
+import sys
 
 from lab.experiment import Run, Experiment, get_default_data_dir
 
@@ -135,8 +136,8 @@ class FastDownwardExperiment(Experiment):
         # Add default parsing for preprocessor and search for the entire
         # experiment to allow users to delete these steps if the components
         # are not run.
-        self.add_command('parse-preprocess', ['{preprocess_parser}'])
-        self.add_command('parse-search', ['{search_parser}'])
+        self.add_command('parse-preprocess', [sys.executable, '{preprocess_parser}'])
+        self.add_command('parse-search', [sys.executable, '{search_parser}'])
 
     def _get_tasks(self):
         tasks = []
