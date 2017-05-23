@@ -61,6 +61,19 @@ class Problem(object):
         is *problem* and the domain file is search for under the names
         'domain.pddl', the base problem name followed by '-domain.pddl'
         or the full problem name preceeded by 'domain_'.
+
+        *properties* may be a dictionary of entries that should be
+        added to the properties file of each run that uses this
+        problem. ::
+
+        suite = [
+            Problem(None, 'gripper-original', 'prob01.pddl',
+                '/path/to/original/domain.pddl', '/path/to/original/problem.pddl',
+                properties={'relaxed': False}),
+            Problem(None, 'gripper-relaxed', 'prob01.pddl',
+                '/path/to/relaxed/domain.pddl', '/path/to/relaxed/problem.pddl',
+                properties={'relaxed': True}),
+        ]
         """
         self.domain = domain
         self.problem = problem
@@ -79,6 +92,8 @@ class Problem(object):
                 benchmarks_dir, self.domain, self.problem)
 
         self.properties = properties or {}
+        self.properties.set_default('domain', self.domain)
+        self.properties.set_default('problem', self.problem)
 
     def __str__(self):
         return '%s:%s' % (self.domain, self.problem)

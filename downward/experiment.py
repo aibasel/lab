@@ -68,8 +68,8 @@ class FastDownwardRun(Run):
         self.set_property('driver_options', self.algo.driver_options)
         self.set_property('component_options', self.algo.component_options)
 
-        self.set_property('domain', self.task.domain)
-        self.set_property('problem', self.task.problem)
+        for key, value in self.task.properties:
+            self.set_property(key, value)
 
         self.set_property('experiment_name', self.experiment.name)
 
