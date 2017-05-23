@@ -288,8 +288,9 @@ class FastDownwardExperiment(Experiment):
         # properties to JSON later. The clean but more complex solution would be to add
         # a method to the JSONEncoder that recognizes and correctly serializes the class
         # Problem.
-        serialized_suites = {benchmarks_dir: [str(problem) for problem in benchmarks]
-                                for benchmarks_dir, benchmarks in self._suites.items()}
+        serialized_suites = {
+            benchmarks_dir: [str(problem) for problem in benchmarks]
+                for benchmarks_dir, benchmarks in self._suites.items()}
         self.set_property('suite', serialized_suites)
         self.set_property('algorithms', self._algorithms.keys())
 
