@@ -29,7 +29,7 @@ class Domain(object):
             p for p in os.listdir(directory)
             if 'domain' not in p and not p.endswith('.py')])
         self.problems = [
-            Problem(benchmarks_dir, domain, problem)
+            Problem(domain, problem, benchmarks_dir=benchmarks_dir)
             for problem in problem_files]
 
     def __str__(self):
@@ -49,7 +49,7 @@ class Domain(object):
 
 
 class Problem(object):
-    def __init__(self, benchmarks_dir, domain, problem,
+    def __init__(self, domain, problem, benchmarks_dir=None,
                  domain_file=None, problem_file=None, properties=None):
         """
         *domain* and *problem* are the display names of the domain and
@@ -67,16 +67,21 @@ class Problem(object):
         problem. ::
 
             suite = [
-                Problem(None, 'gripper-original', 'prob01.pddl',
-                    '/path/to/original/domain.pddl', '/path/to/original/problem.pddl',
+                Problem('gripper-original', 'prob01.pddl',
+                    domain_file='/path/to/original/domain.pddl',
+                    problem_file='/path/to/original/problem.pddl',
                     properties={'relaxed': False}),
-                Problem(None, 'gripper-relaxed', 'prob01.pddl',
-                    '/path/to/relaxed/domain.pddl', '/path/to/relaxed/problem.pddl',
+                Problem('gripper-relaxed', 'prob01.pddl',
+                    domain_file='/path/to/relaxed/domain.pddl',
+                    problem_file='/path/to/relaxed/problem.pddl',
                     properties={'relaxed': True}),
+                Problem('gripper', 'prob01.pddl',
+                    benchmarks_dir='/path/to/benchmarks',
             ]
         """
         self.domain = domain
         self.problem = problem
+        benchmarks_dir = benchmarks_dir or ''
 
         self.domain_file = domain_file
         if self.domain_file is None:
@@ -112,7 +117,7 @@ def _generate_problems(benchmarks_dir, description):
             yield problem
     elif ':' in description:
         domain_name, problem_name = description.split(':', 1)
-        yield Problem(benchmarks_dir, domain_name, problem_name)
+        yield Problem(domain_name, problem_name, benchmarks_dir=benchmarks_dir)
     else:
         for problem in Domain(benchmarks_dir, description):
             yield problem
