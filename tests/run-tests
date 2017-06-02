@@ -7,6 +7,11 @@ set -euo pipefail
 BENCHMARKS="$DOWNWARD_BENCHMARKS"
 REPO="$DOWNWARD_REPO"
 
+if [[ $# -gt 1 ]]; then
+    echo "usage: ./run-tests [--skip-experiments]"
+    exit 2
+fi
+
 function cleanup {
     rm -rf examples/data
     rm -rf examples/ff/data
@@ -52,6 +57,12 @@ make -B html
 echo "Docs: file://$(pwd)/_build/html/index.html"
 cd ..
 
+echo "Code and style tests passed"
+
+if [[ $# -gt 0 ]]; then
+    exit
+fi
+
 cd examples
 
 cd ff
@@ -85,4 +96,4 @@ else
     echo "Repo $REPO is missing. Could not run downward tests."
 fi
 
-echo "TESTS PASSED"
+echo "Experiment tests passed"
