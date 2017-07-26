@@ -454,7 +454,7 @@ def parse_and_set_log_level():
         return
 
     parser = get_parser(add_help=False)
-    args, remaining = parser.parse_known_args()
+    args, _ = parser.parse_known_args()
 
     if getattr(args, 'log_level', None):
         _LOG_LEVEL = getattr(logging, args.log_level.upper())

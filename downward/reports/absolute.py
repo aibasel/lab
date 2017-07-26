@@ -147,7 +147,7 @@ class AbsoluteReport(PlanningReport):
             table.info.append('Each table entry gives the %s of "%s" for that '
                               'domain.' % (func_name, attribute))
 
-        summary_names = [name.lower() for name, sum_func in table.summary_funcs.items()]
+        summary_names = [name.lower() for name, _ in table.summary_funcs.items()]
         if len(summary_names) == 1:
             table.info.append('The last row reports the %s across all domains.' %
                               summary_names[0])

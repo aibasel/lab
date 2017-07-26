@@ -85,7 +85,7 @@ def get_step(steps, step_name):
 def get_steps_text(steps):
     # Use width 0 if no steps have been added.
     name_width = min(max([len(step.name) for step in steps] + [0]), 50)
-    terminal_width, terminal_height = tools.get_terminal_size()
+    terminal_width, _terminal_height = tools.get_terminal_size()
     terminal_width = terminal_width or 80
     lines = ['Available steps:', '================']
     for number, step in enumerate(steps, start=1):

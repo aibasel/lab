@@ -62,7 +62,7 @@ class ScatterPgfPlots(PgfPlots):
     @classmethod
     def _format_coord(cls, coord):
         def format_value(v):
-            return str(v) if isinstance(v, int) else '%.2f' % v
+            return str(v) if isinstance(v, int) else '%.8f' % v
         return '(%s, %s)' % (format_value(coord[0]), format_value(coord[1]))
 
     @classmethod
