@@ -74,7 +74,7 @@ class Environment(object):
         task_order = range(1, len(self.exp.runs) + 1)
         if self.randomize_task_order:
             random.shuffle(task_order)
-        dispatcher_content = fill_template('run-dispatcher.py', dict(
+        dispatcher_content = fill_template('run-dispatcher-template', dict(
             task_order=str(task_order)))
         self.exp.add_new_file(
             '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
@@ -118,7 +118,7 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         self._write_run_dispatcher()
-        script = fill_template('local-job-template.py', dict(
+        script = fill_template('local-job-template', dict(
             num_tasks=len(self.exp.runs),
             processes=self.processes))
 
