@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import math
 import multiprocessing
 import os
 import pkgutil
@@ -235,7 +234,7 @@ class GridEnvironment(Environment):
             exp_path='../' + self.exp.name)
         return fill_template(self.RUN_JOB_BODY_TEMPLATE_FILE, params)
 
-    def _get_step_job_body(self):
+    def _get_step_job_body(self, step):
         params = dict(
             cwd=os.getcwd(),
             python=sys.executable or 'python',
@@ -247,7 +246,7 @@ class GridEnvironment(Environment):
     def _get_job_body(self, step):
         if is_run_step(step):
             return self._get_run_job_body()
-        return self._get_step_job_body()
+        return self._get_step_job_body(step)
 
     def _get_job(self, step, is_last):
         return '%s\n\n%s' % (self._get_job_header(step, is_last),
@@ -323,7 +322,7 @@ class OracleGridEngineEnvironment(GridEnvironment):
         parameters.
 
         """
-        GridEnvironment.__init__(self, queue=queue, priority=priority, **kwargs)
+        GridEnvironment.__init__(self, **kwargs)
 
         if queue is None:
             queue = self.DEFAULT_QUEUE
