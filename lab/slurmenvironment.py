@@ -46,18 +46,22 @@ def is_run_step(step):
         step.name == 'run' and step._funcname == 'start_runs' and
         not step.args and not step.kwargs)
 
+def get_lab_path():
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 class SlurmEnvironment(Environment):
     """Abstract base class for slurm grid environments."""
 
     DEFAULT_PARTITION = None         # must be overridden in derived classes
     DEFAULT_QOS = None               # must be overridden in derived classes
-    DEFAULT_PRIORITY = "TOP"         # can be overridden in derived classes
+    ENVIRONMENT_SETUP = ''           # can be overridden in derived classes
+    DEFAULT_PRIORITY = 'TOP'         # can be overridden in derived classes
     DEFAULT_MODULES = []             # can be overridden in derived classes
     TEMPLATE_FILE = 'slurm-job-header-template'  # can be overridden in derived classes
 
     def __init__(self, partition=None, qos=None, priority=None,
-                 email=None, export=["PATH", "PYTHONPATH"], modules=None,
+                 email=None, export=['PATH'],
                  extra_options=None, **kwargs):
         """
 
@@ -89,9 +93,6 @@ class SlurmEnvironment(Environment):
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes.
 
-        Use *modules* to specify a list of modules to load on the
-        compute nodes.
-
         Use *extra_options* to pass additional options. The
         *extra_options* string may contain newlines.
 
@@ -106,17 +107,14 @@ class SlurmEnvironment(Environment):
             qos = self.DEFAULT_QOS
         if priority is None:
             priority = self.DEFAULT_PRIORITY
-        if modules is None:
-            modules = self.DEFAULT_MODULES
 
         self.partition = partition
         self.qos = qos
-        assert priority in range(-1023, 1024 + 1) + ["TOP"]
+        assert priority in range(-1023, 1024 + 1) + ['TOP']
         self.priority = priority
         self.runs_per_task = 1
         self.email = email
         self.export = export
-        self.modules = modules
         self.extra_options = extra_options or '## (not used)'
 
     def start_runs(self):
@@ -166,6 +164,7 @@ class SlurmEnvironment(Environment):
             'priority': self.priority,
             'partition': self.partition,
             'qos': self.qos,
+            'environment_setup': self.ENVIRONMENT_SETUP,
         }
 
     def _get_job_header(self, step, is_last):
@@ -182,12 +181,6 @@ class SlurmEnvironment(Environment):
                 job_params['mailtype'] = 'ALL'
                 job_params['mailuser'] = self.email
         return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
-
-    def _get_job_module_section(self):
-        if self.modules:
-            commands = ['module purge'] + ['module load %s' % m for m in self.modules]
-            return "\n".join(commands)
-        return ""
 
     def _get_main_job_body(self):
         params = dict(
@@ -208,7 +201,6 @@ class SlurmEnvironment(Environment):
 
     def _get_job(self, step, is_last):
         return '%s\n\n%s\n%s' % (self._get_job_header(step, is_last),
-                                 self._get_job_module_section(),
                                  self._get_job_body(step))
 
     def write_main_script(self):
@@ -276,4 +268,7 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # TODO: update once we have our own nodes set up
     DEFAULT_PARTITION = 'uni'
     DEFAULT_QOS = 'uni-1week'
-    DEFAULT_MODULES = ['Python/2.7.11-goolf-1.7.20']
+
+    ENVIRONMENT_SETUP = (
+        'module load Python/2.7.11-goolf-1.7.20\n'
+        'PYTHONPATH="%s:$PYTHONPATH"' % get_lab_path())

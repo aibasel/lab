@@ -18,6 +18,8 @@
 ### Extra options.
 %(extra_options)s
 
+%(environment_setup)
+
 if [ -s "%(errfile)s" ]; then
     echo "There was output on stderr. Please check '%(errfile)s'. Aborting."
     exit 1
