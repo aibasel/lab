@@ -10,7 +10,7 @@ import sys
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-num_tasks = """NUM_TASKS"""
+num_tasks = %(num_tasks)d
 
 
 def process_task(task_id):
@@ -22,7 +22,7 @@ def process_task(task_id):
 
 
 def main():
-    pool = multiprocessing.Pool(processes="""PROCESSES""")
+    pool = multiprocessing.Pool(processes=%(processes)d)
     result = pool.map_async(process_task, range(1, num_tasks + 1))
     try:
         # Use "timeout" to fix passing KeyboardInterrupts from children

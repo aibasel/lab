@@ -7,7 +7,7 @@ import sys
 from lab.experiment import get_run_dir
 
 
-SHUFFLED_TASK_IDS = """TASK_ORDER"""
+SHUFFLED_TASK_IDS = %(task_order)s
 
 
 def parse_args():

@@ -69,8 +69,8 @@ class Environment(object):
         task_order = range(1, len(self.exp.runs) + 1)
         if self.randomize_task_order:
             random.shuffle(task_order)
-        dispatcher_content = pkgutil.get_data('lab', 'data/run-dispatcher.py').replace(
-            '"""TASK_ORDER"""', str(task_order))
+        dispatcher_content = fill_template('run-dispatcher.py', dict(
+            task_order=str(task_order)))
         self.exp.add_new_file(
             '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
 
@@ -113,12 +113,9 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         self._write_run_dispatcher()
-        script = pkgutil.get_data('lab', 'data/local-job-template.py')
-        replacements = {
-            'NUM_TASKS': str(len(self.exp.runs)),
-            'PROCESSES': str(self.processes)}
-        for orig, new in replacements.items():
-            script = script.replace('"""' + orig + '"""', new)
+        script = fill_template('local-job-template.py', dict(
+            num_tasks=len(self.exp.runs),
+            processes=self.processes))
 
         self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
