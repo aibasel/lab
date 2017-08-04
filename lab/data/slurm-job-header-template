@@ -10,15 +10,15 @@
 #SBATCH --qos=%(qos)s
 ### Number of tasks.
 #SBATCH --array=1-%(num_tasks)d
-### Priority ([-1023,1024] or "TOP", default: TOP).
-#SBATCH --priority=%(priority)s
+### Adjustment to priority ([-2147483645, 2147483645]).
+#SBATCH --nice=%(nice)s
 ### Send mail? Mail type can be e.g. NONE, END, FAIL, ARRAY_TASKS.
 #SBATCH --mail-type=%(mailtype)s
 #SBATCH --mail-user=%(mailuser)s
 ### Extra options.
 %(extra_options)s
 
-%(environment_setup)
+%(environment_setup)s
 
 if [ -s "%(errfile)s" ]; then
     echo "There was output on stderr. Please check '%(errfile)s'. Aborting."

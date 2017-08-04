@@ -21,6 +21,8 @@ import multiprocessing
 import os
 import pkgutil
 import random
+import re
+import subprocess
 import sys
 
 from lab import tools
@@ -48,6 +50,9 @@ def is_run_step(step):
 def fill_template(template_name, parameters):
     template = pkgutil.get_data('lab', 'data/' + template_name)
     return template % parameters
+
+def get_lab_path():
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Environment(object):
@@ -366,6 +371,83 @@ class OracleGridEngineEnvironment(GridEnvironment):
         tools.run_command(submit, cwd=job_dir)
         return job_name
 
+class SlurmEnvironment(GridEnvironment):
+    """Abstract base class for slurm grid environments."""
+
+    JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header-template'       # can be overridden in derived classes
+    RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body-template'   # can be overridden in derived classes
+    STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body-template' # can be overridden in derived classes
+    DEFAULT_PARTITION = None         # must be overridden in derived classes
+    DEFAULT_QOS = None               # must be overridden in derived classes
+    ENVIRONMENT_SETUP = ''           # can be overridden in derived classes
+    DEFAULT_PRIORITY = 0             # can be overridden in derived classes
+
+    def __init__(self, partition=None, qos=None, priority=None,
+                 export=['PATH'], **kwargs):
+        """
+
+        *partition* must be a valid slurm partition name on the grid.
+
+        *qos* must be a valid slurm qos name on the grid.
+
+        *priority* must be in the range [-2147483645, 0] where 0 is the
+        highest priority. If you're a superuser the value can be in the
+        range [-2147483645, 2147483645].
+
+        Use *export* to specify a list of environment variables that
+        should be exported from the login node to the compute nodes.
+
+        See :py:class:`~lab.environments.GridEnvironment` for inherited
+        parameters.
+
+        """
+        GridEnvironment.__init__(self, **kwargs)
+
+        if partition is None:
+            partition = self.DEFAULT_PARTITION
+        if qos is None:
+            qos = self.DEFAULT_QOS
+        if priority is None:
+            priority = self.DEFAULT_PRIORITY
+        assert -2147483645 <= priority <= 2147483645
+
+        self.partition = partition
+        self.qos = qos
+        self.export = export
+        self.nice = -priority
+
+    def _get_job_params(self, step, is_last):
+        job_params = GridEnvironment._get_job_params(self, step, is_last)
+
+        job_params['partition'] = self.partition
+        job_params['qos'] = self.qos
+        job_params['nice'] = self.nice
+        job_params['environment_setup'] = self.ENVIRONMENT_SETUP
+
+        if is_last and self.email:
+            job_params['mailtype'] = 'ALL'
+            job_params['mailuser'] = self.email
+        else:
+            job_params['mailtype'] = 'NONE'
+            job_params['mailuser'] = ''
+
+        return job_params
+
+    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+        submit = ['sbatch']
+        if self.export:
+            submit += ['--export', ",".join(self.export)]
+        if dependency:
+            submit.extend(['-d', 'afterany:' + dependency, '--kill-on-invalid-dep=yes'])
+        submit.append(job_file)
+        # TODO: this duplicates some code from tools.run_command but we need the output
+        logging.info('Executing %s' % (' '.join(submit)))
+        out = subprocess.check_output(submit, cwd=job_dir)
+        print out
+        match = re.match(r"Submitted batch job (\d*)", out.decode())
+        assert match, "Submitting job with sbatch failed: '%s'" % out.decode()
+        return match.group(1)
+
 
 class GkiGridEnvironment(OracleGridEngineEnvironment):
     """Environment for Freiburg's AI group."""
@@ -398,3 +480,15 @@ class MaiaEnvironment(OracleGridEngineEnvironment):
         'maia-quad': _host_range('uni', 1, 32) + _host_range('ugi', 1, 8),
         'maia-six': _host_range('uni', 33, 72),
     }
+
+
+class BaselSlurmEnvironment(SlurmEnvironment):
+    """Environment for Basel's AI group."""
+
+    # TODO: update once we have our own nodes set up
+    DEFAULT_PARTITION = 'uni'
+    DEFAULT_QOS = 'uni-1week'
+
+    ENVIRONMENT_SETUP = (
+        'module load Python/2.7.11-goolf-1.7.20\n'
+        'PYTHONPATH="%s:$PYTHONPATH"' % get_lab_path())
