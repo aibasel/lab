@@ -225,6 +225,7 @@ class SlurmEnvironment(Environment):
         # TODO: this duplicates some code from tools.run_command but we need the output
         logging.info('Executing %s' % (' '.join(submit)))
         out = subprocess.check_output(submit, cwd=cwd)
+        print out
         match = re.match(r"Submitted batch job (\d*)", out.decode())
         assert match, "Submitting job with sbatch failed: '%s'" % out.decode()
         return match.group(1)
