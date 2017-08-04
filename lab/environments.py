@@ -129,15 +129,12 @@ class LocalEnvironment(Environment):
 class GridEnvironment(Environment):
     """Abstract base class for grid environments."""
 
-    DEFAULT_QUEUE = None               # must be overridden in derived classes
     JOB_HEADER_TEMPLATE_FILE = None    # must be overridden in derived classes
     RUN_JOB_BODY_TEMPLATE_FILE = None  # must be overridden in derived classes
     STEP_JOB_BODY_TEMPLATE_FILE = None # must be overridden in derived classes
     MAX_TASKS = float('inf')           # can be overridden in derived classes
-    DEFAULT_PRIORITY = None            # must be overridden in derived classes
 
-    def __init__(self, queue=None, priority=None, email=None,
-                 extra_options=None, **kwargs):
+    def __init__(self, email=None, extra_options=None, **kwargs):
         """
 
         If the main experiment step ('run') is part of the selected
@@ -152,12 +149,6 @@ class GridEnvironment(Environment):
             directory can be inspected if something goes wrong. Since
             the job files call the experiment script during execution,
             it mustn't be changed during the experiment.
-
-        *queue* is used to identify the nodes that this experiment is
-        run on. Allowed values depend on the derived classes.
-
-        *priority* is used for ordering the jobs in the queue. Allowed
-        values depend on the derived classes.
 
         If *email* is provided and the steps run on the grid, a message
         will be sent when the last experiment step finishes.
@@ -177,13 +168,6 @@ class GridEnvironment(Environment):
 
         """
         Environment.__init__(self, **kwargs)
-        if queue is None:
-            queue = self.DEFAULT_QUEUE
-        if priority is None:
-            priority = self.DEFAULT_PRIORITY
-
-        self.queue = queue
-        self.priority = priority
         self.email = email
         self.extra_options = extra_options or '## (not used)'
 
@@ -233,8 +217,6 @@ class GridEnvironment(Environment):
             'logfile': 'driver.log',
             'name': self._get_job_name(step),
             'num_tasks': self._get_num_tasks(step),
-            'priority': self.priority,
-            'queue': self.queue,
         }
 
     def _get_job_header(self, step, is_last):
@@ -316,12 +298,13 @@ class GridEnvironment(Environment):
 class OracleGridEngineEnvironment(GridEnvironment):
     """Abstract base class for grid environments using OGE."""
 
+    DEFAULT_QUEUE = None               # must be overridden in derived classes
     JOB_HEADER_TEMPLATE_FILE = 'oge-job-header-template'       # can be overridden in derived classes
     RUN_JOB_BODY_TEMPLATE_FILE = 'oge-run-job-body-template'   # can be overridden in derived classes
     STEP_JOB_BODY_TEMPLATE_FILE = 'oge-step-job-body-template' # can be overridden in derived classes
-    DEFAULT_PRIORITY = 0             # can be overridden in derived classes
-    HOST_RESTRICTIONS = {}           # can be overridden in derived classes
-    DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
+    DEFAULT_PRIORITY = 0               # can be overridden in derived classes
+    HOST_RESTRICTIONS = {}             # can be overridden in derived classes
+    DEFAULT_HOST_RESTRICTION = ""      # can be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, host_restriction=None, **kwargs):
         """
@@ -337,16 +320,23 @@ class OracleGridEngineEnvironment(GridEnvironment):
         """
         GridEnvironment.__init__(self, queue=queue, priority=priority, **kwargs)
 
-        assert self.priority in xrange(-1023, 1024 + 1)
-
+        if queue is None:
+            queue = self.DEFAULT_QUEUE
+        if priority is None:
+            priority = self.DEFAULT_PRIORITY
         if host_restriction is None:
             host_restriction = self.DEFAULT_HOST_RESTRICTION
+
+        self.queue = queue
+        self.priority = priority
+        assert self.priority in xrange(-1023, 1024 + 1)
         self.host_spec = self._get_host_spec(host_restriction)
 
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
+        job_params['priority'] = self.priority
+        job_params['queue'] = self.queue
         job_params['host_spec'] = self.host_spec
-
         job_params['notification'] = '#$ -m n'
         if is_last and self.email:
             if is_run_step(step):
