@@ -6,7 +6,7 @@ import os
 import os.path
 import platform
 
-from lab.environments import LocalEnvironment, MaiaEnvironment
+from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
@@ -18,7 +18,7 @@ ATTRIBUTES = ['coverage', 'expansions']
 if 'cluster' in platform.node():
     # Create bigger suites with suites.py from the downward-benchmarks repo.
     SUITE = ['depot', 'freecell', 'gripper', 'zenotravel']
-    ENV = MaiaEnvironment(priority=0)
+    ENV = BaselSlurmEnvironment(priority=0)
 else:
     SUITE = ['depot:p01.pddl', 'gripper:prob01.pddl']
     ENV = LocalEnvironment(processes=2)
