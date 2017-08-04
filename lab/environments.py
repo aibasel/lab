@@ -45,6 +45,10 @@ def is_run_step(step):
         step.name == 'run' and step._funcname == 'start_runs' and
         not step.args and not step.kwargs)
 
+def fill_template(template_name, parameters):
+    template = pkgutil.get_data('lab', 'data/' + template_name)
+    return template % parameters
+
 
 class Environment(object):
     """Abstract base class for all environments."""
@@ -128,10 +132,12 @@ class LocalEnvironment(Environment):
 class GridEnvironment(Environment):
     """Abstract base class for grid environments."""
 
-    DEFAULT_QUEUE = None      # must be overridden in derived classes
-    TEMPLATE_FILE = None      # must be overridden in derived classes
-    MAX_TASKS = float('inf')  # can be overridden in derived classes
-    DEFAULT_PRIORITY = None   # must be overridden in derived classes
+    DEFAULT_QUEUE = None               # must be overridden in derived classes
+    JOB_HEADER_TEMPLATE_FILE = None    # must be overridden in derived classes
+    RUN_JOB_BODY_TEMPLATE_FILE = None  # must be overridden in derived classes
+    STEP_JOB_BODY_TEMPLATE_FILE = None # must be overridden in derived classes
+    MAX_TASKS = float('inf')           # can be overridden in derived classes
+    DEFAULT_PRIORITY = None            # must be overridden in derived classes
 
     def __init__(self, queue=None, priority=None, email=None,
                  extra_options=None, **kwargs):
@@ -236,24 +242,28 @@ class GridEnvironment(Environment):
 
     def _get_job_header(self, step, is_last):
         job_params = self._get_job_params(step, is_last)
-        return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
+        return fill_template(self.JOB_HEADER_TEMPLATE_FILE, job_params)
 
-    def _get_main_job_body(self):
+    def _get_run_job_body(self):
         params = dict(
             num_tasks=self._get_num_runs(),
             errfile='driver.err',
             exp_path='../' + self.exp.name)
-        return pkgutil.get_data('lab', 'data/grid-job-body-template') % params
+        return fill_template(self.RUN_JOB_BODY_TEMPLATE_FILE, params)
+
+    def _get_step_job_body(self):
+        params = dict(
+            cwd=os.getcwd(),
+            python=sys.executable or 'python',
+            script=sys.argv[0],
+            args=' '.join(repr(arg) for arg in self._get_script_args()),
+            step_name=step.name)
+        return fill_template(self.STEP_JOB_BODY_TEMPLATE_FILE, params)
 
     def _get_job_body(self, step):
         if is_run_step(step):
-            return self._get_main_job_body()
-        return 'cd "%(cwd)s"\n"%(python)s" "%(script)s" %(args)s "%(step_name)s"\n' % {
-            'cwd': os.getcwd(),
-            'python': sys.executable or 'python',
-            'script': sys.argv[0],
-            'args': ' '.join(repr(arg) for arg in self._get_script_args()),
-            'step_name': step.name}
+            return self._get_run_job_body()
+        return self._get_step_job_body()
 
     def _get_job(self, step, is_last):
         return '%s\n\n%s' % (self._get_job_header(step, is_last),
@@ -309,7 +319,9 @@ class GridEnvironment(Environment):
 class OracleGridEngineEnvironment(GridEnvironment):
     """Abstract base class for grid environments using OGE."""
 
-    TEMPLATE_FILE = 'grid-job-header-template'  # can be overridden in derived classes
+    JOB_HEADER_TEMPLATE_FILE = 'oge-job-header-template'       # can be overridden in derived classes
+    RUN_JOB_BODY_TEMPLATE_FILE = 'oge-run-job-body-template'   # can be overridden in derived classes
+    STEP_JOB_BODY_TEMPLATE_FILE = 'oge-step-job-body-template' # can be overridden in derived classes
     DEFAULT_PRIORITY = 0             # can be overridden in derived classes
     HOST_RESTRICTIONS = {}           # can be overridden in derived classes
     DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes

@@ -179,7 +179,7 @@ class SlurmEnvironment(Environment):
             num_tasks=self._get_num_runs(),
             errfile='driver.err',
             exp_path='../' + self.exp.name)
-        return pkgutil.get_data('lab', 'data/slurm-job-body-template') % params
+        return pkgutil.get_data('lab', 'data/slurm-run-job-body-template') % params
 
     def _get_job_body(self, step):
         if is_run_step(step):
