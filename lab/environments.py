@@ -46,9 +46,11 @@ def is_run_step(step):
         step.name == 'run' and step._funcname == 'start_runs' and
         not step.args and not step.kwargs)
 
+
 def fill_template(template_name, parameters):
     template = pkgutil.get_data('lab', 'data/' + template_name)
     return template % parameters
+
 
 def get_lab_path():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -130,13 +132,16 @@ class LocalEnvironment(Environment):
         for step in steps:
             step()
 
+
 class GridEnvironment(Environment):
     """Abstract base class for grid environments."""
+    # Must be overridden in derived classes.
+    JOB_HEADER_TEMPLATE_FILE = None
+    RUN_JOB_BODY_TEMPLATE_FILE = None
+    STEP_JOB_BODY_TEMPLATE_FILE = None
 
-    JOB_HEADER_TEMPLATE_FILE = None    # must be overridden in derived classes
-    RUN_JOB_BODY_TEMPLATE_FILE = None  # must be overridden in derived classes
-    STEP_JOB_BODY_TEMPLATE_FILE = None # must be overridden in derived classes
-    MAX_TASKS = float('inf')           # can be overridden in derived classes
+    # Can be overridden in derived classes.
+    MAX_TASKS = float('inf')
 
     def __init__(self, email=None, extra_options=None, **kwargs):
         """
@@ -293,7 +298,8 @@ class GridEnvironment(Environment):
             job_file = os.path.join(job_dir, job_name)
             job_content = self._get_job(step, is_last=(step == steps[-1]))
             tools.write_file(job_file, job_content)
-            prev_job_id = self._submit_job(job_name, job_file, job_dir, dependency=prev_job_id)
+            prev_job_id = self._submit_job(
+                job_name, job_file, job_dir, dependency=prev_job_id)
 
     def _submit_job(self, job_name, job_file, job_dir, dependency=None):
         raise NotImplementedError
@@ -301,14 +307,16 @@ class GridEnvironment(Environment):
 
 class OracleGridEngineEnvironment(GridEnvironment):
     """Abstract base class for grid environments using OGE."""
+    # Must be overridden in derived classes.
+    DEFAULT_QUEUE = None
 
-    DEFAULT_QUEUE = None               # must be overridden in derived classes
-    JOB_HEADER_TEMPLATE_FILE = 'oge-job-header-template'       # can be overridden in derived classes
-    RUN_JOB_BODY_TEMPLATE_FILE = 'oge-run-job-body-template'   # can be overridden in derived classes
-    STEP_JOB_BODY_TEMPLATE_FILE = 'oge-step-job-body-template' # can be overridden in derived classes
-    DEFAULT_PRIORITY = 0               # can be overridden in derived classes
-    HOST_RESTRICTIONS = {}             # can be overridden in derived classes
-    DEFAULT_HOST_RESTRICTION = ""      # can be overridden in derived classes
+    # Can be overridden in derived classes.
+    JOB_HEADER_TEMPLATE_FILE = 'oge-job-header-template'
+    RUN_JOB_BODY_TEMPLATE_FILE = 'oge-run-job-body-template'
+    STEP_JOB_BODY_TEMPLATE_FILE = 'oge-step-job-body-template'
+    DEFAULT_PRIORITY = 0
+    HOST_RESTRICTIONS = {}
+    DEFAULT_HOST_RESTRICTION = ""
 
     def __init__(self, queue=None, priority=None, host_restriction=None, **kwargs):
         """
@@ -370,16 +378,19 @@ class OracleGridEngineEnvironment(GridEnvironment):
         tools.run_command(submit, cwd=job_dir)
         return job_name
 
+
 class SlurmEnvironment(GridEnvironment):
     """Abstract base class for slurm grid environments."""
+    # Must be overridden in derived classes.
+    DEFAULT_PARTITION = None
+    DEFAULT_QOS = None
 
-    JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header-template'       # can be overridden in derived classes
-    RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body-template'   # can be overridden in derived classes
-    STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body-template' # can be overridden in derived classes
-    DEFAULT_PARTITION = None         # must be overridden in derived classes
-    DEFAULT_QOS = None               # must be overridden in derived classes
-    ENVIRONMENT_SETUP = ''           # can be overridden in derived classes
-    DEFAULT_PRIORITY = 0             # can be overridden in derived classes
+    # Can be overridden in derived classes.
+    JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header-template'
+    RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body-template'
+    STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body-template'
+    ENVIRONMENT_SETUP = ''
+    DEFAULT_PRIORITY = 0
 
     def __init__(self, partition=None, qos=None, priority=None,
                  export=['PATH'], **kwargs):
