@@ -394,7 +394,7 @@ class SlurmEnvironment(GridEnvironment):
 
         *priority* must be in the range [-2147483645, 0] where 0 is the
         highest priority. If you're a superuser the value can be in the
-        range [-2147483645, 2147483645].
+        range [-2147483645, 2147483645]. By default, the priority is 0.
 
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes.
