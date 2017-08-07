@@ -1,0 +1,26 @@
+#! /bin/bash -l
+### Set name.
+#SBATCH --job-name=%(name)s
+### Redirect stdout and stderr.
+#SBATCH --error=%(errfile)s
+#SBATCH --output=%(logfile)s
+### Set partition.
+#SBATCH --partition=%(partition)s
+### Set quality-of-service group.
+#SBATCH --qos=%(qos)s
+### Number of tasks.
+#SBATCH --array=1-%(num_tasks)d
+### Adjustment to priority ([-2147483645, 2147483645]).
+#SBATCH --nice=%(nice)s
+### Send mail? Mail type can be e.g. NONE, END, FAIL, ARRAY_TASKS.
+#SBATCH --mail-type=%(mailtype)s
+#SBATCH --mail-user=%(mailuser)s
+### Extra options.
+%(extra_options)s
+
+%(environment_setup)s
+
+if [ -s "%(errfile)s" ]; then
+    echo "There was output on stderr. Please check '%(errfile)s'. Aborting."
+    exit 1
+fi

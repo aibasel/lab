@@ -20,6 +20,7 @@ import colorsys
 import functools
 import logging
 import os
+import pkgutil
 import re
 import shutil
 import subprocess
@@ -45,6 +46,10 @@ _LOG_LEVEL = None
 def get_script_path():
     """Get absolute path to main script."""
     return os.path.abspath(sys.argv[0])
+
+
+def get_lab_path():
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class ErrorAbortHandler(logging.StreamHandler):
@@ -142,6 +147,12 @@ def remove_path(path):
 def write_file(filename, content):
     with open(filename, 'w') as f:
         f.write(content)
+
+
+def fill_template(template_name, **parameters):
+    template = pkgutil.get_data(
+        'lab', os.path.join('data', template_name + '.template'))
+    return template % parameters
 
 
 def natural_sort(alist):

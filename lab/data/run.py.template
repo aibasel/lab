@@ -19,7 +19,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 set_property('queue', os.environ.get('QUEUE'))
 
 
-"""CALLS"""
+%(calls)s
 
 for stream in redirects.values():
     stream.close()

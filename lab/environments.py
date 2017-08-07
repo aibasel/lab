@@ -16,11 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import math
 import multiprocessing
 import os
-import pkgutil
 import random
+import re
+import subprocess
 import sys
 
 from lab import tools
@@ -65,8 +65,9 @@ class Environment(object):
         task_order = range(1, len(self.exp.runs) + 1)
         if self.randomize_task_order:
             random.shuffle(task_order)
-        dispatcher_content = pkgutil.get_data('lab', 'data/run-dispatcher.py').replace(
-            '"""TASK_ORDER"""', str(task_order))
+        dispatcher_content = tools.fill_template(
+            'run-dispatcher.py',
+            task_order=str(task_order))
         self.exp.add_new_file(
             '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
 
@@ -109,12 +110,10 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         self._write_run_dispatcher()
-        script = pkgutil.get_data('lab', 'data/local-job-template.py')
-        replacements = {
-            'NUM_TASKS': str(len(self.exp.runs)),
-            'PROCESSES': str(self.processes)}
-        for orig, new in replacements.items():
-            script = script.replace('"""' + orig + '"""', new)
+        script = tools.fill_template(
+            'local-job.py',
+            num_tasks=len(self.exp.runs),
+            processes=self.processes)
 
         self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
@@ -126,18 +125,17 @@ class LocalEnvironment(Environment):
             step()
 
 
-class OracleGridEngineEnvironment(Environment):
+class GridEnvironment(Environment):
     """Abstract base class for grid environments."""
+    # Must be overridden in derived classes.
+    JOB_HEADER_TEMPLATE_FILE = None
+    RUN_JOB_BODY_TEMPLATE_FILE = None
+    STEP_JOB_BODY_TEMPLATE_FILE = None
 
-    DEFAULT_QUEUE = None             # must be overridden in derived classes
-    TEMPLATE_FILE = 'grid-job-header-template'  # can be overridden in derived classes
-    MAX_TASKS = float('inf')         # can be overridden in derived classes
-    DEFAULT_PRIORITY = 0             # can be overridden in derived classes
-    HOST_RESTRICTIONS = {}           # can be overridden in derived classes
-    DEFAULT_HOST_RESTRICTION = ""    # can be overridden in derived classes
+    # Can be overridden in derived classes.
+    MAX_TASKS = float('inf')
 
-    def __init__(self, queue=None, priority=None, host_restriction=None,
-                 email=None, extra_options=None, **kwargs):
+    def __init__(self, email=None, extra_options=None, **kwargs):
         """
 
         If the main experiment step ('run') is part of the selected
@@ -153,38 +151,24 @@ class OracleGridEngineEnvironment(Environment):
             the job files call the experiment script during execution,
             it mustn't be changed during the experiment.
 
-        *queue* must be a valid queue name on the grid.
-
-        *priority* must be in the range [-1023, 0] where 0 is the
-        highest priority. If you're a superuser the value can be in the
-        range [-1023, 1024].
-
         If *email* is provided and the steps run on the grid, a message
         will be sent when the last experiment step finishes.
 
         Use *extra_options* to pass additional options. The
         *extra_options* string may contain newlines. Example that
-        allocates 16 cores per run on maia::
+        allocates 16 cores per run with OGE::
 
             extra_options='#$ -pe smp 16'
+
+        Example that runs each task on its own node with Slurm::
+
+            extra_options='#SBATCH --exclusive'
 
         See :py:class:`~lab.environments.Environment` for inherited
         parameters.
 
         """
         Environment.__init__(self, **kwargs)
-        if queue is None:
-            queue = self.DEFAULT_QUEUE
-        if priority is None:
-            priority = self.DEFAULT_PRIORITY
-        if host_restriction is None:
-            host_restriction = self.DEFAULT_HOST_RESTRICTION
-
-        self.queue = queue
-        self.host_spec = self._get_host_spec(host_restriction)
-        assert priority in xrange(-1023, 1024 + 1)
-        self.priority = priority
-        self.runs_per_task = 1
         self.email = email
         self.extra_options = extra_options or '## (not used)'
 
@@ -214,7 +198,7 @@ class OracleGridEngineEnvironment(Environment):
             step.name)
 
     def _get_num_runs(self):
-        num_runs = int(math.ceil(len(self.exp.runs) / float(self.runs_per_task)))
+        num_runs = len(self.exp.runs)
         if num_runs > self.MAX_TASKS:
             logging.critical('You are trying to submit a job with %d tasks, '
                              'but only %d are allowed.' %
@@ -227,60 +211,43 @@ class OracleGridEngineEnvironment(Environment):
         else:
             return 1
 
-    def _get_job_params(self, step):
+    def _get_job_params(self, step, is_last):
         return {
             'errfile': 'driver.err',
             'extra_options': self.extra_options,
-            'host_spec': self.host_spec,
             'logfile': 'driver.log',
             'name': self._get_job_name(step),
-            'notification': '#$ -m n',
             'num_tasks': self._get_num_tasks(step),
-            'priority': self.priority,
-            'queue': self.queue,
         }
 
     def _get_job_header(self, step, is_last):
-        job_params = self._get_job_params(step)
-        if is_last and self.email:
-            if is_run_step(step):
-                logging.warning(
-                    "The cluster sends mails per run, not per step."
-                    " Since the last of the submitted steps would send"
-                    " too many mails, we disable the notification."
-                    " We recommend submitting the 'run' step together"
-                    " with the 'fetch' step.")
-            else:
-                job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
-        return pkgutil.get_data('lab', 'data/' + self.TEMPLATE_FILE) % job_params
+        job_params = self._get_job_params(step, is_last)
+        return tools.fill_template(self.JOB_HEADER_TEMPLATE_FILE, **job_params)
 
-    def _get_main_job_body(self):
-        params = dict(
+    def _get_run_job_body(self):
+        return tools.fill_template(
+            self.RUN_JOB_BODY_TEMPLATE_FILE,
             num_tasks=self._get_num_runs(),
             errfile='driver.err',
             exp_path='../' + self.exp.name)
-        return pkgutil.get_data('lab', 'data/grid-job-body-template') % params
+
+    def _get_step_job_body(self, step):
+        return tools.fill_template(
+            self.STEP_JOB_BODY_TEMPLATE_FILE,
+            cwd=os.getcwd(),
+            python=sys.executable or 'python',
+            script=sys.argv[0],
+            args=' '.join(repr(arg) for arg in self._get_script_args()),
+            step_name=step.name)
 
     def _get_job_body(self, step):
         if is_run_step(step):
-            return self._get_main_job_body()
-        return 'cd "%(cwd)s"\n"%(python)s" "%(script)s" %(args)s "%(step_name)s"\n' % {
-            'cwd': os.getcwd(),
-            'python': sys.executable or 'python',
-            'script': sys.argv[0],
-            'args': ' '.join(repr(arg) for arg in self._get_script_args()),
-            'step_name': step.name}
+            return self._get_run_job_body()
+        return self._get_step_job_body(step)
 
     def _get_job(self, step, is_last):
         return '%s\n\n%s' % (self._get_job_header(step, is_last),
                              self._get_job_body(step))
-
-    def _get_host_spec(self, host_restriction):
-        if not host_restriction:
-            return '## (not used)'
-        else:
-            hosts = self.HOST_RESTRICTIONS[host_restriction]
-            return '#$ -l hostname="%s"' % '|'.join(hosts)
 
     def write_main_script(self):
         # The main script is written by the run_steps() method.
@@ -317,18 +284,170 @@ class OracleGridEngineEnvironment(Environment):
         # Create job dir only when we need it.
         tools.makedirs(job_dir)
 
-        prev_job_name = None
+        prev_job_id = None
         for step in steps:
             job_name = self._get_job_name(step)
-            tools.write_file(
-                os.path.join(job_dir, job_name),
-                self._get_job(step, is_last=(step == steps[-1])))
-            submit = ['qsub']
-            if prev_job_name:
-                submit.extend(['-hold_jid', prev_job_name])
-            submit.append(job_name)
-            tools.run_command(submit, cwd=job_dir)
-            prev_job_name = job_name
+            job_file = os.path.join(job_dir, job_name)
+            job_content = self._get_job(step, is_last=(step == steps[-1]))
+            tools.write_file(job_file, job_content)
+            prev_job_id = self._submit_job(
+                job_name, job_file, job_dir, dependency=prev_job_id)
+
+    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+        raise NotImplementedError
+
+
+class OracleGridEngineEnvironment(GridEnvironment):
+    """Abstract base class for grid environments using OGE."""
+    # Must be overridden in derived classes.
+    DEFAULT_QUEUE = None
+
+    # Can be overridden in derived classes.
+    JOB_HEADER_TEMPLATE_FILE = 'oge-job-header'
+    RUN_JOB_BODY_TEMPLATE_FILE = 'oge-run-job-body'
+    STEP_JOB_BODY_TEMPLATE_FILE = 'oge-step-job-body'
+    DEFAULT_PRIORITY = 0
+    HOST_RESTRICTIONS = {}
+    DEFAULT_HOST_RESTRICTION = ""
+
+    def __init__(self, queue=None, priority=None, host_restriction=None, **kwargs):
+        """
+        *queue* must be a valid queue name on the grid.
+
+        *priority* must be in the range [-1023, 0] where 0 is the
+        highest priority. If you're a superuser the value can be in the
+        range [-1023, 1024].
+
+        See :py:class:`~lab.environments.GridEnvironment` for inherited
+        parameters.
+
+        """
+        GridEnvironment.__init__(self, **kwargs)
+
+        if queue is None:
+            queue = self.DEFAULT_QUEUE
+        if priority is None:
+            priority = self.DEFAULT_PRIORITY
+        if host_restriction is None:
+            host_restriction = self.DEFAULT_HOST_RESTRICTION
+
+        self.queue = queue
+        self.priority = priority
+        assert self.priority in xrange(-1023, 1024 + 1)
+        self.host_spec = self._get_host_spec(host_restriction)
+
+    def _get_job_params(self, step, is_last):
+        job_params = GridEnvironment._get_job_params(self, step, is_last)
+        job_params['priority'] = self.priority
+        job_params['queue'] = self.queue
+        job_params['host_spec'] = self.host_spec
+        job_params['notification'] = '#$ -m n'
+        if is_last and self.email:
+            if is_run_step(step):
+                logging.warning(
+                    "The cluster sends mails per run, not per step."
+                    " Since the last of the submitted steps would send"
+                    " too many mails, we disable the notification."
+                    " We recommend submitting the 'run' step together"
+                    " with the 'fetch' step.")
+            else:
+                job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
+
+        return job_params
+
+    def _get_host_spec(self, host_restriction):
+        if not host_restriction:
+            return '## (not used)'
+        else:
+            hosts = self.HOST_RESTRICTIONS[host_restriction]
+            return '#$ -l hostname="%s"' % '|'.join(hosts)
+
+    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+        submit = ['qsub']
+        if dependency:
+            submit.extend(['-hold_jid', dependency])
+        submit.append(job_file)
+        tools.run_command(submit, cwd=job_dir)
+        return job_name
+
+
+class SlurmEnvironment(GridEnvironment):
+    """Abstract base class for slurm grid environments."""
+    # Must be overridden in derived classes.
+    DEFAULT_PARTITION = None
+    DEFAULT_QOS = None
+
+    # Can be overridden in derived classes.
+    JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header'
+    RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body'
+    STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body'
+    ENVIRONMENT_SETUP = ''
+    DEFAULT_PRIORITY = 0
+
+    def __init__(self, partition=None, qos=None, priority=None,
+                 export=['PATH'], **kwargs):
+        """
+
+        *partition* must be a valid slurm partition name on the grid.
+
+        *qos* must be a valid slurm qos name on the grid.
+
+        *priority* must be in the range [-2147483645, 0] where 0 is the
+        highest priority. If you're a superuser the value can be in the
+        range [-2147483645, 2147483645]. By default, the priority is 0.
+
+        Use *export* to specify a list of environment variables that
+        should be exported from the login node to the compute nodes.
+
+        See :py:class:`~lab.environments.GridEnvironment` for inherited
+        parameters.
+
+        """
+        GridEnvironment.__init__(self, **kwargs)
+
+        if partition is None:
+            partition = self.DEFAULT_PARTITION
+        if qos is None:
+            qos = self.DEFAULT_QOS
+        if priority is None:
+            priority = self.DEFAULT_PRIORITY
+        assert -2147483645 <= priority <= 2147483645
+
+        self.partition = partition
+        self.qos = qos
+        self.export = export
+        self.nice = -priority
+
+    def _get_job_params(self, step, is_last):
+        job_params = GridEnvironment._get_job_params(self, step, is_last)
+
+        job_params['partition'] = self.partition
+        job_params['qos'] = self.qos
+        job_params['nice'] = self.nice
+        job_params['environment_setup'] = self.ENVIRONMENT_SETUP
+
+        if is_last and self.email:
+            job_params['mailtype'] = 'ALL'
+            job_params['mailuser'] = self.email
+        else:
+            job_params['mailtype'] = 'NONE'
+            job_params['mailuser'] = ''
+
+        return job_params
+
+    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+        submit = ['sbatch']
+        if self.export:
+            submit += ['--export', ",".join(self.export)]
+        if dependency:
+            submit.extend(['-d', 'afterany:' + dependency, '--kill-on-invalid-dep=yes'])
+        submit.append(job_file)
+        logging.info('Executing %s' % (' '.join(submit)))
+        out = subprocess.check_output(submit, cwd=job_dir).decode()
+        print out
+        match = re.match(r"Submitted batch job (\d*)", out)
+        assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
+        return match.group(1)
 
 
 class GkiGridEnvironment(OracleGridEngineEnvironment):
@@ -349,7 +468,7 @@ def _host_range(prefix, from_num, to_num):
 
 
 class MaiaEnvironment(OracleGridEngineEnvironment):
-    """Environment for Basel's AI group."""
+    """Old environment for Basel's AI group."""
 
     DEFAULT_QUEUE = '"all.q@ase*"'
     DEFAULT_HOST_RESTRICTION = ''
@@ -362,3 +481,15 @@ class MaiaEnvironment(OracleGridEngineEnvironment):
         'maia-quad': _host_range('uni', 1, 32) + _host_range('ugi', 1, 8),
         'maia-six': _host_range('uni', 33, 72),
     }
+
+
+class BaselSlurmEnvironment(SlurmEnvironment):
+    """Environment for Basel's AI group."""
+
+    # TODO: update once we have our own nodes set up
+    DEFAULT_PARTITION = 'uni'
+    DEFAULT_QOS = 'uni-1week'
+
+    ENVIRONMENT_SETUP = (
+        'module load Python/2.7.11-goolf-1.7.20\n'
+        'PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path())
