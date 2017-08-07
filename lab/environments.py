@@ -18,7 +18,6 @@
 import logging
 import multiprocessing
 import os
-import pkgutil
 import random
 import re
 import subprocess
@@ -47,15 +46,6 @@ def is_run_step(step):
         not step.args and not step.kwargs)
 
 
-def fill_template(template_name, parameters):
-    template = pkgutil.get_data('lab', 'data/' + template_name)
-    return template % parameters
-
-
-def get_lab_path():
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
 class Environment(object):
     """Abstract base class for all environments."""
     def __init__(self, randomize_task_order=True):
@@ -75,8 +65,9 @@ class Environment(object):
         task_order = range(1, len(self.exp.runs) + 1)
         if self.randomize_task_order:
             random.shuffle(task_order)
-        dispatcher_content = fill_template('run-dispatcher-template', dict(
-            task_order=str(task_order)))
+        dispatcher_content = tools.fill_template(
+            'run-dispatcher.py',
+            task_order=str(task_order))
         self.exp.add_new_file(
             '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
 
@@ -119,9 +110,10 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         self._write_run_dispatcher()
-        script = fill_template('local-job-template', dict(
+        script = tools.fill_template(
+            'local-job.py',
             num_tasks=len(self.exp.runs),
-            processes=self.processes))
+            processes=self.processes)
 
         self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
@@ -230,23 +222,23 @@ class GridEnvironment(Environment):
 
     def _get_job_header(self, step, is_last):
         job_params = self._get_job_params(step, is_last)
-        return fill_template(self.JOB_HEADER_TEMPLATE_FILE, job_params)
+        return tools.fill_template(self.JOB_HEADER_TEMPLATE_FILE, **job_params)
 
     def _get_run_job_body(self):
-        params = dict(
+        return tools.fill_template(
+            self.RUN_JOB_BODY_TEMPLATE_FILE,
             num_tasks=self._get_num_runs(),
             errfile='driver.err',
             exp_path='../' + self.exp.name)
-        return fill_template(self.RUN_JOB_BODY_TEMPLATE_FILE, params)
 
     def _get_step_job_body(self, step):
-        params = dict(
+        return tools.fill_template(
+            self.STEP_JOB_BODY_TEMPLATE_FILE,
             cwd=os.getcwd(),
             python=sys.executable or 'python',
             script=sys.argv[0],
             args=' '.join(repr(arg) for arg in self._get_script_args()),
             step_name=step.name)
-        return fill_template(self.STEP_JOB_BODY_TEMPLATE_FILE, params)
 
     def _get_job_body(self, step):
         if is_run_step(step):
@@ -311,9 +303,9 @@ class OracleGridEngineEnvironment(GridEnvironment):
     DEFAULT_QUEUE = None
 
     # Can be overridden in derived classes.
-    JOB_HEADER_TEMPLATE_FILE = 'oge-job-header-template'
-    RUN_JOB_BODY_TEMPLATE_FILE = 'oge-run-job-body-template'
-    STEP_JOB_BODY_TEMPLATE_FILE = 'oge-step-job-body-template'
+    JOB_HEADER_TEMPLATE_FILE = 'oge-job-header'
+    RUN_JOB_BODY_TEMPLATE_FILE = 'oge-run-job-body'
+    STEP_JOB_BODY_TEMPLATE_FILE = 'oge-step-job-body'
     DEFAULT_PRIORITY = 0
     HOST_RESTRICTIONS = {}
     DEFAULT_HOST_RESTRICTION = ""
@@ -386,9 +378,9 @@ class SlurmEnvironment(GridEnvironment):
     DEFAULT_QOS = None
 
     # Can be overridden in derived classes.
-    JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header-template'
-    RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body-template'
-    STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body-template'
+    JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header'
+    RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body'
+    STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body'
     ENVIRONMENT_SETUP = ''
     DEFAULT_PRIORITY = 0
 
@@ -501,4 +493,4 @@ class BaselSlurmEnvironment(SlurmEnvironment):
 
     ENVIRONMENT_SETUP = (
         'module load Python/2.7.11-goolf-1.7.20\n'
-        'PYTHONPATH="%s:$PYTHONPATH"' % get_lab_path())
+        'PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path())
