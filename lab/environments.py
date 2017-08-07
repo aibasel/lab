@@ -442,12 +442,11 @@ class SlurmEnvironment(GridEnvironment):
         if dependency:
             submit.extend(['-d', 'afterany:' + dependency, '--kill-on-invalid-dep=yes'])
         submit.append(job_file)
-        # TODO: this duplicates some code from tools.run_command but we need the output
         logging.info('Executing %s' % (' '.join(submit)))
-        out = subprocess.check_output(submit, cwd=job_dir)
+        out = subprocess.check_output(submit, cwd=job_dir).decode()
         print out
-        match = re.match(r"Submitted batch job (\d*)", out.decode())
-        assert match, "Submitting job with sbatch failed: '%s'" % out.decode()
+        match = re.match(r"Submitted batch job (\d*)", out)
+        assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
         return match.group(1)
 
 
@@ -469,7 +468,7 @@ def _host_range(prefix, from_num, to_num):
 
 
 class MaiaEnvironment(OracleGridEngineEnvironment):
-    """Environment for Basel's AI group."""
+    """Old environment for Basel's AI group."""
 
     DEFAULT_QUEUE = '"all.q@ase*"'
     DEFAULT_HOST_RESTRICTION = ''
