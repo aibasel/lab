@@ -346,10 +346,6 @@ class PlotReport(PlanningReport):
     def _prepare_categories(self, categories):
         new_categories = {}
         for category, coords in categories.items():
-            # The same coordinate may have been added multiple times. To avoid
-            # drawing it more than once which results in a bolder spot, we
-            # filter duplicate items.
-            coords = list(set(coords))
             # Logarithmic axes cannot handle values <= 0.
             if self.xscale != 'linear':
                 coords = [(handle_zero(x), y) for x, y in coords]
