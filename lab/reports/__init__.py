@@ -717,7 +717,12 @@ class Table(collections.defaultdict):
                 return '{0:.{1}f}'.format(value, self.digits)
             else:
                 result = str(value)
-            return markup.escape(result)
+
+            # Only escape text if it doesn't contain LaTeX or HTML markup.
+            if "''" in result:
+                return result
+            else:
+                return markup.escape(result)
 
         value_text = format_value(value)
 
