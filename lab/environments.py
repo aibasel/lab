@@ -486,9 +486,8 @@ class MaiaEnvironment(OracleGridEngineEnvironment):
 class BaselSlurmEnvironment(SlurmEnvironment):
     """Environment for Basel's AI group."""
 
-    # TODO: update once we have our own nodes set up
-    DEFAULT_PARTITION = 'uni'
-    DEFAULT_QOS = 'uni-1week'
+    DEFAULT_PARTITION = 'infai'
+    DEFAULT_QOS = 'infai'
 
     ENVIRONMENT_SETUP = (
         'module load Python/2.7.11-goolf-1.7.20\n'
