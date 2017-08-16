@@ -429,6 +429,7 @@ class SlurmEnvironment(GridEnvironment):
 
         self.partition = partition
         self.qos = qos
+        self.memory_per_cpu = memory_per_cpu
         self.export = export
         self.nice = -priority
 
