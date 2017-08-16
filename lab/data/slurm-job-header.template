@@ -8,6 +8,8 @@
 #SBATCH --partition=%(partition)s
 ### Set quality-of-service group.
 #SBATCH --qos=%(qos)s
+### Set memory limit.
+#SBATCH --mem-per-cpu=%(memory_per_cpu)s
 ### Number of tasks.
 #SBATCH --array=1-%(num_tasks)d
 ### Adjustment to priority ([-2147483645, 2147483645]).

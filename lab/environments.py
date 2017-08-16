@@ -376,6 +376,7 @@ class SlurmEnvironment(GridEnvironment):
     # Must be overridden in derived classes.
     DEFAULT_PARTITION = None
     DEFAULT_QOS = None
+    DEFAULT_MEMORY_PER_CPU = None
 
     # Can be overridden in derived classes.
     JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header'
@@ -384,13 +385,24 @@ class SlurmEnvironment(GridEnvironment):
     ENVIRONMENT_SETUP = ''
     DEFAULT_PRIORITY = 0
 
-    def __init__(self, partition=None, qos=None, priority=None,
-                 export=['PATH'], **kwargs):
+    def __init__(self, partition=None, qos=None, memory_per_cpu=None,
+                 priority=None, export=['PATH'], **kwargs):
         """
 
         *partition* must be a valid slurm partition name on the grid.
 
         *qos* must be a valid slurm qos name on the grid.
+
+        *memory_per_cpu* must be a string specifying the memory
+        allocated for each processor. The string must end with one of
+        the letters K, M or G. The default is "4000M". Processes that
+        surpass this memory limit are terminated with SIGKILL. Users of
+        BaselSlurmEnvironment should not have to change this variable.
+        Instead, we recommend using the ``memory_limit`` kwarg of
+        :py:func:`~lab.experiment.Run.add_command` for imposing a soft
+        memory limit that can be caught from inside your programs. Fast
+        Downward users should set memory limits via the
+        ``driver_options``.
 
         *priority* must be in the range [-2147483645, 0] where 0 is the
         highest priority. If you're a superuser the value can be in the
@@ -409,6 +421,8 @@ class SlurmEnvironment(GridEnvironment):
             partition = self.DEFAULT_PARTITION
         if qos is None:
             qos = self.DEFAULT_QOS
+        if memory_per_cpu is None:
+            memory_per_cpu = self.DEFAULT_MEMORY_PER_CPU
         if priority is None:
             priority = self.DEFAULT_PRIORITY
         assert -2147483645 <= priority <= 2147483645
@@ -423,6 +437,7 @@ class SlurmEnvironment(GridEnvironment):
 
         job_params['partition'] = self.partition
         job_params['qos'] = self.qos
+        job_params['memory_per_cpu'] = self.memory_per_cpu
         job_params['nice'] = self.nice
         job_params['environment_setup'] = self.ENVIRONMENT_SETUP
 
@@ -488,6 +503,8 @@ class BaselSlurmEnvironment(SlurmEnvironment):
 
     DEFAULT_PARTITION = 'infai'
     DEFAULT_QOS = 'infai'
+    # Leave some slack and don't use the full 4096 MiB.
+    DEFAULT_MEMORY_PER_CPU = '4000M'
 
     ENVIRONMENT_SETUP = (
         'module load Python/2.7.11-goolf-1.7.20\n'
