@@ -443,7 +443,7 @@ class SlurmEnvironment(GridEnvironment):
         job_params['environment_setup'] = self.ENVIRONMENT_SETUP
 
         if is_last and self.email:
-            job_params['mailtype'] = 'ALL'
+            job_params['mailtype'] = 'END,FAIL,REQUEUE,STAGE_OUT'
             job_params['mailuser'] = self.email
         else:
             job_params['mailtype'] = 'NONE'
