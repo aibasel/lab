@@ -5,12 +5,12 @@ Simple experiment showing how to make reports for data obtained without
 lab.
 
 To use custom results, create the file <EXP_DIR>-eval/properties. It
-must be a json file mapping planner runs to results (see below). The
-keys must be unique, but otherwise they are irrelevant. Each mapped
-value must itself be a dictionary with at least the keys "domain",
-"problem" and "algorithm". In addition you need the attribute names and
-values that you want to make reports for, e.g. "coverage",
-"expansions", "time".
+must be a json file mapping planner run IDs to results (see below). The
+run IDs must obviously be unique. Each value in the dictionary must
+itself be a dictionary with at least the keys "domain", "problem",
+"algorithm" and "id". In addition you need the attribute names and
+values that you want to make reports for, e.g. "coverage", "expansions",
+"time".
 
 """
 
@@ -28,6 +28,7 @@ EXP_DIR = "data/custom"
 
 PROPERTIES = {
     "ff-gripper-prob01.pddl": {
+        "id": ["ff", "gripper", "prob01.pddl"],
         "domain": "gripper",
         "problem": "prob01.pddl",
         "algorithm": "ff",
@@ -35,6 +36,7 @@ PROPERTIES = {
         "expansions": 1234
     },
     "blind-gripper-prob01.pddl": {
+        "id": ["blind", "gripper", "prob01.pddl"],
         "domain": "gripper",
         "problem": "prob01.pddl",
         "algorithm": "blind",
