@@ -45,7 +45,8 @@ append your parser to the list of commands of each run.
 
 """
 
-import os
+import errno
+import os.path
 import re
 from collections import defaultdict
 import logging
@@ -105,6 +106,8 @@ class _FileParser(object):
     Private class that parses a given file according to the added patterns
     and functions.
     """
+    LAB_LOG_FILES = ['run.log', 'run.err', 'driver.log', 'driver.err']
+
     def __init__(self):
         self.filename = None
         self.content = None
@@ -113,8 +116,16 @@ class _FileParser(object):
 
     def load_file(self, filename):
         self.filename = filename
-        with open(filename, 'rb') as f:
-            self.content = f.read()
+        try:
+            with open(filename, 'rb') as f:
+                self.content = f.read()
+        except IOError as err:
+            # Ignore missing log files as they are only created on demand.
+            if (err.errno == errno.ENOENT and
+                    os.path.basename(filename) in self.LAB_LOG_FILES):
+                self.content = ''
+            else:
+                raise
 
     def add_pattern(self, pattern):
         self.patterns.append(pattern)
@@ -211,7 +222,7 @@ class Parser(object):
 
         """
         for filename, file_parser in self.file_parsers.items():
-            # If filename is absolute it will not be changed here
+            # If filename is absolute it will not be changed here.
             path = os.path.join(self.run_dir, filename)
             try:
                 file_parser.load_file(path)
@@ -219,7 +230,7 @@ class Parser(object):
                 logging.error('File "%s" could not be read: %s' % (path, err))
                 self.props['error'] = 'unexplained-error:parser-failed-to-read-file'
             else:
-                # Subclasses directly modify the properties during parsing
+                # Subclasses directly modify the properties during parsing.
                 file_parser.parse(self.props)
 
         self.props.write()
