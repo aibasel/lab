@@ -22,6 +22,7 @@ Regular expressions and functions for parsing Fast Downward experiments.
 """
 
 from __future__ import division
+from __future__ import print_function
 
 from collections import defaultdict
 import math
@@ -97,7 +98,7 @@ def _same_length(groups):
 def _update_props_with_iterative_values(props, values, attr_groups):
     for group in attr_groups:
         if not _same_length(values[attr] for attr in group):
-            print 'Error: malformed log:', values
+            print('Error: malformed log:', values)
             props['error'] = 'unexplained-malformed-log'
 
     for name, items in values.items():
@@ -225,10 +226,6 @@ def get_initial_h_values(content, props):
                 props['initial_h_value'] = values[0]
 
 
-def get_memory_limit_in_kb(props):
-    return props['limit_search_memory'] * 1024
-
-
 def check_memory(content, props):
     """Add "memory" attribute if the problem was solved."""
     raw_memory = props.get('raw_memory')
@@ -257,22 +254,31 @@ def scores(content, props):
         best_raw_score = math.log(min_bound) - math.log(max_bound)
         return raw_score / best_raw_score
 
-    # Maximum memory in KB
-    max_memory = get_memory_limit_in_kb(props)
-
-    max_time = props['limit_search_time']
-
     for attr in ('expansions', 'evaluations', 'generated'):
         props['score_' + attr] = log_score(
             props.get(attr), min_bound=100, max_bound=1e6)
 
-    props.update({
-        'score_memory': log_score(
-            props.get('memory'), min_bound=2000, max_bound=max_memory),
-        'score_total_time': log_score(
-            props.get('total_time'), min_bound=1.0, max_bound=max_time),
-        'score_search_time': log_score(
-            props.get('search_time'), min_bound=1.0, max_bound=max_time)})
+    try:
+        max_time = props['limit_search_time']
+    except KeyError:
+        print(
+            "search time limit missing -> can't compute time scores",
+            file=sys.stderr)
+    else:
+        props['score_total_time'] = log_score(
+            props.get('total_time'), min_bound=1.0, max_bound=max_time)
+        props['score_search_time'] = log_score(
+            props.get('search_time'), min_bound=1.0, max_bound=max_time)
+
+    try:
+        max_memory_kb = props['limit_search_memory'] * 1024
+    except KeyError:
+        print(
+            "search memory limit missing -> can't compute score_memory",
+            file=sys.stderr)
+    else:
+        props['score_memory'] = log_score(
+            props.get('memory'), min_bound=2000, max_bound=max_memory_kb)
 
 
 def check_min_values(content, props):
@@ -323,10 +329,10 @@ class SearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
 
+        self.add_function(get_error)
         self.add_function(get_iterative_results)
         self.add_function(coverage)
         self.add_function(unsolvable)
-        self.add_function(get_error)
 
 
 class SingleSearchParser(SearchParser):
@@ -378,11 +384,11 @@ def get_planner_type():
 def main():
     planner_type = get_planner_type()
     if planner_type == 'single':
-        print 'Running single search parser'
+        print('Running single search parser')
         parser = SingleSearchParser()
     else:
         assert planner_type == 'portfolio', planner_type
-        print 'Running portfolio parser'
+        print('Running portfolio parser')
         parser = PortfolioParser()
 
     parser.parse()
