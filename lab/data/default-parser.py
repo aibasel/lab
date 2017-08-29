@@ -5,7 +5,7 @@ import sys
 from lab.parser import Parser
 
 
-MAX_LOG_SIZE_IN_KB = 100 * 1024
+MAX_LOG_SIZE_IN_KB = 1024
 
 
 def check_log_size(content, props):
