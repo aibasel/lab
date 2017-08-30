@@ -394,14 +394,15 @@ class SlurmEnvironment(GridEnvironment):
         *qos* must be a valid slurm qos name on the grid.
 
         *memory_per_cpu* must be a string specifying the memory
-        allocated for each processor. The string must end with one of
-        the letters K, M or G. The default is "4000M". Processes that
-        surpass this memory limit are terminated with SIGKILL. Users of
-        BaselSlurmEnvironment should not have to change this variable.
-        Instead, we recommend using the ``memory_limit`` kwarg of
-        :py:func:`~lab.experiment.Run.add_command` for imposing a soft
-        memory limit that can be caught from inside your programs. Fast
-        Downward users should set memory limits via the
+        allocated for each core. The string must end with one of the
+        letters K, M or G. The default is "3872M", which is the maximum
+        amount that allows using all 16 cores in parallel. Processes
+        that surpass the memory limit are terminated with SIGKILL.
+        Unless you need more memory you should not have to change this
+        variable. Instead, we recommend using the ``memory_limit`` kwarg
+        of :py:func:`~lab.experiment.Run.add_command` for imposing a
+        soft memory limit that can be caught from inside your programs.
+        Fast Downward users should set memory limits via the
         ``driver_options``.
 
         *priority* must be in the range [-2147483645, 0] where 0 is the
@@ -504,8 +505,9 @@ class BaselSlurmEnvironment(SlurmEnvironment):
 
     DEFAULT_PARTITION = 'infai'
     DEFAULT_QOS = 'infai'
-    # Leave some slack and don't use the full 4096 MiB.
-    DEFAULT_MEMORY_PER_CPU = '4000M'
+    # infai nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
+    # (see http://issues.fast-downward.org/issue733).
+    DEFAULT_MEMORY_PER_CPU = '3872M'
 
     ENVIRONMENT_SETUP = (
         'module load Python/2.7.11-goolf-1.7.20\n'
