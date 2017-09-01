@@ -22,7 +22,6 @@ Regular expressions and functions for parsing Fast Downward experiments.
 """
 
 from __future__ import division
-from __future__ import print_function
 
 from collections import defaultdict
 import math
@@ -98,7 +97,7 @@ def _same_length(groups):
 def _update_props_with_iterative_values(props, values, attr_groups):
     for group in attr_groups:
         if not _same_length(values[attr] for attr in group):
-            print('Error: malformed log:', values)
+            print 'Error: malformed log:', values
             props['error'] = 'unexplained-malformed-log'
 
     for name, items in values.items():
@@ -380,11 +379,11 @@ def get_planner_type():
 def main():
     planner_type = get_planner_type()
     if planner_type == 'single':
-        print('Running single search parser')
+        print 'Running single search parser'
         parser = SingleSearchParser()
     else:
         assert planner_type == 'portfolio', planner_type
-        print('Running portfolio parser')
+        print 'Running portfolio parser'
         parser = PortfolioParser()
 
     parser.parse()
