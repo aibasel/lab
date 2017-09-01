@@ -15,8 +15,7 @@ num_tasks = %(num_tasks)d
 
 def process_task(task_id):
     try:
-        subprocess.check_call(
-            ['./run-dispatcher.py', str(num_tasks), str(task_id)])
+        subprocess.check_call(['./run-dispatcher.py', str(task_id)])
     except subprocess.CalledProcessError as err:
         return True
 

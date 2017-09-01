@@ -227,7 +227,6 @@ class GridEnvironment(Environment):
     def _get_run_job_body(self):
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
-            num_tasks=self._get_num_runs(),
             errfile='driver.err',
             exp_path='../' + self.exp.name)
 
