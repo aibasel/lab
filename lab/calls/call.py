@@ -158,10 +158,13 @@ class Call(object):
                     data = os.read(fd, 4096)
                     if not data:
                         close_unregister_and_remove(fd)
-                    if (self.log_limit_in_bytes is not None and
+                    if (fdin_to_fdout[fd] and
+                            self.log_limit_in_bytes is not None and
                             fd_to_bytes[fd] + len(data) > self.log_limit_in_bytes):
                         fdin_to_fdout[fd] = None
-                        set_property('error', 'unexplained-error:logfile-too-big')
+                        set_property('error', 'unexplained-error:logfile-too-large')
+                        sys.stderr.write("Error: logfile too large\n")
+                        self.process.terminate()
                     if fdin_to_fdout[fd]:
                         fd_to_bytes[fd] += os.write(fdin_to_fdout[fd], data)
                 else:
