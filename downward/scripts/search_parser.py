@@ -261,9 +261,7 @@ def scores(content, props):
     try:
         max_time = props['limit_search_time']
     except KeyError:
-        print(
-            "search time limit missing -> can't compute time scores",
-            file=sys.stderr)
+        print "search time limit missing -> can't compute time scores"
     else:
         props['score_total_time'] = log_score(
             props.get('total_time'), min_bound=1.0, max_bound=max_time)
@@ -273,9 +271,7 @@ def scores(content, props):
     try:
         max_memory_kb = props['limit_search_memory'] * 1024
     except KeyError:
-        print(
-            "search memory limit missing -> can't compute score_memory",
-            file=sys.stderr)
+        print "search memory limit missing -> can't compute score_memory"
     else:
         props['score_memory'] = log_score(
             props.get('memory'), min_bound=2000, max_bound=max_memory_kb)
@@ -347,10 +343,10 @@ class SingleSearchParser(SearchParser):
             type=float, required=False)
         self.add_pattern(
             'limit_search_time', 'search time limit: (\d+)s',
-            type=int, required=True)
+            type=int, required=False)
         self.add_pattern(
             'limit_search_memory', 'search memory limit: (\d+) MB',
-            type=int, required=True)
+            type=int, required=False)
 
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
