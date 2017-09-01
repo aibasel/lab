@@ -45,7 +45,6 @@ append your parser to the list of commands of each run.
 
 """
 
-import errno
 import os.path
 import re
 from collections import defaultdict
@@ -106,8 +105,6 @@ class _FileParser(object):
     Private class that parses a given file according to the added patterns
     and functions.
     """
-    LAB_LOG_FILES = ['run.log', 'run.err', 'driver.log', 'driver.err']
-
     def __init__(self):
         self.filename = None
         self.content = None
@@ -116,16 +113,8 @@ class _FileParser(object):
 
     def load_file(self, filename):
         self.filename = filename
-        try:
-            with open(filename, 'rb') as f:
-                self.content = f.read()
-        except IOError as err:
-            # Ignore missing log files as they are only created on demand.
-            if (err.errno == errno.ENOENT and
-                    os.path.basename(filename) in self.LAB_LOG_FILES):
-                self.content = ''
-            else:
-                raise
+        with open(filename, 'rb') as f:
+            self.content = f.read()
 
     def add_pattern(self, pattern):
         self.patterns.append(pattern)
