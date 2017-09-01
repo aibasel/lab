@@ -4,17 +4,24 @@
 import os
 import sys
 
-from lab.calls.call import Call
-from lab.calls.log import driver_log, driver_err, redirects, save_returncode
+driver_log = open('driver.log', 'w')
+driver_err = open('driver.err', 'w')
 
 sys.stdout = driver_log
 sys.stderr = driver_err
 
+from lab.calls.call import Call
+from lab.calls.log import delete_file_if_empty, save_returncode
+
+run_log = open('run.log', 'w')
+run_err = open('run.err', 'w')
+redirects = {'stdout': run_log, 'stderr': run_err}
+
 # Make sure we're in the run directory.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-
 %(calls)s
 
-for stream in redirects.values():
-    stream.close()
+for f in [run_log, run_err, driver_log, driver_err]:
+    f.close()
+    delete_file_if_empty(f.name)

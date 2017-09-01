@@ -2,7 +2,7 @@ import lab
 from lab.environments import GkiGridEnvironment
 from lab.experiment import ARGPARSER
 from lab.calls.call import Call
-from lab.calls.log import redirects, driver_log, driver_err, print_, save_returncode
+from lab.calls.log import delete_file_if_empty, print_, save_returncode
 from lab import reports
 
 
@@ -17,8 +17,6 @@ GkiGridEnvironment()
 
 Call
 
-redirects
-driver_log
-driver_err
+delete_file_if_empty
 print_
 save_returncode

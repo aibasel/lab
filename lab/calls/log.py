@@ -20,45 +20,14 @@ import os
 from lab.tools import Properties
 
 
-class LazyFile(object):
-    def __init__(self, path):
-        self._path = path
-        self._file = None
-
-    def _ensure_file_opened(self):
-        if not self._file:
-            self._file = open(self._path, 'w')
-
-    def write(self, s):
-        self._ensure_file_opened()
-        self._file.write(s)
-
-    def fileno(self):
-        self._ensure_file_opened()
-        return self._file.fileno()
-
-    def flush(self):
-        if self._file:
-            self._file.flush()
-
-    def close(self):
-        if self._file:
-            self.flush()
-            os.fsync(self.fileno())
-            self._file.close()
-            self._file = None
-            if os.path.getsize(self._path) == 0:
-                os.remove(self._path)
-
-
-redirects = {'stdout': LazyFile('run.log'), 'stderr': LazyFile('run.err')}
-driver_log = LazyFile('driver.log')
-driver_err = LazyFile('driver.err')
-
-
 def print_(stream, text):
     stream.write('%s\n' % text)
     stream.flush()
+
+
+def delete_file_if_empty(filename):
+    if os.path.getsize(filename) == 0:
+        os.remove(filename)
 
 
 def set_property(name, value):

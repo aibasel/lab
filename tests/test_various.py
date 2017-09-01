@@ -10,7 +10,6 @@ logging.basicConfig(
     format='%(asctime)-s %(levelname)-8s %(message)s',)
 
 
-from lab.calls.log import LazyFile
 from lab.reports import geometric_mean
 from lab import tools
 
@@ -72,19 +71,3 @@ def test_colors():
     assert tools.get_colors(row, True) == expected_min_wins
     assert tools.get_colors(row, False) == expected_max_wins
     assert tools.rgb_fractions_to_html_color(1, 0, 0.5) == 'rgb(255,0,127)'
-
-
-def test_lazy_file():
-    path = 'test-lazy-file.txt'
-    if os.path.exists(path):
-        os.remove(path)
-    f = LazyFile(path)
-    assert not os.path.exists(path)
-    f.flush()
-    assert not os.path.exists(path)
-    f.close()
-    assert not os.path.exists(path)
-    f.write('Hello')
-    assert os.path.exists(path)
-    f.close()
-    os.remove(path)
