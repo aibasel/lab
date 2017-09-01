@@ -45,11 +45,6 @@ class Call(subprocess.Popen):
         *time_limit* and *memory_limit* are the time and memory contraints in
         seconds and MiB. Pass None to enforce no limit.
 
-        Previously, not only the main process, but also all spawned
-        child processes were watched. This functionality has been removed
-        to simplify the code and reduce wait times in between checking
-        whether the process has finished. As a result the options
-        *kill_delay* and *check_interval* are now ignored.
         """
         self.name = name
         if time_limit is None:
@@ -83,7 +78,7 @@ class Call(subprocess.Popen):
                 self, args, preexec_fn=prepare_call, **kwargs)
         except OSError as err:
             if err.errno == errno.ENOENT:
-                sys.exit("Error: Call {name} failed. File {path} not found".format(
+                sys.exit('Error: Call {name} failed. "{path}" not found'.format(
                     path=args[0], **locals()))
             else:
                 raise
