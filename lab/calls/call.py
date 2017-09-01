@@ -16,7 +16,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import errno
+import os
 import resource
+import select
 import subprocess
 import sys
 import time
@@ -36,31 +38,51 @@ def set_limit(kind, soft_limit, hard_limit=None):
 
 
 class Call(object):
-    def __init__(self, args, name, time_limit=None, memory_limit=None, **kwargs):
+    def __init__(self, args, name, time_limit=None, memory_limit=None,
+                 log_limit=None, **kwargs):
         """Make system calls with time and memory constraints.
 
         *args* and *kwargs* are passed to `subprocess.Popen
         <http://docs.python.org/library/subprocess.html>`_.
 
-        *time_limit* and *memory_limit* are the time and memory contraints in
-        seconds and MiB. Pass ``None`` to enforce no limit.
+        *time_limit* (in seconds), *memory_limit* (in MiB) and
+        *log_limit* (in KiB) limit the time, memory and the size of the
+        log output. Pass ``None`` to enforce no limit.
+
+        See also the documentation for
+        ``lab.experiment._Buildable.add_command()``.
 
         """
         self.name = name
+
         if time_limit is None:
             self.wall_clock_time_limit = None
         else:
             # Enforce miminum on wall-clock limit to account for disk latencies.
             self.wall_clock_time_limit = max(30, time_limit * 1.5)
 
-        stdin = kwargs.get('stdin')
-        if isinstance(stdin, basestring):
-            kwargs['stdin'] = open(stdin)
+        if log_limit is None:
+            self.log_limit_in_bytes = None
+        else:
+            self.log_limit_in_bytes = log_limit * 1024
 
-        for stream_name in ['stdout', 'stderr']:
+        # Allow passing filenames instead of file handles.
+        self.opened_files = []
+        for stream_name in ['stdin', 'stdout', 'stderr']:
             stream = kwargs.get(stream_name)
             if isinstance(stream, basestring):
-                kwargs[stream_name] = open(stream, 'w')
+                mode = 'r' if stream_name == 'stdin' else 'w'
+                file = open(stream, mode=mode)
+                kwargs[stream_name] = file
+                self.opened_files.append(file)
+
+        # Allow redirecting and limiting the output to streams.
+        self.redirected_streams = {}
+        for stream_name in ['stdout', 'stderr']:
+            stream = kwargs.pop(stream_name, None)
+            if stream:
+                self.redirected_streams[stream_name] = stream
+                kwargs[stream_name] = subprocess.PIPE
 
         def prepare_call():
             # When the soft time limit is reached, SIGXCPU is emitted. Once we
@@ -83,9 +105,74 @@ class Call(object):
             else:
                 raise
 
+    def _redirect_streams(self):
+        """
+        Redirect output from original stdout and stderr streams to new
+        streams if redirection is requested in the constructor and limit
+        the output written to the new streams.
+
+        Redirection could also be achieved py passing suitable
+        parameters to Popen, but neither Popen.wait() nor
+        Popen.communicate() allow limiting the redirected output.
+
+        Code adapted from the Python 2 version of subprocess.py.
+        """
+        fdin_to_fdout = {}
+        fd_to_file = {}
+        fd_to_bytes = {}
+
+        poller = select.poll()
+
+        def register_and_append(file_obj, eventmask):
+            poller.register(file_obj.fileno(), eventmask)
+            fd_to_file[file_obj.fileno()] = file_obj
+            fd_to_bytes[file_obj.fileno()] = 0
+
+        def close_unregister_and_remove(fd):
+            poller.unregister(fd)
+            fd_to_file[fd].close()
+            fd_to_file.pop(fd)
+
+        select_POLLIN_POLLPRI = select.POLLIN | select.POLLPRI
+
+        new_stdout = self.redirected_streams.get('stdout')
+        if new_stdout:
+            register_and_append(self.process.stdout, select_POLLIN_POLLPRI)
+            fdin_to_fdout[self.process.stdout.fileno()] = new_stdout.fileno()
+
+        new_stderr = self.redirected_streams.get('stderr')
+        if new_stderr:
+            register_and_append(self.process.stderr, select_POLLIN_POLLPRI)
+            fdin_to_fdout[self.process.stderr.fileno()] = new_stderr.fileno()
+
+        while fd_to_file:
+            try:
+                ready = poller.poll()
+            except select.error as e:
+                if e.args[0] == errno.EINTR:
+                    continue
+                raise
+
+            for fd, mode in ready:
+                if mode & select_POLLIN_POLLPRI:
+                    data = os.read(fd, 4096)
+                    if not data:
+                        close_unregister_and_remove(fd)
+                    if (self.log_limit_in_bytes is not None and
+                            fd_to_bytes[fd] + len(data) > self.log_limit_in_bytes):
+                        fdin_to_fdout[fd] = None
+                    if fdin_to_fdout[fd]:
+                        fd_to_bytes[fd] += os.write(fdin_to_fdout[fd], data)
+                else:
+                    # Ignore hang up or errors.
+                    close_unregister_and_remove(fd)
+
     def wait(self):
         wall_clock_start_time = time.time()
+        self._redirect_streams()
         retcode = self.process.wait()
+        for file in self.opened_files:
+            file.close()
         wall_clock_time = time.time() - wall_clock_start_time
         set_property('%s_wall_clock_time' % self.name, wall_clock_time)
         if (self.wall_clock_time_limit is not None and

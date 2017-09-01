@@ -157,7 +157,8 @@ class _Buildable(object):
             self.env_vars_relative[name] = dest
         self.new_files.append((dest, content, permissions))
 
-    def add_command(self, name, command, time_limit=None, memory_limit=None, **kwargs):
+    def add_command(self, name, command, time_limit=None, memory_limit=None,
+                    log_limit=1024, **kwargs):
         """Call an executable.
 
         If invoked on a *run*, this method adds the command to the
@@ -170,8 +171,10 @@ class _Buildable(object):
         the executable.
 
         The command is aborted after *time_limit* seconds or when it
-        uses more than *memory_limit* MiB. By default no limits are
-        enforced.
+        uses more than *memory_limit* MiB. After writing *log_limit* KiB
+        to stdout or stderr the remaining output is ignored. By default
+        time and memory are not restricted, but log output is limited to
+        1024 KiB.
 
         All *kwargs* are passed to `subprocess.Popen
         <http://docs.python.org/library/subprocess.html>`_. Instead of
@@ -204,6 +207,7 @@ class _Buildable(object):
             logging.critical('a command named "%s" has already been added' % name)
         kwargs['time_limit'] = time_limit
         kwargs['memory_limit'] = memory_limit
+        kwargs['log_limit'] = log_limit
         self.commands[name] = (command, kwargs)
 
     @property
