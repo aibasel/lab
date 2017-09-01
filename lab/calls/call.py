@@ -161,6 +161,7 @@ class Call(object):
                     if (self.log_limit_in_bytes is not None and
                             fd_to_bytes[fd] + len(data) > self.log_limit_in_bytes):
                         fdin_to_fdout[fd] = None
+                        set_property('error', 'unexplained-error:logfile-too-big')
                     if fdin_to_fdout[fd]:
                         fd_to_bytes[fd] += os.write(fdin_to_fdout[fd], data)
                 else:
