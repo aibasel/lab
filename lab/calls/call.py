@@ -35,15 +35,15 @@ def set_limit(kind, soft_limit, hard_limit=None):
             (kind, (soft_limit, hard_limit), err))
 
 
-class Call(subprocess.Popen):
+class Call(object):
     def __init__(self, args, name, time_limit=None, memory_limit=None, **kwargs):
         """Make system calls with time and memory constraints.
 
-        *args* and *kwargs* are passed to the base class
-        `subprocess.Popen <http://docs.python.org/library/subprocess.html>`_.
+        *args* and *kwargs* are passed to `subprocess.Popen
+        <http://docs.python.org/library/subprocess.html>`_.
 
         *time_limit* and *memory_limit* are the time and memory contraints in
-        seconds and MiB. Pass None to enforce no limit.
+        seconds and MiB. Pass ``None`` to enforce no limit.
 
         """
         self.name = name
@@ -74,8 +74,8 @@ class Call(subprocess.Popen):
             set_limit(resource.RLIMIT_CORE, 0)
 
         try:
-            subprocess.Popen.__init__(
-                self, args, preexec_fn=prepare_call, **kwargs)
+            self.process = subprocess.Popen(
+                args, preexec_fn=prepare_call, **kwargs)
         except OSError as err:
             if err.errno == errno.ENOENT:
                 sys.exit('Error: Call {name} failed. "{path}" not found'.format(
@@ -85,7 +85,7 @@ class Call(subprocess.Popen):
 
     def wait(self):
         wall_clock_start_time = time.time()
-        retcode = subprocess.Popen.wait(self)
+        retcode = self.process.wait()
         wall_clock_time = time.time() - wall_clock_start_time
         set_property('%s_wall_clock_time' % self.name, wall_clock_time)
         if (self.wall_clock_time_limit is not None and
