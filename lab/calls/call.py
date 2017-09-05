@@ -117,7 +117,7 @@ class Call(object):
 
         Code adapted from the Python 2 version of subprocess.py.
         """
-        fdin_to_fdout = {}
+        fd_to_outfile = {}
         fd_to_file = {}
         fd_to_bytes = {}
 
@@ -138,12 +138,12 @@ class Call(object):
         new_stdout = self.redirected_streams.get('stdout')
         if new_stdout:
             register_and_append(self.process.stdout, select_POLLIN_POLLPRI)
-            fdin_to_fdout[self.process.stdout.fileno()] = new_stdout.fileno()
+            fd_to_outfile[self.process.stdout.fileno()] = new_stdout
 
         new_stderr = self.redirected_streams.get('stderr')
         if new_stderr:
             register_and_append(self.process.stderr, select_POLLIN_POLLPRI)
-            fdin_to_fdout[self.process.stderr.fileno()] = new_stderr.fileno()
+            fd_to_outfile[self.process.stderr.fileno()] = new_stderr
 
         while fd_to_file:
             try:
@@ -158,15 +158,16 @@ class Call(object):
                     data = os.read(fd, 4096)
                     if not data:
                         close_unregister_and_remove(fd)
-                    if (fdin_to_fdout[fd] and
+                    if (fd_to_outfile[fd] and
                             self.log_limit_in_bytes is not None and
                             fd_to_bytes[fd] + len(data) > self.log_limit_in_bytes):
-                        fdin_to_fdout[fd] = None
+                        fd_to_outfile[fd] = None
                         set_property('error', 'unexplained-error:logfile-too-large')
                         sys.stderr.write("Error: logfile too large\n")
                         self.process.terminate()
-                    if fdin_to_fdout[fd]:
-                        fd_to_bytes[fd] += os.write(fdin_to_fdout[fd], data)
+                    if fd_to_outfile[fd]:
+                        fd_to_outfile[fd].write(data)
+                        fd_to_bytes[fd] += len(data)
                 else:
                     # Ignore hang up or errors.
                     close_unregister_and_remove(fd)
