@@ -382,10 +382,9 @@ class SlurmEnvironment(GridEnvironment):
     RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body'
     STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body'
     ENVIRONMENT_SETUP = ''
-    DEFAULT_PRIORITY = 0
 
     def __init__(self, partition=None, qos=None, memory_per_cpu=None,
-                 priority=None, export=['PATH'], **kwargs):
+                 export=['PATH'], **kwargs):
         """
 
         *partition* must be a valid slurm partition name on the grid.
@@ -404,10 +403,6 @@ class SlurmEnvironment(GridEnvironment):
         Fast Downward users should set memory limits via the
         ``driver_options``.
 
-        *priority* must be in the range [-2147483645, 0] where 0 is the
-        highest priority. If you're a superuser the value can be in the
-        range [-2147483645, 2147483645]. By default, the priority is 0.
-
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes.
 
@@ -423,15 +418,11 @@ class SlurmEnvironment(GridEnvironment):
             qos = self.DEFAULT_QOS
         if memory_per_cpu is None:
             memory_per_cpu = self.DEFAULT_MEMORY_PER_CPU
-        if priority is None:
-            priority = self.DEFAULT_PRIORITY
-        assert -2147483645 <= priority <= 2147483645
 
         self.partition = partition
         self.qos = qos
         self.memory_per_cpu = memory_per_cpu
         self.export = export
-        self.nice = -priority
 
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
@@ -439,7 +430,8 @@ class SlurmEnvironment(GridEnvironment):
         job_params['partition'] = self.partition
         job_params['qos'] = self.qos
         job_params['memory_per_cpu'] = self.memory_per_cpu
-        job_params['nice'] = self.nice
+        # Ensure that single-core tasks always run before multi-core tasks.
+        job_params['nice'] = 2000 if is_run_step(step) else 0
         job_params['environment_setup'] = self.ENVIRONMENT_SETUP
 
         if is_last and self.email:
@@ -460,7 +452,7 @@ class SlurmEnvironment(GridEnvironment):
         submit.append(job_file)
         logging.info('Executing %s' % (' '.join(submit)))
         out = subprocess.check_output(submit, cwd=job_dir).decode()
-        print out
+        print out.strip()
         match = re.match(r"Submitted batch job (\d*)", out)
         assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
         return match.group(1)
