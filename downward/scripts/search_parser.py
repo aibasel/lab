@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
 # downward uses the lab package to conduct experiments with the
@@ -292,7 +292,7 @@ def get_error(content, props):
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
     """
-    if 'error' in props:
+    if props.get('error', None):
         return
 
     # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.

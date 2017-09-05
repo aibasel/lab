@@ -113,9 +113,10 @@ class Fetcher(object):
 
         unxeplained_errors = 0
         for props in combined_props.values():
-            if props.get('error', '').startswith('unexplained'):
+            error = props.get('error', 'unexplained:attribute-error-missing')
+            if error and error.startswith('unexplained'):
                 logging.warning(
-                    'Unexplained error in {run_dir}: {error}'.format(**props))
+                    'Unexplained error in {props[run_dir]}: {error}'.format(**locals()))
                 unxeplained_errors += 1
 
         if unxeplained_errors:

@@ -8,9 +8,9 @@ To use custom results, create the file <EXP_DIR>-eval/properties. It
 must be a json file mapping planner run IDs to results (see below). The
 run IDs must obviously be unique. Each value in the dictionary must
 itself be a dictionary with at least the keys "domain", "problem",
-"algorithm" and "id". In addition you need the attribute names and
-values that you want to make reports for, e.g. "coverage", "expansions",
-"time".
+"algorithm", "id" and "error". In addition you need the attribute names
+and values that you want to make reports for, e.g. "coverage",
+"expansions", "time".
 
 """
 
@@ -33,7 +33,8 @@ PROPERTIES = {
         "problem": "prob01.pddl",
         "algorithm": "ff",
         "coverage": 1,
-        "expansions": 1234
+        "expansions": 1234,
+        "error": "plan-found",
     },
     "blind-gripper-prob01.pddl": {
         "id": ["blind", "gripper", "prob01.pddl"],
@@ -42,6 +43,7 @@ PROPERTIES = {
         "algorithm": "blind",
         "coverage": 1,
         "expansions": 6543,
+        "error": "plan-found",
     },
 }
 
