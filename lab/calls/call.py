@@ -117,8 +117,8 @@ class Call(object):
 
         Code adapted from the Python 2 version of subprocess.py.
         """
-        fd_to_outfile = {}
         fd_to_file = {}
+        fd_to_outfile = {}
         fd_to_bytes = {}
 
         poller = select.poll()
@@ -158,15 +158,18 @@ class Call(object):
                     data = os.read(fd, 4096)
                     if not data:
                         close_unregister_and_remove(fd)
-                    if (fd_to_outfile[fd] and
-                            self.log_limit_in_bytes is not None and
-                            fd_to_bytes[fd] + len(data) > self.log_limit_in_bytes):
-                        fd_to_outfile[fd] = None
-                        set_property('error', 'unexplained-error:logfile-too-large')
-                        sys.stderr.write("Error: logfile too large\n")
-                        self.process.terminate()
                     if fd_to_outfile[fd]:
-                        fd_to_outfile[fd].write(data)
+                        outfile = fd_to_outfile[fd]
+                        if (self.log_limit_in_bytes is not None and
+                                fd_to_bytes[fd] + len(data) > self.log_limit_in_bytes):
+                            # Don't write to this outfile in subsequent rounds.
+                            fd_to_outfile[fd] = None
+                            set_property('error', 'unexplained:logfile-too-large')
+                            sys.stderr.write("Error: logfile too large\n")
+                            self.process.terminate()
+                            # Strip extra bytes.
+                            data = data[:self.log_limit_in_bytes - fd_to_bytes[fd]]
+                        outfile.write(data)
                         fd_to_bytes[fd] += len(data)
                 else:
                     # Ignore hang up or errors.
