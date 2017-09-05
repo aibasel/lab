@@ -116,7 +116,7 @@ class Call(object):
 
         Code adapted from the Python 2 version of subprocess.py.
         """
-        fd_to_file = {}
+        fd_to_infile = {}
         fd_to_outfile = {}
         fd_to_limit = {}
         fd_to_bytes = {}
@@ -125,13 +125,13 @@ class Call(object):
 
         def register_and_append(file_obj, eventmask):
             poller.register(file_obj.fileno(), eventmask)
-            fd_to_file[file_obj.fileno()] = file_obj
+            fd_to_infile[file_obj.fileno()] = file_obj
             fd_to_bytes[file_obj.fileno()] = 0
 
         def close_unregister_and_remove(fd):
             poller.unregister(fd)
-            fd_to_file[fd].close()
-            fd_to_file.pop(fd)
+            fd_to_infile[fd].close()
+            fd_to_infile.pop(fd)
 
         select_POLLIN_POLLPRI = select.POLLIN | select.POLLPRI
 
@@ -149,7 +149,7 @@ class Call(object):
             fd_to_outfile[fd] = new_stderr
             fd_to_limit[fd] = stderr_limit
 
-        while fd_to_file:
+        while fd_to_infile:
             try:
                 ready = poller.poll()
             except select.error as e:
