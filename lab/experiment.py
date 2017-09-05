@@ -170,11 +170,19 @@ class _Buildable(object):
         *command* has to be a list of strings where the first item is
         the executable.
 
-        The command is aborted after *time_limit* seconds or when it
-        uses more than *memory_limit* MiB. After writing *log_limit* KiB
-        to stdout or stderr the remaining output is ignored. By default
-        time and memory are not restricted, but log output is limited to
-        1024 KiB.
+        After *time_limit* seconds the signal SIXCPU is sent to the
+        command. The process can catch this signal and exit gracefully.
+        If it doesn't catch the SIXCPU signal, the command is aborted
+        with SIGKILL after five additional seconds.
+
+        The command is aborted with SIGKILL when it uses more than
+        *memory_limit* MiB.
+
+        After writing *log_limit* KiB to stdout or stderr the remaining
+        output is ignored.
+
+        By default, time and memory are not restricted, but log output
+        is limited to 1024 KiB.
 
         All *kwargs* are passed to `subprocess.Popen
         <http://docs.python.org/library/subprocess.html>`_. Instead of
