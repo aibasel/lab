@@ -427,6 +427,10 @@ class SlurmEnvironment(GridEnvironment):
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
 
+        # %a is replaced by the array ID. Omitting %a results in mangled up logs.
+        job_params['logfile'] = 'driver_%a.log'
+        job_params['errfile'] = 'driver_%a.err'
+
         job_params['partition'] = self.partition
         job_params['qos'] = self.qos
         job_params['memory_per_cpu'] = self.memory_per_cpu
