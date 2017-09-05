@@ -158,7 +158,7 @@ class _Buildable(object):
         self.new_files.append((dest, content, permissions))
 
     def add_command(self, name, command, time_limit=None, memory_limit=None,
-                    log_limit=1024, **kwargs):
+                    stdout_limit=5 * 1024, stderr_limit=1024, **kwargs):
         """Call an executable.
 
         If invoked on a *run*, this method adds the command to the
@@ -182,8 +182,8 @@ class _Buildable(object):
         killed with SIGTERM. This signal can be caught and handled by
         the process.
 
-        By default, time and memory are not restricted, but log output
-        is limited to 1024 KiB.
+        By default, time and memory are not restricted, but output to
+        stdout and stderr is limited to 5 and 1 MiB, respectively.
 
         All *kwargs* (except ``stdin``) are passed to `subprocess.Popen
         <http://docs.python.org/library/subprocess.html>`_. Instead of
@@ -219,7 +219,8 @@ class _Buildable(object):
             logging.critical('redirecting stdin is not supported')
         kwargs['time_limit'] = time_limit
         kwargs['memory_limit'] = memory_limit
-        kwargs['log_limit'] = log_limit
+        kwargs['stdout_limit'] = stdout_limit
+        kwargs['stderr_limit'] = stderr_limit
         self.commands[name] = (command, kwargs)
 
     @property

@@ -39,7 +39,7 @@ def set_limit(kind, soft_limit, hard_limit=None):
 
 class Call(object):
     def __init__(self, args, name, time_limit=None, memory_limit=None,
-                 log_limit=None, **kwargs):
+                 stdout_limit=None, stderr_limit=None, **kwargs):
         """Make system calls with time and memory constraints.
 
         *args* and *kwargs* are passed to `subprocess.Popen
@@ -58,10 +58,11 @@ class Call(object):
             # Enforce miminum on wall-clock limit to account for disk latencies.
             self.wall_clock_time_limit = max(30, time_limit * 1.5)
 
-        if log_limit is None:
-            self.log_limit_in_bytes = None
-        else:
-            self.log_limit_in_bytes = log_limit * 1024
+        def convert_to_bytes(limit):
+            return None if limit is None else limit * 1024
+
+        stdout_limit_in_bytes = convert_to_bytes(stdout_limit)
+        stderr_limit_in_bytes = convert_to_bytes(stderr_limit)
 
         # Allow passing filenames instead of file handles.
         self.opened_files = []
@@ -73,11 +74,13 @@ class Call(object):
                 self.opened_files.append(file)
 
         # Allow redirecting and limiting the output to streams.
-        self.redirected_streams = {}
-        for stream_name in ['stdout', 'stderr']:
+        self.redirected_streams_and_limits = {}
+        for stream_name, limit in [
+                ('stdout', stdout_limit_in_bytes),
+                ('stderr', stderr_limit_in_bytes)]:
             stream = kwargs.pop(stream_name, None)
             if stream:
-                self.redirected_streams[stream_name] = stream
+                self.redirected_streams_and_limits[stream_name] = (stream, limit)
                 kwargs[stream_name] = subprocess.PIPE
 
         def prepare_call():
@@ -115,6 +118,7 @@ class Call(object):
         """
         fd_to_file = {}
         fd_to_outfile = {}
+        fd_to_limit = {}
         fd_to_bytes = {}
 
         poller = select.poll()
@@ -131,15 +135,19 @@ class Call(object):
 
         select_POLLIN_POLLPRI = select.POLLIN | select.POLLPRI
 
-        new_stdout = self.redirected_streams.get('stdout')
-        if new_stdout:
+        if 'stdout' in self.redirected_streams_and_limits:
+            new_stdout, stdout_limit = self.redirected_streams_and_limits['stdout']
             register_and_append(self.process.stdout, select_POLLIN_POLLPRI)
-            fd_to_outfile[self.process.stdout.fileno()] = new_stdout
+            fd = self.process.stdout.fileno()
+            fd_to_outfile[fd] = new_stdout
+            fd_to_limit[fd] = stdout_limit
 
-        new_stderr = self.redirected_streams.get('stderr')
-        if new_stderr:
+        if 'stderr' in self.redirected_streams_and_limits:
+            new_stderr, stderr_limit = self.redirected_streams_and_limits['stderr']
             register_and_append(self.process.stderr, select_POLLIN_POLLPRI)
-            fd_to_outfile[self.process.stderr.fileno()] = new_stderr
+            fd = self.process.stderr.fileno()
+            fd_to_outfile[fd] = new_stderr
+            fd_to_limit[fd] = stderr_limit
 
         while fd_to_file:
             try:
@@ -156,8 +164,8 @@ class Call(object):
                         close_unregister_and_remove(fd)
                     if fd_to_outfile[fd]:
                         outfile = fd_to_outfile[fd]
-                        if (self.log_limit_in_bytes is not None and
-                                fd_to_bytes[fd] + len(data) > self.log_limit_in_bytes):
+                        limit = fd_to_limit[fd]
+                        if (limit is not None and fd_to_bytes[fd] + len(data) > limit):
                             # Don't write to this outfile in subsequent rounds.
                             fd_to_outfile[fd] = None
                             msg = 'too much output to {}'.format(outfile.name)
@@ -166,7 +174,7 @@ class Call(object):
                                 'error', 'unexplained:{}'.format(msg.replace(' ', '-')))
                             self.process.terminate()
                             # Strip extra bytes.
-                            data = data[:self.log_limit_in_bytes - fd_to_bytes[fd]]
+                            data = data[:limit - fd_to_bytes[fd]]
                         outfile.write(data)
                         fd_to_bytes[fd] += len(data)
                 else:
