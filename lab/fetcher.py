@@ -119,8 +119,10 @@ class Fetcher(object):
                     'Unexplained error in {props[run_dir]}: {error}'.format(**locals()))
                 unxeplained_errors += 1
 
-        if unxeplained_errors:
-            logging.warning(
-                'There were {} runs with unexplained errors.'.format(unxeplained_errors))
         tools.makedirs(eval_dir)
         combined_props.write()
+        logging.info('Wrote properties file')
+
+        if unxeplained_errors:
+            logging.critical(
+                'There were {} runs with unexplained errors.'.format(unxeplained_errors))

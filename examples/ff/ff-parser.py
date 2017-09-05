@@ -26,6 +26,13 @@ import re
 from lab.parser import Parser
 
 
+def error(content, props):
+    if props['run-planner_returncode'] == 0:
+        props['error'] = 'plan-found'
+    else:
+        props['error'] = 'unsolvable-or-error'
+
+
 def coverage(content, props):
     props['coverage'] = int(props['run-planner_returncode'] == 0)
 
@@ -47,6 +54,7 @@ def trivially_unsolvable(content, props):
 
 parser = Parser()
 parser.add_pattern('evaluations', r'evaluating (\d+) states')
+parser.add_function(error)
 parser.add_function(coverage)
 parser.add_function(get_plan)
 parser.add_function(get_times)
