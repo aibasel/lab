@@ -176,6 +176,7 @@ class Call(object):
                             # Strip extra bytes.
                             data = data[:limit - fd_to_bytes[fd]]
                         outfile.write(data)
+                        outfile.flush()
                         fd_to_bytes[fd] += len(data)
                 else:
                     # Ignore hang up or errors.
