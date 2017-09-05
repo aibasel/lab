@@ -209,10 +209,10 @@ class PlanningReport(Report):
 
         unxeplained_errors = 0
         for run in self.runs.values():
-            error = run.get('error', 'unexplained:attribute-error-missing')
+            error = run.setdefault('error', 'unexplained:attribute-error-missing')
             if error and error.startswith('unexplained'):
                 logging.warning(
-                    'Unexplained error in "{run[run_dir]}": {error}'.format(**locals()))
+                    'Unexplained error in "{run_dir}": {error}'.format(**run))
                 unxeplained_errors += 1
                 for column in columns:
                     table.add_cell(run['run_dir'], column, run.get(column, '?'))
