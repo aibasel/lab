@@ -164,8 +164,10 @@ class Call(object):
                                 fd_to_bytes[fd] + len(data) > self.log_limit_in_bytes):
                             # Don't write to this outfile in subsequent rounds.
                             fd_to_outfile[fd] = None
-                            set_property('error', 'unexplained:logfile-too-large')
-                            sys.stderr.write("Error: logfile too large\n")
+                            msg = 'too much output to {}'.format(outfile.name)
+                            sys.stderr.write('Error: {}\n'.format(msg))
+                            set_property(
+                                'error', 'unexplained:{}'.format(msg.replace(' ', '-')))
                             self.process.terminate()
                             # Strip extra bytes.
                             data = data[:self.log_limit_in_bytes - fd_to_bytes[fd]]
