@@ -178,16 +178,18 @@ class _Buildable(object):
         The command is aborted with SIGKILL when it uses more than
         *memory_limit* MiB.
 
-        After writing *log_limit* KiB to stdout or stderr the remaining
-        output is ignored.
+        After writing *log_limit* KiB to stdout or stderr the command is
+        killed with SIGTERM. This signal can be caught and handled by
+        the process.
 
         By default, time and memory are not restricted, but log output
         is limited to 1024 KiB.
 
-        All *kwargs* are passed to `subprocess.Popen
+        All *kwargs* (except ``stdin``) are passed to `subprocess.Popen
         <http://docs.python.org/library/subprocess.html>`_. Instead of
-        file handles you can also pass filenames for the ``stdin``,
-        ``stdout`` and ``stderr`` keyword arguments.
+        file handles you can also pass filenames for the ``stdout`` and
+        ``stderr`` keyword arguments. Specifying the ``stdin`` kwarg is
+        not supported.
 
         Examples::
 
@@ -213,6 +215,8 @@ class _Buildable(object):
                 'command name mustn\'t contain double-quotes: {}'.format(name))
         if name in self.commands:
             logging.critical('a command named "%s" has already been added' % name)
+        if 'stdin' in kwargs:
+            logging.critical('redirecting stdin is not supported')
         kwargs['time_limit'] = time_limit
         kwargs['memory_limit'] = memory_limit
         kwargs['log_limit'] = log_limit
