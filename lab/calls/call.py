@@ -45,14 +45,11 @@ class Call(object):
         *args* and *kwargs* are passed to `subprocess.Popen
         <http://docs.python.org/library/subprocess.html>`_.
 
-        *time_limit* (in seconds), *memory_limit* (in MiB) and
-        *log_limit* (in KiB) limit the time, memory and the size of the
-        log output. Pass ``None`` to enforce no limit.
-
         See also the documentation for
         ``lab.experiment._Buildable.add_command()``.
 
         """
+        assert 'stdin' not in kwargs, 'redirecting stdin is not supported'
         self.name = name
 
         if time_limit is None:
@@ -68,11 +65,10 @@ class Call(object):
 
         # Allow passing filenames instead of file handles.
         self.opened_files = []
-        for stream_name in ['stdin', 'stdout', 'stderr']:
+        for stream_name in ['stdout', 'stderr']:
             stream = kwargs.get(stream_name)
             if isinstance(stream, basestring):
-                mode = 'r' if stream_name == 'stdin' else 'w'
-                file = open(stream, mode=mode)
+                file = open(stream, mode='w')
                 kwargs[stream_name] = file
                 self.opened_files.append(file)
 
