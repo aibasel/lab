@@ -56,9 +56,6 @@ class FastDownwardRun(Run):
             ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
             algo.driver_options + ['{domain}', '{problem}'] + algo.component_options)
 
-        self.add_command(
-            'compress-output-sas', ['xz', 'output.sas'])
-
     def _set_properties(self):
         self.set_property('algorithm', self.algo.name)
         self.set_property('repo', self.algo.cached_revision.repo)
@@ -133,11 +130,9 @@ class FastDownwardExperiment(Experiment):
         # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
 
-        # Add default parsing for preprocessor and search for the entire
-        # experiment to allow users to delete these steps if the components
-        # are not run.
         self.add_command('parse-preprocess', [sys.executable, '{preprocess_parser}'])
         self.add_command('parse-search', [sys.executable, '{search_parser}'])
+        self.add_command('compress-output-sas', ['xz', 'output.sas'])
 
     def _get_tasks(self):
         tasks = []
