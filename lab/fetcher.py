@@ -104,7 +104,7 @@ class Fetcher(object):
                 'Scanning properties from {:d} run directories'.format(total_dirs))
             for index, run_dir in enumerate(run_dirs, start=1):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(loglevel, 'Scanning: {:06d}/{:d}'.format(index, total_dirs))
+                logging.log(loglevel, 'Scanning: {:6d}/{:d}'.format(index, total_dirs))
                 props = self.fetch_dir(run_dir, eval_dir, parsers=parsers)
                 id_string = '-'.join(props['id'])
                 new_props[id_string] = props
