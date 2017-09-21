@@ -427,9 +427,11 @@ class SlurmEnvironment(GridEnvironment):
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
 
-        # %a is replaced by the array ID. Omitting %a results in mangled up logs.
-        job_params['logfile'] = 'driver_%a.log'
-        job_params['errfile'] = 'driver_%a.err'
+        # Let all tasks write into the same two files. We could use %a
+        # (which is replaced by the array ID) to prevent mangled up logs,
+        # but we don't want so many files.
+        job_params['logfile'] = 'slurm.log'
+        job_params['errfile'] = 'slurm.err'
 
         job_params['partition'] = self.partition
         job_params['qos'] = self.qos
