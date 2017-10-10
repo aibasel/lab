@@ -461,7 +461,7 @@ class Experiment(_Buildable):
         dest = dest or self.eval_dir
         name = name or 'fetch-%s' % os.path.basename(src)
         self.add_step(
-            name, Fetcher(merge=merge), src, dest, filter=filter, parsers=parsers, **kwargs)
+            name, Fetcher(), src, dest, merge=merge, filter=filter, parsers=parsers, **kwargs)
 
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.

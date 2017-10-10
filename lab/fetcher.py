@@ -54,9 +54,6 @@ class Fetcher(object):
         is more convenient.
 
     """
-    def __init__(self, merge=None):
-        self.merge = merge
-
     def fetch_dir(self, run_dir, eval_dir, parsers=None):
         # Allow specyfing a list of multiple parsers or a single parser.
         parsers = tools.make_list(parsers or [])
@@ -68,7 +65,7 @@ class Fetcher(object):
 
         return tools.Properties(filename=prop_file)
 
-    def __call__(self, src_dir, eval_dir=None, filter=None, parsers=None, **kwargs):
+    def __call__(self, src_dir, eval_dir=None, merge=None, filter=None, parsers=None, **kwargs):
         """
         This method can be used to copy properties from an exp-dir or
         eval-dir into an eval-dir. If the destination eval-dir already
@@ -92,10 +89,11 @@ class Fetcher(object):
         logging.info('Fetching files from {} -> {}'.format(src_dir, eval_dir))
         logging.info('Fetching from evaluation dir: {}'.format(fetch_from_eval_dir))
 
-        if self.merge is None:
+        if merge is None:
             _check_eval_dir(eval_dir)
-        elif self.merge:
+        elif merge:
             # No action needed, data will be merged.
+            pass
         else:
             tools.remove_path(eval_dir)
 
