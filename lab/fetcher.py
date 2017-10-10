@@ -54,6 +54,9 @@ class Fetcher(object):
         is more convenient.
 
     """
+    def __init__(self, merge=None):
+        self.merge = merge
+
     def fetch_dir(self, run_dir, eval_dir, parsers=None):
         # Allow specyfing a list of multiple parsers or a single parser.
         parsers = tools.make_list(parsers or [])
@@ -89,7 +92,11 @@ class Fetcher(object):
         logging.info('Fetching files from {} -> {}'.format(src_dir, eval_dir))
         logging.info('Fetching from evaluation dir: {}'.format(fetch_from_eval_dir))
 
-        _check_eval_dir(eval_dir)
+        if self.merge is None:
+            _check_eval_dir(eval_dir)
+        elif self.merge == False:
+            tools.remove_path(eval_dir)
+        # If self.merge is True, no action needs to be taken (data is merged).
 
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
