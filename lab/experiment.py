@@ -401,8 +401,8 @@ class Experiment(_Buildable):
         else:
             self.steps.append(Step(name, function, *args, **kwargs))
 
-    def add_fetcher(self, src=None, dest=None, name=None, filter=None,
-                    parsers=None, **kwargs):
+    def add_fetcher(self, src=None, dest=None, merge=None, name=None,
+                    filter=None, parsers=None, **kwargs):
         """
         Add a step that fetches results from experiment or evaluation
         directories into a new or existing evaluation directory.
@@ -415,7 +415,11 @@ class Experiment(_Buildable):
 
         *dest* must be a new or existing evaluation directory. It
         defaults to ``exp.eval_dir``. If *dest* already contains
-        data, the old and new data will be merged, not replaced.
+        data and *merge* is set to None, the user will be prompted
+        whether to override the existing data or to merge the old and
+        new data. Setting *merge* to True or to False has the effect
+        that the old data is merged or replaced (and the user will not
+        be prompted).
 
         If no *name* is given, call this step "fetch-``basename(src)``".
 
@@ -457,7 +461,8 @@ class Experiment(_Buildable):
         dest = dest or self.eval_dir
         name = name or 'fetch-%s' % os.path.basename(src)
         self.add_step(
-            name, Fetcher(), src, dest, filter=filter, parsers=parsers, **kwargs)
+            name, Fetcher(), src, dest, merge=merge, filter=filter,
+            parsers=parsers, **kwargs)
 
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.

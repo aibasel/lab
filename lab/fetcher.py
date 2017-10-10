@@ -65,7 +65,8 @@ class Fetcher(object):
 
         return tools.Properties(filename=prop_file)
 
-    def __call__(self, src_dir, eval_dir=None, filter=None, parsers=None, **kwargs):
+    def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
+                 parsers=None, **kwargs):
         """
         This method can be used to copy properties from an exp-dir or
         eval-dir into an eval-dir. If the destination eval-dir already
@@ -89,7 +90,13 @@ class Fetcher(object):
         logging.info('Fetching files from {} -> {}'.format(src_dir, eval_dir))
         logging.info('Fetching from evaluation dir: {}'.format(fetch_from_eval_dir))
 
-        _check_eval_dir(eval_dir)
+        if merge is None:
+            _check_eval_dir(eval_dir)
+        elif merge:
+            # No action needed, data will be merged.
+            pass
+        else:
+            tools.remove_path(eval_dir)
 
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
