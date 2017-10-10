@@ -65,7 +65,8 @@ class Fetcher(object):
 
         return tools.Properties(filename=prop_file)
 
-    def __call__(self, src_dir, eval_dir=None, merge=None, filter=None, parsers=None, **kwargs):
+    def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
+                 parsers=None, **kwargs):
         """
         This method can be used to copy properties from an exp-dir or
         eval-dir into an eval-dir. If the destination eval-dir already
