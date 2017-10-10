@@ -207,6 +207,16 @@ class Properties(dict):
             except ValueError as e:
                 logging.critical("JSON parse error in file '%s': %s" % (filename, e))
 
+    def add_error(self, value):
+        key = 'error'
+        if key in self.keys():
+            assert isinstance(list, self[key])
+        else:
+            self[key] = []
+        self[key].append(value)
+
+        # TODO: do not add None values?
+
     def write(self):
         """Write the properties to disk."""
         assert self.filename

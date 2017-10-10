@@ -67,6 +67,38 @@ def parse_statistics(content, props):
             break
 
 
+def parse_translator_exitcode(content, props):
+    """If there was an error, store its source in props['error'].
+
+    For unexplained errors please check the files run.log, run.err,
+    driver.log and driver.err to find the reason for the error.
+    """
+
+    exitcode = props['fast-downward_returncode']
+    props['translator_out_of_time'] = False
+    if exitcode == 0:
+        props.add_error('none')
+    elif exitcode == 232: # -24 means timeout
+        props['translator_out_of_time'] = True
+        props.add_error('translator-timeout')
+    elif exitcode == 1 and props['translator_out_of_memory'] == True:
+        # translator exits with code 1 if python threw a MemoryError.
+        props.add_error('translator-out-of-memory')
+    else:
+        props.add_error('unexplained-translator-exitcode-{}'.format(exitcode))
+
+
+def parse_translator_memory_error(content, props):
+    """ Parse output for "MemoryError" of python.
+    """
+    translator_out_of_memory = False
+    lines = content.split('\n')
+    for line in lines:
+        if line == 'MemoryError':
+            translator_out_of_memory = True
+    props['translator_out_of_memory'] = translator_out_of_memory
+
+
 class PreprocessParser(Parser):
     def __init__(self):
         Parser.__init__(self)
@@ -106,6 +138,8 @@ class PreprocessParser(Parser):
                              required=False)
 
     def add_preprocess_functions(self):
+        self.add_function(parse_translator_exitcode)
+        self.add_function(parse_translator_memory_error, file='run.err')
         self.add_function(parse_translator_timestamps)
         self.add_function(parse_statistics)
 

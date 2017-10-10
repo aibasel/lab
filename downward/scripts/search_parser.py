@@ -98,7 +98,7 @@ def _update_props_with_iterative_values(props, values, attr_groups):
     for group in attr_groups:
         if not _same_length(values[attr] for attr in group):
             print 'Error: malformed log:', values
-            props['error'] = 'unexplained-malformed-log'
+            props.add_error('unexplained-malformed-log')
 
     for name, items in values.items():
         props[name + '_all'] = items
@@ -230,7 +230,7 @@ def check_memory(content, props):
     raw_memory = props.get('raw_memory')
 
     if raw_memory is None or raw_memory < 0:
-        props['error'] = 'unexplained-could-not-determine-peak-memory'
+        propsprops.add_error('unexplained-could-not-determine-peak-memory')
         return
 
     if solved(props):
@@ -292,8 +292,6 @@ def get_error(content, props):
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
     """
-    if props.get('error', None):
-        return
 
     # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
     # TODO: Check that a plan file exists if coverage=1.
@@ -315,9 +313,9 @@ def get_error(content, props):
 
     exitcode = props['fast-downward_returncode']
     if exitcode in exitcode_to_error:
-        props['error'] = exitcode_to_error[exitcode]
+        props.add_error(exitcode_to_error[exitcode])
     else:
-        props['error'] = 'unexplained-exitcode-%d' % exitcode
+        props.add_error('unexplained-exitcode-{}'.format(exitcode))
 
 
 class SearchParser(Parser):
