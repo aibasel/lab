@@ -94,9 +94,10 @@ class Fetcher(object):
 
         if self.merge is None:
             _check_eval_dir(eval_dir)
-        elif self.merge == False:
+        elif self.merge:
+            # No action needed, data will be merged.
+        else:
             tools.remove_path(eval_dir)
-        # If self.merge is True, no action needs to be taken (data is merged).
 
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
