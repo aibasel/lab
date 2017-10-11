@@ -5,12 +5,12 @@ from lab.parser import Parser
 
 def check_stderr_output(content, props):
     if content:
-        props['error'] = 'unexplained-error:output-to-run-err'
+        props.add_error('unexplained-error:output-to-run-err')
 
 
 def check_driver_stderr_output(content, props):
     if content:
-        props['error'] = 'unexplained-error:output-to-driver-err'
+        props.add_error('unexplained-error:output-to-driver-err')
 
 
 def check_driver_failures(content, props):

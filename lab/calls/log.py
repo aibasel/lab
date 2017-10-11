@@ -38,5 +38,12 @@ def set_property(name, value):
     properties.write()
 
 
+def add_error(error):
+    # See comment for set_property.
+    properties = Properties(filename='properties')
+    properties.add_error(error)
+    properties.write()
+
+
 def save_returncode(command_name, value):
     set_property('%s_returncode' % command_name.lower(), value)

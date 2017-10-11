@@ -207,20 +207,17 @@ class Properties(dict):
             except ValueError as e:
                 logging.critical("JSON parse error in file '%s': %s" % (filename, e))
 
-    def add_error(self, value):
+    def add_error(self, error):
         """
-        Add *value* to the list of errors contained at the key 'error' so far.
-        Create the list if it does not exist yet. 'none' values are ignored to
-        allow concluding 'no error occured' if the list exists but is empty or
-        to throw a 'missing error attribute' if the list does not exist.
+        Add *error* to the list of errors contained at the key 'error' so far.
+        Create the list if it does not exist yet.
         """
         key = 'error'
         if key in self.keys():
             assert isinstance(self[key], list)
         else:
             self[key] = []
-        if value != 'none':
-            self[key].append(value)
+        self[key].append(error)
 
     def write(self):
         """Write the properties to disk."""

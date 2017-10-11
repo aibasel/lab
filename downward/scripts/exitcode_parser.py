@@ -24,7 +24,7 @@ Functions for parsing Fast Downward exit codes.
 from lab.parser import Parser
 
 # Search exit codes. For the moment, all translator errors result in exit code
-# of 1 and are thus treated as critical errors.
+# 1 and are thus treated as critical errors.
 EXIT_PLAN_FOUND = 0
 EXIT_CRITICAL_ERROR = 1
 EXIT_INPUT_ERROR = 2

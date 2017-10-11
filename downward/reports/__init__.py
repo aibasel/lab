@@ -210,7 +210,7 @@ class PlanningReport(Report):
         unexplained_errors = 0
         for run in self.runs.values():
             errors = run.setdefault('error', ['unexplained:attribute-error-missing'])
-            if [error for error in errors if error.startswith('unexplained')]:
+            if any(error.startswith('unexplained') for error in errors):
                 logging.warning(
                     'Unexplained error in "{run_dir}": {error}'.format(**run))
                 unexplained_errors += 1
