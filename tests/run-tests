@@ -50,7 +50,7 @@ python -m pyflakes downward examples tests setup.py docs/conf.py
 ./tests/find-dead-code
 
 # Check code formatting.
-#pep8 --max-line-length=90 --exclude=*external*,data lab downward examples setup.py
+pycodestyle --max-line-length=90 --exclude=data,external lab downward examples setup.py
 
 # Check if documentation builds.
 cd docs
@@ -67,9 +67,9 @@ fi
 
 cd examples
 
-#cd ff
-#./ff.py --all
-#cd ..
+cd ff
+./ff.py --all
+cd ..
 
 cd simple
 ./simple-exp.py --all
