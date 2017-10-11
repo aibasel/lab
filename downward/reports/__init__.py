@@ -196,7 +196,7 @@ class PlanningReport(Report):
             break
         return info
 
-    def _add_error_row(self, table, run, error):
+    def _add_error_row(self, table, columns, run, error):
         if error and error.startswith('unexplained'):
             logging.warning(
                 'Unexplained error in "{}": {}'.format(run['run_dir'], error))
@@ -224,7 +224,7 @@ class PlanningReport(Report):
             else:
                 assert isinstance(error_list, list)
                 for error in error_list:
-                    self._add_error_row(table, run, error)
+                    self._add_error_row(table, columns, run, error)
                 if len(error_list):
                     unexplained_errors += 1
 

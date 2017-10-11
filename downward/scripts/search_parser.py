@@ -230,7 +230,7 @@ def check_memory(content, props):
     raw_memory = props.get('raw_memory')
 
     if raw_memory is None or raw_memory < 0:
-        propsprops.add_error('unexplained-could-not-determine-peak-memory')
+        props.add_error('unexplained-could-not-determine-peak-memory')
         return
 
     if solved(props):
