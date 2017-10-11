@@ -5,7 +5,7 @@ from lab.parser import Parser
 
 def wordcount(content, props):
     props['number_of_files'] = len(content.splitlines())
-    props['error'] = 'none'
+    props.add_error('none')
 
 
 parser = Parser()

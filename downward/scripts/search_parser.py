@@ -31,22 +31,6 @@ import sys
 from lab.parser import Parser
 
 
-# Exit codes.
-EXIT_PLAN_FOUND = 0
-EXIT_CRITICAL_ERROR = 1
-EXIT_INPUT_ERROR = 2
-EXIT_UNSUPPORTED = 3
-EXIT_UNSOLVABLE = 4
-EXIT_UNSOLVED_INCOMPLETE = 5
-EXIT_OUT_OF_MEMORY = 6
-EXIT_TIMEOUT = 7
-EXIT_TIMEOUT_AND_MEMORY = 8
-
-EXIT_PYTHON_SIGKILL = 256 - 9
-EXIT_PYTHON_SIGSEGV = 256 - 11
-EXIT_PYTHON_SIGXCPU = 256 - 24
-
-
 def solved(run):
     return run['coverage'] or run['unsolvable']
 
@@ -98,7 +82,7 @@ def _update_props_with_iterative_values(props, values, attr_groups):
     for group in attr_groups:
         if not _same_length(values[attr] for attr in group):
             print 'Error: malformed log:', values
-            props['error'] = 'unexplained-malformed-log'
+            props.add_error('unexplained-malformed-log')
 
     for name, items in values.items():
         props[name + '_all'] = items
@@ -190,10 +174,6 @@ def set_search_time(content, props):
         props['search_time'] = math.fsum(search_time_all)
 
 
-def unsolvable(content, props):
-    props['unsolvable'] = int(props['fast-downward_returncode'] == EXIT_UNSOLVABLE)
-
-
 def coverage(content, props):
     props['coverage'] = int('plan_length' in props and 'cost' in props)
 
@@ -230,7 +210,7 @@ def check_memory(content, props):
     raw_memory = props.get('raw_memory')
 
     if raw_memory is None or raw_memory < 0:
-        props['error'] = 'unexplained-could-not-determine-peak-memory'
+        props.add_error('unexplained-could-not-determine-peak-memory')
         return
 
     if solved(props):
@@ -286,48 +266,12 @@ def check_min_values(content, props):
             props[attr] = max(time, 0.01)
 
 
-def get_error(content, props):
-    """If there was an error, store its source in props['error'].
-
-    For unexplained errors please check the files run.log, run.err,
-    driver.log and driver.err to find the reason for the error.
-    """
-    if props.get('error', None):
-        return
-
-    # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
-    # TODO: Check that a plan file exists if coverage=1.
-
-    exitcode_to_error = {
-        EXIT_PLAN_FOUND: 'none',
-        EXIT_CRITICAL_ERROR: 'unexplained-critical-error',
-        EXIT_INPUT_ERROR: 'unexplained-input-error',
-        EXIT_UNSUPPORTED: 'unexplained-unsupported-feature-requested',
-        EXIT_UNSOLVABLE: 'unsolvable',
-        EXIT_UNSOLVED_INCOMPLETE: 'incomplete-search-found-no-plan',
-        EXIT_OUT_OF_MEMORY: 'out-of-memory',
-        EXIT_TIMEOUT: 'timeout',  # Currently only for portfolios.
-        EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
-        EXIT_PYTHON_SIGKILL: 'unexplained-sigkill',
-        EXIT_PYTHON_SIGSEGV: 'unexplained-segfault',
-        EXIT_PYTHON_SIGXCPU: 'timeout',
-    }
-
-    exitcode = props['fast-downward_returncode']
-    if exitcode in exitcode_to_error:
-        props['error'] = exitcode_to_error[exitcode]
-    else:
-        props['error'] = 'unexplained-exitcode-%d' % exitcode
-
-
 class SearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
 
-        self.add_function(get_error)
         self.add_function(get_iterative_results)
         self.add_function(coverage)
-        self.add_function(unsolvable)
 
 
 class SingleSearchParser(SearchParser):

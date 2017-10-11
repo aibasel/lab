@@ -18,6 +18,6 @@ exp = Experiment(EXPPATH)
 run = exp.add_run()
 run.add_command('calc-pi', ['echo', 'Pi:', '3.14'])
 run.set_property('id', ['echo-1'])
-run.set_property('error', 'none')
+run.set_property('error', ['none'])
 
 exp.run_steps()

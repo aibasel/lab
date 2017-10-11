@@ -4,7 +4,7 @@ from lab.parser import Parser
 
 
 def error(content, props):
-    props['error'] = 'none'
+    props.add_error('none')
 
 
 parser = Parser()
