@@ -216,7 +216,7 @@ class Properties(dict):
         """
         key = 'error'
         if key in self.keys():
-            assert isinstance(list, self[key])
+            assert isinstance(self[key], list)
         else:
             self[key] = []
         if value != 'none':
