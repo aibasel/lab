@@ -130,6 +130,7 @@ class FastDownwardExperiment(Experiment):
         # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
 
+        self.add_command('parse-exitcodes', [sys.executable, '{exitcode_parser}'])
         self.add_command('parse-preprocess', [sys.executable, '{preprocess_parser}'])
         self.add_command('parse-search', [sys.executable, '{search_parser}'])
         self.add_command('compress-output-sas', ['xz', 'output.sas'])
@@ -312,6 +313,9 @@ class FastDownwardExperiment(Experiment):
 
     def _add_code(self):
         """Add the compiled code to the experiment."""
+        self.add_resource(
+            'exitcode_parser',
+            os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py'))
         self.add_resource(
             'preprocess_parser',
             os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
