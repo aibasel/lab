@@ -4,13 +4,14 @@
 
 set -euo pipefail
 
-BENCHMARKS="$DOWNWARD_BENCHMARKS"
-REPO="$DOWNWARD_REPO"
-
 if [[ $# -gt 1 ]]; then
     echo "usage: ./run-tests [--skip-experiments]"
     exit 2
 fi
+
+# We need two environment variables for the doctests and experiments.
+: "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS}"
+: "${DOWNWARD_REPO?Please set DOWNWARD_REPO}"
 
 function cleanup {
     rm -rf examples/data
@@ -28,7 +29,7 @@ cd ..
 LAB=`realpath .`
 echo "Checking lab at $LAB"
 export PYTHONPATH=${LAB}
-echo "PYTHONPATH: $PYTHONPATH"
+echo "Using PYTHONPATH: $PYTHONPATH"
 
 cleanup
 
@@ -59,6 +60,7 @@ cd ..
 
 echo "Code and style tests passed"
 
+# Skip experiments if any argument (e.g., --skip-experiments) was passed.
 if [[ $# -gt 0 ]]; then
     exit
 fi
@@ -80,20 +82,12 @@ cd ..
 
 ./report-external-results.py --all
 
-# Only check downward code if $REPO exists.
-if [ -d "$REPO" ]; then
-    ./lmcut.py --all
+./lmcut.py --all
 
-    cd planner
-    ./planner.py --all
-    cd ..
+cd planner
+./planner.py --all
+cd ..
 
-    ./showcase-options.py --all
-
-    cd ..
-else
-    echo
-    echo "Repo $REPO is missing. Could not run downward tests."
-fi
+./showcase-options.py --all
 
 echo "Experiment tests passed"
