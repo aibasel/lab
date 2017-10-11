@@ -68,7 +68,8 @@ def parse_statistics(content, props):
 
 
 def parse_translator_exitcode(content, props):
-    """If there was an error, store its source in props['error'].
+    """
+    If there was an error, add its source to the error list at props['error'].
 
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
@@ -89,8 +90,7 @@ def parse_translator_exitcode(content, props):
 
 
 def parse_translator_memory_error(content, props):
-    """ Parse output for "MemoryError" of python.
-    """
+    """ Parse output for "MemoryError" of python."""
     translator_out_of_memory = False
     lines = content.split('\n')
     for line in lines:

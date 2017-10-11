@@ -287,7 +287,8 @@ def check_min_values(content, props):
 
 
 def get_error(content, props):
-    """If there was an error, store its source in props['error'].
+    """
+    If there was an error, add its source to the error list at props['error'].
 
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.

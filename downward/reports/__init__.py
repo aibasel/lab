@@ -196,10 +196,17 @@ class PlanningReport(Report):
             break
         return info
 
+    def _add_error_row(self, table, run, error):
+        if error and error.startswith('unexplained'):
+            logging.warning(
+                'Unexplained error in "{}": {}'.format(run['run_dir'], error))
+            for column in columns:
+                table.add_cell(run['run_dir'], column, run.get(column, '?'))
+
     def _get_warnings_table(self):
         """
         Return a :py:class:`Table <lab.reports.Table>` containing one line for
-        each run where an unexpected error occured.
+        each run and each error that occured in that run.
         """
         columns = [
             'domain', 'problem', 'algorithm', 'error',
@@ -207,19 +214,24 @@ class PlanningReport(Report):
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 
-        unxeplained_errors = 0
+        unexplained_errors = 0
         for run in self.runs.values():
-            error = run.setdefault('error', 'unexplained:attribute-error-missing')
-            if error and error.startswith('unexplained'):
-                logging.warning(
-                    'Unexplained error in "{run_dir}": {error}'.format(**run))
-                unxeplained_errors += 1
-                for column in columns:
-                    table.add_cell(run['run_dir'], column, run.get(column, '?'))
-        if unxeplained_errors:
+            error_list = run.get('error', None)
+            if error_list is None:
+                error = 'unexplained:attribute-error-missing'
+                self._add_error_row(table, run, error)
+                unexplained_errors += 1
+            else:
+                assert isinstance(error_list, list)
+                for error in error_list:
+                    self._add_error_row(table, run, error)
+                if len(error_list):
+                    unexplained_errors += 1
+
+        if unexplained_errors:
             logging.warning(
                 'There were {} runs with unexplained errors.'.format(
-                    unxeplained_errors))
+                    unexplained_errors))
 
         return table
 
