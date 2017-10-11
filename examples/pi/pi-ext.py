@@ -23,6 +23,7 @@ class PiReport(Report):
             lines.append('%s %s' % (run['time'], run['diff']))
         return '\n'.join(lines)
 
+
 exp = Experiment(EXPPATH)
 exp.add_resource('parser', 'pi-parser-ext.py', 'pi-parser.py')
 exp.add_resource('calc', 'calculate.py', 'calculate.py')

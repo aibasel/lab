@@ -273,7 +273,7 @@ class Document(object):
             result = msg
 
         # Unknown error, show the traceback to the user
-        except:
+        except Exception:
             result = txt2tags.getUnknownErrorMessage()
             logging.error(result)
 
@@ -306,6 +306,7 @@ class Document(object):
             result = '\n'.join(new_lines)
 
         return result
+
 
 if __name__ == '__main__':
     doc = Document('MyTitle', 'Max Mustermann')
