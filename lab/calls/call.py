@@ -23,7 +23,7 @@ import subprocess
 import sys
 import time
 
-from lab.calls.log import set_property, add_error
+from lab.calls.log import add_error, set_property
 
 
 def set_limit(kind, soft_limit, hard_limit=None):

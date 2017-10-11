@@ -213,10 +213,7 @@ class Properties(dict):
         Create the list if it does not exist yet.
         """
         key = 'error'
-        if key in self.keys():
-            assert isinstance(self[key], list)
-        else:
-            self[key] = []
+        self.setdefault(key, [])
         self[key].append(error)
 
     def write(self):
