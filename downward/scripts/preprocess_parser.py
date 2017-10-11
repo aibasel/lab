@@ -79,10 +79,11 @@ def parse_translator_exitcode(content, props):
     props['translator_out_of_time'] = False
     if exitcode == 0:
         props.add_error('none')
-    elif exitcode == 232: # -24 means timeout
+    elif exitcode == 232:
+        # -24 means timeout
         props['translator_out_of_time'] = True
         props.add_error('translator-timeout')
-    elif exitcode == 1 and props['translator_out_of_memory'] == True:
+    elif exitcode == 1 and props['translator_out_of_memory']:
         # translator exits with code 1 if python threw a MemoryError.
         props.add_error('translator-out-of-memory')
     else:
