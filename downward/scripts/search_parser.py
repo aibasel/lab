@@ -82,7 +82,7 @@ def _update_props_with_iterative_values(props, values, attr_groups):
     for group in attr_groups:
         if not _same_length(values[attr] for attr in group):
             print 'Error: malformed log:', values
-            props.add_error('unexplained-malformed-log')
+            props.add_unexplained_error('malformed-log')
 
     for name, items in values.items():
         props[name + '_all'] = items
@@ -210,7 +210,7 @@ def check_memory(content, props):
     raw_memory = props.get('raw_memory')
 
     if raw_memory is None or raw_memory < 0:
-        props.add_error('unexplained-could-not-determine-peak-memory')
+        props.add_unexplained_error('could-not-determine-peak-memory')
         return
 
     if solved(props):

@@ -120,10 +120,14 @@ class Fetcher(object):
 
         unexplained_errors = 0
         for props in combined_props.values():
-            errors = props.setdefault('error', ['unexplained:attribute-error-missing'])
-            if any(error.startswith('unexplained') for error in errors):
+            error = props.get('error', None)
+            if error is None:
+                props.add_unexplained_error('attribute-error-missing')
+            unexplained_errors = props.get('unexplained_error', [])
+            if unexplained_errors:
                 logging.warning(
-                    'Unexplained error in "{run_dir}": {error}'.format(**props))
+                    '''Unexplained error in "{run_dir}":
+                    {unexplained_error}'''.format(**props))
                 unexplained_errors += 1
 
         tools.makedirs(eval_dir)

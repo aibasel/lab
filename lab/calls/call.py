@@ -23,7 +23,7 @@ import subprocess
 import sys
 import time
 
-from lab.calls.log import add_error, set_property
+from lab.calls.log import add_unexplained_error, set_property
 
 
 def set_limit(kind, soft_limit, hard_limit=None):
@@ -170,7 +170,7 @@ class Call(object):
                             fd_to_outfile[fd] = None
                             msg = 'too much output to {}'.format(outfile.name)
                             sys.stderr.write('Error: {}\n'.format(msg))
-                            add_error('unexplained:{}'.format(msg.replace(' ', '-')))
+                            add_unexplained_error('{}'.format(msg.replace(' ', '-')))
                             self.process.terminate()
                             # Strip extra bytes.
                             data = data[:limit - fd_to_bytes[fd]]
@@ -191,7 +191,7 @@ class Call(object):
         set_property('%s_wall_clock_time' % self.name, wall_clock_time)
         if (self.wall_clock_time_limit is not None and
                 wall_clock_time > self.wall_clock_time_limit):
-            add_error('unexplained-warning-wall-clock-time-very-high')
+            add_unexplained_error('warning-wall-clock-time-very-high')
             sys.stderr.write(
                 'Error: wall-clock time for %s too high: %.2f > %d\n' %
                 (self.name, wall_clock_time, self.wall_clock_time_limit))
