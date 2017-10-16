@@ -46,10 +46,9 @@ def unsolvable(content, props):
 
 def get_search_error(content, props):
     """
-    If there was an explained error, set the value props['error'] (which
-    should not be present before). If there was an unexplained error, add its
-    source to the error list at props['unexplained_error'] and set the value
-    props['error'].
+    Convert the exitcode of the planner to a human-readable message and store
+    it in props['error']. Additionally, if there was an unexplained error, add
+    its source to the list at props['unexplained_errors'].
 
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
