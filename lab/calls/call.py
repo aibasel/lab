@@ -191,7 +191,8 @@ class Call(object):
         set_property('%s_wall_clock_time' % self.name, wall_clock_time)
         if (self.wall_clock_time_limit is not None and
                 wall_clock_time > self.wall_clock_time_limit):
-            add_unexplained_error('warning-wall-clock-time-very-high')
+            add_unexplained_error(
+                '{}-wall-clock-time-too-high:{}'.format(self.name, wall_clock_time))
             sys.stderr.write(
                 'Error: wall-clock time for %s too high: %.2f > %d\n' %
                 (self.name, wall_clock_time, self.wall_clock_time_limit))

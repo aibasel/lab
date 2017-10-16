@@ -210,7 +210,7 @@ class Properties(dict):
     def add_unexplained_error(self, error):
         """
         Add *error* to the list of unexplained errors contained at the key
-        'unexplained_errors' so far. Create the list if it does not exist yet.
+        'unexplained_errors'. Create the list if it does not exist yet.
         """
         key = 'unexplained_errors'
         self.setdefault(key, [])
