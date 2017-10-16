@@ -675,7 +675,8 @@ class Table(collections.defaultdict):
 
         min_wins = self.get_min_wins(row_name)
         highlight = min_wins is not None
-        colors = tools.get_colors(row_slice, min_wins) if self.colored else None
+        colored = self.colored and highlight
+        colors = tools.get_colors(row_slice, min_wins) if colored else None
 
         def is_close(a, b, rel_tol=1e-09, abs_tol=0.0):
             return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
@@ -685,7 +686,7 @@ class Table(collections.defaultdict):
             bold = False
             # Format data columns
             if col_name in row_slice:
-                if self.colored:
+                if colored:
                     color = tools.rgb_fractions_to_html_color(*colors[col_name])
                 elif highlight and value is not None and (
                         (is_close(value, min_value) and min_wins) or

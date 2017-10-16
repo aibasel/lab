@@ -175,14 +175,14 @@ class DiffColumnsModule(reports.DynamicDataModule):
         for col_names, diff_col_header, diff_col_name in self.header_names:
             for row_name in table.row_names:
                 formatted_value = formatted_cells[row_name].get(diff_col_name)
+                min_wins = table.get_min_wins(row_name)
                 try:
                     value = float(formatted_value)
                 except (ValueError, TypeError):
                     value = '-'
-                if value == 0 or value == '-':
+                if value == 0 or value == '-' or min_wins is None:
                     color = 'grey'
-                elif ((value < 0 and table.get_min_wins(row_name)) or
-                      (value > 0 and not table.get_min_wins(row_name))):
+                elif ((value < 0 and min_wins) or (value > 0 and not min_wins)):
                     color = 'green'
                 else:
                     color = 'red'
