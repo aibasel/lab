@@ -170,7 +170,7 @@ class Call(object):
                             fd_to_outfile[fd] = None
                             msg = 'too much output to {}'.format(outfile.name)
                             sys.stderr.write('Error: {}\n'.format(msg))
-                            add_unexplained_error('{}'.format(msg.replace(' ', '-')))
+                            add_unexplained_error(msg.replace(' ', '-'))
                             self.process.terminate()
                             # Strip extra bytes.
                             data = data[:limit - fd_to_bytes[fd]]

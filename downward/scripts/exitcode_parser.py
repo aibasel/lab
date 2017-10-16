@@ -46,13 +46,16 @@ def unsolvable(content, props):
 
 def get_search_error(content, props):
     """
-    If there was an unexplained error, add its source to the error list at
-    props['unexplained_error']. Also set the value props['error'], which is
-    also set if the error ir not unexplained.
+    If there was an explained error, set the value props['error'] (which
+    should not be present before). If there was an unexplained error, add its
+    source to the error list at props['unexplained_error'] and set the value
+    props['error'].
 
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
     """
+
+    assert 'error' not in props
 
     # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
     # TODO: Check that a plan file exists if coverage=1.
@@ -75,11 +78,13 @@ def get_search_error(content, props):
         EXIT_PYTHON_SIGSEGV: 'segfault',
     }
 
+    assert not set(exitcode_to_error) & set(exitcode_to_unexplained_error)
+
     exitcode = props['fast-downward_returncode']
     if exitcode in exitcode_to_error:
-        props.set_error(exitcode_to_error[exitcode])
+        props['error'] = exitcode_to_error[exitcode]
     elif exitcode in exitcode_to_unexplained_error:
-        props.set_error(exitcode_to_unexplained_error[exitcode])
+        props['error'] = exitcode_to_unexplained_error[exitcode]
         props.add_unexplained_error(exitcode_to_unexplained_error[exitcode])
     else:
         props.add_unexplained_error('exitcode-{}'.format(exitcode))

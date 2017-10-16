@@ -28,9 +28,9 @@ from lab.parser import Parser
 
 def error(content, props):
     if props['run-planner_returncode'] == 0:
-        props.set_error('plan-found')
+        props['error'] = 'plan-found'
     else:
-        props.set_error('unsolvable-or-error')
+        props['error'] = 'unsolvable-or-error'
 
 
 def coverage(content, props):

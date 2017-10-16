@@ -217,7 +217,7 @@ class Parser(object):
                 file_parser.load_file(path)
             except (IOError, MemoryError) as err:
                 logging.error('File "%s" could not be read: %s' % (path, err))
-                self.props.add_unexplained_error('error:parser-failed-to-read-file')
+                self.props.add_unexplained_error('parser-failed-to-read-file')
             else:
                 # Subclasses directly modify the properties during parsing.
                 file_parser.parse(self.props)

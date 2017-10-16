@@ -207,21 +207,12 @@ class Properties(dict):
             except ValueError as e:
                 logging.critical("JSON parse error in file '%s': %s" % (filename, e))
 
-    def set_error(self, error):
-        """
-        Set the key 'error' to the given value *error* if the value has not
-        been set before or if it has been set to 'none'.
-        """
-        key = 'error'
-        if key not in self.keys() or self[key] == 'none':
-            self[key] = error
-
     def add_unexplained_error(self, error):
         """
         Add *error* to the list of unexplained errors contained at the key
-        'unexplained_error' so far. Create the list if it does not exist yet.
+        'unexplained_errors' so far. Create the list if it does not exist yet.
         """
-        key = 'unexplained_error'
+        key = 'unexplained_errors'
         self.setdefault(key, [])
         self[key].append(error)
 
@@ -440,6 +431,21 @@ def get_terminal_size():
         return (width, height)
     except Exception:
         return (None, None)
+
+
+def get_unexplained_errors_message(run):
+    """
+    Return a message string if an unexplained occured. Also add the
+    unexplained error the run dictionary if it is not present (only
+    happens if no error attribute is present).
+    """
+    if 'error' not in run:
+        run.add_unexplained_error('attribute-error-missing')
+
+    if run.get('unexplained_errors', []):
+        return 'Unexplained errors in "{run_dir}": {unexplained_errors}'.format(**run)
+    else:
+        return None
 
 
 class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
