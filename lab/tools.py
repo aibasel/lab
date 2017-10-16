@@ -435,9 +435,9 @@ def get_terminal_size():
 
 def get_unexplained_errors_message(run):
     """
-    Return a message string if an unexplained occured. Also add the
-    unexplained error the run dictionary if it is not present (only
-    happens if no error attribute is present).
+    Return an error message if an unexplained error occured in the given run,
+    otherwise return None. Also, add an unexplained error to the run if
+    run['error'] is missing.
     """
     if 'error' not in run:
         run.add_unexplained_error('attribute-error-missing')
