@@ -199,20 +199,19 @@ class PlanningReport(Report):
     def _get_warnings_table(self):
         """
         Return a :py:class:`Table <lab.reports.Table>` containing one line for
-        each run where an unexpected error occured.
+        each run where an unexplained error occured.
         """
         columns = [
-            'domain', 'problem', 'algorithm', 'error',
+            'domain', 'problem', 'algorithm', 'unexplained_errors',
             'fast-downward_wall_clock_time', 'raw_memory']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 
         unexplained_errors = 0
         for run in self.runs.values():
-            errors = run.setdefault('error', ['unexplained:attribute-error-missing'])
-            if any(error.startswith('unexplained') for error in errors):
-                logging.warning(
-                    'Unexplained error in "{run_dir}": {error}'.format(**run))
+            error_message = tools.get_unexplained_errors_message(run)
+            if error_message is not None:
+                logging.warning(error_message)
                 unexplained_errors += 1
                 for column in columns:
                     table.add_cell(run['run_dir'], column, run.get(column, '?'))

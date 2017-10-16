@@ -201,6 +201,9 @@ class Parser(object):
         >>> parser = Parser()
         >>> parser.add_function(find_f_values)
 
+        You can use `props.add_unexplained_error(msg)` when your parsing
+        function detects that something went wrong during the run.
+
         """
         self.file_parsers[file].add_function(function)
 
@@ -217,7 +220,7 @@ class Parser(object):
                 file_parser.load_file(path)
             except (IOError, MemoryError) as err:
                 logging.error('File "%s" could not be read: %s' % (path, err))
-                self.props.add_error('unexplained-error:parser-failed-to-read-file')
+                self.props.add_unexplained_error('parser-failed-to-read-file')
             else:
                 # Subclasses directly modify the properties during parsing.
                 file_parser.parse(self.props)

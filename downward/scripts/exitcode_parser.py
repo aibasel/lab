@@ -46,35 +46,47 @@ def unsolvable(content, props):
 
 def get_search_error(content, props):
     """
-    If there was an error, add its source to the error list at props['error'].
+    Convert the exitcode of the planner to a human-readable message and store
+    it in props['error']. Additionally, if there was an unexplained error, add
+    its source to the list at props['unexplained_errors'].
 
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
     """
+
+    assert 'error' not in props
 
     # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
     # TODO: Check that a plan file exists if coverage=1.
 
     exitcode_to_error = {
         EXIT_PLAN_FOUND: 'none',
-        EXIT_CRITICAL_ERROR: 'unexplained-critical-error',
-        EXIT_INPUT_ERROR: 'unexplained-input-error',
-        EXIT_UNSUPPORTED: 'unexplained-unsupported-feature-requested',
         EXIT_UNSOLVABLE: 'unsolvable',
         EXIT_UNSOLVED_INCOMPLETE: 'incomplete-search-found-no-plan',
         EXIT_OUT_OF_MEMORY: 'out-of-memory',
         EXIT_TIMEOUT: 'timeout',  # Currently only for portfolios.
         EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
-        EXIT_PYTHON_SIGKILL: 'unexplained-sigkill',
-        EXIT_PYTHON_SIGSEGV: 'unexplained-segfault',
         EXIT_PYTHON_SIGXCPU: 'timeout',
     }
 
+    exitcode_to_unexplained_error = {
+        EXIT_CRITICAL_ERROR: 'critical-error',
+        EXIT_INPUT_ERROR: 'input-error',
+        EXIT_UNSUPPORTED: 'unsupported-feature-requested',
+        EXIT_PYTHON_SIGKILL: 'sigkill',
+        EXIT_PYTHON_SIGSEGV: 'segfault',
+    }
+
+    assert not set(exitcode_to_error) & set(exitcode_to_unexplained_error)
+
     exitcode = props['fast-downward_returncode']
     if exitcode in exitcode_to_error:
-        props.add_error(exitcode_to_error[exitcode])
+        props['error'] = exitcode_to_error[exitcode]
+    elif exitcode in exitcode_to_unexplained_error:
+        props['error'] = exitcode_to_unexplained_error[exitcode]
+        props.add_unexplained_error(exitcode_to_unexplained_error[exitcode])
     else:
-        props.add_error('unexplained-exitcode-{}'.format(exitcode))
+        props.add_unexplained_error('exitcode-{}'.format(exitcode))
 
 
 class ExitCodeParser(Parser):
