@@ -80,27 +80,30 @@ class AbsoluteReport(PlanningReport):
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
             if attribute == 'error':
-                seen_outcomes = set()
-                outcome_counter = defaultdict(int)
+                seen_errors = set()
+                error_counter = defaultdict(int)
 
                 for run in self.runs.values():
-                    exitcode = run['fast-downward_returncode']
-                    outcome = outcomes.get_outcome(exitcode)
-                    seen_outcomes.add(outcome)
-                    outcome_counter[(run["algorithm"], run["domain"], outcome)] += 1
+                    error = run['error']
+                    seen_errors.add(error)
+                    error_counter[(run["algorithm"], run["domain"], error)] += 1
 
-                for outcome in sorted(seen_outcomes):
+                error_to_min_wins = dict(
+                    (outcome.msg, outcome.min_wins) for outcome in outcomes.OUTCOMES)
+
+                for error in sorted(seen_errors):
                     # Txt2tags seems to only allow letters, "-" and "_" in anchors.
-                    pseudo_attribute = 'error-' + outcome.msg
+                    pseudo_attribute = 'error-' + error
                     table = self._get_empty_table(title=pseudo_attribute)
-                    table.min_wins = outcome.min_wins
-                    table.colored = outcome.min_wins is not None
+                    min_wins = error_to_min_wins.get(error, None)
+                    table.min_wins = min_wins
+                    table.colored = min_wins is not None
                     for domain in self.domains:
                         formatter = reports.CellFormatter(
                             link='#error-{domain}'.format(**locals()))
                         table.cell_formatters[domain][table.header_column] = formatter
                         for algorithm in self.algorithms:
-                            count = outcome_counter.get((algorithm, domain, outcome), 0)
+                            count = error_counter.get((algorithm, domain, error), 0)
                             table.add_cell(domain, algorithm, count)
                     table.add_summary_function('Sum', sum)
                     reports.extract_summary_rows(
