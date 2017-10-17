@@ -21,6 +21,7 @@ import logging
 
 from lab import reports
 
+from downward import outcomes
 from downward.reports import PlanningReport
 
 
@@ -79,18 +80,21 @@ class AbsoluteReport(PlanningReport):
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
             if attribute == 'error':
-                outcomes = set()
+                seen_outcomes = set()
                 outcome_counter = defaultdict(int)
 
                 for run in self.runs.values():
-                    outcome = run.get("error", "<missing>")
-                    outcomes.add(outcome)
+                    exitcode = run['fast-downward_returncode']
+                    outcome = outcomes.get_outcome(exitcode)
+                    seen_outcomes.add(outcome)
                     outcome_counter[(run["algorithm"], run["domain"], outcome)] += 1
 
-                for outcome in sorted(outcomes):
+                for outcome in sorted(seen_outcomes):
                     # Txt2tags seems to only allow letters, "-" and "_" in anchors.
-                    pseudo_attribute = 'error-' + outcome
+                    pseudo_attribute = 'error-' + outcome.msg
                     table = self._get_empty_table(title=pseudo_attribute)
+                    table.min_wins = outcome.min_wins
+                    table.colored = outcome.min_wins is not None
                     for domain in self.domains:
                         formatter = reports.CellFormatter(
                             link='#error-{domain}'.format(**locals()))
