@@ -23,25 +23,12 @@ Functions for parsing Fast Downward exit codes.
 
 from lab.parser import Parser
 
-# Search exit codes. For the moment, all translator errors result in exit code
-# 1 and are thus treated as critical errors.
-EXIT_PLAN_FOUND = 0
-EXIT_CRITICAL_ERROR = 1
-EXIT_INPUT_ERROR = 2
-EXIT_UNSUPPORTED = 3
-EXIT_UNSOLVABLE = 4
-EXIT_UNSOLVED_INCOMPLETE = 5
-EXIT_OUT_OF_MEMORY = 6
-EXIT_TIMEOUT = 7
-EXIT_TIMEOUT_AND_MEMORY = 8
-
-EXIT_PYTHON_SIGKILL = 256 - 9
-EXIT_PYTHON_SIGSEGV = 256 - 11
-EXIT_PYTHON_SIGXCPU = 256 - 24
+from downward import outcomes
 
 
 def unsolvable(content, props):
-    props['unsolvable'] = int(props['fast-downward_returncode'] == EXIT_UNSOLVABLE)
+    outcome = outcomes.get_outcome(props['fast-downward_returncode'])
+    props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
 
 
 def get_search_error(content, props):
@@ -52,41 +39,22 @@ def get_search_error(content, props):
 
     For unexplained errors please check the files run.log, run.err,
     driver.log and driver.err to find the reason for the error.
-    """
 
+    """
     assert 'error' not in props
 
     # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
     # TODO: Check that a plan file exists if coverage=1.
 
-    exitcode_to_error = {
-        EXIT_PLAN_FOUND: 'none',
-        EXIT_UNSOLVABLE: 'unsolvable',
-        EXIT_UNSOLVED_INCOMPLETE: 'incomplete-search-found-no-plan',
-        EXIT_OUT_OF_MEMORY: 'out-of-memory',
-        EXIT_TIMEOUT: 'timeout',  # Currently only for portfolios.
-        EXIT_TIMEOUT_AND_MEMORY: 'timeout-and-out-of-memory',
-        EXIT_PYTHON_SIGXCPU: 'timeout',
-    }
-
-    exitcode_to_unexplained_error = {
-        EXIT_CRITICAL_ERROR: 'critical-error',
-        EXIT_INPUT_ERROR: 'input-error',
-        EXIT_UNSUPPORTED: 'unsupported-feature-requested',
-        EXIT_PYTHON_SIGKILL: 'sigkill',
-        EXIT_PYTHON_SIGSEGV: 'segfault',
-    }
-
-    assert not set(exitcode_to_error) & set(exitcode_to_unexplained_error)
-
     exitcode = props['fast-downward_returncode']
-    if exitcode in exitcode_to_error:
-        props['error'] = exitcode_to_error[exitcode]
-    elif exitcode in exitcode_to_unexplained_error:
-        props['error'] = exitcode_to_unexplained_error[exitcode]
-        props.add_unexplained_error(exitcode_to_unexplained_error[exitcode])
-    else:
+    outcome = outcomes.get_outcome(exitcode)
+    if outcome is None:
         props.add_unexplained_error('exitcode-{}'.format(exitcode))
+    elif outcome.explained:
+        props['error'] = outcome.msg
+    else:
+        props['error'] = outcome.msg
+        props.add_unexplained_error(outcome.msg)
 
 
 class ExitCodeParser(Parser):
