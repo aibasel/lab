@@ -99,9 +99,10 @@ class AbsoluteReport(PlanningReport):
                     table.min_wins = min_wins
                     table.colored = min_wins is not None
                     for domain in self.domains:
-                        formatter = reports.CellFormatter(
-                            link='#error-{domain}'.format(**locals()))
-                        table.cell_formatters[domain][table.header_column] = formatter
+                        if self.use_domain_links:
+                            table.cell_formatters[domain][table.header_column] = (
+                                reports.CellFormatter(
+                                    link='#error-{domain}'.format(**locals())))
                         for algorithm in self.algorithms:
                             count = error_counter.get((algorithm, domain, error), 0)
                             table.add_cell(domain, algorithm, count)
