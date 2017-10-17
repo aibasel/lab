@@ -88,7 +88,8 @@ class AbsoluteReport(PlanningReport):
                     outcome_counter[(run["algorithm"], run["domain"], outcome)] += 1
 
                 for outcome in sorted(outcomes):
-                    pseudo_attribute = 'error:' + outcome
+                    # Txt2tags seems to only allow letters, "-" and "_" in anchors.
+                    pseudo_attribute = 'error-' + outcome
                     table = self._get_empty_table(title=pseudo_attribute)
                     for domain in self.domains:
                         for algorithm in self.algorithms:
@@ -96,8 +97,8 @@ class AbsoluteReport(PlanningReport):
                             table.add_cell(domain, algorithm, count)
                     table.add_summary_function('Sum', sum)
                     reports.extract_summary_rows(
-                        table, summary, link='#' + 'error-' + outcome)
-                    tables.append((outcome, table))
+                        table, summary, link='#' + 'error-' + pseudo_attribute)
+                    tables.append((pseudo_attribute, table))
             elif self.attribute_is_numeric(attribute):
                 domain_table = self._get_table(attribute)
                 tables.append(('', domain_table))
