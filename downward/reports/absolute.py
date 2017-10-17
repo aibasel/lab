@@ -75,8 +75,6 @@ class AbsoluteReport(PlanningReport):
         summary.colored = self.colored
         toc_lines.append('- **[Summary #summary]**')
 
-        self._add_outcome_counts(summary)
-
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
@@ -97,6 +95,8 @@ class AbsoluteReport(PlanningReport):
                             count = outcome_counter.get((algorithm, domain, outcome), 0)
                             table.add_cell(domain, algorithm, count)
                     table.add_summary_function('Sum', sum)
+                    reports.extract_summary_rows(
+                        table, summary, link='#' + 'error-' + outcome)
                     tables.append((outcome, table))
             elif self.attribute_is_numeric(attribute):
                 domain_table = self._get_table(attribute)
@@ -260,35 +260,6 @@ class AbsoluteReport(PlanningReport):
         formatter = reports.CellFormatter(link=link)
         table.cell_formatters[table.header_row][table.header_column] = formatter
         return table
-
-    def _add_outcome_counts(self, table):
-        """
-        Add information about how often each error outcome occured:
-
-                                algo1   algo2
-
-            error:none             34      29
-            error:timeout          22      14
-
-        """
-        link_to_error_table = 'error' in self.attributes
-        outcomes = set()
-        outcome_counter = defaultdict(int)
-
-        for run in self.runs.values():
-            outcome = run.get("error", "<missing>")
-            outcomes.add(outcome)
-            outcome_counter[(outcome, run["algorithm"])] += 1
-
-        for outcome in outcomes:
-            row_name = 'error:' + outcome
-            table.row_min_wins[row_name] = None
-            if link_to_error_table:
-                formatter = reports.CellFormatter(link='#error')
-                table.cell_formatters[row_name][table.header_column] = formatter
-            for algorithm in self.algorithms:
-                count = outcome_counter.get((outcome, algorithm), 0)
-                table.add_cell(row_name, algorithm, count)
 
     def _add_summary_functions(self, table, attribute):
         for funcname, func in self._get_group_functions(attribute):
