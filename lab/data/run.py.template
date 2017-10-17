@@ -11,7 +11,7 @@ sys.stdout = driver_log
 sys.stderr = driver_err
 
 from lab.calls.call import Call
-from lab.calls.log import delete_file_if_empty, save_returncode
+from lab.calls.log import add_unexplained_error, delete_file_if_empty, save_returncode
 
 run_log = open('run.log', 'w')
 run_err = open('run.err', 'w')
@@ -21,6 +21,10 @@ redirects = {'stdout': run_log, 'stderr': run_err}
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 %(calls)s
+
+for f in [run_err, driver_err]:
+    if os.path.getsize(f.name) != 0:
+        add_unexplained_error('output-to-' + f.name)
 
 for f in [run_log, run_err, driver_log, driver_err]:
     f.close()
