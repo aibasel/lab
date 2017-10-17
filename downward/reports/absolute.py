@@ -96,6 +96,7 @@ class AbsoluteReport(PlanningReport):
                         for algorithm in self.algorithms:
                             count = outcome_counter.get((algorithm, domain, outcome), 0)
                             table.add_cell(domain, algorithm, count)
+                    table.add_summary_function('Sum', sum)
                     tables.append((outcome, table))
             elif self.attribute_is_numeric(attribute):
                 domain_table = self._get_table(attribute)
