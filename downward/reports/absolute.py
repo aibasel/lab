@@ -80,7 +80,24 @@ class AbsoluteReport(PlanningReport):
         for attribute in self.attributes:
             logging.info('Creating table(s) for %s' % attribute)
             tables = []
-            if self.attribute_is_numeric(attribute):
+            if attribute == 'error':
+                outcomes = set()
+                outcome_counter = defaultdict(int)
+
+                for run in self.runs.values():
+                    outcome = run.get("error", "<missing>")
+                    outcomes.add(outcome)
+                    outcome_counter[(run["algorithm"], run["domain"], outcome)] += 1
+
+                for outcome in sorted(outcomes):
+                    pseudo_attribute = 'error:' + outcome
+                    table = self._get_empty_table(title=pseudo_attribute)
+                    for domain in self.domains:
+                        for algorithm in self.algorithms:
+                            count = outcome_counter.get((algorithm, domain, outcome), 0)
+                            table.add_cell(domain, algorithm, count)
+                    tables.append((outcome, table))
+            elif self.attribute_is_numeric(attribute):
                 domain_table = self._get_table(attribute)
                 tables.append(('', domain_table))
                 reports.extract_summary_rows(
