@@ -92,6 +92,9 @@ class AbsoluteReport(PlanningReport):
                     pseudo_attribute = 'error-' + outcome
                     table = self._get_empty_table(title=pseudo_attribute)
                     for domain in self.domains:
+                        formatter = reports.CellFormatter(
+                            link='#error-{domain}'.format(**locals()))
+                        table.cell_formatters[domain][table.header_column] = formatter
                         for algorithm in self.algorithms:
                             count = outcome_counter.get((algorithm, domain, outcome), 0)
                             table.add_cell(domain, algorithm, count)
