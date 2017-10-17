@@ -48,12 +48,8 @@ def get_search_error(content, props):
 
     exitcode = props['fast-downward_returncode']
     outcome = outcomes.get_outcome(exitcode)
-    if outcome is None:
-        props.add_unexplained_error('exitcode-{}'.format(exitcode))
-    elif outcome.explained:
-        props['error'] = outcome.msg
-    else:
-        props['error'] = outcome.msg
+    props['error'] = outcome.msg
+    if not outcome.explained:
         props.add_unexplained_error(outcome.msg)
 
 

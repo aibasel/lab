@@ -49,4 +49,8 @@ MAP = dict((code.value, code) for code in OUTCOMES)
 
 
 def get_outcome(exitcode):
-    return MAP.get(exitcode)
+    if exitcode in MAP:
+        return MAP[exitcode]
+    else:
+        msg = 'exitcode-{exitcode}'.format(**locals())
+        return Outcome(exitcode, msg, explained=False, min_wins=True)
