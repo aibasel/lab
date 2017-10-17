@@ -45,12 +45,12 @@ OUTCOMES = [
     Outcome(get_exit_code(signal.SIGXCPU), 'timeout', explained=True, min_wins=True),
 ]
 
-MAP = dict((code.value, code) for code in OUTCOMES)
+EXITCODE_TO_OUTCOME = dict((outcome.value, outcome) for outcome in OUTCOMES)
 
 
 def get_outcome(exitcode):
-    if exitcode in MAP:
-        return MAP[exitcode]
+    if exitcode in EXITCODE_TO_OUTCOME:
+        return EXITCODE_TO_OUTCOME[exitcode]
     else:
         msg = 'exitcode-{exitcode}'.format(**locals())
         return Outcome(exitcode, msg, explained=False, min_wins=True)
