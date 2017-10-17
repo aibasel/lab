@@ -225,8 +225,7 @@ class Properties(dict):
 
 class RunFilter(object):
     def __init__(self, filter, **kwargs):
-        filter = filter or []
-        self.filters = make_list(filter)
+        self.filters = make_list(filter or [])
         for arg_name, arg_value in kwargs.items():
             if not arg_name.startswith('filter_'):
                 logging.critical('Invalid keyword argument name "%s"' % arg_name)
