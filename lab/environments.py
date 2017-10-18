@@ -225,9 +225,12 @@ class GridEnvironment(Environment):
         return tools.fill_template(self.JOB_HEADER_TEMPLATE_FILE, **job_params)
 
     def _get_run_job_body(self):
+        task_order = range(1, len(self.exp.runs) + 1)
+        if self.randomize_task_order:
+            random.shuffle(task_order)
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
-            errfile='driver.err',
+            task_order=' '.join(str(i) for i in task_order),
             exp_path='../' + self.exp.name)
 
     def _get_step_job_body(self, step):
