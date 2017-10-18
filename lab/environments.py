@@ -67,15 +67,6 @@ class Environment(object):
             random.shuffle(task_order)
         return task_order
 
-    # TODO: Remove this method and run-dispatcher file once we get rid
-    #       of OracleGridEngineEnvironment.
-    def _write_run_dispatcher(self):
-        dispatcher_content = tools.fill_template(
-            'run-dispatcher.py',
-            task_order=self._get_task_order())
-        self.exp.add_new_file(
-            '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
-
     def write_main_script(self):
         raise NotImplementedError
 
@@ -254,7 +245,7 @@ class GridEnvironment(Environment):
 
     def write_main_script(self):
         # The main script is written by the run_steps() method.
-        self._write_run_dispatcher()
+        pass
 
     def run_steps(self, steps):
         """
@@ -338,6 +329,19 @@ class OracleGridEngineEnvironment(GridEnvironment):
         self.priority = priority
         assert self.priority in xrange(-1023, 1024 + 1)
         self.host_spec = self._get_host_spec(host_restriction)
+
+    # TODO: Don't forget to remove the run-dispatcher file once we get rid
+    #       of OracleGridEngineEnvironment.
+    def _write_run_dispatcher(self):
+        dispatcher_content = tools.fill_template(
+            'run-dispatcher.py',
+            task_order=self._get_task_order())
+        self.exp.add_new_file(
+            '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
+
+    def write_main_script(self):
+        # The main script is written by the run_steps() method.
+        self._write_run_dispatcher()
 
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
