@@ -1,7 +1,28 @@
-cd %(exp_path)s
-RUN="$SLURM_ARRAY_TASK_ID"
-./run-dispatcher.py "$RUN"
+declare -a SHUFFLED_TASK_IDS=(%(task_order)s)
+
+function print_run_dir {
+    local RUN_ID=${SHUFFLED_TASK_IDS[$1 - 1]}
+    let "LOWER=((RUN_ID - 1) / 100) * 100 + 1"
+    let "UPPER=((RUN_ID + 100 - 1) / 100) * 100"
+    printf "runs-%%05d-%%05d/%%05d" $LOWER $UPPER $RUN_ID
+}
+
+RUN_DIR=$(print_run_dir $SLURM_ARRAY_TASK_ID)
+
+cd "%(exp_path)s/$RUN_DIR"
+
+(
+./run
 RETCODE=$?
-if (( $RETCODE != 0 )); then
-    echo "Run $RUN returned $RETCODE" >> %(errfile)s
+if [[ $RETCODE != 0 ]]; then
+    >&2 echo "The run script finished with exit code $RETCODE"
+fi
+) > driver.log 2> driver.err
+
+# Delete empty driver files.
+if [[ ! -s driver.log ]]; then
+  rm driver.log
+fi
+if [[ ! -s driver.err ]]; then
+  rm driver.err
 fi

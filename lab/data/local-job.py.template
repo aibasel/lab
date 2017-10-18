@@ -5,23 +5,35 @@ import multiprocessing
 import subprocess
 import sys
 
+from lab.calls import log
+from lab.experiment import get_run_dir
 
-# make sure we're in the run directory
+SHUFFLED_TASK_IDS = %(task_order)s
+
+# Make sure we're in the experiment directory.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-num_tasks = %(num_tasks)d
+def get_run_id(task_id):
+    return SHUFFLED_TASK_IDS[task_id - 1]
 
 
 def process_task(task_id):
-    try:
-        subprocess.check_call(['./run-dispatcher.py', str(task_id)])
-    except subprocess.CalledProcessError as err:
-        return True
+    run_id = get_run_id(task_id)
+    run_dir = get_run_dir(run_id)
+    with open(os.path.join(run_dir, 'driver.log'), 'w') as driver_log:
+        with open(os.path.join(run_dir, 'driver.err'), 'w') as driver_err:
+            try:
+                subprocess.check_call(['./run'], cwd=run_dir, stdout=driver_log, stderr=driver_err)
+            except subprocess.CalledProcessError as err:
+                return True
+    for filehandle in [driver_log, driver_err]:
+        log.delete_file_if_empty(filehandle.name)
 
 
 def main():
     pool = multiprocessing.Pool(processes=%(processes)d)
+    num_tasks = len(SHUFFLED_TASK_IDS)
     result = pool.map_async(process_task, range(1, num_tasks + 1))
     try:
         # Use "timeout" to fix passing KeyboardInterrupts from children
