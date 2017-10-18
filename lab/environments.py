@@ -110,9 +110,12 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         self._write_run_dispatcher()
+        task_order = range(1, len(self.exp.runs) + 1)
+        if self.randomize_task_order:
+            random.shuffle(task_order)
         script = tools.fill_template(
             'local-job.py',
-            num_tasks=len(self.exp.runs),
+            task_order=str(task_order),
             processes=self.processes)
 
         self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
