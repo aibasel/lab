@@ -14,9 +14,15 @@ cd "%(exp_path)s/$RUN_DIR"
 (
 ./run
 RETCODE=$?
-if (( $RETCODE != 0 )); then
+if [[ $RETCODE != 0 ]]; then
     >&2 echo "The run script finished with exit code $RETCODE"
 fi
 ) > driver.log 2> driver.err
 
-# TODO: Delete driver files if empty.
+# Delete empty driver files.
+if [[ ! -s driver.log ]]; then
+  rm driver.log
+fi
+if [[ ! -s driver.err ]]; then
+  rm driver.err
+fi
