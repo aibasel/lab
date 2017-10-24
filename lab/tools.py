@@ -189,6 +189,17 @@ def run_command(cmd, **kwargs):
     return subprocess.call(cmd, **kwargs)
 
 
+def add_unexplained_error(dictionary, error):
+    """
+    Add *error* to the list of unexplained errors at
+    dictionary['unexplained_errors']. Create the list if it does not
+    exist yet.
+    """
+    key = 'unexplained_errors'
+    dictionary.setdefault(key, [])
+    dictionary[key].append(error)
+
+
 class Properties(dict):
     def __init__(self, filename=None):
         self.filename = filename
@@ -208,13 +219,7 @@ class Properties(dict):
                 logging.critical("JSON parse error in file '%s': %s" % (filename, e))
 
     def add_unexplained_error(self, error):
-        """
-        Add *error* to the list of unexplained errors contained at the key
-        'unexplained_errors'. Create the list if it does not exist yet.
-        """
-        key = 'unexplained_errors'
-        self.setdefault(key, [])
-        self[key].append(error)
+        add_unexplained_error(self, error)
 
     def write(self):
         """Write the properties to disk."""
@@ -439,7 +444,7 @@ def get_unexplained_errors_message(run):
     run['error'] is missing.
     """
     if 'error' not in run:
-        run.add_unexplained_error('attribute-error-missing')
+        add_unexplained_error(run, 'attribute-error-missing')
 
     if run.get('unexplained_errors', []):
         return 'Unexplained errors in "{run_dir}": {unexplained_errors}'.format(**run)
