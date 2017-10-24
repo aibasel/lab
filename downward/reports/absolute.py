@@ -84,7 +84,7 @@ class AbsoluteReport(PlanningReport):
                 error_counter = defaultdict(int)
 
                 for run in self.runs.values():
-                    error = run['error']
+                    error = run.get('error', 'attribute-error-missing')
                     seen_errors.add(error)
                     error_counter[(run["algorithm"], run["domain"], error)] += 1
 
