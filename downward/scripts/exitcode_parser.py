@@ -61,6 +61,7 @@ class ExitCodeParser(Parser):
 
 
 def main():
+    print 'Running exit code parser'
     parser = ExitCodeParser()
     parser.parse()
 

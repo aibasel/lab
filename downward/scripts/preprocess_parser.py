@@ -111,5 +111,6 @@ class PreprocessParser(Parser):
 
 
 if __name__ == '__main__':
+    print 'Running preprocess parser'
     parser = PreprocessParser()
     parser.parse()
