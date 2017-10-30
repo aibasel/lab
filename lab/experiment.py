@@ -20,7 +20,6 @@
 from collections import OrderedDict
 import logging
 import os
-import pkgutil
 import sys
 
 from lab import environments
@@ -329,14 +328,6 @@ class Experiment(_Buildable):
         self.runs = []
 
         self.set_property('experiment_file', self._script)
-
-        self.add_new_file(
-            "lab_default_parser",
-            "lab-default-parser.py",
-            pkgutil.get_data('lab', 'data/default-parser.py'),
-            permissions=0o755)
-        self.add_command(
-            "run-lab-default-parser", [sys.executable, "{lab_default_parser}"])
 
         self.steps = []
         self.add_step('build', self.build)
