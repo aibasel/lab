@@ -197,7 +197,8 @@ def add_unexplained_error(dictionary, error):
     """
     key = 'unexplained_errors'
     dictionary.setdefault(key, [])
-    dictionary[key].append(error)
+    if error not in dictionary[key]:
+        dictionary[key].append(error)
 
 
 class Properties(dict):
