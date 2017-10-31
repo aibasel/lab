@@ -38,9 +38,9 @@ def set_property(name, value):
     properties.write()
 
 
-def add_unexplained_error(error):
+def add_unexplained_error(error, filename='properties'):
     # See comment for set_property.
-    properties = Properties(filename='properties')
+    properties = Properties(filename=filename)
     properties.add_unexplained_error(error)
     properties.write()
 
