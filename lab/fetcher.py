@@ -127,6 +127,8 @@ class Fetcher(object):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, 'Scanning: {:6d}/{:d}'.format(index, total_dirs))
                 props = self.fetch_dir(run_dir, eval_dir, parsers=parsers)
+                if slurm_err_content:
+                    props.add_unexplained_error('output-to-slurm.err')
                 id_string = '-'.join(props['id'])
                 new_props[id_string] = props
             run_filter.apply(new_props)
