@@ -40,6 +40,16 @@ def _check_eval_dir(eval_dir):
             logging.critical('Invalid answer: "{}"'.format(answer))
 
 
+def _get_slurm_err_content(src_dir):
+    grid_steps_dir = src_dir.rstrip('/') + '-grid-steps'
+    slurm_err_filename = os.path.join(grid_steps_dir, 'slurm.err')
+    try:
+        with open(slurm_err_filename) as f:
+            return f.read()
+    except IOError:
+        return ''
+
+
 class Fetcher(object):
     """
     Collect data from the runs of an experiment and store it in an
@@ -104,6 +114,10 @@ class Fetcher(object):
             run_filter.apply(src_props)
             combined_props.update(src_props)
         else:
+            slurm_err_content = _get_slurm_err_content(src_dir)
+            if slurm_err_content:
+                logging.error('Slurm error log:\n{sep}\n{slurm_err_content}\n{sep}'.format(
+                    sep='*' * 72, **locals()))
             new_props = tools.Properties()
             run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
             total_dirs = len(run_dirs)
