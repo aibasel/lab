@@ -116,8 +116,9 @@ class Fetcher(object):
         else:
             slurm_err_content = _get_slurm_err_content(src_dir)
             if slurm_err_content:
-                logging.error('Slurm error log:\n{sep}\n{slurm_err_content}\n{sep}'.format(
-                    sep='*' * 72, **locals()))
+                logging.error(
+                    'Slurm error log:\n{sep}\n{slurm_err_content}\n{sep}'.format(
+                        sep='*' * 72, **locals()))
             new_props = tools.Properties()
             run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
             total_dirs = len(run_dirs)
