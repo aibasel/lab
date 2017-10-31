@@ -203,7 +203,7 @@ class PlanningReport(Report):
         """
         columns = [
             'domain', 'problem', 'algorithm', 'unexplained_errors', 'error',
-            'fast-downward_wall_clock_time', 'raw_memory']
+            'fast-downward_wall_clock_time', 'raw_memory', 'node']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 
