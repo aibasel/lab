@@ -650,8 +650,8 @@ class Run(_Buildable):
             parts = [cmd_string]
             if kwargs_string:
                 parts.append(kwargs_string)
-            call = ('retcode = Call({}, **redirects).wait()\n'
-                    'save_returncode({name!r}, retcode)\n'.format(
+            call = ('retcode = call.Call({}, **redirects).wait()\n'
+                    'log.save_returncode({name!r}, retcode)\n'.format(
                         ', '.join(parts), **locals()))
             return call
 

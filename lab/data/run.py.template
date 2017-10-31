@@ -3,8 +3,8 @@
 
 import os
 
-from lab.calls.call import Call
-from lab.calls.log import add_unexplained_error, delete_file_if_empty, save_returncode
+from lab.calls import call
+from lab.calls import log
 
 run_log = open('run.log', 'w')
 run_err = open('run.err', 'w')
@@ -16,8 +16,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 %(calls)s
 
 if os.path.getsize(run_err.name) != 0:
-    add_unexplained_error('output-to-' + run_err.name)
+    log.add_unexplained_error('output-to-' + run_err.name)
 
 for f in [run_log, run_err]:
     f.close()
-    delete_file_if_empty(f.name)
+    log.delete_file_if_empty(f.name)
