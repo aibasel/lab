@@ -21,8 +21,10 @@ fi
 
 # Delete empty driver files.
 if [[ ! -s driver.log ]]; then
-  rm driver.log
+    rm driver.log
 fi
-if [[ ! -s driver.err ]]; then
-  rm driver.err
+if [[ -s driver.err ]]; then
+    python2 -c "from lab.calls import log; log.add_unexplained_error('output-to-driver.err')"
+else
+    rm driver.err
 fi
