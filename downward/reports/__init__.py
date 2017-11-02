@@ -207,19 +207,33 @@ class PlanningReport(Report):
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 
-        unexplained_errors = 0
+        num_output_to_slurm_err = 0
+        num_unexplained_errors = 0
         for run in self.runs.values():
-            error_message = tools.get_unexplained_errors_message(run)
-            if error_message is not None:
-                logging.warning(error_message)
-                unexplained_errors += 1
-                for column in columns:
-                    table.add_cell(run['run_dir'], column, run.get(column, '?'))
+            unexplained_errors = run.get('unexplained_errors', [])
+            if unexplained_errors == ['output-to-slurm.err']:
+                num_output_to_slurm_err += 1
+            else:
+                error_message = tools.get_unexplained_errors_message(run)
+                if error_message is not None:
+                    logging.warning(error_message)
+                    num_unexplained_errors += 1
+                    for column in columns:
+                        table.add_cell(run['run_dir'], column, run.get(column, '?'))
 
-        if unexplained_errors:
-            logging.warning(
-                'There were {} runs with unexplained errors.'.format(
-                    unexplained_errors))
+        if num_unexplained_errors:
+            logging.error(
+                'There were {num_unexplained_errors} runs with unexplained'
+                ' errors.'.format(**locals()))
+
+        if num_output_to_slurm_err:
+            logging.error(
+                '{num_output_to_slurm_err} runs affected by output to'
+                ' <exp-name>-grid-steps/slurm.err.'.format(**locals()))
+            table.add_cell(
+                '{num_output_to_slurm_err} runs'.format(**locals()),
+                'unexplained_errors',
+                "['output-to-slurm.err']")
 
         return table
 

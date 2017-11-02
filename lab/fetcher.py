@@ -97,8 +97,7 @@ class Fetcher(object):
         fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
 
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
-        logging.info('Fetching files from {} -> {}'.format(src_dir, eval_dir))
-        logging.info('Fetching from evaluation dir: {}'.format(fetch_from_eval_dir))
+        logging.info('Fetching properties from {} to {}'.format(src_dir, eval_dir))
 
         if merge is None:
             _check_eval_dir(eval_dir)
