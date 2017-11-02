@@ -2,8 +2,10 @@
 ### Set name.
 #SBATCH --job-name=%(name)s
 ### Redirect stdout and stderr.
-#SBATCH --error=%(errfile)s
 #SBATCH --output=%(logfile)s
+#SBATCH --error=%(errfile)s
+### Let later steps append their logs to the output and error files.
+#SBATCH --open-mode=append
 ### Set partition.
 #SBATCH --partition=%(partition)s
 ### Set quality-of-service group.
