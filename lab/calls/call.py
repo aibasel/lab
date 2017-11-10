@@ -185,7 +185,7 @@ class Call(object):
                             add_unexplained_error(msg)
                             self.process.terminate()
                             # Strip extra bytes.
-                            data = data[:limit - fd_to_bytes[fd]]
+                            data = data[:hard_limit - fd_to_bytes[fd]]
                         outfile.write(data)
                         outfile.flush()
                         fd_to_bytes[fd] += len(data)
