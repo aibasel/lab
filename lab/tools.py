@@ -453,6 +453,20 @@ def get_unexplained_errors_message(run):
         return None
 
 
+def get_slurm_err_content(src_dir):
+    grid_steps_dir = src_dir.rstrip('/') + '-grid-steps'
+    slurm_err_filename = os.path.join(grid_steps_dir, 'slurm.err')
+    with open(slurm_err_filename) as f:
+        return f.read()
+
+
+def filter_slurm_err_content(content):
+    filtered = re.sub(
+        "slurmstepd: error: task/cgroup: unable to add task\[pid=\d+\]"
+        " to memory cg '\(null\)'\n", '', content)
+    return "\n".join(line for line in filtered.splitlines() if line.strip())
+
+
 class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
     """
     Help message formatter which preserves the description format and adds

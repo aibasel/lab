@@ -196,7 +196,7 @@ class PlanningReport(Report):
             break
         return info
 
-    def _get_warnings_table(self):
+    def _get_warnings_text_and_table(self):
         """
         Return a :py:class:`Table <lab.reports.Table>` containing one line for
         each run where an unexplained error occured.
@@ -226,16 +226,35 @@ class PlanningReport(Report):
                 'There were {num_unexplained_errors} runs with unexplained'
                 ' errors.'.format(**locals()))
 
+        text = ''
         if num_output_to_slurm_err:
+            src_dir = self.eval_dir.rstrip('/').rstrip('-eval')
+            slurm_err_file = src_dir + '-grid-steps/slurm.err'
+            try:
+                slurm_err_content = tools.get_slurm_err_content(src_dir)
+            except IOError:
+                slurm_err_content = (
+                    'The file {slurm_err_file} was missing during the '
+                    'creation of the report.'.format(**locals()))
+            else:
+                slurm_err_content = tools.filter_slurm_err_content(slurm_err_content)
+
             logging.error(
                 '{num_output_to_slurm_err} runs affected by output to'
                 ' <exp-name>-grid-steps/slurm.err.'.format(**locals()))
-            table.add_cell(
-                '{num_output_to_slurm_err} runs'.format(**locals()),
-                'unexplained_errors',
-                "['output-to-slurm.err']")
 
-        return table
+            text = (
+                'There was output to slurm.err, affecting '
+                '{num_output_to_slurm_err} runs. '
+                'Please inspect the relevant *-grid-steps/slurm.err file(s). '
+                'Contents of {slurm_err_file} without "memory cg" errors:\n'
+                '```\n'
+                '{slurm_err_content}\n```'.format(**locals()))
+
+        return ''.join([
+            text,
+            '\n' if text and table else '',
+            table if table else ''])
 
     def _get_algorithm_order(self):
         """

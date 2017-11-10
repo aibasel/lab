@@ -13,7 +13,7 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
 
 
-ATTRIBUTES = ['coverage', 'expansions']
+ATTRIBUTES = ['coverage', 'error', 'expansions']
 
 if 'cluster' in platform.node():
     # Create bigger suites with suites.py from the downward-benchmarks repo.
