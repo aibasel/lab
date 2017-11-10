@@ -167,16 +167,20 @@ class Call(object):
                         soft_limit, hard_limit = fd_to_limits[fd]
                         if (soft_limit is not None and
                                 fd_to_bytes[fd] + len(data) > soft_limit):
-                            msg = 'output to {} reached soft limit of {} KiB'.format(
-                                outfile.name, soft_limit / 1024)
+                            msg = (
+                                '{} wrote more than the soft limit of {}'
+                                ' KiB to {} -> let command finish'.format(
+                                    self.name, soft_limit / 1024, outfile.name))
                             sys.stdout.write('Warning: {}\n'.format(msg))
                             add_unexplained_error(msg)
                         if (hard_limit is not None and
                                 fd_to_bytes[fd] + len(data) > hard_limit):
                             # Don't write to this outfile in subsequent rounds.
                             fd_to_outfile[fd] = None
-                            msg = 'output to {} reached hard limit of {} KiB'.format(
-                                outfile.name, hard_limit / 1024)
+                            msg = (
+                                '{} wrote {} KiB (hard limit) to {} ->'
+                                ' abort command'.format(
+                                    self.name, hard_limit / 1024, outfile.name))
                             sys.stderr.write('Error: {}\n'.format(msg))
                             add_unexplained_error(msg)
                             self.process.terminate()
