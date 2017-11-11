@@ -197,6 +197,10 @@ class Call(object):
         wall_clock_start_time = time.time()
         self._redirect_streams()
         retcode = self.process.wait()
+        # Write the log and error output to disk before the next Call starts.
+        for stream, _ in self.redirected_streams_and_limits.values():
+            stream.flush()
+        # Close files that were opened in the constructor.
         for file in self.opened_files:
             file.close()
         wall_clock_time = time.time() - wall_clock_start_time
