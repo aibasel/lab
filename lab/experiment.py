@@ -157,7 +157,9 @@ class _Buildable(object):
         self.new_files.append((dest, content, permissions))
 
     def add_command(self, name, command, time_limit=None, memory_limit=None,
-                    stdout_limit=5 * 1024, stderr_limit=1024, **kwargs):
+                    soft_stdout_limit=1024, hard_stdout_limit=10 * 1024,
+                    soft_stderr_limit=1024, hard_stderr_limit=10 * 1024,
+                    **kwargs):
         """Call an executable.
 
         If invoked on a *run*, this method adds the command to the
@@ -169,20 +171,23 @@ class _Buildable(object):
         *command* has to be a list of strings where the first item is
         the executable.
 
-        After *time_limit* seconds the signal SIXCPU is sent to the
+        After *time_limit* seconds the signal SIGXCPU is sent to the
         command. The process can catch this signal and exit gracefully.
-        If it doesn't catch the SIXCPU signal, the command is aborted
+        If it doesn't catch the SIGXCPU signal, the command is aborted
         with SIGKILL after five additional seconds.
 
         The command is aborted with SIGKILL when it uses more than
         *memory_limit* MiB.
 
-        After writing *log_limit* KiB to stdout or stderr the command is
-        killed with SIGTERM. This signal can be caught and handled by
-        the process.
+        You can limit the log size (in KiB) with a soft and hard limit
+        for both stdout and stderr. When the soft limit is hit, an
+        unexplained error is registered for this run, but the command is
+        allowed to continue running. When the hard limit is hit, the
+        command is killed with SIGTERM. This signal can be caught and
+        handled by the process.
 
-        By default, time and memory are not restricted, but output to
-        stdout and stderr is limited to 5 and 1 MiB, respectively.
+        By default, there are limits for the log and error output, but
+        time and memory are not restricted.
 
         All *kwargs* (except ``stdin``) are passed to `subprocess.Popen
         <http://docs.python.org/library/subprocess.html>`_. Instead of
@@ -218,8 +223,10 @@ class _Buildable(object):
             logging.critical('redirecting stdin is not supported')
         kwargs['time_limit'] = time_limit
         kwargs['memory_limit'] = memory_limit
-        kwargs['stdout_limit'] = stdout_limit
-        kwargs['stderr_limit'] = stderr_limit
+        kwargs['soft_stdout_limit'] = soft_stdout_limit
+        kwargs['hard_stdout_limit'] = hard_stdout_limit
+        kwargs['soft_stderr_limit'] = soft_stderr_limit
+        kwargs['hard_stderr_limit'] = hard_stderr_limit
         self.commands[name] = (command, kwargs)
 
     @property
