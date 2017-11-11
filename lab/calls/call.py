@@ -166,6 +166,7 @@ class Call(object):
                         outfile = fd_to_outfile[fd]
                         soft_limit, hard_limit = fd_to_limits[fd]
                         if (soft_limit is not None and
+                                fd_to_bytes[fd] <= soft_limit and
                                 fd_to_bytes[fd] + len(data) > soft_limit):
                             msg = (
                                 '{} wrote more than the soft limit of {}'
