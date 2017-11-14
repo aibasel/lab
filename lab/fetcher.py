@@ -133,7 +133,7 @@ class Fetcher(object):
         unexplained_errors = 0
         for props in combined_props.values():
             error_message = tools.get_unexplained_errors_message(props)
-            if error_message is not None:
+            if error_message:
                 logging.warning(error_message)
                 unexplained_errors += 1
 

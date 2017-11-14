@@ -447,10 +447,11 @@ def get_unexplained_errors_message(run):
     if 'error' not in run:
         add_unexplained_error(run, 'attribute-error-missing')
 
-    if run.get('unexplained_errors', []):
-        return 'Unexplained errors in "{run_dir}": {unexplained_errors}'.format(**run)
+    unexplained_errors = run.get('unexplained_errors', [])
+    if not unexplained_errors or unexplained_errors == ['output-to-slurm.err']:
+        return ''
     else:
-        return None
+        return 'Unexplained errors in "{run_dir}": {unexplained_errors}'.format(**run)
 
 
 def get_slurm_err_content(src_dir):

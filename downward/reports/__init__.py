@@ -207,19 +207,18 @@ class PlanningReport(Report):
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 
-        num_output_to_slurm_err = 0
+        num_output_to_slurm_err = sum(
+            'output-to-slurm.err' in run.get('unexplained_errors', [])
+            for run in self.runs.values())
+
         num_unexplained_errors = 0
         for run in self.runs.values():
-            unexplained_errors = run.get('unexplained_errors', [])
-            if unexplained_errors == ['output-to-slurm.err']:
-                num_output_to_slurm_err += 1
-            else:
-                error_message = tools.get_unexplained_errors_message(run)
-                if error_message is not None:
-                    logging.warning(error_message)
-                    num_unexplained_errors += 1
-                    for column in columns:
-                        table.add_cell(run['run_dir'], column, run.get(column, '?'))
+            error_message = tools.get_unexplained_errors_message(run)
+            if error_message:
+                logging.warning(error_message)
+                num_unexplained_errors += 1
+                for column in columns:
+                    table.add_cell(run['run_dir'], column, run.get(column, '?'))
 
         if num_unexplained_errors:
             logging.error(
