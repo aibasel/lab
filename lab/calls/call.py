@@ -61,7 +61,7 @@ class Call(object):
             self.wall_clock_time_limit = max(30, time_limit * 1.5)
 
         def get_bytes(limit):
-            return None if limit is None else limit * 1024
+            return None if limit is None else int(limit * 1024)
 
         # Allow passing filenames instead of file handles.
         self.opened_files = []
@@ -135,19 +135,13 @@ class Call(object):
 
         select_POLLIN_POLLPRI = select.POLLIN | select.POLLPRI
 
-        if 'stdout' in self.redirected_streams_and_limits:
-            new_stdout, stdout_limits = self.redirected_streams_and_limits['stdout']
-            register_and_append(self.process.stdout, select_POLLIN_POLLPRI)
-            fd = self.process.stdout.fileno()
-            fd_to_outfile[fd] = new_stdout
-            fd_to_limits[fd] = stdout_limits
-
-        if 'stderr' in self.redirected_streams_and_limits:
-            new_stderr, stderr_limits = self.redirected_streams_and_limits['stderr']
-            register_and_append(self.process.stderr, select_POLLIN_POLLPRI)
-            fd = self.process.stderr.fileno()
-            fd_to_outfile[fd] = new_stderr
-            fd_to_limits[fd] = stderr_limits
+        for stream_name, (new_stream, limits) in (
+                self.redirected_streams_and_limits.items()):
+            old_stream = getattr(self.process, stream_name)
+            register_and_append(old_stream, select_POLLIN_POLLPRI)
+            fd = old_stream.fileno()
+            fd_to_outfile[fd] = new_stream
+            fd_to_limits[fd] = limits
 
         while fd_to_infile:
             try:
@@ -164,16 +158,7 @@ class Call(object):
                         close_unregister_and_remove(fd)
                     if fd_to_outfile[fd]:
                         outfile = fd_to_outfile[fd]
-                        soft_limit, hard_limit = fd_to_limits[fd]
-                        if (soft_limit is not None and
-                                fd_to_bytes[fd] <= soft_limit and
-                                fd_to_bytes[fd] + len(data) > soft_limit):
-                            msg = (
-                                '{} wrote more than the soft limit of {}'
-                                ' KiB to {} -> let command finish'.format(
-                                    self.name, soft_limit / 1024, outfile.name))
-                            sys.stdout.write('Warning: {}\n'.format(msg))
-                            add_unexplained_error(msg)
+                        _, hard_limit = fd_to_limits[fd]
                         if (hard_limit is not None and
                                 fd_to_bytes[fd] + len(data) > hard_limit):
                             # Don't write to this outfile in subsequent rounds.
@@ -193,13 +178,29 @@ class Call(object):
                     # Ignore hang up or errors.
                     close_unregister_and_remove(fd)
 
+        # Check soft limit.
+        for fd, outfile in fd_to_outfile.items():
+            # Ignore streams that exceeded the hard limit.
+            if outfile is not None:
+                soft_limit, _ = fd_to_limits[fd]
+                bytes_written = fd_to_bytes[fd]
+                if (soft_limit is not None and bytes_written > soft_limit):
+                    msg = (
+                        '{} finished and wrote {} KiB to {} (soft limit: {} KiB)'.format(
+                            self.name, bytes_written / 1024, outfile.name,
+                            soft_limit / 1024))
+                    print 'Warning: {}'.format(msg)
+                    add_unexplained_error(msg)
+
     def wait(self):
         wall_clock_start_time = time.time()
         self._redirect_streams()
         retcode = self.process.wait()
-        # Write the log and error output to disk before the next Call starts.
-        for stream, _ in self.redirected_streams_and_limits.values():
+        for stream, (soft_limit, _) in self.redirected_streams_and_limits.values():
+            # Write output to disk before the next Call starts.
             stream.flush()
+            os.fsync(stream.fileno())
+
         # Close files that were opened in the constructor.
         for file in self.opened_files:
             file.close()
