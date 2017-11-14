@@ -57,12 +57,11 @@ class Fetcher(object):
     def fetch_dir(self, run_dir, eval_dir, parsers=None):
         # Allow specyfing a list of multiple parsers or a single parser.
         parsers = tools.make_list(parsers or [])
-        prop_file = os.path.join(run_dir, 'properties')
-
         for parser in parsers:
             rel_parser = os.path.relpath(parser, start=run_dir)
             subprocess.call([rel_parser], cwd=run_dir)
 
+        prop_file = os.path.join(run_dir, 'properties')
         return tools.Properties(filename=prop_file)
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,

@@ -32,6 +32,8 @@ Call the fetcher by invoking the new experiment step::
 
     ./my-exp.py parse-again
 
+Note that this changes the ``properties`` files in all run directories.
+
 
 How can I make reports and plots for results obtained without lab?
 ------------------------------------------------------------------

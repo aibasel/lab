@@ -426,10 +426,10 @@ class Experiment(_Buildable):
         with the *filter* argument.
 
         *parsers* can be a list of paths to parser scripts. If given,
-        each parser is called in each run directory and the results are
-        added to the properties file which is fetched afterwards. This
-        option is useful if you forgot to parse some attributes during
-        the experiment.
+        each parser is called in each run directory and each
+        ``properties`` file is updated with the results from the parser
+        and rewritten to disk. This option is useful if you forgot to
+        parse some attributes during the experiment.
 
         Example setup:
 
