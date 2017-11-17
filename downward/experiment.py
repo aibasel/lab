@@ -133,7 +133,7 @@ class FastDownwardExperiment(Experiment):
         self.add_command('parse-exitcode', [sys.executable, '{exitcode_parser}'])
         self.add_command('parse-preprocess', [sys.executable, '{preprocess_parser}'])
         self.add_command('parse-search', [sys.executable, '{search_parser}'])
-        self.add_command('compress-output-sas', ['xz', 'output.sas'])
+        self.add_command('remove-output-sas', ['rm', 'output.sas'])
 
     def _get_tasks(self):
         tasks = []
