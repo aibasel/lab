@@ -78,6 +78,10 @@ class ScatterPgfPlots(PgfPlots):
                     ' '.join(cls._format_coord(c) for c in coords)))
             if category:
                 lines.append('\\addlegendentry{%s}' % category)
+            elif report.has_multiple_categories:
+                # None is treated as the default category if using multiple
+                # categories. Add a corresponding entry to the legend.
+                lines.append('\\addlegendentry{default}')
         # Add black line.
         start = min(report.min_x, report.min_y)
         if report.xlim_left is not None:
