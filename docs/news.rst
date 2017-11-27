@@ -5,6 +5,43 @@ News
 .. module :: downward.experiments
 
 
+v2.1 (2017-11-27)
+-----------------
+
+lab
+^^^
+* Add BaselSlurmEnvironment (Florian).
+* Support running experiments in virtualenv (Shuwa).
+* Redirect output to ``driver.log`` and ``driver.err`` as soon as possible.
+* Store all observed unexplained errors instead of a single one (Silvan).
+* Report unexplained error if ``run.err`` or ``driver.err`` contain output.
+* Report unexplained error if "error" attribute is missing.
+* Add configurable soft and hard limits for output to ``run.log`` and ``run.err``.
+* Record grid node for each run and add it to warnings table.
+* Omit \toprule and \bottomrule in LaTeX tables.
+* Add ``lab.reports.Table.set_row_order()`` method.
+* Only escape text in table cells if it doesn't contain LaTeX or HTML markup.
+* Allow run filters to change a run's ID (needed for renaming algorithms).
+* Add ``merge`` kwarg to ``add_fetcher()`` (Silvan).
+* Exit with returncode 1 if fetcher finds unexplained errors.
+* Let fetcher show warning if ``slurm.err`` is not empty.
+* Include content of ``slurm.err`` in reports if it contains text.
+* Add continuous integration testing.
+* Add ``--skip-experiments`` option for ``tests/run-tests`` script.
+* Clean up code.
+* Polish documentation.
+
+downward
+^^^^^^^^
+* For each error outcome show number of runs with that outcome in summary table and dedicated tables.
+* Add standalone exit code parser. Allow removing translate and search parsers (Silvan).
+* Allow passing ``Problem`` instances to ``FastDownwardExperiment.add_suite()`` (Florian).
+* Don't filter duplicate coordinates in scatter plots.
+* Don't round scatter plot coordinates.
+* Remove output.sas instead of compressing it.
+* Fix scatter plots for multiple categories **and** the default ``None`` category (Silvan).
+
+
 v2.0 (2017-01-09)
 -----------------
 
