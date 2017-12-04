@@ -48,7 +48,7 @@ LEGACY_OUTCOMES = [
 
 EXITCODE_TO_LEGACY_OUTCOME = dict((outcome.value, outcome) for outcome in LEGACY_OUTCOMES)
 
-OUTCOMES = [
+NEW_OUTCOMES = [
     Outcome(0, 'none', explained=True, min_wins=False),
     Outcome(1, 'search-plan-found-and-out-of-memory', explained=True, min_wins=True),
     Outcome(2, 'search-plan-found-and-out-of-time', explained=True, min_wins=True),
@@ -75,7 +75,9 @@ OUTCOMES = [
     Outcome(get_exit_code(signal.SIGSEGV), 'segfault', explained=False, min_wins=True),
 ]
 
-EXITCODE_TO_OUTCOME = dict((outcome.value, outcome) for outcome in OUTCOMES)
+EXITCODE_TO_OUTCOME = dict((outcome.value, outcome) for outcome in NEW_OUTCOMES)
+
+OUTCOMES = LEGACY_OUTCOMES + NEW_OUTCOMES
 
 
 def get_outcome(exitcode, legacy_exit_codes):
