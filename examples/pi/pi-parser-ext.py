@@ -11,7 +11,7 @@ def diff(content, props):
 
 
 parser = Parser()
-parser.add_pattern('pi', 'Pi: (.+)', type=float)
-parser.add_pattern('time', 'Time: (.+)', type=float)
+parser.add_pattern('pi', '^Pi: (.+)$', type=float, flags='M')
+parser.add_pattern('time', '^Time: (.+)$', type=float, flags='M')
 parser.add_function(diff)
 parser.parse()

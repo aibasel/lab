@@ -8,6 +8,6 @@ def error(content, props):
 
 
 parser = Parser()
-parser.add_pattern('pi', 'Pi: (.+)', type=float)
+parser.add_pattern('pi', '^Pi: (.+)$', type=float, flags='M')
 parser.add_function(error)
 parser.parse()
