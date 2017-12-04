@@ -88,8 +88,9 @@ class AbsoluteReport(PlanningReport):
                     seen_errors.add(error)
                     error_counter[(run["algorithm"], run["domain"], error)] += 1
 
+                combined_outcomes = outcomes.LEGACY_OUTCOMES + outcomes.OUTCOMES
                 error_to_min_wins = dict(
-                    (outcome.msg, outcome.min_wins) for outcome in outcomes.OUTCOMES)
+                    (outcome.msg, outcome.min_wins) for outcome in outcomes.LEGACY_OUTCOMES)
 
                 for error in sorted(seen_errors):
                     # Txt2tags seems to only allow letters, "-" and "_" in anchors.

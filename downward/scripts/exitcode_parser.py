@@ -26,12 +26,7 @@ from lab.parser import Parser
 from downward import outcomes
 
 
-def unsolvable(content, props):
-    outcome = outcomes.get_outcome(props['fast-downward_returncode'])
-    props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
-
-
-def get_search_error(content, props):
+def parse_exit_code(content, props):
     """
     Convert the exitcode of the planner to a human-readable message and store
     it in props['error']. Additionally, if there was an unexplained error, add
@@ -43,12 +38,25 @@ def get_search_error(content, props):
     """
     assert 'error' not in props
 
+    # Check if Fast Downward uses the latest exit codes.
+    legacy_exit_codes = True
+    for line in content.split('\n'):
+        if line.startswith('translate exit code:') or line.startswith('search exit code:'):
+            legacy_exit_codes = False
+            break
+    props['legacy_exit_codes'] = legacy_exit_codes
+
+
     # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
     # TODO: Check that a plan file exists if coverage=1.
 
     exitcode = props['fast-downward_returncode']
-    outcome = outcomes.get_outcome(exitcode)
+    outcome = outcomes.get_outcome(exitcode, legacy_exit_codes)
     props['error'] = outcome.msg
+    if legacy_exit_codes:
+        props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
+    else:
+        props['unsolvable'] = int(outcome and (outcome.msg == 'search-unsolvable' or outcome.msg == 'translate-unsolvable'))
     if not outcome.explained:
         props.add_unexplained_error(outcome.msg)
 
@@ -56,8 +64,7 @@ def get_search_error(content, props):
 class ExitCodeParser(Parser):
     def __init__(self):
         Parser.__init__(self)
-        self.add_function(get_search_error)
-        self.add_function(unsolvable)
+        self.add_function(parse_exit_code)
 
 
 def main():
