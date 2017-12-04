@@ -90,7 +90,7 @@ class AbsoluteReport(PlanningReport):
 
                 combined_outcomes = outcomes.LEGACY_OUTCOMES + outcomes.OUTCOMES
                 error_to_min_wins = dict(
-                    (outcome.msg, outcome.min_wins) for outcome in outcomes.LEGACY_OUTCOMES)
+                    (outcome.msg, outcome.min_wins) for outcome in combined_outcomes)
 
                 for error in sorted(seen_errors):
                     # Txt2tags seems to only allow letters, "-" and "_" in anchors.
