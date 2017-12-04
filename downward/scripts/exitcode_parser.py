@@ -42,7 +42,7 @@ def parse_exit_code(content, props):
     legacy_exit_codes = True
     for line in content.split('\n'):
         if (line.startswith('translate exit code:') or
-            line.startswith('search exit code:')):
+                line.startswith('search exit code:')):
             legacy_exit_codes = False
             break
     props['legacy_exit_codes'] = legacy_exit_codes
@@ -56,8 +56,9 @@ def parse_exit_code(content, props):
     if legacy_exit_codes:
         props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
     else:
-        props['unsolvable'] = int(outcome and (outcome.msg == 'search-unsolvable'
-            or outcome.msg == 'translate-unsolvable'))
+        props['unsolvable'] = int(outcome and
+                                  (outcome.msg == 'search-unsolvable' or
+                                   outcome.msg == 'translate-unsolvable'))
     if not outcome.explained:
         props.add_unexplained_error(outcome.msg)
 

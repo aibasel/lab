@@ -53,7 +53,7 @@ OUTCOMES = [
     Outcome(1, 'search-plan-found-and-out-of-memory', explained=True, min_wins=True),
     Outcome(2, 'search-plan-found-and-out-of-time', explained=True, min_wins=True),
     Outcome(3, 'search-plan-found-and-out-of-memory-and-time',
-        explained=True, min_wins=True),
+            explained=True, min_wins=True),
 
     Outcome(10, 'translate-unsolvable', explained=True, min_wins=False),
     Outcome(11, 'search-unsolvable', explained=True, min_wins=False),
