@@ -24,6 +24,7 @@ def process_task(task_id):
     error = False
     with open(os.path.join(run_dir, 'driver.log'), 'w') as driver_log:
         with open(os.path.join(run_dir, 'driver.err'), 'w') as driver_err:
+            print 'Starting run {run_id} (TASK_ID {task_id}) in {run_dir}'.format(**locals())
             try:
                 subprocess.check_call(['./run'], cwd=run_dir, stdout=driver_log, stderr=driver_err)
             except subprocess.CalledProcessError as err:
