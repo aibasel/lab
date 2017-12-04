@@ -40,7 +40,7 @@ def parse_exit_code(content, props):
 
     # Check if Fast Downward uses the latest exit codes.
     use_legacy_exit_codes = True
-    for line in content.splitlines:
+    for line in content.splitlines():
         if (line.startswith('translate exit code:') or
                 line.startswith('search exit code:')):
             use_legacy_exit_codes = False
