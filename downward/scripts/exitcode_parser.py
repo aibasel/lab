@@ -39,26 +39,24 @@ def parse_exit_code(content, props):
     assert 'error' not in props
 
     # Check if Fast Downward uses the latest exit codes.
-    legacy_exit_codes = True
-    for line in content.split('\n'):
+    use_legacy_exit_codes = True
+    for line in content.splitlines:
         if (line.startswith('translate exit code:') or
                 line.startswith('search exit code:')):
-            legacy_exit_codes = False
+            use_legacy_exit_codes = False
             break
-    props['legacy_exit_codes'] = legacy_exit_codes
 
     # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
     # TODO: Check that a plan file exists if coverage=1.
 
     exitcode = props['fast-downward_returncode']
-    outcome = outcomes.get_outcome(exitcode, legacy_exit_codes)
+    outcome = outcomes.get_outcome(exitcode, use_legacy_exit_codes)
     props['error'] = outcome.msg
-    if legacy_exit_codes:
+    if use_legacy_exit_codes:
         props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
     else:
-        props['unsolvable'] = int(outcome and
-                                  (outcome.msg == 'search-unsolvable' or
-                                   outcome.msg == 'translate-unsolvable'))
+        props['unsolvable'] = int(
+            outcome and outcome.msg in ['translate-unsolvable', 'search-unsolvable'])
     if not outcome.explained:
         props.add_unexplained_error(outcome.msg)
 

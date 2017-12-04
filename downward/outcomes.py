@@ -17,8 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Fast Downward exit codes and their meaning.
-The latest exit codes of are documented at http://www.fast-downward.org/ExitCodes.
+Fast Downward exit codes and their meaning. They are documented at
+http://www.fast-downward.org/ExitCodes.
 """
 
 import collections
@@ -50,10 +50,10 @@ EXITCODE_TO_LEGACY_OUTCOME = dict((outcome.value, outcome) for outcome in LEGACY
 
 NEW_OUTCOMES = [
     Outcome(0, 'none', explained=True, min_wins=False),
-    Outcome(1, 'search-plan-found-and-out-of-memory', explained=True, min_wins=True),
-    Outcome(2, 'search-plan-found-and-out-of-time', explained=True, min_wins=True),
+    Outcome(1, 'search-plan-found-and-out-of-memory', explained=True, min_wins=None),
+    Outcome(2, 'search-plan-found-and-out-of-time', explained=True, min_wins=None),
     Outcome(3, 'search-plan-found-and-out-of-memory-and-time',
-            explained=True, min_wins=True),
+            explained=True, min_wins=None),
 
     Outcome(10, 'translate-unsolvable', explained=True, min_wins=False),
     Outcome(11, 'search-unsolvable', explained=True, min_wins=False),
@@ -80,10 +80,10 @@ EXITCODE_TO_OUTCOME = dict((outcome.value, outcome) for outcome in NEW_OUTCOMES)
 OUTCOMES = LEGACY_OUTCOMES + NEW_OUTCOMES
 
 
-def get_outcome(exitcode, legacy_exit_codes):
-    if legacy_exit_codes and exitcode in EXITCODE_TO_LEGACY_OUTCOME:
+def get_outcome(exitcode, use_legacy_exit_codes):
+    if use_legacy_exit_codes and exitcode in EXITCODE_TO_LEGACY_OUTCOME:
         return EXITCODE_TO_LEGACY_OUTCOME[exitcode]
-    elif not legacy_exit_codes and exitcode in EXITCODE_TO_OUTCOME:
+    elif not use_legacy_exit_codes and exitcode in EXITCODE_TO_OUTCOME:
         return EXITCODE_TO_OUTCOME[exitcode]
     else:
         msg = 'exitcode-{exitcode}'.format(**locals())
