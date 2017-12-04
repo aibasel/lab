@@ -209,11 +209,7 @@ def check_memory(content, props):
     """Add "memory" attribute if the problem was solved."""
     raw_memory = props.get('raw_memory')
 
-    if raw_memory is None or raw_memory < 0:
-        props.add_unexplained_error('could-not-determine-peak-memory')
-        return
-
-    if solved(props):
+    if raw_memory is not None and raw_memory >= 0 and solved(props):
         props['memory'] = raw_memory
 
 

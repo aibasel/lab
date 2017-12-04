@@ -52,11 +52,12 @@ OUTCOMES = [
     Outcome(0, 'none', explained=True, min_wins=False),
     Outcome(1, 'search-plan-found-and-out-of-memory', explained=True, min_wins=True),
     Outcome(2, 'search-plan-found-and-out-of-time', explained=True, min_wins=True),
-    Outcome(3, 'search-plan-found-and-out-of-memory-and-time', explained=True, min_wins=True),
+    Outcome(3, 'search-plan-found-and-out-of-memory-and-time',
+        explained=True, min_wins=True),
 
     Outcome(10, 'translate-unsolvable', explained=True, min_wins=False),
     Outcome(11, 'search-unsolvable', explained=True, min_wins=False),
-    Outcome(12, 'search-incomplete-found-no-plan', explained=True, min_wins=None),
+    Outcome(12, 'search-unsolvable-incomplete', explained=True, min_wins=None),
 
     Outcome(20, 'translate-out-of-memory', explained=True, min_wins=True),
     Outcome(21, 'translate-out-of-time', explained=True, min_wins=True),
@@ -68,7 +69,7 @@ OUTCOMES = [
     Outcome(31, 'translate-input-error', explained=False, min_wins=True),
     Outcome(32, 'search-critical-error', explained=False, min_wins=True),
     Outcome(33, 'search-input-error', explained=False, min_wins=True),
-    Outcome(34, 'search-unsupported-feature-requested', explained=False, min_wins=True),
+    Outcome(34, 'search-unsupported', explained=False, min_wins=True),
 
     Outcome(get_exit_code(signal.SIGKILL), 'sigkill', explained=False, min_wins=True),
     Outcome(get_exit_code(signal.SIGSEGV), 'segfault', explained=False, min_wins=True),
