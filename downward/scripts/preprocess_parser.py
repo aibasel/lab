@@ -74,16 +74,6 @@ class PreprocessParser(Parser):
         self.add_preprocess_functions()
 
     def add_preprocess_parsing(self):
-        # These logs were part of the preprocessor. The latter two are
-        # now printed by the translator. We keep them for backwards
-        # compatibility.
-        self.add_pattern(
-            'preprocessor_variables',
-            r'(\d+) variables of \d+ necessary',
-            required=False)
-        self.add_pattern('preprocessor_operators', r'(\d+) of \d+ operators necessary')
-        self.add_pattern('preprocessor_axioms', r'(\d+) of \d+ axiom rules necessary')
-
         # Parse the numbers from the following lines of translator output:
         #    170 relevant atoms
         #    141 auxiliary atoms
@@ -99,11 +89,10 @@ class PreprocessParser(Parser):
                 'relevant atoms', 'auxiliary atoms', 'final queue length',
                 'total queue pushes', 'uncovered facts',
                 'effect conditions simplified', 'implied preconditions added',
-                'operators removed', 'axioms_removed', 'propositions removed']:
+                'operators removed', 'axioms removed', 'propositions removed']:
             attribute = 'translator_' + value.lower().replace(' ', '_')
-            # These lines are not required, because they were not always printed.
-            self.add_pattern(attribute, r'(.+) %s' % value, type=int,
-                             required=False)
+            self.add_pattern(
+                attribute, '^(.+) {}$'.format(value), type=int, flags='M', required=False)
 
     def add_preprocess_functions(self):
         self.add_function(parse_translator_timestamps)

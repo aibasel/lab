@@ -101,6 +101,7 @@ class Fetcher(object):
         if fetch_from_eval_dir:
             run_filter.apply(src_props)
             combined_props.update(src_props)
+            logging.info('Fetched properties of {} runs.'.format(len(src_props)))
         else:
             try:
                 slurm_err_content = tools.get_slurm_err_content(src_dir)
@@ -134,7 +135,7 @@ class Fetcher(object):
         for props in combined_props.values():
             error_message = tools.get_unexplained_errors_message(props)
             if error_message:
-                logging.warning(error_message)
+                logging.error(error_message)
                 unexplained_errors += 1
 
         tools.makedirs(eval_dir)
@@ -142,6 +143,6 @@ class Fetcher(object):
         logging.info('Wrote properties file')
 
         if unexplained_errors:
-            logging.critical(
+            logging.error(
                 'There were {} runs with unexplained errors.'.format(
                     unexplained_errors))
