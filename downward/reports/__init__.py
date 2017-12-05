@@ -233,18 +233,15 @@ class PlanningReport(Report):
                 slurm_err_content = tools.get_slurm_err_content(src_dir)
             except IOError:
                 slurm_err_content = (
-                    'The slurm.err file was missing during the'
-                    ' creation of the report.')
+                    'The slurm.err file was missing while creating the report.')
             else:
                 slurm_err_content = tools.filter_slurm_err_content(slurm_err_content)
 
             logging.error(
-                '{num_output_to_slurm_err} runs affected by output to'
-                ' <exp-name>-grid-steps/slurm.err.'.format(**locals()))
+                'There was output to {slurm_err_file}.'.format(**locals()))
 
             text = (
-                'There was output to slurm.err, affecting'
-                ' {num_output_to_slurm_err} runs.'
+                'There was output to slurm.err.'
                 ' Please inspect the relevant *-grid-steps/slurm.err file(s).'
                 ' Contents of {slurm_err_file} without "memory cg"'
                 ' errors:\n```\n{slurm_err_content}\n```'.format(**locals()))
