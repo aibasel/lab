@@ -227,7 +227,7 @@ class PlanningReport(Report):
 
         text = ''
         if num_output_to_slurm_err:
-            src_dir = self.eval_dir.rstrip('/').rstrip('-eval')
+            src_dir = self.eval_dir.rstrip('/')[:-len('-eval')]
             slurm_err_file = src_dir + '-grid-steps/slurm.err'
             try:
                 slurm_err_content = tools.get_slurm_err_content(src_dir)
