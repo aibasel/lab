@@ -158,7 +158,7 @@ class _Buildable(object):
 
     def add_command(self, name, command, time_limit=None, memory_limit=None,
                     soft_stdout_limit=1024, hard_stdout_limit=10 * 1024,
-                    soft_stderr_limit=1024, hard_stderr_limit=10 * 1024,
+                    soft_stderr_limit=64, hard_stderr_limit=10 * 1024,
                     **kwargs):
         """Call an executable.
 
