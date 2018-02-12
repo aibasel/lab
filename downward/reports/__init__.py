@@ -215,7 +215,7 @@ class PlanningReport(Report):
         for run in self.runs.values():
             error_message = tools.get_unexplained_errors_message(run)
             if error_message:
-                logging.warning(error_message)
+                logging.error(error_message)
                 num_unexplained_errors += 1
                 for column in columns:
                     table.add_cell(run['run_dir'], column, run.get(column, '?'))
