@@ -77,7 +77,7 @@ cd ..
 
 cd pi
 ./pi.py --all
-./pi-ext.py --help
+./pi-ext.py --all
 cd ..
 
 ./report-external-results.py --all
