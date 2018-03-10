@@ -23,9 +23,9 @@ Seipp.
     @Misc{seipp-et-al-misc2017,
       author =       "Jendrik Seipp and Florian Pommerening and
                       Silvan Sievers and Malte Helmert",
-      title =        "downward-lab 2.0",
+      title =        "downward-lab",
       year =         "2017",
-      doi =          "10.5281/zenodo.399255",
-      url =          "https://doi.org/10.5281/zenodo.399255",
-      howpublished = "\url{https://doi.org/10.5281/zenodo.399255}"
+      doi =          "10.5281/zenodo.790461",
+      url =          "https://doi.org/10.5281/zenodo.790461",
+      howpublished = "\url{https://doi.org/10.5281/zenodo.790461}"
     }
