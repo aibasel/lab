@@ -53,7 +53,7 @@ Install VAL
     cd VAL
     make clean  # Remove old object files and binaries.
     make
-    # Add "validate" binary to a directory on your PATH.
+    sudo cp validate /usr/local/bin  # Add binary to a directory on PATH.
 
 **MacOS**: clone the repo, add ``VAL/bin/MacOSExecutables/validate`` to
 your ``PATH`` and make it executable (``chmod + x``).
