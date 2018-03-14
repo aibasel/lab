@@ -28,7 +28,7 @@ exp = Experiment(EXPPATH)
 exp.add_resource('parser', 'pi-parser-ext.py', 'pi-parser.py')
 exp.add_resource('calc', 'calculate.py', 'calculate.py')
 
-for rounds in [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]:
+for rounds in [1, 5, 10, 50, 100]:
     run = exp.add_run()
     run.add_command('calc-pi', ['{calc}', rounds], time_limit=10, memory_limit=1024)
     run.add_command('parse-pi', ['{parser}'])
