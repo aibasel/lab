@@ -42,6 +42,9 @@ steps_group.add_argument(
     '--all', dest='run_all_steps', action='store_true',
     help='Run all steps.')
 
+DIR = os.path.dirname(os.path.abspath(__file__))
+LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
+
 
 def get_default_data_dir():
     """E.g. "ham/spam/eggs.py" => "ham/spam/data/"."""
@@ -242,8 +245,8 @@ class _Buildable(object):
     def _get_rel_path(self, abs_path):
         return os.path.relpath(abs_path, start=self.path)
 
-    def _build_properties_file(self):
-        combined_props = tools.Properties(self._get_abs_path('properties'))
+    def _build_properties_file(self, properties_filename):
+        combined_props = tools.Properties(self._get_abs_path(properties_filename))
         combined_props.update(self.properties)
         combined_props.write()
 
@@ -335,6 +338,9 @@ class Experiment(_Buildable):
         self.runs = []
         self.parsers = []
 
+        # Add a default parser to copy static_run.properties to properties."""
+        self.add_parser(os.path.join(LAB_SCRIPTS_DIR, 'static_properties_parser.py'), 'static_properties_parser')
+
         self.set_property('experiment_file', self._script)
 
         self.steps = []
@@ -419,6 +425,10 @@ class Experiment(_Buildable):
         self.add_resource(parser_name, path_to_parser)
         self.add_command('run-{}'.format(parser_name), ["{{{}}}".format(parser_name)])
         self.parsers.append(parser_name)
+
+    def add_driver_parser(self):
+        """Add a default parser to copy driver.properties to properties."""
+        self.add_parser(os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py'), 'driver_properties_parser')
 
     def add_fetcher(self, src=None, dest=None, merge=None, name=None,
                     filter=None, parsers=None, **kwargs):
@@ -572,7 +582,7 @@ class Experiment(_Buildable):
 
         self._build_resources()
         self._build_runs()
-        self._build_properties_file()
+        self._build_properties_file('static_experiment.properties')
 
     def start_runs(self):
         """Execute all runs that were added to the experiment.
@@ -635,7 +645,7 @@ class Run(_Buildable):
         self._build_run_script()
         self._build_resources()
         self._check_id()
-        self._build_properties_file()
+        self._build_properties_file('static_run.properties')
 
     def _build_run_script(self):
         if not self.commands:

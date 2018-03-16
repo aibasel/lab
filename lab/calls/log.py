@@ -33,12 +33,12 @@ def delete_file_if_empty(filename):
 def set_property(name, value):
     # Read properties again before each write to ensure consistency.
     # Otherwise we might overwrite results added by parsers.
-    properties = Properties(filename='properties')
+    properties = Properties(filename='driver.properties')
     properties[name] = value
     properties.write()
 
 
-def add_unexplained_error(error, filename='properties'):
+def add_unexplained_error(error, filename='driver.properties'):
     # See comment for set_property.
     properties = Properties(filename=filename)
     properties.add_unexplained_error(error)
