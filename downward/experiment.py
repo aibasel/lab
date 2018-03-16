@@ -97,9 +97,6 @@ class FastDownwardExperiment(Experiment):
 
     """
 
-    DEFAULT_SEARCH_TIME_LIMIT = "30m"
-    DEFAULT_SEARCH_MEMORY_LIMIT = "2G"
-
     def __init__(self, path=None, environment=None, revision_cache=None):
         """
         See :class:`lab.experiment.Experiment` for an explanation of
@@ -206,9 +203,9 @@ class FastDownwardExperiment(Experiment):
         If given, *driver_options* must be a list of strings. They will
         be passed to the ``fast-downward.py`` script. See
         ``fast-downward.py --help`` for available options. The list is
-        always prepended with ``["--validate", "--search-time-limit",
-        "30m", "--search-memory-limit', "2G"]``. Specifying custom
-        limits will override the default limits.
+        always prepended with ``["--validate", "--overall-time-limit",
+        "30m", "--overall-memory-limit', "3584M"]``. Specifying custom
+        limits overrides the default limits.
 
         Example experiment setup:
 
@@ -244,14 +241,14 @@ class FastDownwardExperiment(Experiment):
         ...     build_options=["release64"],
         ...     driver_options=["--build", "release64"])
 
-        Run LAMA-2011 with custom search time limit:
+        Run LAMA-2011 with custom planner time limit:
 
         >>> exp.add_algorithm(
         ...     "lama", repo, "default",
         ...     [],
         ...     driver_options=[
         ...         "--alias", "seq-saq-lama-2011",
-        ...         "--search-time-limit", "5m"])
+        ...         "--overall-time-limit", "5m"])
 
         """
         if not isinstance(name, basestring):
@@ -261,8 +258,8 @@ class FastDownwardExperiment(Experiment):
         build_options = build_options or []
         driver_options = ([
             '--validate',
-            '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
-            '--search-memory-limit', self.DEFAULT_SEARCH_MEMORY_LIMIT] +
+            '--overall-time-limit', '30m',
+            '--overall-memory-limit', '3584M'] +
             (driver_options or []))
         self._algorithms[name] = _DownwardAlgorithm(
             name, CachedRevision(repo, rev, build_options),
