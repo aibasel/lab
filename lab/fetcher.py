@@ -54,18 +54,12 @@ class Fetcher(object):
         is more convenient.
 
     """
-    def fetch_dir(self, run_dir, eval_dir, parsers=None):
-        # Allow specyfing a list of multiple parsers or a single parser.
-        parsers = tools.make_list(parsers or [])
-        for parser in parsers:
-            rel_parser = os.path.relpath(parser, start=run_dir)
-            subprocess.call([rel_parser], cwd=run_dir)
-
+    def fetch_dir(self, run_dir):
         prop_file = os.path.join(run_dir, 'properties')
         return tools.Properties(filename=prop_file)
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
-                 parsers=None, **kwargs):
+                 **kwargs):
         """
         This method can be used to copy properties from an exp-dir or
         eval-dir into an eval-dir. If the destination eval-dir already
@@ -123,7 +117,7 @@ class Fetcher(object):
             for index, run_dir in enumerate(run_dirs, start=1):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, 'Scanning: {:6d}/{:d}'.format(index, total_dirs))
-                props = self.fetch_dir(run_dir, eval_dir, parsers=parsers)
+                props = self.fetch_dir(run_dir)
                 if slurm_err_content:
                     props.add_unexplained_error('output-to-slurm.err')
                 id_string = '-'.join(props['id'])

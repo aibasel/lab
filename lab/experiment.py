@@ -431,7 +431,7 @@ class Experiment(_Buildable):
         self.add_parser(os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py'), 'driver_properties_parser')
 
     def add_fetcher(self, src=None, dest=None, merge=None, name=None,
-                    filter=None, parsers=None, **kwargs):
+                    filter=None, **kwargs):
         """
         Add a step that fetches results from experiment or evaluation
         directories into a new or existing evaluation directory.
@@ -456,12 +456,6 @@ class Experiment(_Buildable):
         domains or algorithms) by passing :py:class:`filters <.Report>`
         with the *filter* argument.
 
-        *parsers* can be a list of paths to parser scripts. If given,
-        each parser is called in each run directory and each
-        ``properties`` file is updated with the results from the parser
-        and rewritten to disk. This option is useful if you forgot to
-        parse some attributes during the experiment.
-
         Example setup:
 
         >>> exp = Experiment('/tmp/exp')
@@ -481,17 +475,13 @@ class Experiment(_Buildable):
 
         >>> exp.add_fetcher(filter_algorithm=['algo_1', 'algo_5'])
 
-        Parse additional attributes:
-
-        >>> exp.add_fetcher(parsers=['path/to/myparser.py'])
-
         """
         src = src or self.path
         dest = dest or self.eval_dir
         name = name or 'fetch-%s' % os.path.basename(src)
         self.add_step(
             name, Fetcher(), src, dest, merge=merge, filter=filter,
-            parsers=parsers, **kwargs)
+            **kwargs)
 
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.
