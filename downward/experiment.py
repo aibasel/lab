@@ -130,9 +130,6 @@ class FastDownwardExperiment(Experiment):
         # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
 
-        self.add_command('parse-exitcode', [sys.executable, '{exitcode_parser}'])
-        self.add_command('parse-preprocess', [sys.executable, '{preprocess_parser}'])
-        self.add_command('parse-search', [sys.executable, '{search_parser}'])
         self.add_command('remove-output-sas', ['rm', 'output.sas'])
 
     def _get_tasks(self):
@@ -272,6 +269,19 @@ class FastDownwardExperiment(Experiment):
             name, CachedRevision(repo, rev, build_options),
             driver_options, component_options)
 
+    def add_exitcode_parser(self):
+        """Add a default parser to parse exit codes of the Fast Downward
+        driver."""
+        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py'), 'exitcode_parser')
+
+    def add_preprocess_parser(self):
+        """Add a default preprocess parser."""
+        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'), 'preprocess_parser')
+
+    def add_search_parser(self):
+        """Add a default search parser."""
+        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'), 'search_parser')
+
     def build(self, **kwargs):
         """Add Fast Downward code, runs and write everything to disk.
 
@@ -313,16 +323,6 @@ class FastDownwardExperiment(Experiment):
 
     def _add_code(self):
         """Add the compiled code to the experiment."""
-        self.add_resource(
-            'exitcode_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py'))
-        self.add_resource(
-            'preprocess_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
-        self.add_resource(
-            'search_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
-
         for cached_rev in self._get_unique_cached_revisions():
             self.add_resource(
                 '',
