@@ -37,7 +37,7 @@ and http://www.fast-downward.org/LPBuildInstructions)
     hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
     # Optionally check that Fast Downward works:
     cd ${DOWNWARD_REPO}
-    ./build.py -j4  # Use 4 cores for compilation.
+    ./build.py
     ./fast-downward.py ${DOWNWARD_BENCHMARKS}/grid/prob01.pddl \
         --search "astar(lmcut())"
 

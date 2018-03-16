@@ -22,7 +22,6 @@ A module for running Fast Downward experiments.
 
 from collections import defaultdict, OrderedDict
 import logging
-import multiprocessing
 import os.path
 import sys
 
@@ -199,13 +198,10 @@ class FastDownwardExperiment(Experiment):
         the default for the following options, until overridden again.
 
         If given, *build_options* must be a list of strings. They will
-        be passed to the ``build.py`` script. Options can be build
-        names (e.g., ``"release32"``, ``"debug64"``), ``build.py``
-        options (e.g., ``"--debug"``) or options for Make. The list is
-        always prepended with ``["-j<num_cpus>"]``. This setting can be
-        overriden, e.g., ``driver_options=["-j1"]`` builds the planner
-        using a single CPU. If *build_options* is omitted, the
-        ``"release32"`` version is built using all CPUs.
+        be passed to the ``build.py`` script. Options can be build names
+        (e.g., ``"release32"``, ``"debug64"``), ``build.py`` options
+        (e.g., ``"--debug"``) or options for Make. If *build_options* is
+        omitted, the ``"release32"`` version is built.
 
         If given, *driver_options* must be a list of strings. They will
         be passed to the ``fast-downward.py`` script. See
@@ -262,7 +258,7 @@ class FastDownwardExperiment(Experiment):
             logging.critical('Algorithm name must be a string: {}'.format(name))
         if name in self._algorithms:
             logging.critical('Algorithm names must be unique: {}'.format(name))
-        build_options = self._get_default_build_options() + (build_options or [])
+        build_options = build_options or []
         driver_options = ([
             '--validate',
             '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
@@ -302,10 +298,6 @@ class FastDownwardExperiment(Experiment):
         for algo in self._algorithms.values():
             unique_cached_revs.add(algo.cached_revision)
         return unique_cached_revs
-
-    def _get_default_build_options(self):
-        cores = multiprocessing.cpu_count()
-        return ['-j{}'.format(cores)]
 
     def _cache_revisions(self):
         for cached_rev in self._get_unique_cached_revisions():
