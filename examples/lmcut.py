@@ -18,7 +18,7 @@ ATTRIBUTES = ['coverage', 'error', 'expansions']
 if 'cluster' in platform.node():
     # Create bigger suites with suites.py from the downward-benchmarks repo.
     SUITE = ['depot', 'freecell', 'gripper', 'zenotravel']
-    ENV = BaselSlurmEnvironment()
+    ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
 else:
     SUITE = ['depot:p01.pddl', 'gripper:prob01.pddl']
     ENV = LocalEnvironment(processes=2)

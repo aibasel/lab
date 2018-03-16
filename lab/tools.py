@@ -451,7 +451,9 @@ def get_unexplained_errors_message(run):
     if not unexplained_errors or unexplained_errors == ['output-to-slurm.err']:
         return ''
     else:
-        return 'Unexplained errors in "{run_dir}": {unexplained_errors}'.format(**run)
+        return (
+            'Unexplained error(s): {unexplained_errors}. Please inspect'
+            ' output and error logs under "{run_dir}".'.format(**run))
 
 
 def get_slurm_err_content(src_dir):

@@ -5,6 +5,23 @@ News
 .. module :: downward.experiments
 
 
+v2.2 (2018-03-16)
+-----------------
+
+lab
+^^^
+* Print run and task IDs during local experiments.
+* Make warnings and error messages more informative.
+* Abort after fetch step if fetcher finds unexplained errors.
+* Improve examples and docs.
+
+downward
+^^^^^^^^
+* Don't parse preprocessor logs anymore.
+* Make regular expressions stricter in parsers.
+* Don't complain if SAS file is missing.
+
+
 v2.1 (2017-11-27)
 -----------------
 
