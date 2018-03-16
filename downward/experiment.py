@@ -278,9 +278,13 @@ class FastDownwardExperiment(Experiment):
         """Add a default preprocess parser."""
         self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'), 'preprocess_parser')
 
-    def add_search_parser(self):
-        """Add a default search parser."""
-        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'), 'search_parser')
+    def add_single_search_parser(self):
+        """Add a default search parser for single search algorithms."""
+        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'single_search_parser.py'), 'single_search_parser')
+
+    def add_portfolio_parser(self):
+        """Add a default search parser for parsing portoflio planners."""
+        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'portfolio_parser.py'), 'portfolio_parser')
 
     def build(self, **kwargs):
         """Add Fast Downward code, runs and write everything to disk.
