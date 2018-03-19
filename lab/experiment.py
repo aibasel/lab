@@ -18,8 +18,10 @@
 """Main module for creating experiments."""
 
 from collections import OrderedDict
+from glob import glob
 import logging
 import os
+import subprocess
 import sys
 
 from lab import environments
@@ -429,6 +431,35 @@ class Experiment(_Buildable):
     def add_driver_parser(self):
         """Add a default parser to copy driver.properties to properties."""
         self.add_parser(os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py'), 'driver_properties_parser')
+
+    def add_parse_again_step(self):
+        """
+        Add a step that runs all of the experiment's parsers again. This step
+        overwrites the existing properties file in each run dir.
+        """
+        def run_parsers():
+            if not os.path.isdir(self.path):
+                logging.critical('{} is missing or not a directory'.format(self.path))
+            run_dirs = sorted(glob(os.path.join(self.path, 'runs-*-*', '*')))
+            assert all(os.path.exists(run_dir) for run_dir in run_dirs)
+
+            total_dirs = len(run_dirs)
+            logging.info(
+                'Parsing properties in {:d} run directories'.format(total_dirs))
+            for index, run_dir in enumerate(run_dirs, start=1):
+                if os.path.exists(os.path.join(run_dir, 'properties')):
+                    # print "removing path {}".format(os.path.join(run_dir, 'properties'))
+                    tools.remove_path(os.path.join(run_dir, 'properties'))
+                loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
+                logging.log(loglevel, 'Parsing: {:6d}/{:d}'.format(index, total_dirs))
+                for parser in self.parsers:
+                    # TODO: if we want to support writing exit codes and wallclock times
+                    # of parsers into the properties files as before, we should do it here.
+                    parser_resource = self.env_vars_relative[parser]
+                    rel_parser = '../../{}'.format(parser_resource)
+                    subprocess.call([rel_parser], cwd=run_dir)
+
+        self.add_step('parse-again', run_parsers)
 
     def add_fetcher(self, src=None, dest=None, merge=None, name=None,
                     filter=None, **kwargs):
