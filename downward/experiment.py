@@ -130,6 +130,7 @@ class FastDownwardExperiment(Experiment):
         self.revision_cache = revision_cache or os.path.join(
             get_default_data_dir(), 'revision-cache')
 
+        self._tasks = []
         self._suites = defaultdict(list)
 
         # Use OrderedDict to ensure that names are unique and ordered.
@@ -141,10 +142,35 @@ class FastDownwardExperiment(Experiment):
         self.add_command('remove-output-sas', ['rm', '-f', 'output.sas'])
 
     def _get_tasks(self):
-        tasks = []
+        tasks = self._tasks[:]
         for benchmarks_dir, suite in self._suites.items():
             tasks.extend(suites.build_suite(benchmarks_dir, suite))
         return tasks
+
+    def add_task(self, domain, problem, problem_file,
+            domain_file=None, properties=None):
+        """
+        Add a PDDL or SAS planning task to the experiment. ::
+
+            # PDDL task:
+            exp.add_task(
+                domain="gripper",
+                problem="prob01",
+                problem_file="/path/to/gripper/prob01.pddl",
+                domain_file="/path/to/gripper/domain.pddl")
+
+            # SAS task:
+            exp.add_task(
+                domain="gripper",
+                problem="prob01",
+                problem_file="/path/to/gripper/prob01.sas")
+
+        See :meth:`.add_suite` for where to find PDDL benchmarks.
+
+        """
+        self._tasks.append(suites.Problem(
+            domain, problem, problem_file,
+            domain_file=domain_file, properties=properties))
 
     def add_suite(self, benchmarks_dir, suite):
         """Add benchmarks to the experiment.
@@ -169,7 +195,7 @@ class FastDownwardExperiment(Experiment):
 
         You can copy the generated list into your experiment script::
 
-            >>> benchmarks_dir = REPO = os.environ["DOWNWARD_BENCHMARKS"]
+            >>> benchmarks_dir = os.environ["DOWNWARD_BENCHMARKS"]
             >>> exp = FastDownwardExperiment()
             >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
 
