@@ -5,6 +5,8 @@ from lab.calls.call import Call
 from lab.calls.log import delete_file_if_empty, print_, save_returncode
 from lab import reports
 
+from downward.experiment import FastDownwardExperiment
+
 
 ARGPARSER.epilog
 reports.Table.add_col
@@ -20,3 +22,6 @@ Call
 delete_file_if_empty
 print_
 save_returncode
+
+
+FastDownwardExperiment.add_task

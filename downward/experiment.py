@@ -147,8 +147,9 @@ class FastDownwardExperiment(Experiment):
             tasks.extend(suites.build_suite(benchmarks_dir, suite))
         return tasks
 
-    def add_task(self, domain, problem, problem_file,
-            domain_file=None, properties=None):
+    def add_task(
+            self, domain, problem, problem_file, domain_file=None,
+            properties=None):
         """
         Add a PDDL or SAS planning task to the experiment. ::
 
