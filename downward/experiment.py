@@ -43,17 +43,26 @@ class FastDownwardRun(Run):
 
         self._set_properties()
 
-        # Linking to instead of copying the PDDL files makes building
-        # the experiment twice as fast.
-        self.add_resource(
-            'domain', self.task.domain_file, 'domain.pddl', symlink=True)
-        self.add_resource(
-            'problem', self.task.problem_file, 'problem.pddl', symlink=True)
+        driver_options = algo.driver_options[:]
+
+        if self.task.domain_file is None:
+            self.add_resource(
+                'task', self.task.problem_file, 'task.sas', symlink=True)
+            input_files = ['{task}']
+            # Without PDDL input files, we can't validate the solution.
+            assert '--validate' in driver_options
+            driver_options.remove('--validate')
+        else:
+            self.add_resource(
+                'domain', self.task.domain_file, 'domain.pddl', symlink=True)
+            self.add_resource(
+                'problem', self.task.problem_file, 'problem.pddl', symlink=True)
+            input_files = ['{domain}', '{problem}']
 
         self.add_command(
             'fast-downward',
             ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
-            algo.driver_options + ['{domain}', '{problem}'] + algo.component_options)
+            driver_options + input_files + algo.component_options)
 
     def _set_properties(self):
         self.set_property('algorithm', self.algo.name)
