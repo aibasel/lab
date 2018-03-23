@@ -265,19 +265,19 @@ class FastDownwardExperiment(Experiment):
     def add_exitcode_parser(self):
         """Add a default parser to parse exit codes of the Fast Downward
         driver."""
-        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py'), 'exitcode_parser')
+        self.add_parser('exitcode_parser', os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py'))
 
     def add_translator_parser(self):
         """Add a default translator parser."""
-        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'), 'preprocess_parser')
+        self.add_parser('preprocess_parser', os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
 
     def add_single_search_parser(self):
         """Add a default search parser for single search algorithms."""
-        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'single_search_parser.py'), 'single_search_parser')
+        self.add_parser('single_search_parser', os.path.join(DOWNWARD_SCRIPTS_DIR, 'single_search_parser.py'))
 
     def add_portfolio_parser(self):
         """Add a default search parser for parsing portoflio planners."""
-        self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'portfolio_parser.py'), 'portfolio_parser')
+        self.add_parser('portfolio_parser', os.path.join(DOWNWARD_SCRIPTS_DIR, 'portfolio_parser.py'))
 
     def build(self, **kwargs):
         """Add Fast Downward code, runs and write everything to disk.

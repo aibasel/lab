@@ -341,7 +341,7 @@ class Experiment(_Buildable):
         self.parsers = []
 
         # Add a default parser to copy static_run.properties to properties."""
-        self.add_parser(os.path.join(LAB_SCRIPTS_DIR, 'static_properties_parser.py'), 'static_properties_parser')
+        self.add_parser('static_properties_parser', os.path.join(LAB_SCRIPTS_DIR, 'static_properties_parser.py'))
 
         self.set_property('experiment_file', self._script)
 
@@ -408,29 +408,30 @@ class Experiment(_Buildable):
         else:
             self.steps.append(Step(name, function, *args, **kwargs))
 
-    def add_parser(self, path_to_parser, name=None):
-        """Add a `parser` to the experiment. *path_to_parser* has to be the
-        path to an executable file that can be executed in the run directory.
-        *name*, if given, must be a unique string that identifies the parser,
-        that starts with a letter and may only contain letters, numbers, or
-        underscores. If not given, parsers will be named automatically by
-        numbering them. Parsers are run in the order they were added."""
+    def add_parser(self, name, path_to_parser):
+        """Add a `parser` to each run of the experiment. Parsers will be run
+        in the order they are added.
+
+        *name* must be a unique string that identifies the parser. The same
+        rules as for all resources apply: it must start with a letter and may
+        only contain letters, numbers, or underscores.
+
+        *path_to_parser* must be the path to an executable file that can be
+        executed in the run directory.
+        """
+        self._check_alias(name)
         if not os.path.isfile(path_to_parser):
             logging.critical('Parser %s could not be found.' % path_to_parser)
         if not os.access(path_to_parser, os.X_OK):
             logging.critical('Parser %s is not executable.' % path_to_parser)
-        if name is not None and not (name[0].isalpha() and name.replace('_', '').isalnum()):
-            logging.critical(
-                'Parser names must start with a letter and consist '
-                'exclusively of letters, numbers and underscores: {}'.format(name))
-        parser_name = name or 'parser_{:d}'.format(len(self.parsers))
-        self.add_resource(parser_name, path_to_parser)
-        self.add_command('run-{}'.format(parser_name), ["{{{}}}".format(parser_name)])
-        self.parsers.append(parser_name)
+
+        self.add_resource(name, path_to_parser)
+        self.add_command(name, ["{{{}}}".format(name)])
+        self.parsers.append(name)
 
     def add_driver_parser(self):
         """Add a default parser to copy driver.properties to properties."""
-        self.add_parser(os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py'), 'driver_properties_parser')
+        self.add_parser('driver_properties_parser', os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py'))
 
     def add_parse_again_step(self):
         """
