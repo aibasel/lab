@@ -27,7 +27,8 @@ import logging
 import os
 
 
-# TODO: this should read from the run script itself, where the static information should live.
+# TODO: this should read from the run script itself, where the static information
+# should live.
 def main():
     read_from = "static_run.properties"
     write_to = "properties"

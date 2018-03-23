@@ -35,6 +35,11 @@ EXPNAME = 'showcase-options'
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
 
+exp.add_parser('driver_parser', exp.DRIVER_PARSER)
+exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
+exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)
+exp.add_parser('single_search_parser', exp.SINGLE_SEARCH_PARSER)
+
 exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'miconic:s1-0.pddl'])
 exp.add_algorithm('iter-hadd', REPO, REV, [
     '--heuristic', 'hadd=add()',
@@ -60,6 +65,7 @@ exp.steps.insert(0, Step(
 # Showcase add_parse_again_step option.
 
 exp.add_parse_again_step()
+
 
 # Define some filters
 

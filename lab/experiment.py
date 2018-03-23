@@ -343,7 +343,9 @@ class Experiment(_Buildable):
         # Add a default parser to copy static_run.properties to properties.
         # We always include this parser because no user-written parser can
         # generate this data otherwise.
-        self.add_parser('static_properties_parser', os.path.join(LAB_SCRIPTS_DIR, 'static_properties_parser.py'))
+        self.add_parser(
+            'static_properties_parser',
+            os.path.join(LAB_SCRIPTS_DIR, 'static_properties_parser.py'))
         # This can be used by users to add the default driver properties parser.
         self.DRIVER_PARSER = os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py')
 
@@ -453,8 +455,9 @@ class Experiment(_Buildable):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, 'Parsing run: {:6d}/{:d}'.format(index, total_dirs))
                 for parser in self.parsers:
-                    # TODO: if we want to support writing exit codes and wallclock times
-                    # of parsers into the properties files as before, we should do it here.
+                    # TODO: if we want to support writing exit codes and wallclock
+                    # times of parsers into the properties files as before, we
+                    # should do it here.
                     parser_resource = self.env_vars_relative[parser]
                     rel_parser = os.path.join('../../', parser_resource)
                     subprocess.call([rel_parser], cwd=run_dir)

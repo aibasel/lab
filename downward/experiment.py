@@ -128,10 +128,14 @@ class FastDownwardExperiment(Experiment):
         self.add_command('remove-output-sas', ['rm', '-f', 'output.sas'])
 
         # The following constants can be used by users to add default parsers.
-        self.EXITCODE_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py')
-        self.TRANSLATOR_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py')
-        self.SINGLE_SEARCH_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, 'single_search_parser.py')
-        self.PORTFOLIO_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, 'portfolio_parser.py')
+        self.EXITCODE_PARSER = os.path.join(
+                DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py')
+        self.TRANSLATOR_PARSER = os.path.join(
+                DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py')
+        self.SINGLE_SEARCH_PARSER = os.path.join(
+                DOWNWARD_SCRIPTS_DIR, 'single_search_parser.py')
+        self.PORTFOLIO_PARSER = os.path.join(
+                DOWNWARD_SCRIPTS_DIR, 'portfolio_parser.py')
 
     def _get_tasks(self):
         tasks = []

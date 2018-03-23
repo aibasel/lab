@@ -75,7 +75,8 @@ class Fetcher(object):
             logging.critical('{} is missing or not a directory'.format(src_dir))
         run_filter = tools.RunFilter(filter, **kwargs)
 
-        src_props = tools.Properties(filename=os.path.join(src_dir, 'static_experiment.properties'))
+        src_props = tools.Properties(
+            filename=os.path.join(src_dir, 'static_experiment.properties'))
         fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
 
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
