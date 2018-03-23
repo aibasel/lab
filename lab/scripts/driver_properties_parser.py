@@ -18,20 +18,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Read a json dict from the file 'driver.properties' and write it to 'properties'
+Read a JSON dict from the file 'driver.properties' and write it to 'properties'.
 """
 
 from lab.tools import Properties
+from lab.calls import log
 
 import logging
-import os
+import os.path
 
 
 def main():
-    read_from = "driver.properties"
+    read_from = log.DRIVER_PROPERTIES_FILENAME
     write_to = "properties"
     if not os.path.exists(read_from):
-        logging.critical("{} does not exist!".format(read_from))
+        logging.critical("{} does not exist.".format(read_from))
     props = Properties(filename=write_to)
     props.load(read_from)
     print("Adding properties from {} to properties".format(read_from))
