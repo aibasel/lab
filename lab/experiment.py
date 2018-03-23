@@ -340,8 +340,12 @@ class Experiment(_Buildable):
         self.runs = []
         self.parsers = []
 
-        # Add a default parser to copy static_run.properties to properties."""
+        # Add a default parser to copy static_run.properties to properties.
+        # We always include this parser because no user-written parser can
+        # generate this data otherwise.
         self.add_parser('static_properties_parser', os.path.join(LAB_SCRIPTS_DIR, 'static_properties_parser.py'))
+        # This can be used by users to add the default driver properties parser.
+        self.DRIVER_PARSER = os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py')
 
         self.set_property('experiment_file', self._script)
 
@@ -428,10 +432,6 @@ class Experiment(_Buildable):
         self.add_resource(name, path_to_parser)
         self.add_command(name, ["{{{}}}".format(name)])
         self.parsers.append(name)
-
-    def add_driver_parser(self):
-        """Add a default parser to copy driver.properties to properties."""
-        self.add_parser('driver_properties_parser', os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py'))
 
     def add_parse_again_step(self):
         """
