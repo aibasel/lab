@@ -23,7 +23,6 @@ A module for running Fast Downward experiments.
 from collections import defaultdict, OrderedDict
 import logging
 import os.path
-import sys
 
 from lab.experiment import Run, Experiment, get_default_data_dir
 

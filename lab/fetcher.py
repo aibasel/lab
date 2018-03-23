@@ -18,7 +18,6 @@
 from glob import glob
 import logging
 import os
-import subprocess
 import sys
 
 from lab import tools
