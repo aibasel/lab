@@ -33,9 +33,10 @@ ATTRIBUTES = [
 
 # Create a new experiment.
 exp = Experiment(environment=ENV)
-# Copy parser into experiment dir and make it available as
-# "PARSER". Parsers have to be executable.
-exp.add_resource('parser', 'ff-parser.py')
+# add default driver parser
+exp.add_parser('driver_parser', exp.DRIVER_PARSER)
+# add custom ff-parser
+exp.add_parser('parser', 'ff-parser.py')
 
 for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
@@ -59,8 +60,6 @@ for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     # The algorithm name is only really needed when there are
     # multiple algorithms.
     run.set_property('id', ['ff', task.domain, task.problem])
-    # Schedule parser.
-    run.add_command('parse', ['{parser}'])
 
 # Make a report.
 exp.add_report(

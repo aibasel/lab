@@ -10,7 +10,7 @@ and counts the number of files.
 This experiment shows how to
 * add a command to a run
 * add a run to an experiment
-* add a custom result parser
+* add default and custom result parsers
 * add a report
 """
 
@@ -27,15 +27,16 @@ ENV = LocalEnvironment()
 
 # Create a new experiment.
 exp = Experiment(path=EXPPATH, environment=ENV)
-exp.add_resource(
-    'simple_parser', 'simple-parser.py', 'simple-parser.py')
+# add default driver parser
+exp.add_parser('driver_parser', exp.DRIVER_PARSER)
+# add custom parser
+exp.add_parser('simple_parser', 'simple-parser.py')
 reportfile = os.path.join(exp.eval_dir, EXPNAME + '.html')
 
 run = exp.add_run()
 run.add_command('list-dir', ['ls', '-l'])
 # Every run has to have an id in the form of a list.
 run.set_property('id', ['current-dir'])
-run.add_command('parse', ['{simple_parser}'])
 
 # Make a default report.
 exp.add_report(

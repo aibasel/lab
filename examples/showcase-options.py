@@ -57,6 +57,10 @@ exp.steps.insert(0, Step(
     'delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
 
 
+# Showcase add_parse_again_step option.
+
+exp.add_parse_again_step()
+
 # Define some filters
 
 def solved(run):
@@ -78,9 +82,6 @@ exp.add_fetcher(
     dest=eval_dir(1), name='fetcher-test1', filter=only_two_algorithms)
 exp.add_fetcher(
     dest=eval_dir(2), name='fetcher-test2', filter_algorithm='lama11')
-exp.add_fetcher(
-    dest=eval_dir(3), name='fetcher-test3',
-    parsers=os.path.join(DIR, 'simple', 'simple-parser.py'))
 
 
 # Add report steps
