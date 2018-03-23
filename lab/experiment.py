@@ -442,7 +442,6 @@ class Experiment(_Buildable):
             if not os.path.isdir(self.path):
                 logging.critical('{} is missing or not a directory'.format(self.path))
             run_dirs = sorted(glob(os.path.join(self.path, 'runs-*-*', '*')))
-            assert all(os.path.exists(run_dir) for run_dir in run_dirs)
 
             total_dirs = len(run_dirs)
             logging.info(
@@ -452,12 +451,12 @@ class Experiment(_Buildable):
                     # print "removing path {}".format(os.path.join(run_dir, 'properties'))
                     tools.remove_path(os.path.join(run_dir, 'properties'))
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(loglevel, 'Parsing: {:6d}/{:d}'.format(index, total_dirs))
+                logging.log(loglevel, 'Parsing run: {:6d}/{:d}'.format(index, total_dirs))
                 for parser in self.parsers:
                     # TODO: if we want to support writing exit codes and wallclock times
                     # of parsers into the properties files as before, we should do it here.
                     parser_resource = self.env_vars_relative[parser]
-                    rel_parser = '../../{}'.format(parser_resource)
+                    rel_parser = os.path.join('../../', parser_resource)
                     subprocess.call([rel_parser], cwd=run_dir)
 
         self.add_step('parse-again', run_parsers)
