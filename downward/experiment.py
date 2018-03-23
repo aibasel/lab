@@ -267,8 +267,8 @@ class FastDownwardExperiment(Experiment):
         driver."""
         self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py'), 'exitcode_parser')
 
-    def add_preprocess_parser(self):
-        """Add a default preprocess parser."""
+    def add_translator_parser(self):
+        """Add a default translator parser."""
         self.add_parser(os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'), 'preprocess_parser')
 
     def add_single_search_parser(self):
