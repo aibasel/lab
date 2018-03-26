@@ -139,12 +139,12 @@ class GridEnvironment(Environment):
 
         .. note::
 
-            For correct sequential execution, this class writes job
-            files to the experiment directory and makes them depend on
-            one another. The driver.log and driver.err files in this
-            directory can be inspected if something goes wrong. Since
-            the job files call the experiment script during execution,
-            it mustn't be changed during the experiment.
+            If the steps are run by the grid engine, this class writes
+            job files to the directory ``<EXPPATH>-grid-steps`` and
+            makes them depend on one another. Please inspect the *.log
+            and *.err files in this directory if something goes wrong.
+            Since the job files call the experiment script during
+            execution, it mustn't be changed during the experiment.
 
         If *email* is provided and the steps run on the grid, a message
         will be sent when the last experiment step finishes.
