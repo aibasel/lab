@@ -52,8 +52,6 @@
 .. autoclass:: lab.environments.Environment
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.GridEnvironment
-.. autoclass:: lab.environments.GkiGridEnvironment
-.. autoclass:: lab.environments.MaiaEnvironment
 .. autoclass:: lab.environments.BaselSlurmEnvironment
 
 

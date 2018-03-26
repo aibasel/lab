@@ -9,7 +9,7 @@ import platform
 import shutil
 from subprocess import call
 
-from lab.environments import LocalEnvironment, MaiaEnvironment
+from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.steps import Step
 from lab.reports.filter import FilterReport
 
@@ -23,7 +23,7 @@ from downward.reports.taskwise import TaskwiseReport
 DIR = os.path.dirname(os.path.abspath(__file__))
 REMOTE = 'cluster' in platform.node()
 if REMOTE:
-    ENV = MaiaEnvironment()
+    ENV = BaselSlurmEnvironment("my.name@unibas.ch")
 else:
     ENV = LocalEnvironment(processes=4)
 REPO = os.environ["DOWNWARD_REPO"]
