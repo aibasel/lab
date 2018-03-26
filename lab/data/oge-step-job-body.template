@@ -1,2 +1,0 @@
-cd "%(cwd)s"
-"%(python)s" "%(script)s" %(args)s "%(step_name)s"
