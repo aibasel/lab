@@ -140,9 +140,9 @@ class GridEnvironment(Environment):
         .. note::
 
             If the steps are run by the grid engine, this class writes
-            job files to the directory ``<EXPPATH>-grid-steps`` and
-            makes them depend on one another. Please inspect the *.log
-            and *.err files in this directory if something goes wrong.
+            job files to the directory ``<exppath>-grid-steps`` and
+            makes them depend on one another. Please inspect the \*.log
+            and \*.err files in this directory if something goes wrong.
             Since the job files call the experiment script during
             execution, it mustn't be changed during the experiment.
 
