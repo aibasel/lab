@@ -22,11 +22,10 @@ A parser can be any program that analyzes files in the run's
 directory (e.g. ``run.log``) and manipulates the ``properties``
 file in the same directory.
 
-To make parsing easier, however, you can use the ``Parser`` class.
-The parser ``examples/simple/simple-parser.py`` serves as an
-example:
+To make parsing easier, however, you can use the ``Parser`` class. The
+parser ``examples/ff/ff-parser.py`` serves as an example:
 
-.. literalinclude:: ../examples/simple/simple-parser.py
+.. literalinclude:: ../examples/ff/ff-parser.py
 
 You can add your parser to a run by using :py:func:`add_command
 <lab.experiment.Run.add_command>`::
