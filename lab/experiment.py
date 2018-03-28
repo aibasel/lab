@@ -438,12 +438,33 @@ class Experiment(_Buildable):
 
     def add_parse_again_step(self):
         """
-        Add a step that runs all of the experiment's parsers again. This step
-        overwrites the existing properties file in each run dir.
+        Add a step that copies the parsers from their originally specified
+        locations to the experiment direcotry and runs all of them again. This
+        step overwrites the existing properties file in each run dir.
         """
         def run_parsers():
             if not os.path.isdir(self.path):
                 logging.critical('{} is missing or not a directory'.format(self.path))
+
+            # TODO: copied and adapted from _build_resources
+            for parser in self.parsers:
+                for source, dest, required, symlink in self.resources:
+                    resource_name = self.env_vars_relative[parser]
+                    if resource_name == dest:
+                        assert required
+                        assert not symlink
+                        if not os.path.exists(source):
+                            logging.critical('Required parser not found: %s' % source)
+                        dest = self._get_abs_path(dest)
+                        if not dest.startswith(self.path):
+                            # Only copy resources that reside in the experiment/run dir.
+                            continue
+
+                        # Even if the directory containing a resource has already been,
+                        # added we copy the resource since we might want to overwrite it.
+                        logging.debug('Copying %s to %s' % (source, dest))
+                        tools.copy(source, dest, required)
+
             run_dirs = sorted(glob(os.path.join(self.path, 'runs-*-*', '*')))
 
             total_dirs = len(run_dirs)
