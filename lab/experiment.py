@@ -347,7 +347,8 @@ class Experiment(_Buildable):
             'static_properties_parser',
             os.path.join(LAB_SCRIPTS_DIR, 'static_properties_parser.py'))
         # This can be used by users to add the default driver properties parser.
-        self.DRIVER_PARSER = os.path.join(LAB_SCRIPTS_DIR, 'driver_properties_parser.py')
+        self.LAB_DRIVER_PARSER = os.path.join(
+            LAB_SCRIPTS_DIR, 'driver_properties_parser.py')
 
         self.set_property('experiment_file', self._script)
 

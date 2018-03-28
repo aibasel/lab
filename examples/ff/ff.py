@@ -34,7 +34,7 @@ ATTRIBUTES = [
 # Create a new experiment.
 exp = Experiment(environment=ENV)
 # Add default driver parser.
-exp.add_parser('driver_parser', exp.DRIVER_PARSER)
+exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
 # Add custom ff-parser.
 exp.add_parser('parser', 'ff-parser.py')
 
