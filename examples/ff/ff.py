@@ -33,9 +33,9 @@ ATTRIBUTES = [
 
 # Create a new experiment.
 exp = Experiment(environment=ENV)
-# add default driver parser
+# Add default driver parser.
 exp.add_parser('driver_parser', exp.DRIVER_PARSER)
-# add custom ff-parser
+# Add custom ff-parser.
 exp.add_parser('parser', 'ff-parser.py')
 
 for task in suites.build_suite(BENCHMARKS_DIR, SUITE):

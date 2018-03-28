@@ -27,9 +27,9 @@ ENV = LocalEnvironment()
 
 # Create a new experiment.
 exp = Experiment(path=EXPPATH, environment=ENV)
-# add default driver parser
+# Add default driver parser.
 exp.add_parser('driver_parser', exp.DRIVER_PARSER)
-# add custom parser
+# Add custom parser.
 exp.add_parser('simple_parser', 'simple-parser.py')
 reportfile = os.path.join(exp.eval_dir, EXPNAME + '.html')
 
