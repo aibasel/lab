@@ -279,6 +279,7 @@ class SingleSearchParser(Parser):
         self.add_function(scores)
         self.add_function(check_min_values)
 
+
 def main():
     print 'Running single search parser'
     parser = SingleSearchParser()

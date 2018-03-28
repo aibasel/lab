@@ -24,9 +24,7 @@ Regular expressions and functions for parsing Fast Downward experiments.
 from __future__ import division
 
 from collections import defaultdict
-import math
 import re
-import sys
 
 from lab.parser import Parser
 
