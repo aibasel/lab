@@ -344,10 +344,10 @@ class Experiment(_Buildable):
         # generate this data otherwise.
         self.add_parser(
             'static_properties_parser',
-            os.path.join(LAB_SCRIPTS_DIR, 'static_properties_parser.py'))
+            os.path.join(LAB_SCRIPTS_DIR, 'static-properties-parser.py'))
         # This can be used by users to add the default driver properties parser.
         self.LAB_DRIVER_PARSER = os.path.join(
-            LAB_SCRIPTS_DIR, 'driver_properties_parser.py')
+            LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
 
         self.set_property('experiment_file', self._script)
 
