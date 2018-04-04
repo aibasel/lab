@@ -440,7 +440,7 @@ class Experiment(_Buildable):
     def add_parse_again_step(self):
         """
         Add a step that copies the parsers from their originally specified
-        locations to the experiment direcotry and runs all of them again. This
+        locations to the experiment directory and runs all of them again. This
         step overwrites the existing properties file in each run dir.
         """
         def run_parsers():
@@ -461,8 +461,8 @@ class Experiment(_Buildable):
                             # Only copy resources that reside in the experiment/run dir.
                             continue
 
-                        # Even if the directory containing a resource has already been,
-                        # added we copy the resource since we might want to overwrite it.
+                        # Even if the directory containing a resource has already been
+                        # added, we copy the resource since we might want to overwrite it.
                         logging.debug('Copying %s to %s' % (source, dest))
                         tools.copy(source, dest, required)
 
