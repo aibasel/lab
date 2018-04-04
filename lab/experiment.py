@@ -46,6 +46,8 @@ steps_group.add_argument(
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
+STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static_experiment.properties'
+STATIC_RUN_PROPERTIES_FILENAME = 'static_run.properties'
 
 
 def get_default_data_dir():
@@ -339,9 +341,9 @@ class Experiment(_Buildable):
         self.runs = []
         self.parsers = []
 
-        # Add a default parser to copy static_run.properties to properties.
-        # We always include this parser because no user-written parser can
-        # generate this data otherwise.
+        # Add a default parser to copy STATIC_RUN_PROPERTIES_FILENAME to
+        # properties. We always include this parser because no user-written
+        # parser can generate this data otherwise.
         self.add_parser(
             'static_properties_parser',
             os.path.join(LAB_SCRIPTS_DIR, 'static-properties-parser.py'))
@@ -627,7 +629,7 @@ class Experiment(_Buildable):
 
         self._build_resources()
         self._build_runs()
-        self._build_properties_file('static_experiment.properties')
+        self._build_properties_file(STATIC_EXPERIMENT_PROPERTIES_FILENAME)
 
     def start_runs(self):
         """Execute all runs that were added to the experiment.
@@ -690,7 +692,7 @@ class Run(_Buildable):
         self._build_run_script()
         self._build_resources()
         self._check_id()
-        self._build_properties_file('static_run.properties')
+        self._build_properties_file(STATIC_RUN_PROPERTIES_FILENAME)
 
     def _build_run_script(self):
         if not self.commands:

@@ -18,9 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Read a json dict from the file 'static_run.properties' and write it to 'properties'
+Read a json dict from the file lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
+and write it to 'properties'.
 """
 
+import lab.experiment
 from lab.tools import Properties
 
 import logging
@@ -30,7 +32,7 @@ import os
 # TODO: this should read from the run script itself, where the static information
 # should live.
 def main():
-    read_from = "static_run.properties"
+    read_from = lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
     write_to = "properties"
     if not os.path.exists(read_from):
         logging.critical("{} does not exist!".format(read_from))
