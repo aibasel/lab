@@ -481,9 +481,12 @@ class Experiment(_Buildable):
                     # TODO: if we want to support writing exit codes and wallclock
                     # times of parsers into the properties files as before, we
                     # should do it here.
+                    # TODO: if the parsers produce output (some of the default
+                    # ones currently do), running may be even slower due to
+                    # thousands of lines of output.
                     parser_resource = self.env_vars_relative[parser]
                     rel_parser = os.path.join('../../', parser_resource)
-                    subprocess.call([rel_parser], cwd=run_dir)
+                    subprocess.check_call([rel_parser], cwd=run_dir)
 
         self.add_step('parse-again', run_parsers)
 
