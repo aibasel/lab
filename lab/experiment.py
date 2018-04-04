@@ -321,12 +321,11 @@ class Experiment(_Buildable):
         *environment* must be an :ref:`Environment <environments>`
         instance. You can use
         :class:`~lab.environments.LocalEnvironment` to run your
-        experiment on a single computer (default). If you have access
-        to the computer grids in Basel or Freiburg you can use the
-        predefined grid environments
-        :class:`~lab.environments.MaiaEnvironment` or
-        :class:`~lab.environments.GkiGridEnvironment`. Alternatively,
-        you can write your own :ref:`Environment <environments>` class.
+        experiment on a single computer (default). If you have access to
+        the computer grid in Basel you can use the predefined grid
+        environment :class:`~lab.environments.BaselSlurmEnvironment`.
+        Alternatively, you can derive your own class from
+        :ref:`Environment <environments>`.
 
         """
         _Buildable.__init__(self)

@@ -10,7 +10,7 @@ General documentation
    faq
 
 
-Documentation for lab
+Documentation for Lab
 ---------------------
 
 .. toctree::
@@ -22,7 +22,7 @@ Documentation for lab
    lab.reports
 
 
-Documentation for downward-lab
+Documentation for Downward Lab
 ------------------------------
 
 .. toctree::

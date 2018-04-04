@@ -106,8 +106,8 @@ class FastDownwardExperiment(Experiment):
         This directory can become very large since each revision uses
         about 30 MB.
 
-        >>> from lab.environments import MaiaEnvironment
-        >>> env = MaiaEnvironment(priority=-2)
+        >>> from lab.environments import BaselSlurmEnvironment
+        >>> env = BaselSlurmEnvironment(email="my.name@unibas.ch")
         >>> exp = FastDownwardExperiment(environment=env)
 
         If running a translator-only experiment, i.e. all algorithms use the

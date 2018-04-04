@@ -139,23 +139,19 @@ class GridEnvironment(Environment):
 
         .. note::
 
-            For correct sequential execution, this class writes job
-            files to the experiment directory and makes them depend on
-            one another. The driver.log and driver.err files in this
-            directory can be inspected if something goes wrong. Since
-            the job files call the experiment script during execution,
-            it mustn't be changed during the experiment.
+            If the steps are run by the grid engine, this class writes
+            job files to the directory ``<exppath>-grid-steps`` and
+            makes them depend on one another. Please inspect the \*.log
+            and \*.err files in this directory if something goes wrong.
+            Since the job files call the experiment script during
+            execution, it mustn't be changed during the experiment.
 
         If *email* is provided and the steps run on the grid, a message
         will be sent when the last experiment step finishes.
 
         Use *extra_options* to pass additional options. The
-        *extra_options* string may contain newlines. Example that
-        allocates 16 cores per run with OGE::
-
-            extra_options='#$ -pe smp 16'
-
-        Example that runs each task on its own node with Slurm::
+        *extra_options* string may contain newlines. Example that runs
+        each task on its own node with Slurm::
 
             extra_options='#SBATCH --exclusive'
 
@@ -291,93 +287,6 @@ class GridEnvironment(Environment):
         raise NotImplementedError
 
 
-class OracleGridEngineEnvironment(GridEnvironment):
-    """Abstract base class for grid environments using OGE."""
-    # Must be overridden in derived classes.
-    DEFAULT_QUEUE = None
-
-    # Can be overridden in derived classes.
-    JOB_HEADER_TEMPLATE_FILE = 'oge-job-header'
-    RUN_JOB_BODY_TEMPLATE_FILE = 'oge-run-job-body'
-    STEP_JOB_BODY_TEMPLATE_FILE = 'oge-step-job-body'
-    DEFAULT_PRIORITY = 0
-    HOST_RESTRICTIONS = {}
-    DEFAULT_HOST_RESTRICTION = ""
-
-    def __init__(self, queue=None, priority=None, host_restriction=None, **kwargs):
-        """
-        *queue* must be a valid queue name on the grid.
-
-        *priority* must be in the range [-1023, 0] where 0 is the
-        highest priority. If you're a superuser the value can be in the
-        range [-1023, 1024].
-
-        See :py:class:`~lab.environments.GridEnvironment` for inherited
-        parameters.
-
-        """
-        GridEnvironment.__init__(self, **kwargs)
-
-        if queue is None:
-            queue = self.DEFAULT_QUEUE
-        if priority is None:
-            priority = self.DEFAULT_PRIORITY
-        if host_restriction is None:
-            host_restriction = self.DEFAULT_HOST_RESTRICTION
-
-        self.queue = queue
-        self.priority = priority
-        assert self.priority in xrange(-1023, 1024 + 1)
-        self.host_spec = self._get_host_spec(host_restriction)
-
-    # TODO: Don't forget to remove the run-dispatcher file once we get rid
-    #       of OracleGridEngineEnvironment.
-    def _write_run_dispatcher(self):
-        dispatcher_content = tools.fill_template(
-            'run-dispatcher.py',
-            task_order=self._get_task_order())
-        self.exp.add_new_file(
-            '', 'run-dispatcher.py', dispatcher_content, permissions=0o755)
-
-    def write_main_script(self):
-        # The main script is written by the run_steps() method.
-        self._write_run_dispatcher()
-
-    def _get_job_params(self, step, is_last):
-        job_params = GridEnvironment._get_job_params(self, step, is_last)
-        job_params['priority'] = self.priority
-        job_params['queue'] = self.queue
-        job_params['host_spec'] = self.host_spec
-        job_params['notification'] = '#$ -m n'
-        if is_last and self.email:
-            if is_run_step(step):
-                logging.warning(
-                    "The cluster sends mails per run, not per step."
-                    " Since the last of the submitted steps would send"
-                    " too many mails, we disable the notification."
-                    " We recommend submitting the 'run' step together"
-                    " with the 'fetch' step.")
-            else:
-                job_params['notification'] = '#$ -M %s\n#$ -m e' % self.email
-
-        return job_params
-
-    def _get_host_spec(self, host_restriction):
-        if not host_restriction:
-            return '## (not used)'
-        else:
-            hosts = self.HOST_RESTRICTIONS[host_restriction]
-            return '#$ -l hostname="%s"' % '|'.join(hosts)
-
-    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
-        submit = ['qsub']
-        if dependency:
-            submit.extend(['-hold_jid', dependency])
-        submit.append(job_file)
-        tools.run_command(submit, cwd=job_dir)
-        return job_name
-
-
 class SlurmEnvironment(GridEnvironment):
     """Abstract base class for slurm grid environments."""
     # Must be overridden in derived classes.
@@ -470,39 +379,6 @@ class SlurmEnvironment(GridEnvironment):
         match = re.match(r"Submitted batch job (\d*)", out)
         assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
         return match.group(1)
-
-
-class GkiGridEnvironment(OracleGridEngineEnvironment):
-    """Environment for Freiburg's AI group."""
-
-    DEFAULT_QUEUE = 'opteron_core.q'
-    MAX_TASKS = 75000
-
-    def run_steps(self, steps):
-        if 'xeon' in self.queue:
-            logging.critical('Experiments must be run stepwise on xeon, '
-                             'because mercurial is missing there.')
-        OracleGridEngineEnvironment.run_steps(self, steps)
-
-
-def _host_range(prefix, from_num, to_num):
-    return ['%s%02d*' % (prefix, num) for num in xrange(from_num, to_num + 1)]
-
-
-class MaiaEnvironment(OracleGridEngineEnvironment):
-    """Old environment for Basel's AI group."""
-
-    DEFAULT_QUEUE = '"all.q@ase*"'
-    DEFAULT_HOST_RESTRICTION = ''
-
-    # Note: the hosts in the following host restrictions are part of the
-    # queue 'all.q' and not part of the default queue '"all.q@ase*"'.
-    # Use them like this:
-    # MaiaEnvironment(queue='all.q', host_restrictions='maia-six')
-    HOST_RESTRICTIONS = {
-        'maia-quad': _host_range('uni', 1, 32) + _host_range('ugi', 1, 8),
-        'maia-six': _host_range('uni', 33, 72),
-    }
 
 
 class BaselSlurmEnvironment(SlurmEnvironment):

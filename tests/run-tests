@@ -16,9 +16,6 @@ fi
 function cleanup {
     rm -rf examples/data
     rm -rf examples/ff/data
-    rm -rf examples/pi/data
-    rm -rf examples/planner/data
-    rm -rf examples/simple/data
 }
 
 # Change into top directory.
@@ -71,22 +68,9 @@ cd ff
 ./ff.py --all
 cd ..
 
-cd simple
-./simple-exp.py --all
-cd ..
-
-cd pi
-./pi.py --all
-./pi-ext.py --all
-cd ..
-
 ./report-external-results.py --all
 
 ./lmcut.py --all
-
-cd planner
-./planner.py --all
-cd ..
 
 ./showcase-options.py --all
 

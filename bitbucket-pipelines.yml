@@ -6,10 +6,10 @@ pipelines:
           - apt-get update
           - apt-get -y upgrade
 
-          # Install downward-lab dependencies.
+          # Install Lab dependencies.
           - apt-get -y install mercurial python2.7 python-matplotlib python-simplejson
 
-          # Install dependencies of this script and downward-lab tests.
+          # Install dependencies of this script and Lab tests.
           - apt-get -y install python-pip realpath wget
           - pip install -U pycodestyle pyflakes pytest sphinx vulture
 
