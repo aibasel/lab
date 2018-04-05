@@ -236,6 +236,30 @@ class _Buildable(object):
         kwargs['hard_stderr_limit'] = hard_stderr_limit
         self.commands[name] = (command, kwargs)
 
+    def add_parser(self, name, path_to_parser):
+        """
+        Add a parser. Parsers will be run in the order they are added.
+
+        If invoked on a *run*, this method adds the parser to the
+        **specific** run. If invoked on the experiment, the parser is
+        appended to the list of parsers of **all** runs.
+
+        *name* must be a unique string that identifies the parser. The same
+        rules as for all resources apply: it must start with a letter and may
+        only contain letters, numbers, or underscores.
+
+        *path_to_parser* must be the path to an executable file that can be
+        executed in the run directory.
+        """
+        self._check_alias(name)
+        if not os.path.isfile(path_to_parser):
+            logging.critical('Parser %s could not be found.' % path_to_parser)
+        if not os.access(path_to_parser, os.X_OK):
+            logging.critical('Parser %s is not executable.' % path_to_parser)
+
+        self.add_resource(name, path_to_parser)
+        self.add_command(name, ["{{{}}}".format(name)])
+
     @property
     def _env_vars(self):
         return dict(
@@ -417,24 +441,7 @@ class Experiment(_Buildable):
             self.steps.append(Step(name, function, *args, **kwargs))
 
     def add_parser(self, name, path_to_parser):
-        """Add a `parser` to each run of the experiment. Parsers will be run
-        in the order they are added.
-
-        *name* must be a unique string that identifies the parser. The same
-        rules as for all resources apply: it must start with a letter and may
-        only contain letters, numbers, or underscores.
-
-        *path_to_parser* must be the path to an executable file that can be
-        executed in the run directory.
-        """
-        self._check_alias(name)
-        if not os.path.isfile(path_to_parser):
-            logging.critical('Parser %s could not be found.' % path_to_parser)
-        if not os.access(path_to_parser, os.X_OK):
-            logging.critical('Parser %s is not executable.' % path_to_parser)
-
-        self.add_resource(name, path_to_parser)
-        self.add_command(name, ["{{{}}}".format(name)])
+        _Buildable.add_parser(self, name, path_to_parser)
         self.parsers.append(name)
 
     def add_parse_again_step(self):
