@@ -304,9 +304,14 @@ class SlurmEnvironment(GridEnvironment):
                  export=['PATH'], **kwargs):
         """
 
-        *partition* must be a valid slurm partition name on the grid.
+        *partition* must be a valid Slurm partition name. Choose from
 
-        *qos* must be a valid slurm qos name on the grid.
+        * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
+        * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
+        * "infai_all": combination of "infai_1" and "infai_2"
+          (only use this when runtime is irrelevant)
+
+        *qos* must be a valid Slurm QOS name.
 
         *memory_per_cpu* must be a string specifying the memory
         allocated for each core. The string must end with one of the
@@ -384,8 +389,8 @@ class SlurmEnvironment(GridEnvironment):
 class BaselSlurmEnvironment(SlurmEnvironment):
     """Environment for Basel's AI group."""
 
-    DEFAULT_PARTITION = 'infai'
-    DEFAULT_QOS = 'infai'
+    DEFAULT_PARTITION = 'infai_1'
+    DEFAULT_QOS = 'normal'
     # infai nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = '3872M'
