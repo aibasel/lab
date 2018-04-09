@@ -21,7 +21,8 @@ from downward.reports.taskwise import TaskwiseReport
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-REMOTE = 'cluster' in platform.node()
+NODE = platform.node()
+REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
 if REMOTE:
     ENV = BaselSlurmEnvironment("my.name@unibas.ch")
 else:
