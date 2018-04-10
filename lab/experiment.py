@@ -478,15 +478,13 @@ class Experiment(_Buildable):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, 'Parsing run: {:6d}/{:d}'.format(index, total_dirs))
                 for parser in self.parsers:
-                    # TODO: if we want to support writing exit codes and wallclock
-                    # times of parsers into the properties files as before, we
-                    # should do it here.
-                    # TODO: if the parsers produce output (some of the default
-                    # ones currently do), running may be even slower due to
-                    # thousands of lines of output.
                     parser_resource = self.env_vars_relative[parser]
                     rel_parser = os.path.join('../../', parser_resource)
-                    subprocess.check_call([rel_parser], cwd=run_dir)
+                    with open(os.devnull, 'w') as FNULL:
+                        # Since parsers often produce output which we would
+                        # rather not want to see for each individual run, we
+                        # suppress it here.
+                        subprocess.check_call([rel_parser], cwd=run_dir, stdout=FNULL)
 
         self.add_step('parse-again', run_parsers)
 
