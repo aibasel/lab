@@ -442,6 +442,9 @@ class Experiment(_Buildable):
         Add a step that copies the parsers from their originally specified
         locations to the experiment directory and runs all of them again. This
         step overwrites the existing properties file in each run dir.
+
+        Do not forget to run the default fetch step again to overwrite
+        existing data in the -eval dir of the experiment.
         """
         def run_parsers():
             if not os.path.isdir(self.path):
