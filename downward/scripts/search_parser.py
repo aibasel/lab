@@ -279,17 +279,17 @@ class SingleSearchParser(SearchParser):
         SearchParser.__init__(self)
 
         self.add_pattern(
-            'landmarks', '^Discovered (\d+?) landmarks$',
+            'landmarks', r'^Discovered (\d+?) landmarks$',
             type=int, flags='M', required=False)
         self.add_pattern(
             'landmarks_generation_time', '^Landmarks generation time: (.+)s$',
             type=float, flags='M', required=False)
         # TODO: Make the following two patterns mandatory.
         self.add_pattern(
-            'limit_search_time', 'search time limit: (\d+)s$',
+            'limit_search_time', r'search time limit: (\d+)s$',
             type=int, flags='M', required=False)
         self.add_pattern(
-            'limit_search_memory', 'search memory limit: (\d+) MB$',
+            'limit_search_memory', r'search memory limit: (\d+) MB$',
             type=int, flags='M', required=False)
 
         self.add_function(get_cumulative_results)

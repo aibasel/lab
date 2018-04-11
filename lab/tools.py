@@ -465,8 +465,8 @@ def get_slurm_err_content(src_dir):
 
 def filter_slurm_err_content(content):
     filtered = re.sub(
-        "slurmstepd: error: task/cgroup: unable to add task\[pid=\d+\]"
-        " to memory cg '\(null\)'\n", '', content)
+        r"slurmstepd: error: task/cgroup: unable to add task\[pid=\d+\]"
+        r" to memory cg '\(null\)'\n", '', content)
     return "\n".join(line for line in filtered.splitlines() if line.strip())
 
 
