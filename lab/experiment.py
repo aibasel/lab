@@ -155,7 +155,8 @@ class _Buildable(object):
         self._check_alias(name)
         if name:
             self.env_vars_relative[name] = dest
-        self.resources.append(_Resource(name, source, dest, required, symlink, is_parser=False))
+        self.resources.append(
+            _Resource(name, source, dest, required, symlink, is_parser=False))
 
     def add_new_file(self, name, dest, content, permissions=0o644):
         """
@@ -353,7 +354,6 @@ class Experiment(_Buildable):
         self.environment.exp = self
 
         self.runs = []
-        self.parsers = []
 
         # Add a default parser to copy STATIC_RUN_PROPERTIES_FILENAME to
         # properties. We always include this parser because no user-written
@@ -454,7 +454,8 @@ class Experiment(_Buildable):
         dest = os.path.basename(path_to_parser)
         self._check_alias(name)
         self.env_vars_relative[name] = dest
-        self.resources.append(_Resource(name, path_to_parser, dest, required=False, symlink=False, is_parser=True))
+        self.resources.append(_Resource(
+            name, path_to_parser, dest, required=False, symlink=False, is_parser=True))
         self.add_command(name, ["{{{}}}".format(name)])
 
     def add_parse_again_step(self):

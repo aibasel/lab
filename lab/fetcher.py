@@ -88,7 +88,8 @@ class Fetcher(object):
 
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
-        fetch_from_eval_dir = not os.path.exists(os.path.join(src_dir, 'runs-00001-00100'))
+        fetch_from_eval_dir = not os.path.exists(
+            os.path.join(src_dir, 'runs-00001-00100'))
         if fetch_from_eval_dir:
             src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
             run_filter.apply(src_props)
