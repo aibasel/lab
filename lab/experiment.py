@@ -434,9 +434,10 @@ class Experiment(_Buildable):
         """
         Add a `parser` to each run of the experiment. This adds the parser
         as a `resource` to the experiment and adds a command to each run that
-        executes the parser. Parsers will be run in the order they are added.
-        They are also collected to allow copying and running them again with
-        the method `add_parse_again_step`.
+        executes the parser. Since commands are exectued in the order they
+        are added, parsers should be added after all other commands, and they
+        should be added in the desired order they should be run. All parsers
+        can be copied and re-run again with the method `add_parse_again_step`.
 
         *name* must be a unique string that identifies the parser. The same
         rules as for all resources apply: it must start with a letter and may
