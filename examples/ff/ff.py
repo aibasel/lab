@@ -17,7 +17,8 @@ from downward import suites
 from downward.reports.absolute import AbsoluteReport
 
 
-REMOTE = 'cluster' in platform.node()
+NODE = platform.node()
+REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 if REMOTE:
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
