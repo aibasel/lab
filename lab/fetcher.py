@@ -75,12 +75,6 @@ class Fetcher(object):
             logging.critical('{} is missing or not a directory'.format(src_dir))
         run_filter = tools.RunFilter(filter, **kwargs)
 
-        # TODO: we should use lab.experiment.STATIC_EXPERIMENT_PROPERTIES_FILENAME
-        # below, but we cannot import lab.experiment due to a cyclic dependency.
-        src_props = tools.Properties(
-            filename=os.path.join(src_dir, 'static_experiment.properties'))
-        fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
-
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching properties from {} to {}'.format(src_dir, eval_dir))
 
@@ -94,7 +88,9 @@ class Fetcher(object):
 
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
+        fetch_from_eval_dir = not os.path.exists(os.path.join(src_dir, 'runs-00001-00100'))
         if fetch_from_eval_dir:
+            src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
             run_filter.apply(src_props)
             combined_props.update(src_props)
             logging.info('Fetched properties of {} runs.'.format(len(src_props)))
