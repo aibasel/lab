@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Read a json dict from the file lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
+Read a JSON dict from the file lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
 and write it to 'properties'.
 """
 
