@@ -46,8 +46,8 @@ steps_group.add_argument(
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
-STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static_experiment.properties'
-STATIC_RUN_PROPERTIES_FILENAME = 'static_run.properties'
+STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static_experiment_properties'
+STATIC_RUN_PROPERTIES_FILENAME = 'static_run_properties'
 
 
 def get_default_data_dir():
@@ -77,7 +77,6 @@ def get_run_dir(task_id):
 
 
 class _Resource(object):
-    """Resource class."""
     def __init__(self, name, source, dest, required, symlink, is_parser):
         self.name = name
         self.source = source
@@ -490,11 +489,12 @@ class Experiment(_Buildable):
                     if resource.is_parser:
                         parser_filename = self.env_vars_relative[resource.name]
                         rel_parser = os.path.join('../../', parser_filename)
-                        with open(os.devnull, 'w') as FNULL:
+                        with open(os.devnull, 'w') as devnull:
                             # Since parsers often produce output which we would
                             # rather not want to see for each individual run, we
                             # suppress it here.
-                            subprocess.check_call([rel_parser], cwd=run_dir, stdout=FNULL)
+                            subprocess.check_call(
+                                [rel_parser], cwd=run_dir, stdout=devnull)
 
         self.add_step('parse-again', run_parsers)
 
