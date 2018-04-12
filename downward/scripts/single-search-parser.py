@@ -92,21 +92,6 @@ def _update_props_with_iterative_values(props, values, attr_groups):
             props[attr] = min(values[attr])
 
 
-def get_iterative_portfolio_results(content, props):
-    values = defaultdict(list)
-
-    for line in content.splitlines():
-        for name, pattern, cast in PORTFOLIO_PATTERNS:
-            match = pattern.search(line)
-            if not match:
-                continue
-            values[name].append(cast(match.group(1)))
-            # We can break here, because each line contains only one value
-            break
-
-    _update_props_with_iterative_values(props, values, [('cost', 'plan_length')])
-
-
 def get_iterative_results(content, props):
     """
     In iterative search some attributes like plan cost can have multiple
@@ -266,17 +251,12 @@ def check_min_values(content, props):
             props[attr] = max(time, 0.01)
 
 
-class SearchParser(Parser):
+class SingleSearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
 
         self.add_function(get_iterative_results)
         self.add_function(coverage)
-
-
-class SingleSearchParser(SearchParser):
-    def __init__(self):
-        SearchParser.__init__(self)
 
         self.add_pattern(
             'landmarks', r'^Discovered (\d+?) landmarks$',
@@ -300,37 +280,9 @@ class SingleSearchParser(SearchParser):
         self.add_function(check_min_values)
 
 
-class PortfolioParser(SearchParser):
-    def __init__(self):
-        SearchParser.__init__(self)
-        self.add_function(get_iterative_portfolio_results)
-
-
-def parse_planner_type(content, props):
-    match = re.search(r'^INFO     search portfolio:', content, re.M)
-    if match:
-        props['planner_type'] = 'portfolio'
-    else:
-        props['planner_type'] = 'single'
-
-
-def get_planner_type():
-    planner_type_parser = Parser()
-    planner_type_parser.add_function(parse_planner_type)
-    planner_type_parser.parse()
-    return planner_type_parser.props['planner_type']
-
-
 def main():
-    planner_type = get_planner_type()
-    if planner_type == 'single':
-        print 'Running single search parser'
-        parser = SingleSearchParser()
-    else:
-        assert planner_type == 'portfolio', planner_type
-        print 'Running portfolio parser'
-        parser = PortfolioParser()
-
+    print 'Running single search parser'
+    parser = SingleSearchParser()
     parser.parse()
 
 

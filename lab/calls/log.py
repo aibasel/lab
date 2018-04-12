@@ -19,6 +19,8 @@ import os
 
 from lab.tools import Properties
 
+DRIVER_PROPERTIES_FILENAME = 'driver-properties'
+
 
 def print_(stream, text):
     stream.write('%s\n' % text)
@@ -33,12 +35,12 @@ def delete_file_if_empty(filename):
 def set_property(name, value):
     # Read properties again before each write to ensure consistency.
     # Otherwise we might overwrite results added by parsers.
-    properties = Properties(filename='properties')
+    properties = Properties(filename=DRIVER_PROPERTIES_FILENAME)
     properties[name] = value
     properties.write()
 
 
-def add_unexplained_error(error, filename='properties'):
+def add_unexplained_error(error, filename=DRIVER_PROPERTIES_FILENAME):
     # See comment for set_property.
     properties = Properties(filename=filename)
     properties.add_unexplained_error(error)

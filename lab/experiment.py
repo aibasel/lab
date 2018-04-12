@@ -18,8 +18,10 @@
 """Main module for creating experiments."""
 
 from collections import OrderedDict
+from glob import glob
 import logging
 import os
+import subprocess
 import sys
 
 from lab import environments
@@ -41,6 +43,11 @@ steps_group.add_argument(
 steps_group.add_argument(
     '--all', dest='run_all_steps', action='store_true',
     help='Run all steps.')
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
+STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static-experiment-properties'
+STATIC_RUN_PROPERTIES_FILENAME = 'static-run-properties'
 
 
 def get_default_data_dir():
@@ -67,6 +74,16 @@ def get_run_dir(task_id):
     lower = ((task_id - 1) / SHARD_SIZE) * SHARD_SIZE + 1
     upper = ((task_id + SHARD_SIZE - 1) / SHARD_SIZE) * SHARD_SIZE
     return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
+
+
+class _Resource(object):
+    def __init__(self, name, source, dest, required, symlink, is_parser):
+        self.name = name
+        self.source = source
+        self.dest = dest
+        self.required = required
+        self.symlink = symlink
+        self.is_parser = is_parser
 
 
 class _Buildable(object):
@@ -137,7 +154,8 @@ class _Buildable(object):
         self._check_alias(name)
         if name:
             self.env_vars_relative[name] = dest
-        self.resources.append((source, dest, required, symlink))
+        self.resources.append(
+            _Resource(name, source, dest, required, symlink, is_parser=False))
 
     def add_new_file(self, name, dest, content, permissions=0o644):
         """
@@ -242,12 +260,12 @@ class _Buildable(object):
     def _get_rel_path(self, abs_path):
         return os.path.relpath(abs_path, start=self.path)
 
-    def _build_properties_file(self):
-        combined_props = tools.Properties(self._get_abs_path('properties'))
+    def _build_properties_file(self, properties_filename):
+        combined_props = tools.Properties(self._get_abs_path(properties_filename))
         combined_props.update(self.properties)
         combined_props.write()
 
-    def _build_resources(self):
+    def _build_new_files(self):
         for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
@@ -255,26 +273,29 @@ class _Buildable(object):
             tools.write_file(filename, content)
             os.chmod(filename, permissions)
 
-        for source, dest, required, symlink in self.resources:
-            if required and not os.path.exists(source):
-                logging.critical('Required resource not found: %s' % source)
-            dest = self._get_abs_path(dest)
+    def _build_resources(self, only_parsers=False):
+        for resource in self.resources:
+            if only_parsers and not resource.is_parser:
+                continue
+            if resource.required and not os.path.exists(resource.source):
+                logging.critical('Required resource not found: %s' % resource.source)
+            dest = self._get_abs_path(resource.dest)
             if not dest.startswith(self.path):
                 # Only copy resources that reside in the experiment/run dir.
                 continue
-            if symlink:
+            if resource.symlink:
                 # Do not create a symlink if the file doesn't exist.
-                if not os.path.exists(source):
+                if not os.path.exists(resource.source):
                     continue
-                source = self._get_rel_path(source)
+                source = self._get_rel_path(resource.source)
                 os.symlink(source, dest)
                 logging.debug('Linking from %s to %s' % (source, dest))
                 continue
 
             # Even if the directory containing a resource has already been added,
             # we copy the resource since we might want to overwrite it.
-            logging.debug('Copying %s to %s' % (source, dest))
-            tools.copy(source, dest, required)
+            logging.debug('Copying %s to %s' % (resource.source, dest))
+            tools.copy(resource.source, dest, resource.required)
 
 
 class Experiment(_Buildable):
@@ -332,6 +353,16 @@ class Experiment(_Buildable):
         self.environment.exp = self
 
         self.runs = []
+
+        # Add a default parser to copy STATIC_RUN_PROPERTIES_FILENAME to
+        # properties. We always include this parser because no user-written
+        # parser can generate this data otherwise.
+        self.add_parser(
+            'static_properties_parser',
+            os.path.join(LAB_SCRIPTS_DIR, 'static-properties-parser.py'))
+        # This can be used by users to add the default driver properties parser.
+        self.LAB_DRIVER_PARSER = os.path.join(
+            LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
 
         self.set_property('experiment_file', self._script)
 
@@ -398,8 +429,77 @@ class Experiment(_Buildable):
         else:
             self.steps.append(Step(name, function, *args, **kwargs))
 
+    def add_parser(self, name, path_to_parser):
+        """
+        Add a `parser` to each run of the experiment. This adds the parser
+        as a `resource` to the experiment and adds a command to each run that
+        executes the parser. Since commands are exectued in the order they
+        are added, parsers should be added after all other commands, and they
+        should be added in the desired order they should be run. All parsers
+        can be copied and re-run again with the method `add_parse_again_step`.
+
+        *name* must be a unique string that identifies the parser. The same
+        rules as for all resources apply: it must start with a letter and may
+        only contain letters, numbers, or underscores.
+
+        *path_to_parser* must be the path to an executable file that can be
+        executed in the run directory.
+        """
+        self._check_alias(name)
+        if not os.path.isfile(path_to_parser):
+            logging.critical('Parser %s could not be found.' % path_to_parser)
+        if not os.access(path_to_parser, os.X_OK):
+            logging.critical('Parser %s is not executable.' % path_to_parser)
+
+        dest = os.path.basename(path_to_parser)
+        self._check_alias(name)
+        self.env_vars_relative[name] = dest
+        self.resources.append(_Resource(
+            name, path_to_parser, dest, required=False, symlink=False, is_parser=True))
+        self.add_command(name, ["{{{}}}".format(name)])
+
+    def add_parse_again_step(self):
+        """
+        Add a step that copies the parsers from their originally specified
+        locations to the experiment directory and runs all of them again. This
+        step overwrites the existing properties file in each run dir.
+
+        Do not forget to run the default fetch step again to overwrite
+        existing data in the -eval dir of the experiment.
+        """
+        def run_parsers():
+            if not os.path.isdir(self.path):
+                logging.critical('{} is missing or not a directory'.format(self.path))
+
+            # Copy all parsers from their source to their destination again.
+            self._build_resources(only_parsers=True)
+
+            run_dirs = sorted(glob(os.path.join(self.path, 'runs-*-*', '*')))
+
+            total_dirs = len(run_dirs)
+            logging.info(
+                'Parsing properties in {:d} run directories'.format(total_dirs))
+            for index, run_dir in enumerate(run_dirs, start=1):
+                if os.path.exists(os.path.join(run_dir, 'properties')):
+                    # print "removing path {}".format(os.path.join(run_dir, 'properties'))
+                    tools.remove_path(os.path.join(run_dir, 'properties'))
+                loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
+                logging.log(loglevel, 'Parsing run: {:6d}/{:d}'.format(index, total_dirs))
+                for resource in self.resources:
+                    if resource.is_parser:
+                        parser_filename = self.env_vars_relative[resource.name]
+                        rel_parser = os.path.join('../../', parser_filename)
+                        with open(os.devnull, 'w') as devnull:
+                            # Since parsers often produce output which we would
+                            # rather not want to see for each individual run, we
+                            # suppress it here.
+                            subprocess.check_call(
+                                [rel_parser], cwd=run_dir, stdout=devnull)
+
+        self.add_step('parse-again', run_parsers)
+
     def add_fetcher(self, src=None, dest=None, merge=None, name=None,
-                    filter=None, parsers=None, **kwargs):
+                    filter=None, **kwargs):
         """
         Add a step that fetches results from experiment or evaluation
         directories into a new or existing evaluation directory.
@@ -424,12 +524,6 @@ class Experiment(_Buildable):
         domains or algorithms) by passing :py:class:`filters <.Report>`
         with the *filter* argument.
 
-        *parsers* can be a list of paths to parser scripts. If given,
-        each parser is called in each run directory and each
-        ``properties`` file is updated with the results from the parser
-        and rewritten to disk. This option is useful if you forgot to
-        parse some attributes during the experiment.
-
         Example setup:
 
         >>> exp = Experiment('/tmp/exp')
@@ -449,17 +543,13 @@ class Experiment(_Buildable):
 
         >>> exp.add_fetcher(filter_algorithm=['algo_1', 'algo_5'])
 
-        Parse additional attributes:
-
-        >>> exp.add_fetcher(parsers=['path/to/myparser.py'])
-
         """
         src = src or self.path
         dest = dest or self.eval_dir
         name = name or 'fetch-%s' % os.path.basename(src)
         self.add_step(
             name, Fetcher(), src, dest, merge=merge, filter=filter,
-            parsers=parsers, **kwargs)
+            **kwargs)
 
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.
@@ -548,9 +638,10 @@ class Experiment(_Buildable):
         tools.makedirs(self.path)
         self.environment.write_main_script()
 
+        self._build_new_files()
         self._build_resources()
         self._build_runs()
-        self._build_properties_file()
+        self._build_properties_file(STATIC_EXPERIMENT_PROPERTIES_FILENAME)
 
     def start_runs(self):
         """Execute all runs that were added to the experiment.
@@ -611,9 +702,10 @@ class Run(_Buildable):
         # We need to build the run script before the resources, because
         # the run script is added as a resource.
         self._build_run_script()
+        self._build_new_files()
         self._build_resources()
         self._check_id()
-        self._build_properties_file()
+        self._build_properties_file(STATIC_RUN_PROPERTIES_FILENAME)
 
     def _build_run_script(self):
         if not self.commands:

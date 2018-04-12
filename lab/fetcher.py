@@ -18,7 +18,6 @@
 from glob import glob
 import logging
 import os
-import subprocess
 import sys
 
 from lab import tools
@@ -54,18 +53,12 @@ class Fetcher(object):
         is more convenient.
 
     """
-    def fetch_dir(self, run_dir, eval_dir, parsers=None):
-        # Allow specyfing a list of multiple parsers or a single parser.
-        parsers = tools.make_list(parsers or [])
-        for parser in parsers:
-            rel_parser = os.path.relpath(parser, start=run_dir)
-            subprocess.call([rel_parser], cwd=run_dir)
-
+    def fetch_dir(self, run_dir):
         prop_file = os.path.join(run_dir, 'properties')
         return tools.Properties(filename=prop_file)
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
-                 parsers=None, **kwargs):
+                 **kwargs):
         """
         This method can be used to copy properties from an exp-dir or
         eval-dir into an eval-dir. If the destination eval-dir already
@@ -82,9 +75,6 @@ class Fetcher(object):
             logging.critical('{} is missing or not a directory'.format(src_dir))
         run_filter = tools.RunFilter(filter, **kwargs)
 
-        src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
-        fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
-
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching properties from {} to {}'.format(src_dir, eval_dir))
 
@@ -98,7 +88,10 @@ class Fetcher(object):
 
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
+        fetch_from_eval_dir = not os.path.exists(
+            os.path.join(src_dir, 'runs-00001-00100'))
         if fetch_from_eval_dir:
+            src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
             run_filter.apply(src_props)
             combined_props.update(src_props)
             logging.info('Fetched properties of {} runs.'.format(len(src_props)))
@@ -123,7 +116,7 @@ class Fetcher(object):
             for index, run_dir in enumerate(run_dirs, start=1):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, 'Scanning: {:6d}/{:d}'.format(index, total_dirs))
-                props = self.fetch_dir(run_dir, eval_dir, parsers=parsers)
+                props = self.fetch_dir(run_dir)
                 if slurm_err_content:
                     props.add_unexplained_error('output-to-slurm.err')
                 id_string = '-'.join(props['id'])

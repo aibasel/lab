@@ -5,7 +5,7 @@ Simple experiment showing how to make reports for data obtained without
 lab.
 
 To use custom results, create the file <EXP_DIR>-eval/properties. It
-must be a json file mapping planner run IDs to results (see below). The
+must be a JSON file mapping planner run IDs to results (see below). The
 run IDs must obviously be unique. Each value in the dictionary must
 itself be a dictionary with at least the keys "domain", "problem",
 "algorithm", "id" and "error". In addition you need the attribute names

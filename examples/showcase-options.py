@@ -35,6 +35,11 @@ ATTRIBUTES = ['coverage']
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
 
+exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
+exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
+exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)
+exp.add_parser('single_search_parser', exp.SINGLE_SEARCH_PARSER)
+
 exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'miconic:s1-0.pddl'])
 exp.add_algorithm('iter-hadd', REPO, REV, [
     '--heuristic', 'hadd=add()',
@@ -55,6 +60,11 @@ exp.add_algorithm(
 # Before we fetch the new results, delete the old ones
 exp.steps.insert(0, Step(
     'delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
+
+
+# Showcase add_parse_again_step option.
+
+exp.add_parse_again_step()
 
 
 # Define some filters
