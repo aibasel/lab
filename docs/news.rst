@@ -5,6 +5,20 @@ News
 .. module :: downward.experiments
 
 
+v2.3 (2018-04-12)
+-----------------
+
+lab
+^^^
+* BaselSlurmEnvironment: Use ``infai_1`` and ``normal`` as default Slurm partition and QOS.
+* Remove ``OracleGridEngineEnvironment``.
+
+downward
+^^^^^^^^
+* Use ``--overall-time-limit=30m`` and ``--overall-memory-limit=3584M`` for all Fast Downward runs by default.
+* Don't add ``-j`` option to build options (``build.py`` now uses all CPUs automatically).
+
+
 v2.2 (2018-03-16)
 -----------------
 
