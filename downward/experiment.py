@@ -134,8 +134,8 @@ class FastDownwardExperiment(Experiment):
             DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
         self.SINGLE_SEARCH_PARSER = os.path.join(
             DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
-        self.PORTFOLIO_PARSER = os.path.join(
-            DOWNWARD_SCRIPTS_DIR, 'portfolio-parser.py')
+        self.ANYTIME_PARSER = os.path.join(
+            DOWNWARD_SCRIPTS_DIR, 'anytime-parser.py')
 
     def _get_tasks(self):
         tasks = []

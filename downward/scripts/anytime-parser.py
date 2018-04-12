@@ -68,7 +68,8 @@ def main():
     print 'Running anytime parser'
     parser = AnytimeParser()
     parser.add_repeated_pattern('cost:all', r'^Plan cost: (.+)$', type=float)
-    parser.add_repeated_pattern('plan_length:all', r'^Plan length: (\d+) step\(s\).$', type=int)
+    parser.add_repeated_pattern(
+        'plan_length:all', r'^Plan length: (\d+) step\(s\).$', type=int)
     parser.add_function(reduce_to_min('cost:all', 'cost'))
     parser.add_function(reduce_to_min('plan_length:all', 'plan_length'))
     parser.add_function(coverage)
