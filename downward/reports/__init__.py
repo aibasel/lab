@@ -56,7 +56,8 @@ class QualityFilters(object):
 
     def store_costs(self, run):
         cost = run.get('cost')
-        if cost is not None and run.get('coverage'):
+        if cost is not None:
+            assert run['coverage']
             self.tasks_to_costs[self._get_task(run)].append(cost)
         return True
 

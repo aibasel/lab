@@ -39,6 +39,7 @@ exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
 exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
 exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)
 exp.add_parser('single_search_parser', exp.SINGLE_SEARCH_PARSER)
+exp.add_parser('anytime_parser', exp.ANYTIME_PARSER)
 
 exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'miconic:s1-0.pddl'])
 exp.add_algorithm('iter-hadd', REPO, REV, [
