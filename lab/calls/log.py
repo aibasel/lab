@@ -19,7 +19,7 @@ import os
 
 from lab.tools import Properties
 
-DRIVER_PROPERTIES_FILENAME = 'driver_properties'
+DRIVER_PROPERTIES_FILENAME = 'driver-properties'
 
 
 def print_(stream, text):

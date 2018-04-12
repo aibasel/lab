@@ -46,8 +46,8 @@ steps_group.add_argument(
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
-STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static_experiment_properties'
-STATIC_RUN_PROPERTIES_FILENAME = 'static_run_properties'
+STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static-experiment-properties'
+STATIC_RUN_PROPERTIES_FILENAME = 'static-run-properties'
 
 
 def get_default_data_dir():
