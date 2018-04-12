@@ -2,7 +2,7 @@
 
 # Test setup: see bitbucket-pipelines.yml
 
-set -euo pipefail
+set -exuo pipefail
 
 if [[ $# -gt 1 ]]; then
     echo "usage: ./run-tests [--skip-experiments]"

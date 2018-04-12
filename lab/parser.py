@@ -153,7 +153,7 @@ class Parser(object):
     def add_pattern(
             self, attribute, regex, file='run.log', type=int, flags='',
             required=True):
-        """
+        r"""
         Look for *regex* in *file*, cast what is found in brackets to
         *type* and store it in the properties dictionary under
         *attribute*. During parsing roughly the following code will be
@@ -180,7 +180,7 @@ class Parser(object):
             _Pattern(attribute, regex, required, type, flags))
 
     def add_function(self, function, file='run.log'):
-        """Call ``function(open(file), properties)`` during parsing.
+        r"""Call ``function(open(file), properties)`` during parsing.
 
         Functions are applied **after** all patterns have been
         evaluated.
