@@ -329,9 +329,9 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
         raise Exception(errors)
 
 
-def copy(src, dest, required=True, ignores=None):
+def copy(src, dest, ignores=None):
     """
-    Copies a file or directory to another file or directory
+    Copies a file or directory to another file or directory.
     """
     if os.path.isfile(src) and os.path.isdir(dest):
         makedirs(dest)
@@ -343,12 +343,9 @@ def copy(src, dest, required=True, ignores=None):
     elif os.path.isdir(src):
         ignore = shutil.ignore_patterns(*ignores) if ignores else None
         fast_updatetree(src, dest, ignore=ignore)
-    elif required:
-        logging.critical('Required path %s cannot be copied to %s' %
-                         (os.path.abspath(src), os.path.abspath(dest)))
     else:
-        # Do not warn if an optional file cannot be copied.
-        return
+        logging.critical('Path {} cannot be copied to {}'.format(
+            os.path.abspath(src), os.path.abspath(dest)))
 
 
 def get_color(fraction, min_wins):

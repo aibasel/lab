@@ -77,11 +77,10 @@ def get_run_dir(task_id):
 
 
 class _Resource(object):
-    def __init__(self, name, source, dest, required, symlink, is_parser):
+    def __init__(self, name, source, dest, symlink, is_parser):
         self.name = name
         self.source = source
         self.dest = dest
-        self.required = required
         self.symlink = symlink
         self.is_parser = is_parser
 
@@ -123,7 +122,7 @@ class _Buildable(object):
         if name in self.env_vars_relative:
             logging.critical('Resource names must be unique: {!r}'.format(name))
 
-    def add_resource(self, name, source, dest='', required=True, symlink=False):
+    def add_resource(self, name, source, dest='', symlink=False):
         """Include the file or directory *source* in the experiment or run.
 
         *name* is an alias for the resource in commands. It must start with a
@@ -155,7 +154,7 @@ class _Buildable(object):
         if name:
             self.env_vars_relative[name] = dest
         self.resources.append(
-            _Resource(name, source, dest, required, symlink, is_parser=False))
+            _Resource(name, source, dest, symlink, is_parser=False))
 
     def add_new_file(self, name, dest, content, permissions=0o644):
         """
@@ -277,8 +276,8 @@ class _Buildable(object):
         for resource in self.resources:
             if only_parsers and not resource.is_parser:
                 continue
-            if resource.required and not os.path.exists(resource.source):
-                logging.critical('Required resource not found: %s' % resource.source)
+            if not os.path.exists(resource.source):
+                logging.critical('Resource not found: {}'.format(resource.source))
             dest = self._get_abs_path(resource.dest)
             if not dest.startswith(self.path):
                 # Only copy resources that reside in the experiment/run dir.
@@ -295,7 +294,7 @@ class _Buildable(object):
             # Even if the directory containing a resource has already been added,
             # we copy the resource since we might want to overwrite it.
             logging.debug('Copying %s to %s' % (resource.source, dest))
-            tools.copy(resource.source, dest, resource.required)
+            tools.copy(resource.source, dest)
 
 
 class Experiment(_Buildable):
@@ -455,7 +454,7 @@ class Experiment(_Buildable):
         self._check_alias(name)
         self.env_vars_relative[name] = dest
         self.resources.append(_Resource(
-            name, path_to_parser, dest, required=False, symlink=False, is_parser=True))
+            name, path_to_parser, dest, symlink=False, is_parser=True))
         self.add_command(name, ["{{{}}}".format(name)])
 
     def add_parse_again_step(self):
