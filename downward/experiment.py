@@ -135,7 +135,7 @@ class FastDownwardExperiment(Experiment):
         self.SINGLE_SEARCH_PARSER = os.path.join(
             DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
         self.ANYTIME_PARSER = os.path.join(
-            DOWNWARD_SCRIPTS_DIR, 'anytime-parser.py')
+            DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
 
     def _get_tasks(self):
         tasks = []
