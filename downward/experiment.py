@@ -129,9 +129,9 @@ class FastDownwardExperiment(Experiment):
 
         # The following constants can be used by users to add default parsers.
         self.EXITCODE_PARSER = os.path.join(
-            DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py')
+            DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
         self.TRANSLATOR_PARSER = os.path.join(
-            DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py')
+            DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
         self.SINGLE_SEARCH_PARSER = os.path.join(
             DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
         self.PORTFOLIO_PARSER = os.path.join(
