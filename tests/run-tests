@@ -34,7 +34,7 @@ python2 -m py.test tests
 
 # Run doctests.
 cd lab
-python -m doctest reports/__init__.py experiment.py tools.py
+python -m doctest reports/__init__.py experiment.py parser.py tools.py
 cd ..
 cd downward
 python -m doctest experiment.py

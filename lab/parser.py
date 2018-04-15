@@ -27,21 +27,19 @@ parser ``examples/ff/ff-parser.py`` serves as an example:
 
 .. literalinclude:: ../examples/ff/ff-parser.py
 
-You can add your parser to a run by using :py:func:`add_command
-<lab.experiment.Run.add_command>`::
+You can add your parser to alls runs by using :meth:`add_parser()
+<lab.experiment.Experiment.add_parser>`::
 
-    run.add_command('solve', ['path/to/my-solver', 'path/to/benchmark'])
-    run.add_command('parse-output', ['path/to/my-parser.py'])
+    >>> from lab import experiment
+    >>> exp = experiment.Experiment()
+    >>> parser = os.path.join(
+    ...     experiment.DIR, '../examples/ff/ff-parser.py')
+    >>> exp.add_parser('parse_ff_log', parser)
 
-This calls ``my-parser.py`` in the run's directory after running the
-solver.
+This calls the parser in each run directory after running the run's
+commands.
 
-A single run can have multiple parsing commands.
-
-Instead of adding a parser to individual runs, you can use
-:py:func:`add_command <lab.experiment.Experiment.add_command>` to
-append your parser to the list of commands of each run.
-
+A single run can have multiple parsers.
 """
 
 import os.path
@@ -144,11 +142,6 @@ class Parser(object):
     """
     def __init__(self):
         self.file_parsers = defaultdict(_FileParser)
-        self.run_dir = os.path.abspath('.')
-        prop_file = os.path.join(self.run_dir, 'properties')
-        if not os.path.exists(prop_file):
-            logging.critical('No properties file found at "%s"' % prop_file)
-        self.props = tools.Properties(filename=prop_file)
 
     def add_pattern(
             self, attribute, regex, file='run.log', type=int, flags='',
@@ -212,9 +205,15 @@ class Parser(object):
         The found values are written to the run's ``properties`` file.
 
         """
+        run_dir = os.path.abspath('.')
+        prop_file = os.path.join(run_dir, 'properties')
+        if not os.path.exists(prop_file):
+            logging.critical('No properties file found at {}'.format(prop_file))
+        self.props = tools.Properties(filename=prop_file)
+
         for filename, file_parser in self.file_parsers.items():
             # If filename is absolute it will not be changed here.
-            path = os.path.join(self.run_dir, filename)
+            path = os.path.join(run_dir, filename)
             try:
                 file_parser.load_file(path)
             except (IOError, MemoryError) as err:

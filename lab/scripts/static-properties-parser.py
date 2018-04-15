@@ -18,8 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Read a JSON dict from the file lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
-and write it to 'properties'.
+Read a JSON dict from the file 'static-experiment-properties' and write it to
+'properties'.
 """
 
 import lab.experiment
