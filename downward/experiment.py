@@ -98,6 +98,9 @@ class FastDownwardExperiment(Experiment):
     # Built-in parsers that can be passed to exp.add_parser().
 
     #: Parsed attributes: error, unsolvable
+    #:
+    #: This parser is always required and needs to be added after
+    #: ``exp.LAB_DRIVER_PARSER``.
     EXITCODE_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
 
@@ -127,10 +130,19 @@ class FastDownwardExperiment(Experiment):
         >>> env = BaselSlurmEnvironment(email="my.name@unibas.ch")
         >>> exp = FastDownwardExperiment(environment=env)
 
-        If running a translator-only experiment, i.e. all algorithms use the
-        driver option --translate but not --search, then use
-        ``del exp.commands['parse-search']`` to avoid errors due to
-        running the default search parser without running the search.
+        You can add parsers with :meth:`.add_parser()`. Two parsers are
+        required and have to be added in the following order:
+
+        >>> exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
+        >>> exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
+
+        You can add other parsers depending on the algorithms you're
+        running:
+
+        >>> exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)
+        >>> exp.add_parser('single_search_parser', exp.SINGLE_SEARCH_PARSER)
+        >>> exp.add_parser('anytime_parser', exp.ANYTIME_SEARCH_PARSER)
+
         """
         Experiment.__init__(self, path=path, environment=environment)
 
