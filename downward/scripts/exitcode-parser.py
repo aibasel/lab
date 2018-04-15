@@ -22,9 +22,19 @@ Parse Fast Downward exit code and store a message describing the outcome
 in the "error" attribute.
 """
 
+import sys
+
 from lab.parser import Parser
 
 from downward import outcomes
+
+
+def _get_planner_exitcode(props):
+    attr = 'fast-downward_returncode'
+    exitcode = props.get(attr)
+    if exitcode is None:
+        sys.exit('Attribute {} is missing.'.format(attr))
+    return exitcode
 
 
 def get_search_error(content, props):
@@ -39,7 +49,7 @@ def get_search_error(content, props):
     """
     assert 'error' not in props
 
-    exitcode = props['fast-downward_returncode']
+    exitcode = _get_planner_exitcode(props)
     outcome = outcomes.get_outcome(exitcode)
     props['error'] = outcome.msg
     if not outcome.explained:
@@ -47,7 +57,7 @@ def get_search_error(content, props):
 
 
 def unsolvable(content, props):
-    outcome = outcomes.get_outcome(props['fast-downward_returncode'])
+    outcome = outcomes.get_outcome(_get_planner_exitcode(props))
     props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
 
 
