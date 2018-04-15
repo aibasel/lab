@@ -33,7 +33,9 @@ def _get_planner_exitcode(props):
     attr = 'fast-downward_returncode'
     exitcode = props.get(attr)
     if exitcode is None:
-        sys.exit('Attribute {} is missing.'.format(attr))
+        sys.exit(
+            'Attribute {} is missing. Did you forget to call'
+            ' exp.add_parser("lab_driver_parser", exp.LAB_DRIVER_PARSER)?'.format(attr))
     return exitcode
 
 
