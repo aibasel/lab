@@ -95,12 +95,12 @@ class FastDownwardExperiment(Experiment):
     You can add report steps with :meth:`.add_report`.
 
     """
+
     # Built-in parsers that can be passed to exp.add_parser().
 
-    #: Parsed attributes: error, unsolvable
+    #: Needed attributes: fast-downward_returncode
     #:
-    #: This parser is always required and needs to be added after
-    #: ``exp.LAB_DRIVER_PARSER``.
+    #: Parsed attributes: error, unsolvable
     EXITCODE_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
 

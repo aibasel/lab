@@ -10,6 +10,7 @@
    :members:
    :undoc-members:
    :inherited-members:
+   :noindex: LAB_DRIVER_PARSER
 
 .. data:: ARGPARSER
 

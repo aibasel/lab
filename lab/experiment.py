@@ -327,6 +327,11 @@ class Experiment(_Buildable):
     This will parse the commandline and execute the selected steps.
 
     """
+
+    #: Parsed attributes: \*_returncode, \*_wall_clock_time
+    LAB_DRIVER_PARSER = os.path.join(
+        LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
+
     def __init__(self, path=None, environment=None):
         """
         The experiment will be built at *path*. It defaults to
@@ -354,15 +359,12 @@ class Experiment(_Buildable):
 
         self.runs = []
 
-        # Add a default parser to copy STATIC_RUN_PROPERTIES_FILENAME to
-        # properties. We always include this parser because no user-written
-        # parser can generate this data otherwise.
+        # Add a default parser to copy 'static-run-properties' to 'properties'.
+        # We always include this parser because no user-written parser can
+        # generate this data.
         self.add_parser(
             'static_properties_parser',
             os.path.join(LAB_SCRIPTS_DIR, 'static-properties-parser.py'))
-        # This can be used by users to add the default driver properties parser.
-        self.LAB_DRIVER_PARSER = os.path.join(
-            LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
 
         self.set_property('experiment_file', self._script)
 

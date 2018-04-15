@@ -7,7 +7,12 @@ Built-in parsers
 ----------------
 
 The following constants are paths to built-in parsers that can be passed
-to :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`.
+to :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. See
+:class:`FastDownwardExperiment
+<downward.experiment.FastDownwardExperiment>` for examples.
+
+.. autoattribute:: lab.experiment.Experiment.LAB_DRIVER_PARSER
+   :annotation:
 
 .. autoattribute:: downward.experiment.FastDownwardExperiment.EXITCODE_PARSER
    :annotation:
