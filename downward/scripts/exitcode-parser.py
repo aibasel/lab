@@ -18,17 +18,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Functions for parsing Fast Downward exit codes.
+Parse Fast Downward exit code and store a message describing the outcome
+in the "error" attribute.
 """
 
 from lab.parser import Parser
 
 from downward import outcomes
-
-
-def unsolvable(content, props):
-    outcome = outcomes.get_outcome(props['fast-downward_returncode'])
-    props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
 
 
 def get_search_error(content, props):
@@ -43,14 +39,16 @@ def get_search_error(content, props):
     """
     assert 'error' not in props
 
-    # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
-    # TODO: Check that a plan file exists if coverage=1.
-
     exitcode = props['fast-downward_returncode']
     outcome = outcomes.get_outcome(exitcode)
     props['error'] = outcome.msg
     if not outcome.explained:
         props.add_unexplained_error(outcome.msg)
+
+
+def unsolvable(content, props):
+    outcome = outcomes.get_outcome(props['fast-downward_returncode'])
+    props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
 
 
 class ExitCodeParser(Parser):
