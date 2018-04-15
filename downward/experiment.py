@@ -95,6 +95,23 @@ class FastDownwardExperiment(Experiment):
     You can add report steps with :meth:`.add_report`.
 
     """
+    # Built-in parsers that can be passed to exp.add_parser().
+
+    #: Parsed attributes: error
+    EXITCODE_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
+
+    #: Parsed attributes: translator_variables, translator_time_done, etc.
+    TRANSLATOR_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
+
+    #: Parsed attributes: coverage, expansions_until_last_jump, total_time, etc.
+    SINGLE_SEARCH_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
+
+    #: Parsed attributes: cost, cost:all, coverage
+    ANYTIME_SEARCH_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
 
     def __init__(self, path=None, environment=None, revision_cache=None):
         """
@@ -126,16 +143,6 @@ class FastDownwardExperiment(Experiment):
         self._algorithms = OrderedDict()
 
         self.add_command('remove-output-sas', ['rm', '-f', 'output.sas'])
-
-        # The following constants can be used by users to add default parsers.
-        self.EXITCODE_PARSER = os.path.join(
-            DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
-        self.TRANSLATOR_PARSER = os.path.join(
-            DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
-        self.SINGLE_SEARCH_PARSER = os.path.join(
-            DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
-        self.ANYTIME_PARSER = os.path.join(
-            DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
 
     def _get_tasks(self):
         tasks = []
