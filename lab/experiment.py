@@ -115,7 +115,8 @@ class _Buildable(object):
         self.properties[name] = value
 
     def _check_alias(self, name):
-        if name and not (name[0].isalpha() and name.replace('_', '').isalnum()):
+        assert name
+        if not (name[0].isalpha() and name.replace('_', '').isalnum()):
             logging.critical(
                 'Resource names must start with a letter and consist '
                 'exclusively of letters, numbers and underscores: {}'.format(name))
@@ -150,8 +151,8 @@ class _Buildable(object):
             dest = os.path.basename(source)
         if dest is None:
             dest = os.path.abspath(source)
-        self._check_alias(name)
         if name:
+            self._check_alias(name)
             self.env_vars_relative[name] = dest
         self.resources.append(
             _Resource(name, source, dest, symlink, is_parser=False))
@@ -168,8 +169,8 @@ class _Buildable(object):
             run.add_command('print-trainingset', ['cat', '{learn}'])
 
         """
-        self._check_alias(name)
         if name:
+            self._check_alias(name)
             self.env_vars_relative[name] = dest
         self.new_files.append((dest, content, permissions))
 
@@ -393,10 +394,10 @@ class Experiment(_Buildable):
     def add_step(self, name, function=None, *args, **kwargs):
         """Add a step to the list of experiment steps.
 
-        Use this method to add **custom** experiment steps like
-        removing directories and publishing results. To add fetch and
-        report steps, use the convenience methods ``add_fetcher()`` and
-        ``add_report()``.
+        Use this method to add **custom** experiment steps like removing
+        directories and publishing results. To add fetch and report
+        steps, use the convenience methods :meth:`.add_fetcher` and
+        :meth:`.add_report`.
 
         *name* is a descriptive name for the step.
 
@@ -430,20 +431,26 @@ class Experiment(_Buildable):
 
     def add_parser(self, name, path_to_parser):
         """
-        Add a `parser` to each run of the experiment. This adds the parser
-        as a `resource` to the experiment and adds a command to each run that
-        executes the parser. Since commands are exectued in the order they
-        are added, parsers should be added after all other commands, and they
-        should be added in the desired order they should be run. All parsers
-        can be copied and re-run again with the method `add_parse_again_step`.
+        Add a parser to each run of the experiment.
 
-        *name* must be a unique string that identifies the parser. The same
-        rules as for all resources apply: it must start with a letter and may
-        only contain letters, numbers, or underscores.
+        Add the parser as a resource to the experiment and add a command
+        that executes the parser to each run. Since commands are
+        executed in the order they are added, parsers should be added
+        after all other commands. If you need to change your parsers and
+        execute them again you can use the :meth:`.add_parse_again_step`
+        method.
 
-        *path_to_parser* must be the path to an executable file that can be
-        executed in the run directory.
+        *name* must be a unique string that identifies the parser. The
+        same rules as for all resources apply: it must start with a
+        letter and may only contain letters, numbers, or underscores.
+
+        *path_to_parser* must be the path to an executable file that can
+        be executed in the run directory. For information about how to
+        write parsers see :ref:`parsing`.
+
         """
+        if not name:
+            logging.critical('Parser names cannot be empty.')
         self._check_alias(name)
         if not os.path.isfile(path_to_parser):
             logging.critical('Parser %s could not be found.' % path_to_parser)
@@ -451,7 +458,6 @@ class Experiment(_Buildable):
             logging.critical('Parser %s is not executable.' % path_to_parser)
 
         dest = os.path.basename(path_to_parser)
-        self._check_alias(name)
         self.env_vars_relative[name] = dest
         self.resources.append(_Resource(
             name, path_to_parser, dest, symlink=False, is_parser=True))
