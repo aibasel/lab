@@ -259,12 +259,6 @@ class SingleSearchParser(Parser):
         self.add_function(coverage)
 
         self.add_pattern(
-            'landmarks', r'^Discovered (\d+?) landmarks$',
-            type=int, flags='M', required=False)
-        self.add_pattern(
-            'landmarks_generation_time', '^Landmarks generation time: (.+)s$',
-            type=float, flags='M', required=False)
-        self.add_pattern(
             'limit_search_time', r'search time limit: (.+)s$',
             type=float, flags='M', required=True)
         self.add_pattern(
