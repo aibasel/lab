@@ -118,7 +118,7 @@ class _Buildable(object):
         assert name
         if not (name[0].isalpha() and name.replace('_', '').isalnum()):
             logging.critical(
-                'Resource names must start with a letter and consist '
+                'Resource and parser names must start with a letter and consist '
                 'exclusively of letters, numbers and underscores: {}'.format(name))
         if name in self.env_vars_relative:
             logging.critical('Resource names must be unique: {!r}'.format(name))
@@ -184,7 +184,9 @@ class _Buildable(object):
         **specific** run. If invoked on the experiment, the command is
         appended to the list of commands of **all** runs.
 
-        *name* is a string describing the command.
+        *name* is a string describing the command. It must start with a
+        letter and consist exclusively of letters, numbers, underscores
+        and hyphens.
 
         *command* has to be a list of strings where the first item is
         the executable.
@@ -227,16 +229,22 @@ class _Buildable(object):
 
         """
         if not isinstance(name, basestring):
-            logging.critical('name %s is not a string' % name)
-        if not isinstance(command, (list, tuple)):
-            logging.critical('%s is not a list' % command)
-        if not command:
-            logging.critical('command "%s" cannot be empty' % name)
-        if '"' in name:
+            logging.critical('Name {} is not a string'.format(name))
+        if not name:
+            logging.critical('Command names must not be empty')
+        if not (name[0].isalpha() and name.replace('_', '').replace('-', '').isalnum()):
             logging.critical(
-                'command name mustn\'t contain double-quotes: {}'.format(name))
+                'Command names must start with a letter and consist exclusively'
+                ' of letters, numbers, underscores and hyphens: {}'.format(name))
         if name in self.commands:
-            logging.critical('a command named "%s" has already been added' % name)
+            logging.critical('A command named "{}" has already been added'.format(name))
+
+        if not isinstance(command, list):
+            logging.critical(
+                'The command for {name} is not a list: {command}'.format(**locals()))
+        if not command:
+            logging.critical('Command "{}" must not be empty'.format(name))
+
         if 'stdin' in kwargs:
             logging.critical('redirecting stdin is not supported')
         kwargs['time_limit'] = time_limit
