@@ -215,17 +215,14 @@ class _Buildable(object):
         ``stderr`` keyword arguments. Specifying the ``stdin`` kwarg is
         not supported.
 
-        Examples::
-
-            # Add a command to a *specific* run.
-            run.add_command('list-directory', ['ls', '-al'])
-            run.add_command(
-                'solver', [path-to-solver, 'input-file'], time_limit=60)
-            run.add_command(
-                'preprocess', ['preprocessor-path'], stdin='output.sas')
-
-            # Add a command to *all* runs.
-            exp.add_command('cleanup', ['rm', 'my-temp-file'])
+        >>> exp = Experiment()
+        >>> run = exp.add_run()
+        >>> # Add commands to a *specific* run.
+        >>> run.add_command('list-directory', ['ls', '-al'])
+        >>> run.add_command(
+        ...     'solver', ['path-to-solver', 'input-file'], time_limit=60)
+        >>> # Add a command to *all* runs.
+        >>> exp.add_command('cleanup', ['rm', 'my-temp-file'])
 
         """
         if not isinstance(name, basestring):
