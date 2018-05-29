@@ -702,8 +702,7 @@ class Run(_Buildable):
     """
     def __init__(self, experiment):
         """
-        *experiment* is a lab :py:class:`Experiment
-        <lab.experiment.Experiment>` object.
+        *experiment* must be an :class:`~lab.experiment.Experiment` instance.
         """
         _Buildable.__init__(self)
         self.experiment = experiment
