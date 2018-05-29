@@ -220,7 +220,7 @@ class _Buildable(object):
         >>> # Add commands to a *specific* run.
         >>> run.add_command('list-directory', ['ls', '-al'])
         >>> run.add_command(
-        ...     'solver', ['path-to-solver', 'input-file'], time_limit=60)
+        ...     'solver', ['mysolver', 'input-file'], time_limit=60)
         >>> # Add a command to *all* runs.
         >>> exp.add_command('cleanup', ['rm', 'my-temp-file'])
 
