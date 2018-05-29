@@ -34,8 +34,8 @@ def _get_planner_exitcode(props):
     exitcode = props.get(attr)
     if exitcode is None:
         sys.exit(
-            'Attribute {} is missing. Did you forget to call'
-            ' exp.add_parser("lab_driver_parser", exp.LAB_DRIVER_PARSER)?'.format(attr))
+            'The exit code parser needs the {} attribute. Did you forget to add the'
+            ' Lab driver parser and the exit code parser in that order?'.format(attr))
     return exitcode
 
 

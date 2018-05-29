@@ -447,6 +447,10 @@ def get_unexplained_errors_message(run):
     unexplained_errors = run.get('unexplained_errors', [])
     if not unexplained_errors or unexplained_errors == ['output-to-slurm.err']:
         return ''
+    elif unexplained_errors == ['attribute-error-missing']:
+        return (
+            'Attribute "error" is missing. Have you added the required parsers?'
+            ' See documentation and "examples" directory.')
     else:
         return (
             'Unexplained error(s): {unexplained_errors}. Please inspect'
