@@ -12,6 +12,9 @@
    :undoc-members:
    :inherited-members:
 
+.. autoattribute:: lab.experiment.Experiment.LAB_DRIVER_PARSER
+   :annotation:
+
 .. data:: ARGPARSER
 
    `ArgumentParser <http://docs.python.org/library/argparse.html>`_

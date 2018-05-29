@@ -14,11 +14,11 @@ to :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. See
 Mandatory built-in parsers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-These two parsers have to be part of every Fast Downward experiment and
-``LAB_DRIVER_PARSER`` has to be added before ``EXITCODE_PARSER``.
-
-.. autoattribute:: lab.experiment.Experiment.LAB_DRIVER_PARSER
-   :annotation:
+:attr:`exp.LAB_DRIVER_PARSER
+<lab.experiment.Experiment.LAB_DRIVER_PARSER>` and
+:attr:`exp.EXITCODE_PARSER
+<downward.experiment.FastDownwardExperiment.EXITCODE_PARSER>` have to
+be added to every Fast Downward experiment in this order.
 
 .. autoattribute:: downward.experiment.FastDownwardExperiment.EXITCODE_PARSER
    :annotation:

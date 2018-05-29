@@ -328,7 +328,10 @@ class Experiment(_Buildable):
 
     """
 
-    #: Parsed attributes: \*_returncode, \*_wall_clock_time
+    #: Built-in parser that parses returncodes,
+    #: wall-clock times and unexplained errors of all commands.
+    #:
+    #: Parsed attributes: unexplained_errors, \*_returncode, \*_wall_clock_time
     LAB_DRIVER_PARSER = os.path.join(
         LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
 
@@ -449,6 +452,12 @@ class Experiment(_Buildable):
         *path_to_parser* must be the path to an executable file that can
         be executed in the run directory. For information about how to
         write parsers see :ref:`parsing`.
+
+        You can add the built-in "driver parser" to parse returncodes,
+        wall-clock times and unexplained errors of all commands::
+
+        >>> exp = Experiment()
+        >>> exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
 
         """
         if not name:
