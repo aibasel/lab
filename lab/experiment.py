@@ -76,6 +76,20 @@ def get_run_dir(task_id):
     return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
 
 
+def _check_name(name, typ, extra_chars=''):
+    if not isinstance(name, basestring):
+        logging.critical('Name for {typ} must be a string: {name}'.format(**locals()))
+    if not name:
+        logging.critical('Name for {typ} must not be empty'.format(**locals()))
+    alpha_num_name = name
+    for c in extra_chars:
+        alpha_num_name = alpha_num_name.replace(c, '')
+    if not (name[0].isalpha() and alpha_num_name.isalnum()):
+        logging.critical(
+            'Name for {typ} must start with a letter and may use characters from'
+            ' [A-Z], [a-z], [0-9], [{extra_chars}]: {name}'.format(**locals()))
+
+
 class _Resource(object):
     def __init__(self, name, source, dest, symlink, is_parser):
         self.name = name
@@ -409,7 +423,9 @@ class Experiment(_Buildable):
         results. To add fetch and report steps, use the convenience
         methods :meth:`.add_fetcher` and :meth:`.add_report`.
 
-        *name* is a descriptive name for the step.
+        *name* is a descriptive name for the step. It must start with a
+        letter and consist of letters, numbers, underscores, hyphens and
+        dots.
 
         *function* must be a callable Python object, e.g., a function
         or a class implementing `__call__`. We allow function to be
@@ -439,6 +455,7 @@ class Experiment(_Buildable):
                     'parameters must be given.')
             self.steps.append(name)
         else:
+            _check_name(name, "Step", extra_chars='_-.')
             self.steps.append(Step(name, function, *args, **kwargs))
 
     def add_parser(self, name, path_to_parser):
