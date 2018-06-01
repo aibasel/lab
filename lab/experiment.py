@@ -456,6 +456,8 @@ class Experiment(_Buildable):
             self.steps.append(name)
         else:
             _check_name(name, "Step", extra_chars='_-.')
+            if any(step.name == name for step in self.steps):
+                raise ValueError("Step names must be unique: {}".format(name))
             self.steps.append(Step(name, function, *args, **kwargs))
 
     def add_parser(self, name, path_to_parser):
