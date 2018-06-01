@@ -444,21 +444,10 @@ class Experiment(_Buildable):
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
-        # Backwards compatibility.
-        if isinstance(name, Step):
-            tools.show_deprecation_warning(
-                'Passing a Step object to add_step() has been deprecated. '
-                'Please see the documentation of add_step().')
-            if function or args or kwargs:
-                raise ValueError(
-                    'When passing a Step object to add_step(), no other '
-                    'parameters must be given.')
-            self.steps.append(name)
-        else:
-            _check_name(name, "Step", extra_chars='_-.')
-            if any(step.name == name for step in self.steps):
-                raise ValueError("Step names must be unique: {}".format(name))
-            self.steps.append(Step(name, function, *args, **kwargs))
+        _check_name(name, "Step", extra_chars='_-.')
+        if any(step.name == name for step in self.steps):
+            raise ValueError("Step names must be unique: {}".format(name))
+        self.steps.append(Step(name, function, *args, **kwargs))
 
     def add_parser(self, name, path_to_parser):
         """
