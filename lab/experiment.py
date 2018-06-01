@@ -452,7 +452,7 @@ class Experiment(_Buildable):
 
         *name* must be a unique string that identifies the parser. The
         same rules as for all resources apply: it must start with a
-        letter and may only contain letters, numbers, or underscores.
+        letter and may only contain letters, numbers and underscores.
 
         *path_to_parser* must be the path to an executable file that can
         be executed in the run directory. For information about how to
@@ -465,8 +465,6 @@ class Experiment(_Buildable):
         >>> exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
 
         """
-        if not name:
-            logging.critical('Parser names cannot be empty.')
         self._check_alias(name)
         if not os.path.isfile(path_to_parser):
             logging.critical('Parser %s could not be found.' % path_to_parser)
