@@ -15,5 +15,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#: lab version number. A "+" is appended to all non-tagged revisions.
+#: Lab version number. A "+" is appended to all non-tagged revisions.
 __version__ = '2.3+'

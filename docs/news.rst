@@ -109,7 +109,7 @@ lab
 
 downward
 ^^^^^^^^
-* Always validate plans. Previous lab versions don't add ``--validate``
+* Always validate plans. Previous Lab versions don't add ``--validate``
   since older Fast Downward versions don't support it.
 * HTML reports: hide tables by default, add buttons for toggling visibility.
 * Unify "score_*", "quality" and "coverage" attributes: assign values in range [0, 1]
@@ -224,7 +224,7 @@ lab
 downward
 ^^^^^^^^
 * Parse both evaluated states (evaluated) and evaluations (evaluations).
-* Add example experiment showing how to make reports for data obtained without lab.
+* Add example experiment showing how to make reports for data obtained without Lab.
 * Add suite_sat_strips().
 * Parse negative initial h values.
 * Support CMake builds.
@@ -324,7 +324,7 @@ downward
 * Add :func:`DownwardExperiment.add_search_parser()` method.
 * Run ``make clean`` in revision-cache after compiling preprocessor and search code.
 * Strip executables after compilation in revision-cache.
-* Do not copy lab into experiment directories and grid-steps. Use the global lab version instead.
+* Do not copy lab into experiment directories and grid-steps. Use the global Lab version instead.
 
 
 v1.4
@@ -334,13 +334,13 @@ lab
 ^^^
 * Add :py:func:`exp.add_report() <lab.experiment.Experiment.add_report>` method to simplify adding reports.
 * Use simplejson when available to make loading properties more than twice as fast.
-* Raise default check-interval in Calls to 5s. This should reduce lab's overhead.
+* Raise default check-interval in Calls to 5s. This should reduce Lab's overhead.
 * Send mail when grid experiment finishes. Usage: ``MaiaEnvironment(email='mymail@example.com')``.
 * Remove ``steps.Step.publish_reports()`` method.
 * Allow creating nested new files in experiment directory (e.g. ``exp.add_new_file('path/to/file.txt')``).
 * Remove duplicate attributes from reports.
 * Make commandline parser available globally as :data:`lab.experiment.ARGPARSER` so users can add custom arguments.
-* Add ``cache_dir`` parameter in :py:class:`Experiment <lab.experiment.Experiment>` for specifying where lab stores temporary data.
+* Add ``cache_dir`` parameter in :py:class:`Experiment <lab.experiment.Experiment>` for specifying where Lab stores temporary data.
 
 downward
 ^^^^^^^^

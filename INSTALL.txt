@@ -13,11 +13,11 @@
 
 Notes about requirements:
 
-* lab needs Python 2.7. Python 3 is not supported.
+* Lab needs Python 2.7. Python 3 is not supported.
 * python-matplotlib is only needed for reports that generate graphs.
 * python-simplejson is optional, but makes generating reports much faster.
 
-Append to your ``.bashrc`` to make lab available on the ``PYTHONPATH``::
+Add to your ``.bashrc`` to make Lab available on the ``PYTHONPATH``::
 
     export PYTHONPATH=/path/to/lab
 

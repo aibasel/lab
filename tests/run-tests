@@ -22,9 +22,9 @@ function cleanup {
 cd "$(dirname "$0")"
 cd ..
 
-# Make lab available on the PYTHONPATH.
+# Make Lab available on the PYTHONPATH.
 LAB=`realpath .`
-echo "Checking lab at $LAB"
+echo "Checking Lab at $LAB"
 export PYTHONPATH=${LAB}
 echo "Using PYTHONPATH: $PYTHONPATH"
 

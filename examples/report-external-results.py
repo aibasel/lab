@@ -2,7 +2,7 @@
 
 """
 Simple experiment showing how to make reports for data obtained without
-lab.
+Lab.
 
 To use custom results, create the file <EXP_DIR>-eval/properties. It
 must be a JSON file mapping planner run IDs to results (see below). The

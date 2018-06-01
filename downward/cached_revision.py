@@ -108,7 +108,7 @@ class CachedRevision(object):
             if not os.path.exists(self._get_sentinel_file()):
                 logging.critical(
                     'The build for the cached revision at {} is corrupted '
-                    'or was made with an older lab version. Please delete '
+                    'or was made with an older Lab version. Please delete '
                     'it and try again.'.format(self.path))
         else:
             tools.makedirs(self.path)
