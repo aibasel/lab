@@ -129,13 +129,10 @@ class _Buildable(object):
         self.properties[name] = value
 
     def _check_alias(self, name):
-        assert name
-        if not (name[0].isalpha() and name.replace('_', '').isalnum()):
-            logging.critical(
-                'Resource and parser names must start with a letter and consist '
-                'exclusively of letters, numbers and underscores: {}'.format(name))
+        _check_name(name, 'parser or resource', extra_chars='_')
         if name in self.env_vars_relative:
-            logging.critical('Resource names must be unique: {!r}'.format(name))
+            logging.critical(
+                'Parser and resource names must be unique: {!r}'.format(name))
 
     def add_resource(self, name, source, dest='', symlink=False):
         """Include the file or directory *source* in the experiment or run.
@@ -239,16 +236,9 @@ class _Buildable(object):
         >>> exp.add_command('cleanup', ['rm', 'my-temp-file'])
 
         """
-        if not isinstance(name, basestring):
-            logging.critical('Name {} is not a string'.format(name))
-        if not name:
-            logging.critical('Command names must not be empty')
-        if not (name[0].isalpha() and name.replace('_', '').replace('-', '').isalnum()):
-            logging.critical(
-                'Command names must start with a letter and consist exclusively'
-                ' of letters, numbers, underscores and hyphens: {}'.format(name))
+        _check_name(name, "command", extra_chars='_-')
         if name in self.commands:
-            logging.critical('A command named "{}" has already been added'.format(name))
+            logging.critical('Command names must be unique: {}'.format(name))
 
         if not isinstance(command, list):
             logging.critical(
