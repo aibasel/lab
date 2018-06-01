@@ -304,32 +304,36 @@ class _Buildable(object):
 
 
 class Experiment(_Buildable):
-    """Base class for lab experiments.
+    """Base class for Lab experiments.
 
-    An **experiment** consists of multiple **runs**. Each run consists
-    of multiple **commands**.
-
-    Here is a simple example:
+    An **experiment** consists of multiple **steps**. Most experiments
+    will have steps for building and executing the experiment:
 
     >>> exp = Experiment()
-    >>> run = exp.add_run()
-    >>> run.add_command('greet', ['echo', 'hello world'])
-    >>> run.set_property('id', ['1'])  # Runs need unique IDs.
+    >>> exp.add_step('build', exp.build)
+    >>> exp.add_step('start', exp.start_runs)
 
-    An **experiment** also has multiple **steps**. By default the
-    following ones are present:
+    Moreover, there are usually steps for fetching the results and
+    making reports:
 
-    * Build the experiment.
-    * Execute all runs.
-    * Fetch the results.
+    >>> from lab.reports import Report
+    >>> exp.add_fetcher(name='fetch')
+    >>> exp.add_report(Report(attributes=["error"]))
 
-    You can add report steps with :meth:`.add_report`.
+    When calling :meth:`.start_runs`, all **runs** part of the
+    experiment are executed. You can add runs with the :meth:`.add_run`
+    method. Each run needs a unique ID and at least one **command**:
 
-    You can start an experiment's steps by calling ::
+    >>> for algo in ["algo1", "algo2"]:
+    ...     for value in range(10):
+    ...         run = exp.add_run()
+    ...         run.set_property('id', [algo, str(value)])
+    ...         run.add_command('solve', [algo, str(value)])
 
-        exp.run_steps()
-
-    This will parse the commandline and execute the selected steps.
+    You can pass the names of selected steps to your experiment script
+    or use ``--all`` to execute all steps. At the end of your script,
+    call ``exp.run_steps()`` to parse the commandline and execute the
+    selected steps.
 
     """
 
@@ -365,6 +369,7 @@ class Experiment(_Buildable):
         self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
 
+        self.steps = []
         self.runs = []
 
         # Add a default parser to copy 'static-run-properties' to 'properties'.
@@ -375,11 +380,6 @@ class Experiment(_Buildable):
             os.path.join(LAB_SCRIPTS_DIR, 'static-properties-parser.py'))
 
         self.set_property('experiment_file', self._script)
-
-        self.steps = []
-        self.add_step('build', self.build)
-        self.add_step('run', self.start_runs)
-        self.add_fetcher(name='fetch')
 
     @property
     def name(self):
@@ -404,10 +404,10 @@ class Experiment(_Buildable):
     def add_step(self, name, function=None, *args, **kwargs):
         """Add a step to the list of experiment steps.
 
-        Use this method to add **custom** experiment steps like removing
-        directories and publishing results. To add fetch and report
-        steps, use the convenience methods :meth:`.add_fetcher` and
-        :meth:`.add_report`.
+        Use this method to add experiment steps like writing the
+        experiment file to disk, removing directories and publishing
+        results. To add fetch and report steps, use the convenience
+        methods :meth:`.add_fetcher` and :meth:`.add_report`.
 
         *name* is a descriptive name for the step.
 
@@ -422,6 +422,8 @@ class Experiment(_Buildable):
         >>> import subprocess
         >>> from lab.experiment import Experiment
         >>> exp = Experiment('/tmp/myexp')
+        >>> exp.add_step('build', exp.build)
+        >>> exp.add_step('start', exp.start_runs)
         >>> exp.add_step('rm-eval-dir', shutil.rmtree, exp.eval_dir)
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
@@ -644,11 +646,9 @@ class Experiment(_Buildable):
         needed for the experiment to disk.
 
         If *write_to_disk* is False, only compute the internal data
-        structures. This is only needed internally for
-        FastDownwardExperiments on grids, where build() turns the added
-        algorithms and benchmarks into Runs.
-
-        By default, the first experiment step calls this method.
+        structures. This is only needed on grids for
+        FastDownwardExperiments.build() which turns the added algorithms
+        and benchmarks into Runs.
 
         """
         if not write_to_disk:
@@ -668,9 +668,7 @@ class Experiment(_Buildable):
         """Execute all runs that were added to the experiment.
 
         Depending on the selected environment this method will start
-        the runs locally or on a computer cluster.
-
-        By default, the second experiment step calls this method.
+        the runs locally or on a computer grid.
 
         """
         self.environment.start_runs()

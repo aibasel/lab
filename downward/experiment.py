@@ -83,16 +83,20 @@ class _DownwardAlgorithm(object):
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
-    You can customize an experiment by adding the desired algorithms,
-    benchmarks and reports.
+    You can customize an experiment by adding the desired algorithms
+    (:meth:`.add_algorithm`), benchmarks (:meth:`.add_suite`) and
+    reports (:meth:`.add_report`).
 
-    Fast Downward experiments consist of the following steps:
+    .. note::
 
-    * Step 1: write experiment files to disk
-    * Step 2: run experiment
-    * Step 3: fetch results and save them in ``<path>-eval``
+        To build the experiment, execute its runs and fetch the results,
+        add the following steps (previous Lab versions added these steps
+        automatically):
 
-    You can add report steps with :meth:`.add_report`.
+        >>> exp = FastDownwardExperiment()
+        >>> exp.add_step('build', exp.build)
+        >>> exp.add_step('start', exp.start_runs)
+        >>> exp.add_fetcher(name='fetch')
 
     """
 

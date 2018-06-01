@@ -62,6 +62,16 @@ for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     # multiple algorithms.
     run.set_property('id', ['ff', task.domain, task.problem])
 
+# Add step that writes experiment files to disk.
+exp.add_step('build', exp.build)
+
+# Add step that executes all runs.
+exp.add_step('start', exp.start_runs)
+
+# Add step that collects properties from run directories and
+# writes them to *-eval/properties.
+exp.add_fetcher(name='fetch')
+
 # Make a report.
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES),

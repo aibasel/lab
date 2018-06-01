@@ -6,11 +6,9 @@ This experiment demonstrates most of the available options.
 import os
 import os.path
 import platform
-import shutil
 from subprocess import call
 
 from lab.environments import LocalEnvironment, BaselSlurmEnvironment
-from lab.steps import Step
 from lab.reports.filter import FilterReport
 
 from downward.experiment import FastDownwardExperiment
@@ -30,7 +28,7 @@ else:
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
-REV = 'tip'
+REV = 'default'
 ATTRIBUTES = ['coverage']
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
@@ -58,12 +56,16 @@ exp.add_algorithm(
         '--portfolio',
         os.path.join(REPO, 'driver', 'portfolios', 'seq_opt_fdss_1.py')])
 
-# Before we fetch the new results, delete the old ones
-exp.steps.insert(0, Step(
-    'delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
 
+# Add step that writes experiment files to disk.
+exp.add_step('build', exp.build)
 
-# Showcase add_parse_again_step option.
+# Add step that executes all runs.
+exp.add_step('start', exp.start_runs)
+
+# Add step that collects properties from run directories and
+# writes them to *-eval/properties.
+exp.add_fetcher(name='fetch')
 
 exp.add_parse_again_step()
 
