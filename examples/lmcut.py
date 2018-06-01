@@ -23,7 +23,7 @@ if NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch"):
 else:
     SUITE = ['depot:p01.pddl', 'gripper:prob01.pddl']
     ENV = LocalEnvironment(processes=2)
-# Change to path to your Fast Downward repository.
+# Use path to your Fast Downward repository.
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
@@ -42,11 +42,21 @@ exp.add_algorithm(
 exp.add_algorithm(
     'lmcut', REPO, 'default', ['--search', 'astar(lmcut())'])
 
-# Make a report (AbsoluteReport is the standard report).
+# Add step that writes experiment files to disk.
+exp.add_step('build', exp.build)
+
+# Add step that executes all runs.
+exp.add_step('start', exp.start_runs)
+
+# Add step that collects properties from run directories and
+# writes them to *-eval/properties.
+exp.add_fetcher(name='fetch')
+
+# Add report step (AbsoluteReport is the standard report).
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES), outfile='report.html')
 
-# Compare the number of expansions in a scatter plot.
+# Add scatter plot report step.
 exp.add_report(
     ScatterPlotReport(
         attributes=["expansions"], filter_algorithm=["blind", "lmcut"]),
