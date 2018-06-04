@@ -612,14 +612,14 @@ class Experiment(_Buildable):
         """Parse the commandline and run selected steps."""
         ARGPARSER.epilog = get_steps_text(self.steps)
         self.args = ARGPARSER.parse_args()
+        assert not self.args.steps or not self.args.run_all_steps
         if not self.args.steps and not self.args.run_all_steps:
             ARGPARSER.print_help()
             sys.exit(0)
-        # If no steps were given on the commandline, run all exp steps.
+        # Run all steps if --all is passed.
         steps = [get_step(self.steps, name) for name in self.args.steps] or self.steps
         # Use LocalEnvironment if the main experiment step is inactive.
-        if (self.args.run_all_steps or
-                any(environments.is_run_step(step) for step in steps)):
+        if any(environments.is_run_step(step) for step in steps):
             env = self.environment
         else:
             env = environments.LocalEnvironment()
