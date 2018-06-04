@@ -341,12 +341,20 @@ class Experiment(_Buildable):
 
     """
 
-    #: Built-in parser that parses returncodes,
-    #: wall-clock times and unexplained errors of all commands.
+    #: Parser that copies returncodes, wall-clock times and
+    #: unexplained errors from "driver-properties" to "properties".
     #:
-    #: Parsed attributes: unexplained_errors, \*_returncode, \*_wall_clock_time
+    #: Parsed attributes: "unexplained_errors", "\*_returncode", "\*_wall_clock_time"
     LAB_DRIVER_PARSER = os.path.join(
         LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
+
+    #: Parser that copies "static-run-properties" to "properties".
+    #:
+    #: Parsed Lab attributes: "id", "run_dir"
+    #:
+    #: Parsed Downward attributes: "algorithm", "domain", "problem", etc.
+    LAB_STATIC_PROPERTIES_PARSER = os.path.join(
+        LAB_SCRIPTS_DIR, 'static-properties-parser.py')
 
     def __init__(self, path=None, environment=None):
         """
@@ -375,13 +383,6 @@ class Experiment(_Buildable):
 
         self.steps = []
         self.runs = []
-
-        # Add a default parser to copy 'static-run-properties' to 'properties'.
-        # We always include this parser because no user-written parser can
-        # generate this data.
-        self.add_parser(
-            'static_properties_parser',
-            os.path.join(LAB_SCRIPTS_DIR, 'static-properties-parser.py'))
 
         self.set_property('experiment_file', self._script)
 

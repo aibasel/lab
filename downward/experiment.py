@@ -104,19 +104,19 @@ class FastDownwardExperiment(Experiment):
 
     #: Needed attributes: fast-downward_returncode
     #:
-    #: Parsed attributes: error, unsolvable
+    #: Parsed attributes: "error", "unsolvable"
     EXITCODE_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
 
-    #: Parsed attributes: translator_variables, translator_time_done, etc.
+    #: Parsed attributes: "translator_variables", "translator_time_done", etc.
     TRANSLATOR_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
 
-    #: Parsed attributes: coverage, expansions_until_last_jump, total_time, etc.
+    #: Parsed attributes: "coverage", "expansions_until_last_jump", "total_time", etc.
     SINGLE_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
 
-    #: Parsed attributes: cost, cost:all, coverage
+    #: Parsed attributes: "cost", "cost:all", "coverage"
     ANYTIME_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
 
@@ -137,6 +137,8 @@ class FastDownwardExperiment(Experiment):
         You can add parsers with :meth:`.add_parser()`. Two parsers are
         required and have to be added in the following order:
 
+        >>> exp.add_parser(
+        ...     'lab_static_properties_parser', exp.LAB_STATIC_PROPERTIES_PARSER)
         >>> exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
         >>> exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
 

@@ -33,6 +33,7 @@ ATTRIBUTES = ['coverage']
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
 
+exp.add_parser('lab_static_properties_parser', exp.LAB_STATIC_PROPERTIES_PARSER)
 exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
 exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
 exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)

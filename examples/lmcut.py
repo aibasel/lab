@@ -30,7 +30,8 @@ REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 
-# Add default parsers to the experiment.
+# Add built-in parsers to the experiment.
+exp.add_parser('lab_static_properties_parser', exp.LAB_STATIC_PROPERTIES_PARSER)
 exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
 exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
 exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)
