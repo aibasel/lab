@@ -18,10 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Regular expressions and functions for parsing preprocessing results.
+Regular expressions and functions for parsing translator logs.
 """
-
-from __future__ import division
 
 import ast
 import re
@@ -50,30 +48,29 @@ def parse_translator_timestamps(content, props):
 
 
 def parse_statistics(content, props):
-    """Parse all output of the following forms:
+    """Parse all translator output of the following form:
 
         Translator xxx: yyy
-        Preprocessor xxx: yyy
     """
-    pattern = re.compile(r'^(Translator|Preprocessor) (.+): (.+?)( KB|)$')
+    pattern = re.compile(r'^Translator (.+): (.+?)(?: KB|)$')
     for line in content.splitlines():
         match = pattern.match(line)
         if match:
-            part = match.group(1).lower()
-            attr = match.group(2).lower().replace(' ', '_')
+            attr = match.group(1).lower().replace(' ', '_')
             # Support strings, numbers, tuples, lists, dicts, booleans, and None.
-            props['%s_%s' % (part, attr)] = ast.literal_eval(match.group(3))
+            props['translator_{}'.format(attr)] = ast.literal_eval(match.group(2))
         if line.startswith('done'):
             break
 
 
-class PreprocessParser(Parser):
+class TranslatorParser(Parser):
     def __init__(self):
         Parser.__init__(self)
-        self.add_preprocess_parsing()
-        self.add_preprocess_functions()
+        self.add_patterns()
+        self.add_function(parse_translator_timestamps)
+        self.add_function(parse_statistics)
 
-    def add_preprocess_parsing(self):
+    def add_patterns(self):
         # Parse the numbers from the following lines of translator output:
         #    170 relevant atoms
         #    141 auxiliary atoms
@@ -94,12 +91,8 @@ class PreprocessParser(Parser):
             self.add_pattern(
                 attribute, '^(.+) {}$'.format(value), type=int, flags='M', required=False)
 
-    def add_preprocess_functions(self):
-        self.add_function(parse_translator_timestamps)
-        self.add_function(parse_statistics)
-
 
 if __name__ == '__main__':
-    print 'Running preprocess parser'
-    parser = PreprocessParser()
+    print 'Running translator parser'
+    parser = TranslatorParser()
     parser.parse()

@@ -8,8 +8,12 @@
 
 .. autoclass:: Experiment
    :members:
+   :exclude-members: LAB_DRIVER_PARSER
    :undoc-members:
    :inherited-members:
+
+.. autoattribute:: lab.experiment.Experiment.LAB_DRIVER_PARSER
+   :annotation:
 
 .. data:: ARGPARSER
 
@@ -52,8 +56,6 @@
 .. autoclass:: lab.environments.Environment
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.GridEnvironment
-.. autoclass:: lab.environments.GkiGridEnvironment
-.. autoclass:: lab.environments.MaiaEnvironment
 .. autoclass:: lab.environments.BaselSlurmEnvironment
 
 

@@ -2,7 +2,7 @@
 
 # Test setup: see bitbucket-pipelines.yml
 
-set -euo pipefail
+set -exuo pipefail
 
 if [[ $# -gt 1 ]]; then
     echo "usage: ./run-tests [--skip-experiments]"
@@ -16,18 +16,15 @@ fi
 function cleanup {
     rm -rf examples/data
     rm -rf examples/ff/data
-    rm -rf examples/pi/data
-    rm -rf examples/planner/data
-    rm -rf examples/simple/data
 }
 
 # Change into top directory.
 cd "$(dirname "$0")"
 cd ..
 
-# Make lab available on the PYTHONPATH.
+# Make Lab available on the PYTHONPATH.
 LAB=`realpath .`
-echo "Checking lab at $LAB"
+echo "Checking Lab at $LAB"
 export PYTHONPATH=${LAB}
 echo "Using PYTHONPATH: $PYTHONPATH"
 
@@ -37,7 +34,7 @@ python2 -m py.test tests
 
 # Run doctests.
 cd lab
-python -m doctest reports/__init__.py experiment.py tools.py
+python -m doctest reports/__init__.py experiment.py parser.py tools.py
 cd ..
 cd downward
 python -m doctest experiment.py
@@ -71,22 +68,9 @@ cd ff
 ./ff.py --all
 cd ..
 
-cd simple
-./simple-exp.py --all
-cd ..
-
-cd pi
-./pi.py --all
-./pi-ext.py --help
-cd ..
-
 ./report-external-results.py --all
 
 ./lmcut.py --all
-
-cd planner
-./planner.py --all
-cd ..
 
 ./showcase-options.py --all
 

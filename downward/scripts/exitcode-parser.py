@@ -18,12 +18,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Functions for parsing Fast Downward exit codes.
+Parse Fast Downward exit code and store a message describing the outcome
+in the "error" attribute.
 """
+
+import sys
 
 from lab.parser import Parser
 
 from downward import outcomes
+
+
+def _get_planner_exitcode(props):
+    attr = 'fast-downward_returncode'
+    exitcode = props.get(attr)
+    if exitcode is None:
+        sys.exit(
+            'The exit code parser needs the {} attribute. Did you forget to add the'
+            ' Lab driver parser and the exit code parser in that order?'.format(attr))
+    return exitcode
 
 
 def parse_exit_code(content, props):
@@ -46,10 +59,7 @@ def parse_exit_code(content, props):
             use_legacy_exit_codes = False
             break
 
-    # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
-    # TODO: Check that a plan file exists if coverage=1.
-
-    exitcode = props['fast-downward_returncode']
+    exitcode = _get_planner_exitcode(props)
     outcome = outcomes.get_outcome(exitcode, use_legacy_exit_codes)
     props['error'] = outcome.msg
     if use_legacy_exit_codes:

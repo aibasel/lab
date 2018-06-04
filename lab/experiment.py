@@ -18,8 +18,10 @@
 """Main module for creating experiments."""
 
 from collections import OrderedDict
+from glob import glob
 import logging
 import os
+import subprocess
 import sys
 
 from lab import environments
@@ -41,6 +43,11 @@ steps_group.add_argument(
 steps_group.add_argument(
     '--all', dest='run_all_steps', action='store_true',
     help='Run all steps.')
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
+STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static-experiment-properties'
+STATIC_RUN_PROPERTIES_FILENAME = 'static-run-properties'
 
 
 def get_default_data_dir():
@@ -67,6 +74,29 @@ def get_run_dir(task_id):
     lower = ((task_id - 1) / SHARD_SIZE) * SHARD_SIZE + 1
     upper = ((task_id + SHARD_SIZE - 1) / SHARD_SIZE) * SHARD_SIZE
     return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
+
+
+def _check_name(name, typ, extra_chars=''):
+    if not isinstance(name, basestring):
+        logging.critical('Name for {typ} must be a string: {name}'.format(**locals()))
+    if not name:
+        logging.critical('Name for {typ} must not be empty'.format(**locals()))
+    alpha_num_name = name
+    for c in extra_chars:
+        alpha_num_name = alpha_num_name.replace(c, '')
+    if not (name[0].isalpha() and alpha_num_name.isalnum()):
+        logging.critical(
+            'Name for {typ} must start with a letter and may use characters from'
+            ' [A-Z], [a-z], [0-9], [{extra_chars}]: {name}'.format(**locals()))
+
+
+class _Resource(object):
+    def __init__(self, name, source, dest, symlink, is_parser):
+        self.name = name
+        self.source = source
+        self.dest = dest
+        self.symlink = symlink
+        self.is_parser = is_parser
 
 
 class _Buildable(object):
@@ -99,14 +129,12 @@ class _Buildable(object):
         self.properties[name] = value
 
     def _check_alias(self, name):
-        if name and not (name[0].isalpha() and name.replace('_', '').isalnum()):
-            logging.critical(
-                'Resource names must start with a letter and consist '
-                'exclusively of letters, numbers and underscores: {}'.format(name))
+        _check_name(name, 'parser or resource', extra_chars='_')
         if name in self.env_vars_relative:
-            logging.critical('Resource names must be unique: {!r}'.format(name))
+            logging.critical(
+                'Parser and resource names must be unique: {!r}'.format(name))
 
-    def add_resource(self, name, source, dest='', required=True, symlink=False):
+    def add_resource(self, name, source, dest='', symlink=False):
         """Include the file or directory *source* in the experiment or run.
 
         *name* is an alias for the resource in commands. It must start with a
@@ -134,10 +162,11 @@ class _Buildable(object):
             dest = os.path.basename(source)
         if dest is None:
             dest = os.path.abspath(source)
-        self._check_alias(name)
         if name:
+            self._check_alias(name)
             self.env_vars_relative[name] = dest
-        self.resources.append((source, dest, required, symlink))
+        self.resources.append(
+            _Resource(name, source, dest, symlink, is_parser=False))
 
     def add_new_file(self, name, dest, content, permissions=0o644):
         """
@@ -151,8 +180,8 @@ class _Buildable(object):
             run.add_command('print-trainingset', ['cat', '{learn}'])
 
         """
-        self._check_alias(name)
         if name:
+            self._check_alias(name)
             self.env_vars_relative[name] = dest
         self.new_files.append((dest, content, permissions))
 
@@ -166,7 +195,9 @@ class _Buildable(object):
         **specific** run. If invoked on the experiment, the command is
         appended to the list of commands of **all** runs.
 
-        *name* is a string describing the command.
+        *name* is a string describing the command. It must start with a
+        letter and consist exclusively of letters, numbers, underscores
+        and hyphens.
 
         *command* has to be a list of strings where the first item is
         the executable.
@@ -195,30 +226,26 @@ class _Buildable(object):
         ``stderr`` keyword arguments. Specifying the ``stdin`` kwarg is
         not supported.
 
-        Examples::
-
-            # Add command to a *specific* run.
-            run.add_command('list-directory', ['ls', '-al'])
-            run.add_command(
-                'solver', [path-to-solver, 'input-file'], time_limit=60)
-            run.add_command(
-                'preprocess', ['preprocessor-path'], stdin='output.sas')
-
-            # Add parser to *all* runs.
-            exp.add_command('parser', ['path-to-my-parser'])
+        >>> exp = Experiment()
+        >>> run = exp.add_run()
+        >>> # Add commands to a *specific* run.
+        >>> run.add_command('list-directory', ['ls', '-al'])
+        >>> run.add_command(
+        ...     'solver', ['mysolver', 'input-file'], time_limit=60)
+        >>> # Add a command to *all* runs.
+        >>> exp.add_command('cleanup', ['rm', 'my-temp-file'])
 
         """
-        if not isinstance(name, basestring):
-            logging.critical('name %s is not a string' % name)
-        if not isinstance(command, (list, tuple)):
-            logging.critical('%s is not a list' % command)
-        if not command:
-            logging.critical('command "%s" cannot be empty' % name)
-        if '"' in name:
-            logging.critical(
-                'command name mustn\'t contain double-quotes: {}'.format(name))
+        _check_name(name, "command", extra_chars='_-')
         if name in self.commands:
-            logging.critical('a command named "%s" has already been added' % name)
+            logging.critical('Command names must be unique: {}'.format(name))
+
+        if not isinstance(command, list):
+            logging.critical(
+                'The command for {name} is not a list: {command}'.format(**locals()))
+        if not command:
+            logging.critical('Command "{}" must not be empty'.format(name))
+
         if 'stdin' in kwargs:
             logging.critical('redirecting stdin is not supported')
         kwargs['time_limit'] = time_limit
@@ -242,12 +269,12 @@ class _Buildable(object):
     def _get_rel_path(self, abs_path):
         return os.path.relpath(abs_path, start=self.path)
 
-    def _build_properties_file(self):
-        combined_props = tools.Properties(self._get_abs_path('properties'))
+    def _build_properties_file(self, properties_filename):
+        combined_props = tools.Properties(self._get_abs_path(properties_filename))
         combined_props.update(self.properties)
         combined_props.write()
 
-    def _build_resources(self):
+    def _build_new_files(self):
         for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
@@ -255,57 +282,72 @@ class _Buildable(object):
             tools.write_file(filename, content)
             os.chmod(filename, permissions)
 
-        for source, dest, required, symlink in self.resources:
-            if required and not os.path.exists(source):
-                logging.critical('Required resource not found: %s' % source)
-            dest = self._get_abs_path(dest)
+    def _build_resources(self, only_parsers=False):
+        for resource in self.resources:
+            if only_parsers and not resource.is_parser:
+                continue
+            if not os.path.exists(resource.source):
+                logging.critical('Resource not found: {}'.format(resource.source))
+            dest = self._get_abs_path(resource.dest)
             if not dest.startswith(self.path):
                 # Only copy resources that reside in the experiment/run dir.
                 continue
-            if symlink:
+            if resource.symlink:
                 # Do not create a symlink if the file doesn't exist.
-                if not os.path.exists(source):
+                if not os.path.exists(resource.source):
                     continue
-                source = self._get_rel_path(source)
+                source = self._get_rel_path(resource.source)
                 os.symlink(source, dest)
                 logging.debug('Linking from %s to %s' % (source, dest))
                 continue
 
             # Even if the directory containing a resource has already been added,
             # we copy the resource since we might want to overwrite it.
-            logging.debug('Copying %s to %s' % (source, dest))
-            tools.copy(source, dest, required)
+            logging.debug('Copying %s to %s' % (resource.source, dest))
+            tools.copy(resource.source, dest)
 
 
 class Experiment(_Buildable):
-    """Base class for lab experiments.
+    """Base class for Lab experiments.
 
-    An **experiment** consists of multiple **runs**. Each run consists
-    of multiple **commands**.
-
-    Here is a simple example:
+    An **experiment** consists of multiple **steps**. Most experiments
+    will have steps for building and executing the experiment:
 
     >>> exp = Experiment()
-    >>> run = exp.add_run()
-    >>> run.add_command('greet', ['echo', 'hello world'])
-    >>> run.set_property('id', ['1'])  # Runs need unique IDs.
+    >>> exp.add_step('build', exp.build)
+    >>> exp.add_step('start', exp.start_runs)
 
-    An **experiment** also has multiple **steps**. By default the
-    following ones are present:
+    Moreover, there are usually steps for fetching the results and
+    making reports:
 
-    * Build the experiment.
-    * Execute all runs.
-    * Fetch the results.
+    >>> from lab.reports import Report
+    >>> exp.add_fetcher(name='fetch')
+    >>> exp.add_report(Report(attributes=["error"]))
 
-    You can add report steps with :meth:`.add_report`.
+    When calling :meth:`.start_runs`, all **runs** part of the
+    experiment are executed. You can add runs with the :meth:`.add_run`
+    method. Each run needs a unique ID and at least one **command**:
 
-    You can start an experiment's steps by calling ::
+    >>> for algo in ["algo1", "algo2"]:
+    ...     for value in range(10):
+    ...         run = exp.add_run()
+    ...         run.set_property('id', [algo, str(value)])
+    ...         run.add_command('solve', [algo, str(value)])
 
-        exp.run_steps()
-
-    This will parse the commandline and execute the selected steps.
+    You can pass the names of selected steps to your experiment script
+    or use ``--all`` to execute all steps. At the end of your script,
+    call ``exp.run_steps()`` to parse the commandline and execute the
+    selected steps.
 
     """
+
+    #: Built-in parser that parses returncodes,
+    #: wall-clock times and unexplained errors of all commands.
+    #:
+    #: Parsed attributes: unexplained_errors, \*_returncode, \*_wall_clock_time
+    LAB_DRIVER_PARSER = os.path.join(
+        LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
+
     def __init__(self, path=None, environment=None):
         """
         The experiment will be built at *path*. It defaults to
@@ -316,12 +358,11 @@ class Experiment(_Buildable):
         *environment* must be an :ref:`Environment <environments>`
         instance. You can use
         :class:`~lab.environments.LocalEnvironment` to run your
-        experiment on a single computer (default). If you have access
-        to the computer grids in Basel or Freiburg you can use the
-        predefined grid environments
-        :class:`~lab.environments.MaiaEnvironment` or
-        :class:`~lab.environments.GkiGridEnvironment`. Alternatively,
-        you can write your own :ref:`Environment <environments>` class.
+        experiment on a single computer (default). If you have access to
+        the computer grid in Basel you can use the predefined grid
+        environment :class:`~lab.environments.BaselSlurmEnvironment`.
+        Alternatively, you can derive your own class from
+        :ref:`Environment <environments>`.
 
         """
         _Buildable.__init__(self)
@@ -332,14 +373,17 @@ class Experiment(_Buildable):
         self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
 
+        self.steps = []
         self.runs = []
 
-        self.set_property('experiment_file', self._script)
+        # Add a default parser to copy 'static-run-properties' to 'properties'.
+        # We always include this parser because no user-written parser can
+        # generate this data.
+        self.add_parser(
+            'static_properties_parser',
+            os.path.join(LAB_SCRIPTS_DIR, 'static-properties-parser.py'))
 
-        self.steps = []
-        self.add_step('build', self.build)
-        self.add_step('run', self.start_runs)
-        self.add_fetcher(name='fetch')
+        self.set_property('experiment_file', self._script)
 
     @property
     def name(self):
@@ -364,12 +408,14 @@ class Experiment(_Buildable):
     def add_step(self, name, function=None, *args, **kwargs):
         """Add a step to the list of experiment steps.
 
-        Use this method to add **custom** experiment steps like
-        removing directories and publishing results. To add fetch and
-        report steps, use the convenience methods ``add_fetcher()`` and
-        ``add_report()``.
+        Use this method to add experiment steps like writing the
+        experiment file to disk, removing directories and publishing
+        results. To add fetch and report steps, use the convenience
+        methods :meth:`.add_fetcher` and :meth:`.add_report`.
 
-        *name* is a descriptive name for the step.
+        *name* is a descriptive name for the step. It must start with a
+        letter and consist of letters, numbers, underscores, hyphens and
+        dots.
 
         *function* must be a callable Python object, e.g., a function
         or a class implementing `__call__`. We allow function to be
@@ -382,25 +428,97 @@ class Experiment(_Buildable):
         >>> import subprocess
         >>> from lab.experiment import Experiment
         >>> exp = Experiment('/tmp/myexp')
+        >>> exp.add_step('build', exp.build)
+        >>> exp.add_step('start', exp.start_runs)
         >>> exp.add_step('rm-eval-dir', shutil.rmtree, exp.eval_dir)
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
-        # Backwards compatibility.
-        if isinstance(name, Step):
-            tools.show_deprecation_warning(
-                'Passing a Step object to add_step() has been deprecated. '
-                'Please see the documentation of add_step().')
-            if function or args or kwargs:
-                raise ValueError(
-                    'When passing a Step object to add_step(), no other '
-                    'parameters must be given.')
-            self.steps.append(name)
-        else:
-            self.steps.append(Step(name, function, *args, **kwargs))
+        _check_name(name, "Step", extra_chars='_-.')
+        if any(step.name == name for step in self.steps):
+            raise ValueError("Step names must be unique: {}".format(name))
+        self.steps.append(Step(name, function, *args, **kwargs))
+
+    def add_parser(self, name, path_to_parser):
+        """
+        Add a parser to each run of the experiment.
+
+        Add the parser as a resource to the experiment and add a command
+        that executes the parser to each run. Since commands are
+        executed in the order they are added, parsers should be added
+        after all other commands. If you need to change your parsers and
+        execute them again you can use the :meth:`.add_parse_again_step`
+        method.
+
+        *name* must be a unique string that identifies the parser. The
+        same rules as for all resources apply: it must start with a
+        letter and may only contain letters, numbers and underscores.
+
+        *path_to_parser* must be the path to an executable file that can
+        be executed in the run directory. For information about how to
+        write parsers see :ref:`parsing`.
+
+        You can add the built-in "driver parser" to parse returncodes,
+        wall-clock times and unexplained errors of all commands::
+
+        >>> exp = Experiment()
+        >>> exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
+
+        """
+        self._check_alias(name)
+        if not os.path.isfile(path_to_parser):
+            logging.critical('Parser %s could not be found.' % path_to_parser)
+        if not os.access(path_to_parser, os.X_OK):
+            logging.critical('Parser %s is not executable.' % path_to_parser)
+
+        dest = os.path.basename(path_to_parser)
+        self.env_vars_relative[name] = dest
+        self.resources.append(_Resource(
+            name, path_to_parser, dest, symlink=False, is_parser=True))
+        self.add_command(name, ["{{{}}}".format(name)])
+
+    def add_parse_again_step(self):
+        """
+        Add a step that copies the parsers from their originally specified
+        locations to the experiment directory and runs all of them again. This
+        step overwrites the existing properties file in each run dir.
+
+        Do not forget to run the default fetch step again to overwrite
+        existing data in the -eval dir of the experiment.
+        """
+        def run_parsers():
+            if not os.path.isdir(self.path):
+                logging.critical('{} is missing or not a directory'.format(self.path))
+
+            # Copy all parsers from their source to their destination again.
+            self._build_resources(only_parsers=True)
+
+            run_dirs = sorted(glob(os.path.join(self.path, 'runs-*-*', '*')))
+
+            total_dirs = len(run_dirs)
+            logging.info(
+                'Parsing properties in {:d} run directories'.format(total_dirs))
+            for index, run_dir in enumerate(run_dirs, start=1):
+                if os.path.exists(os.path.join(run_dir, 'properties')):
+                    # print "removing path {}".format(os.path.join(run_dir, 'properties'))
+                    tools.remove_path(os.path.join(run_dir, 'properties'))
+                loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
+                logging.log(loglevel, 'Parsing run: {:6d}/{:d}'.format(index, total_dirs))
+                for resource in self.resources:
+                    if resource.is_parser:
+                        parser_filename = self.env_vars_relative[resource.name]
+                        rel_parser = os.path.join('../../', parser_filename)
+                        with open(os.devnull, 'w') as devnull:
+                            # Since parsers often produce output which we would
+                            # rather not want to see for each individual run, we
+                            # suppress it here.
+                            subprocess.check_call(
+                                [rel_parser], cwd=run_dir, stdout=devnull)
+
+        self.add_step('parse-again', run_parsers)
 
     def add_fetcher(self, src=None, dest=None, merge=None, name=None,
-                    filter=None, parsers=None, **kwargs):
+                    filter=None, **kwargs):
         """
         Add a step that fetches results from experiment or evaluation
         directories into a new or existing evaluation directory.
@@ -425,12 +543,6 @@ class Experiment(_Buildable):
         domains or algorithms) by passing :py:class:`filters <.Report>`
         with the *filter* argument.
 
-        *parsers* can be a list of paths to parser scripts. If given,
-        each parser is called in each run directory and each
-        ``properties`` file is updated with the results from the parser
-        and rewritten to disk. This option is useful if you forgot to
-        parse some attributes during the experiment.
-
         Example setup:
 
         >>> exp = Experiment('/tmp/exp')
@@ -450,17 +562,13 @@ class Experiment(_Buildable):
 
         >>> exp.add_fetcher(filter_algorithm=['algo_1', 'algo_5'])
 
-        Parse additional attributes:
-
-        >>> exp.add_fetcher(parsers=['path/to/myparser.py'])
-
         """
         src = src or self.path
         dest = dest or self.eval_dir
         name = name or 'fetch-%s' % os.path.basename(src)
         self.add_step(
             name, Fetcher(), src, dest, merge=merge, filter=filter,
-            parsers=parsers, **kwargs)
+            **kwargs)
 
     def add_report(self, report, name='', eval_dir='', outfile=''):
         """Add *report* to the list of experiment steps.
@@ -503,15 +611,15 @@ class Experiment(_Buildable):
     def run_steps(self):
         """Parse the commandline and run selected steps."""
         ARGPARSER.epilog = get_steps_text(self.steps)
-        self.args = ARGPARSER.parse_args()
-        if not self.args.steps and not self.args.run_all_steps:
+        args = ARGPARSER.parse_args()
+        assert not args.steps or not args.run_all_steps
+        if not args.steps and not args.run_all_steps:
             ARGPARSER.print_help()
             sys.exit(0)
-        # If no steps were given on the commandline, run all exp steps.
-        steps = [get_step(self.steps, name) for name in self.args.steps] or self.steps
+        # Run all steps if --all is passed.
+        steps = [get_step(self.steps, name) for name in args.steps] or self.steps
         # Use LocalEnvironment if the main experiment step is inactive.
-        if (self.args.run_all_steps or
-                any(environments.is_run_step(step) for step in steps)):
+        if any(environments.is_run_step(step) for step in steps):
             env = self.environment
         else:
             env = environments.LocalEnvironment()
@@ -534,11 +642,9 @@ class Experiment(_Buildable):
         needed for the experiment to disk.
 
         If *write_to_disk* is False, only compute the internal data
-        structures. This is only needed internally for
-        FastDownwardExperiments on grids, where build() turns the added
-        algorithms and benchmarks into Runs.
-
-        By default, the first experiment step calls this method.
+        structures. This is only needed on grids for
+        FastDownwardExperiments.build() which turns the added algorithms
+        and benchmarks into Runs.
 
         """
         if not write_to_disk:
@@ -549,17 +655,16 @@ class Experiment(_Buildable):
         tools.makedirs(self.path)
         self.environment.write_main_script()
 
+        self._build_new_files()
         self._build_resources()
         self._build_runs()
-        self._build_properties_file()
+        self._build_properties_file(STATIC_EXPERIMENT_PROPERTIES_FILENAME)
 
     def start_runs(self):
         """Execute all runs that were added to the experiment.
 
         Depending on the selected environment this method will start
-        the runs locally or on a computer cluster.
-
-        By default, the second experiment step calls this method.
+        the runs locally or on a computer grid.
 
         """
         self.environment.start_runs()
@@ -591,8 +696,7 @@ class Run(_Buildable):
     """
     def __init__(self, experiment):
         """
-        *experiment* is a lab :py:class:`Experiment
-        <lab.experiment.Experiment>` object.
+        *experiment* must be an :class:`~lab.experiment.Experiment` instance.
         """
         _Buildable.__init__(self)
         self.experiment = experiment
@@ -612,9 +716,10 @@ class Run(_Buildable):
         # We need to build the run script before the resources, because
         # the run script is added as a resource.
         self._build_run_script()
+        self._build_new_files()
         self._build_resources()
         self._check_id()
-        self._build_properties_file()
+        self._build_properties_file(STATIC_RUN_PROPERTIES_FILENAME)
 
     def _build_run_script(self):
         if not self.commands:

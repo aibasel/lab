@@ -18,24 +18,18 @@ How can I combine the results from multiple experiments?
     exp.add_report(AbsoluteReport())
 
 
-I forgot to parse something. How can I run only the parser again?
------------------------------------------------------------------
+I forgot to parse something. How can I run only the parsers again?
+------------------------------------------------------------------
 
-See above for writing a parser. Once you have it, add a new fetcher
-with :py:func:`add_fetcher <lab.experiment.Experiment.add_fetcher>` and
-let it use your parser::
-
-    exp = Experiment('my-path')
-    exp.add_fetcher(name='parse-again', parsers=['path/to/my-parser'])
-
-Call the fetcher by invoking the new experiment step::
+See the `parsing documentation <lab.parser.html>`_ for how to write
+parsers. Once you have fixed your existing parsers or added new parsers,
+add ``exp.add_parse_again_step()`` to your experiment script
+``my-exp.py`` and then call ::
 
     ./my-exp.py parse-again
 
-Note that this changes the ``properties`` files in all run directories.
 
-
-How can I make reports and plots for results obtained without lab?
+How can I make reports and plots for results obtained without Lab?
 ------------------------------------------------------------------
 
 See ``examples/report-external-results.py`` for an example.
@@ -44,6 +38,6 @@ See ``examples/report-external-results.py`` for an example.
 Which experiment class should I use for which Fast Downward revision?
 ---------------------------------------------------------------------
 
-* Before CMake: Use DownwardExperiment in lab 1.x
-* With CMake and mandatory validation: Use FastDownwardExperiment in lab 1.x
-* With CMake and optional validation: Use FastDownwardExperiment in lab 2.x
+* Before CMake: Use DownwardExperiment in Lab 1.x
+* With CMake and optional validation: Use FastDownwardExperiment in Lab 1.x
+* With CMake and mandatory validation: Use FastDownwardExperiment in Lab 2.x

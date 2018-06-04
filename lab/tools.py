@@ -329,9 +329,9 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
         raise Exception(errors)
 
 
-def copy(src, dest, required=True, ignores=None):
+def copy(src, dest, ignores=None):
     """
-    Copies a file or directory to another file or directory
+    Copies a file or directory to another file or directory.
     """
     if os.path.isfile(src) and os.path.isdir(dest):
         makedirs(dest)
@@ -343,12 +343,9 @@ def copy(src, dest, required=True, ignores=None):
     elif os.path.isdir(src):
         ignore = shutil.ignore_patterns(*ignores) if ignores else None
         fast_updatetree(src, dest, ignore=ignore)
-    elif required:
-        logging.critical('Required path %s cannot be copied to %s' %
-                         (os.path.abspath(src), os.path.abspath(dest)))
     else:
-        # Do not warn if an optional file cannot be copied.
-        return
+        logging.critical('Path {} cannot be copied to {}'.format(
+            os.path.abspath(src), os.path.abspath(dest)))
 
 
 def get_color(fraction, min_wins):
@@ -450,8 +447,14 @@ def get_unexplained_errors_message(run):
     unexplained_errors = run.get('unexplained_errors', [])
     if not unexplained_errors or unexplained_errors == ['output-to-slurm.err']:
         return ''
+    elif unexplained_errors == ['attribute-error-missing']:
+        return (
+            'Attribute "error" is missing. Have you added the required parsers?'
+            ' See documentation and "examples" directory.')
     else:
-        return 'Unexplained errors in "{run_dir}": {unexplained_errors}'.format(**run)
+        return (
+            'Unexplained error(s): {unexplained_errors}. Please inspect'
+            ' output and error logs under "{run_dir}".'.format(**run))
 
 
 def get_slurm_err_content(src_dir):
@@ -463,8 +466,8 @@ def get_slurm_err_content(src_dir):
 
 def filter_slurm_err_content(content):
     filtered = re.sub(
-        "slurmstepd: error: task/cgroup: unable to add task\[pid=\d+\]"
-        " to memory cg '\(null\)'\n", '', content)
+        r"slurmstepd: error: task/cgroup: unable to add task\[pid=\d+\]"
+        r" to memory cg '\(null\)'\n", '', content)
     return "\n".join(line for line in filtered.splitlines() if line.strip())
 
 

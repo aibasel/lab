@@ -8,7 +8,7 @@ Example experiment for the FF planner
 import os
 import platform
 
-from lab.environments import LocalEnvironment, MaiaEnvironment
+from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.experiment import Experiment
 
 # In the future, these modules should live in a separate
@@ -17,10 +17,11 @@ from downward import suites
 from downward.reports.absolute import AbsoluteReport
 
 
-REMOTE = 'cluster' in platform.node()
+NODE = platform.node()
+REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 if REMOTE:
-    ENV = MaiaEnvironment()
+    ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
 else:
     ENV = LocalEnvironment(processes=4)
 SUITE = [
@@ -33,9 +34,10 @@ ATTRIBUTES = [
 
 # Create a new experiment.
 exp = Experiment(environment=ENV)
-# Copy parser into experiment dir and make it available as
-# "PARSER". Parsers have to be executable.
-exp.add_resource('parser', 'ff-parser.py')
+# Add default driver parser.
+exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
+# Add custom ff-parser.
+exp.add_parser('parser', 'ff-parser.py')
 
 for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
@@ -59,8 +61,16 @@ for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     # The algorithm name is only really needed when there are
     # multiple algorithms.
     run.set_property('id', ['ff', task.domain, task.problem])
-    # Schedule parser.
-    run.add_command('parse', ['{parser}'])
+
+# Add step that writes experiment files to disk.
+exp.add_step('build', exp.build)
+
+# Add step that executes all runs.
+exp.add_step('start', exp.start_runs)
+
+# Add step that collects properties from run directories and
+# writes them to *-eval/properties.
+exp.add_fetcher(name='fetch')
 
 # Make a report.
 exp.add_report(

@@ -3,8 +3,8 @@
 Downward tutorial
 =================
 
-Install lab and downward
-------------------------
+Install Lab and Downward Lab
+----------------------------
 .. highlight:: bash
 .. include:: ../INSTALL.txt
 
@@ -37,7 +37,7 @@ and http://www.fast-downward.org/LPBuildInstructions)
     hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
     # Optionally check that Fast Downward works:
     cd ${DOWNWARD_REPO}
-    ./build.py -j4  # Use 4 cores for compilation.
+    ./build.py
     ./fast-downward.py ${DOWNWARD_BENCHMARKS}/grid/prob01.pddl \
         --search "astar(lmcut())"
 
@@ -53,7 +53,7 @@ Install VAL
     cd VAL
     make clean  # Remove old object files and binaries.
     make
-    # Add "validate" binary to a directory on your PATH.
+    sudo cp validate /usr/local/bin  # Add binary to a directory on PATH.
 
 **MacOS**: clone the repo, add ``VAL/bin/MacOSExecutables/validate`` to
 your ``PATH`` and make it executable (``chmod + x``).

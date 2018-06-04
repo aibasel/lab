@@ -6,11 +6,9 @@ This experiment demonstrates most of the available options.
 import os
 import os.path
 import platform
-import shutil
 from subprocess import call
 
-from lab.environments import LocalEnvironment, MaiaEnvironment
-from lab.steps import Step
+from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.reports.filter import FilterReport
 
 from downward.experiment import FastDownwardExperiment
@@ -21,19 +19,25 @@ from downward.reports.taskwise import TaskwiseReport
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-REMOTE = 'cluster' in platform.node()
+NODE = platform.node()
+REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
 if REMOTE:
-    ENV = MaiaEnvironment()
+    ENV = BaselSlurmEnvironment("my.name@unibas.ch")
 else:
     ENV = LocalEnvironment(processes=4)
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
-REV = 'tip'
+REV = 'default'
 ATTRIBUTES = ['coverage']
-EXPNAME = 'showcase-options'
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
+
+exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
+exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
+exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)
+exp.add_parser('single_search_parser', exp.SINGLE_SEARCH_PARSER)
+exp.add_parser('anytime_parser', exp.ANYTIME_SEARCH_PARSER)
 
 exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'miconic:s1-0.pddl'])
 exp.add_algorithm('iter-hadd', REPO, REV, [
@@ -52,9 +56,18 @@ exp.add_algorithm(
         '--portfolio',
         os.path.join(REPO, 'driver', 'portfolios', 'seq_opt_fdss_1.py')])
 
-# Before we fetch the new results, delete the old ones
-exp.steps.insert(0, Step(
-    'delete-old-results', shutil.rmtree, exp.eval_dir, ignore_errors=True))
+
+# Add step that writes experiment files to disk.
+exp.add_step('build', exp.build)
+
+# Add step that executes all runs.
+exp.add_step('start', exp.start_runs)
+
+# Add step that collects properties from run directories and
+# writes them to *-eval/properties.
+exp.add_fetcher(name='fetch')
+
+exp.add_parse_again_step()
 
 
 # Define some filters
@@ -78,9 +91,6 @@ exp.add_fetcher(
     dest=eval_dir(1), name='fetcher-test1', filter=only_two_algorithms)
 exp.add_fetcher(
     dest=eval_dir(2), name='fetcher-test2', filter_algorithm='lama11')
-exp.add_fetcher(
-    dest=eval_dir(3), name='fetcher-test3',
-    parsers=os.path.join(DIR, 'simple', 'simple-parser.py'))
 
 
 # Add report steps

@@ -22,9 +22,7 @@ A module for running Fast Downward experiments.
 
 from collections import defaultdict, OrderedDict
 import logging
-import multiprocessing
 import os.path
-import sys
 
 from lab.experiment import Run, Experiment, get_default_data_dir
 
@@ -85,21 +83,42 @@ class _DownwardAlgorithm(object):
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
-    You can customize an experiment by adding the desired algorithms,
-    benchmarks and reports.
+    You can customize an experiment by adding the desired algorithms
+    (:meth:`.add_algorithm`), benchmarks (:meth:`.add_suite`) and
+    reports (:meth:`.add_report`).
 
-    Fast Downward experiments consist of the following steps:
+    .. note::
 
-    * Step 1: write experiment files to disk
-    * Step 2: run experiment
-    * Step 3: fetch results and save them in ``<path>-eval``
+        To build the experiment, execute its runs and fetch the results,
+        add the following steps (previous Lab versions added these steps
+        automatically):
 
-    You can add report steps with :meth:`.add_report`.
+        >>> exp = FastDownwardExperiment()
+        >>> exp.add_step('build', exp.build)
+        >>> exp.add_step('start', exp.start_runs)
+        >>> exp.add_fetcher(name='fetch')
 
     """
 
-    DEFAULT_SEARCH_TIME_LIMIT = "30m"
-    DEFAULT_SEARCH_MEMORY_LIMIT = "2G"
+    # Built-in parsers that can be passed to exp.add_parser().
+
+    #: Needed attributes: fast-downward_returncode
+    #:
+    #: Parsed attributes: error, unsolvable
+    EXITCODE_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
+
+    #: Parsed attributes: translator_variables, translator_time_done, etc.
+    TRANSLATOR_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
+
+    #: Parsed attributes: coverage, expansions_until_last_jump, total_time, etc.
+    SINGLE_SEARCH_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
+
+    #: Parsed attributes: cost, cost:all, coverage
+    ANYTIME_SEARCH_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
 
     def __init__(self, path=None, environment=None, revision_cache=None):
         """
@@ -111,14 +130,23 @@ class FastDownwardExperiment(Experiment):
         This directory can become very large since each revision uses
         about 30 MB.
 
-        >>> from lab.environments import MaiaEnvironment
-        >>> env = MaiaEnvironment(priority=-2)
+        >>> from lab.environments import BaselSlurmEnvironment
+        >>> env = BaselSlurmEnvironment(email="my.name@unibas.ch")
         >>> exp = FastDownwardExperiment(environment=env)
 
-        If running a translator-only experiment, i.e. all algorithms use the
-        driver option --translate but not --search, then use
-        ``del exp.commands['parse-search']`` to avoid errors due to
-        running the default search parser without running the search.
+        You can add parsers with :meth:`.add_parser()`. Two parsers are
+        required and have to be added in the following order:
+
+        >>> exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
+        >>> exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
+
+        You can add other parsers depending on the algorithms you're
+        running:
+
+        >>> exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)
+        >>> exp.add_parser('single_search_parser', exp.SINGLE_SEARCH_PARSER)
+        >>> exp.add_parser('anytime_parser', exp.ANYTIME_SEARCH_PARSER)
+
         """
         Experiment.__init__(self, path=path, environment=environment)
 
@@ -130,9 +158,6 @@ class FastDownwardExperiment(Experiment):
         # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
 
-        self.add_command('parse-exitcode', [sys.executable, '{exitcode_parser}'])
-        self.add_command('parse-preprocess', [sys.executable, '{preprocess_parser}'])
-        self.add_command('parse-search', [sys.executable, '{search_parser}'])
         self.add_command('remove-output-sas', ['rm', '-f', 'output.sas'])
 
     def _get_tasks(self):
@@ -199,20 +224,17 @@ class FastDownwardExperiment(Experiment):
         the default for the following options, until overridden again.
 
         If given, *build_options* must be a list of strings. They will
-        be passed to the ``build.py`` script. Options can be build
-        names (e.g., ``"release32"``, ``"debug64"``), ``build.py``
-        options (e.g., ``"--debug"``) or options for Make. The list is
-        always prepended with ``["-j<num_cpus>"]``. This setting can be
-        overriden, e.g., ``driver_options=["-j1"]`` builds the planner
-        using a single CPU. If *build_options* is omitted, the
-        ``"release32"`` version is built using all CPUs.
+        be passed to the ``build.py`` script. Options can be build names
+        (e.g., ``"release32"``, ``"debug64"``), ``build.py`` options
+        (e.g., ``"--debug"``) or options for Make. If *build_options* is
+        omitted, the ``"release32"`` version is built.
 
         If given, *driver_options* must be a list of strings. They will
         be passed to the ``fast-downward.py`` script. See
         ``fast-downward.py --help`` for available options. The list is
-        always prepended with ``["--validate", "--search-time-limit",
-        "30m", "--search-memory-limit', "2G"]``. Specifying custom
-        limits will override the default limits.
+        always prepended with ``["--validate", "--overall-time-limit",
+        "30m", "--overall-memory-limit', "3584M"]``. Specifying custom
+        limits overrides the default limits.
 
         Example experiment setup:
 
@@ -248,25 +270,25 @@ class FastDownwardExperiment(Experiment):
         ...     build_options=["release64"],
         ...     driver_options=["--build", "release64"])
 
-        Run LAMA-2011 with custom search time limit:
+        Run LAMA-2011 with custom planner time limit:
 
         >>> exp.add_algorithm(
         ...     "lama", repo, "default",
         ...     [],
         ...     driver_options=[
         ...         "--alias", "seq-saq-lama-2011",
-        ...         "--search-time-limit", "5m"])
+        ...         "--overall-time-limit", "5m"])
 
         """
         if not isinstance(name, basestring):
             logging.critical('Algorithm name must be a string: {}'.format(name))
         if name in self._algorithms:
             logging.critical('Algorithm names must be unique: {}'.format(name))
-        build_options = self._get_default_build_options() + (build_options or [])
+        build_options = build_options or []
         driver_options = ([
             '--validate',
-            '--search-time-limit', self.DEFAULT_SEARCH_TIME_LIMIT,
-            '--search-memory-limit', self.DEFAULT_SEARCH_MEMORY_LIMIT] +
+            '--overall-time-limit', '30m',
+            '--overall-memory-limit', '3584M'] +
             (driver_options or []))
         self._algorithms[name] = _DownwardAlgorithm(
             name, CachedRevision(repo, rev, build_options),
@@ -303,26 +325,12 @@ class FastDownwardExperiment(Experiment):
             unique_cached_revs.add(algo.cached_revision)
         return unique_cached_revs
 
-    def _get_default_build_options(self):
-        cores = multiprocessing.cpu_count()
-        return ['-j{}'.format(cores)]
-
     def _cache_revisions(self):
         for cached_rev in self._get_unique_cached_revisions():
             cached_rev.cache(self.revision_cache)
 
     def _add_code(self):
         """Add the compiled code to the experiment."""
-        self.add_resource(
-            'exitcode_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py'))
-        self.add_resource(
-            'preprocess_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
-        self.add_resource(
-            'search_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
-
         for cached_rev in self._get_unique_cached_revisions():
             self.add_resource(
                 '',
