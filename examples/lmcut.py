@@ -31,11 +31,11 @@ REVISION_CACHE = os.path.expanduser('~/lab/revision-cache')
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 
 # Add built-in parsers to the experiment.
-exp.add_parser('lab_static_properties_parser', exp.LAB_STATIC_PROPERTIES_PARSER)
-exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
-exp.add_parser('exitcode_parser', exp.EXITCODE_PARSER)
-exp.add_parser('translator_parser', exp.TRANSLATOR_PARSER)
-exp.add_parser('single_search_parser', exp.SINGLE_SEARCH_PARSER)
+exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
+exp.add_parser(exp.LAB_DRIVER_PARSER)
+exp.add_parser(exp.EXITCODE_PARSER)
+exp.add_parser(exp.TRANSLATOR_PARSER)
+exp.add_parser(exp.SINGLE_SEARCH_PARSER)
 
 exp.add_suite(BENCHMARKS_DIR, SUITE)
 exp.add_algorithm(

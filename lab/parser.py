@@ -34,7 +34,7 @@ You can add your parser to alls runs by using :meth:`add_parser()
     >>> exp = experiment.Experiment()
     >>> parser = os.path.join(
     ...     experiment.DIR, '../examples/ff/ff-parser.py')
-    >>> exp.add_parser('parse_ff_log', parser)
+    >>> exp.add_parser(parser)
 
 This calls the parser in each run directory after running the run's
 commands.
