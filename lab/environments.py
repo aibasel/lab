@@ -34,16 +34,12 @@ def _get_job_prefix(exp_name):
 
 def is_build_step(step):
     """Return true iff the given step is the "build" step."""
-    return (
-        step.name == 'build' and step._funcname == 'build' and
-        not step.args and not step.kwargs)
+    return step._funcname == 'build'
 
 
 def is_run_step(step):
     """Return true iff the given step is the "run" step."""
-    return (
-        step.name == 'run' and step._funcname == 'start_runs' and
-        not step.args and not step.kwargs)
+    return step._funcname == 'start_runs'
 
 
 class Environment(object):
