@@ -123,8 +123,9 @@ class Fetcher(object):
                     id_string = '-'.join(props['id'])
                 except KeyError:
                     logging.critical(
-                        'Properties are missing an "id" entry: {}. Did you forget to call'
-                        ' exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)?'.format(props))
+                        'Properties need an "id" entry: {}. Did you forget to call'
+                        ' exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)?'.format(
+                            props))
                 new_props[id_string] = props
             run_filter.apply(new_props)
             combined_props.update(new_props)
