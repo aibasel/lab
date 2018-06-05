@@ -6,14 +6,14 @@ from lab import __version__ as version
 
 
 setup(
-    name='lab',
+    name='Lab',
     version=version.rstrip('+'),
     description='Benchmark your code',
     long_description='\n\n'.join(
         [open('README.rst').read()]),
     keywords='benchmarks cluster grid',
     author='Jendrik Seipp',
-    author_email='jendrikseipp@web.de',
+    author_email='jendrikseipp@gmail.com',
     url='https://bitbucket.org/jendrikseipp/lab',
     license='GPL3+',
     packages=[
@@ -21,7 +21,7 @@ setup(
         'lab', 'lab.calls', 'lab.external', 'lab.reports'],
     package_data={
         'downward': ['scripts/*.py'],
-        'lab': ['data/*']},
+        'lab': ['data/*', 'scripts/*.py']},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
