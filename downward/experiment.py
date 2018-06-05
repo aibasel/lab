@@ -83,9 +83,9 @@ class _DownwardAlgorithm(object):
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
-    You can customize an experiment by adding the desired algorithms
-    (:meth:`.add_algorithm`), benchmarks (:meth:`.add_suite`) and
-    reports (:meth:`.add_report`).
+    The most important methods for customizing an experiment are
+    :meth:`.add_algorithm`, :meth:`.add_suite`, :meth:`.add_parser`,
+    :meth:`.add_step` and :meth:`.add_report`.
 
     .. note::
 
