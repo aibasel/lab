@@ -273,9 +273,8 @@ class RunFilter(object):
                 del props[old_run_id]
                 modified_run = self.apply_filter_to_run(filter_, run)
                 if modified_run:
-                    # Filters may change a run's ID.
-                    assert run['id']
-                    new_run_id = '-'.join(run['id'])
+                    # Filters may change a run's ID. Don't complain if ID is missing.
+                    new_run_id = '-'.join(run['id']) if 'id' in run else old_run_id
                     props[new_run_id] = modified_run
 
 

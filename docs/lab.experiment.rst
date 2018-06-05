@@ -8,12 +8,21 @@
 
 .. autoclass:: Experiment
    :members:
-   :exclude-members: LAB_DRIVER_PARSER
+   :exclude-members: LAB_DRIVER_PARSER, LAB_STATIC_PROPERTIES_PARSER
    :undoc-members:
    :inherited-members:
 
+Parsers
+.......
+
+.. autoattribute:: lab.experiment.Experiment.LAB_STATIC_PROPERTIES_PARSER
+   :annotation:
+
 .. autoattribute:: lab.experiment.Experiment.LAB_DRIVER_PARSER
    :annotation:
+
+Custom command line arguments
+.............................
 
 .. data:: ARGPARSER
 

@@ -341,12 +341,20 @@ class Experiment(_Buildable):
 
     """
 
-    #: Built-in parser that parses returncodes,
-    #: wall-clock times and unexplained errors of all commands.
+    #: Parser that copies returncodes, wall-clock times and
+    #: unexplained errors from "driver-properties" to "properties".
     #:
-    #: Parsed attributes: unexplained_errors, \*_returncode, \*_wall_clock_time
+    #: Parsed attributes: "unexplained_errors", "\*_returncode", "\*_wall_clock_time"
     LAB_DRIVER_PARSER = os.path.join(
         LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
+
+    #: Parser that copies "static-run-properties" to "properties".
+    #:
+    #: Parsed Lab attributes: "id", "run_dir"
+    #:
+    #: Parsed Downward attributes: "algorithm", "domain", "problem", etc.
+    LAB_STATIC_PROPERTIES_PARSER = os.path.join(
+        LAB_SCRIPTS_DIR, 'static-properties-parser.py')
 
     def __init__(self, path=None, environment=None):
         """
@@ -375,13 +383,6 @@ class Experiment(_Buildable):
 
         self.steps = []
         self.runs = []
-
-        # Add a default parser to copy 'static-run-properties' to 'properties'.
-        # We always include this parser because no user-written parser can
-        # generate this data.
-        self.add_parser(
-            'static_properties_parser',
-            os.path.join(LAB_SCRIPTS_DIR, 'static-properties-parser.py'))
 
         self.set_property('experiment_file', self._script)
 
@@ -439,7 +440,7 @@ class Experiment(_Buildable):
             raise ValueError("Step names must be unique: {}".format(name))
         self.steps.append(Step(name, function, *args, **kwargs))
 
-    def add_parser(self, name, path_to_parser):
+    def add_parser(self, path_to_parser):
         """
         Add a parser to each run of the experiment.
 
@@ -450,21 +451,30 @@ class Experiment(_Buildable):
         execute them again you can use the :meth:`.add_parse_again_step`
         method.
 
-        *name* must be a unique string that identifies the parser. The
-        same rules as for all resources apply: it must start with a
-        letter and may only contain letters, numbers and underscores.
+        *path_to_parser* must be the path to an executable file. The
+        parser is executed in the run directory and manipulates the
+        run's "properties" file. The last part of the filename (without
+        the extension) is used as a resource name. Therefore, it must be
+        unique among all parsers and other resources. Also, it must
+        start with a letter and contain only letters, numbers,
+        underscores and dashes (which are converted to underscores
+        automatically).
 
-        *path_to_parser* must be the path to an executable file that can
-        be executed in the run directory. For information about how to
-        write parsers see :ref:`parsing`.
+        For information about how to write parsers see :ref:`parsing`.
 
-        You can add the built-in "driver parser" to parse returncodes,
-        wall-clock times and unexplained errors of all commands::
+        Two built-in parsers are useful for most experiments:
+        :attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information
+        into the "properties" file and :attr:`.LAB_DRIVER_PARSER` copies
+        returncodes, wall-clock times and unexplained errors of all
+        commands into "properties"::
 
         >>> exp = Experiment()
-        >>> exp.add_parser('lab_driver_parser', exp.LAB_DRIVER_PARSER)
+        >>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
+        >>> exp.add_parser(exp.LAB_DRIVER_PARSER)
 
         """
+        name, _ = os.path.splitext(os.path.basename(path_to_parser))
+        name = name.replace('-', '_')
         self._check_alias(name)
         if not os.path.isfile(path_to_parser):
             logging.critical('Parser %s could not be found.' % path_to_parser)
@@ -624,12 +634,6 @@ class Experiment(_Buildable):
         else:
             env = environments.LocalEnvironment()
         env.run_steps(steps)
-
-    @tools.deprecated(
-        "Using exp() has been deprecated in lab 2.0, please use "
-        "exp.run_steps() instead.")
-    def __call__(self):
-        return self.run_steps()
 
     def _remove_experiment_dir(self):
         if os.path.exists(self.path):
