@@ -406,7 +406,7 @@ class Experiment(_Buildable):
         """Return the filename of the experiment script."""
         return os.path.basename(sys.argv[0])
 
-    def add_step(self, name, function=None, *args, **kwargs):
+    def add_step(self, name, function, *args, **kwargs):
         """Add a step to the list of experiment steps.
 
         Use this method to add experiment steps like writing the
@@ -419,11 +419,10 @@ class Experiment(_Buildable):
         dots.
 
         *function* must be a callable Python object, e.g., a function
-        or a class implementing `__call__`. We allow function to be
-        None only for backwards compatibility.
+        or a class implementing `__call__`.
 
-        *args* and *kwargs* will be passed to the *function* when the
-        step is executed.
+        *args* and *kwargs* will be passed to *function* when the step
+        is executed.
 
         >>> import shutil
         >>> import subprocess
