@@ -89,7 +89,7 @@ class TranslatorParser(Parser):
                 'operators removed', 'axioms removed', 'propositions removed']:
             attribute = 'translator_' + value.lower().replace(' ', '_')
             self.add_pattern(
-                attribute, '^(.+) {}$'.format(value), type=int, flags='M', required=False)
+                attribute, '^(.+) {}$'.format(value), type=int, required=False)
 
 
 if __name__ == '__main__':

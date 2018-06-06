@@ -260,10 +260,10 @@ class SingleSearchParser(Parser):
 
         self.add_pattern(
             'limit_search_time', r'search time limit: (.+)s$',
-            type=float, flags='M', required=True)
+            type=float, required=True)
         self.add_pattern(
             'limit_search_memory', r'search memory limit: (\d+) MB$',
-            type=int, flags='M', required=True)
+            type=int, required=True)
 
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
