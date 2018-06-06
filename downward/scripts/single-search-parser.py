@@ -259,11 +259,9 @@ class SingleSearchParser(Parser):
         self.add_function(coverage)
 
         self.add_pattern(
-            'limit_search_time', r'search time limit: (.+)s$',
-            type=float, required=True)
+            'limit_search_time', r'search time limit: (.+)s$', type=float)
         self.add_pattern(
-            'limit_search_memory', r'search memory limit: (\d+) MB$',
-            type=int, required=True)
+            'limit_search_memory', r'search memory limit: (\d+) MB$', type=int)
 
         self.add_function(get_cumulative_results)
         self.add_function(check_memory)
