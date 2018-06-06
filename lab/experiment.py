@@ -113,17 +113,18 @@ class _Buildable(object):
 
         These can be used later, for example, in reports. ::
 
-            exp.set_property('suite', ['gripper', 'grid'])
-
-            run.set_property('domain', 'gripper')
-            run.set_property('problem', 'prob01.pddl')
+        >>> exp = Experiment()
+        >>> exp.set_property('suite', ['gripper', 'grid'])
+        >>> run = exp.add_run()
+        >>> run.set_property('domain', 'gripper')
+        >>> run.set_property('problem', 'prob01.pddl')
 
         Each run must have the property *id* which must be a *unique*
         list of strings. They determine where the results for this run
         will land in the combined properties file. ::
 
-            run.set_property('id', [algorithm, benchmark])
-            run.set_property('id', [algorithm, domain, problem])
+        >>> run.set_property('id', ["algo1", "task1"])
+        >>> run.set_property('id', ["algo2", "domain1", "problem1"])
 
         """
         self.properties[name] = value
@@ -148,14 +149,16 @@ class _Buildable(object):
 
         Example::
 
-            exp.add_resource('planner', 'path/to/my-planner', dest='planner')
+        >>> exp = Experiment()
+        >>> exp.add_resource('planner', 'path/to/planner')
 
         includes my-planner in the experiment directory. You can use
         ``{planner}`` to reference my-planner in a run's commands::
 
-            run.add_resource('domain', 'path-to/gripper/domain.pddl')
-            run.add_resource('problem', 'path-to/gripper/prob01.pddl')
-            run.add_command('solve', ['{planner}', '{domain}', '{problem}'])
+        >>> run = exp.add_run()
+        >>> run.add_resource('domain', 'path-to/gripper/domain.pddl')
+        >>> run.add_resource('task', 'path-to/gripper/prob01.pddl')
+        >>> run.add_command('plan', ['{planner}', '{domain}', '{task}'])
 
         """
         if dest == '':
@@ -176,8 +179,10 @@ class _Buildable(object):
         *name* is an alias for the resource in commands. It must start with a
         letter and consist exclusively of letters, numbers and underscores. ::
 
-            run.add_new_file('learn', 'learn.txt', 'a = 5; b = 2; c = 5')
-            run.add_command('print-trainingset', ['cat', '{learn}'])
+        >>> exp = Experiment()
+        >>> run = exp.add_run()
+        >>> run.add_new_file('learn', 'learn.txt', 'a = 5; b = 2; c = 5')
+        >>> run.add_command('print-trainingset', ['cat', '{learn}'])
 
         """
         if name:
