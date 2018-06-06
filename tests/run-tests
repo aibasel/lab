@@ -34,10 +34,10 @@ python2 -m py.test tests
 
 # Run doctests.
 cd lab
-python -m doctest reports/__init__.py experiment.py parser.py tools.py
+python -m doctest reports/__init__.py reports/filter.py experiment.py parser.py tools.py
 cd ..
 cd downward
-python -m doctest experiment.py
+python -m doctest experiment.py reports/__init__.py reports/absolute.py reports/compare.py reports/plot.py reports/scatter.py reports/taskwise.py
 cd ..
 
 # Check imports and unused/missing variables.
