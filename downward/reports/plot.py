@@ -260,26 +260,29 @@ class PlotReport(PlanningReport):
         *xlabel* and *ylabel* are the axis labels.
 
         *matplotlib_options* may be a dictionary of matplotlib rc
-        parameters (see http://matplotlib.org/users/customizing.html)::
+        parameters (see http://matplotlib.org/users/customizing.html):
 
-            matplotlib_options = {
-                'font.family': 'serif',
-                'font.weight': 'normal',
-                'font.size': 20,  # Used if more specific sizes not set.
-                'axes.labelsize': 20,
-                'axes.titlesize': 30,
-                'legend.fontsize': 22,
-                'xtick.labelsize': 10,
-                'ytick.labelsize': 10,
-                'lines.markersize': 10,
-                'lines.markeredgewidth': 0.25,
-                'lines.linewidth': 1,
-                'figure.figsize': [8, 8],  # Width and height in inches.
-                'savefig.dpi': 100,
-            }
-            ScatterPlotReport(
-                attributes=['initial_h_value'],
-                matplotlib_options=matplotlib_options)
+        >>> from downward.reports.scatter import ScatterPlotReport
+        >>> matplotlib_options = {
+        ...     'font.family': 'serif',
+        ...     'font.weight': 'normal',
+        ...     # Used if more specific sizes not set.
+        ...     'font.size': 20,
+        ...     'axes.labelsize': 20,
+        ...     'axes.titlesize': 30,
+        ...     'legend.fontsize': 22,
+        ...     'xtick.labelsize': 10,
+        ...     'ytick.labelsize': 10,
+        ...     'lines.markersize': 10,
+        ...     'lines.markeredgewidth': 0.25,
+        ...     'lines.linewidth': 1,
+        ...     # Width and height in inches.
+        ...     'figure.figsize': [8, 8],
+        ...     'savefig.dpi': 100,
+        ... }
+        >>> report = ScatterPlotReport(
+        ...     attributes=['initial_h_value'],
+        ...     matplotlib_options=matplotlib_options)
 
         You can see the full list of matplotlib options and their
         defaults by executing ::

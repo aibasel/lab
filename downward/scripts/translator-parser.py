@@ -88,8 +88,7 @@ class TranslatorParser(Parser):
                 'effect conditions simplified', 'implied preconditions added',
                 'operators removed', 'axioms removed', 'propositions removed']:
             attribute = 'translator_' + value.lower().replace(' ', '_')
-            self.add_pattern(
-                attribute, '^(.+) {}$'.format(value), type=int, flags='M', required=False)
+            self.add_pattern(attribute, '^(.+) {}$'.format(value), type=int)
 
 
 if __name__ == '__main__':

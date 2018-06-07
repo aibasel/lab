@@ -52,12 +52,14 @@ class ComparativeReport(AbsoluteReport):
         'C')]`` the resulting columns will be A, B, Diff BA (contains B
         - A), A, C , Diff (contains C - A).
 
-        Example::
+        Example:
 
-            algorithm_pairs = [
-                ('default-lmcut', 'issue123-lmcut', 'Diff lmcut')]
-            exp.add_report(ComparativeReport(
-                algorithm_pairs, attributes=['coverage']))
+        >>> from downward.experiment import FastDownwardExperiment
+        >>> exp = FastDownwardExperiment()
+        >>> algorithm_pairs = [
+        ...     ('default-lmcut', 'issue123-lmcut', 'Diff lmcut')]
+        >>> exp.add_report(ComparativeReport(
+        ...     algorithm_pairs, attributes=['coverage']))
 
         Example output:
 

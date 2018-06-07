@@ -163,22 +163,6 @@ class GridEnvironment(Environment):
         # The queue will start the experiment by itself.
         pass
 
-    def _get_script_args(self):
-        """
-        Retrieve additional commandline parameters given when the experiment
-        is called by the user and pass them again when the step is called by
-        the grid.
-        """
-        # Remove step names from the back of the commandline to avoid deleting
-        # custom args by accident.
-        commandline = list(reversed(sys.argv[1:]))
-        if '--all' in commandline:
-            commandline.remove('--all')
-        for step in self.exp.steps:
-            if step.name in commandline:
-                commandline.remove(step.name)
-        return list(reversed(commandline))
-
     def _get_job_name(self, step):
         return '%s%02d-%s' % (
             _get_job_prefix(self.exp.name),
@@ -224,7 +208,6 @@ class GridEnvironment(Environment):
             cwd=os.getcwd(),
             python=sys.executable or 'python',
             script=sys.argv[0],
-            args=' '.join(repr(arg) for arg in self._get_script_args()),
             step_name=step.name)
 
     def _get_job_body(self, step):

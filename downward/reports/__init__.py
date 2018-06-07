@@ -101,15 +101,15 @@ class PlanningReport(Report):
         You can include only specific domains or algorithms by
         using :py:class:`filters <.Report>`. If you provide a list for
         *filter_algorithm*, it will be used to determine the order of
-        algorithms in the report. ::
+        algorithms in the report.
 
-            # Use a filter function: algorithms sorted alphabetically.
-            def only_blind_and_lmcut(run):
-                return run['algorithm'] in ['blind', 'lmcut']
-            PlanningReport(filter=only_blind_and_lmcut)
+        >>> # Use a filter function to select algorithms.
+        >>> def only_blind_and_lmcut(run):
+        ...     return run['algorithm'] in ['blind', 'lmcut']
+        >>> report = PlanningReport(filter=only_blind_and_lmcut)
 
-            # Use "filter_algorithm": list orders algorithms.
-            PlanningReport(filter_algorithm=['lmcut', 'blind'])
+        >>> # Use "filter_algorithm" to order algorithms.
+        >>> r = PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
         The constructor automatically adds two filters that together
         compute and store IPC scores in the "quality" attribute. The

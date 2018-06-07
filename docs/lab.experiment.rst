@@ -12,6 +12,7 @@
    :undoc-members:
    :inherited-members:
 
+
 Parsers
 .......
 
@@ -20,6 +21,7 @@ Parsers
 
 .. autoattribute:: lab.experiment.Experiment.LAB_DRIVER_PARSER
    :annotation:
+
 
 Custom command line arguments
 .............................
@@ -30,7 +32,14 @@ Custom command line arguments
    instance that can be used to add custom command line arguments.
    You can import it, add your arguments and call its ``parse_args()``
    method to retrieve the argument values. To avoid confusion with step
-   names you shouldn't use positional arguments. ::
+   names you shouldn't use positional arguments.
+
+   .. note::
+
+        Custom command line arguments are only passed to locally
+        executed steps.
+
+   ::
 
         from lab.experiment import ARGPARSER
 
@@ -46,6 +55,7 @@ Custom command line arguments
             print "perform test run"
         else:
             print "run real experiment"
+
 
 :class:`Run`
 -------------------

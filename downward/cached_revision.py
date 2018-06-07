@@ -112,8 +112,7 @@ class CachedRevision(object):
                     'it and try again.'.format(self.path))
         else:
             tools.makedirs(self.path)
-            # TODO: Remove "benchmarks".
-            excludes = ['-X{}'.format(d) for d in ['benchmarks', 'experiments', 'misc']]
+            excludes = ['-X{}'.format(d) for d in ['experiments', 'misc']]
             retcode = tools.run_command(
                 ['hg', 'archive', '-r', self.global_rev] + excludes + [self.path],
                 cwd=self.repo)

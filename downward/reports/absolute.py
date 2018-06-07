@@ -31,11 +31,13 @@ class AbsoluteReport(PlanningReport):
 
     This report should be part of all your Fast Downward experiments as
     it includes a table of unexplained errors, e.g. invalid solutions,
-    segmentation faults, etc. ::
+    segmentation faults, etc.
 
-        exp.add_report(
-            AbsoluteReport(attributes=["expansions"]),
-            outfile='report.html')
+    >>> from downward.experiment import FastDownwardExperiment
+    >>> exp = FastDownwardExperiment()
+    >>> exp.add_report(
+    ...     AbsoluteReport(attributes=["expansions"]),
+    ...     outfile='report.html')
 
     Example output:
 

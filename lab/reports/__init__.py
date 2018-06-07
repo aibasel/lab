@@ -91,7 +91,7 @@ class Attribute(str):
           ``expansions``).
         * *min_wins*: Set to True if a smaller value for this attribute
           is better, to False if a higher value is better and to None
-          if values can't be compared. (E.g. *min_wins* is False for
+          if values can't be compared. (E.g., *min_wins* is False for
           ``coverage``, but it is True for ``expansions``).
         * *functions*: Set the function or functions used to group
           values of multiple runs for this attribute. The first entry
@@ -106,16 +106,11 @@ class Attribute(str):
         * *digits*: Number of digits after the decimal point.
 
         The ``downward`` package automatically uses appropriate
-        settings for most attributes. ::
+        settings for most attributes.
 
-            avg_h = Attribute(
-                'average_h', min_wins=False,
-                functions=[sum, min, max])
-            abstraction_done = Attribute(
-                'abstraction_done', absolute=True, min_wins=False)
-
-            Report(attributes=[
-                avg_h, abstraction_done, 'coverage', 'expansions'])
+        >>> avg_h = Attribute('avg_h', min_wins=False)
+        >>> abstraction_done = Attribute(
+        ...     'abstraction_done', absolute=True, min_wins=False)
 
         """
         self.absolute = absolute
@@ -146,9 +141,9 @@ class Report(object):
 
         *attributes* is the list of attributes you want to include in
         your report. If omitted, use all numerical attributes. Globbing
-        characters * and ? are allowed. Example: ::
+        characters * and ? are allowed. Example:
 
-            Report(attributes=['expansions', 'translator_time_*'])
+        >>> report = Report(attributes=['coverage', 'translator_*'])
 
         When a report is made, both the available and the selected
         attributes are printed on the commandline.
@@ -177,56 +172,54 @@ class Report(object):
 
         Examples:
 
-        Include only *coverage* and *expansions* in a LaTeX report::
+        Include only the "cost" attribute in a LaTeX report:
 
-            exp.add_report(Report(
-                attributes=['coverage', 'expansions'], format='tex'))
+        >>> report = Report(attributes=['cost'], format='tex')
 
-        Only include successful runs in the report::
+        Only include successful runs in the report:
 
-            exp.add_report(Report(filter_coverage=1))
+        >>> report = Report(filter_coverage=1)
 
-        Only include runs in the report where the time score is better
-        than the memory score::
+        Only include runs in the report where the initial h value is
+        at most 100:
 
-            def better_time_than_memory_score(run):
-                return run['score_search_time'] > run['score_memory']
-            exp.add_report(Report(filter=better_time_than_memory_score))
+        >>> def low_init_h(run):
+        ...     return run['initial_h_value'] <= 100
+        >>> report = Report(filter=low_init_h)
 
-        Add a new attribute::
+        Only include runs from "blocks" and "barman" with a timeout:
 
-            def add_expansions_per_time(run):
-                expansions = run.get('expansions')
-                time = run.get('search_time')
-                if expansions is not None and time:
-                    run['expansions_per_time'] = expansions / time
-                return run
+        >>> report = Report(
+        ...     filter_domain=['blocks', 'barman'],
+        ...     filter_search_timeout=1)
 
-            exp.add_report(Report(
-                attributes=['expansions_per_time'],
-                filter=[add_expansions_per_time]))
+        Add a new attribute:
 
-        Rename, filter and sort algorithms::
+        >>> def add_expansions_per_time(run):
+        ...     expansions = run.get('expansions')
+        ...     time = run.get('search_time')
+        ...     if expansions is not None and time:
+        ...         run['expansions_per_time'] = expansions / time
+        ...     return run
+        >>> report = Report(
+        ...     attributes=['expansions_per_time'],
+        ...     filter=[add_expansions_per_time])
 
-            def rename_algorithms(run):
-                name = run['algorithm']
-                paper_names = {
-                    'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1'}
-                run['algorithm'] = paper_names[name]
-                return run
+        Rename, filter and sort algorithms:
 
-            # We want LAMA 2011 to be the leftmost column.
-            # filter_* filters are evaluated last, so we use the updated
-            # algorithm names here.
-            algorithms = ['LAMA 2011', 'FDSS 1']
-            exp.add_report(Report(
-                filter=rename_algorithms, filter_algorithm=algorithms))
+        >>> def rename_algorithms(run):
+        ...     name = run['algorithm']
+        ...     paper_names = {
+        ...         'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1'}
+        ...     run['algorithm'] = paper_names[name]
+        ...     return run
 
-        Only include runs from blocks and barman with a timeout::
-
-            exp.add_report(Report(
-                filter_domain=['blocks', 'barman'],
-                filter_search_timeout=1))
+        >>> # We want LAMA 2011 to be the leftmost column.
+        >>> # filter_* filters are evaluated last, so we use the updated
+        >>> # algorithm names here.
+        >>> algorithms = ['LAMA 2011', 'FDSS 1']
+        >>> report = Report(
+        ...     filter=rename_algorithms, filter_algorithm=algorithms)
 
         """
         self.attributes = tools.make_list(attributes or [])

@@ -144,7 +144,7 @@ class Parser(object):
         self.file_parsers = defaultdict(_FileParser)
 
     def add_pattern(
-            self, attribute, regex, file='run.log', type=int, flags='',
+            self, attribute, regex, file='run.log', type=int, flags='M',
             required=True):
         r"""
         Look for *regex* in *file*, cast what is found in brackets to
@@ -156,14 +156,16 @@ class Parser(object):
             match = re.compile(regex).search(contents)
             properties[attribute] = type(match.group(1))
 
-        If given, *flags* must be a string of Python regular expression
-        flags (e.g. ``flags='UM'``).
+        *flags* must be a string of Python regular expression flags (see
+        https://docs.python.org/2/library/re.html). The default
+        ``flags='M'`` lets "^" and "$" match at the beginning and end of
+        each line, respectively.
 
         If *required* is True and the pattern is not found in *file*,
-        an error message is printed.
+        an error message is printed to stdout.
 
         >>> parser = Parser()
-        >>> parser.add_pattern('facts', r'^Facts: (\d+)$', type=int, flags='M')
+        >>> parser.add_pattern('facts', r'^Facts: (\d+)$', type=int)
 
         """
         if type == bool:
@@ -173,7 +175,7 @@ class Parser(object):
             _Pattern(attribute, regex, required, type, flags))
 
     def add_function(self, function, file='run.log'):
-        r"""Call ``function(open(file), properties)`` during parsing.
+        r"""Call ``function(open(file).read(), properties)`` during parsing.
 
         Functions are applied **after** all patterns have been
         evaluated.

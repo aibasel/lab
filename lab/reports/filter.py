@@ -22,14 +22,16 @@ class FilterReport(Report):
     """Filter properties files.
 
     This report only applies the given filter and writes a new
-    properties file to the output destination. ::
+    properties file to the output destination.
 
-        def remove_openstacks(run):
-            return not 'openstacks' in run['domain']
+    >>> def remove_openstacks(run):
+    ...     return 'openstacks' not in run['domain']
 
-        exp.add_report(
-            FilterReport(filter=remove_openstacks),
-            outfile='path/to/new/properties')
+    >>> from lab.experiment import Experiment
+    >>> report = FilterReport(filter=remove_openstacks)
+    >>> exp = Experiment()
+    >>> exp.add_report(report, outfile='path/to/new/properties')
+
     """
     def __init__(self, **kwargs):
         Report.__init__(self, **kwargs)
