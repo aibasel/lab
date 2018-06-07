@@ -63,10 +63,10 @@ def parse_exit_code(content, props):
     outcome = outcomes.get_outcome(exitcode, use_legacy_exit_codes)
     props['error'] = outcome.msg
     if use_legacy_exit_codes:
-        props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
+        props['unsolvable'] = int(outcome.msg == 'unsolvable')
     else:
         props['unsolvable'] = int(
-            outcome and outcome.msg in ['translate-unsolvable', 'search-unsolvable'])
+            outcome.msg in ['translate-unsolvable', 'search-unsolvable'])
     if not outcome.explained:
         props.add_unexplained_error(outcome.msg)
 
