@@ -5,6 +5,31 @@ News
 .. module :: downward.experiments
 
 
+v3.0 (unreleased)
+-----------------
+
+lab
+^^^
+* Add :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. Don't add any parser implicitly.
+* Add :meth:`exp.add_parse_again_step() <lab.experiment.Experiment.add_parse_again_step>` for running parsers again.
+* Require that the ``build``, ``start_runs`` and ``fetch`` steps are added explicitly (see :class:`~lab.experiment.Experiment`).
+* Remove *required* argument from ``add_resource()``. All resources are now required.
+* Use stricter naming rules for commands, resources, parsers and steps. See respective ``add_*`` methods for details.
+* Use ``flags='M'`` by default for :meth:`lab.parser.Parser.add_pattern`.
+* Only support custom command line arguments for locally executed steps.
+* Remove deprecated possibility of passing Step objects to ``add_step()``.
+* Remove deprecated ``exp.__call__()`` method.
+
+downward
+^^^^^^^^
+* See :class:`~downward.experiment.FastDownwardExperiment` for required parsers.
+* Revise anytime search parser: parse only "cost", "cost:all" and "coverage".
+* Single search parser: fix regexes for time and memory limits and make them mandatory.
+* Single search parser: remove two landmark-specific patterns.
+* Parse new Fast Downward exit codes (http://issues.fast-downward.org/issue739).
+* Don't exclude (obsolete) 'benchmarks' directory when caching revisions.
+
+
 v2.3 (2018-04-12)
 -----------------
 
@@ -170,7 +195,7 @@ v1.10 (2015-12-11)
 
 lab
 ^^^
-* Add ``permissions`` parameter to :func:`Experiment.add_new_file()`.
+* Add ``permissions`` parameter to :func:`lab.experiment.Experiment.add_new_file()`.
 * Add default parser which checks that log files are not bigger than 100 MB. Maybe we'll make this configurable in the future.
 * Ensure that resource names are not shared between runs and experiment.
 * Show error message if resource names are not unique.
