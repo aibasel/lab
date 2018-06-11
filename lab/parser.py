@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module for parsing logs and files.
+Parse logs and output files.
 
 A parser can be any program that analyzes files in the run's
 directory (e.g. ``run.log``) and manipulates the ``properties``
@@ -27,19 +27,30 @@ parser ``examples/ff/ff-parser.py`` serves as an example:
 
 .. literalinclude:: ../examples/ff/ff-parser.py
 
-You can add your parser to alls runs by using :meth:`add_parser()
-<lab.experiment.Experiment.add_parser>`::
+Two built-in parsers should be added to almost all experiments:
+:attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information into the
+"properties" file and :attr:`.LAB_DRIVER_PARSER` copies returncodes,
+wall-clock times and unexplained errors of all commands into
+"properties". You can add these parsers to alls runs by using
+:meth:`add_parser() <lab.experiment.Experiment.add_parser>`:
 
-    >>> from lab import experiment
-    >>> exp = experiment.Experiment()
-    >>> parser = os.path.join(
-    ...     experiment.DIR, '../examples/ff/ff-parser.py')
-    >>> exp.add_parser(parser)
+>>> from lab import experiment
+>>> exp = experiment.Experiment()
+>>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
+>>> exp.add_parser(exp.LAB_DRIVER_PARSER)
 
-This calls the parser in each run directory after running the run's
-commands.
+You can add your custom parser in the same way:
 
-A single run can have multiple parsers.
+>>> exp.add_parser(os.path.join(
+...     experiment.DIR, '../examples/ff/ff-parser.py'))
+
+All added parsers will be run in the order in which they were added
+after executing the run's commands.
+
+If you need to change your parsers and execute them again, use the
+:meth:`~lab.experiment.Experiment.add_parse_again_step` method to
+re-parse your results.
+
 """
 
 import os.path

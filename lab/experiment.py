@@ -464,17 +464,17 @@ class Experiment(_Buildable):
         underscores and dashes (which are converted to underscores
         automatically).
 
-        For information about how to write parsers see :ref:`parsing`.
-
-        Two built-in parsers are useful for most experiments:
+        Two built-in parsers should be added to almost all experiments:
         :attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information
         into the "properties" file and :attr:`.LAB_DRIVER_PARSER` copies
         returncodes, wall-clock times and unexplained errors of all
-        commands into "properties"::
+        commands into "properties":
 
         >>> exp = Experiment()
         >>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
         >>> exp.add_parser(exp.LAB_DRIVER_PARSER)
+
+        For information about how to write parsers see :ref:`parsing`.
 
         """
         name, _ = os.path.splitext(os.path.basename(path_to_parser))

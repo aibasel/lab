@@ -1,7 +1,7 @@
 .. _downward.tutorial:
 
-Downward tutorial
-=================
+Downward Lab tutorial
+=====================
 
 Install Lab and Downward Lab
 ----------------------------

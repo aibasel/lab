@@ -10,7 +10,7 @@ v3.0 (unreleased)
 
 lab
 ^^^
-* Add :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. Don't add any parser implicitly.
+* Add :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. Don't add any parser implicitly. See also :ref:`parsing`.
 * Add :meth:`exp.add_parse_again_step() <lab.experiment.Experiment.add_parse_again_step>` for running parsers again.
 * Require that the ``build``, ``start_runs`` and ``fetch`` steps are added explicitly (see :class:`~lab.experiment.Experiment`).
 * Remove *required* argument from ``add_resource()``. All resources are now required.
