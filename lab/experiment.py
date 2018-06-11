@@ -579,7 +579,7 @@ class Experiment(_Buildable):
         """
         src = src or self.path
         dest = dest or self.eval_dir
-        name = name or 'fetch-%s' % os.path.basename(src)
+        name = name or 'fetch-%s' % os.path.basename(src.rstrip('/'))
         self.add_step(
             name, Fetcher(), src, dest, merge=merge, filter=filter,
             **kwargs)
