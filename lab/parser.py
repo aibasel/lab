@@ -69,22 +69,11 @@ class _Pattern(object):
         self.group = 1
 
         flag = 0
-
         for char in flags:
-            if char == 'M':
-                flag |= re.M
-            elif char == 'L':
-                flag |= re.L
-            elif char == 'S':
-                flag |= re.S
-            elif char == 'I':
-                flag |= re.I
-            elif char == 'U':
-                flag |= re.U
-            elif char == 'X':
-                flag |= re.X
-            else:
-                logging.critical('Unknown regex flag: {}'.format(char))
+            try:
+                flag |= getattr(re, char)
+            except AttributeError:
+                logging.critical('Unknown pattern flag: {}'.format(char))
 
         self.regex = re.compile(regex, flag)
 
