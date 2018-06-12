@@ -52,16 +52,6 @@ def get_lab_path():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-class ErrorAbortHandler(logging.StreamHandler):
-    """
-    Custom logging Handler that exits when a critical error is encountered.
-    """
-    def emit(self, record):
-        logging.StreamHandler.emit(self, record)
-        if record.levelno >= logging.CRITICAL:
-            sys.exit('aborting')
-
-
 def setup_logging(level):
     # Python adds a default handler if some log is written before this
     # function is called. We therefore remove all handlers that have
@@ -70,15 +60,35 @@ def setup_logging(level):
     for handler in root_logger.handlers:
         root_logger.removeHandler(handler)
 
-    # Handler which writes _LOG_LEVEL messages or higher to stdout
-    console = ErrorAbortHandler(sys.stdout)
-    # set a format which is simpler for console use
-    format = '%(asctime)-s %(levelname)-8s %(message)s'
-    formatter = logging.Formatter(format)
-    # tell the handler to use this format
-    console.setFormatter(formatter)
-    # add the handler to the root logger
-    root_logger.addHandler(console)
+    class ErrorAbortHandler(logging.StreamHandler):
+        """
+        Logging handler that exits when a critical error is encountered.
+        """
+        def emit(self, record):
+            logging.StreamHandler.emit(self, record)
+            if record.levelno >= logging.CRITICAL:
+                sys.exit('aborting')
+
+    class StdoutFilter(logging.Filter):
+        def filter(self, record):
+            return record.levelno <= logging.WARNING
+
+    class StderrFilter(logging.Filter):
+        def filter(self, record):
+            return record.levelno > logging.WARNING
+
+    formatter = logging.Formatter('%(asctime)-s %(levelname)-8s %(message)s')
+
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setFormatter(formatter)
+    stdout_handler.addFilter(StdoutFilter())
+
+    stderr_handler = ErrorAbortHandler(sys.stderr)
+    stderr_handler.setFormatter(formatter)
+    stderr_handler.addFilter(StderrFilter())
+
+    root_logger.addHandler(stdout_handler)
+    root_logger.addHandler(stderr_handler)
     root_logger.setLevel(level)
 
 
