@@ -17,6 +17,7 @@ lab
 * Use stricter naming rules for commands, resources, parsers and steps. See respective ``add_*`` methods for details.
 * Use ``flags='M'`` by default for :meth:`lab.parser.Parser.add_pattern`.
 * Only support custom command line arguments for locally executed steps.
+* Log errors to stderr.
 * Remove deprecated possibility of passing Step objects to ``add_step()``.
 * Remove deprecated ``exp.__call__()`` method.
 
