@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import errno
+import logging
 import os
 import resource
 import select
@@ -213,4 +214,5 @@ class Call(object):
             sys.stderr.write(
                 'Error: wall-clock time for %s too high: %.2f > %d\n' %
                 (self.name, wall_clock_time, self.wall_clock_time_limit))
+        logging.info('{} exit code: {}'.format(self.name, retcode))
         return retcode

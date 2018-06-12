@@ -45,7 +45,3 @@ def add_unexplained_error(error, filename=DRIVER_PROPERTIES_FILENAME):
     properties = Properties(filename=filename)
     properties.add_unexplained_error(error)
     properties.write()
-
-
-def save_returncode(command_name, value):
-    set_property('%s_returncode' % command_name.lower(), value)

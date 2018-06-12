@@ -1,7 +1,7 @@
 import lab
 from lab.experiment import ARGPARSER
 from lab.calls.call import Call
-from lab.calls.log import delete_file_if_empty, print_, save_returncode
+from lab.calls.log import delete_file_if_empty, print_
 from lab import reports
 
 
@@ -15,4 +15,3 @@ Call
 
 delete_file_if_empty
 print_
-save_returncode
