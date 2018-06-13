@@ -760,7 +760,7 @@ class Run(_Buildable):
             parts = [cmd_string]
             if kwargs_string:
                 parts.append(kwargs_string)
-            return ('call.Call({}, **redirects).wait()\n'.format(', '.join(parts)))
+            return ('Call({}, **redirects).wait()\n'.format(', '.join(parts)))
 
         calls_text = '\n'.join(
             make_call(name, cmd, kwargs)

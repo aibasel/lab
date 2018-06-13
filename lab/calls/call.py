@@ -24,8 +24,6 @@ import subprocess
 import sys
 import time
 
-from lab.calls.log import add_unexplained_error
-
 
 def set_limit(kind, soft_limit, hard_limit=None):
     if hard_limit is None:
@@ -164,12 +162,10 @@ class Call(object):
                                 fd_to_bytes[fd] + len(data) > hard_limit):
                             # Don't write to this outfile in subsequent rounds.
                             fd_to_outfile[fd] = None
-                            msg = (
+                            logging.error(
                                 '{} wrote {} KiB (hard limit) to {} ->'
                                 ' abort command'.format(
                                     self.name, hard_limit / 1024, outfile.name))
-                            sys.stderr.write('Error: {}\n'.format(msg))
-                            add_unexplained_error(msg)
                             self.process.terminate()
                             # Strip extra bytes.
                             data = data[:hard_limit - fd_to_bytes[fd]]
@@ -186,12 +182,10 @@ class Call(object):
                 soft_limit, _ = fd_to_limits[fd]
                 bytes_written = fd_to_bytes[fd]
                 if (soft_limit is not None and bytes_written > soft_limit):
-                    msg = (
+                    logging.error(
                         '{} finished and wrote {} KiB to {} (soft limit: {} KiB)'.format(
                             self.name, bytes_written / 1024, outfile.name,
                             soft_limit / 1024))
-                    print 'Warning: {}'.format(msg)
-                    add_unexplained_error(msg)
 
     def wait(self):
         wall_clock_start_time = time.time()
@@ -209,10 +203,8 @@ class Call(object):
         logging.info('{} wall-clock time: {:.2f}s'.format(self.name, wall_clock_time))
         if (self.wall_clock_time_limit is not None and
                 wall_clock_time > self.wall_clock_time_limit):
-            add_unexplained_error(
-                '{}-wall-clock-time-too-high:{}'.format(self.name, wall_clock_time))
-            sys.stderr.write(
-                'Error: wall-clock time for %s too high: %.2f > %d\n' %
+            logging.error(
+                'wall-clock time for %s too high: %.2f > %d\n' %
                 (self.name, wall_clock_time, self.wall_clock_time_limit))
         logging.info('{} exit code: {}'.format(self.name, retcode))
         return retcode

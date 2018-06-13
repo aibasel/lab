@@ -189,7 +189,7 @@ class Parser(object):
         >>> parser = Parser()
         >>> parser.add_function(find_f_values)
 
-        You can use `props.add_unexplained_error(msg)` when your parsing
+        You can use ``props.add_unexplained_error(msg)`` when your parsing
         function detects that something went wrong during the run.
 
         """

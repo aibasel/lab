@@ -5,8 +5,10 @@ import logging
 import os
 import platform
 
-from lab.calls import call
-from lab.calls import log
+from lab.calls.call import Call
+from lab import tools
+
+tools.setup_logging(logging.INFO)
 
 logging.info('node name: {}'.format(platform.node()))
 
@@ -19,9 +21,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 %(calls)s
 
-if os.path.getsize(run_err.name) != 0:
-    log.add_unexplained_error('output-to-' + run_err.name)
-
 for f in [run_log, run_err]:
     f.close()
-    log.delete_file_if_empty(f.name)
+    if os.path.getsize(f.name) == 0:
+        os.remove(f.name)
