@@ -102,7 +102,8 @@ class FastDownwardExperiment(Experiment):
 
     # Built-in parsers that can be passed to exp.add_parser().
 
-    #: Parsed attributes: "error", "unsolvable"
+    #: Parsed attributes: "error", "planner_exit_code", "planner_wall_clock_time",
+    #: "unsolvable"
     EXITCODE_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
 
