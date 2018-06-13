@@ -1,13 +1,14 @@
 #! /usr/bin/env python2
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import platform
 
 from lab.calls import call
 from lab.calls import log
 
-log.set_property('node', platform.node())
+logging.info('node name: {}'.format(platform.node()))
 
 run_log = open('run.log', 'w')
 run_err = open('run.err', 'w')

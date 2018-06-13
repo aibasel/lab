@@ -24,7 +24,7 @@ import subprocess
 import sys
 import time
 
-from lab.calls.log import add_unexplained_error, set_property
+from lab.calls.log import add_unexplained_error
 
 
 def set_limit(kind, soft_limit, hard_limit=None):
@@ -206,7 +206,7 @@ class Call(object):
         for file in self.opened_files:
             file.close()
         wall_clock_time = time.time() - wall_clock_start_time
-        set_property('%s_wall_clock_time' % self.name, wall_clock_time)
+        logging.info('{} wall-clock time: {:.2f}s'.format(self.name, wall_clock_time))
         if (self.wall_clock_time_limit is not None and
                 wall_clock_time > self.wall_clock_time_limit):
             add_unexplained_error(
