@@ -346,13 +346,6 @@ class Experiment(_Buildable):
 
     """
 
-    #: Parser that copies returncodes, wall-clock times and
-    #: unexplained errors from "driver-properties" to "properties".
-    #:
-    #: Parsed attributes: "unexplained_errors", "\*_returncode", "\*_wall_clock_time"
-    LAB_DRIVER_PARSER = os.path.join(
-        LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
-
     #: Parser that copies "static-run-properties" to "properties".
     #:
     #: Parsed Lab attributes: "id", "run_dir"
@@ -464,15 +457,12 @@ class Experiment(_Buildable):
         underscores and dashes (which are converted to underscores
         automatically).
 
-        Two built-in parsers should be added to almost all experiments:
+        One built-in parser should be added to almost all experiments:
         :attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information
-        into the "properties" file and :attr:`.LAB_DRIVER_PARSER` copies
-        returncodes, wall-clock times and unexplained errors of all
-        commands into "properties":
+        into the "properties" file:
 
         >>> exp = Experiment()
         >>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
-        >>> exp.add_parser(exp.LAB_DRIVER_PARSER)
 
         For information about how to write parsers see :ref:`parsing`.
 

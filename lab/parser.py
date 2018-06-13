@@ -27,17 +27,14 @@ parser ``examples/ff/ff-parser.py`` serves as an example:
 
 .. literalinclude:: ../examples/ff/ff-parser.py
 
-Two built-in parsers should be added to almost all experiments:
+One built-in parser should be added to almost all experiments:
 :attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information into the
-"properties" file and :attr:`.LAB_DRIVER_PARSER` copies returncodes,
-wall-clock times and unexplained errors of all commands into
-"properties". You can add these parsers to alls runs by using
+"properties" file. You can add this parser to alls runs by using
 :meth:`add_parser() <lab.experiment.Experiment.add_parser>`:
 
 >>> from lab import experiment
 >>> exp = experiment.Experiment()
 >>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
->>> exp.add_parser(exp.LAB_DRIVER_PARSER)
 
 You can add your custom parser in the same way:
 

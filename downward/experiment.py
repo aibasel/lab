@@ -134,11 +134,10 @@ class FastDownwardExperiment(Experiment):
         >>> env = BaselSlurmEnvironment(email="my.name@unibas.ch")
         >>> exp = FastDownwardExperiment(environment=env)
 
-        You can add parsers with :meth:`.add_parser()`. Three parsers
+        You can add parsers with :meth:`.add_parser()`. Two parsers
         are required and have to be added in the following order:
 
         >>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
-        >>> exp.add_parser(exp.LAB_DRIVER_PARSER)
         >>> exp.add_parser(exp.EXITCODE_PARSER)
 
         You can add other parsers depending on the algorithms you're
