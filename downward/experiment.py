@@ -111,13 +111,22 @@ class FastDownwardExperiment(Experiment):
     TRANSLATOR_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
 
-    #: Parsed attributes: "coverage", "expansions_until_last_jump", "total_time", etc.
+    #: Required attributes: unsolvable
+    #:
+    #: Parsed attributes: "coverage", "memory", "total_time", etc.
     SINGLE_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
 
     #: Parsed attributes: "cost", "cost:all", "coverage"
     ANYTIME_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
+
+    #: Required attributes: "memory", "total_time",
+    #: "translator_peak_memory", "translator_time_done"
+    #:
+    #: Parsed attributes: "planner_peak_memory", "planner_time"
+    PLANNER_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'planner-parser.py')
 
     def __init__(self, path=None, environment=None, revision_cache=None):
         """

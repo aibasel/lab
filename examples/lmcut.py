@@ -34,6 +34,7 @@ exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 exp.add_parser(exp.EXITCODE_PARSER)
 exp.add_parser(exp.TRANSLATOR_PARSER)
 exp.add_parser(exp.SINGLE_SEARCH_PARSER)
+exp.add_parser(exp.PLANNER_PARSER)
 
 exp.add_suite(BENCHMARKS_DIR, SUITE)
 exp.add_algorithm(
