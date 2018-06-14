@@ -18,12 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Regular expressions and functions for parsing Fast Downward experiments.
+Regular expressions and functions for parsing single-search runs of Fast Downward.
 """
 
 from __future__ import division
 
-from collections import defaultdict
 import math
 import re
 import sys
@@ -31,147 +30,59 @@ import sys
 from lab.parser import Parser
 
 
-def solved(run):
+def _solved(run):
     return run['coverage'] or run['unsolvable']
 
 
 def _get_states_pattern(attribute, name):
-    return (attribute, re.compile(r'%s (\d+) state\(s\)\.' % name), int)
+    return (attribute, r'^{name} (\d+) state\(s\)\.$'.format(**locals()), int)
 
 
-PORTFOLIO_PATTERNS = [
-    ('cost', re.compile(r'Plan cost: (.+)'), float),
-    ('plan_length', re.compile(r'Plan length: (\d+)'), int),
-]
-
-
-COMMON_PATTERNS = [
+PATTERNS = [
+    ('limit_search_time', r'^.*search time limit: (.+)s$', float),
+    ('limit_search_memory', r'^.*search memory limit: (\d+) MB$', int),
+    ('cost', r'^Plan cost: (.+)$', float),
+    ('plan_length', r'^Plan length: (\d+) step\(s\)\.$', int),
+    ('evaluations', r'^Evaluations: (.+)$', int),
     _get_states_pattern('dead_ends', 'Dead ends:'),
     _get_states_pattern('evaluated', 'Evaluated'),
-    ('evaluations', re.compile(r'^Evaluations: (.+)$'), int),
     _get_states_pattern('expansions', 'Expanded'),
     _get_states_pattern('generated', 'Generated'),
     _get_states_pattern('reopened', 'Reopened'),
-]
-
-
-ITERATIVE_PATTERNS = COMMON_PATTERNS + PORTFOLIO_PATTERNS + [
-    # We cannot include " \[t=.+s\]" (global timer) in the regex, because
-    # older versions don't print it.
-    ('search_time', re.compile(r'Actual search time: (.+?)s'), float)
-]
-
-
-CUMULATIVE_PATTERNS = COMMON_PATTERNS + [
-    # Keep old names for backwards compatibility.
     _get_states_pattern('evaluations_until_last_jump', 'Evaluated until last jump:'),
     _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
     _get_states_pattern('reopened_until_last_jump', 'Reopened until last jump:'),
-    ('search_time', re.compile(r'^Search time: (.+)s$'), float),
-    ('total_time', re.compile(r'^Total time: (.+)s$'), float),
-    ('raw_memory', re.compile(r'Peak memory: (.+) KB'), int),
+    ('search_time', r'^Search time: (.+)s$', float),
+    ('total_time', r'^Total time: (.+)s$', float),
+    ('raw_memory', r'^Peak memory: (.+) KB$', int),
 ]
 
 
-def _same_length(groups):
-    return len(set(len(x) for x in groups)) == 1
+def check_single_search(content, props):
+    if '\nCumulative statistics:\n' in content:
+        props.add_unexplained_error(
+            'single-search parser can\'t be used for iterated search')
+    for name, pattern, _ in PATTERNS:
+        results = re.findall(pattern, content)
+        if len(results) > 1:
+            props.add_unexplained_error(
+                'single-search parser can\'t be used for anytime planner')
 
 
-def _update_props_with_iterative_values(props, values, attr_groups):
-    for group in attr_groups:
-        if not _same_length(values[attr] for attr in group):
-            print 'Error: malformed log:', values
-            props.add_unexplained_error('malformed-log')
-
-    for name, items in values.items():
-        props[name + '_all'] = items
-
-    for attr in ['cost', 'plan_length']:
-        if values[attr]:
-            props[attr] = min(values[attr])
+def add_coverage(content, props):
+    props['coverage'] = int('cost' in props)
 
 
-def get_iterative_results(content, props):
+def add_initial_h_values(content, props):
     """
-    In iterative search some attributes like plan cost can have multiple
-    values, i.e. one value for each iterative search. We save those values in
-    lists.
+    Add a mapping from heuristic names to initial h values.
+
+    If exactly one initial heuristic value was reported, add it to the
+    properties under the name "initial_h_value".
+
     """
-    values = defaultdict(list)
-
-    for line in content.splitlines():
-        # At the end of iterative search some statistics are printed and we do
-        # not want to parse those here.
-        if line == 'Cumulative statistics:':
-            break
-        for name, pattern, cast in ITERATIVE_PATTERNS:
-            match = pattern.search(line)
-            if not match:
-                continue
-            values[name].append(cast(match.group(1)))
-            # We can break here, because each line contains only one value
-            break
-
-    # After iterative search completes there is another line starting with
-    # "Actual search time" that just states the cumulative search time.
-    # In order to let all lists have the same length, we omit that value here.
-    if len(values['search_time']) > len(values['expansions']):
-        values['search_time'].pop()
-
-    _update_props_with_iterative_values(
-        props, values, [
-            ('cost', 'plan_length'),
-            ('expansions', 'generated', 'search_time')])
-
-
-def get_cumulative_results(content, props):
-    """
-    Some cumulative results are printed at the end of the logfile. We revert
-    the content to make a search for those values much faster. We would have to
-    reverse the content anyways, because there's no real telling if those
-    values talk about a single or a cumulative result. If we start parsing at
-    the bottom of the file we know that the values are the cumulative ones.
-    """
-    reverse_content = list(reversed(content.splitlines()))
-    for name, pattern, cast in CUMULATIVE_PATTERNS:
-        for line in reverse_content:
-            # There will be no cumulative values above this line
-            if line == 'Cumulative statistics:':
-                break
-            match = pattern.search(line)
-            if not match:
-                continue
-            props[name] = cast(match.group(1))
-
-
-def set_search_time(content, props):
-    """
-    If iterative search has accumulated single search times, but the total
-    search time was not written (due to a possible timeout for example), we
-    set search_time to be the sum of the single search times.
-    """
-    if 'search_time' in props:
-        return
-    search_time_all = props.get('search_time_all', [])
-    # Do not write search_time if no iterative search_time has been found.
-    if search_time_all:
-        props['search_time'] = math.fsum(search_time_all)
-
-
-def coverage(content, props):
-    props['coverage'] = int('plan_length' in props and 'cost' in props)
-
-
-def get_initial_h_values(content, props):
-    """
-    For each heuristic, collect the reported initial heuristic values in
-    a list. For iterative searches this list may contain more than one
-    value. Add a dictionary mapping from heuristics to initial heuristic
-    values to the properties. If exactly one initial heuristic value was
-    reported, add it to the properties under the name "initial_h_value".
-    """
-    heuristic_to_values = defaultdict(list)
+    initial_h_values = {}
     matches = re.findall(
         r'^Initial heuristic value for (.+): ([-]?\d+|infinity)$',
         content, flags=re.M)
@@ -180,34 +91,43 @@ def get_initial_h_values(content, props):
             init_h = sys.maxint
         else:
             init_h = int(init_h)
-        heuristic_to_values[heuristic].append(init_h)
+        if heuristic in initial_h_values:
+            props.add_unexplained_error(
+                'multiple initial h values found for {}'.format(heuristic))
+        initial_h_values[heuristic] = init_h
 
-    props['initial_h_values'] = heuristic_to_values
+    props['initial_h_values'] = initial_h_values
 
-    if len(heuristic_to_values) == 1:
-        for heuristic, values in heuristic_to_values.items():
-            if len(values) == 1:
-                props['initial_h_value'] = values[0]
+    if len(initial_h_values) == 1:
+        props['initial_h_value'] = initial_h_values.values()[0]
 
 
-def check_memory(content, props):
-    """Add "memory" attribute if the problem was solved."""
+def add_memory(content, props):
+    """Add "memory" attribute if the problem was solved.
+
+    Peak memory usage is printed even for runs that are terminated
+    abnormally. For these runs we do not take the reported value into
+    account since the value is censored: it only takes into account the
+    memory usage until termination.
+
+    """
     raw_memory = props.get('raw_memory')
 
     if raw_memory is None or raw_memory < 0:
         props.add_unexplained_error('could-not-determine-peak-memory')
         return
 
-    if solved(props):
+    if _solved(props):
         props['memory'] = raw_memory
 
 
-def scores(content, props):
+def add_scores(content, props):
     """
-    Some reported results are measured via scores from the
-    range 0-1, where best possible performance in a task is
-    counted as 1, while failure to solve a task and worst
-    performance are counted as 0.
+    Convert some properties into scores in the range [0, 1].
+
+    Best possible performance in a task is counted as 1, while failure
+    to solve a task and worst performance are counted as 0.
+
     """
     def log_score(value, min_bound, max_bound):
         if value is None:
@@ -222,26 +142,18 @@ def scores(content, props):
         props['score_' + attr] = log_score(
             props.get(attr), min_bound=100, max_bound=1e6)
 
-    try:
-        max_time = props['limit_search_time']
-    except KeyError:
-        print "search time limit missing -> can't compute time scores"
-    else:
-        props['score_total_time'] = log_score(
-            props.get('total_time'), min_bound=1.0, max_bound=max_time)
-        props['score_search_time'] = log_score(
-            props.get('search_time'), min_bound=1.0, max_bound=max_time)
+    max_time = props['limit_search_time']
+    props['score_total_time'] = log_score(
+        props.get('total_time'), min_bound=1.0, max_bound=max_time)
+    props['score_search_time'] = log_score(
+        props.get('search_time'), min_bound=1.0, max_bound=max_time)
 
-    try:
-        max_memory_kb = props['limit_search_memory'] * 1024
-    except KeyError:
-        print "search memory limit missing -> can't compute score_memory"
-    else:
-        props['score_memory'] = log_score(
-            props.get('memory'), min_bound=2000, max_bound=max_memory_kb)
+    max_memory_kb = props['limit_search_memory'] * 1024
+    props['score_memory'] = log_score(
+        props.get('memory'), min_bound=2000, max_bound=max_memory_kb)
 
 
-def check_min_values(content, props):
+def ensure_minimum_times(content, props):
     """
     Ensure that times are not 0 if they are present in log.
     """
@@ -255,20 +167,15 @@ class SingleSearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
 
-        self.add_function(get_iterative_results)
-        self.add_function(coverage)
+        for name, pattern, typ in PATTERNS:
+            self.add_pattern(name, pattern, type=typ)
 
-        self.add_pattern(
-            'limit_search_time', r'search time limit: (.+)s$', type=float)
-        self.add_pattern(
-            'limit_search_memory', r'search memory limit: (\d+) MB$', type=int)
-
-        self.add_function(get_cumulative_results)
-        self.add_function(check_memory)
-        self.add_function(get_initial_h_values)
-        self.add_function(set_search_time)
-        self.add_function(scores)
-        self.add_function(check_min_values)
+        self.add_function(check_single_search)
+        self.add_function(add_coverage)
+        self.add_function(add_memory)
+        self.add_function(add_initial_h_values)
+        self.add_function(ensure_minimum_times)
+        self.add_function(add_scores)
 
 
 def main():
