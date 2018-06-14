@@ -104,7 +104,7 @@ class FastDownwardExperiment(Experiment):
 
     #: Required attributes: fast-downward_returncode
     #:
-    #: Parsed attributes: "error", "unsolvable"
+    #: Parsed attributes: "coverage", "error", "unsolvable"
     EXITCODE_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
 

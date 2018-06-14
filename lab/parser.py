@@ -90,7 +90,7 @@ class _Pattern(object):
                 value = self.type_(value)
                 found_props[self.attribute] = value
         elif self.required:
-            logging.error('Pattern %s not found in %s' % (self, filename))
+            logging.error('Pattern "%s" not found in %s' % (self, filename))
         return found_props
 
     def __str__(self):

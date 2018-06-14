@@ -37,7 +37,6 @@ exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
 exp.add_parser(exp.LAB_DRIVER_PARSER)
 exp.add_parser(exp.EXITCODE_PARSER)
 exp.add_parser(exp.TRANSLATOR_PARSER)
-exp.add_parser(exp.SINGLE_SEARCH_PARSER)
 exp.add_parser(exp.ANYTIME_SEARCH_PARSER)
 
 exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'miconic:s1-0.pddl'])
@@ -71,13 +70,7 @@ exp.add_fetcher(name='fetch')
 exp.add_parse_again_step()
 
 
-# Define some filters
-
-def solved(run):
-    """Only include solved problems."""
-    return run['coverage'] == 1
-
-
+# Define a filter.
 def only_two_algorithms(run):
     return run['algorithm'] in ['lama11', 'iter-hadd']
 
@@ -96,7 +89,7 @@ exp.add_fetcher(
 
 # Add report steps
 exp.add_report(
-    AbsoluteReport(attributes=ATTRIBUTES + ['expansions', 'cost']),
+    AbsoluteReport(attributes=ATTRIBUTES + ['cost', 'coverage']),
     name='report-abs-d')
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES, filter=only_two_algorithms),
@@ -118,7 +111,7 @@ def get_domain(run1, run2):
 
 exp.add_report(
     ScatterPlotReport(
-        attributes=['expansions'],
+        attributes=['cost'],
         filter_algorithm=['iter-hadd', 'lama11']),
     name='report-scatter',
     outfile=os.path.join('plots', 'scatter.png'))
@@ -142,7 +135,7 @@ matplotlib_options = {
 for format in ["png", "tex"]:
     exp.add_report(
         ScatterPlotReport(
-            attributes=['expansions'],
+            attributes=['cost'],
             format=format,
             filter=only_two_algorithms,
             get_category=get_domain,
@@ -153,23 +146,18 @@ for format in ["png", "tex"]:
 exp.add_report(
     ComparativeReport(
         [('lama11', 'iter-hadd')],
-        attributes=['quality', 'coverage', 'expansions']),
+        attributes=['quality', 'coverage']),
     name='report-compare',
     outfile='compare.html')
 
 exp.add_report(
     TaskwiseReport(
-        attributes=['coverage', 'expansions'],
+        attributes=['cost', 'coverage'],
         filter_algorithm=['ipdb']),
     name='report-taskwise',
     outfile='taskwise.html')
 
-exp.add_report(
-    AbsoluteReport(attributes=[
-        'coverage', 'evaluated', 'evaluations', 'search_time',
-        'cost', 'memory', 'error', 'cost_all', 'limit_search_time',
-        'initial_h_value', 'initial_h_values', 'run_dir']),
-    name='report-abs-p')
+exp.add_report(AbsoluteReport(), name='report-abs-p')
 
 exp.add_step('finished', call, ['echo', 'Experiment', 'finished.'])
 
