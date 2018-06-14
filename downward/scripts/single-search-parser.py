@@ -99,7 +99,14 @@ def add_initial_h_values(content, props):
 
 
 def add_memory(content, props):
-    """Add "memory" attribute if the problem was solved."""
+    """Add "memory" attribute if the problem was solved.
+
+    Peak memory usage is printed even for runs that are terminated
+    abnormally. For these runs we do not take the reported value into
+    account since the value is censored: it only takes into account the
+    memory usage until termination.
+
+    """
     raw_memory = props.get('raw_memory')
 
     if raw_memory is None or raw_memory < 0:
