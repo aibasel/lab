@@ -55,7 +55,18 @@ class Fetcher(object):
     """
     def fetch_dir(self, run_dir):
         prop_file = os.path.join(run_dir, 'properties')
-        return tools.Properties(filename=prop_file)
+        props = tools.Properties(filename=prop_file)
+
+        driver_err_file = os.path.join(run_dir, 'driver.err')
+        run_err_file = os.path.join(run_dir, 'run.err')
+        for err_file in [driver_err_file, run_err_file]:
+            if os.path.exists(err_file):
+                with open(err_file) as f:
+                    content = f.read()
+                if content:
+                    props.add_unexplained_error(
+                        '{}: {}'.format(os.path.basename(err_file), content))
+        return props
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
                  **kwargs):

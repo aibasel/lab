@@ -114,7 +114,7 @@ def add_memory(content, props):
     raw_memory = props.get('raw_memory')
 
     if raw_memory is None or raw_memory < 0:
-        props.add_unexplained_error('could-not-determine-peak-memory')
+        props.add_unexplained_error('log does not contain peak memory')
         return
 
     if _solved(props):

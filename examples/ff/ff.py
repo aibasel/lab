@@ -34,9 +34,8 @@ ATTRIBUTES = [
 
 # Create a new experiment.
 exp = Experiment(environment=ENV)
-# Add built-in parsers.
+# Add built-in parser.
 exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
-exp.add_parser(exp.LAB_DRIVER_PARSER)
 # Add custom ff-parser.
 exp.add_parser('ff-parser.py')
 

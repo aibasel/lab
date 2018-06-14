@@ -15,9 +15,7 @@ Mandatory built-in parsers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :attr:`exp.LAB_STATIC_PROPERTIES_PARSER
-<lab.experiment.Experiment.LAB_STATIC_PROPERTIES_PARSER>`,
-:attr:`exp.LAB_DRIVER_PARSER
-<lab.experiment.Experiment.LAB_DRIVER_PARSER>` and
+<lab.experiment.Experiment.LAB_STATIC_PROPERTIES_PARSER>` and
 :attr:`exp.EXITCODE_PARSER
 <downward.experiment.FastDownwardExperiment.EXITCODE_PARSER>` have to be
 added to every Fast Downward experiment in this order.
