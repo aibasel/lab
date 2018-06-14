@@ -44,10 +44,8 @@ steps_group.add_argument(
     '--all', dest='run_all_steps', action='store_true',
     help='Run all steps.')
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
 STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static-experiment-properties'
-STATIC_RUN_PROPERTIES_FILENAME = 'static-run-properties'
+STATIC_RUN_PROPERTIES_FILENAME = 'static-properties'
 
 
 def get_default_data_dir():
@@ -346,21 +344,6 @@ class Experiment(_Buildable):
 
     """
 
-    #: Parser that copies returncodes, wall-clock times and
-    #: unexplained errors from "driver-properties" to "properties".
-    #:
-    #: Parsed attributes: "unexplained_errors", "\*_returncode", "\*_wall_clock_time"
-    LAB_DRIVER_PARSER = os.path.join(
-        LAB_SCRIPTS_DIR, 'driver-properties-parser.py')
-
-    #: Parser that copies "static-run-properties" to "properties".
-    #:
-    #: Parsed Lab attributes: "id", "run_dir"
-    #:
-    #: Parsed Downward attributes: "algorithm", "domain", "problem", etc.
-    LAB_STATIC_PROPERTIES_PARSER = os.path.join(
-        LAB_SCRIPTS_DIR, 'static-properties-parser.py')
-
     def __init__(self, path=None, environment=None):
         """
         The experiment will be built at *path*. It defaults to
@@ -463,16 +446,6 @@ class Experiment(_Buildable):
         start with a letter and contain only letters, numbers,
         underscores and dashes (which are converted to underscores
         automatically).
-
-        Two built-in parsers should be added to almost all experiments:
-        :attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information
-        into the "properties" file and :attr:`.LAB_DRIVER_PARSER` copies
-        returncodes, wall-clock times and unexplained errors of all
-        commands into "properties":
-
-        >>> exp = Experiment()
-        >>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
-        >>> exp.add_parser(exp.LAB_DRIVER_PARSER)
 
         For information about how to write parsers see :ref:`parsing`.
 
@@ -770,10 +743,7 @@ class Run(_Buildable):
             parts = [cmd_string]
             if kwargs_string:
                 parts.append(kwargs_string)
-            call = ('retcode = call.Call({}, **redirects).wait()\n'
-                    'log.save_returncode({name!r}, retcode)\n'.format(
-                        ', '.join(parts), **locals()))
-            return call
+            return ('Call({}, **redirects).wait()\n'.format(', '.join(parts)))
 
         calls_text = '\n'.join(
             make_call(name, cmd, kwargs)

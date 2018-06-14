@@ -32,7 +32,7 @@ def get_exit_code(signal_value):
 Outcome = collections.namedtuple('Outcome', ['value', 'msg', 'explained', 'min_wins'])
 
 LEGACY_OUTCOMES = [
-    Outcome(0, 'none', explained=True, min_wins=False),
+    Outcome(0, 'success', explained=True, min_wins=False),
     Outcome(1, 'critical-error', explained=False, min_wins=True),
     Outcome(2, 'input-error', explained=False, min_wins=True),
     Outcome(3, 'unsupported-feature-requested', explained=False, min_wins=True),
@@ -49,7 +49,7 @@ LEGACY_OUTCOMES = [
 EXITCODE_TO_LEGACY_OUTCOME = dict((outcome.value, outcome) for outcome in LEGACY_OUTCOMES)
 
 NEW_OUTCOMES = [
-    Outcome(0, 'none', explained=True, min_wins=False),
+    Outcome(0, 'success', explained=True, min_wins=False),
     Outcome(1, 'search-plan-found-and-out-of-memory', explained=True, min_wins=None),
     Outcome(2, 'search-plan-found-and-out-of-time', explained=True, min_wins=None),
     Outcome(3, 'search-plan-found-and-out-of-memory-and-time',

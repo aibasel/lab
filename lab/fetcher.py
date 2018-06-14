@@ -20,6 +20,7 @@ import logging
 import os
 import sys
 
+import lab.experiment
 from lab import tools
 
 
@@ -54,8 +55,24 @@ class Fetcher(object):
 
     """
     def fetch_dir(self, run_dir):
-        prop_file = os.path.join(run_dir, 'properties')
-        return tools.Properties(filename=prop_file)
+        static_props = tools.Properties(
+            filename=os.path.join(run_dir, lab.experiment.STATIC_RUN_PROPERTIES_FILENAME))
+        dynamic_props = tools.Properties(filename=os.path.join(run_dir, 'properties'))
+
+        props = tools.Properties()
+        props.update(static_props)
+        props.update(dynamic_props)
+
+        driver_err_file = os.path.join(run_dir, 'driver.err')
+        run_err_file = os.path.join(run_dir, 'run.err')
+        for err_file in [driver_err_file, run_err_file]:
+            if os.path.exists(err_file):
+                with open(err_file) as f:
+                    content = f.read()
+                if content:
+                    props.add_unexplained_error(
+                        '{}: {}'.format(os.path.basename(err_file), content))
+        return props
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
                  **kwargs):
@@ -119,13 +136,7 @@ class Fetcher(object):
                 props = self.fetch_dir(run_dir)
                 if slurm_err_content:
                     props.add_unexplained_error('output-to-slurm.err')
-                try:
-                    id_string = '-'.join(props['id'])
-                except KeyError:
-                    logging.critical(
-                        'Properties need an "id" entry: {}. Did you forget to call'
-                        ' exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)?'.format(
-                            props))
+                id_string = '-'.join(props['id'])
                 new_props[id_string] = props
             run_filter.apply(new_props)
             combined_props.update(new_props)

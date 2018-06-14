@@ -50,7 +50,7 @@ class FastDownwardRun(Run):
             'problem', self.task.problem_file, 'problem.pddl', symlink=True)
 
         self.add_command(
-            'fast-downward',
+            'planner',
             ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
             algo.driver_options + ['{domain}', '{problem}'] + algo.component_options)
 
@@ -102,9 +102,8 @@ class FastDownwardExperiment(Experiment):
 
     # Built-in parsers that can be passed to exp.add_parser().
 
-    #: Required attributes: fast-downward_returncode
-    #:
-    #: Parsed attributes: "error", "unsolvable"
+    #: Parsed attributes: "error", "planner_exit_code", "planner_wall_clock_time",
+    #: "unsolvable"
     EXITCODE_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
 
@@ -122,8 +121,8 @@ class FastDownwardExperiment(Experiment):
     ANYTIME_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
 
-    #: Required attributes: "coverage", "memory", "total_time",
-    #: "translator_peak_memory", "translator_time_done", "unsolvable"
+    #: Required attributes: "memory", "total_time",
+    #: "translator_peak_memory", "translator_time_done"
     #:
     #: Parsed attributes: "planner_peak_memory", "planner_time"
     PLANNER_PARSER = os.path.join(
@@ -143,11 +142,9 @@ class FastDownwardExperiment(Experiment):
         >>> env = BaselSlurmEnvironment(email="my.name@unibas.ch")
         >>> exp = FastDownwardExperiment(environment=env)
 
-        You can add parsers with :meth:`.add_parser()`. Three parsers
-        are required and have to be added in the following order:
+        You can add parsers with :meth:`.add_parser()`. The exit code parser
+        is required since it adds the mandatory "error" attribute:
 
-        >>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
-        >>> exp.add_parser(exp.LAB_DRIVER_PARSER)
         >>> exp.add_parser(exp.EXITCODE_PARSER)
 
         You can add other parsers depending on the algorithms you're

@@ -22,21 +22,9 @@ Parse Fast Downward exit code and store a message describing the outcome
 in the "error" attribute.
 """
 
-import sys
-
 from lab.parser import Parser
 
 from downward import outcomes
-
-
-def _get_planner_exitcode(props):
-    attr = 'fast-downward_returncode'
-    exitcode = props.get(attr)
-    if exitcode is None:
-        sys.exit(
-            'The exit code parser needs the {} attribute. Did you forget to add the'
-            ' Lab driver parser and the exit code parser in that order?'.format(attr))
-    return exitcode
 
 
 def parse_exit_code(content, props):
@@ -59,7 +47,7 @@ def parse_exit_code(content, props):
             use_legacy_exit_codes = False
             break
 
-    exitcode = _get_planner_exitcode(props)
+    exitcode = props['planner_exit_code']
     outcome = outcomes.get_outcome(exitcode, use_legacy_exit_codes)
     props['error'] = outcome.msg
     if use_legacy_exit_codes:
@@ -74,6 +62,16 @@ def parse_exit_code(content, props):
 class ExitCodeParser(Parser):
     def __init__(self):
         Parser.__init__(self)
+        self.add_pattern(
+            'planner_exit_code',
+            r'^.*planner exit code: (.+)$',
+            type=int,
+            file='driver.log')
+        self.add_pattern(
+            'planner_wall_clock_time',
+            r'^.*planner wall-clock time: (.+)s$',
+            type=float,
+            file='driver.log')
         self.add_function(parse_exit_code)
 
 

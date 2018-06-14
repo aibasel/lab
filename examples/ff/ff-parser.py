@@ -27,14 +27,14 @@ from lab.parser import Parser
 
 
 def error(content, props):
-    if props['run-planner_returncode'] == 0:
+    if props['planner_exit_code'] == 0:
         props['error'] = 'plan-found'
     else:
         props['error'] = 'unsolvable-or-error'
 
 
 def coverage(content, props):
-    props['coverage'] = int(props['run-planner_returncode'] == 0)
+    props['coverage'] = int(props['planner_exit_code'] == 0)
 
 
 def get_plan(content, props):
@@ -52,8 +52,11 @@ def trivially_unsolvable(content, props):
         'ff: goal can be simplified to FALSE. No plan will solve it' in content)
 
 
+print 'Running FF parser'
 parser = Parser()
-parser.add_pattern('evaluations', r'evaluating (\d+) states')
+parser.add_pattern(
+    'planner_exit_code', r'^.*run-planner exit code: (.+)$', type=int, file='driver.log')
+parser.add_pattern('evaluations', r'evaluating (\d+) states', required=False)
 parser.add_function(error)
 parser.add_function(coverage)
 parser.add_function(get_plan)

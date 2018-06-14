@@ -20,22 +20,17 @@
 from lab.parser import Parser
 
 
-def solved(props):
-    return props['coverage'] or props['unsolvable']
-
-
 def add_planner_memory(content, props):
     translate_memory = props['translator_peak_memory']
     search_memory = props.get('memory')
     if search_memory is not None:
-        assert solved(props)
         props['planner_peak_memory'] = max(translate_memory, search_memory)
 
 
 def add_planner_time(content, props):
     translate_time = props['translator_time_done']
     search_time = props.get('total_time')
-    if search_time is not None and solved(props):
+    if search_time is not None:
         props['planner_time'] = translate_time + search_time
 
 

@@ -27,22 +27,15 @@ parser ``examples/ff/ff-parser.py`` serves as an example:
 
 .. literalinclude:: ../examples/ff/ff-parser.py
 
-Two built-in parsers should be added to almost all experiments:
-:attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information into the
-"properties" file and :attr:`.LAB_DRIVER_PARSER` copies returncodes,
-wall-clock times and unexplained errors of all commands into
-"properties". You can add these parsers to alls runs by using
+You can add this parser to alls runs by using
 :meth:`add_parser() <lab.experiment.Experiment.add_parser>`:
 
+>>> import os.path
 >>> from lab import experiment
 >>> exp = experiment.Experiment()
->>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
->>> exp.add_parser(exp.LAB_DRIVER_PARSER)
-
-You can add your custom parser in the same way:
-
->>> exp.add_parser(os.path.join(
-...     experiment.DIR, '../examples/ff/ff-parser.py'))
+>>> parser = os.path.abspath(
+...     os.path.join(__file__, '../../examples/ff/ff-parser.py'))
+>>> exp.add_parser(parser)
 
 All added parsers will be run in the order in which they were added
 after executing the run's commands.
@@ -90,7 +83,7 @@ class _Pattern(object):
                 value = self.type_(value)
                 found_props[self.attribute] = value
         elif self.required:
-            logging.error('Pattern %s not found in %s' % (self, filename))
+            logging.error('Pattern "%s" not found in %s' % (self, filename))
         return found_props
 
     def __str__(self):
@@ -119,18 +112,15 @@ class _FileParser(object):
     def add_function(self, function):
         self.functions.append(function)
 
-    def parse(self, props):
-        assert self.filename
-        props.update(self._search_patterns())
-        self._apply_functions(props)
-
-    def _search_patterns(self):
+    def search_patterns(self):
+        assert self.content is not None
         found_props = {}
         for pattern in self.patterns:
             found_props.update(pattern.search(self.content, self.filename))
         return found_props
 
-    def _apply_functions(self, props):
+    def apply_functions(self, props):
+        assert self.content is not None
         for function in self.functions:
             function(self.content, props)
 
@@ -195,7 +185,7 @@ class Parser(object):
         >>> parser = Parser()
         >>> parser.add_function(find_f_values)
 
-        You can use `props.add_unexplained_error(msg)` when your parsing
+        You can use ``props.add_unexplained_error(msg)`` when your parsing
         function detects that something went wrong during the run.
 
         """
@@ -209,8 +199,6 @@ class Parser(object):
         """
         run_dir = os.path.abspath('.')
         prop_file = os.path.join(run_dir, 'properties')
-        if not os.path.exists(prop_file):
-            logging.critical('No properties file found at {}'.format(prop_file))
         self.props = tools.Properties(filename=prop_file)
 
         for filename, file_parser in self.file_parsers.items():
@@ -221,8 +209,11 @@ class Parser(object):
             except (IOError, MemoryError) as err:
                 logging.error('File "%s" could not be read: %s' % (path, err))
                 self.props.add_unexplained_error('parser-failed-to-read-file')
-            else:
-                # Subclasses directly modify the properties during parsing.
-                file_parser.parse(self.props)
+
+        for file_parser in self.file_parsers.values():
+            self.props.update(file_parser.search_patterns())
+
+        for file_parser in self.file_parsers.values():
+            file_parser.apply_functions(self.props)
 
         self.props.write()
