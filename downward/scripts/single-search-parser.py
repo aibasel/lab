@@ -70,6 +70,10 @@ def check_single_search(content, props):
                 'single-search parser can\'t be used for anytime planner')
 
 
+def add_coverage(content, props):
+    props['coverage'] = int('cost' in props)
+
+
 def add_initial_h_values(content, props):
     """
     Add a mapping from heuristic names to initial h values.
@@ -167,6 +171,7 @@ class SingleSearchParser(Parser):
             self.add_pattern(name, pattern, type=typ)
 
         self.add_function(check_single_search)
+        self.add_function(add_coverage)
         self.add_function(add_memory)
         self.add_function(add_initial_h_values)
         self.add_function(ensure_minimum_times)

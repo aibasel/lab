@@ -62,7 +62,6 @@ def parse_exit_code(content, props):
     exitcode = _get_planner_exitcode(props)
     outcome = outcomes.get_outcome(exitcode, use_legacy_exit_codes)
     props['error'] = outcome.msg
-    props['coverage'] = int(outcome.msg == 'success')
     if use_legacy_exit_codes:
         props['unsolvable'] = int(outcome.msg == 'unsolvable')
     else:
