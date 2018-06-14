@@ -20,6 +20,7 @@ import logging
 import os
 import sys
 
+import lab.experiment
 from lab import tools
 
 
@@ -54,8 +55,13 @@ class Fetcher(object):
 
     """
     def fetch_dir(self, run_dir):
-        prop_file = os.path.join(run_dir, 'properties')
-        props = tools.Properties(filename=prop_file)
+        static_props = tools.Properties(
+            filename=os.path.join(run_dir, lab.experiment.STATIC_RUN_PROPERTIES_FILENAME))
+        dynamic_props = tools.Properties(filename=os.path.join(run_dir, 'properties'))
+
+        props = tools.Properties()
+        props.update(static_props)
+        props.update(dynamic_props)
 
         driver_err_file = os.path.join(run_dir, 'driver.err')
         run_err_file = os.path.join(run_dir, 'run.err')
