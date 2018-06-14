@@ -27,17 +27,11 @@ parser ``examples/ff/ff-parser.py`` serves as an example:
 
 .. literalinclude:: ../examples/ff/ff-parser.py
 
-One built-in parser should be added to almost all experiments:
-:attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information into the
-"properties" file. You can add this parser to alls runs by using
+You can add this parser to alls runs by using
 :meth:`add_parser() <lab.experiment.Experiment.add_parser>`:
 
 >>> from lab import experiment
 >>> exp = experiment.Experiment()
->>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
-
-You can add your custom parser in the same way:
-
 >>> exp.add_parser(os.path.join(
 ...     experiment.DIR, '../examples/ff/ff-parser.py'))
 

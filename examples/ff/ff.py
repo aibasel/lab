@@ -34,9 +34,7 @@ ATTRIBUTES = [
 
 # Create a new experiment.
 exp = Experiment(environment=ENV)
-# Add built-in parser.
-exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
-# Add custom ff-parser.
+# Add custom parser for FF.
 exp.add_parser('ff-parser.py')
 
 for task in suites.build_suite(BENCHMARKS_DIR, SUITE):

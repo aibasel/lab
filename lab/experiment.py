@@ -45,7 +45,6 @@ steps_group.add_argument(
     help='Run all steps.')
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
 STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static-experiment-properties'
 STATIC_RUN_PROPERTIES_FILENAME = 'static-properties'
 
@@ -346,14 +345,6 @@ class Experiment(_Buildable):
 
     """
 
-    #: Parser that copies "static-properties" to "properties".
-    #:
-    #: Parsed Lab attributes: "id", "run_dir"
-    #:
-    #: Parsed Downward attributes: "algorithm", "domain", "problem", etc.
-    LAB_STATIC_PROPERTIES_PARSER = os.path.join(
-        LAB_SCRIPTS_DIR, 'static-properties-parser.py')
-
     def __init__(self, path=None, environment=None):
         """
         The experiment will be built at *path*. It defaults to
@@ -456,13 +447,6 @@ class Experiment(_Buildable):
         start with a letter and contain only letters, numbers,
         underscores and dashes (which are converted to underscores
         automatically).
-
-        One built-in parser should be added to almost all experiments:
-        :attr:`.LAB_STATIC_PROPERTIES_PARSER` copies static information
-        into the "properties" file:
-
-        >>> exp = Experiment()
-        >>> exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)
 
         For information about how to write parsers see :ref:`parsing`.
 

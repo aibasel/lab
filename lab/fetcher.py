@@ -136,13 +136,7 @@ class Fetcher(object):
                 props = self.fetch_dir(run_dir)
                 if slurm_err_content:
                     props.add_unexplained_error('output-to-slurm.err')
-                try:
-                    id_string = '-'.join(props['id'])
-                except KeyError:
-                    logging.critical(
-                        'Properties need an "id" entry: {}. Did you forget to call'
-                        ' exp.add_parser(exp.LAB_STATIC_PROPERTIES_PARSER)?'.format(
-                            props))
+                id_string = '-'.join(props['id'])
                 new_props[id_string] = props
             run_filter.apply(new_props)
             combined_props.update(new_props)
