@@ -24,10 +24,10 @@ lab
 downward
 ^^^^^^^^
 * Add "planner_timer" and "planner_memory" attributes.
-* See :class:`~downward.experiment.FastDownwardExperiment` for required parsers.
-* Revise anytime search parser: parse only "cost", "cost:all" and "coverage".
-* Single search parser: fix regexes for time and memory limits and make them mandatory.
-* Single search parser: remove two landmark-specific patterns.
+* Reorganize parsers. See :class:`~downward.experiment.FastDownwardExperiment` for built-in parsers.
+* Revise anytime-search parser: parse only "cost", "cost:all" and "coverage".
+* Single-search parser: fix regexes for time and memory limits and make them mandatory.
+* Single-search parser: remove two landmark-specific patterns.
 * Parse new Fast Downward exit codes (http://issues.fast-downward.org/issue739).
 * Don't exclude (obsolete) 'benchmarks' directory when caching revisions.
 
