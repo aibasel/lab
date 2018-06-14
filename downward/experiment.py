@@ -50,7 +50,7 @@ class FastDownwardRun(Run):
             'problem', self.task.problem_file, 'problem.pddl', symlink=True)
 
         self.add_command(
-            'fast-downward',
+            'planner',
             ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
             algo.driver_options + ['{domain}', '{problem}'] + algo.component_options)
 

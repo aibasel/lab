@@ -64,12 +64,12 @@ class ExitCodeParser(Parser):
         Parser.__init__(self)
         self.add_pattern(
             'planner_exit_code',
-            r'^.*fast-downward exit code: (.+)$',
+            r'^.*planner exit code: (.+)$',
             type=int,
             file='driver.log')
         self.add_pattern(
             'planner_wall_clock_time',
-            r'^.*fast-downward wall-clock time: (.+)s$',
+            r'^.*planner wall-clock time: (.+)s$',
             type=float,
             file='driver.log')
         self.add_function(parse_exit_code)
