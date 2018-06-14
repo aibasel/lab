@@ -47,7 +47,7 @@ steps_group.add_argument(
 DIR = os.path.dirname(os.path.abspath(__file__))
 LAB_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
 STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static-experiment-properties'
-STATIC_RUN_PROPERTIES_FILENAME = 'static-run-properties'
+STATIC_RUN_PROPERTIES_FILENAME = 'static-properties'
 
 
 def get_default_data_dir():
@@ -346,7 +346,7 @@ class Experiment(_Buildable):
 
     """
 
-    #: Parser that copies "static-run-properties" to "properties".
+    #: Parser that copies "static-properties" to "properties".
     #:
     #: Parsed Lab attributes: "id", "run_dir"
     #:
