@@ -23,6 +23,7 @@ lab
 
 downward
 ^^^^^^^^
+* Add "planner_timer" and "planner_memory" attributes.
 * See :class:`~downward.experiment.FastDownwardExperiment` for required parsers.
 * Revise anytime search parser: parse only "cost", "cost:all" and "coverage".
 * Single search parser: fix regexes for time and memory limits and make them mandatory.

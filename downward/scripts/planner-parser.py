@@ -24,7 +24,7 @@ def add_planner_memory(content, props):
     translate_memory = props['translator_peak_memory']
     search_memory = props.get('memory')
     if search_memory is not None:
-        props['planner_peak_memory'] = max(translate_memory, search_memory)
+        props['planner_memory'] = max(translate_memory, search_memory)
 
 
 def add_planner_time(content, props):

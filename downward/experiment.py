@@ -124,7 +124,7 @@ class FastDownwardExperiment(Experiment):
     #: Required attributes: "memory", "total_time",
     #: "translator_peak_memory", "translator_time_done"
     #:
-    #: Parsed attributes: "planner_peak_memory", "planner_time"
+    #: Parsed attributes: "planner_memory", "planner_time"
     PLANNER_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'planner-parser.py')
 
