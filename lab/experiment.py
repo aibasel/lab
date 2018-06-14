@@ -44,7 +44,6 @@ steps_group.add_argument(
     '--all', dest='run_all_steps', action='store_true',
     help='Run all steps.')
 
-DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static-experiment-properties'
 STATIC_RUN_PROPERTIES_FILENAME = 'static-properties'
 

@@ -30,10 +30,12 @@ parser ``examples/ff/ff-parser.py`` serves as an example:
 You can add this parser to alls runs by using
 :meth:`add_parser() <lab.experiment.Experiment.add_parser>`:
 
+>>> import os.path
 >>> from lab import experiment
 >>> exp = experiment.Experiment()
->>> exp.add_parser(os.path.join(
-...     experiment.DIR, '../examples/ff/ff-parser.py'))
+>>> parser = os.path.abspath(
+...     os.path.join(__file__, '../../examples/ff/ff-parser.py'))
+>>> exp.add_parser(parser)
 
 All added parsers will be run in the order in which they were added
 after executing the run's commands.
