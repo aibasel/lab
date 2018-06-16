@@ -63,15 +63,20 @@ class Fetcher(object):
         props.update(static_props)
         props.update(dynamic_props)
 
-        driver_err_file = os.path.join(run_dir, 'driver.err')
-        run_err_file = os.path.join(run_dir, 'run.err')
-        for err_file in [driver_err_file, run_err_file]:
-            if os.path.exists(err_file):
-                with open(err_file) as f:
+        driver_log = os.path.join(run_dir, 'driver.log')
+        if not os.path.exists(driver_log):
+            props.add_unexplained_error(
+                'driver.log is missing. Probably the run was never started.')
+
+        driver_err = os.path.join(run_dir, 'driver.err')
+        run_err = os.path.join(run_dir, 'run.err')
+        for logfile in [driver_err, run_err]:
+            if os.path.exists(logfile):
+                with open(logfile) as f:
                     content = f.read()
                 if content:
                     props.add_unexplained_error(
-                        '{}: {}'.format(os.path.basename(err_file), content))
+                        '{}: {}'.format(os.path.basename(logfile), content))
         return props
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
