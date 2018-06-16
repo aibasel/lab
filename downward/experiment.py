@@ -188,7 +188,7 @@ class FastDownwardExperiment(Experiment):
         http://bitbucket.org/aibasel/downward-benchmarks. After cloning
         the repo, you can generate suites with the ``suites.py``
         script. We recommend using the suite ``optimal_strips`` for
-        optimal planning and ``satisficing`` for satisifing planning::
+        optimal planning and ``satisficing`` for satisficing planning::
 
             # Create standard optimal planning suite.
             $ path/to/downward-benchmarks/suites.py optimal_strips
