@@ -74,7 +74,7 @@ def get_run_dir(task_id):
     return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
 
 
-def _check_name(name, typ, extra_chars=''):
+def _check_name(name, typ, extra_chars='', letter_first=True):
     if not isinstance(name, basestring):
         logging.critical('Name for {typ} must be a string: {name}'.format(**locals()))
     if not name:
@@ -82,9 +82,12 @@ def _check_name(name, typ, extra_chars=''):
     alpha_num_name = name
     for c in extra_chars:
         alpha_num_name = alpha_num_name.replace(c, '')
-    if not (name[0].isalpha() and alpha_num_name.isalnum()):
+    if letter_first and not name[0].isalpha():
         logging.critical(
-            'Name for {typ} must start with a letter and may use characters from'
+            'Name for {typ} must start with a letter.'.format(**locals()))
+    if not alpha_num_name.isalnum():
+        logging.critical(
+            'Name for {typ} may only use characters from'
             ' [A-Z], [a-z], [0-9], [{extra_chars}]: {name}'.format(**locals()))
 
 
@@ -422,7 +425,7 @@ class Experiment(_Buildable):
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
-        _check_name(name, "Step", extra_chars='_-.')
+        _check_name(name, "Step", extra_chars='_-.', letter_first=False)
         if any(step.name == name for step in self.steps):
             raise ValueError("Step names must be unique: {}".format(name))
         self.steps.append(Step(name, function, *args, **kwargs))
