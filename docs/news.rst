@@ -10,26 +10,31 @@ v3.0 (unreleased)
 
 lab
 ^^^
-* Add :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. Don't add any parser implicitly. See also :ref:`parsing`.
-* Add :meth:`exp.add_parse_again_step() <lab.experiment.Experiment.add_parse_again_step>` for running parsers again.
+* Add :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>` (Silvan). See also :ref:`parsing`.
+* Add :meth:`exp.add_parse_again_step() <lab.experiment.Experiment.add_parse_again_step>` for running parsers again (Silvan).
 * Require that the ``build``, ``start_runs`` and ``fetch`` steps are added explicitly (see :class:`~lab.experiment.Experiment`).
 * Remove *required* argument from ``add_resource()``. All resources are now required.
 * Use stricter naming rules for commands, resources, parsers and steps. See respective ``add_*`` methods for details.
 * Use ``flags='M'`` by default for :meth:`lab.parser.Parser.add_pattern`.
 * Only support custom command line arguments for locally executed steps.
 * Log errors to stderr.
+* Log exit codes and wall-clock times of commands to driver.log.
+* Add unexplained error if driver.log is empty.
+* Let fetcher fetch ``properties`` and ``static-properties`` files.
 * Remove deprecated possibility of passing Step objects to ``add_step()``.
 * Remove deprecated ``exp.__call__()`` method.
 
 downward
 ^^^^^^^^
 * Add "planner_timer" and "planner_memory" attributes.
-* Reorganize parsers. See :class:`~downward.experiment.FastDownwardExperiment` for built-in parsers.
-* Revise anytime-search parser: parse only "cost", "cost:all" and "coverage".
-* Single-search parser: fix regexes for time and memory limits and make them mandatory.
-* Single-search parser: remove two landmark-specific patterns.
+* Reorganize parsers and don't add any parser implicitly. See :ref:`downward-parsers`.
+* Add anytime-search parser that parses only "cost", "cost:all" and "coverage".
+* Revise and simplify single-search parser.
 * Parse new Fast Downward exit codes (http://issues.fast-downward.org/issue739).
-* Don't exclude (obsolete) 'benchmarks' directory when caching revisions.
+* Don't exclude (obsolete) "benchmarks" directory when caching revisions.
+* Only copy "raw_memory" value to "memory" when "total_time" is present.
+* Rename "fast-downward" command to "planner".
+* Make "error" attribute optional for reports.
 
 
 v2.3 (2018-04-12)
