@@ -152,7 +152,7 @@ class Parser(object):
         each line, respectively.
 
         If *required* is True and the pattern is not found in *file*,
-        an error message is printed to stdout.
+        an error message is printed to stderr.
 
         >>> parser = Parser()
         >>> parser.add_pattern('facts', r'^Facts: (\d+)$', type=int)
@@ -185,8 +185,9 @@ class Parser(object):
         >>> parser = Parser()
         >>> parser.add_function(find_f_values)
 
-        You can use ``props.add_unexplained_error(msg)`` when your parsing
-        function detects that something went wrong during the run.
+        You can use ``props.add_unexplained_error("message")`` when your
+        parsing function detects that something went wrong during the
+        run.
 
         """
         self.file_parsers[file].add_function(function)
