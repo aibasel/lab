@@ -44,7 +44,8 @@ def parse_translator_timestamps(content, props):
             section = match.group(1).lower().replace(' ', '_')
             props['translator_time_' + section] = float(match.group(3))
         if line.startswith('Done!'):
-            break
+            return
+    assert False
 
 
 def parse_statistics(content, props):
@@ -59,8 +60,9 @@ def parse_statistics(content, props):
             attr = match.group(1).lower().replace(' ', '_')
             # Support strings, numbers, tuples, lists, dicts, booleans, and None.
             props['translator_{}'.format(attr)] = ast.literal_eval(match.group(2))
-        if line.startswith('done'):
-            break
+        if line.startswith('Done!'):
+            return
+    assert False
 
 
 class TranslatorParser(Parser):
