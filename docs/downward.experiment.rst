@@ -11,18 +11,8 @@ to :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. See
 :class:`FastDownwardExperiment
 <downward.experiment.FastDownwardExperiment>` for examples.
 
-Mandatory built-in parsers
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-:attr:`exp.EXITCODE_PARSER
-<downward.experiment.FastDownwardExperiment.EXITCODE_PARSER>` has to be
-added to every Fast Downward experiment.
-
 .. autoattribute:: downward.experiment.FastDownwardExperiment.EXITCODE_PARSER
    :annotation:
-
-Optional built-in parsers
-~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoattribute:: downward.experiment.FastDownwardExperiment.TRANSLATOR_PARSER
    :annotation:
@@ -31,4 +21,7 @@ Optional built-in parsers
    :annotation:
 
 .. autoattribute:: downward.experiment.FastDownwardExperiment.ANYTIME_SEARCH_PARSER
+   :annotation:
+
+.. autoattribute:: downward.experiment.FastDownwardExperiment.PLANNER_PARSER
    :annotation:

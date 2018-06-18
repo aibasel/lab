@@ -107,11 +107,11 @@ class FastDownwardExperiment(Experiment):
     EXITCODE_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
 
-    #: Parsed attributes: "translator_variables", "translator_time_done", etc.
+    #: Parsed attributes: "translator_peak_memory", "translator_time_done", etc.
     TRANSLATOR_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
 
-    #: Required attributes: unsolvable
+    #: Required attributes: "unsolvable"
     #:
     #: Parsed attributes: "coverage", "memory", "total_time", etc.
     SINGLE_SEARCH_PARSER = os.path.join(
@@ -142,14 +142,11 @@ class FastDownwardExperiment(Experiment):
         >>> env = BaselSlurmEnvironment(email="my.name@unibas.ch")
         >>> exp = FastDownwardExperiment(environment=env)
 
-        You can add parsers with :meth:`.add_parser()`. The exit code parser
-        is required since it adds the mandatory "error" attribute:
+        You can add parsers with :meth:`.add_parser()`. Which parsers
+        you should use depends on the algorithms you're running. For
+        standard experiments, we recommend adding the following parsers:
 
         >>> exp.add_parser(exp.EXITCODE_PARSER)
-
-        You can add other parsers depending on the algorithms you're
-        running:
-
         >>> exp.add_parser(exp.TRANSLATOR_PARSER)
         >>> exp.add_parser(exp.SINGLE_SEARCH_PARSER)
         >>> exp.add_parser(exp.ANYTIME_SEARCH_PARSER)
