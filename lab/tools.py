@@ -447,19 +447,11 @@ def get_terminal_size():
 def get_unexplained_errors_message(run):
     """
     Return an error message if an unexplained error occured in the given run,
-    otherwise return None. Also, add an unexplained error to the run if
-    run['error'] is missing.
+    otherwise return None.
     """
-    if 'error' not in run:
-        add_unexplained_error(run, 'attribute-error-missing')
-
     unexplained_errors = run.get('unexplained_errors', [])
     if not unexplained_errors or unexplained_errors == ['output-to-slurm.err']:
         return ''
-    elif unexplained_errors == ['attribute-error-missing']:
-        return (
-            'Attribute "error" is missing. Have you added the required parsers?'
-            ' See documentation and "examples" directory.')
     else:
         return (
             'Unexplained error(s): {unexplained_errors}. Please inspect'

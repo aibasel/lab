@@ -28,7 +28,7 @@ SUITE = [
     'grid', 'gripper:prob01.pddl',
     'miconic:s1-0.pddl', 'mystery:prob07.pddl']
 ATTRIBUTES = [
-    'coverage', 'evaluations', 'plan', 'times',
+    'coverage', 'error', 'evaluations', 'plan', 'times',
     'trivially_unsolvable']
 
 
