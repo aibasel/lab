@@ -34,9 +34,13 @@ def _get_states_pattern(attribute, name):
     return (attribute, r'^{name} (\d+) state\(s\)\.$'.format(**locals()), int)
 
 
-PATTERNS = [
+REQUIRED_PATTERNS = [
     ('limit_search_time', r'^.*search time limit: (.+)s$', float),
     ('limit_search_memory', r'^.*search memory limit: (\d+) MB$', int),
+    ('raw_memory', r'^Peak memory: (.+) KB$', int),
+]
+
+OPTIONAL_PATTERNS = [
     ('cost', r'^Plan cost: (.+)$', float),
     ('plan_length', r'^Plan length: (\d+) step\(s\)\.$', int),
     ('evaluations', r'^Evaluations: (.+)$', int),
@@ -51,7 +55,6 @@ PATTERNS = [
     _get_states_pattern('reopened_until_last_jump', 'Reopened until last jump:'),
     ('search_time', r'^Search time: (.+)s$', float),
     ('total_time', r'^Total time: (.+)s$', float),
-    ('raw_memory', r'^Peak memory: (.+) KB$', int),
 ]
 
 
@@ -59,7 +62,7 @@ def check_single_search(content, props):
     if '\nCumulative statistics:\n' in content:
         props.add_unexplained_error(
             'single-search parser can\'t be used for iterated search')
-    for name, pattern, _ in PATTERNS:
+    for name, pattern, _ in REQUIRED_PATTERNS + OPTIONAL_PATTERNS:
         results = re.findall(pattern, content)
         if len(results) > 1:
             props.add_unexplained_error(
@@ -160,8 +163,10 @@ class SingleSearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
 
-        for name, pattern, typ in PATTERNS:
-            self.add_pattern(name, pattern, type=typ)
+        for name, pattern, typ in REQUIRED_PATTERNS:
+            self.add_pattern(name, pattern, type=typ, required=True)
+        for name, pattern, typ in OPTIONAL_PATTERNS:
+            self.add_pattern(name, pattern, type=typ, required=False)
 
         self.add_function(check_single_search)
         self.add_function(add_coverage)
