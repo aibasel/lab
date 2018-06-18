@@ -37,11 +37,6 @@ def add_planner_time(content, props):
 class PlannerParser(Parser):
     def __init__(self):
         Parser.__init__(self)
-        self.add_pattern(
-            'planner_wall_clock_time',
-            r'^.*planner wall-clock time: (.+)s$',
-            type=float,
-            file='driver.log')
         self.add_function(add_planner_memory)
         self.add_function(add_planner_time)
 
