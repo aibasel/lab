@@ -21,17 +21,17 @@ from lab.parser import Parser
 
 
 def add_planner_memory(content, props):
-    translate_memory = props['translator_peak_memory']
-    search_memory = props.get('memory')
-    if search_memory is not None:
-        props['planner_memory'] = max(translate_memory, search_memory)
+    try:
+        props['planner_memory'] = max(props['translator_peak_memory'], props['memory'])
+    except KeyError:
+        pass
 
 
 def add_planner_time(content, props):
-    translate_time = props['translator_time_done']
-    search_time = props.get('total_time')
-    if search_time is not None:
-        props['planner_time'] = translate_time + search_time
+    try:
+        props['planner_time'] = props['translator_time_done'] + props['total_time']
+    except KeyError:
+        pass
 
 
 class PlannerParser(Parser):
