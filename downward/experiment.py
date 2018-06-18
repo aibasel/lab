@@ -110,8 +110,6 @@ class FastDownwardExperiment(Experiment):
     TRANSLATOR_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
 
-    #: Required attributes: "unsolvable".
-    #:
     #: Parsed attributes: "coverage", "memory", "total_time", etc.
     SINGLE_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')

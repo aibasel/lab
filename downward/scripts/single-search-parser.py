@@ -30,10 +30,6 @@ import sys
 from lab.parser import Parser
 
 
-def _solved(run):
-    return run['coverage'] or run['unsolvable']
-
-
 def _get_states_pattern(attribute, name):
     return (attribute, r'^{name} (\d+) state\(s\)\.$'.format(**locals()), int)
 
@@ -103,7 +99,7 @@ def add_initial_h_values(content, props):
 
 
 def add_memory(content, props):
-    """Add "memory" attribute if the problem was solved.
+    """Add "memory" attribute if the run was not aborted.
 
     Peak memory usage is printed even for runs that are terminated
     abnormally. For these runs we do not take the reported value into
@@ -112,12 +108,9 @@ def add_memory(content, props):
 
     """
     raw_memory = props.get('raw_memory')
-
     if raw_memory is None or raw_memory < 0:
         props.add_unexplained_error('log does not contain peak memory')
-        return
-
-    if _solved(props):
+    elif 'total_time' in props:
         props['memory'] = raw_memory
 
 
