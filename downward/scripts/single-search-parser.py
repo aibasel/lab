@@ -123,7 +123,7 @@ def add_scores(content, props):
 
     """
     def log_score(value, min_bound, max_bound):
-        if value is None:
+        if value is None or not props['coverage']:
             return 0
         value = max(value, min_bound)
         value = min(value, max_bound)
