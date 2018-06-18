@@ -241,8 +241,6 @@ class PlanningReport(Report):
                 'There was output to {slurm_err_file}.'.format(**locals()))
 
             text = (
-                'There was output to slurm.err.'
-                ' Please inspect the relevant *-grid-steps/slurm.err file(s).'
                 ' Contents of {slurm_err_file} without "memory cg"'
                 ' errors:\n```\n{slurm_err_content}\n```'.format(**locals()))
 
