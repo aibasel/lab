@@ -102,8 +102,7 @@ class FastDownwardExperiment(Experiment):
 
     # Built-in parsers that can be passed to exp.add_parser().
 
-    #: Parsed attributes: "error", "planner_exit_code", "planner_wall_clock_time",
-    #: "unsolvable"
+    #: Parsed attributes: "error", "planner_exit_code", "unsolvable".
     EXITCODE_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
 
@@ -111,20 +110,20 @@ class FastDownwardExperiment(Experiment):
     TRANSLATOR_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
 
-    #: Required attributes: "unsolvable"
+    #: Required attributes: "unsolvable".
     #:
     #: Parsed attributes: "coverage", "memory", "total_time", etc.
     SINGLE_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
 
-    #: Parsed attributes: "cost", "cost:all", "coverage"
+    #: Parsed attributes: "cost", "cost:all", "coverage".
     ANYTIME_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
 
     #: Required attributes: "memory", "total_time",
-    #: "translator_peak_memory", "translator_time_done"
+    #: "translator_peak_memory", "translator_time_done".
     #:
-    #: Parsed attributes: "planner_memory", "planner_time"
+    #: Parsed attributes: "planner_memory", "planner_time", "planner_wall_clock_time".
     PLANNER_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'planner-parser.py')
 

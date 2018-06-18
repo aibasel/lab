@@ -67,11 +67,6 @@ class ExitCodeParser(Parser):
             r'^.*planner exit code: (.+)$',
             type=int,
             file='driver.log')
-        self.add_pattern(
-            'planner_wall_clock_time',
-            r'^.*planner wall-clock time: (.+)s$',
-            type=float,
-            file='driver.log')
         self.add_function(parse_exit_code)
 
 
