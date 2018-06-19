@@ -74,7 +74,7 @@ def get_run_dir(task_id):
     return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
 
 
-def _check_name(name, typ, extra_chars='', letter_first=True):
+def _check_name(name, typ, extra_chars=''):
     if not isinstance(name, basestring):
         logging.critical('Name for {typ} must be a string: {name}'.format(**locals()))
     if not name:
@@ -82,7 +82,7 @@ def _check_name(name, typ, extra_chars='', letter_first=True):
     alpha_num_name = name
     for c in extra_chars:
         alpha_num_name = alpha_num_name.replace(c, '')
-    if letter_first and not name[0].isalpha():
+    if not name[0].isalpha():
         logging.critical(
             'Name for {typ} must start with a letter.'.format(**locals()))
     if not alpha_num_name.isalnum():
@@ -407,9 +407,9 @@ class Experiment(_Buildable):
         results. To add fetch and report steps, use the convenience
         methods :meth:`.add_fetcher` and :meth:`.add_report`.
 
-        *name* is a descriptive name for the step. It must start with a
-        letter and consist of letters, numbers, underscores, hyphens and
-        dots.
+        *name* is a descriptive name for the step. When selecting steps
+        on the command line, you may either use step names or their
+        indices.
 
         *function* must be a callable Python object, e.g., a function
         or a class implementing `__call__`.
@@ -427,7 +427,10 @@ class Experiment(_Buildable):
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
-        _check_name(name, "Step", extra_chars='_-.', letter_first=False)
+        if not isinstance(name, basestring):
+            logging.critical('Step name must be a string: {}'.format(name))
+        if not name:
+            logging.critical('Step name must not be empty')
         if any(step.name == name for step in self.steps):
             raise ValueError("Step names must be unique: {}".format(name))
         self.steps.append(Step(name, function, *args, **kwargs))

@@ -14,7 +14,7 @@ lab
 * Add :meth:`exp.add_parse_again_step() <lab.experiment.Experiment.add_parse_again_step>` for running parsers again (Silvan).
 * Require that the ``build``, ``start_runs`` and ``fetch`` steps are added explicitly (see :class:`~lab.experiment.Experiment`).
 * Remove *required* argument from ``add_resource()``. All resources are now required.
-* Use stricter naming rules for commands, resources, parsers and steps. See respective ``add_*`` methods for details.
+* Use stricter naming rules for commands and resources. See respective ``add_*`` methods for details.
 * Use ``flags='M'`` by default for :meth:`lab.parser.Parser.add_pattern`.
 * Only support custom command line arguments for locally executed steps.
 * Log errors to stderr.
