@@ -34,7 +34,7 @@ from lab.steps import Step, get_step, get_steps_text
 SHARD_SIZE = 100
 
 # Make argparser available globally so users can add custom arguments.
-ARGPARSER = tools.get_parser()
+ARGPARSER = tools.get_argument_parser()
 ARGPARSER.epilog = "The list of available steps will be added later."
 steps_group = ARGPARSER.add_mutually_exclusive_group()
 steps_group.add_argument(
@@ -364,6 +364,10 @@ class Experiment(_Buildable):
         :ref:`Environment <environments>`.
 
         """
+        # Configure logging.
+        log_level = getattr(logging, ARGPARSER.parse_args().log_level.upper())
+        tools.configure_logging(log_level)
+
         _Buildable.__init__(self)
         path = path or _get_default_experiment_dir()
         self.path = os.path.abspath(path)

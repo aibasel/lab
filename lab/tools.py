@@ -40,9 +40,6 @@ except ImportError:
     import json
 
 
-_LOG_LEVEL = None
-
-
 def get_script_path():
     """Get absolute path to main script."""
     return os.path.abspath(sys.argv[0])
@@ -52,7 +49,7 @@ def get_lab_path():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def setup_logging(level):
+def configure_logging(level):
     # Python adds a default handler if some log is written before this
     # function is called. We therefore remove all handlers that have
     # been added automatically.
@@ -495,31 +492,12 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
         return help
 
 
-def get_parser(add_log_option=True, **kwargs):
-    kwargs.setdefault('formatter_class', RawAndDefaultsHelpFormatter)
-    parser = argparse.ArgumentParser(**kwargs)
-    if add_log_option:
-        parser.add_argument(
-            '-l', '--log-level',
-            dest='log_level',
-            choices=['DEBUG', 'INFO', 'WARNING'],
-            default='INFO',
-            help='Logging verbosity')
+def get_argument_parser():
+    parser = argparse.ArgumentParser(formatter_class=RawAndDefaultsHelpFormatter)
+    parser.add_argument(
+        '-l', '--log-level',
+        dest='log_level',
+        choices=['DEBUG', 'INFO', 'WARNING'],
+        default='INFO',
+        help='Logging verbosity')
     return parser
-
-
-def parse_and_set_log_level():
-    # Set log level only once.
-    global _LOG_LEVEL
-    if _LOG_LEVEL:
-        return
-
-    parser = get_parser(add_help=False)
-    args, _ = parser.parse_known_args()
-
-    if getattr(args, 'log_level', None):
-        _LOG_LEVEL = getattr(logging, args.log_level.upper())
-        setup_logging(_LOG_LEVEL)
-
-
-parse_and_set_log_level()
