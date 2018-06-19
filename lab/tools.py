@@ -493,9 +493,13 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
 
 
 def get_argument_parser():
+    def log_level(s):
+        return getattr(logging, s.upper())
+
     parser = argparse.ArgumentParser(formatter_class=RawAndDefaultsHelpFormatter)
     parser.add_argument(
         '-l', '--log-level',
+        type=log_level,
         dest='log_level',
         choices=['DEBUG', 'INFO', 'WARNING'],
         default='INFO',

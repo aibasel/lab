@@ -364,9 +364,7 @@ class Experiment(_Buildable):
         :ref:`Environment <environments>`.
 
         """
-        # Configure logging.
-        log_level = getattr(logging, ARGPARSER.parse_args().log_level.upper())
-        tools.configure_logging(log_level)
+        tools.configure_logging(ARGPARSER.parse_args().log_level)
 
         _Buildable.__init__(self)
         path = path or _get_default_experiment_dir()
