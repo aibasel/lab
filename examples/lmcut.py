@@ -21,7 +21,7 @@ if NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch"):
     SUITE = ['depot', 'freecell', 'gripper', 'zenotravel']
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
 else:
-    SUITE = ['depot:p01.pddl', 'gripper:prob01.pddl']
+    SUITE = ['depot:p01.pddl', 'gripper:prob01.pddl', 'mystery:prob07.pddl']
     ENV = LocalEnvironment(processes=2)
 # Use path to your Fast Downward repository.
 REPO = os.environ["DOWNWARD_REPO"]
