@@ -110,9 +110,9 @@ def add_memory(content, props):
     memory usage until termination.
 
     """
-    raw_memory = props.get('raw_memory')
-    if raw_memory is None or raw_memory < 0:
-        props.add_unexplained_error('log does not contain peak memory')
+    raw_memory = props['raw_memory']
+    if raw_memory < 0:
+        props.add_unexplained_error('planner failed to log peak memory')
     elif 'total_time' in props:
         props['memory'] = raw_memory
 
