@@ -34,13 +34,10 @@ def _get_states_pattern(attribute, name):
     return (attribute, r'^{name} (\d+) state\(s\)\.$'.format(**locals()), int)
 
 
-REQUIRED_PATTERNS = [
+PATTERNS = [
     ('limit_search_time', r'^.*search time limit: (.+)s$', float),
     ('limit_search_memory', r'^.*search memory limit: (\d+) MB$', int),
     ('raw_memory', r'^Peak memory: (.+) KB$', int),
-]
-
-OPTIONAL_PATTERNS = [
     ('cost', r'^Plan cost: (.+)$', float),
     ('plan_length', r'^Plan length: (\d+) step\(s\)\.$', int),
     ('evaluations', r'^Evaluations: (.+)$', int),
@@ -62,7 +59,7 @@ def check_single_search(content, props):
     if '\nCumulative statistics:\n' in content:
         props.add_unexplained_error(
             'single-search parser can\'t be used for iterated search')
-    for name, pattern, _ in REQUIRED_PATTERNS + OPTIONAL_PATTERNS:
+    for name, pattern, _ in PATTERNS:
         results = re.findall(pattern, content)
         if len(results) > 1:
             props.add_unexplained_error(
@@ -110,11 +107,12 @@ def add_memory(content, props):
     memory usage until termination.
 
     """
-    raw_memory = props['raw_memory']
-    if raw_memory < 0:
-        props.add_unexplained_error('planner failed to log peak memory')
-    elif 'total_time' in props:
-        props['memory'] = raw_memory
+    raw_memory = props.get('raw_memory')
+    if raw_memory is not None:
+        if raw_memory < 0:
+            props.add_unexplained_error('planner failed to log peak memory')
+        elif 'total_time' in props:
+            props['memory'] = raw_memory
 
 
 def add_scores(content, props):
@@ -138,15 +136,23 @@ def add_scores(content, props):
         props['score_' + attr] = log_score(
             props.get(attr), min_bound=100, max_bound=1e6)
 
-    max_time = props['limit_search_time']
-    props['score_total_time'] = log_score(
-        props.get('total_time'), min_bound=1.0, max_bound=max_time)
-    props['score_search_time'] = log_score(
-        props.get('search_time'), min_bound=1.0, max_bound=max_time)
+    try:
+        max_time = props['limit_search_time']
+    except KeyError:
+        print "search time limit missing -> can't compute time scores"
+    else:
+        props['score_total_time'] = log_score(
+            props.get('total_time'), min_bound=1.0, max_bound=max_time)
+        props['score_search_time'] = log_score(
+            props.get('search_time'), min_bound=1.0, max_bound=max_time)
 
-    max_memory_kb = props['limit_search_memory'] * 1024
-    props['score_memory'] = log_score(
-        props.get('memory'), min_bound=2000, max_bound=max_memory_kb)
+    try:
+        max_memory_kb = props['limit_search_memory'] * 1024
+    except KeyError:
+        print "search memory limit missing -> can't compute memory score"
+    else:
+        props['score_memory'] = log_score(
+            props.get('memory'), min_bound=2000, max_bound=max_memory_kb)
 
 
 def ensure_minimum_times(content, props):
@@ -163,9 +169,7 @@ class SingleSearchParser(Parser):
     def __init__(self):
         Parser.__init__(self)
 
-        for name, pattern, typ in REQUIRED_PATTERNS:
-            self.add_pattern(name, pattern, type=typ, required=True)
-        for name, pattern, typ in OPTIONAL_PATTERNS:
+        for name, pattern, typ in PATTERNS:
             self.add_pattern(name, pattern, type=typ, required=False)
 
         self.add_function(check_single_search)
