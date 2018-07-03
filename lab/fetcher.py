@@ -123,13 +123,6 @@ class Fetcher(object):
             except IOError:
                 slurm_err_content = ''
 
-            if slurm_err_content:
-                filtered = tools.filter_slurm_err_content(slurm_err_content)
-                logging.error(
-                    'Slurm error log without "memory cg" errors:\n'
-                    '{sep}\n{filtered}\n{sep}'.format(
-                        sep='*' * 72, **locals()))
-
             new_props = tools.Properties()
             run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
             total_dirs = len(run_dirs)
