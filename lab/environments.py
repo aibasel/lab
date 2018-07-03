@@ -129,9 +129,9 @@ class GridEnvironment(Environment):
     def __init__(self, email=None, extra_options=None, **kwargs):
         """
 
-        If the main experiment step ('run') is part of the selected
-        steps, the selected steps are submitted to the grid engine.
-        Otherwise, the selected steps are run locally.
+        If the main experiment step is part of the selected steps, the
+        selected steps are submitted to the grid engine. Otherwise, the
+        selected steps are run locally.
 
         .. note::
 
