@@ -275,16 +275,18 @@ class SlurmEnvironment(GridEnvironment):
     DEFAULT_MEMORY_PER_CPU = None
 
     # Can be overridden in derived classes.
+    DEFAULT_EXPORT = ['PATH']
+    DEFAULT_SETUP = ''
     JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header'
     RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body'
     STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body'
-    ENVIRONMENT_SETUP = ''
 
     def __init__(self, partition=None, qos=None, memory_per_cpu=None,
-                 export=['PATH'], **kwargs):
+                 export=None, setup=None, **kwargs):
         """
 
-        *partition* must be a valid Slurm partition name. Choose from
+        *partition* must be a valid Slurm partition name. In Basel you
+        can choose from
 
         * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
         * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
@@ -306,7 +308,14 @@ class SlurmEnvironment(GridEnvironment):
         ``driver_options``.
 
         Use *export* to specify a list of environment variables that
-        should be exported from the login node to the compute nodes.
+        should be exported from the login node to the compute nodes
+        (default: ["PATH"]).
+
+        You can alter the environment in which the experiment runs with
+        the **setup** argument. If given, it must be a string of Bash
+        commands. If omitted,
+        :class:`~lab.environments.BaselSlurmEnvironment` loads a
+        suitable Python version and adds Lab to the PYTHONPATH.
 
         See :py:class:`~lab.environments.GridEnvironment` for inherited
         parameters.
@@ -320,11 +329,16 @@ class SlurmEnvironment(GridEnvironment):
             qos = self.DEFAULT_QOS
         if memory_per_cpu is None:
             memory_per_cpu = self.DEFAULT_MEMORY_PER_CPU
+        if export is None:
+            export = self.DEFAULT_EXPORT
+        if setup is None:
+            setup = self.DEFAULT_SETUP
 
         self.partition = partition
         self.qos = qos
         self.memory_per_cpu = memory_per_cpu
         self.export = export
+        self.setup = setup
 
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
@@ -340,7 +354,7 @@ class SlurmEnvironment(GridEnvironment):
         job_params['memory_per_cpu'] = self.memory_per_cpu
         # Ensure that single-core tasks always run before multi-core tasks.
         job_params['nice'] = 2000 if is_run_step(step) else 0
-        job_params['environment_setup'] = self.ENVIRONMENT_SETUP
+        job_params['environment_setup'] = self.setup
 
         if is_last and self.email:
             job_params['mailtype'] = 'END,FAIL,REQUEUE,STAGE_OUT'
@@ -374,7 +388,6 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # infai nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = '3872M'
-
-    ENVIRONMENT_SETUP = (
+    DEFAULT_SETUP = (
         'module load Python/2.7.11-goolf-1.7.20\n'
         'PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path())
