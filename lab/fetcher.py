@@ -123,6 +123,9 @@ class Fetcher(object):
             except IOError:
                 slurm_err_content = ''
 
+            if slurm_err_content:
+                logging.error('There was ouput to *-grid-steps/slurm.err')
+
             new_props = tools.Properties()
             run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
             total_dirs = len(run_dirs)
