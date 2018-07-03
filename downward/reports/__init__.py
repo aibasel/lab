@@ -82,6 +82,7 @@ class PlanningReport(Report):
             'initial_h_value', min_wins=False, scale='linear',
             functions=reports.finite_sum),
         Attribute('plan_length', scale='linear'),
+        Attribute('planner_time', functions=geometric_mean),
         Attribute('quality', absolute=True, min_wins=False),
         Attribute('score_*', min_wins=False, digits=4),
         Attribute('search_time', functions=geometric_mean),
