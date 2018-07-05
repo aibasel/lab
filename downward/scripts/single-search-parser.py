@@ -170,7 +170,7 @@ class SingleSearchParser(Parser):
         Parser.__init__(self)
 
         for name, pattern, typ in PATTERNS:
-            self.add_pattern(name, pattern, type=typ, required=False)
+            self.add_pattern(name, pattern, type=typ)
 
         self.add_function(check_single_search)
         self.add_function(add_coverage)

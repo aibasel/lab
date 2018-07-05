@@ -15,7 +15,7 @@ lab
 * Require that the ``build``, ``start_runs`` and ``fetch`` steps are added explicitly (see :class:`~lab.experiment.Experiment`).
 * Remove *required* argument from ``add_resource()``. All resources are now required.
 * Use stricter naming rules for commands and resources. See respective ``add_*`` methods for details.
-* Use ``flags='M'`` by default for :meth:`lab.parser.Parser.add_pattern`.
+* Use ``required=False`` and ``flags='M'`` by default for :meth:`lab.parser.Parser.add_pattern`.
 * Only support custom command line arguments for locally executed steps.
 * Log errors to stderr.
 * Log exit codes and wall-clock times of commands to driver.log.

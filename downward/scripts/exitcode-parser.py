@@ -66,7 +66,8 @@ class ExitCodeParser(Parser):
             'planner_exit_code',
             r'^.*planner exit code: (.+)$',
             type=int,
-            file='driver.log')
+            file='driver.log',
+            required=True)
         self.add_function(parse_exit_code)
 
 

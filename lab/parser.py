@@ -135,7 +135,7 @@ class Parser(object):
 
     def add_pattern(
             self, attribute, regex, file='run.log', type=int, flags='M',
-            required=True):
+            required=False):
         r"""
         Look for *regex* in *file*, cast what is found in brackets to
         *type* and store it in the properties dictionary under
