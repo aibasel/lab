@@ -38,6 +38,7 @@ See ``examples/report-external-results.py`` for an example.
 Which experiment class should I use for which Fast Downward revision?
 ---------------------------------------------------------------------
 
-* Before CMake: Use DownwardExperiment in Lab 1.x
-* With CMake and optional validation: Use FastDownwardExperiment in Lab 1.x
-* With CMake and mandatory validation: Use FastDownwardExperiment in Lab 2.x
+* Before CMake: use DownwardExperiment in Lab 1.x
+* With CMake and optional validation: use FastDownwardExperiment in Lab 1.x
+* With CMake and mandatory validation: use FastDownwardExperiment in Lab 2.x
+* New translator exit codes (issue739): use FastDownwardExperiment in Lab 3.x
