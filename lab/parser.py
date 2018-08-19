@@ -46,6 +46,7 @@ re-parse your results.
 
 """
 
+import errno
 import os.path
 import re
 from collections import defaultdict
@@ -131,6 +132,7 @@ class Parser(object):
     run's ``properties`` file.
     """
     def __init__(self):
+        tools.configure_logging()
         self.file_parsers = defaultdict(_FileParser)
 
     def add_pattern(
@@ -207,9 +209,13 @@ class Parser(object):
             path = os.path.join(run_dir, filename)
             try:
                 file_parser.load_file(path)
-            except (IOError, MemoryError) as err:
-                logging.error('File "%s" could not be read: %s' % (path, err))
-                self.props.add_unexplained_error('parser-failed-to-read-file')
+            except IOError as err:
+                if err.errno == errno.ENOENT:
+                    logging.info('File "{path}" is missing and thus not parsed.'.format(
+                        **locals()))
+                    del self.file_parsers[filename]
+                else:
+                    logging.error('Failed to read "{path}": {err}'.format(**locals()))
 
         for file_parser in self.file_parsers.values():
             self.props.update(file_parser.search_patterns())

@@ -5,6 +5,14 @@ News
 .. module :: downward.experiments
 
 
+v3.1 (unreleased)
+-----------------
+
+lab
+^^^
+* Parser: don't try to parse missing files. Print message to stdout instead.
+
+
 v3.0 (2018-07-10)
 -----------------
 
