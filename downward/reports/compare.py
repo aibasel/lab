@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# downward uses the lab package to conduct experiments with the
+# Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -52,12 +52,14 @@ class ComparativeReport(AbsoluteReport):
         'C')]`` the resulting columns will be A, B, Diff BA (contains B
         - A), A, C , Diff (contains C - A).
 
-        Example::
+        Example:
 
-            algorithm_pairs = [
-                ('default-lmcut', 'issue123-lmcut', 'Diff lmcut')]
-            exp.add_report(ComparativeReport(
-                algorithm_pairs, attributes=['coverage']))
+        >>> from downward.experiment import FastDownwardExperiment
+        >>> exp = FastDownwardExperiment()
+        >>> algorithm_pairs = [
+        ...     ('default-lmcut', 'issue123-lmcut', 'Diff lmcut')]
+        >>> exp.add_report(ComparativeReport(
+        ...     algorithm_pairs, attributes=['coverage']))
 
         Example output:
 

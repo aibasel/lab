@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# lab is a Python API for running and evaluating algorithms.
+# Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
 from glob import glob
 import logging
 import os
-import subprocess
 import sys
 
+import lab.experiment
 from lab import tools
 
 
@@ -54,18 +54,33 @@ class Fetcher(object):
         is more convenient.
 
     """
-    def fetch_dir(self, run_dir, eval_dir, parsers=None):
-        # Allow specyfing a list of multiple parsers or a single parser.
-        parsers = tools.make_list(parsers or [])
-        for parser in parsers:
-            rel_parser = os.path.relpath(parser, start=run_dir)
-            subprocess.call([rel_parser], cwd=run_dir)
+    def fetch_dir(self, run_dir):
+        static_props = tools.Properties(
+            filename=os.path.join(run_dir, lab.experiment.STATIC_RUN_PROPERTIES_FILENAME))
+        dynamic_props = tools.Properties(filename=os.path.join(run_dir, 'properties'))
 
-        prop_file = os.path.join(run_dir, 'properties')
-        return tools.Properties(filename=prop_file)
+        props = tools.Properties()
+        props.update(static_props)
+        props.update(dynamic_props)
+
+        driver_log = os.path.join(run_dir, 'driver.log')
+        if not os.path.exists(driver_log):
+            props.add_unexplained_error(
+                'driver.log is missing. Probably the run was never started.')
+
+        driver_err = os.path.join(run_dir, 'driver.err')
+        run_err = os.path.join(run_dir, 'run.err')
+        for logfile in [driver_err, run_err]:
+            if os.path.exists(logfile):
+                with open(logfile) as f:
+                    content = f.read()
+                if content:
+                    props.add_unexplained_error(
+                        '{}: {}'.format(os.path.basename(logfile), content))
+        return props
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
-                 parsers=None, **kwargs):
+                 **kwargs):
         """
         This method can be used to copy properties from an exp-dir or
         eval-dir into an eval-dir. If the destination eval-dir already
@@ -82,9 +97,6 @@ class Fetcher(object):
             logging.critical('{} is missing or not a directory'.format(src_dir))
         run_filter = tools.RunFilter(filter, **kwargs)
 
-        src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
-        fetch_from_eval_dir = 'runs' not in src_props or src_dir.endswith('-eval')
-
         eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
         logging.info('Fetching properties from {} to {}'.format(src_dir, eval_dir))
 
@@ -98,7 +110,10 @@ class Fetcher(object):
 
         # Load properties in the eval_dir if there are any already.
         combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
+        fetch_from_eval_dir = not os.path.exists(
+            os.path.join(src_dir, 'runs-00001-00100'))
         if fetch_from_eval_dir:
+            src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
             run_filter.apply(src_props)
             combined_props.update(src_props)
             logging.info('Fetched properties of {} runs.'.format(len(src_props)))
@@ -109,11 +124,7 @@ class Fetcher(object):
                 slurm_err_content = ''
 
             if slurm_err_content:
-                filtered = tools.filter_slurm_err_content(slurm_err_content)
-                logging.error(
-                    'Slurm error log without "memory cg" errors:\n'
-                    '{sep}\n{filtered}\n{sep}'.format(
-                        sep='*' * 72, **locals()))
+                logging.error('There was ouput to *-grid-steps/slurm.err')
 
             new_props = tools.Properties()
             run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
@@ -123,7 +134,7 @@ class Fetcher(object):
             for index, run_dir in enumerate(run_dirs, start=1):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, 'Scanning: {:6d}/{:d}'.format(index, total_dirs))
-                props = self.fetch_dir(run_dir, eval_dir, parsers=parsers)
+                props = self.fetch_dir(run_dir)
                 if slurm_err_content:
                     props.add_unexplained_error('output-to-slurm.err')
                 id_string = '-'.join(props['id'])

@@ -3,7 +3,7 @@
 Lab tutorial
 ============
 
-Install lab
+Install Lab
 -----------
 .. highlight:: bash
 .. include:: ../INSTALL.txt
@@ -32,5 +32,5 @@ You can use this file as a basis for your own experiments.
 
 .. literalinclude:: ../examples/ff/ff.py
 
-Have a look at other example experiments under ``examples/simple`` and
-``examples/pi`` or go directly to the `lab API <lab.experiment.html>`_.
+Have a look at other example experiments under ``examples/`` or go
+directly to the `Lab API <lab.experiment.html>`_.

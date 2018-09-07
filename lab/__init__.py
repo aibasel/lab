@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# lab is a Python API for running and evaluating algorithms.
+# Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,5 +15,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#: lab version number. A "+" is appended to all non-tagged revisions.
-__version__ = '2.2+'
+#: Lab version number. A "+" is appended to all non-tagged revisions.
+__version__ = '3.0+'

@@ -1,12 +1,15 @@
 #! /usr/bin/env python2
 
+import logging
 import os
 import multiprocessing
 import subprocess
 import sys
 
-from lab.calls import log
 from lab.experiment import get_run_dir
+from lab import tools
+
+tools.configure_logging()
 
 SHUFFLED_TASK_IDS = %(task_order)s
 
@@ -24,18 +27,16 @@ def process_task(task_id):
     error = False
     with open(os.path.join(run_dir, 'driver.log'), 'w') as driver_log:
         with open(os.path.join(run_dir, 'driver.err'), 'w') as driver_err:
-            print 'Starting run {run_id} (TASK_ID {task_id}) in {run_dir}'.format(**locals())
+            logging.info('Starting run {run_id} (TASK_ID {task_id}) in {run_dir}'.format(**locals()))
             try:
                 subprocess.check_call(['./run'], cwd=run_dir, stdout=driver_log, stderr=driver_err)
             except subprocess.CalledProcessError as err:
                 error = True
     if os.path.getsize(driver_err.name) != 0:
         error = True
-        log.add_unexplained_error(
-            'output-to-' + os.path.basename(driver_err.name),
-            filename=os.path.join(run_dir, 'properties'))
-    for filehandle in [driver_log, driver_err]:
-        log.delete_file_if_empty(filehandle.name)
+    for f in [driver_log, driver_err]:
+        if os.path.getsize(f.name) == 0:
+            os.remove(f.name)
     return error
 
 
@@ -48,11 +49,11 @@ def main():
         # (see https://stackoverflow.com/questions/1408356).
         result.wait(timeout=sys.maxint)
     except KeyboardInterrupt:
-        print 'Main script interrupted'
+        logging.warning('Main script interrupted')
         pool.terminate()
     finally:
         pool.close()
-        print 'Joining pool processes'
+        logging.info('Joining pool processes')
         pool.join()
 
     if any(result.get()):

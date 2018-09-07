@@ -5,6 +5,60 @@ News
 .. module :: downward.experiments
 
 
+v3.1 (unreleased)
+-----------------
+
+lab
+^^^
+* Parser: don't try to parse missing files. Print message to stdout instead.
+
+
+v3.0 (2018-07-10)
+-----------------
+
+lab
+^^^
+* Add :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>` method. See also :ref:`parsing` (Silvan).
+* Add :meth:`exp.add_parse_again_step() <lab.experiment.Experiment.add_parse_again_step>` method for running parsers again (Silvan).
+* Require that the ``build``, ``start_runs`` and ``fetch`` steps are added explicitly (see :class:`~lab.experiment.Experiment`).
+* Remove *required* argument from ``add_resource()``. All resources are now required.
+* Use stricter naming rules for commands and resources. See respective ``add_*`` methods for details.
+* Use ``required=False`` and ``flags='M'`` by default for :meth:`lab.parser.Parser.add_pattern`.
+* Only support custom command line arguments for locally executed steps.
+* Log errors to stderr.
+* Log exit codes and wall-clock times of commands to driver.log.
+* Add unexplained error if driver.log is empty.
+* Let fetcher fetch ``properties`` and ``static-properties`` files.
+* Remove deprecated possibility of passing Step objects to ``add_step()``.
+* Remove deprecated ``exp.__call__()`` method.
+
+downward
+^^^^^^^^
+* Add "planner_timer" and "planner_memory" attributes.
+* Reorganize parsers and don't add any parser implicitly. See :ref:`downward-parsers`.
+* Add anytime-search parser that parses only "cost", "cost:all" and "coverage".
+* Revise and simplify single-search parser.
+* Parse new Fast Downward exit codes (http://issues.fast-downward.org/issue739).
+* Don't exclude (obsolete) "benchmarks" directory when caching revisions.
+* Only copy "raw_memory" value to "memory" when "total_time" is present.
+* Rename "fast-downward" command to "planner".
+* Make "error" attribute optional for reports.
+
+
+v2.3 (2018-04-12)
+-----------------
+
+lab
+^^^
+* BaselSlurmEnvironment: Use ``infai_1`` and ``normal`` as default Slurm partition and QOS.
+* Remove ``OracleGridEngineEnvironment``.
+
+downward
+^^^^^^^^
+* Use ``--overall-time-limit=30m`` and ``--overall-memory-limit=3584M`` for all Fast Downward runs by default.
+* Don't add ``-j`` option to build options (``build.py`` now uses all CPUs automatically).
+
+
 v2.2 (2018-03-16)
 -----------------
 
@@ -95,7 +149,7 @@ lab
 
 downward
 ^^^^^^^^
-* Always validate plans. Previous lab versions don't add ``--validate``
+* Always validate plans. Previous Lab versions don't add ``--validate``
   since older Fast Downward versions don't support it.
 * HTML reports: hide tables by default, add buttons for toggling visibility.
 * Unify "score_*", "quality" and "coverage" attributes: assign values in range [0, 1]
@@ -156,7 +210,7 @@ v1.10 (2015-12-11)
 
 lab
 ^^^
-* Add ``permissions`` parameter to :func:`Experiment.add_new_file()`.
+* Add ``permissions`` parameter to :func:`lab.experiment.Experiment.add_new_file()`.
 * Add default parser which checks that log files are not bigger than 100 MB. Maybe we'll make this configurable in the future.
 * Ensure that resource names are not shared between runs and experiment.
 * Show error message if resource names are not unique.
@@ -210,7 +264,7 @@ lab
 downward
 ^^^^^^^^
 * Parse both evaluated states (evaluated) and evaluations (evaluations).
-* Add example experiment showing how to make reports for data obtained without lab.
+* Add example experiment showing how to make reports for data obtained without Lab.
 * Add suite_sat_strips().
 * Parse negative initial h values.
 * Support CMake builds.
@@ -310,7 +364,7 @@ downward
 * Add :func:`DownwardExperiment.add_search_parser()` method.
 * Run ``make clean`` in revision-cache after compiling preprocessor and search code.
 * Strip executables after compilation in revision-cache.
-* Do not copy lab into experiment directories and grid-steps. Use the global lab version instead.
+* Do not copy lab into experiment directories and grid-steps. Use the global Lab version instead.
 
 
 v1.4
@@ -320,13 +374,13 @@ lab
 ^^^
 * Add :py:func:`exp.add_report() <lab.experiment.Experiment.add_report>` method to simplify adding reports.
 * Use simplejson when available to make loading properties more than twice as fast.
-* Raise default check-interval in Calls to 5s. This should reduce lab's overhead.
+* Raise default check-interval in Calls to 5s. This should reduce Lab's overhead.
 * Send mail when grid experiment finishes. Usage: ``MaiaEnvironment(email='mymail@example.com')``.
 * Remove ``steps.Step.publish_reports()`` method.
 * Allow creating nested new files in experiment directory (e.g. ``exp.add_new_file('path/to/file.txt')``).
 * Remove duplicate attributes from reports.
 * Make commandline parser available globally as :data:`lab.experiment.ARGPARSER` so users can add custom arguments.
-* Add ``cache_dir`` parameter in :py:class:`Experiment <lab.experiment.Experiment>` for specifying where lab stores temporary data.
+* Add ``cache_dir`` parameter in :py:class:`Experiment <lab.experiment.Experiment>` for specifying where Lab stores temporary data.
 
 downward
 ^^^^^^^^

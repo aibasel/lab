@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# downward uses the lab package to conduct experiments with the
+# Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -134,38 +134,40 @@ class ScatterPlotReport(PlotReport):
         than one group, a legend is automatically added. Runs for which
         this function returns None are shown in a default category and
         are not contained in the legend. For example, to group by
-        domain::
+        domain:
 
-            def domain_as_category(run1, run2):
-                # run2['domain'] has the same value, because we always
-                # compare two runs of the same problem.
-                return run1['domain']
+        >>> def domain_as_category(run1, run2):
+        ...     # run2['domain'] has the same value, because we always
+        ...     # compare two runs of the same problem.
+        ...     return run1['domain']
 
-        Example grouping by difficulty::
+        Example grouping by difficulty:
 
-            def improvement(run1, run2):
-                time1 = run1.get('search_time', 1800)
-                time2 = run2.get('search_time', 1800)
-                if time1 > time2:
-                    return 'better'
-                if time1 == time2:
-                    return 'equal'
-                return 'worse'
+        >>> def improvement(run1, run2):
+        ...     time1 = run1.get('search_time', 1800)
+        ...     time2 = run2.get('search_time', 1800)
+        ...     if time1 > time2:
+        ...         return 'better'
+        ...     if time1 == time2:
+        ...         return 'equal'
+        ...     return 'worse'
 
-            ScatterPlotReport(
-                attributes=['search_time'],
-                get_category=improvement)
+        >>> from downward.experiment import FastDownwardExperiment
+        >>> exp = FastDownwardExperiment()
+        >>> exp.add_report(ScatterPlotReport(
+        ...     attributes=['search_time'],
+        ...     get_category=improvement))
 
         Example comparing the number of expanded states for two
-        algorithms::
+        algorithms:
 
-            exp.add_report(ScatterPlotReport(
-                    attributes=["expansions_until_last_jump"],
-                    filter_algorithm=["algorithm-1", "algorithm-2"],
-                    get_category=domain_as_category,
-                    format="png",  # Use "tex" for pgfplots output.
-                    ),
-                name="scatterplot-expansions")
+        >>> exp.add_report(ScatterPlotReport(
+        ...         attributes=["expansions_until_last_jump"],
+        ...         filter_algorithm=["algorithm-1", "algorithm-2"],
+        ...         get_category=domain_as_category,
+        ...         format="png",  # Use "tex" for pgfplots output.
+        ...         ),
+        ...     name="scatterplot-expansions")
 
         """
         # If the size has not been set explicitly, make it a square.

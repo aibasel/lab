@@ -1,7 +1,7 @@
 #! /usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
-# downward uses the lab package to conduct experiments with the
+# Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Functions for parsing Fast Downward exit codes.
+Parse Fast Downward exit code and store a message describing the outcome
+in the "error" attribute.
 """
 
 from lab.parser import Parser
@@ -26,12 +27,7 @@ from lab.parser import Parser
 from downward import outcomes
 
 
-def unsolvable(content, props):
-    outcome = outcomes.get_outcome(props['fast-downward_returncode'])
-    props['unsolvable'] = int(outcome and outcome.msg == 'unsolvable')
-
-
-def get_search_error(content, props):
+def parse_exit_code(content, props):
     """
     Convert the exitcode of the planner to a human-readable message and store
     it in props['error']. Additionally, if there was an unexplained error, add
@@ -43,12 +39,22 @@ def get_search_error(content, props):
     """
     assert 'error' not in props
 
-    # TODO: Set coverage=1 only if EXIT_PLAN_FOUND is returned.
-    # TODO: Check that a plan file exists if coverage=1.
+    # Check if Fast Downward uses the latest exit codes.
+    use_legacy_exit_codes = True
+    for line in content.splitlines():
+        if (line.startswith('translate exit code:') or
+                line.startswith('search exit code:')):
+            use_legacy_exit_codes = False
+            break
 
-    exitcode = props['fast-downward_returncode']
-    outcome = outcomes.get_outcome(exitcode)
+    exitcode = props['planner_exit_code']
+    outcome = outcomes.get_outcome(exitcode, use_legacy_exit_codes)
     props['error'] = outcome.msg
+    if use_legacy_exit_codes:
+        props['unsolvable'] = int(outcome.msg == 'unsolvable')
+    else:
+        props['unsolvable'] = int(
+            outcome.msg in ['translate-unsolvable', 'search-unsolvable'])
     if not outcome.explained:
         props.add_unexplained_error(outcome.msg)
 
@@ -56,8 +62,13 @@ def get_search_error(content, props):
 class ExitCodeParser(Parser):
     def __init__(self):
         Parser.__init__(self)
-        self.add_function(get_search_error)
-        self.add_function(unsolvable)
+        self.add_pattern(
+            'planner_exit_code',
+            r'^.*planner exit code: (.+)$',
+            type=int,
+            file='driver.log',
+            required=True)
+        self.add_function(parse_exit_code)
 
 
 def main():

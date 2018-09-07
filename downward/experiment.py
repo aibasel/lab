@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# downward uses the lab package to conduct experiments with the
+# Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ A module for running Fast Downward experiments.
 from collections import defaultdict, OrderedDict
 import logging
 import os.path
-import sys
 
 from lab.experiment import Run, Experiment, get_default_data_dir
 
@@ -60,7 +59,7 @@ class FastDownwardRun(Run):
             input_files = ['{domain}', '{problem}']
 
         self.add_command(
-            'fast-downward',
+            'planner',
             ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
             driver_options + input_files + algo.component_options)
 
@@ -93,18 +92,47 @@ class _DownwardAlgorithm(object):
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
-    You can customize an experiment by adding the desired algorithms,
-    benchmarks and reports.
+    The most important methods for customizing an experiment are
+    :meth:`.add_algorithm`, :meth:`.add_suite`, :meth:`.add_parser`,
+    :meth:`.add_step` and :meth:`.add_report`.
 
-    Fast Downward experiments consist of the following steps:
+    .. note::
 
-    * Step 1: write experiment files to disk
-    * Step 2: run experiment
-    * Step 3: fetch results and save them in ``<path>-eval``
+        To build the experiment, execute its runs and fetch the results,
+        add the following steps (previous Lab versions added these steps
+        automatically):
 
-    You can add report steps with :meth:`.add_report`.
+        >>> exp = FastDownwardExperiment()
+        >>> exp.add_step('build', exp.build)
+        >>> exp.add_step('start', exp.start_runs)
+        >>> exp.add_fetcher(name='fetch')
 
     """
+
+    # Built-in parsers that can be passed to exp.add_parser().
+
+    #: Parsed attributes: "error", "planner_exit_code", "unsolvable".
+    EXITCODE_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
+
+    #: Parsed attributes: "translator_peak_memory", "translator_time_done", etc.
+    TRANSLATOR_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
+
+    #: Parsed attributes: "coverage", "memory", "total_time", etc.
+    SINGLE_SEARCH_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
+
+    #: Parsed attributes: "cost", "cost:all", "coverage".
+    ANYTIME_SEARCH_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
+
+    #: Required attributes: "memory", "total_time",
+    #: "translator_peak_memory", "translator_time_done".
+    #:
+    #: Parsed attributes: "planner_memory", "planner_time".
+    PLANNER_PARSER = os.path.join(
+        DOWNWARD_SCRIPTS_DIR, 'planner-parser.py')
 
     def __init__(self, path=None, environment=None, revision_cache=None):
         """
@@ -116,14 +144,22 @@ class FastDownwardExperiment(Experiment):
         This directory can become very large since each revision uses
         about 30 MB.
 
-        >>> from lab.environments import MaiaEnvironment
-        >>> env = MaiaEnvironment(priority=-2)
+        >>> from lab.environments import BaselSlurmEnvironment
+        >>> env = BaselSlurmEnvironment(email="my.name@unibas.ch")
         >>> exp = FastDownwardExperiment(environment=env)
 
-        If running a translator-only experiment, i.e. all algorithms use the
-        driver option --translate but not --search, then use
-        ``del exp.commands['parse-search']`` to avoid errors due to
-        running the default search parser without running the search.
+        You can add parsers with :meth:`.add_parser()`. See
+        :ref:`parsing` for how to write custom parsers and
+        :ref:`downward-parsers` for the list of built-in parsers. Which
+        parsers you should use depends on the algorithms you're running.
+        For single-search experiments, we recommend adding the following
+        parsers in this order:
+
+        >>> exp.add_parser(exp.EXITCODE_PARSER)
+        >>> exp.add_parser(exp.TRANSLATOR_PARSER)
+        >>> exp.add_parser(exp.SINGLE_SEARCH_PARSER)
+        >>> exp.add_parser(exp.PLANNER_PARSER)
+
         """
         Experiment.__init__(self, path=path, environment=environment)
 
@@ -136,9 +172,6 @@ class FastDownwardExperiment(Experiment):
         # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
 
-        self.add_command('parse-exitcode', [sys.executable, '{exitcode_parser}'])
-        self.add_command('parse-preprocess', [sys.executable, '{preprocess_parser}'])
-        self.add_command('parse-search', [sys.executable, '{search_parser}'])
         self.add_command('remove-output-sas', ['rm', '-f', 'output.sas'])
 
     def _get_tasks(self):
@@ -188,7 +221,7 @@ class FastDownwardExperiment(Experiment):
         http://bitbucket.org/aibasel/downward-benchmarks. After cloning
         the repo, you can generate suites with the ``suites.py``
         script. We recommend using the suite ``optimal_strips`` for
-        optimal planning and ``satisficing`` for satisifing planning::
+        optimal planning and ``satisficing`` for satisficing planning::
 
             # Create standard optimal planning suite.
             $ path/to/downward-benchmarks/suites.py optimal_strips
@@ -338,16 +371,6 @@ class FastDownwardExperiment(Experiment):
 
     def _add_code(self):
         """Add the compiled code to the experiment."""
-        self.add_resource(
-            'exitcode_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'exitcode_parser.py'))
-        self.add_resource(
-            'preprocess_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'preprocess_parser.py'))
-        self.add_resource(
-            'search_parser',
-            os.path.join(DOWNWARD_SCRIPTS_DIR, 'search_parser.py'))
-
         for cached_rev in self._get_unique_cached_revisions():
             self.add_resource(
                 '',

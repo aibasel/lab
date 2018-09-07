@@ -1,3 +1,4 @@
+#! /usr/bin/env python2
 # -*- coding: utf-8 -*-
 #
 # Downward Lab uses the Lab package to conduct experiments with the
@@ -15,3 +16,35 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from lab.parser import Parser
+
+
+def add_planner_memory(content, props):
+    try:
+        props['planner_memory'] = max(props['translator_peak_memory'], props['memory'])
+    except KeyError:
+        pass
+
+
+def add_planner_time(content, props):
+    try:
+        props['planner_time'] = props['translator_time_done'] + props['total_time']
+    except KeyError:
+        pass
+
+
+class PlannerParser(Parser):
+    def __init__(self):
+        Parser.__init__(self)
+        self.add_function(add_planner_memory)
+        self.add_function(add_planner_time)
+
+
+def main():
+    print 'Running planner parser'
+    parser = PlannerParser()
+    parser.parse()
+
+
+main()

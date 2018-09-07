@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# downward uses the lab package to conduct experiments with the
+# Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -108,12 +108,11 @@ class CachedRevision(object):
             if not os.path.exists(self._get_sentinel_file()):
                 logging.critical(
                     'The build for the cached revision at {} is corrupted '
-                    'or was made with an older lab version. Please delete '
+                    'or was made with an older Lab version. Please delete '
                     'it and try again.'.format(self.path))
         else:
             tools.makedirs(self.path)
-            # TODO: Remove "benchmarks".
-            excludes = ['-X{}'.format(d) for d in ['benchmarks', 'experiments', 'misc']]
+            excludes = ['-X{}'.format(d) for d in ['experiments', 'misc']]
             retcode = tools.run_command(
                 ['hg', 'archive', '-r', self.global_rev] + excludes + [self.path],
                 cwd=self.repo)

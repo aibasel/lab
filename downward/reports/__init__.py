@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# downward uses the lab package to conduct experiments with the
+# Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -56,7 +56,8 @@ class QualityFilters(object):
 
     def store_costs(self, run):
         cost = run.get('cost')
-        if cost is not None and run.get('coverage'):
+        if cost is not None:
+            assert run['coverage']
             self.tasks_to_costs[self._get_task(run)].append(cost)
         return True
 
@@ -81,6 +82,7 @@ class PlanningReport(Report):
             'initial_h_value', min_wins=False, scale='linear',
             functions=reports.finite_sum),
         Attribute('plan_length', scale='linear'),
+        Attribute('planner_time', functions=geometric_mean),
         Attribute('quality', absolute=True, min_wins=False),
         Attribute('score_*', min_wins=False, digits=4),
         Attribute('search_time', functions=geometric_mean),
@@ -100,15 +102,15 @@ class PlanningReport(Report):
         You can include only specific domains or algorithms by
         using :py:class:`filters <.Report>`. If you provide a list for
         *filter_algorithm*, it will be used to determine the order of
-        algorithms in the report. ::
+        algorithms in the report.
 
-            # Use a filter function: algorithms sorted alphabetically.
-            def only_blind_and_lmcut(run):
-                return run['algorithm'] in ['blind', 'lmcut']
-            PlanningReport(filter=only_blind_and_lmcut)
+        >>> # Use a filter function to select algorithms.
+        >>> def only_blind_and_lmcut(run):
+        ...     return run['algorithm'] in ['blind', 'lmcut']
+        >>> report = PlanningReport(filter=only_blind_and_lmcut)
 
-            # Use "filter_algorithm": list orders algorithms.
-            PlanningReport(filter_algorithm=['lmcut', 'blind'])
+        >>> # Use "filter_algorithm" to order algorithms.
+        >>> r = PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
         The constructor automatically adds two filters that together
         compute and store IPC scores in the "quality" attribute. The
@@ -202,8 +204,7 @@ class PlanningReport(Report):
         each run where an unexplained error occured.
         """
         columns = [
-            'domain', 'problem', 'algorithm', 'unexplained_errors', 'error',
-            'fast-downward_wall_clock_time', 'raw_memory', 'node']
+            'domain', 'problem', 'algorithm', 'unexplained_errors', 'error']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 
@@ -241,8 +242,6 @@ class PlanningReport(Report):
                 'There was output to {slurm_err_file}.'.format(**locals()))
 
             text = (
-                'There was output to slurm.err.'
-                ' Please inspect the relevant *-grid-steps/slurm.err file(s).'
                 ' Contents of {slurm_err_file} without "memory cg"'
                 ' errors:\n```\n{slurm_err_content}\n```'.format(**locals()))
 

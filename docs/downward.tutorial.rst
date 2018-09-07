@@ -1,10 +1,10 @@
 .. _downward.tutorial:
 
-Downward tutorial
-=================
+Downward Lab tutorial
+=====================
 
-Install lab and downward
-------------------------
+Install Lab and Downward Lab
+----------------------------
 .. highlight:: bash
 .. include:: ../INSTALL.txt
 

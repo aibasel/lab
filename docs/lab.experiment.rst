@@ -11,13 +11,25 @@
    :undoc-members:
    :inherited-members:
 
+
+
+Custom command line arguments
+.............................
+
 .. data:: ARGPARSER
 
    `ArgumentParser <http://docs.python.org/library/argparse.html>`_
    instance that can be used to add custom command line arguments.
    You can import it, add your arguments and call its ``parse_args()``
    method to retrieve the argument values. To avoid confusion with step
-   names you shouldn't use positional arguments. ::
+   names you shouldn't use positional arguments.
+
+   .. note::
+
+        Custom command line arguments are only passed to locally
+        executed steps.
+
+   ::
 
         from lab.experiment import ARGPARSER
 
@@ -33,6 +45,7 @@
             print "perform test run"
         else:
             print "run real experiment"
+
 
 :class:`Run`
 -------------------
@@ -52,8 +65,6 @@
 .. autoclass:: lab.environments.Environment
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.GridEnvironment
-.. autoclass:: lab.environments.GkiGridEnvironment
-.. autoclass:: lab.environments.MaiaEnvironment
 .. autoclass:: lab.environments.BaselSlurmEnvironment
 
 

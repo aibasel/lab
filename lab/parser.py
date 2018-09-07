@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# lab is a Python API for running and evaluating algorithms.
+# Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,35 +16,37 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module for parsing logs and files.
+Parse logs and output files.
 
 A parser can be any program that analyzes files in the run's
 directory (e.g. ``run.log``) and manipulates the ``properties``
 file in the same directory.
 
-To make parsing easier, however, you can use the ``Parser`` class.
-The parser ``examples/simple/simple-parser.py`` serves as an
-example:
+To make parsing easier, however, you can use the ``Parser`` class. The
+parser ``examples/ff/ff-parser.py`` serves as an example:
 
-.. literalinclude:: ../examples/simple/simple-parser.py
+.. literalinclude:: ../examples/ff/ff-parser.py
 
-You can add your parser to a run by using :py:func:`add_command
-<lab.experiment.Run.add_command>`::
+You can add this parser to alls runs by using
+:meth:`add_parser() <lab.experiment.Experiment.add_parser>`:
 
-    run.add_command('solve', ['path/to/my-solver', 'path/to/benchmark'])
-    run.add_command('parse-output', ['path/to/my-parser.py'])
+>>> import os.path
+>>> from lab import experiment
+>>> exp = experiment.Experiment()
+>>> parser = os.path.abspath(
+...     os.path.join(__file__, '../../examples/ff/ff-parser.py'))
+>>> exp.add_parser(parser)
 
-This calls ``my-parser.py`` in the run's directory after running the
-solver.
+All added parsers will be run in the order in which they were added
+after executing the run's commands.
 
-A single run can have multiple parsing commands.
-
-Instead of adding a parser to individual runs, you can use
-:py:func:`add_command <lab.experiment.Experiment.add_command>` to
-append your parser to the list of commands of each run.
+If you need to change your parsers and execute them again, use the
+:meth:`~lab.experiment.Experiment.add_parse_again_step` method to
+re-parse your results.
 
 """
 
+import errno
 import os.path
 import re
 from collections import defaultdict
@@ -61,22 +63,11 @@ class _Pattern(object):
         self.group = 1
 
         flag = 0
-
         for char in flags:
-            if char == 'M':
-                flag |= re.M
-            elif char == 'L':
-                flag |= re.L
-            elif char == 'S':
-                flag |= re.S
-            elif char == 'I':
-                flag |= re.I
-            elif char == 'U':
-                flag |= re.U
-            elif char == 'X':
-                flag |= re.X
-            else:
-                logging.critical('Unknown regex flag: {}'.format(char))
+            try:
+                flag |= getattr(re, char)
+            except AttributeError:
+                logging.critical('Unknown pattern flag: {}'.format(char))
 
         self.regex = re.compile(regex, flag)
 
@@ -93,7 +84,7 @@ class _Pattern(object):
                 value = self.type_(value)
                 found_props[self.attribute] = value
         elif self.required:
-            logging.error('Pattern %s not found in %s' % (self, filename))
+            logging.error('Pattern "%s" not found in %s' % (self, filename))
         return found_props
 
     def __str__(self):
@@ -122,18 +113,15 @@ class _FileParser(object):
     def add_function(self, function):
         self.functions.append(function)
 
-    def parse(self, props):
-        assert self.filename
-        props.update(self._search_patterns())
-        self._apply_functions(props)
-
-    def _search_patterns(self):
+    def search_patterns(self):
+        assert self.content is not None
         found_props = {}
         for pattern in self.patterns:
             found_props.update(pattern.search(self.content, self.filename))
         return found_props
 
-    def _apply_functions(self, props):
+    def apply_functions(self, props):
+        assert self.content is not None
         for function in self.functions:
             function(self.content, props)
 
@@ -144,17 +132,13 @@ class Parser(object):
     run's ``properties`` file.
     """
     def __init__(self):
+        tools.configure_logging()
         self.file_parsers = defaultdict(_FileParser)
-        self.run_dir = os.path.abspath('.')
-        prop_file = os.path.join(self.run_dir, 'properties')
-        if not os.path.exists(prop_file):
-            logging.critical('No properties file found at "%s"' % prop_file)
-        self.props = tools.Properties(filename=prop_file)
 
     def add_pattern(
-            self, attribute, regex, file='run.log', type=int, flags='',
-            required=True):
-        """
+            self, attribute, regex, file='run.log', type=int, flags='M',
+            required=False):
+        r"""
         Look for *regex* in *file*, cast what is found in brackets to
         *type* and store it in the properties dictionary under
         *attribute*. During parsing roughly the following code will be
@@ -164,14 +148,16 @@ class Parser(object):
             match = re.compile(regex).search(contents)
             properties[attribute] = type(match.group(1))
 
-        If given, *flags* must be a string of Python regular expression
-        flags (e.g. ``flags='UM'``).
+        *flags* must be a string of Python regular expression flags (see
+        https://docs.python.org/2/library/re.html). The default
+        ``flags='M'`` lets "^" and "$" match at the beginning and end of
+        each line, respectively.
 
         If *required* is True and the pattern is not found in *file*,
-        an error message is printed.
+        an error message is printed to stderr.
 
         >>> parser = Parser()
-        >>> parser.add_pattern('facts', r'^Facts: (\d+)$', type=int, flags='M')
+        >>> parser.add_pattern('facts', r'^Facts: (\d+)$', type=int)
 
         """
         if type == bool:
@@ -181,7 +167,7 @@ class Parser(object):
             _Pattern(attribute, regex, required, type, flags))
 
     def add_function(self, function, file='run.log'):
-        """Call ``function(open(file), properties)`` during parsing.
+        r"""Call ``function(open(file).read(), properties)`` during parsing.
 
         Functions are applied **after** all patterns have been
         evaluated.
@@ -201,8 +187,9 @@ class Parser(object):
         >>> parser = Parser()
         >>> parser.add_function(find_f_values)
 
-        You can use `props.add_unexplained_error(msg)` when your parsing
-        function detects that something went wrong during the run.
+        You can use ``props.add_unexplained_error("message")`` when your
+        parsing function detects that something went wrong during the
+        run.
 
         """
         self.file_parsers[file].add_function(function)
@@ -213,16 +200,27 @@ class Parser(object):
         The found values are written to the run's ``properties`` file.
 
         """
+        run_dir = os.path.abspath('.')
+        prop_file = os.path.join(run_dir, 'properties')
+        self.props = tools.Properties(filename=prop_file)
+
         for filename, file_parser in self.file_parsers.items():
             # If filename is absolute it will not be changed here.
-            path = os.path.join(self.run_dir, filename)
+            path = os.path.join(run_dir, filename)
             try:
                 file_parser.load_file(path)
-            except (IOError, MemoryError) as err:
-                logging.error('File "%s" could not be read: %s' % (path, err))
-                self.props.add_unexplained_error('parser-failed-to-read-file')
-            else:
-                # Subclasses directly modify the properties during parsing.
-                file_parser.parse(self.props)
+            except IOError as err:
+                if err.errno == errno.ENOENT:
+                    logging.info('File "{path}" is missing and thus not parsed.'.format(
+                        **locals()))
+                    del self.file_parsers[filename]
+                else:
+                    logging.error('Failed to read "{path}": {err}'.format(**locals()))
+
+        for file_parser in self.file_parsers.values():
+            self.props.update(file_parser.search_patterns())
+
+        for file_parser in self.file_parsers.values():
+            file_parser.apply_functions(self.props)
 
         self.props.write()

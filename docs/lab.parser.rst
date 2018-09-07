@@ -1,3 +1,5 @@
+.. _parsing:
+
 :mod:`lab.parser` --- Parse logs
 ================================
 

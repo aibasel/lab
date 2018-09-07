@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# downward uses the lab package to conduct experiments with the
+# Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -29,11 +29,13 @@ class TaskwiseReport(PlanningReport):
 
     If the experiment contains more than one algorithm, use
     ``filter_algorithm='my_algorithm'`` to select exactly one algorithm
-    for the report. ::
+    for the report.
 
-        exp.add_report(TaskwiseReport(
-            attributes=["expansions", "search_time"],
-            filter_algorithm=["lmcut"]))
+    >>> from downward.experiment import FastDownwardExperiment
+    >>> exp = FastDownwardExperiment()
+    >>> exp.add_report(TaskwiseReport(
+    ...     attributes=["expansions", "search_time"],
+    ...     filter_algorithm=["lmcut"]))
 
     Example output:
 
