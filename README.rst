@@ -14,9 +14,6 @@ reports. Currently, Lab comes bundled with Downward Lab.
 
 **Documentation**: https://lab.readthedocs.io
 
-**Contact**: for questions and comments please get in touch with Jendrik
-Seipp.
-
 **Cite**: please cite Downward Lab by using
 
 .. highlight:: bash
