@@ -40,6 +40,13 @@ class PlannerParser(Parser):
         self.add_function(add_planner_memory)
         self.add_function(add_planner_time)
 
+        self.add_pattern(
+            'node_name',
+            r'^.*node name: (.+)$',
+            type=str,
+            file='driver.log',
+            required=True)
+
 
 def main():
     print 'Running planner parser'

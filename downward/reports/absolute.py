@@ -165,7 +165,13 @@ class AbsoluteReport(PlanningReport):
                 if info[attr]:
                     table.add_cell(algo, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
-        return str(table)
+
+        nodes = set(
+            run.get("node_name", "<unknown: planner parser run?>")
+            for run in self.runs.values())
+        node_info = "Used nodes: " + ", ".join(sorted(nodes))
+
+        return str(table) + "\n" + node_info
 
     def _get_group_functions(self, attribute):
         """Decide on a list of group functions for this attribute."""

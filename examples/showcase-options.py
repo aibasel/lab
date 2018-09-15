@@ -36,6 +36,7 @@ exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
 exp.add_parser(exp.EXITCODE_PARSER)
 exp.add_parser(exp.TRANSLATOR_PARSER)
 exp.add_parser(exp.ANYTIME_SEARCH_PARSER)
+exp.add_parser(exp.PLANNER_PARSER)
 
 exp.add_suite(BENCHMARKS_DIR, ['gripper:prob01.pddl', 'miconic:s1-0.pddl'])
 exp.add_algorithm('iter-hadd', REPO, REV, [
