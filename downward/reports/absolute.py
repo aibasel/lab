@@ -18,11 +18,50 @@
 
 from collections import defaultdict
 import logging
+import re
 
 from lab import reports
 
 from downward import outcomes
 from downward.reports import PlanningReport
+
+
+def _abbreviate_node_names(nodes):
+    """
+    ase05.cluster.bc2.ch -> ase05
+    {ase10, ase11, ase12, ase13, ase14} -> {ase10, ..., ase14}
+    """
+    abbrev_nodes = []
+    sequence_buffer = []
+
+    def flush_buffer():
+        if len(sequence_buffer) <= 2:
+            abbrev_nodes.extend(sequence_buffer)
+        else:
+            abbrev_nodes.extend([sequence_buffer[0], '...', sequence_buffer[-1]])
+        del sequence_buffer[:]
+
+    for node in sorted(nodes):
+        node = node.replace('.cluster.bc2.ch', '')
+        match = re.match(r'ase(\d{2})', node)
+        if match:
+            infai_node_id = int(match.group(1))
+            if sequence_buffer:
+                if sequence_buffer[-1] == 'ase{:02d}'.format(infai_node_id - 1):
+                    sequence_buffer.append(node)
+                elif len(sequence_buffer) in [1, 2]:
+                    flush_buffer()
+                    sequence_buffer = [node]
+                else:
+                    flush_buffer()
+                    sequence_buffer = [node]
+            else:
+                sequence_buffer.append(node)
+        else:
+            flush_buffer()
+            abbrev_nodes.append(node)
+    flush_buffer()
+    return abbrev_nodes
 
 
 class AbsoluteReport(PlanningReport):
@@ -166,7 +205,8 @@ class AbsoluteReport(PlanningReport):
                     table.add_cell(algo, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
 
-        node_info = "Used nodes: " + ", ".join(sorted(self._get_node_names()))
+        node_info = "Used nodes: {{{}}}".format(
+            ", ".join(_abbreviate_node_names(self._get_node_names())))
 
         return str(table) + "\n" + node_info
 
