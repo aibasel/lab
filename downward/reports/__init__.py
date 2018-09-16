@@ -209,7 +209,7 @@ class PlanningReport(Report):
         each run where an unexplained error occured.
         """
         columns = [
-            'domain', 'problem', 'algorithm', 'unexplained_errors', 'error']
+            'domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node_name']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 
