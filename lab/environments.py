@@ -385,7 +385,7 @@ class BaselSlurmEnvironment(SlurmEnvironment):
 
     DEFAULT_PARTITION = 'infai_1'
     DEFAULT_QOS = 'normal'
-    # infai nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
+    # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = '3872M'
     DEFAULT_SETUP = (

@@ -198,6 +198,11 @@ class PlanningReport(Report):
             break
         return info
 
+    def _get_node_names(self):
+        return set(
+            run.get("node_name", "<unknown: planner parser run?>")
+            for run in self.runs.values())
+
     def _get_warnings_text_and_table(self):
         """
         Return a :py:class:`Table <lab.reports.Table>` containing one line for
@@ -226,7 +231,8 @@ class PlanningReport(Report):
                 'There were {num_unexplained_errors} runs with unexplained'
                 ' errors.'.format(**locals()))
 
-        text = ''
+        errors = []
+
         if num_output_to_slurm_err:
             src_dir = self.eval_dir.rstrip('/')[:-len('-eval')]
             slurm_err_file = src_dir + '-grid-steps/slurm.err'
@@ -241,14 +247,18 @@ class PlanningReport(Report):
             logging.error(
                 'There was output to {slurm_err_file}.'.format(**locals()))
 
-            text = (
+            errors.append(
                 ' Contents of {slurm_err_file} without "memory cg"'
                 ' errors:\n```\n{slurm_err_content}\n```'.format(**locals()))
+            errors.append(str(table))
 
-        return ''.join([
-            text,
-            '\n' if text and table else '',
-            str(table) if table else ''])
+        infai_1_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(1, 24 + 1))
+        infai_2_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(31, 54 + 1))
+        nodes = self._get_node_names()
+        if nodes & infai_1_nodes and nodes & infai_2_nodes:
+            errors.append('Report combines runs from infai_1 and infai_2 partitions.')
+
+        return '\n'.join(errors)
 
     def _get_algorithm_order(self):
         """

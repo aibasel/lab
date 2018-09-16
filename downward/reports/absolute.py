@@ -166,10 +166,7 @@ class AbsoluteReport(PlanningReport):
                     table.add_cell(algo, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
 
-        nodes = set(
-            run.get("node_name", "<unknown: planner parser run?>")
-            for run in self.runs.values())
-        node_info = "Used nodes: " + ", ".join(sorted(nodes))
+        node_info = "Used nodes: " + ", ".join(sorted(self._get_node_names()))
 
         return str(table) + "\n" + node_info
 
