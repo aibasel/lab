@@ -10,7 +10,7 @@ from lab import tools
 
 tools.configure_logging()
 
-logging.info('node name: {}'.format(platform.node()))
+logging.info('node: {}'.format(platform.node()))
 
 run_log = open('run.log', 'w')
 run_err = open('run.err', 'w')

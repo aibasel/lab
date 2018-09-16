@@ -200,7 +200,7 @@ class PlanningReport(Report):
 
     def _get_node_names(self):
         return set(
-            run.get("node_name", "<unknown: planner parser run?>")
+            run.get("node", "<unknown: planner parser run?>")
             for run in self.runs.values())
 
     def _get_warnings_text_and_table(self):
@@ -209,7 +209,7 @@ class PlanningReport(Report):
         each run where an unexplained error occured.
         """
         columns = [
-            'domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node_name']
+            'domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node']
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 

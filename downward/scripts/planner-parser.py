@@ -41,8 +41,8 @@ class PlannerParser(Parser):
         self.add_function(add_planner_time)
 
         self.add_pattern(
-            'node_name',
-            r'^.*node name: (.+)$',
+            'node',
+            r'^.*node: (.+)$',
             type=str,
             file='driver.log',
             required=True)
