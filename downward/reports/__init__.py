@@ -252,8 +252,8 @@ class PlanningReport(Report):
                 ' errors:\n```\n{slurm_err_content}\n```'.format(**locals()))
             errors.append(str(table))
 
-        infai_1_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(1, 24 + 1))
-        infai_2_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(31, 54 + 1))
+        infai_1_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(1, 25))
+        infai_2_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(31, 55))
         nodes = self._get_node_names()
         if nodes & infai_1_nodes and nodes & infai_2_nodes:
             errors.append('Report combines runs from infai_1 and infai_2 partitions.')
