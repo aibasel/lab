@@ -298,14 +298,22 @@ class SlurmEnvironment(GridEnvironment):
         *memory_per_cpu* must be a string specifying the memory
         allocated for each core. The string must end with one of the
         letters K, M or G. The default is "3872M", which is the maximum
-        amount that allows using all 16 cores in parallel. Processes
-        that surpass the memory limit are terminated with SIGKILL.
-        Unless you need more memory you should not have to change this
-        variable. Instead, we recommend using the ``memory_limit`` kwarg
-        of :py:func:`~lab.experiment.Run.add_command` for imposing a
-        soft memory limit that can be caught from inside your programs.
-        Fast Downward users should set memory limits via the
+        amount that allows using all 16 infai_1 cores in parallel.
+        Processes that surpass the memory limit are terminated with
+        SIGKILL. Unless you need more memory you should not have to
+        change this variable. Instead, we recommend using the
+        ``memory_limit`` kwarg of
+        :py:func:`~lab.experiment.Run.add_command` for imposing a soft
+        memory limit that can be caught from inside your programs. Fast
+        Downward users should set memory limits via the
         ``driver_options``.
+
+        Slurm limits the memory with cgroups. Unfortunately, this often
+        fails on our nodes, so we set our own soft memory limit of 3600
+        MiB for all Slurm jobs. We use a soft instead of a hard limit so
+        that child processes can raise the limit. The value of 3600 MiB
+        stems from the fact that the infai_1 nodes have 3872 MiB per
+        core and we want to leave some slack.
 
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes

@@ -24,8 +24,5 @@
 
 %(environment_setup)s
 
-# Slurm limits the memory with cgroups. Unfortunately, this often fails,
-# so we set our own memory limit here. Since this is a soft limit, it
-# can be raised by child processes. We use a limit of 3600 MiB since our
-# older nodes have 3872 MiB per core and we want to leave some slack.
+# Set a soft memory limit of 3600 MiB (see SlurmEnvironment docs).
 ulimit -v -S 3686400
