@@ -237,7 +237,8 @@ class FastDownwardExperiment(Experiment):
         be passed to the ``fast-downward.py`` script. See
         ``fast-downward.py --help`` for available options. The list is
         always prepended with ``["--validate", "--overall-time-limit",
-        "30m", "--overall-memory-limit', "3584M"]``. Specifying custom
+        "30m", "--overall-memory-limit', "3584M", "--validate-time-limit",
+        "30m", "--validate-memory-limit', "3584M"]``. Specifying custom
         limits overrides the default limits.
 
         Example experiment setup:
@@ -292,7 +293,9 @@ class FastDownwardExperiment(Experiment):
         driver_options = ([
             '--validate',
             '--overall-time-limit', '30m',
-            '--overall-memory-limit', '3584M'] +
+            '--overall-memory-limit', '3584M',
+            '--validate-time-limit', '30m',
+            '--validate-memory-limit', '3584M'] +
             (driver_options or []))
         self._algorithms[name] = _DownwardAlgorithm(
             name, CachedRevision(repo, rev, build_options),
