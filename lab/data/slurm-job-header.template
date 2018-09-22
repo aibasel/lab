@@ -23,3 +23,6 @@
 %(extra_options)s
 
 %(environment_setup)s
+
+# Set a soft memory limit of 3872 MiB (see SlurmEnvironment docs).
+ulimit -Sv 3964928

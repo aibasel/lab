@@ -70,6 +70,9 @@ NEW_OUTCOMES = [
     Outcome(32, 'search-critical-error', explained=False, min_wins=True),
     Outcome(33, 'search-input-error', explained=False, min_wins=True),
     Outcome(34, 'search-unsupported', explained=False, min_wins=True),
+    Outcome(35, 'driver-critital-error', explained=False, min_wins=True),
+    Outcome(36, 'driver-input-error', explained=False, min_wins=True),
+    Outcome(37, 'driver-unsupported', explained=False, min_wins=True),
 
     Outcome(get_exit_code(signal.SIGKILL), 'sigkill', explained=False, min_wins=True),
     Outcome(get_exit_code(signal.SIGSEGV), 'segfault', explained=False, min_wins=True),
