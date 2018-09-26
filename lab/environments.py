@@ -309,8 +309,10 @@ class SlurmEnvironment(GridEnvironment):
         ``driver_options``.
 
         Slurm limits the memory with cgroups. Unfortunately, this often
-        fails on our nodes, so we set our own soft memory limit of 3872
-        MiB (see above) for all Slurm jobs. We use a soft instead of a
+        fails on our nodes, so we set our own soft memory limit of 3833
+        MiB for all Slurm jobs. We came up with this specific limit by
+        multiplying 3872 MiB (see above) with 0.99 (the Slurm config
+        file contains "AllowedRAMSpace=99"). We use a soft instead of a
         hard limit so that child processes can raise the limit.
 
         Use *export* to specify a list of environment variables that
