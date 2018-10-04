@@ -11,6 +11,12 @@ v3.1 (unreleased)
 lab
 ^^^
 * Parser: don't try to parse missing files. Print message to stdout instead.
+* Add soft memory limit of 3833 MiB for Slurm runs.
+
+downward
+^^^^^^^^
+* Include node names in standard reports and warn if report mixes runs form different partitions.
+
 
 
 v3.0 (2018-07-10)
