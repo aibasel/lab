@@ -33,6 +33,8 @@ You can add this parser to alls runs by using
 >>> import os.path
 >>> from lab import experiment
 >>> exp = experiment.Experiment()
+>>> # The path can be absolute or relative to the working directory
+>>> # at build time.
 >>> parser = os.path.abspath(
 ...     os.path.join(__file__, '../../examples/ff/ff-parser.py'))
 >>> exp.add_parser(parser)
