@@ -15,8 +15,9 @@ lab
 
 downward
 ^^^^^^^^
-* Include node names in standard reports and warn if report mixes runs form different partitions.
-
+* Include node names in standard reports and warn if report mixes runs from different partitions.
+* Parse "planner_wall_clock_time" attribute in planner parser.
+* Include planner_wall_clock_time and raw_memory attributes in unexplained errors table.
 
 
 v3.0 (2018-07-10)
