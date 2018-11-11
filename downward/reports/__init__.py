@@ -251,6 +251,8 @@ class PlanningReport(Report):
             errors.append(
                 ' Contents of {slurm_err_file} without "memory cg"'
                 ' errors:\n```\n{slurm_err_content}\n```'.format(**locals()))
+
+        if table:
             errors.append(str(table))
 
         infai_1_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(1, 25))
