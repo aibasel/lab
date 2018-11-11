@@ -268,7 +268,15 @@ class Report(object):
             logging.info('Using all numerical attributes.')
             self.attributes = self._get_numerical_attributes()
 
-        self.attributes = sorted(set(self.attributes))
+        self.attributes = sorted(self.attributes)
+
+        # Check for duplicate attributes to avoid "coverage" overwriting
+        # Attribute("coverage") by accident.
+        counter = collections.Counter(self.attributes)
+        duplicates = [name for name, count in sorted(counter.items()) if count > 1]
+        if duplicates:
+            logging.critical("Duplicate attributes detected: {}".format(duplicates))
+
         self.write()
 
     def _prepare_attribute(self, attr):

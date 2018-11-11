@@ -88,7 +88,7 @@ exp.add_fetcher(
 
 # Add report steps
 exp.add_report(
-    AbsoluteReport(attributes=ATTRIBUTES + ['cost', 'coverage']),
+    AbsoluteReport(attributes=ATTRIBUTES + ['cost']),
     name='report-abs-d')
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES, filter=only_two_algorithms),

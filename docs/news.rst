@@ -12,6 +12,7 @@ lab
 ^^^
 * Parser: don't try to parse missing files. Print message to stdout instead.
 * Add soft memory limit of 3833 MiB for Slurm runs.
+* Abort if report contains duplicate attribute names.
 
 downward
 ^^^^^^^^
