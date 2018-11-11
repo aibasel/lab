@@ -457,9 +457,17 @@ def get_unexplained_errors_message(run):
 
 def get_slurm_err_content(src_dir):
     grid_steps_dir = src_dir.rstrip('/') + '-grid-steps'
-    slurm_err_filename = os.path.join(grid_steps_dir, 'slurm.err')
-    with open(slurm_err_filename) as f:
-        return f.read()
+    if os.path.exists(grid_steps_dir):
+        slurm_err_filename = os.path.join(grid_steps_dir, 'slurm.err')
+        if os.path.exists(slurm_err_filename):
+            try:
+                with open(slurm_err_filename) as f:
+                    return f.read()
+            except IOError:
+                logging.error('Failed to read slurm.err file.')
+        else:
+            logging.error('File slurm.err is missing.')
+    return ''
 
 
 def filter_slurm_err_content(content):

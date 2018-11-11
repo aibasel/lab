@@ -214,7 +214,7 @@ class PlanningReport(Report):
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(columns)
 
-        num_output_to_slurm_err = sum(
+        wrote_to_slurm_err = any(
             'output-to-slurm.err' in run.get('unexplained_errors', [])
             for run in self.runs.values())
 
@@ -234,7 +234,7 @@ class PlanningReport(Report):
 
         errors = []
 
-        if num_output_to_slurm_err:
+        if wrote_to_slurm_err:
             src_dir = self.eval_dir.rstrip('/')[:-len('-eval')]
             slurm_err_file = src_dir + '-grid-steps/slurm.err'
             try:

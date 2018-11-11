@@ -118,13 +118,9 @@ class Fetcher(object):
             combined_props.update(src_props)
             logging.info('Fetched properties of {} runs.'.format(len(src_props)))
         else:
-            try:
-                slurm_err_content = tools.get_slurm_err_content(src_dir)
-            except IOError:
-                slurm_err_content = ''
-
+            slurm_err_content = tools.get_slurm_err_content(src_dir)
             if slurm_err_content:
-                logging.error('There was ouput to *-grid-steps/slurm.err')
+                logging.error('There was output to *-grid-steps/slurm.err')
 
             new_props = tools.Properties()
             run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
