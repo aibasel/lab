@@ -24,5 +24,5 @@
 
 %(environment_setup)s
 
-# Set a soft memory limit of 3833 MiB (see SlurmEnvironment docs).
-ulimit -Sv 3924992
+# Set a soft memory limit to guard against the cgroup mechanism failing (see SlurmEnvironment docs).
+ulimit -Sv %(soft_memory_limit)d
