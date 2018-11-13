@@ -11,14 +11,14 @@ v3.1 (unreleased)
 lab
 ^^^
 * Parser: don't try to parse missing files. Print message to stdout instead.
-* Add soft memory limit of 3833 MiB for Slurm runs.
+* Add soft memory limit of "memory_per_cpu * 0.99" for Slurm runs to safeguard against cgroup failures.
 * Abort if report contains duplicate attribute names.
 
 downward
 ^^^^^^^^
 * Include node names in standard reports and warn if report mixes runs from different partitions.
 * Parse "planner_wall_clock_time" attribute in planner parser.
-* Include planner_wall_clock_time and raw_memory attributes in unexplained errors table.
+* Include "planner_wall_clock_time" and "raw_memory" attributes in unexplained errors table.
 
 
 v3.0 (2018-07-10)

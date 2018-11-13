@@ -309,11 +309,12 @@ class SlurmEnvironment(GridEnvironment):
         ``driver_options``.
 
         Slurm limits the memory with cgroups. Unfortunately, this often
-        fails on our nodes, so we set our own soft memory limit of 3833
-        MiB for all Slurm jobs. We came up with this specific limit by
-        multiplying 3872 MiB (see above) with 0.99 (the Slurm config
-        file contains "AllowedRAMSpace=99"). We use a soft instead of a
-        hard limit so that child processes can raise the limit.
+        fails on our nodes, so we set our own soft memory limit for all
+        Slurm jobs. We derive the soft memory limit by multiplying the
+        value denoted by the *memory_per_cpu* parameter with 0.99 (the
+        Slurm config file contains "AllowedRAMSpace=99"). We use a soft
+        instead of a hard limit so that child processes can raise the
+        limit.
 
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes
@@ -348,6 +349,23 @@ class SlurmEnvironment(GridEnvironment):
         self.export = export
         self.setup = setup
 
+    @staticmethod
+    def _get_memory_in_kb(limit):
+        match = re.match(r"^(\d+)(k|m|g)?$", limit, flags=re.I)
+        if not match:
+            logging.critical("malformed memory_per_cpu parameter: {}".format(limit))
+        memory = int(match.group(1))
+        suffix = match.group(2)
+        if suffix is not None:
+            suffix = suffix.lower()
+        if suffix == "k":
+            pass
+        elif suffix is None or suffix == "m":
+            memory *= 1024
+        elif suffix == "g":
+            memory *= 1024 * 1024
+        return memory
+
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
 
@@ -360,6 +378,8 @@ class SlurmEnvironment(GridEnvironment):
         job_params['partition'] = self.partition
         job_params['qos'] = self.qos
         job_params['memory_per_cpu'] = self.memory_per_cpu
+        memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
+        job_params['soft_memory_limit'] = int(memory_per_cpu_kb * 0.99)
         # Ensure that single-core tasks always run before multi-core tasks.
         job_params['nice'] = 2000 if is_run_step(step) else 0
         job_params['environment_setup'] = self.setup
