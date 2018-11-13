@@ -13,6 +13,7 @@ lab
 * Parser: don't try to parse missing files. Print message to stdout instead.
 * Add soft memory limit of "memory_per_cpu * 0.99" for Slurm runs to safeguard against cgroup failures.
 * Abort if report contains duplicate attribute names.
+* Make reports even if fetcher detects unexplained errors.
 
 downward
 ^^^^^^^^
