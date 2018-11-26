@@ -40,7 +40,7 @@ def coverage(content, props):
 def get_plan(content, props):
     # All patterns are parsed before functions are called.
     if props.get('evaluations') is not None:
-        props['plan'] = re.findall(r'^(?:step)?\s*\d+: (.+)$', content, re.M)
+        props['plan'] = re.findall(r'\n(?:step)?\s*\d+: (.+)$', content, re.M)
 
 
 def get_times(content, props):
@@ -55,7 +55,7 @@ def trivially_unsolvable(content, props):
 print 'Running FF parser'
 parser = Parser()
 parser.add_pattern(
-    'planner_exit_code', r'^.*run-planner exit code: (.+)$', type=int, file='driver.log')
+    'planner_exit_code', r'run-planner exit code: (.+)$', type=int, file='driver.log')
 parser.add_pattern('evaluations', r'evaluating (\d+) states')
 parser.add_function(error)
 parser.add_function(coverage)

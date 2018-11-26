@@ -42,13 +42,13 @@ class PlannerParser(Parser):
 
         self.add_pattern(
             'node',
-            r'^.*node: (.+)$',
+            r'\n.*node: (.+)$',
             type=str,
             file='driver.log',
             required=True)
         self.add_pattern(
             'planner_wall_clock_time',
-            r'^.*planner wall-clock time: (.+)s$',
+            r'\n.*planner wall-clock time: (.+)s$',
             type=float,
             file='driver.log',
             required=True)

@@ -31,16 +31,16 @@ from lab.parser import Parser
 
 
 def _get_states_pattern(attribute, name):
-    return (attribute, r'^{name} (\d+) state\(s\)\.$'.format(**locals()), int)
+    return (attribute, r'\n{name} (\d+) state\(s\)\.$'.format(**locals()), int)
 
 
 PATTERNS = [
-    ('limit_search_time', r'^.*search time limit: (.+)s$', float),
-    ('limit_search_memory', r'^.*search memory limit: (\d+) MB$', int),
-    ('raw_memory', r'^Peak memory: (.+) KB$', int),
-    ('cost', r'^Plan cost: (.+)$', float),
-    ('plan_length', r'^Plan length: (\d+) step\(s\)\.$', int),
-    ('evaluations', r'^Evaluations: (.+)$', int),
+    ('limit_search_time', r'\n.*search time limit: (.+)s$', float),
+    ('limit_search_memory', r'\n.*search memory limit: (\d+) MB$', int),
+    ('raw_memory', r'\nPeak memory: (.+) KB$', int),
+    ('cost', r'\nPlan cost: (.+)$', float),
+    ('plan_length', r'\nPlan length: (\d+) step\(s\)\.$', int),
+    ('evaluations', r'\nEvaluations: (.+)$', int),
     _get_states_pattern('dead_ends', 'Dead ends:'),
     _get_states_pattern('evaluated', 'Evaluated'),
     _get_states_pattern('expansions', 'Expanded'),
@@ -50,8 +50,8 @@ PATTERNS = [
     _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
     _get_states_pattern('reopened_until_last_jump', 'Reopened until last jump:'),
-    ('search_time', r'^Search time: (.+)s$', float),
-    ('total_time', r'^Total time: (.+)s$', float),
+    ('search_time', r'\nSearch time: (.+)s$', float),
+    ('total_time', r'\nTotal time: (.+)s$', float),
 ]
 
 
@@ -80,7 +80,7 @@ def add_initial_h_values(content, props):
     """
     initial_h_values = {}
     matches = re.findall(
-        r'^Initial heuristic value for (.+): ([-]?\d+|infinity)$',
+        r'\nInitial heuristic value for (.+): ([-]?\d+|infinity)$',
         content, flags=re.M)
     for heuristic, init_h in matches:
         if init_h == "infinity":

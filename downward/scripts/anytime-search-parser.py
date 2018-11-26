@@ -64,7 +64,7 @@ def coverage(content, props):
 def main():
     print 'Running anytime parser'
     parser = AnytimeParser()
-    parser.add_repeated_pattern('cost:all', r'^Plan cost: (.+)$', type=float)
+    parser.add_repeated_pattern('cost:all', r'\nPlan cost: (.+)$', type=float)
     parser.add_function(reduce_to_min('cost:all', 'cost'))
     parser.add_function(coverage)
     parser.parse()
