@@ -37,7 +37,7 @@ def parse_translator_timestamps(content, props):
 
         Done! [6.860s CPU, 6.923s wall-clock]
     """
-    pattern = re.compile(r'\n(.+)(\.\.\.|:|!) \[(.+)s CPU, .+s wall-clock\]$')
+    pattern = re.compile(r'(.+)(\.\.\.|:|!) \[(.+)s CPU, .+s wall-clock\]$')
     for line in content.splitlines():
         match = pattern.match(line)
         if match:
@@ -52,7 +52,7 @@ def parse_statistics(content, props):
 
         Translator xxx: yyy
     """
-    pattern = re.compile(r'\nTranslator (.+): (.+?)(?: KB|)$')
+    pattern = re.compile(r'Translator (.+): (.+?)(?: KB|)$')
     for line in content.splitlines():
         match = pattern.match(line)
         if match:
@@ -88,7 +88,7 @@ class TranslatorParser(Parser):
                 'effect conditions simplified', 'implied preconditions added',
                 'operators removed', 'axioms removed', 'propositions removed']:
             attribute = 'translator_' + value.lower().replace(' ', '_')
-            self.add_pattern(attribute, '\n(.+) {}$'.format(value), type=int)
+            self.add_pattern(attribute, '(.+) {}$'.format(value), type=int)
 
 
 if __name__ == '__main__':
