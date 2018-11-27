@@ -64,7 +64,7 @@ class ExitCodeParser(Parser):
         Parser.__init__(self)
         self.add_pattern(
             'planner_exit_code',
-            r'\n.*planner exit code: (.+)$',
+            r'.*planner exit code: (.+)$',
             type=int,
             file='driver.log',
             required=True)

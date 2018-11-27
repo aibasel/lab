@@ -40,7 +40,7 @@ def coverage(content, props):
 def get_plan(content, props):
     # All patterns are parsed before functions are called.
     if props.get('evaluations') is not None:
-        props['plan'] = re.findall(r'\n(?:step)?\s*\d+: (.+)$', content, re.M)
+        props['plan'] = re.findall(r'(?:step)?\s*\d+: (.+)$', content, re.M)
 
 
 def get_times(content, props):
