@@ -311,10 +311,10 @@ class SlurmEnvironment(GridEnvironment):
         Slurm limits the memory with cgroups. Unfortunately, this often
         fails on our nodes, so we set our own soft memory limit for all
         Slurm jobs. We derive the soft memory limit by multiplying the
-        value denoted by the *memory_per_cpu* parameter with 0.99 (the
-        Slurm config file contains "AllowedRAMSpace=99"). We use a soft
-        instead of a hard limit so that child processes can raise the
-        limit.
+        value denoted by the *memory_per_cpu* parameter with 0.98 (the
+        Slurm config file contains "AllowedRAMSpace=99" and we add some
+        slack). We use a soft instead of a hard limit so that child
+        processes can raise the limit.
 
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes
@@ -379,7 +379,7 @@ class SlurmEnvironment(GridEnvironment):
         job_params['qos'] = self.qos
         job_params['memory_per_cpu'] = self.memory_per_cpu
         memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
-        job_params['soft_memory_limit'] = int(memory_per_cpu_kb * 0.99)
+        job_params['soft_memory_limit'] = int(memory_per_cpu_kb * 0.98)
         # Ensure that single-core tasks always run before multi-core tasks.
         job_params['nice'] = 2000 if is_run_step(step) else 0
         job_params['environment_setup'] = self.setup
