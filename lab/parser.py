@@ -138,7 +138,7 @@ class Parser(object):
         self.file_parsers = defaultdict(_FileParser)
 
     def add_pattern(
-            self, attribute, regex, file='run.log', type=int, flags='M',
+            self, attribute, regex, file='run.log', type=int, flags='',
             required=False):
         r"""
         Look for *regex* in *file*, cast what is found in brackets to
@@ -151,15 +151,15 @@ class Parser(object):
             properties[attribute] = type(match.group(1))
 
         *flags* must be a string of Python regular expression flags (see
-        https://docs.python.org/2/library/re.html). The default
-        ``flags='M'`` lets "^" and "$" match at the beginning and end of
-        each line, respectively.
+        https://docs.python.org/2/library/re.html). E.g., ``flags='M'``
+        lets "^" and "$" match at the beginning and end of each line,
+        respectively.
 
         If *required* is True and the pattern is not found in *file*,
         an error message is printed to stderr.
 
         >>> parser = Parser()
-        >>> parser.add_pattern('facts', r'^Facts: (\d+)$', type=int)
+        >>> parser.add_pattern('facts', r'Facts: (\d+)', type=int)
 
         """
         if type == bool:
