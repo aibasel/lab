@@ -14,6 +14,7 @@ lab
 * Add soft memory limit of "memory_per_cpu * 0.98" for Slurm runs to safeguard against cgroup failures.
 * Abort if report contains duplicate attribute names.
 * Make reports even if fetcher detects unexplained errors.
+* Use ``flags=''`` for :meth:`lab.parser.Parser.add_pattern` by default again.
 * Add new example experiment using a simple vertex cover solver.
 
 downward
