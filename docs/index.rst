@@ -1,14 +1,5 @@
 .. include:: ../README.rst
 
-General documentation
----------------------
-
-.. toctree::
-   :maxdepth: 1
-
-   news
-   faq
-
 
 Documentation for Lab
 ---------------------
@@ -31,3 +22,13 @@ Documentation for Downward Lab
    downward.tutorial
    downward.experiment
    downward.reports
+
+
+General documentation
+---------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   news
+   faq
