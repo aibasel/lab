@@ -16,6 +16,7 @@ fi
 function cleanup {
     rm -rf examples/data
     rm -rf examples/ff/data
+    rm -rf examples/vertex-cover/data
 }
 
 # Change into top directory.
@@ -67,6 +68,10 @@ cd examples
 
 cd ff
 ./ff.py --all
+cd ..
+
+cd vertex-cover
+./exp.py --all
 cd ..
 
 ./report-external-results.py --all
