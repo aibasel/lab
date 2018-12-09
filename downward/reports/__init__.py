@@ -200,7 +200,7 @@ class PlanningReport(Report):
 
     def _get_node_names(self):
         return set(
-            run.get("node", "<unknown: planner parser run?>")
+            run.get("node", "<attribute 'node' missing>")
             for run in self.runs.values())
 
     def _get_warnings_text_and_table(self):

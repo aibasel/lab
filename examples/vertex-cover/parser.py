@@ -27,6 +27,8 @@ if __name__ == '__main__':
     print 'Running vertex cover parser'
     parser = Parser()
     parser.add_pattern(
+        'node', r'node: (.+)\n', type=str, file='driver.log', required=True)
+    parser.add_pattern(
         'solver_exit_code', r'solve exit code: (.+)\n', type=int, file='driver.log')
     parser.add_pattern('cover', r'Cover: set\(\[(.*)\]\)', type=str)
     parser.add_pattern('cover_size', r'Cover size: (\d+)\n', type=int)
