@@ -31,16 +31,16 @@ from lab.parser import Parser
 
 
 def _get_states_pattern(attribute, name):
-    return (attribute, r'{name} (\d+) state\(s\)\.$'.format(**locals()), int)
+    return (attribute, r'{name} (\d+) state\(s\)\.'.format(**locals()), int)
 
 
 PATTERNS = [
-    ('limit_search_time', r'search time limit: (.+)s$', float),
-    ('limit_search_memory', r'search memory limit: (\d+) MB$', int),
-    ('raw_memory', r'Peak memory: (.+) KB$', int),
-    ('cost', r'Plan cost: (.+)$', float),
-    ('plan_length', r'Plan length: (\d+) step\(s\)\.$', int),
-    ('evaluations', r'Evaluations: (.+)$', int),
+    ('limit_search_time', r'search time limit: (.+)s', float),
+    ('limit_search_memory', r'search memory limit: (\d+) MB', int),
+    ('raw_memory', r'Peak memory: (.+) KB', int),
+    ('cost', r'Plan cost: (.+)\n', float),
+    ('plan_length', r'Plan length: (\d+) step\(s\)\.', int),
+    ('evaluations', r'Evaluations: (.+)\n', int),
     _get_states_pattern('dead_ends', 'Dead ends:'),
     _get_states_pattern('evaluated', 'Evaluated'),
     _get_states_pattern('expansions', 'Expanded'),
@@ -50,8 +50,8 @@ PATTERNS = [
     _get_states_pattern('expansions_until_last_jump', 'Expanded until last jump:'),
     _get_states_pattern('generated_until_last_jump', 'Generated until last jump:'),
     _get_states_pattern('reopened_until_last_jump', 'Reopened until last jump:'),
-    ('search_time', r'Search time: (.+)s$', float),
-    ('total_time', r'Total time: (.+)s$', float),
+    ('search_time', r'Search time: (.+)s', float),
+    ('total_time', r'Total time: (.+)s', float),
 ]
 
 

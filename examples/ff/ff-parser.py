@@ -55,7 +55,7 @@ def trivially_unsolvable(content, props):
 print 'Running FF parser'
 parser = Parser()
 parser.add_pattern(
-    'planner_exit_code', r'run-planner exit code: (.+)$', type=int, file='driver.log')
+    'planner_exit_code', r'run-planner exit code: (.+)\n', type=int, file='driver.log')
 parser.add_pattern('evaluations', r'evaluating (\d+) states')
 parser.add_function(error)
 parser.add_function(coverage)
