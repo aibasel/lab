@@ -10,7 +10,6 @@ import argparse
 import collections
 import random
 import re
-import sys
 import time
 
 
@@ -19,7 +18,6 @@ def get_edges(input_file):
     with open(input_file) as f:
         header = f.readline().strip()
         match = re.match(r"\S+ \S+ (\d+) (\d+)", header)
-        num_vertices = int(match.group(1))
         num_edges = int(match.group(2))
         for _ in range(num_edges):
             line = f.readline().strip()
@@ -47,8 +45,8 @@ def find_greedy_cover(edges):
         num_incident_edges = collections.defaultdict(int)
         for edge in remaining_edges:
             u, v, = edge
-            num_incident_edges[u] +=1
-            num_incident_edges[v] +=1
+            num_incident_edges[u] += 1
+            num_incident_edges[v] += 1
         return max(num_incident_edges, key=lambda v: num_incident_edges[v])
 
     cover = set()
@@ -70,7 +68,6 @@ def parse_args():
 
 
 def main():
-    #example = [set(e) for e in [(1, 2), (1, 3), (1, 5), (2, 3), (3, 4)]]
     args = parse_args()
     random.seed(args.seed)
     edges = get_edges(args.input_file)
