@@ -124,10 +124,11 @@ class FastDownwardExperiment(Experiment):
     ANYTIME_SEARCH_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
 
-    #: Required attributes: "memory", "total_time",
+    #: Used attributes: "memory", "total_time",
     #: "translator_peak_memory", "translator_time_done".
     #:
-    #: Parsed attributes: "planner_memory", "planner_time", "planner_wall_clock_time".
+    #: Parsed attributes: "node", "planner_memory", "planner_time",
+    #: "planner_wall_clock_time".
     PLANNER_PARSER = os.path.join(
         DOWNWARD_SCRIPTS_DIR, 'planner-parser.py')
 
