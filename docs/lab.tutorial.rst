@@ -13,24 +13,26 @@ Run tutorial experiment
 -----------------------
 .. highlight:: python
 
-The script below shows how to run the `FF planner
-<http://fai.cs.uni-saarland.de/hoffmann/ff.html>`_ on a number of
-classical planning benchmarks. It is located at ``examples/ff/ff.py``.
+The following script shows a simple experiment that runs a naive vertex
+cover solver on a set of benchmarks. You can find the whole experiment
+under ``examples/vertex-cover/``.
+
+.. literalinclude:: ../examples/vertex-cover/exp.py
+
 You can see the available steps with ::
 
-    ./ff.py
+    ./exp.py
 
 
 Select steps by name or index::
 
-    ./ff.py build
-    ./ff.py 2
-    ./ff.py 3 4
+    ./exp.py build
+    ./exp.py 2
+    ./exp.py 3 4
 
+Here is the parser that the experiment uses:
 
-You can use this file as a basis for your own experiments.
-
-.. literalinclude:: ../examples/ff/ff.py
+.. literalinclude:: ../examples/vertex-cover/parser.py
 
 Have a look at other example experiments under ``examples/`` or go
 directly to the `Lab API <lab.experiment.html>`_.
