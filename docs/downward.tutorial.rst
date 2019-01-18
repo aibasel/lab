@@ -33,7 +33,7 @@ and http://www.fast-downward.org/LPBuildInstructions)
 ::
 
     DOWNWARD_REPO=/path/to/fast-downward-repo
-    sudo apt-get install mercurial g++ cmake make python g++-multilib
+    sudo apt-get install mercurial g++ cmake make python
     hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
     # Optionally check that Fast Downward works:
     cd ${DOWNWARD_REPO}
