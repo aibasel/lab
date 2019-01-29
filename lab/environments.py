@@ -290,8 +290,8 @@ class SlurmEnvironment(GridEnvironment):
 
         * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
         * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
-        * "infai_all": combination of "infai_1" and "infai_2"
-          (only use this when runtime is irrelevant)
+
+        The "infai_all" queue is deprecated and should not be used.
 
         *qos* must be a valid Slurm QOS name.
 
