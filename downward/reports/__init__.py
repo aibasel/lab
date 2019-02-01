@@ -34,8 +34,9 @@ from lab.reports import Attribute, Report, geometric_mean
 class QualityFilters(object):
     """Compute the IPC score.
 
-    This class provide two filters. The first stores costs, the second
-    computes IPC scores.
+    This class provides basic methods to implement IPC scores. The class
+    PlanningReport presents two specific filters to store the costs of all runs
+    and to compute the quality of each run.
 
     """
     def __init__(self):
@@ -53,18 +54,6 @@ class QualityFilters(object):
             assert min_cost == 0
             return 1.0
         return min_cost / cost
-
-    def store_costs(self, run):
-        cost = run.get('cost')
-        if cost is not None:
-            assert run['coverage']
-            self.tasks_to_costs[self._get_task(run)].append(cost)
-        return True
-
-    def add_quality(self, run):
-        run['quality'] = self._compute_quality(
-            run.get('cost'), self.tasks_to_costs[self._get_task(run)])
-        return run
 
 
 class PlanningReport(Report):
@@ -93,6 +82,16 @@ class PlanningReport(Report):
     INFO_ATTRIBUTES = [
         'local_revision', 'global_revision', 'revision_summary',
         'build_options', 'driver_options', 'component_options'
+    ]
+
+    BUILTIN_FILTERS = [
+        'store_costs',
+        'add_quality'
+    ]
+
+    ERROR_ATTRIBUTES = [
+        'domain', 'problem', 'algorithm', 'unexplained_errors',
+        'error', 'planner_wall_clock_time', 'raw_memory', 'node'
     ]
 
     def __init__(self, **kwargs):
@@ -126,10 +125,11 @@ class PlanningReport(Report):
         self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
 
         # Compute IPC scores.
-        quality_filters = QualityFilters()
+        self.quality_filters = QualityFilters()
         filters = tools.make_list(kwargs.get('filter', []))
-        filters.append(quality_filters.store_costs)
-        filters.append(quality_filters.add_quality)
+        for builtin_filter in self.BUILTIN_FILTERS:
+            filters.append(getattr(self, builtin_filter))
+
         kwargs['filter'] = filters
 
         Report.__init__(self, **kwargs)
@@ -208,11 +208,11 @@ class PlanningReport(Report):
         Return a :py:class:`Table <lab.reports.Table>` containing one line for
         each run where an unexplained error occured.
         """
-        columns = [
-            'domain', 'problem', 'algorithm', 'unexplained_errors',
-            'error', 'planner_wall_clock_time', 'raw_memory', 'node']
+        if len(self.ERROR_ATTRIBUTES) == 0:
+            logging.critical('The list of error attributes cannot be empty')
+
         table = reports.Table(title='Unexplained errors')
-        table.set_column_order(columns)
+        table.set_column_order(self.ERROR_ATTRIBUTES)
 
         wrote_to_slurm_err = any(
             'output-to-slurm.err' in run.get('unexplained_errors', [])
@@ -224,8 +224,8 @@ class PlanningReport(Report):
             if error_message:
                 logging.error(error_message)
                 num_unexplained_errors += 1
-                for column in columns:
-                    table.add_cell(run['run_dir'], column, run.get(column, '?'))
+                for attr in self.ERROR_ATTRIBUTES:
+                    table.add_cell(run['run_dir'], column, run.get(attr, '?'))
 
         if num_unexplained_errors:
             logging.error(
@@ -288,3 +288,23 @@ class PlanningReport(Report):
         else:
             algo_order = tools.natural_sort(all_algos)
         return algo_order
+
+    # IPC score filters
+    def store_costs(self, run):
+        """
+        This filter stores the costs of all runs to compute the IPC scores later
+        using other filters
+        """
+        cost = run.get('cost')
+        if cost is not None:
+            assert run['coverage']
+            self.quality_filters.tasks_to_costs[self.quality_filters._get_task(run)].append(cost)
+        return True
+
+    def add_quality(self, run):
+        """
+        This filter computes IPC scores for plan quality.
+        """
+        run['quality'] = self.quality_filters._compute_quality(
+            run.get('cost'), self.quality_filters.tasks_to_costs[self.quality_filters._get_task(run)])
+        return run
