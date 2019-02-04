@@ -9,8 +9,8 @@
 ^docs/run.log$
 ^examples/data/
 ^examples/ff/data/
-^examples/vertex-cover/data/
 ^examples/pi/data/
 ^examples/planner/data/
 ^examples/simple/data/
+^examples/vertex-cover/data/
 ^lab.egg-info/
