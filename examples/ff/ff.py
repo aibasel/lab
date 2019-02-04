@@ -19,7 +19,7 @@ from downward.reports.absolute import AbsoluteReport
 # Create your own report class from the AbsoluteReport class
 class BaseReport(AbsoluteReport):
     BUILTIN_FILTERS = []
-    INFO_ATTRIBUTES = []
+    INFO_ATTRIBUTES = ['time_limit', 'memory_limit']
     ERROR_ATTRIBUTES = ['domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node']
 
 
@@ -36,6 +36,8 @@ SUITE = [
 ATTRIBUTES = [
     'coverage', 'error', 'evaluations', 'plan', 'times',
     'trivially_unsolvable']
+TIME_LIMIT = 1800
+MEMORY_LIMIT = 2048
 
 
 # Create a new experiment.
@@ -54,13 +56,17 @@ for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     run.add_command(
         'run-planner',
         ['ff', '-o', '{domain}', '-f', '{problem}'],
-        time_limit=1800,
-        memory_limit=2048)
+        time_limit=TIME_LIMIT,
+        memory_limit=MEMORY_LIMIT)
     # AbsoluteReport needs the following properties:
     # 'domain', 'problem', 'algorithm', 'coverage'.
     run.set_property('domain', task.domain)
     run.set_property('problem', task.problem)
     run.set_property('algorithm', 'ff')
+    # BaseReport needs the following properties:
+    # 'time_limit', 'memory_limit'.
+    run.set_property('time_limit', TIME_LIMIT)
+    run.set_property('memory_limit', MEMORY_LIMIT)
     # Every run has to have a unique id in the form of a list.
     # The algorithm name is only really needed when there are
     # multiple algorithms.

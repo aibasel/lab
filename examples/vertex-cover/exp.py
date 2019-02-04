@@ -18,7 +18,7 @@ from downward.reports.absolute import AbsoluteReport
 # Create your own report class from the AbsoluteReport class
 class BaseReport(AbsoluteReport):
     BUILTIN_FILTERS = []
-    INFO_ATTRIBUTES = []
+    INFO_ATTRIBUTES = ['time_limit', 'memory_limit', 'seed']
     ERROR_ATTRIBUTES = ['domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node']
 
 
@@ -30,6 +30,8 @@ BHOSLIB_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, 'bhoslib', '*.mis
 RANDOM_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, 'random', '*.txt')))
 ALGORITHMS = ["2approx", "greedy"]
 SEED = 2018
+TIME_LIMIT = 1800
+MEMORY_LIMIT = 2048
 
 if REMOTE:
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
@@ -58,8 +60,8 @@ for algo in ALGORITHMS:
         run.add_command(
             'solve',
             ['{solver}', '--seed', str(SEED), '{task}', algo],
-            time_limit=1800,
-            memory_limit=2048)
+            time_limit=TIME_LIMIT,
+            memory_limit=MEMORY_LIMIT)
         # AbsoluteReport needs the following attributes:
         # 'domain', 'problem' and 'algorithm'.
         domain = os.path.basename(os.path.dirname(task))
@@ -67,6 +69,11 @@ for algo in ALGORITHMS:
         run.set_property('domain', domain)
         run.set_property('problem', task_name)
         run.set_property('algorithm', algo)
+        # BaseReport needs the following properties:
+        # 'time_limit', 'memory_limit', 'seed'.
+        run.set_property('time_limit', TIME_LIMIT)
+        run.set_property('memory_limit', MEMORY_LIMIT)
+        run.set_property('seed', SEED)
         # Every run has to have a unique id in the form of a list.
         run.set_property('id', [algo, domain, task_name])
 
