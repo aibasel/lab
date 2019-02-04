@@ -211,7 +211,7 @@ class AbsoluteReport(PlanningReport):
         if table:
             return str(table) + "\n" + node_info
         else:
-            logging.warning('Table containing general information is empty.')
+            logging.warning('Table containing algorithm information is empty.')
             return node_info
 
     def _get_group_functions(self, attribute):

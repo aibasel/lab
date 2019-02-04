@@ -16,7 +16,7 @@ from lab.experiment import Experiment
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
 
-# Create your own report class from the AbsoluteReport class
+# Create your own report class from the AbsoluteReport class.
 class BaseReport(AbsoluteReport):
     BUILTIN_FILTERS = []
     INFO_ATTRIBUTES = ['time_limit', 'memory_limit']

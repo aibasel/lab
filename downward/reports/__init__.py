@@ -219,8 +219,8 @@ class PlanningReport(Report):
         Return a :py:class:`Table <lab.reports.Table>` containing one line for
         each run where an unexplained error occured.
         """
-        if len(self.ERROR_ATTRIBUTES) == 0:
-            logging.critical('The list of error attributes cannot be empty')
+        if not self.ERROR_ATTRIBUTES:
+            logging.critical('The list of error attributes cannot be empty.')
 
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(self.ERROR_ATTRIBUTES)
@@ -236,7 +236,7 @@ class PlanningReport(Report):
                 logging.error(error_message)
                 num_unexplained_errors += 1
                 for attr in self.ERROR_ATTRIBUTES:
-                    table.add_cell(run['run_dir'], column, run.get(attr, '?'))
+                    table.add_cell(run['run_dir'], attr, run.get(attr, '?'))
 
         if num_unexplained_errors:
             logging.error(
