@@ -34,9 +34,8 @@ from lab.reports import Attribute, Report, geometric_mean
 class QualityFilters(object):
     """Compute the IPC score.
 
-    This class provides basic methods to implement IPC scores. The class
-    PlanningReport presents two specific filters to store the costs of all runs
-    and to compute the quality of each run.
+    This class provide two filters. The first stores costs, the second
+    computes IPC scores.
 
     """
     def __init__(self):
@@ -54,6 +53,18 @@ class QualityFilters(object):
             assert min_cost == 0
             return 1.0
         return min_cost / cost
+
+    def store_costs(self, run):
+        cost = run.get('cost')
+        if cost is not None:
+            assert run['coverage']
+            self.tasks_to_costs[self._get_task(run)].append(cost)
+        return True
+
+    def add_quality(self, run):
+        run['quality'] = self._compute_quality(
+            run.get('cost'), self.tasks_to_costs[self._get_task(run)])
+        return run
 
 
 class PlanningReport(Report):
@@ -125,10 +136,10 @@ class PlanningReport(Report):
         self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
 
         # Compute IPC scores.
-        self.quality_filters = QualityFilters()
+        quality_filters = QualityFilters()
         filters = tools.make_list(kwargs.get('filter', []))
         for builtin_filter in self.BUILTIN_FILTERS:
-            filters.append(getattr(self, builtin_filter))
+            filters.append(getattr(quality_filters, builtin_filter))
 
         kwargs['filter'] = filters
 
@@ -288,23 +299,3 @@ class PlanningReport(Report):
         else:
             algo_order = tools.natural_sort(all_algos)
         return algo_order
-
-    # IPC score filters
-    def store_costs(self, run):
-        """
-        This filter stores the costs of all runs to compute the IPC scores later
-        using other filters
-        """
-        cost = run.get('cost')
-        if cost is not None:
-            assert run['coverage']
-            self.quality_filters.tasks_to_costs[self.quality_filters._get_task(run)].append(cost)
-        return True
-
-    def add_quality(self, run):
-        """
-        This filter computes IPC scores for plan quality.
-        """
-        run['quality'] = self.quality_filters._compute_quality(
-            run.get('cost'), self.quality_filters.tasks_to_costs[self.quality_filters._get_task(run)])
-        return run
