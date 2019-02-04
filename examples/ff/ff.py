@@ -16,6 +16,12 @@ from lab.experiment import Experiment
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
 
+# Create your own report class from the AbsoluteReport class
+class BaseReport(AbsoluteReport):
+    BUILTIN_FILTERS = []
+    INFO_ATTRIBUTES = []
+    ERROR_ATTRIBUTES = ['domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node']
+
 
 NODE = platform.node()
 REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
@@ -72,7 +78,7 @@ exp.add_fetcher(name='fetch')
 
 # Make a report.
 exp.add_report(
-    AbsoluteReport(attributes=ATTRIBUTES),
+    BaseReport(attributes=ATTRIBUTES),
     outfile='report.html')
 
 # Parse the commandline and run the specified steps.
