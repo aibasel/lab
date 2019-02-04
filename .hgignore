@@ -9,9 +9,8 @@
 ^docs/run.log$
 ^examples/data/
 ^examples/ff/data/
+^examples/vertex-cover/data/
 ^examples/pi/data/
 ^examples/planner/data/
 ^examples/simple/data/
 ^lab.egg-info/
-syntax: glob
-examples/vertex-cover/data/
