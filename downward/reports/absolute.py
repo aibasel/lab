@@ -208,7 +208,11 @@ class AbsoluteReport(PlanningReport):
         node_info = "Used nodes: {{{}}}".format(
             ", ".join(_abbreviate_node_names(self._get_node_names())))
 
-        return str(table) + "\n" + node_info
+        if table:
+            return str(table) + "\n" + node_info
+        else:
+            logging.warning('Table containing general information is empty.')
+            return node_info
 
     def _get_group_functions(self, attribute):
         """Decide on a list of group functions for this attribute."""

@@ -13,3 +13,5 @@
 ^examples/planner/data/
 ^examples/simple/data/
 ^lab.egg-info/
+syntax: glob
+examples/vertex-cover/data/
