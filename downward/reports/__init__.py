@@ -95,11 +95,6 @@ class PlanningReport(Report):
         'build_options', 'driver_options', 'component_options'
     ]
 
-    BUILTIN_FILTERS = [
-        'store_costs',
-        'add_quality'
-    ]
-
     ERROR_ATTRIBUTES = [
         'domain', 'problem', 'algorithm', 'unexplained_errors',
         'error', 'planner_wall_clock_time', 'raw_memory', 'node'
@@ -138,9 +133,6 @@ class PlanningReport(Report):
         # Compute IPC scores.
         quality_filters = QualityFilters()
         filters = tools.make_list(kwargs.get('filter', []))
-        for builtin_filter in self.BUILTIN_FILTERS:
-            filters.append(getattr(quality_filters, builtin_filter))
-
         kwargs['filter'] = filters
 
         Report.__init__(self, **kwargs)

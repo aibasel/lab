@@ -12,6 +12,7 @@ from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.reports.filter import FilterReport
 
 from downward.experiment import FastDownwardExperiment
+from downward.reports import QualityFilters
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import ComparativeReport
 from downward.reports.scatter import ScatterPlotReport
@@ -45,6 +46,8 @@ exp.add_algorithm('iter-hadd', REPO, REV, [
 exp.add_algorithm(
     'ipdb', REPO, REV, ["--search", "astar(ipdb())"],
     driver_options=['--search-time-limit', 10])
+exp.add_algorithm(
+    'ff', REPO, REV, ["--search", "eager_greedy([ff()])"])
 exp.add_algorithm(
     'lama11', REPO, REV, [],
     driver_options=['--alias', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
@@ -85,11 +88,18 @@ exp.add_fetcher(
 exp.add_fetcher(
     dest=eval_dir(2), name='fetcher-test2', filter_algorithm='lama11')
 
+# Create QualityFilter to store the costs of all tasks and use the built-in IPC
+# score filters.
+quality_filters = QualityFilters()
 
 # Add report steps
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES + ['cost']),
     name='report-abs-d')
+exp.add_report(
+    AbsoluteReport(attributes=ATTRIBUTES + ['cost', 'quality'],
+    filter=[quality_filters.store_costs, quality_filters.add_quality]),
+    name='report-abs-builtin-filters')
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES, filter=only_two_algorithms),
     name='report-abs-p-filter')
