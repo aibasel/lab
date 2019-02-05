@@ -41,6 +41,14 @@ class QualityFilters(object):
     has been executed. Also, both filters require the 'cost' attribute
     to be collected in the experiment.
 
+    You can also add filters to compute new attributes or to modify
+    properties of each run. For instance, using the built-in filters from
+    QualityFilters class:
+
+    >>> quality_filters = QualityFilters()
+    >>> report = PlanningReport(filter=[quality_filters.store_costs,
+                                        quality_filters.add_quality])
+
     """
     def __init__(self):
         self.tasks_to_costs = defaultdict(list)
@@ -94,15 +102,13 @@ class PlanningReport(Report):
         Attribute('unsolvable', absolute=True, min_wins=False),
     ])
 
-    # List of attributes to be showed for each algorithm in the algorithms
-    # information table.
+    # Attributes shown in the algorithm info table.
     INFO_ATTRIBUTES = [
         'local_revision', 'global_revision', 'revision_summary',
         'build_options', 'driver_options', 'component_options'
     ]
 
-    # List of attributes to be showed for each run present in the
-    # error tables.
+    # Attributes shown in unexplained-errors table.
     ERROR_ATTRIBUTES = [
         'domain', 'problem', 'algorithm', 'unexplained_errors',
         'error', 'planner_wall_clock_time', 'raw_memory', 'node'
@@ -129,9 +135,7 @@ class PlanningReport(Report):
         properties of each run. For instance, using the built-in filters from
         QualityFilters class:
 
-        >>> # Create a QualityFilters object.
         >>> quality_filters = QualityFilters()
-        >>> # Add quality filters to the report
         >>> report = PlanningReport(filter=[quality_filters.store_costs,
                                             quality_filters.add_quality])
 
@@ -143,7 +147,6 @@ class PlanningReport(Report):
         # Remember the order of algorithms if it is given as a keyword argument filter.
         self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
 
-        # Compute IPC scores.
         filters = tools.make_list(kwargs.get('filter', []))
         kwargs['filter'] = filters
 

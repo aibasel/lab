@@ -88,14 +88,13 @@ exp.add_fetcher(
 exp.add_fetcher(
     dest=eval_dir(2), name='fetcher-test2', filter_algorithm='lama11')
 
-# Create QualityFilter to store the costs of all tasks and use the built-in IPC
-# score filters.
-quality_filters = QualityFilters()
 
-# Add report steps
+# Add report steps.
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES + ['cost']),
     name='report-abs-d')
+# Compute IPC quality scores.
+quality_filters = QualityFilters()
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES + ['cost', 'quality'],
     filter=[quality_filters.store_costs, quality_filters.add_quality]),
