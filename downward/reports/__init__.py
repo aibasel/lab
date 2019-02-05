@@ -102,13 +102,13 @@ class PlanningReport(Report):
         Attribute('unsolvable', absolute=True, min_wins=False),
     ])
 
-    # Attributes shown in the algorithm info table.
+    #: Attributes shown in the algorithm info table.
     INFO_ATTRIBUTES = [
         'local_revision', 'global_revision', 'revision_summary',
         'build_options', 'driver_options', 'component_options'
     ]
 
-    # Attributes shown in unexplained-errors table.
+    #: Attributes shown in unexplained-errors table.
     ERROR_ATTRIBUTES = [
         'domain', 'problem', 'algorithm', 'unexplained_errors',
         'error', 'planner_wall_clock_time', 'raw_memory', 'node'
