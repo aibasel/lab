@@ -5,6 +5,7 @@ Tables
 ------
 
 .. autoclass:: downward.reports.PlanningReport
+   :members: ERROR_ATTRIBUTES, INFO_ATTRIBUTES
 .. autoclass:: downward.reports.absolute.AbsoluteReport
 .. autoclass:: downward.reports.taskwise.TaskwiseReport
 .. autoclass:: downward.reports.compare.ComparativeReport
