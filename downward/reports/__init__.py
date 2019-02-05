@@ -37,6 +37,10 @@ class QualityFilters(object):
     This class provide two filters. The first stores costs, the second
     computes IPC scores.
 
+    The 'add_quality' filter can only be executed after 'store_costs'
+    has been executed. Also, both filters require the 'cost' attribute
+    to be collected in the experiment.
+
     """
     def __init__(self):
         self.tasks_to_costs = defaultdict(list)
@@ -90,11 +94,15 @@ class PlanningReport(Report):
         Attribute('unsolvable', absolute=True, min_wins=False),
     ])
 
+    # List of attributes to be showed for each algorithm in the algorithms
+    # information table.
     INFO_ATTRIBUTES = [
         'local_revision', 'global_revision', 'revision_summary',
         'build_options', 'driver_options', 'component_options'
     ]
 
+    # List of attributes to be showed for each run present in the
+    # error tables.
     ERROR_ATTRIBUTES = [
         'domain', 'problem', 'algorithm', 'unexplained_errors',
         'error', 'planner_wall_clock_time', 'raw_memory', 'node'
@@ -117,10 +125,15 @@ class PlanningReport(Report):
         >>> # Use "filter_algorithm" to order algorithms.
         >>> r = PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
-        The constructor automatically adds two filters that together
-        compute and store IPC scores in the "quality" attribute. The
-        first caches the costs and the second computes and adds the IPC
-        score to each run.
+        You can also add filters to compute new attributes or to modify
+        properties of each run. For instance, using the built-in filters from
+        QualityFilters class:
+
+        >>> # Create a QualityFilters object.
+        >>> quality_filters = QualityFilters()
+        >>> # Add quality filters to the report
+        >>> report = PlanningReport(filter=[quality_filters.store_costs,
+                                            quality_filters.add_quality])
 
         """
         # Set non-default options for some attributes.
@@ -131,7 +144,6 @@ class PlanningReport(Report):
         self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
 
         # Compute IPC scores.
-        quality_filters = QualityFilters()
         filters = tools.make_list(kwargs.get('filter', []))
         kwargs['filter'] = filters
 
