@@ -31,54 +31,6 @@ from lab import tools
 from lab.reports import Attribute, Report, geometric_mean
 
 
-class QualityFilters(object):
-    """Compute the IPC score.
-
-    This class provide two filters. The first stores costs, the second
-    computes IPC scores.
-
-    The 'add_quality' filter can only be executed after 'store_costs'
-    has been executed. Also, both filters require the 'cost' attribute
-    to be collected in the experiment.
-
-    You can also add filters to compute new attributes or to modify
-    properties of each run. For instance, using the built-in filters from
-    QualityFilters class:
-
-    >>> quality_filters = QualityFilters()
-    >>> report = PlanningReport(filter=[quality_filters.store_costs,
-                                        quality_filters.add_quality])
-
-    """
-    def __init__(self):
-        self.tasks_to_costs = defaultdict(list)
-
-    def _get_task(self, run):
-        return (run['domain'], run['problem'])
-
-    def _compute_quality(self, cost, all_costs):
-        if cost is None:
-            return 0.0
-        assert all_costs
-        min_cost = min(all_costs)
-        if cost == 0:
-            assert min_cost == 0
-            return 1.0
-        return min_cost / cost
-
-    def store_costs(self, run):
-        cost = run.get('cost')
-        if cost is not None:
-            assert run['coverage']
-            self.tasks_to_costs[self._get_task(run)].append(cost)
-        return True
-
-    def add_quality(self, run):
-        run['quality'] = self._compute_quality(
-            run.get('cost'), self.tasks_to_costs[self._get_task(run)])
-        return run
-
-
 class PlanningReport(Report):
     """
     This is the base class for Fast Downward reports.
@@ -118,26 +70,22 @@ class PlanningReport(Report):
         """
         See :class:`~lab.reports.Report` for inherited parameters.
 
-        You can include only specific domains or algorithms by
-        using :py:class:`filters <.Report>`. If you provide a list for
-        *filter_algorithm*, it will be used to determine the order of
-        algorithms in the report.
+        You can filter and modify runs for a report with
+        :py:class:`filters <.Report>`. For example, you can include only
+        a subset of algorithms or compute new attributes. If you provide
+        a list for *filter_algorithm*, it will be used to determine the
+        order of algorithms in the report.
 
         >>> # Use a filter function to select algorithms.
         >>> def only_blind_and_lmcut(run):
         ...     return run['algorithm'] in ['blind', 'lmcut']
         >>> report = PlanningReport(filter=only_blind_and_lmcut)
 
-        >>> # Use "filter_algorithm" to order algorithms.
+        >>> # Use "filter_algorithm" to select and *order* algorithms.
         >>> r = PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
-        You can also add filters to compute new attributes or to modify
-        properties of each run. For instance, using the built-in filters from
-        QualityFilters class:
-
-        >>> quality_filters = QualityFilters()
-        >>> report = PlanningReport(filter=[quality_filters.store_costs,
-                                            quality_filters.add_quality])
+        :py:class:`Filters <.Report>` can be very helpful so we
+        recommend reading up on them to use their full potential.
 
         """
         # Set non-default options for some attributes.

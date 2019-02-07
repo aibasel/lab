@@ -3,6 +3,7 @@
 This experiment demonstrates most of the available options.
 """
 
+from collections import defaultdict
 import os
 import os.path
 import platform
@@ -12,7 +13,6 @@ from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.reports.filter import FilterReport
 
 from downward.experiment import FastDownwardExperiment
-from downward.reports import QualityFilters
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import ComparativeReport
 from downward.reports.scatter import ScatterPlotReport
@@ -31,6 +31,54 @@ BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
 REV = 'default'
 ATTRIBUTES = ['coverage']
+
+class QualityFilters(object):
+    """Compute the IPC quality score.
+
+    The IPC score is computed over the list of runs for each task. Since
+    filters only work on individual runs, we can't compute the score
+    with a single filter, but it is possible by using two filters:
+    *store_costs* saves the list of costs per task in a dictionary
+    whereas *add_quality* uses the stored costs to compute IPC quality
+    scores and adds them to the runs.
+
+    The *add_quality* filter can only be executed after *store_costs*
+    has been executed. Also, both filters require the "cost" attribute
+    to be parsed.
+
+    >>> from downward.reports.absolute import AbsoluteReport
+    >>> quality_filters = QualityFilters()
+    >>> report = AbsoluteReport(filter=[quality_filters.store_costs,
+    ...                                 quality_filters.add_quality])
+
+    """
+    def __init__(self):
+        self.tasks_to_costs = defaultdict(list)
+
+    def _get_task(self, run):
+        return (run['domain'], run['problem'])
+
+    def _compute_quality(self, cost, all_costs):
+        if cost is None:
+            return 0.0
+        assert all_costs
+        min_cost = min(all_costs)
+        if cost == 0:
+            assert min_cost == 0
+            return 1.0
+        return min_cost / cost
+
+    def store_costs(self, run):
+        cost = run.get('cost')
+        if cost is not None:
+            assert run['coverage']
+            self.tasks_to_costs[self._get_task(run)].append(cost)
+        return True
+
+    def add_quality(self, run):
+        run['quality'] = self._compute_quality(
+            run.get('cost'), self.tasks_to_costs[self._get_task(run)])
+        return run
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
 
@@ -93,7 +141,6 @@ exp.add_fetcher(
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES + ['cost']),
     name='report-abs-d')
-# Compute IPC quality scores.
 quality_filters = QualityFilters()
 exp.add_report(
     AbsoluteReport(attributes=ATTRIBUTES + ['cost', 'quality'],
