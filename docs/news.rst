@@ -22,6 +22,10 @@ downward
 * Include node names in standard reports and warn if report mixes runs from different partitions.
 * Parse "planner_wall_clock_time" attribute in planner parser.
 * Include "planner_wall_clock_time" and "raw_memory" attributes in unexplained errors table.
+* Make PlanningReport more generic by letting derived classes override the new
+  ``PREDEFINED_ATTRIBUTES``, ``INFO_ATTRIBUTES`` and ``ERROR_ATTRIBUTES`` class members (Augusto).
+* Don't compute the "quality" attribute automatically. The docs and ``showcase-options.py`` show
+  how to add the two filters that together add the IPC quality score to each run.
 
 
 v3.0 (2018-07-10)
