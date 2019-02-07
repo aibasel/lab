@@ -30,7 +30,6 @@ REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
 REV = 'default'
-ATTRIBUTES = ['coverage']
 
 class QualityFilters(object):
     """Compute the IPC quality score.
@@ -139,15 +138,15 @@ exp.add_fetcher(
 
 # Add report steps.
 exp.add_report(
-    AbsoluteReport(attributes=ATTRIBUTES + ['cost']),
+    AbsoluteReport(attributes=['coverage', 'cost']),
     name='report-abs-d')
 quality_filters = QualityFilters()
 exp.add_report(
-    AbsoluteReport(attributes=ATTRIBUTES + ['cost', 'quality'],
+    AbsoluteReport(attributes=['coverage', 'cost', 'quality'],
     filter=[quality_filters.store_costs, quality_filters.add_quality]),
     name='report-abs-builtin-filters')
 exp.add_report(
-    AbsoluteReport(attributes=ATTRIBUTES, filter=only_two_algorithms),
+    AbsoluteReport(attributes=['coverage'], filter=only_two_algorithms),
     name='report-abs-p-filter')
 exp.add_report(
     AbsoluteReport(attributes=['coverage', 'error'], format='tex'),

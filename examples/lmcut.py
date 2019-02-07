@@ -13,7 +13,7 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
 
 
-ATTRIBUTES = ['coverage', 'error', 'expansions']
+ATTRIBUTES = ['coverage', 'error', 'expansions', 'total_time']
 
 NODE = platform.node()
 if NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch"):
