@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module that permits generating downward reports by reading properties files.
+Module that permits generating planner reports by reading properties files.
 """
 
 from __future__ import with_statement, division
@@ -31,47 +31,21 @@ from lab import tools
 from lab.reports import Attribute, Report, geometric_mean
 
 
-class QualityFilters(object):
-    """Compute the IPC score.
-
-    This class provide two filters. The first stores costs, the second
-    computes IPC scores.
-
-    """
-    def __init__(self):
-        self.tasks_to_costs = defaultdict(list)
-
-    def _get_task(self, run):
-        return (run['domain'], run['problem'])
-
-    def _compute_quality(self, cost, all_costs):
-        if cost is None:
-            return 0.0
-        assert all_costs
-        min_cost = min(all_costs)
-        if cost == 0:
-            assert min_cost == 0
-            return 1.0
-        return min_cost / cost
-
-    def store_costs(self, run):
-        cost = run.get('cost')
-        if cost is not None:
-            assert run['coverage']
-            self.tasks_to_costs[self._get_task(run)].append(cost)
-        return True
-
-    def add_quality(self, run):
-        run['quality'] = self._compute_quality(
-            run.get('cost'), self.tasks_to_costs[self._get_task(run)])
-        return run
-
-
 class PlanningReport(Report):
     """
-    This is the base class for Fast Downward reports.
+    This is the base class for planner reports.
+
+    The :py:attr:`~INFO_ATTRIBUTES` and :py:attr:`~ERROR_ATTRIBUTES`
+    class members hold attributes for Fast Downward experiments by
+    default. You may want to adjust the two lists in derived classes.
+
     """
-    ATTRIBUTES = dict((str(attr), attr) for attr in [
+    #: List of predefined :py:class:`~Attribute` instances. If
+    #: PlanningReport receives ``attributes=['coverage']``, it converts
+    #: the plain string ``'coverage'`` to the attribute instance
+    #: ``Attribute('coverage', absolute=True, min_wins=False, scale='linear')``.
+    #: The list can be overriden in subclasses.
+    PREDEFINED_ATTRIBUTES = [
         Attribute('cost', scale='linear'),
         Attribute('coverage', absolute=True, min_wins=False, scale='linear'),
         Attribute('dead_ends', min_wins=False),
@@ -88,34 +62,42 @@ class PlanningReport(Report):
         Attribute('search_time', functions=geometric_mean),
         Attribute('total_time', functions=geometric_mean),
         Attribute('unsolvable', absolute=True, min_wins=False),
-    ])
+    ]
 
+    #: Attributes shown in the algorithm info table. Can be overriden in
+    #: subclasses.
     INFO_ATTRIBUTES = [
         'local_revision', 'global_revision', 'revision_summary',
         'build_options', 'driver_options', 'component_options'
+    ]
+
+    #: Attributes shown in the unexplained-errors table. Can be overriden
+    #: in subclasses.
+    ERROR_ATTRIBUTES = [
+        'domain', 'problem', 'algorithm', 'unexplained_errors',
+        'error', 'planner_wall_clock_time', 'raw_memory', 'node'
     ]
 
     def __init__(self, **kwargs):
         """
         See :class:`~lab.reports.Report` for inherited parameters.
 
-        You can include only specific domains or algorithms by
-        using :py:class:`filters <.Report>`. If you provide a list for
-        *filter_algorithm*, it will be used to determine the order of
-        algorithms in the report.
+        You can filter and modify runs for a report with
+        :py:class:`filters <.Report>`. For example, you can include only
+        a subset of algorithms or compute new attributes. If you provide
+        a list for *filter_algorithm*, it will be used to determine the
+        order of algorithms in the report.
 
         >>> # Use a filter function to select algorithms.
         >>> def only_blind_and_lmcut(run):
         ...     return run['algorithm'] in ['blind', 'lmcut']
         >>> report = PlanningReport(filter=only_blind_and_lmcut)
 
-        >>> # Use "filter_algorithm" to order algorithms.
+        >>> # Use "filter_algorithm" to select and *order* algorithms.
         >>> r = PlanningReport(filter_algorithm=['lmcut', 'blind'])
 
-        The constructor automatically adds two filters that together
-        compute and store IPC scores in the "quality" attribute. The
-        first caches the costs and the second computes and adds the IPC
-        score to each run.
+        :py:class:`Filters <.Report>` can be very helpful so we
+        recommend reading up on them to use their full potential.
 
         """
         # Set non-default options for some attributes.
@@ -125,20 +107,14 @@ class PlanningReport(Report):
         # Remember the order of algorithms if it is given as a keyword argument filter.
         self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
 
-        # Compute IPC scores.
-        quality_filters = QualityFilters()
-        filters = tools.make_list(kwargs.get('filter', []))
-        filters.append(quality_filters.store_costs)
-        filters.append(quality_filters.add_quality)
-        kwargs['filter'] = filters
-
         Report.__init__(self, **kwargs)
 
     def _prepare_attribute(self, attr):
+        predefined = dict((str(attr), attr) for attr in self.PREDEFINED_ATTRIBUTES)
         if not isinstance(attr, Attribute):
-            if attr in self.ATTRIBUTES:
-                return self.ATTRIBUTES[attr]
-            for pattern in self.ATTRIBUTES.values():
+            if attr in predefined:
+                return predefined[attr]
+            for pattern in predefined.values():
                 if (fnmatch(attr, pattern)):
                     return pattern.copy(attr)
         return Report._prepare_attribute(self, attr)
@@ -208,11 +184,11 @@ class PlanningReport(Report):
         Return a :py:class:`Table <lab.reports.Table>` containing one line for
         each run where an unexplained error occured.
         """
-        columns = [
-            'domain', 'problem', 'algorithm', 'unexplained_errors',
-            'error', 'planner_wall_clock_time', 'raw_memory', 'node']
+        if not self.ERROR_ATTRIBUTES:
+            logging.critical('The list of error attributes must not be empty.')
+
         table = reports.Table(title='Unexplained errors')
-        table.set_column_order(columns)
+        table.set_column_order(self.ERROR_ATTRIBUTES)
 
         wrote_to_slurm_err = any(
             'output-to-slurm.err' in run.get('unexplained_errors', [])
@@ -224,8 +200,8 @@ class PlanningReport(Report):
             if error_message:
                 logging.error(error_message)
                 num_unexplained_errors += 1
-                for column in columns:
-                    table.add_cell(run['run_dir'], column, run.get(column, '?'))
+                for attr in self.ERROR_ATTRIBUTES:
+                    table.add_cell(run['run_dir'], attr, run.get(attr, '?'))
 
         if num_unexplained_errors:
             logging.error(

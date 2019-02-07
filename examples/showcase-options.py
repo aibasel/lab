@@ -3,6 +3,7 @@
 This experiment demonstrates most of the available options.
 """
 
+from collections import defaultdict
 import os
 import os.path
 import platform
@@ -29,7 +30,56 @@ REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
 REV = 'default'
-ATTRIBUTES = ['coverage']
+
+
+class QualityFilters(object):
+    """Compute the IPC quality score.
+
+    The IPC score is computed over the list of runs for each task. Since
+    filters only work on individual runs, we can't compute the score
+    with a single filter, but it is possible by using two filters:
+    *store_costs* saves the list of costs per task in a dictionary
+    whereas *add_quality* uses the stored costs to compute IPC quality
+    scores and adds them to the runs.
+
+    The *add_quality* filter can only be executed after *store_costs*
+    has been executed. Also, both filters require the "cost" attribute
+    to be parsed.
+
+    >>> from downward.reports.absolute import AbsoluteReport
+    >>> quality_filters = QualityFilters()
+    >>> report = AbsoluteReport(filter=[quality_filters.store_costs,
+    ...                                 quality_filters.add_quality])
+
+    """
+    def __init__(self):
+        self.tasks_to_costs = defaultdict(list)
+
+    def _get_task(self, run):
+        return (run['domain'], run['problem'])
+
+    def _compute_quality(self, cost, all_costs):
+        if cost is None:
+            return 0.0
+        assert all_costs
+        min_cost = min(all_costs)
+        if cost == 0:
+            assert min_cost == 0
+            return 1.0
+        return min_cost / cost
+
+    def store_costs(self, run):
+        cost = run.get('cost')
+        if cost is not None:
+            assert run['coverage']
+            self.tasks_to_costs[self._get_task(run)].append(cost)
+        return True
+
+    def add_quality(self, run):
+        run['quality'] = self._compute_quality(
+            run.get('cost'), self.tasks_to_costs[self._get_task(run)])
+        return run
+
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
 
@@ -45,6 +95,8 @@ exp.add_algorithm('iter-hadd', REPO, REV, [
 exp.add_algorithm(
     'ipdb', REPO, REV, ["--search", "astar(ipdb())"],
     driver_options=['--search-time-limit', 10])
+exp.add_algorithm(
+    'ff', REPO, REV, ["--search", "eager_greedy([ff()])"])
 exp.add_algorithm(
     'lama11', REPO, REV, [],
     driver_options=['--alias', 'seq-sat-lama-2011', '--plan-file', 'sas_plan'])
@@ -86,12 +138,18 @@ exp.add_fetcher(
     dest=eval_dir(2), name='fetcher-test2', filter_algorithm='lama11')
 
 
-# Add report steps
+# Add report steps.
 exp.add_report(
-    AbsoluteReport(attributes=ATTRIBUTES + ['cost']),
+    AbsoluteReport(attributes=['coverage', 'cost']),
     name='report-abs-d')
+quality_filters = QualityFilters()
 exp.add_report(
-    AbsoluteReport(attributes=ATTRIBUTES, filter=only_two_algorithms),
+    AbsoluteReport(
+        attributes=['coverage', 'cost', 'quality'],
+        filter=[quality_filters.store_costs, quality_filters.add_quality]),
+    name='report-abs-builtin-filters')
+exp.add_report(
+    AbsoluteReport(attributes=['coverage'], filter=only_two_algorithms),
     name='report-abs-p-filter')
 exp.add_report(
     AbsoluteReport(attributes=['coverage', 'error'], format='tex'),
@@ -145,7 +203,7 @@ for format in ["png", "tex"]:
 exp.add_report(
     ComparativeReport(
         [('lama11', 'iter-hadd')],
-        attributes=['quality', 'coverage']),
+        attributes=['coverage']),
     name='report-compare',
     outfile='compare.html')
 

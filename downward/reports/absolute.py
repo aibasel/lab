@@ -208,7 +208,11 @@ class AbsoluteReport(PlanningReport):
         node_info = "Used nodes: {{{}}}".format(
             ", ".join(_abbreviate_node_names(self._get_node_names())))
 
-        return str(table) + "\n" + node_info
+        if table:
+            return str(table) + "\n" + node_info
+        else:
+            logging.warning('Table containing algorithm information is empty.')
+            return node_info
 
     def _get_group_functions(self, attribute):
         """Decide on a list of group functions for this attribute."""
@@ -242,14 +246,14 @@ class AbsoluteReport(PlanningReport):
         self._add_table_info(attribute, func_name, table)
         domain_algo_values = defaultdict(list)
         for (domain, problem), runs in self.problem_runs.items():
-                if (not attribute.absolute and
-                        any(run.get(attribute) is None for run in runs)):
-                    continue
-                num_probs += 1
-                for run in runs:
-                    value = run.get(attribute)
-                    if value is not None:
-                        domain_algo_values[(domain, run['algorithm'])].append(value)
+            if (not attribute.absolute and
+                    any(run.get(attribute) is None for run in runs)):
+                continue
+            num_probs += 1
+            for run in runs:
+                value = run.get(attribute)
+                if value is not None:
+                    domain_algo_values[(domain, run['algorithm'])].append(value)
 
         # If the attribute is absolute (e.g. coverage) we may have
         # added problems for which not all algorithms have a value. Therefore, we
