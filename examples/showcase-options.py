@@ -31,6 +31,7 @@ BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
 REV = 'default'
 
+
 class QualityFilters(object):
     """Compute the IPC quality score.
 
@@ -78,6 +79,7 @@ class QualityFilters(object):
         run['quality'] = self._compute_quality(
             run.get('cost'), self.tasks_to_costs[self._get_task(run)])
         return run
+
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REV_CACHE)
 
@@ -142,8 +144,9 @@ exp.add_report(
     name='report-abs-d')
 quality_filters = QualityFilters()
 exp.add_report(
-    AbsoluteReport(attributes=['coverage', 'cost', 'quality'],
-    filter=[quality_filters.store_costs, quality_filters.add_quality]),
+    AbsoluteReport(
+        attributes=['coverage', 'cost', 'quality'],
+        filter=[quality_filters.store_costs, quality_filters.add_quality]),
     name='report-abs-builtin-filters')
 exp.add_report(
     AbsoluteReport(attributes=['coverage'], filter=only_two_algorithms),
@@ -200,7 +203,7 @@ for format in ["png", "tex"]:
 exp.add_report(
     ComparativeReport(
         [('lama11', 'iter-hadd')],
-        attributes=['quality', 'coverage']),
+        attributes=['coverage']),
     name='report-compare',
     outfile='compare.html')
 

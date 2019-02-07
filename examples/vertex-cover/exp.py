@@ -14,10 +14,12 @@ from lab.reports import Attribute
 
 from downward.reports.absolute import AbsoluteReport
 
+
 # Create custom report class with suitable info and error attributes.
 class BaseReport(AbsoluteReport):
     INFO_ATTRIBUTES = ['time_limit', 'memory_limit', 'seed']
-    ERROR_ATTRIBUTES = ['domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node']
+    ERROR_ATTRIBUTES = [
+        'domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node']
 
 
 NODE = platform.node()
