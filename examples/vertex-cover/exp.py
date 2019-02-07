@@ -12,10 +12,9 @@ from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.experiment import Experiment
 from lab.reports import Attribute
 
-# This report should ideally live the Lab package.
 from downward.reports.absolute import AbsoluteReport
 
-# Create your own report class from the AbsoluteReport class.
+# Create custom report class with suitable info and error attributes.
 class BaseReport(AbsoluteReport):
     INFO_ATTRIBUTES = ['time_limit', 'memory_limit', 'seed']
     ERROR_ATTRIBUTES = ['domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node']

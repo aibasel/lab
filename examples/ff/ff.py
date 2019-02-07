@@ -11,12 +11,10 @@ import platform
 from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.experiment import Experiment
 
-# In the future, these modules should live in a separate
-# "planning" or "solver" package.
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
 
-# Create your own report class from the AbsoluteReport class.
+# Create custom report class with suitable info and error attributes.
 class BaseReport(AbsoluteReport):
     INFO_ATTRIBUTES = ['time_limit', 'memory_limit']
     ERROR_ATTRIBUTES = ['domain', 'problem', 'algorithm', 'unexplained_errors', 'error', 'node']

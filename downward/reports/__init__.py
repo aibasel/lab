@@ -33,7 +33,12 @@ from lab.reports import Attribute, Report, geometric_mean
 
 class PlanningReport(Report):
     """
-    This is the base class for Fast Downward reports.
+    This is the base class for planner reports.
+
+    The :py:attr:`~INFO_ATTRIBUTES` and :py:attr:`~ERROR_ATTRIBUTES`
+    class members hold attributes for Fast Downward experiments by
+    default. You may want to adjust the two lists in derived classes.
+
     """
     ATTRIBUTES = dict((str(attr), attr) for attr in [
         Attribute('cost', scale='linear'),
@@ -54,13 +59,15 @@ class PlanningReport(Report):
         Attribute('unsolvable', absolute=True, min_wins=False),
     ])
 
-    #: Attributes shown in the algorithm info table.
+    #: Attributes shown in the algorithm info table. Can be overriden in
+    #: subclasses.
     INFO_ATTRIBUTES = [
         'local_revision', 'global_revision', 'revision_summary',
         'build_options', 'driver_options', 'component_options'
     ]
 
-    #: Attributes shown in unexplained-errors table.
+    #: Attributes shown in the unexplained-errors table. Can be overriden
+    #: in subclasses.
     ERROR_ATTRIBUTES = [
         'domain', 'problem', 'algorithm', 'unexplained_errors',
         'error', 'planner_wall_clock_time', 'raw_memory', 'node'
@@ -94,9 +101,6 @@ class PlanningReport(Report):
 
         # Remember the order of algorithms if it is given as a keyword argument filter.
         self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm', []))
-
-        filters = tools.make_list(kwargs.get('filter', []))
-        kwargs['filter'] = filters
 
         Report.__init__(self, **kwargs)
 
@@ -175,7 +179,7 @@ class PlanningReport(Report):
         each run where an unexplained error occured.
         """
         if not self.ERROR_ATTRIBUTES:
-            logging.critical('The list of error attributes cannot be empty.')
+            logging.critical('The list of error attributes must not be empty.')
 
         table = reports.Table(title='Unexplained errors')
         table.set_column_order(self.ERROR_ATTRIBUTES)
