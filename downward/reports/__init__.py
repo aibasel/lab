@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module that permits generating downward reports by reading properties files.
+Module that permits generating planner reports by reading properties files.
 """
 
 from __future__ import with_statement, division
@@ -40,7 +40,12 @@ class PlanningReport(Report):
     default. You may want to adjust the two lists in derived classes.
 
     """
-    ATTRIBUTES = dict((str(attr), attr) for attr in [
+    #: List of predefined :py:class:`~Attribute` instances. If
+    #: PlanningReport receives ``attributes=['coverage']``, it converts
+    #: the plain string ``'coverage'`` to the attribute instance
+    #: ``Attribute('coverage', absolute=True, min_wins=False, scale='linear')``.
+    #: The list can be overriden in subclasses.
+    PREDEFINED_ATTRIBUTES = [
         Attribute('cost', scale='linear'),
         Attribute('coverage', absolute=True, min_wins=False, scale='linear'),
         Attribute('dead_ends', min_wins=False),
@@ -57,7 +62,7 @@ class PlanningReport(Report):
         Attribute('search_time', functions=geometric_mean),
         Attribute('total_time', functions=geometric_mean),
         Attribute('unsolvable', absolute=True, min_wins=False),
-    ])
+    ]
 
     #: Attributes shown in the algorithm info table. Can be overriden in
     #: subclasses.
@@ -105,10 +110,11 @@ class PlanningReport(Report):
         Report.__init__(self, **kwargs)
 
     def _prepare_attribute(self, attr):
+        predefined = dict((str(attr), attr) for attr in self.PREDEFINED_ATTRIBUTES)
         if not isinstance(attr, Attribute):
-            if attr in self.ATTRIBUTES:
-                return self.ATTRIBUTES[attr]
-            for pattern in self.ATTRIBUTES.values():
+            if attr in predefined:
+                return predefined[attr]
+            for pattern in predefined.values():
                 if (fnmatch(attr, pattern)):
                     return pattern.copy(attr)
         return Report._prepare_attribute(self, attr)
