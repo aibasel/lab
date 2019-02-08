@@ -6,10 +6,6 @@
     sudo apt-get install mercurial python2.7 python-matplotlib python-simplejson
     # Clone Lab repository.
     hg clone https://bitbucket.org/jendrikseipp/lab ${LAB}
-    # Update to latest release.
-    cd ${LAB}
-    LATEST=$(hg log -r "." --template "{latesttag}\n")
-    hg update ${LATEST}
 
 Notes about requirements:
 
