@@ -291,9 +291,8 @@ class SlurmEnvironment(GridEnvironment):
         * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
         * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
 
-        The "infai_all" queue is deprecated and should not be used.
-
-        *qos* must be a valid Slurm QOS name.
+        *qos* must be a valid Slurm QOS name. In Basel this must be
+        "normal".
 
         *memory_per_cpu* must be a string specifying the memory
         allocated for each core. The string must end with one of the
@@ -323,8 +322,8 @@ class SlurmEnvironment(GridEnvironment):
         You can alter the environment in which the experiment runs with
         the **setup** argument. If given, it must be a string of Bash
         commands. If omitted,
-        :class:`~lab.environments.BaselSlurmEnvironment` loads a
-        suitable Python version and adds Lab to the PYTHONPATH.
+        :class:`~lab.environments.BaselSlurmEnvironment` adds Lab to the
+        PYTHONPATH.
 
         See :py:class:`~lab.environments.GridEnvironment` for inherited
         parameters.
