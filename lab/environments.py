@@ -146,10 +146,10 @@ class GridEnvironment(Environment):
         will be sent when the last experiment step finishes.
 
         Use *extra_options* to pass additional options. The
-        *extra_options* string may contain newlines. Example that runs
-        each task on its own node with Slurm::
+        *extra_options* string may contain newlines. Slurm example that
+        reserves two cores per run::
 
-            extra_options='#SBATCH --exclusive'
+            extra_options='#SBATCH --cpus-per-task=2'
 
         See :py:class:`~lab.environments.Environment` for inherited
         parameters.
@@ -296,16 +296,15 @@ class SlurmEnvironment(GridEnvironment):
 
         *memory_per_cpu* must be a string specifying the memory
         allocated for each core. The string must end with one of the
-        letters K, M or G. The default is "3872M", which is the maximum
-        amount that allows using all 16 infai_1 cores in parallel.
-        Processes that surpass the memory limit are terminated with
-        SIGKILL. Unless you need more memory you should not have to
-        change this variable. Instead, we recommend using the
+        letters K, M or G. The default is "3872M". The value for
+        *memory_per_cpu* should not surpass the amount of memory that is
+        available per core, which is "3872M" for infai_1 and "6354M" for
+        infai_2. Processes that surpass the *memory_per_cpu* limit are
+        terminated with SIGKILL. To impose a soft limit that can be
+        caught from within your programs, you can use the
         ``memory_limit`` kwarg of
-        :py:func:`~lab.experiment.Run.add_command` for imposing a soft
-        memory limit that can be caught from inside your programs. Fast
-        Downward users should set memory limits via the
-        ``driver_options``.
+        :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
+        should set memory limits via the ``driver_options``.
 
         Slurm limits the memory with cgroups. Unfortunately, this often
         fails on our nodes, so we set our own soft memory limit for all
@@ -314,6 +313,29 @@ class SlurmEnvironment(GridEnvironment):
         Slurm config file contains "AllowedRAMSpace=99" and we add some
         slack). We use a soft instead of a hard limit so that child
         processes can raise the limit.
+
+        Examples that reserve the maximum amount of memory available per core:
+
+        >>> env1 = BaselSlurmEnvironment(partition="infai_1", memory_per_cpu="3872M")
+        >>> env2 = BaselSlurmEnvironment(partition="infai_2", memory_per_cpu="6354M")
+
+        Example that reserves 12 GiB of memory on infai_1:
+
+        >>> # 12 * 1024 / 3872 = 3.17 -> round to next int -> 4 cores per task
+        >>> # 12G / 4 = 3G per core
+        >>> env = BaselSlurmEnvironment(
+        ...     partition="infai_1",
+        ...     memory_per_cpu="3G",
+        ...     extra_options='#SBATCH --cpus-per-task=4')
+
+        Example that reserves 12 GiB of memory on infai_2:
+
+        >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
+        >>> # 12G / 2 = 6G per core
+        >>> env = BaselSlurmEnvironment(
+        ...     partition="infai_2",
+        ...     memory_per_cpu="6G",
+        ...     extra_options='#SBATCH --cpus-per-task=2')
 
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes
