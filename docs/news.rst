@@ -5,21 +5,24 @@ News
 .. module :: downward.experiments
 
 
-v3.1 (unreleased)
+v4.0 (2019-02-19)
 -----------------
 
-lab
+Lab
 ^^^
 * Parser: don't try to parse missing files. Print message to stdout instead.
 * Add soft memory limit of "memory_per_cpu * 0.98" for Slurm runs to safeguard against cgroup failures.
 * Abort if report contains duplicate attribute names.
 * Make reports even if fetcher detects unexplained errors.
 * Use ``flags=''`` for :meth:`lab.parser.Parser.add_pattern` by default again.
-* Add new example experiment using a simple vertex cover solver.
-
-downward
-^^^^^^^^
 * Include node names in standard reports and warn if report mixes runs from different partitions.
+* Add new example experiment using a simple vertex cover solver.
+* ``BaselSlurmEnvironment``: don't load Python 2.7.11 since it might conflict with an already loaded module.
+* Raise default ``nice`` value to 5000.
+
+Downward Lab
+^^^^^^^^^^^^
+* Support new Fast Downward exitcodes (Silvan).
 * Parse "planner_wall_clock_time" attribute in planner parser.
 * Include "planner_wall_clock_time" and "raw_memory" attributes in unexplained errors table.
 * Make PlanningReport more generic by letting derived classes override the new
@@ -31,7 +34,7 @@ downward
 v3.0 (2018-07-10)
 -----------------
 
-lab
+Lab
 ^^^
 * Add :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>` method. See also :ref:`parsing` (Silvan).
 * Add :meth:`exp.add_parse_again_step() <lab.experiment.Experiment.add_parse_again_step>` method for running parsers again (Silvan).
@@ -47,8 +50,8 @@ lab
 * Remove deprecated possibility of passing Step objects to ``add_step()``.
 * Remove deprecated ``exp.__call__()`` method.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Add "planner_timer" and "planner_memory" attributes.
 * Reorganize parsers and don't add any parser implicitly. See :ref:`downward-parsers`.
 * Add anytime-search parser that parses only "cost", "cost:all" and "coverage".
@@ -63,13 +66,13 @@ downward
 v2.3 (2018-04-12)
 -----------------
 
-lab
+Lab
 ^^^
 * BaselSlurmEnvironment: Use ``infai_1`` and ``normal`` as default Slurm partition and QOS.
 * Remove ``OracleGridEngineEnvironment``.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Use ``--overall-time-limit=30m`` and ``--overall-memory-limit=3584M`` for all Fast Downward runs by default.
 * Don't add ``-j`` option to build options (``build.py`` now uses all CPUs automatically).
 
@@ -77,15 +80,15 @@ downward
 v2.2 (2018-03-16)
 -----------------
 
-lab
+Lab
 ^^^
 * Print run and task IDs during local experiments.
 * Make warnings and error messages more informative.
 * Abort after fetch step if fetcher finds unexplained errors.
 * Improve examples and docs.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Don't parse preprocessor logs anymore.
 * Make regular expressions stricter in parsers.
 * Don't complain if SAS file is missing.
@@ -94,7 +97,7 @@ downward
 v2.1 (2017-11-27)
 -----------------
 
-lab
+Lab
 ^^^
 * Add BaselSlurmEnvironment (Florian).
 * Support running experiments in virtualenv (Shuwa).
@@ -117,8 +120,8 @@ lab
 * Clean up code.
 * Polish documentation.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * For each error outcome show number of runs with that outcome in summary table and dedicated tables.
 * Add standalone exit code parser. Allow removing translate and search parsers (Silvan).
 * Allow passing ``Problem`` instances to ``FastDownwardExperiment.add_suite()`` (Florian).
@@ -131,7 +134,7 @@ downward
 v2.0 (2017-01-09)
 -----------------
 
-lab
+Lab
 ^^^
 * Show warning and ask for action when evaluation dir already exists.
 * Add ``scale`` parameter to Attribute. It is used by the plot reports.
@@ -162,8 +165,8 @@ lab
 * Many speed improvements and better error messages.
 * Rewrite docs.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Always validate plans. Previous Lab versions don't add ``--validate``
   since older Fast Downward versions don't support it.
 * HTML reports: hide tables by default, add buttons for toggling visibility.
@@ -197,8 +200,8 @@ downward
 v1.12 (2017-01-09)
 ------------------
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Only compress "output" file if it exists.
 * Preprocess parser: make legacy preprocessor output optional.
 
@@ -206,12 +209,12 @@ downward
 v1.11 (2016-12-15)
 ------------------
 
-lab
+Lab
 ^^^
 * Add bitbucket-pipelines.yml for continuous integration testing.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Add IPC 2014 benchmark suites (Silvan).
 * Set ``min_wins=False`` for ``dead_ends`` attribute.
 * Fit coordinates better into plots.
@@ -223,7 +226,7 @@ downward
 v1.10 (2015-12-11)
 ------------------
 
-lab
+Lab
 ^^^
 * Add ``permissions`` parameter to :func:`lab.experiment.Experiment.add_new_file()`.
 * Add default parser which checks that log files are not bigger than 100 MB. Maybe we'll make this configurable in the future.
@@ -231,8 +234,8 @@ lab
 * Show error message if resource names are not unique.
 * Table: don't format list items. This allows us to keep the quotes for configuration lists.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Cleanup :py:mod:`downward.suites`: update suite names, add STRIPS and
   ADL versions of all IPCs. We recommend selecting a subset of domains
   manually to only run your code on "interesting" benchmarks. As a
@@ -243,8 +246,8 @@ downward
 v1.9.1 (2015-11-12)
 -------------------
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Always prepend build options with ``-j<num_cpus>``.
 * Fix: Use correct revisions in ``FastDownwardExperiment``.
 * Don't abort parser if resource limits can't be found (support old planner versions).
@@ -253,14 +256,14 @@ downward
 v1.9 (2015-11-07)
 -----------------
 
-lab
+Lab
 ^^^
 * Add :func:`lab.experiment.Experiment.add_command()` method.
 * Add :py:data:`lab.__version__` string.
 * Explicitly remove support for Python 2.6.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Add :py:class:`downward.experiment.FastDownwardExperiment` class for whole-planner experiments.
 * Deprecate :py:class:`downward.experiments.DownwardExperiment` class.
 * Repeat headers between domains in :py:class:`downward.reports.taskwise.TaskwiseReport`.
@@ -269,15 +272,15 @@ downward
 v1.8 (2015-10-02)
 -----------------
 
-lab
+Lab
 ^^^
 * Deprecate predefined experiment steps (``remove_exp_dir``,
   ``zip_exp_dir``, ``unzip_exp_dir``).
 * Docs: add FAQs, update docs.
 * Add more regression and style tests.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Parse both evaluated states (evaluated) and evaluations (evaluations).
 * Add example experiment showing how to make reports for data obtained without Lab.
 * Add suite_sat_strips().
@@ -288,7 +291,7 @@ downward
 v1.7 (2015-08-19)
 -----------------
 
-lab
+Lab
 ^^^
 * Automatically determine whether to queue steps sequentially on the grid.
 * Reports: right-align headers (except the left-most one).
@@ -303,8 +306,8 @@ lab
   additional options like parallel environments.
 * Sort ``properties`` files by keys.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Add support for new python driver script ``fast-downward.py``.
 * Use booktabs package for latex tables.
 * Remove vertical lines from Latex tables (recommended by booktabs docs).
@@ -324,12 +327,12 @@ downward
 v1.6
 ----
 
-lab
+Lab
 ^^^
 * Restore earlier default behavior for grid jobs by passing all environment variables (e.g. ``PYTHONPATH``) to the job environments.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Use write-once revision cache: instead of *cloning* the full FD repo
   into the revision cache only *copy* the ``src`` directory. This
   greatly reduces the time and space needed to cache revisions. As a
@@ -351,7 +354,7 @@ downward
 v1.5
 ----
 
-lab
+Lab
 ^^^
 * Add :func:`Experiment.add_fetcher()` method.
 * If all columns have the same value in an uncolored table row, make all values bold, not grey.
@@ -363,8 +366,8 @@ lab
 * Do not replace underscores by dashes in table headers. Instead allow browsers to break lines after underscores.
 * Left-justify string and list values in tables.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Add optional *nick* parameter to Translator, Preprocessor and Planner classes. It defaults to the revision name *rev*.
 * Save ``hg id`` output for each checkout and include it in reports.
 * Add *timeout* parameter to :func:`DownwardExperiment.add_config()`.
@@ -379,13 +382,13 @@ downward
 * Add :func:`DownwardExperiment.add_search_parser()` method.
 * Run ``make clean`` in revision-cache after compiling preprocessor and search code.
 * Strip executables after compilation in revision-cache.
-* Do not copy lab into experiment directories and grid-steps. Use the global Lab version instead.
+* Do not copy Lab into experiment directories and grid-steps. Use the global Lab version instead.
 
 
 v1.4
 ----
 
-lab
+Lab
 ^^^
 * Add :py:func:`exp.add_report() <lab.experiment.Experiment.add_report>` method to simplify adding reports.
 * Use simplejson when available to make loading properties more than twice as fast.
@@ -397,8 +400,8 @@ lab
 * Make commandline parser available globally as :data:`lab.experiment.ARGPARSER` so users can add custom arguments.
 * Add ``cache_dir`` parameter in :py:class:`Experiment <lab.experiment.Experiment>` for specifying where Lab stores temporary data.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Move ``downward.experiment.DownwardExperiment`` to ``downward.experiments.DownwardExperiment``, but keep both import locations indefinitely.
 * Flag invalid plans in absolute reports.
 * PlanningReport: When you append '_relative' to an attribute, you will get a table containing the attribute's values of each configuration relative to the leftmost column.
@@ -415,12 +418,12 @@ downward
 v1.3
 ----
 
-lab
+Lab
 ^^^
 * For Latex tables only keep the first two and last two hlines.
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Plots: Make category_styles a dictionary mapping from names to dictionaries of
   matplotlib plotting parameters to allow for more and simpler customization.
   This means e.g. that you can now change the line style in plots.
@@ -441,7 +444,7 @@ downward
 v1.2
 ----
 
-lab
+Lab
 ^^^
 * Fetcher: Only copy the link not the content for symbolic links.
 * Make properties files more compact by using an indent of 2 instead of 4.
@@ -457,8 +460,8 @@ lab
 * Reports: Allow specifying a *single* attribute as a string instead of
   a list of one string (e.g. attributes='coverage').
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * If compact=True for a DownwardExperiment, link to the benchmarks instead of copying them.
 * Do not call ./build-all script, but build components only if needed.
 * Fetch and compile sources only when needed: Only prepare translator and
@@ -467,7 +470,7 @@ downward
 * Save space by deleting the benchmarks directories and omitting the search
   directory and validator for preprocess experiments.
 * Only support using 'src' directory, not the old 'downward' dir.
-* Use downward script regardless of other binaries found in the search directory.
+* Use ``downward`` script regardless of other binaries found in the search directory.
 * Do not try to set parent-revision property. It cannot be determined without
   fetching the code first.
 * Make ProblemPlotReport class more general by allowing the get_points() method
@@ -501,13 +504,13 @@ downward
 * DownwardReport: Allow passing a single function for ``derived_properties``.
 * Plots: Remove code that sets parameters explicitly, sort items in legend.
 * Add parameters to PlotReport that set the axes' limits.
-* Add more items to downward FAQ.
+* Add more items to Downward Lab FAQ.
 
 
 v1.1
 ----
 
-lab
+Lab
 ^^^
 * Add filter shortcuts: ``filter_config_nick=['lama', 'hcea'], filter_domain=['depot']`` (see :py:class:`Report <lab.reports.Report>`) (Florian)
 * Ability to use more than one filter function (Florian)
@@ -527,8 +530,8 @@ lab
 * Added more tests
 * Improved documentation
 
-downward
-^^^^^^^^
+Downward Lab
+^^^^^^^^^^^^
 * Make the files output.sas, domain.pddl and problem.pddl optional for search experiments
 * Use more compact table of contents for AbsoluteReports
 * Use named anchors in AbsoluteReport (``report.html#expansions``, ``report.html#expansions-gripper``)
@@ -540,7 +543,7 @@ downward
 * Sort table columns based on given config filters if given (Florian)
 * Do not add VAL source files to experiment
 * Parse number of reopened states
-* Remove temporary downward files even if downward was killed
+* Remove temporary Fast Downward files even if planner was killed
 * Divide scatter-plot points into categories and lable them (see :py:class:`ScatterPlotReport <downward.reports.scatter.ScatterPlotReport>`) (Florian)
 * Only add a highlighting and summary functions for numeric attributes in AbsoluteReports
 * Compile validator if it isn't compiled already
