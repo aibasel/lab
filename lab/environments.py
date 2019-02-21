@@ -247,7 +247,7 @@ class GridEnvironment(Environment):
         # Remove eval dir if it exists.
         if os.path.exists(self.exp.eval_dir):
             tools.confirm_or_abort(
-                'The evalution directory "%s" already exists. '
+                'The evaluation directory "%s" already exists. '
                 'Do you want to remove it?' % self.exp.eval_dir)
             tools.remove_path(self.exp.eval_dir)
 
