@@ -35,17 +35,17 @@ python2 -m py.test tests
 
 # Run doctests.
 cd lab
-python -m doctest reports/__init__.py reports/filter.py experiment.py parser.py tools.py
+python2 -m doctest reports/__init__.py reports/filter.py experiment.py parser.py tools.py
 cd ../downward
-python -m doctest experiment.py reports/__init__.py reports/absolute.py \
+python2 -m doctest experiment.py reports/__init__.py reports/absolute.py \
     reports/compare.py reports/plot.py reports/scatter.py reports/taskwise.py
 cd ../examples
-python -m doctest examples/showcase-options.py
+python2 -m doctest examples/showcase-options.py
 cd ..
 
 # Check imports and unused/missing variables.
-python -m pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
-python -m pyflakes downward examples tests setup.py docs/conf.py
+python2 -m pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
+python2 -m pyflakes downward examples tests setup.py docs/conf.py
 
 ./tests/find-dead-code
 
