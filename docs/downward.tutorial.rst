@@ -52,6 +52,7 @@ Install VAL
     git clone https://github.com/KCL-Planning/VAL.git
     cd VAL
     make clean  # Remove old object files and binaries.
+    sed -i 's/-Werror //g' Makefile  # Ignore warnings.
     make
     sudo cp validate /usr/local/bin  # Add binary to a directory on PATH.
 
