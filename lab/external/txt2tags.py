@@ -3779,13 +3779,10 @@ class BlockMaster:
     def _get_escaped_hold(self):
         ret = []
         for line in self.hold():
-            linetype = type(line)
-            if linetype == type(''):
-                ret.append(self._last_escapes(line))
-            elif linetype == type([]):
+            if isinstance(line, list):
                 ret.extend(line)
             else:
-                Error("BlockMaster: Unknown HOLD item type: %s" % linetype)
+                ret.append(self._last_escapes(line))
         return ret
 
     def _remove_twoblanks(self, lastitem):
