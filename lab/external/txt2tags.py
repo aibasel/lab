@@ -3,13 +3,13 @@
 # http://txt2tags.org
 #
 # Copyright 2001-2010 Aurelio Jargas
-# Copyright 2010-2017 Jendrik Seipp
+# Copyright 2010-2019 Jendrik Seipp
 #
 # This file is based on txt2tags version 2.6, but has been modified for
-# RedNotebook. The changes compared to the upstream version are:
+# Lab. The changes compared to the upstream version are:
 #
 #   * use spaces instead of tabs
-#   * port to Python 3
+#   * support Python 3
 #   * don't escape underscores in tagged and raw LaTeX text
 #   * don't use locale-dependent str.capitalize()
 #   * support SVG images
