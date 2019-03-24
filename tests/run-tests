@@ -31,26 +31,26 @@ echo "Using PYTHONPATH: $PYTHONPATH"
 
 cleanup
 
-python2 -m py.test tests
+python -m py.test tests
 
 # Run doctests.
 cd lab
-python2 -m doctest reports/__init__.py reports/filter.py experiment.py parser.py tools.py
+python -m doctest reports/__init__.py reports/filter.py experiment.py parser.py tools.py
 cd ../downward
-python2 -m doctest experiment.py reports/__init__.py reports/absolute.py \
+python -m doctest experiment.py reports/__init__.py reports/absolute.py \
     reports/compare.py reports/plot.py reports/scatter.py reports/taskwise.py
 cd ../examples
-python2 -m doctest examples/showcase-options.py
+python -m doctest examples/showcase-options.py
 cd ..
 
 # Check imports and unused/missing variables.
-python2 -m pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
-python2 -m pyflakes downward examples tests setup.py docs/conf.py
+python -m pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
+python -m pyflakes downward examples tests setup.py docs/conf.py
 
 ./tests/find-dead-code
 
 # Check code formatting.
-pycodestyle --max-line-length=90 --exclude=data,external lab downward examples setup.py
+python -m pycodestyle --max-line-length=90 --exclude=data,external lab downward examples setup.py
 
 # Check if documentation builds.
 cd docs

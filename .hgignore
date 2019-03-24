@@ -1,6 +1,7 @@
 ~$
 \.pyc$
 .cache/v/cache/lastfailed$
+^.tox/
 ^build/
 ^docs/_build/
 ^docs/driver.err$
