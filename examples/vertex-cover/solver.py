@@ -4,8 +4,6 @@
 Example program that finds vertex covers.
 """
 
-from __future__ import print_function
-
 import argparse
 import collections
 import random

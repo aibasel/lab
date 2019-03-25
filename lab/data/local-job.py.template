@@ -47,7 +47,7 @@ def main():
     try:
         # Use "timeout" to fix passing KeyboardInterrupts from children
         # (see https://stackoverflow.com/questions/1408356).
-        result.wait(timeout=sys.maxint)
+        result.wait(timeout=99999)
     except KeyboardInterrupt:
         logging.warning('Main script interrupted')
         pool.terminate()

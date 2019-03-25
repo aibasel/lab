@@ -55,7 +55,6 @@ class PlannerParser(Parser):
 
 
 def main():
-    print 'Running planner parser'
     parser = PlannerParser()
     parser.parse()
 

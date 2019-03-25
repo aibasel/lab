@@ -36,7 +36,7 @@ def hg_id(repo, args=None, rev=None):
     cmd = ('hg', 'id', '--repository', repo) + tuple(args)
     if cmd not in _HG_ID_CACHE:
         try:
-            result = subprocess.check_output(cmd).strip()
+            result = tools.get_string(subprocess.check_output(cmd).strip())
         except subprocess.CalledProcessError:
             logging.critical(
                 'Call failed: "{}". Please check path and revision.'.format(
@@ -58,7 +58,7 @@ def get_rev_id(repo, rev=None):
 def _compute_md5_hash(mylist):
     m = hashlib.md5()
     for s in mylist:
-        m.update(s)
+        m.update(s.encode("utf-8"))
     return m.hexdigest()[:8]
 
 
@@ -97,7 +97,7 @@ class CachedRevision(object):
 
     def _compute_hashed_name(self):
         if self.build_options:
-            return self.global_rev + '_' + _compute_md5_hash(self.build_options)
+            return '{}_{}'.format(self.global_rev, _compute_md5_hash(self.build_options))
         else:
             return self.global_rev
 

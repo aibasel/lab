@@ -229,7 +229,7 @@ class PgfPlots(object):
                 continue
             if isinstance(value, bool) or value is None:
                 opts.append(key)
-            elif isinstance(value, basestring):
+            elif isinstance(value, str):
                 if ' ' in value or '=' in value:
                     value = '{%s}' % value
                 opts.append("%s=%s" % (key, value.replace("_", "-")))
@@ -358,8 +358,8 @@ class PlotReport(PlanningReport):
         return new_categories
 
     def set_min_max_values(self, categories):
-        min_x = sys.maxint
-        min_y = sys.maxint
+        min_x = sys.maxsize
+        min_y = sys.maxsize
         max_x = MIN_VALUE
         max_y = MIN_VALUE
         for coordinates in categories.values():

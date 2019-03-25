@@ -41,8 +41,8 @@ class Domain(object):
     def __hash__(self):
         return hash(self.domain)
 
-    def __cmp__(self, other):
-        return cmp(self.domain, other.domain)
+    def __eq__(self, other):
+        return self.domain == other.domain
 
     def __iter__(self):
         return iter(self.problems)

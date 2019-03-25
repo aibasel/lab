@@ -106,7 +106,7 @@ class _FileParser(object):
 
     def load_file(self, filename):
         self.filename = filename
-        with open(filename, 'rb') as f:
+        with open(filename, 'r') as f:
             self.content = f.read()
 
     def add_pattern(self, pattern):

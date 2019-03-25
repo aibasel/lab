@@ -26,7 +26,7 @@ from lab import tools
 
 def _check_eval_dir(eval_dir):
     if os.path.exists(eval_dir):
-        answer = raw_input(
+        answer = tools.user_input(
             '{} already exists. Do you want to (o)verwrite it, '
             '(m)erge the results, or (c)ancel? '.format(eval_dir)).strip().lower()
         if answer == 'o':

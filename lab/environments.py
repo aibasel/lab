@@ -58,7 +58,7 @@ class Environment(object):
         self.randomize_task_order = randomize_task_order
 
     def _get_task_order(self):
-        task_order = range(1, len(self.exp.runs) + 1)
+        task_order = list(range(1, len(self.exp.runs) + 1))
         if self.randomize_task_order:
             random.shuffle(task_order)
         return task_order
@@ -423,7 +423,7 @@ class SlurmEnvironment(GridEnvironment):
         submit.append(job_file)
         logging.info('Executing %s' % (' '.join(submit)))
         out = subprocess.check_output(submit, cwd=job_dir).decode()
-        print out.strip()
+        logging.info('Output: {}'.format(out.strip()))
         match = re.match(r"Submitted batch job (\d*)", out)
         assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
         return match.group(1)

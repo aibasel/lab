@@ -52,7 +52,6 @@ def trivially_unsolvable(content, props):
         'ff: goal can be simplified to FALSE. No plan will solve it' in content)
 
 
-print 'Running FF parser'
 parser = Parser()
 parser.add_pattern(
     'node', r'node: (.+)\n', type=str, file='driver.log', required=True)

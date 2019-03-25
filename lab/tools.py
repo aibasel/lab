@@ -39,6 +39,22 @@ try:
 except ImportError:
     import json
 
+try:
+    # Python 2
+    user_input = raw_input
+except NameError:
+    # Python 3
+    user_input = input
+
+
+def get_string(bytes_):
+    if sys.version_info < (3, 0):
+        # Python 2
+        return bytes_
+    else:
+        # Python 3
+        return bytes_.decode('utf-8')
+
 
 def get_script_path():
     """Get absolute path to main script."""
@@ -131,7 +147,7 @@ def makedirs(path):
 
 
 def confirm_or_abort(question):
-    answer = raw_input('%s (y/N): ' % question).strip()
+    answer = user_input('%s (y/N): ' % question).strip()
     if not answer.lower() == 'y':
         sys.exit('Aborted')
 
@@ -157,8 +173,8 @@ def write_file(filename, content):
 
 
 def fill_template(template_name, **parameters):
-    template = pkgutil.get_data(
-        'lab', os.path.join('data', template_name + '.template'))
+    template = get_string(pkgutil.get_data(
+        'lab', os.path.join('data', template_name + '.template')))
     return template % parameters
 
 
@@ -177,7 +193,7 @@ def natural_sort(alist):
 
     def extract_numbers(text):
         parts = re.split("([0-9]+)", text)
-        return map(to_int_if_number, parts)
+        return list(map(to_int_if_number, parts))
 
     return sorted(alist, key=extract_numbers)
 
@@ -276,7 +292,7 @@ class RunFilter(object):
 
     def apply(self, props):
         for filter_ in self.filters:
-            for old_run_id, run in props.items():
+            for old_run_id, run in list(props.items()):
                 del props[old_run_id]
                 modified_run = self.apply_filter_to_run(filter_, run)
                 if modified_run:
@@ -325,11 +341,11 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
             else:
                 shutil.copy2(srcname, dstname)
             # XXX What about devices, sockets etc.?
-        except (IOError, os.error), why:
+        except (IOError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except Exception, err:
+        except Exception as err:
             errors.append(err.args[0])
     if errors:
         raise Exception(errors)
@@ -411,8 +427,8 @@ def get_min_max(items):
 def product(values):
     """Compute the product of a sequence of numbers.
 
-    >>> round(product([2, 3, 7]), 2)
-    42.0
+    >>> product([2, 3, 7])
+    42
     """
     assert None not in values
     prod = 1

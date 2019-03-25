@@ -24,7 +24,6 @@ def error(content, props):
 
 
 if __name__ == '__main__':
-    print 'Running vertex cover parser'
     parser = Parser()
     parser.add_pattern(
         'node', r'node: (.+)\n', type=str, file='driver.log', required=True)

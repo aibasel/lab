@@ -92,6 +92,5 @@ class TranslatorParser(Parser):
 
 
 if __name__ == '__main__':
-    print 'Running translator parser'
     parser = TranslatorParser()
     parser.parse()

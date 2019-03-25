@@ -21,7 +21,7 @@
 Regular expressions and functions for parsing single-search runs of Fast Downward.
 """
 
-from __future__ import division
+from __future__ import print_function
 
 import math
 import re
@@ -84,7 +84,7 @@ def add_initial_h_values(content, props):
         content, flags=re.M)
     for heuristic, init_h in matches:
         if init_h == "infinity":
-            init_h = sys.maxint
+            init_h = sys.maxsize
         else:
             init_h = int(init_h)
         if heuristic in initial_h_values:
@@ -95,7 +95,7 @@ def add_initial_h_values(content, props):
     props['initial_h_values'] = initial_h_values
 
     if len(initial_h_values) == 1:
-        props['initial_h_value'] = initial_h_values.values()[0]
+        props['initial_h_value'] = list(initial_h_values.values())[0]
 
 
 def add_memory(content, props):
@@ -139,7 +139,7 @@ def add_scores(content, props):
     try:
         max_time = props['limit_search_time']
     except KeyError:
-        print "search time limit missing -> can't compute time scores"
+        print("search time limit missing -> can't compute time scores")
     else:
         props['score_total_time'] = log_score(
             props.get('total_time'), min_bound=1.0, max_bound=max_time)
@@ -149,7 +149,7 @@ def add_scores(content, props):
     try:
         max_memory_kb = props['limit_search_memory'] * 1024
     except KeyError:
-        print "search memory limit missing -> can't compute memory score"
+        print("search memory limit missing -> can't compute memory score")
     else:
         props['score_memory'] = log_score(
             props.get('memory'), min_bound=2000, max_bound=max_memory_kb)
@@ -181,7 +181,6 @@ class SingleSearchParser(Parser):
 
 
 def main():
-    print 'Running single search parser'
     parser = SingleSearchParser()
     parser.parse()
 
