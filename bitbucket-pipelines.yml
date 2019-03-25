@@ -7,7 +7,7 @@ pipelines:
           - apt-get -y upgrade
 
           # Install dependencies of this script.
-          - apt-get -y install mercurial python2.7 python3.6 python-pip realpath python-tox wget
+          - apt-get -y install mercurial python2.7 python3.6 python-pip python-tox wget
 
           # Print information about environment.
           - python --version
