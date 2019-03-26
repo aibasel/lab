@@ -51,10 +51,12 @@ def get_string(s):
     if isinstance(s, str):
         # Byte string in Python 2 or unicode string in Python 3.
         return s
-    else:
+    elif isinstance(s, bytes):
         # Bytes object in Python 3 (if-case handles Python 2 byte strings).
-        assert isinstance(s, bytes)
         return s.decode('utf-8')
+    else:
+        # Unicode string in Python 2.
+        return s
 
 
 def get_bytes(s):
@@ -62,8 +64,7 @@ def get_bytes(s):
         # Byte string in Python 2 or bytes object in Python 3.
         return s
     else:
-        # Unicode string in Python 3 (if-case handles Python 2 byte strings).
-        assert isinstance(s, str)
+        # Unicode string in Python 2 or 3 (if-case handles Python 2 byte strings).
         return s.encode('utf-8')
 
 
