@@ -58,7 +58,7 @@ def get_rev_id(repo, rev=None):
 def _compute_md5_hash(mylist):
     m = hashlib.md5()
     for s in mylist:
-        m.update(s.encode("utf-8"))
+        m.update(tools.get_bytes(s))
     return m.hexdigest()[:8]
 
 

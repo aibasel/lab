@@ -47,13 +47,24 @@ except NameError:
     user_input = input
 
 
-def get_string(bytes_):
-    if sys.version_info < (3, 0):
-        # Python 2
-        return bytes_
+def get_string(s):
+    if isinstance(s, str):
+        # Byte string in Python 2 or unicode string in Python 3.
+        return s
     else:
-        # Python 3
-        return bytes_.decode('utf-8')
+        # Bytes object in Python 3 (if-case handles Python 2 byte strings).
+        assert isinstance(s, bytes)
+        return s.decode('utf-8')
+
+
+def get_bytes(s):
+    if isinstance(s, bytes):
+        # Byte string in Python 2 or bytes object in Python 3.
+        return s
+    else:
+        # Unicode string in Python 3 (if-case handles Python 2 byte strings).
+        assert isinstance(s, str)
+        return s.encode('utf-8')
 
 
 def get_script_path():
