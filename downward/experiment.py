@@ -25,6 +25,7 @@ import logging
 import os.path
 
 from lab.experiment import Run, Experiment, get_default_data_dir
+from lab import tools
 
 from downward.cached_revision import CachedRevision
 from downward import suites
@@ -205,7 +206,7 @@ class FastDownwardExperiment(Experiment):
             >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
 
         """
-        if isinstance(suite, str):
+        if isinstance(suite, tools.string_type):
             suite = [suite]
         benchmarks_dir = os.path.abspath(benchmarks_dir)
         if not os.path.exists(benchmarks_dir):
@@ -291,7 +292,7 @@ class FastDownwardExperiment(Experiment):
         ...         "--overall-time-limit", "5m"])
 
         """
-        if not isinstance(name, str):
+        if not isinstance(name, tools.string_type):
             logging.critical('Algorithm name must be a string: {}'.format(name))
         if name in self._algorithms:
             logging.critical('Algorithm names must be unique: {}'.format(name))

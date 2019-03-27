@@ -229,7 +229,7 @@ class PgfPlots(object):
                 continue
             if isinstance(value, bool) or value is None:
                 opts.append(key)
-            elif isinstance(value, str):
+            elif isinstance(value, tools.string_type):
                 if ' ' in value or '=' in value:
                     value = '{%s}' % value
                 opts.append("%s=%s" % (key, value.replace("_", "-")))

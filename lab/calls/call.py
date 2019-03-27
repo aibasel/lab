@@ -68,7 +68,7 @@ class Call(object):
         self.opened_files = []
         for stream_name in ['stdout', 'stderr']:
             stream = kwargs.get(stream_name)
-            if isinstance(stream, str):
+            if isinstance(stream, tools.string_type):
                 file = open(stream, mode='w')
                 kwargs[stream_name] = file
                 self.opened_files.append(file)

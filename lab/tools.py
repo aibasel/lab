@@ -47,6 +47,14 @@ except NameError:
     user_input = input
 
 
+try:
+    # Python 2
+    string_type = basestring
+except NameError:
+    # Python 3
+    string_type = str
+
+
 def get_string(s):
     if isinstance(s, str):
         # Byte string in Python 2 or unicode string in Python 3.
