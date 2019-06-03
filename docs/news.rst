@@ -1,6 +1,12 @@
 News
 ====
 
+v4.1 (2019-06-03)
+-----------------
+
+* Add support for Python 3. Lab now supports Python 2.7 and Python >= 3.5.
+
+
 v4.0 (2019-02-19)
 -----------------
 
