@@ -1,6 +1,7 @@
 ~$
 \.pyc$
-.cache/v/cache/lastfailed$
+^.pytest_cache/
+^.tox/
 ^build/
 ^docs/_build/
 ^docs/driver.err$
@@ -13,4 +14,4 @@
 ^examples/planner/data/
 ^examples/simple/data/
 ^examples/vertex-cover/data/
-^lab.egg-info/
+^Lab.egg-info/

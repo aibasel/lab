@@ -69,13 +69,13 @@ def _get_default_experiment_dir():
 
 
 def get_run_dir(task_id):
-    lower = ((task_id - 1) / SHARD_SIZE) * SHARD_SIZE + 1
-    upper = ((task_id + SHARD_SIZE - 1) / SHARD_SIZE) * SHARD_SIZE
+    lower = ((task_id - 1) // SHARD_SIZE) * SHARD_SIZE + 1
+    upper = ((task_id + SHARD_SIZE - 1) // SHARD_SIZE) * SHARD_SIZE
     return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
 
 
 def _check_name(name, typ, extra_chars=''):
-    if not isinstance(name, basestring):
+    if not isinstance(name, tools.string_type):
         logging.critical('Name for {typ} must be a string: {name}'.format(**locals()))
     if not name:
         logging.critical('Name for {typ} must not be empty'.format(**locals()))
@@ -427,7 +427,7 @@ class Experiment(_Buildable):
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
-        if not isinstance(name, basestring):
+        if not isinstance(name, tools.string_type):
             logging.critical('Step name must be a string: {}'.format(name))
         if not name:
             logging.critical('Step name must not be empty')
@@ -730,7 +730,7 @@ class Run(_Buildable):
 
             # Support running globally installed binaries.
             def format_arg(arg):
-                if isinstance(arg, basestring):
+                if isinstance(arg, tools.string_type):
                     try:
                         return repr(arg.format(**env_vars))
                     except KeyError as err:
@@ -739,7 +739,7 @@ class Run(_Buildable):
                     return repr(str(arg))
 
             def format_key_value_pair(key, val):
-                if isinstance(val, basestring):
+                if isinstance(val, tools.string_type):
                     formatted_value = format_arg(val)
                 else:
                     formatted_value = repr(val)
@@ -778,5 +778,5 @@ class Run(_Buildable):
         if not isinstance(run_id, (list, tuple)):
             logging.critical('id must be a list: {}'.format(run_id))
         for id_part in run_id:
-            if not isinstance(id_part, basestring):
+            if not isinstance(id_part, tools.string_type):
                 logging.critical('run IDs must be a list of strings: {}'.format(run_id))

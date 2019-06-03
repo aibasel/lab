@@ -20,8 +20,6 @@
 Module that permits generating planner reports by reading properties files.
 """
 
-from __future__ import with_statement, division
-
 from collections import defaultdict
 from fnmatch import fnmatch
 import logging
@@ -148,7 +146,7 @@ class PlanningReport(Report):
                 'eval-dir that got included in the report. '
                 'Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)' %
                 (len(self.algorithms), self.algorithms, len(problems),
-                 len(self.domains), self.domains.keys(), len(self.runs)))
+                 len(self.domains), list(self.domains.keys()), len(self.runs)))
 
         # Sort each entry in problem_runs by algorithm.
         algo_to_index = dict(

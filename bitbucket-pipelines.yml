@@ -1,4 +1,4 @@
-image: ubuntu:16.04
+image: ubuntu:18.04
 pipelines:
   default:
     - step:
@@ -6,18 +6,13 @@ pipelines:
           - apt-get update
           - apt-get -y upgrade
 
-          # Install Lab dependencies.
-          - apt-get -y install mercurial python2.7 python-matplotlib python-simplejson
-
-          # Install dependencies of this script and Lab tests.
-          - apt-get -y install python-pip realpath wget
-          - pip install -U pycodestyle pyflakes pytest sphinx sphinx_rtd_theme vulture
-
-          # Print information about environment.
-          - python --version
+          # Install dependencies of this script.
+          - apt-get -y install mercurial python2.7 python2.7-dev python3.6 python3.7 python-tox software-properties-common wget
+          - add-apt-repository -y --update ppa:deadsnakes/ppa
+          - apt-get -y install python3.5
 
           # Clone Fast Downward.
-          - apt-get -y install mercurial g++ cmake make python g++-multilib
+          - apt-get -y install mercurial g++ cmake make python
           - export DOWNWARD_REPO=`realpath fast-downward`
           - hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
 
@@ -50,4 +45,4 @@ pipelines:
           # Add binaries to PATH.
           - export PATH="$(pwd):$PATH"
 
-          - ./tests/run-tests
+          - tox

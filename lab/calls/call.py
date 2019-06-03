@@ -24,13 +24,15 @@ import subprocess
 import sys
 import time
 
+from lab import tools
+
 
 def set_limit(kind, soft_limit, hard_limit=None):
     if hard_limit is None:
         hard_limit = soft_limit
     try:
         resource.setrlimit(kind, (soft_limit, hard_limit))
-    except (OSError, ValueError), err:
+    except (OSError, ValueError) as err:
         sys.stderr.write(
             'Resource limit for %s could not be set to %s (%s)\n' %
             (kind, (soft_limit, hard_limit), err))
@@ -66,7 +68,7 @@ class Call(object):
         self.opened_files = []
         for stream_name in ['stdout', 'stderr']:
             stream = kwargs.get(stream_name)
-            if isinstance(stream, basestring):
+            if isinstance(stream, tools.string_type):
                 file = open(stream, mode='w')
                 kwargs[stream_name] = file
                 self.opened_files.append(file)
@@ -169,7 +171,7 @@ class Call(object):
                             self.process.terminate()
                             # Strip extra bytes.
                             data = data[:hard_limit - fd_to_bytes[fd]]
-                        outfile.write(data)
+                        outfile.write(tools.get_string(data))
                         fd_to_bytes[fd] += len(data)
                 else:
                     # Ignore hang up or errors.

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Downward Lab uses the Lab package to conduct experiments with the
@@ -55,7 +55,6 @@ class PlannerParser(Parser):
 
 
 def main():
-    print 'Running planner parser'
     parser = PlannerParser()
     parser.parse()
 

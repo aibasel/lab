@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Downward Lab uses the Lab package to conduct experiments with the
@@ -72,7 +72,6 @@ class ExitCodeParser(Parser):
 
 
 def main():
-    print 'Running exit code parser'
     parser = ExitCodeParser()
     parser.parse()
 

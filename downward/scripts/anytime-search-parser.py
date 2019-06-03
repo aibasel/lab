@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Downward Lab uses the Lab package to conduct experiments with the
@@ -62,7 +62,6 @@ def coverage(content, props):
 
 
 def main():
-    print 'Running anytime parser'
     parser = AnytimeParser()
     parser.add_repeated_pattern('cost:all', r'Plan cost: (.+)\n', type=float)
     parser.add_function(reduce_to_min('cost:all', 'cost'))

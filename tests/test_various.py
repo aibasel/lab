@@ -1,5 +1,3 @@
-from __future__ import division
-
 import os
 import datetime
 import logging
@@ -55,7 +53,7 @@ def test_copy_dir_to_dir():
 
 
 def geometric_mean_old(values):
-    return tools.product(values) ** (1 / len(values))
+    return tools.product(values) ** (1. / len(values))
 
 
 def test_geometric_mean1():
