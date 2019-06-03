@@ -25,7 +25,8 @@ cd ..
 
 # Make Lab available on the PYTHONPATH.
 LAB=`realpath .`
-echo "Checking Lab at $LAB"
+PYTHON_VERSION="$(python --version 2>&1)"
+echo "Checking Lab at $LAB with $PYTHON_VERSION"
 export PYTHONPATH=${LAB}
 echo "Using PYTHONPATH: $PYTHONPATH"
 
