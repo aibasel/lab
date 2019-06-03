@@ -1,10 +1,6 @@
 News
 ====
 
-.. module :: lab.experiment
-.. module :: downward.experiments
-
-
 v4.0 (2019-02-19)
 -----------------
 
