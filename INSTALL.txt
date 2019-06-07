@@ -3,7 +3,7 @@
     # Choose destination for Lab.
     LAB=/path/to/lab
     # Install dependencies.
-    sudo apt-get install mercurial python2.7 python-matplotlib python-simplejson
+    sudo apt-get install mercurial python python-matplotlib python-simplejson
     # Clone Lab repository.
     hg clone https://bitbucket.org/jendrikseipp/lab ${LAB}
 
