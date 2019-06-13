@@ -33,4 +33,9 @@ setup(
     ],
     entry_points={
     },
+
+    install_requires=[
+        'matplotlib',
+        'simplejson',
+    ],
 )
