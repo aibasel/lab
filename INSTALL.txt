@@ -20,3 +20,23 @@ Add to your ``.bashrc`` to make Lab available on the ``PYTHONPATH``::
 Update shell configuration::
 
     source ~/.bashrc
+
+Installing with ``pip``
+~~~~~~~~~~~~~~~~~~~~~~~~
+If preferred, Lab can also be installed directly through ``pip``:
+
+    # Choose destination for Lab.
+    LAB=/path/to/lab
+    # Install dependencies.
+    sudo apt-get install mercurial python python-pip
+    # Clone Lab repository.
+    hg clone https://bitbucket.org/jendrikseipp/lab ${LAB}
+    # Perform the installation
+    cd ${LAB}
+    pip install .
+
+Using ``pip install -e .`` instead of ``pip install .`` will install the project in "editable mode", which is more
+suitable for development purposes, since modifications to the source in ``${LAB}`` are immediately reflected in the
+installed package.
+
+We recommend using this installation procedure within a Python virtual environment.
