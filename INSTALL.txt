@@ -21,22 +21,26 @@ Update shell configuration::
 
     source ~/.bashrc
 
-Installing with ``pip``
-~~~~~~~~~~~~~~~~~~~~~~~~
-If preferred, Lab can also be installed directly through ``pip``:
+Install Lab in a virtual environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+An alternative way to install Lab is by using a
+`Python virtual environment <https://docs.python.org/3/tutorial/venv.html>`_. This has the advantage that
+there is no modification to the system-wide configuration, and that you can create multiple environments with different
+Lab versions (say, for development purposes) with no conflicts at all. Using Python3, you would proceed like this:
 
-    # Choose destination for Lab.
-    LAB=/path/to/lab
-    # Install dependencies.
-    sudo apt-get install mercurial python python-pip
+::
+
+    # Install required packages, including virtualenv.
+    sudo apt install mercurial python3 python3-venv
+    # Create and activate a Python3 virtual environment where Lab will be installed.
+    python3 -m venv lab-venv  # Or any other name instead of lab-venv
+    source lab-venv/bin/activate
+
     # Clone Lab repository.
     hg clone https://bitbucket.org/jendrikseipp/lab ${LAB}
-    # Perform the installation
-    cd ${LAB}
-    pip install .
+    # Perform the installation.
+    pip install -e ${LAB}
 
-Using ``pip install -e .`` instead of ``pip install .`` will install the project in "editable mode", which is more
-suitable for development purposes, since modifications to the source in ``${LAB}`` are immediately reflected in the
-installed package.
-
-We recommend using this installation procedure within a Python virtual environment.
+The ``-e`` flag in the last command is optional, and  will install the project in "editable mode",
+which is better suited for development purposes, since modifications to the source in ``${LAB}`` are immediately
+reflected in the installed package.
