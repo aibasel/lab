@@ -10,5 +10,3 @@ python -m pyflakes downward examples tests setup.py docs/conf.py
 
 # Check code formatting.
 python -m pycodestyle --max-line-length=90 --exclude=data,external lab downward examples setup.py
-
-echo "Code and style tests passed"

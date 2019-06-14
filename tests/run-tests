@@ -13,11 +13,6 @@ fi
 : "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS}"
 : "${DOWNWARD_REPO?Please set DOWNWARD_REPO}"
 
-function cleanup {
-    rm -rf examples/data
-    rm -rf examples/ff/data
-    rm -rf examples/vertex-cover/data
-}
 
 # Change into top directory.
 cd "$(dirname "$0")"
@@ -29,8 +24,6 @@ PYTHON_VERSION="$(python --version 2>&1)"
 echo "Checking Lab at $LAB with $PYTHON_VERSION"
 export PYTHONPATH=${LAB}
 echo "Using PYTHONPATH: $PYTHONPATH"
-
-cleanup
 
 python -m pytest tests
 
