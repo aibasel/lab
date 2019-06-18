@@ -18,12 +18,10 @@ fi
 cd "$(dirname "$0")"
 cd ..
 
-# Make Lab available on the PYTHONPATH.
+# Print some debugging information.
 LAB=`realpath .`
 PYTHON_VERSION="$(python --version 2>&1)"
 echo "Checking Lab at $LAB with $PYTHON_VERSION"
-export PYTHONPATH=${LAB}
-echo "Using PYTHONPATH: $PYTHONPATH"
 
 python -m pytest tests
 

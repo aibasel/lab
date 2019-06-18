@@ -1,11 +1,9 @@
 ::
 
-    # Choose destination for Lab.
-    LAB=/path/to/lab
     # Install dependencies.
-    sudo apt-get install mercurial python python-matplotlib python-simplejson
+    sudo apt install mercurial python python-matplotlib python-simplejson
     # Clone Lab repository.
-    hg clone https://bitbucket.org/jendrikseipp/lab ${LAB}
+    hg clone https://bitbucket.org/jendrikseipp/lab /path/to/lab
 
 Notes about requirements:
 
@@ -20,3 +18,29 @@ Add to your ``.bashrc`` to make Lab available on the ``PYTHONPATH``::
 Update shell configuration::
 
     source ~/.bashrc
+
+Install Lab in a virtual environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An alternative way to install Lab is by using a `Python virtual
+environment <https://docs.python.org/3/tutorial/venv.html>`_. This has
+the advantage that there is no modification to the system-wide
+configuration, and that you can create multiple environments with
+different Lab versions (e.g., for different papers) with no conflicts
+at all. Using Python 3, you would proceed like this::
+
+    # Install required packages, including virtualenv.
+    sudo apt install mercurial python3 python3-venv
+    # Create and activate a Python 3 virtual environment for Lab.
+    python3 -m venv lab-venv  # Or any other name instead of lab-venv
+    source lab-venv/bin/activate
+
+    # Clone Lab repository.
+    hg clone https://bitbucket.org/jendrikseipp/lab /path/to/lab
+    # Perform the installation.
+    pip install -e /path/to/lab
+
+The ``-e`` flag in the last command is optional. It installs the project
+in "editable mode", which is better suited if you need to change the Lab
+source code, since any changes under ``/path/to/lab`` are immediately
+reflected in the installed package.
