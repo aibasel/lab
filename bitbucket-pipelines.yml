@@ -45,4 +45,4 @@ pipelines:
           # Add binaries to PATH.
           - export PATH="$(pwd):$PATH"
 
-          - tox
+          - TOX_LATEST_PYTHON=python3.7 tox

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Test setup: see bitbucket-pipelines.yml
+
+set -exuo pipefail
+
+# Check imports and unused/missing variables.
+python -m pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
+python -m pyflakes downward examples tests setup.py docs/conf.py
+
+# Check code formatting.
+python -m pycodestyle --max-line-length=90 --exclude=data,external lab downward examples setup.py
