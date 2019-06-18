@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Test setup: see bitbucket-pipelines.yml
+
+set -exuo pipefail
+
+# Check if documentation builds.
+cd docs
+rm -rf _build/
+make -B html
+echo "Docs: file://$(pwd)/_build/html/index.html"
+cd ..

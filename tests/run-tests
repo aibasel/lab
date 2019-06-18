@@ -13,11 +13,6 @@ fi
 : "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS}"
 : "${DOWNWARD_REPO?Please set DOWNWARD_REPO}"
 
-function cleanup {
-    rm -rf examples/data
-    rm -rf examples/ff/data
-    rm -rf examples/vertex-cover/data
-}
 
 # Change into top directory.
 cd "$(dirname "$0")"
@@ -30,8 +25,6 @@ echo "Checking Lab at $LAB with $PYTHON_VERSION"
 export PYTHONPATH=${LAB}
 echo "Using PYTHONPATH: $PYTHONPATH"
 
-cleanup
-
 python -m pytest tests
 
 # Run doctests.
@@ -43,24 +36,6 @@ python -m doctest experiment.py reports/__init__.py reports/absolute.py \
 cd ../examples
 python -m doctest examples/showcase-options.py
 cd ..
-
-# Check imports and unused/missing variables.
-python -m pyflakes lab/calls lab/reports lab/*.py  # Don't check external dir.
-python -m pyflakes downward examples tests setup.py docs/conf.py
-
-./tests/find-dead-code
-
-# Check code formatting.
-python -m pycodestyle --max-line-length=90 --exclude=data,external lab downward examples setup.py
-
-# Check if documentation builds.
-cd docs
-rm -rf _build/
-make -B html
-echo "Docs: file://$(pwd)/_build/html/index.html"
-cd ..
-
-echo "Code and style tests passed"
 
 # Skip experiments if any argument (e.g., --skip-experiments) was passed.
 if [[ $# -gt 0 ]]; then
