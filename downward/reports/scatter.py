@@ -221,7 +221,7 @@ class ScatterPlotReport(PlotReport):
                     run2['algorithm'] == self.algorithms[1])
             val1 = run1.get(self.attribute)
             val2 = run2.get(self.attribute)
-            if val1 is None and val2 is None:
+            if val1 is None and val2 is None and not self.show_missing:
                 continue
             category = self.get_category(run1, run2)
             categories[category].append((val1, val2))
