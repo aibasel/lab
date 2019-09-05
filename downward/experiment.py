@@ -80,6 +80,13 @@ class _DownwardAlgorithm(object):
         self.driver_options = driver_options
         self.component_options = component_options
 
+    def __eq__(self, other):
+        """Return true iff all components (excluding the name) match."""
+        return (
+            self.cached_revision == other.cached_revision and
+            self.driver_options == other.driver_options and
+            self.component_options == other.component_options)
+
 
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
@@ -302,9 +309,15 @@ class FastDownwardExperiment(Experiment):
             '--overall-time-limit', '30m',
             '--overall-memory-limit', '3584M'] +
             (driver_options or []))
-        self._algorithms[name] = _DownwardAlgorithm(
+        algorithm = _DownwardAlgorithm(
             name, CachedRevision(repo, rev, build_options),
             driver_options, component_options)
+        for algo in self._algorithms.values():
+            if algorithm == algo:
+                logging.critical(
+                    'Algorithms {algo.name} and {algorithm.name} are '
+                    'identical.'.format(**locals()))
+        self._algorithms[name] = algorithm
 
     def build(self, **kwargs):
         """Add Fast Downward code, runs and write everything to disk.

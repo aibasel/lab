@@ -1,6 +1,14 @@
 News
 ====
 
+v4.2 (unreleased)
+-----------------
+
+Downward Lab
+^^^^^^^^^^^^
+* Abort if two algorithms are identical, i.e., use the same revision, build config and commandline options.
+
+
 v4.1 (2019-06-03)
 -----------------
 
