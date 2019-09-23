@@ -9,7 +9,7 @@
 # Lab. The changes compared to the upstream version are:
 #
 #   * use spaces instead of tabs
-#   * support Python 3
+#   * support Python 3.6+ in addition to Python 2.7
 #   * don't escape underscores in tagged and raw LaTeX text
 #   * don't use locale-dependent str.capitalize()
 #   * support SVG images
@@ -2188,17 +2188,12 @@ def Readfile(file_path, remove_linebreaks=0, ignore_error=0):
     Message(_("File read (%d lines): %s") % (len(data), file_path), 2)
     return data
 
-def Savefile(file_path, contents):
+def Savefile(file_path, lines):
     try:
-        f = open(file_path, 'wb')
-    except:
+        with open(file_path, "w") as f:
+            f.writelines(lines)
+    except IOError:
         Error(_("Cannot open file for writing:") + ' ' + file_path)
-    if type(contents) == type([]):
-        doit = f.writelines
-    else:
-        doit = f.write
-    doit(contents)
-    f.close()
 
 def showdic(dic):
     for k in dic.keys(): print("%15s : %s" % (k,dic[k]))
