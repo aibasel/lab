@@ -6,7 +6,7 @@ from lab import __version__ as version
 
 
 setup(
-    name='Lab',
+    name='lab',
     version=version.rstrip('+'),
     description='Benchmark your code',
     long_description='\n\n'.join(
