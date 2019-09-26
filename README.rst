@@ -16,8 +16,6 @@ reports. Currently, Lab comes bundled with Downward Lab.
 
 **Cite**: please cite Downward Lab by using
 
-.. highlight:: bash
-
 ::
 
     @Misc{seipp-et-al-misc2017,
