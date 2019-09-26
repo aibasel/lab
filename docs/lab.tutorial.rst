@@ -3,8 +3,6 @@
 Lab tutorial
 ============
 
-Install Lab
------------
 .. highlight:: bash
 .. include:: ../INSTALL.txt
 

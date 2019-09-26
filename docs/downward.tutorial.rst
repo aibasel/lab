@@ -3,8 +3,6 @@
 Downward Lab tutorial
 =====================
 
-Install Lab and Downward Lab
-----------------------------
 .. highlight:: bash
 .. include:: ../INSTALL.txt
 
