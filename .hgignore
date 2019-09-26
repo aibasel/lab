@@ -3,6 +3,7 @@
 ^.pytest_cache/
 ^.tox/
 ^build/
+^dist/
 ^docs/_build/
 ^docs/driver.err$
 ^docs/driver.log$
@@ -14,4 +15,4 @@
 ^examples/planner/data/
 ^examples/simple/data/
 ^examples/vertex-cover/data/
-^Lab.egg-info/
+^lab.egg-info/
