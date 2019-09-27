@@ -200,7 +200,8 @@ class GridEnvironment(Environment):
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
             task_order=' '.join(str(i) for i in self._get_task_order()),
-            exp_path='../' + self.exp.name)
+            exp_path='../' + self.exp.name,
+            python=sys.executable or 'python')
 
     def _get_step_job_body(self, step):
         return tools.fill_template(
