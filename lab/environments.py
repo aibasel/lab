@@ -109,7 +109,8 @@ class LocalEnvironment(Environment):
         self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
     def start_runs(self):
-        tools.run_command([tools.get_python_executable(), self.EXP_RUN_SCRIPT], cwd=self.exp.path)
+        tools.run_command(
+            [tools.get_python_executable(), self.EXP_RUN_SCRIPT], cwd=self.exp.path)
 
     def run_steps(self, steps):
         for step in steps:

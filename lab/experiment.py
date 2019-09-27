@@ -470,7 +470,7 @@ class Experiment(_Buildable):
         self.env_vars_relative[name] = dest
         self.resources.append(_Resource(
             name, path_to_parser, dest, symlink=False, is_parser=True))
-        self.add_command(name, ["{{{}}}".format(name)])
+        self.add_command(name, [tools.get_python_executable(), "{{{}}}".format(name)])
 
     def add_parse_again_step(self):
         """
