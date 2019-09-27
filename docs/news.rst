@@ -7,7 +7,7 @@ v4.2 (2019-09-27)
 Lab
 ^^^
 * Upload to PyPI. Install Lab and Downward Lab with ``pip install lab``.
-* Add support for running Lab in Python virtual environments.
+* Add support for running Lab in Python virtual environments (Guillem).
 * Parser scripts don't have to be executable anymore, but they must be Python scripts.
 
 Downward Lab
