@@ -347,7 +347,14 @@ class SlurmEnvironment(GridEnvironment):
         the **setup** argument. If given, it must be a string of Bash
         commands. If omitted,
         :class:`~lab.environments.BaselSlurmEnvironment` adds Lab to the
-        PYTHONPATH.
+        PYTHONPATH (this is unneeded if you run Lab inside a virtual
+        environment). Examples::
+
+            # Activate virtual environment on grid node.
+            setup="source /path/to/virtual-env/bin/activate"
+
+            # Load module.
+            setup="module load Singularity/2.6.1 2> /dev/null"
 
         See :py:class:`~lab.environments.GridEnvironment` for inherited
         parameters.
