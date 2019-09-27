@@ -109,7 +109,7 @@ class LocalEnvironment(Environment):
         self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
     def start_runs(self):
-        tools.run_command([sys.executable, self.EXP_RUN_SCRIPT], cwd=self.exp.path)
+        tools.run_command([tools.get_python_executable(), self.EXP_RUN_SCRIPT], cwd=self.exp.path)
 
     def run_steps(self, steps):
         for step in steps:
@@ -201,13 +201,13 @@ class GridEnvironment(Environment):
             self.RUN_JOB_BODY_TEMPLATE_FILE,
             task_order=' '.join(str(i) for i in self._get_task_order()),
             exp_path='../' + self.exp.name,
-            python=sys.executable or 'python')
+            python=tools.get_python_executable())
 
     def _get_step_job_body(self, step):
         return tools.fill_template(
             self.STEP_JOB_BODY_TEMPLATE_FILE,
             cwd=os.getcwd(),
-            python=sys.executable or 'python',
+            python=tools.get_python_executable(),
             script=sys.argv[0],
             step_name=step.name)
 
