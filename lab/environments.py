@@ -438,4 +438,4 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = '3872M'
     DEFAULT_SETUP = (
-        'PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path())
+        'export PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path())
