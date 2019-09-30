@@ -42,20 +42,24 @@ and http://www.fast-downward.org/LPBuildInstructions)
 
 Install VAL
 -----------
+
+Downward Lab uses VAL to validate the plans that Fast Downward finds.
+
 .. highlight:: bash
 
 ::
 
-    sudo apt-get install g++ make flex bison
+    sudo apt-get install bash bison cmake flex g++ git make
     git clone https://github.com/KCL-Planning/VAL.git
     cd VAL
-    make clean  # Remove old object files and binaries.
-    sed -i 's/-Werror //g' Makefile  # Ignore warnings.
-    make
-    sudo cp validate /usr/local/bin  # Add binary to a directory on PATH.
+    git checkout 09b9a1ea0d9de56bd6a0cd2180b0d2af378e0cc7
+    # Make sure that CXXFLAGS does not contain -Werror, then run:
+    bash scripts/linux/build_linux64.sh Validate Release
+    # Add binary to a directory on your PATH.
+    sudo cp build/linux64/Release/bin/Validate /usr/local/bin/validate
 
-**MacOS**: clone the repo, add ``VAL/bin/MacOSExecutables/validate`` to
-your ``PATH`` and make it executable (``chmod + x``).
+**MacOS**: use the instructions above, but execute the MacOS build
+script instead of the Linux script (untested).
 
 
 Run tutorial experiment
