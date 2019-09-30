@@ -31,13 +31,15 @@ pipelines:
           - rm -rf FF-v2.3/
 
           # Setup VAL.
-          - apt-get -y install bash bison cmake flex g++ git make
+          - apt-get -y install g++ git make flex bison
           - git clone https://github.com/KCL-Planning/VAL.git
           - cd VAL
-          - git checkout 09b9a1ea0d9de56bd6a0cd2180b0d2af378e0cc7
-          - bash scripts/linux/build_linux64.sh Validate Release
-          - mv build/linux64/Release/bin/Validate ../validate
-          - cd ..
+          - git checkout a5565396007eee73ac36527fbf904142b3077c74
+          - make clean  # Remove old build artifacts and binaries.
+          - sed -i 's/-Werror //g' Makefile  # Ignore warnings.
+          - make -j8
+          - mv validate ../
+          - cd ../
           - rm -rf VAL
 
           # Add binaries to PATH.
