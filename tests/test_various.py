@@ -1,12 +1,5 @@
-import os
 import datetime
-import logging
-
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)-s %(levelname)-8s %(message)s',)
-
+import os
 
 from lab.reports import geometric_mean
 from lab import tools
@@ -63,9 +56,11 @@ def test_geometric_mean1():
 
 
 def test_colors():
-    row = {'col 1' : 0, 'col 2' : 0.5, 'col 3' : 1}
-    expected_min_wins = {'col 1' : (0.0, 0.7, 0.0), 'col 2' : (0.0, 0.7, 0.7), 'col 3' : (0.0, 0.0, 0.7)}
-    expected_max_wins = {'col 1' : (0.0, 0.0, 0.7), 'col 2' : (0.0, 0.7, 0.7), 'col 3' : (0.0, 0.7, 0.0)}
+    row = {'col 1': 0, 'col 2': 0.5, 'col 3': 1}
+    expected_min_wins = {
+        'col 1': (0.0, 0.7, 0.0), 'col 2': (0.0, 0.7, 0.7), 'col 3': (0.0, 0.0, 0.7)}
+    expected_max_wins = {
+        'col 1': (0.0, 0.0, 0.7), 'col 2': (0.0, 0.7, 0.7), 'col 3': (0.0, 0.7, 0.0)}
     assert tools.get_colors(row, True) == expected_min_wins
     assert tools.get_colors(row, False) == expected_max_wins
     assert tools.rgb_fractions_to_html_color(1, 0, 0.5) == 'rgb(255,0,127)'
