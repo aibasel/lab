@@ -108,7 +108,7 @@ class PlanningReport(Report):
         Report.__init__(self, **kwargs)
 
     def _prepare_attribute(self, attr):
-        predefined = dict((str(attr), attr) for attr in self.PREDEFINED_ATTRIBUTES)
+        predefined = {str(attr): attr for attr in self.PREDEFINED_ATTRIBUTES}
         if not isinstance(attr, Attribute):
             if attr in predefined:
                 return predefined[attr]
@@ -149,9 +149,9 @@ class PlanningReport(Report):
                  len(self.domains), list(self.domains.keys()), len(self.runs)))
 
         # Sort each entry in problem_runs by algorithm.
-        algo_to_index = dict(
-            (algorithm, index)
-            for index, algorithm in enumerate(self.algorithms))
+        algo_to_index = {
+            algorithm: index
+            for index, algorithm in enumerate(self.algorithms)}
 
         def run_key(run):
             return algo_to_index[run['algorithm']]
@@ -163,19 +163,18 @@ class PlanningReport(Report):
 
     def _scan_algorithm_info(self):
         info = {}
-        for (domain, problem), runs in self.problem_runs.items():
+        for runs in self.problem_runs.values():
             for run in runs:
-                info[run['algorithm']] = dict(
-                    (attr, run.get(attr, '?'))
-                    for attr in self.INFO_ATTRIBUTES)
+                info[run['algorithm']] = {
+                    attr: run.get(attr, '?') for attr in self.INFO_ATTRIBUTES}
             # We only need to scan the algorithms for one task.
             break
         return info
 
     def _get_node_names(self):
-        return set(
+        return {
             run.get("node", "<attribute 'node' missing>")
-            for run in self.runs.values())
+            for run in self.runs.values()}
 
     def _get_warnings_text_and_table(self):
         """
@@ -229,8 +228,8 @@ class PlanningReport(Report):
         if table:
             errors.append(str(table))
 
-        infai_1_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(1, 25))
-        infai_2_nodes = set('ase{:02d}.cluster.bc2.ch'.format(i) for i in range(31, 55))
+        infai_1_nodes = {'ase{:02d}.cluster.bc2.ch'.format(i) for i in range(1, 25)}
+        infai_2_nodes = {'ase{:02d}.cluster.bc2.ch'.format(i) for i in range(31, 55)}
         nodes = self._get_node_names()
         if nodes & infai_1_nodes and nodes & infai_2_nodes:
             errors.append('Report combines runs from infai_1 and infai_2 partitions.')
@@ -249,7 +248,7 @@ class PlanningReport(Report):
         self._scan_planning_data.
 
         """
-        all_algos = set(run['algorithm'] for run in self.props.values())
+        all_algos = {run['algorithm'] for run in self.props.values()}
         if self.filter_algorithm:
             # Other filters may have changed the set of available algorithms by either
             # removing all runs for one algorithm or changing run['algorithm'] for a run.

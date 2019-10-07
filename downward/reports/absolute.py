@@ -129,8 +129,8 @@ class AbsoluteReport(PlanningReport):
                     seen_errors.add(error)
                     error_counter[(run["algorithm"], run["domain"], error)] += 1
 
-                error_to_min_wins = dict(
-                    (outcome.msg, outcome.min_wins) for outcome in outcomes.OUTCOMES)
+                error_to_min_wins = {
+                    outcome.msg: outcome.min_wins for outcome in outcomes.OUTCOMES}
 
                 for error in sorted(seen_errors):
                     # Txt2tags seems to only allow letters, "-" and "_" in anchors.
@@ -245,7 +245,7 @@ class AbsoluteReport(PlanningReport):
         num_probs = 0
         self._add_table_info(attribute, func_name, table)
         domain_algo_values = defaultdict(list)
-        for (domain, problem), runs in self.problem_runs.items():
+        for (domain, _), runs in self.problem_runs.items():
             if (not attribute.absolute and
                     any(run.get(attribute) is None for run in runs)):
                 continue
@@ -308,10 +308,11 @@ class AbsoluteReport(PlanningReport):
 
         if attribute is not None and self.attribute_is_numeric(attribute):
             # Decide whether we want to highlight minima or maxima.
-            kwargs = dict(
-                min_wins=attribute.min_wins,
-                colored=self.colored and attribute.min_wins is not None,
-                digits=attribute.digits)
+            kwargs = {
+                'min_wins': attribute.min_wins,
+                'colored': self.colored and attribute.min_wins is not None,
+                'digits': attribute.digits,
+            }
         else:
             # Do not highlight anything.
             kwargs = {}

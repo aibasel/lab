@@ -87,7 +87,7 @@ class MatplotlibPlot(object):
         extra_artists = []
         if self.legend:
             extra_artists.append(self.legend.legendPatch)
-        kwargs = dict(bbox_extra_artists=extra_artists)
+        kwargs = {'bbox_extra_artists': extra_artists}
         # Note: Setting bbox_inches keyword breaks pgf export.
         if not filename.endswith('pgf'):
             kwargs['bbox_inches'] = 'tight'
@@ -109,7 +109,7 @@ class Matplotlib(object):
         all_x = sorted(all_x)
 
         # Map all x-values to positions on the x-axis.
-        indices = dict((val, i) for i, val in enumerate(all_x, start=1))
+        indices = {val: i for i, val in enumerate(all_x, start=1)}
 
         # Only use xticks for non-numeric values.
         all_x_numeric = all(isinstance(x, (int, float)) for x in all_x)

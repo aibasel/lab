@@ -5,4 +5,4 @@
 set -exuo pipefail
 
 # Check imports and unused/missing variables.
-python -m flake8 --exclude=data,external,conf.py,.tox,.hg --max-line-length=90
+python -m flake8 --exclude=build,data,external,conf.py,.tox,.hg --max-line-length=90

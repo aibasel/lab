@@ -174,7 +174,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
         each row.
         Do not format dummy columns and summary functions.
         """
-        for col_names, diff_col_header, diff_col_name in self.header_names:
+        for _, _, diff_col_name in self.header_names:
             for row_name in table.row_names:
                 formatted_value = formatted_cells[row_name].get(diff_col_name)
                 min_wins = table.get_min_wins(row_name)
@@ -198,7 +198,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
         Hide all other columns.
         """
         new_column_order = [table.header_column]
-        for col_names, diff_col_header, diff_col_name in self.header_names:
+        for col_names, _, diff_col_name in self.header_names:
             if len(new_column_order) >= 4:
                 new_column_order.append('DiffDummy')
             for col_name in col_names:

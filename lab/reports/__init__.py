@@ -59,7 +59,7 @@ def finite_sum(values):
     """Compute the sum of a list of numbers, excluding values of
     None and 'infinity'.
     """
-    return sum([x for x in values if x is not None and x != sys.maxsize])
+    return sum(x for x in values if x is not None and x != sys.maxsize)
 
 
 def function_name(f):
@@ -377,7 +377,7 @@ class Report(object):
         logging.info('Wrote file://%s' % self.outfile)
 
     def _get_type(self, attribute):
-        for run_id, run in self.props.items():
+        for run in self.props.values():
             val = run.get(attribute)
             if val is not None:
                 return type(val)
@@ -385,12 +385,13 @@ class Report(object):
         return None
 
     def _get_type_map(self, attributes):
-        return dict((self._prepare_attribute(attr), self._get_type(attr))
-                    for attr in attributes)
+        return {
+            self._prepare_attribute(attr): self._get_type(attr)
+            for attr in attributes}
 
     def _scan_data(self):
         attributes = set()
-        for run_id, run in self.props.items():
+        for run in self.props.values():
             attributes |= set(run.keys())
         self._all_attributes = self._get_type_map(attributes)
 
@@ -673,8 +674,7 @@ class Table(collections.defaultdict):
         # Get the slice of the row that should be formated (i.e. the data columns).
         # Note that there might be other columns (e.g. added by dynamic data
         # modules) that should not be formated.
-        row_slice = dict((col_name, row.get(col_name))
-                         for col_name in self.col_names)
+        row_slice = {col_name: row.get(col_name) for col_name in self.col_names}
 
         min_wins = self.get_min_wins(row_name)
         highlight = min_wins is not None

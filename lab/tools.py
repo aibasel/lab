@@ -407,7 +407,7 @@ def get_color(fraction, min_wins):
 
 
 def get_colors(cells, min_wins):
-    result = dict((col, (0.5, 0.5, 0.5)) for col in cells.keys())
+    result = {col: (0.5, 0.5, 0.5) for col in cells.keys()}
     min_value, max_value = get_min_max(cells.values())
 
     if min_value == max_value:

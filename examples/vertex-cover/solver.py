@@ -20,7 +20,7 @@ def get_edges(input_file):
         for _ in range(num_edges):
             line = f.readline().strip()
             parts = line.split()
-            edge = set([int(v) for v in parts[1:]])
+            edge = {int(v) for v in parts[1:]}
             assert len(edge) == 2
             edges.append(edge)
     return edges
@@ -31,8 +31,8 @@ def find_two_approximation(edges):
     remaining_edges = edges[:]
     while remaining_edges:
         u, v = random.choice(edges)
-        selected_edge = set([u, v])
-        cover |= set([u, v])
+        selected_edge = {u, v}
+        cover |= {u, v}
         remaining_edges = [
             edge for edge in remaining_edges if not (edge & selected_edge)]
     return cover

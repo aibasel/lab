@@ -46,7 +46,7 @@ LEGACY_OUTCOMES = [
     Outcome(get_exit_code(signal.SIGXCPU), 'timeout', explained=True, min_wins=True),
 ]
 
-EXITCODE_TO_LEGACY_OUTCOME = dict((outcome.value, outcome) for outcome in LEGACY_OUTCOMES)
+EXITCODE_TO_LEGACY_OUTCOME = {outcome.value: outcome for outcome in LEGACY_OUTCOMES}
 
 NEW_OUTCOMES = [
     Outcome(0, 'success', explained=True, min_wins=False),
@@ -78,7 +78,7 @@ NEW_OUTCOMES = [
     Outcome(get_exit_code(signal.SIGSEGV), 'segfault', explained=False, min_wins=True),
 ]
 
-EXITCODE_TO_OUTCOME = dict((outcome.value, outcome) for outcome in NEW_OUTCOMES)
+EXITCODE_TO_OUTCOME = {outcome.value: outcome for outcome in NEW_OUTCOMES}
 
 OUTCOMES = LEGACY_OUTCOMES + NEW_OUTCOMES
 

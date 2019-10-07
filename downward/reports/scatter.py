@@ -213,7 +213,7 @@ class ScatterPlotReport(PlotReport):
         # We discard the *runs* parameter.
         # Map category names to value tuples
         categories = defaultdict(list)
-        for (domain, problem), runs in self.problem_runs.items():
+        for runs in self.problem_runs.values():
             if len(runs) != 2:
                 continue
             run1, run2 = runs

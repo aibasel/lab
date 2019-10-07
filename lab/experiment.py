@@ -264,9 +264,9 @@ class _Buildable(object):
 
     @property
     def _env_vars(self):
-        return dict(
-            (name, self._get_abs_path(dest))
-            for name, dest in self.env_vars_relative.items())
+        return {
+            name: self._get_abs_path(dest)
+            for name, dest in self.env_vars_relative.items()}
 
     def _get_abs_path(self, rel_path):
         """Return absolute path by applying rel_path to the base dir."""

@@ -193,7 +193,7 @@ class Call(object):
         wall_clock_start_time = time.time()
         self._redirect_streams()
         retcode = self.process.wait()
-        for stream, (soft_limit, _) in self.redirected_streams_and_limits.values():
+        for stream, _ in self.redirected_streams_and_limits.values():
             # Write output to disk before the next Call starts.
             stream.flush()
             os.fsync(stream.fileno())

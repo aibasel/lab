@@ -59,7 +59,7 @@ def check_single_search(content, props):
     if 'Cumulative statistics:' in content:
         props.add_unexplained_error(
             'single-search parser can\'t be used for iterated search')
-    for name, pattern, _ in PATTERNS:
+    for _, pattern, _ in PATTERNS:
         results = re.findall(pattern, content)
         if len(results) > 1:
             props.add_unexplained_error(

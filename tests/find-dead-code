@@ -8,4 +8,4 @@ cd ..
 
 python tests/whitelist.py
 python -m vulture tests/whitelist.py
-python -m vulture --exclude=external lab downward examples tests
+python -m vulture --exclude=data,external lab downward examples tests
