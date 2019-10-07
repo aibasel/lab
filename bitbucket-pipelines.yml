@@ -3,6 +3,10 @@ pipelines:
   default:
     - step:
         script:
+          - pwd
+          - pushd ../deps
+          - pwd
+
           - apt-get update
           - apt-get -y upgrade
 
@@ -45,4 +49,8 @@ pipelines:
           # Add binaries to PATH.
           - export PATH="$(pwd):$PATH"
 
+          - ls
+          - pwd
+          - popd
+          - pwd
           - TOX_LATEST_PYTHON=python3.7 tox
