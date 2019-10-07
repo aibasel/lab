@@ -4,6 +4,7 @@ pipelines:
     - step:
         script:
           - pwd
+          - mkdir ../deps
           - pushd ../deps
           - pwd
 
