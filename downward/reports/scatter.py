@@ -20,6 +20,8 @@ from collections import defaultdict
 import logging
 import os
 
+import matplotlib.lines as mlines
+
 from lab import tools
 
 from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
@@ -41,9 +43,9 @@ class ScatterMatplotlib(Matplotlib):
                 has_points = True
 
         # Plot a diagonal black line.
-        x_vals = axes.get_xlim()
-        y_vals = x_vals
-        axes.plot(x_vals, y_vals, 'k')
+        xmin, xmax = axes.get_xbound()
+        ymin, ymax = axes.get_ybound()
+        axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k'))
 
         for axis in [axes.xaxis, axes.yaxis]:
             MatplotlibPlot.change_axis_formatter(
