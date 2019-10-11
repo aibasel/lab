@@ -72,8 +72,8 @@ class ScatterPgfPlots(PgfPlots):
         def format_value(v):
             if v is None:
                 v = missing_value
-            return str(v) if isinstance(v, int) else '%f' % v
-        return '(%s, %s)' % (format_value(coord[0]), format_value(coord[1]))
+            return str(v)
+        return '({}, {})'.format(format_value(coord[0]), format_value(coord[1]))
 
     @classmethod
     def _get_missing_value(cls, categories, scale):
