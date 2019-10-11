@@ -32,15 +32,6 @@ from lab import tools
 from downward.reports import PlanningReport
 
 
-MIN_VALUE = 0.1
-
-
-def handle_zero(number):
-    if number == 0:
-        return MIN_VALUE
-    return number
-
-
 class MatplotlibPlot(object):
     def __init__(self):
         self.legend = None
@@ -279,15 +270,13 @@ class PlotReport(PlanningReport):
         raise NotImplementedError
 
     def _prepare_categories(self, categories):
-        new_categories = {}
-        for category, coords in categories.items():
-            # Logarithmic axes cannot handle values <= 0.
-            if self.xscale != 'linear':
-                coords = [(handle_zero(x), y) for x, y in coords]
-            if self.yscale != 'linear':
-                coords = [(x, handle_zero(y)) for x, y in coords]
-            new_categories[category] = coords
-        return new_categories
+        for coords in categories.values():
+            for x, y in coords:
+                if (self.xscale == 'log' and x <= 0) or (self.yscale == 'log' and y <= 0):
+                    logging.critical(
+                        'Logarithmic axes can only show positve values. '
+                        'Use a symlog or linear scale instead. ')
+        return categories
 
     def has_multiple_categories(self):
         return any(key is not None for key in self.categories.keys())
