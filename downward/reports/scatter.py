@@ -18,13 +18,12 @@
 
 from collections import defaultdict
 import logging
-import math
 import os
 
 from lab import tools
 
 from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
-    PlotReport, MIN_AXIS
+    PlotReport
 
 
 class ScatterMatplotlib(Matplotlib):
@@ -41,16 +40,10 @@ class ScatterMatplotlib(Matplotlib):
             if X and Y:
                 has_points = True
 
-        if report.xscale == 'linear' or report.yscale == 'linear':
-            plot_size = report.missing_val * 1.01
-        else:
-            plot_size = report.missing_val * 1.5
-
-        # Plot a diagonal black line. Starting at (0,0) often raises errors.
-        axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
-
-        axes.set_xlim(report.xlim_left or -1, report.xlim_right or plot_size)
-        axes.set_ylim(report.ylim_bottom or -1, report.ylim_top or plot_size)
+        # Plot a diagonal black line.
+        x_vals = axes.get_xlim()
+        y_vals = x_vals
+        axes.plot(x_vals, y_vals, 'k')
 
         for axis in [axes.xaxis, axes.yaxis]:
             MatplotlibPlot.change_axis_formatter(
@@ -82,22 +75,10 @@ class ScatterPgfPlots(PgfPlots):
                 # None is treated as the default category if using multiple
                 # categories. Add a corresponding entry to the legend.
                 lines.append('\\addlegendentry{default}')
-        # Add black line.
-        start = min(report.min_x, report.min_y)
-        if report.xlim_left is not None:
-            start = min(start, report.xlim_left)
-        if report.ylim_bottom is not None:
-            start = min(start, report.ylim_bottom)
-        end = max(report.max_x, report.max_y)
-        if report.xlim_right:
-            end = max(end, report.xlim_right)
-        if report.ylim_top:
-            end = max(end, report.ylim_top)
-        if report.show_missing:
-            end = max(end, report.missing_val)
-        lines.append(
-            '\\addplot[color=black] coordinates {(%f, %f) (%d, %d)};' %
-            (start, start, end, end))
+
+        # Add black diagonal line.
+        lines.append('\\draw[color=black] (rel axis cs:0,0) -- (rel axis cs:1,1);')
+
         lines.append('\\end{axis}')
         return lines
 
@@ -180,8 +161,6 @@ class ScatterPlotReport(PlotReport):
         # By default all values are in the same category.
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
-        self.xlim_left = self.xlim_left or MIN_AXIS
-        self.ylim_bottom = self.ylim_bottom or MIN_AXIS
         if self.output_format == 'tex':
             self.writer = ScatterPgfPlots
         else:
@@ -191,16 +170,6 @@ class ScatterPlotReport(PlotReport):
         PlotReport._set_scales(self, xscale or self.attribute.scale or 'log', yscale)
         if self.xscale != self.yscale:
             logging.critical('Scatterplots must use the same scale on both axes.')
-
-    def _get_missing_val(self, max_value):
-        """
-        Separate the missing values by plotting them at (max_value * 10)
-        rounded to the next power of 10.
-        """
-        assert max_value is not None
-        if self.yscale == 'linear':
-            return max_value * 1.1
-        return int(10 ** math.ceil(math.log10(max_value)))
 
     def _handle_none_values(self, X, Y, replacement):
         assert len(X) == len(Y), (X, Y)
@@ -231,7 +200,7 @@ class ScatterPlotReport(PlotReport):
         categories = PlotReport._prepare_categories(self, categories)
 
         # Find max-value to fit plot and to draw missing values.
-        self.missing_val = self._get_missing_val(max(self.max_x, self.max_y))
+        self.missing_val = 1000
 
         new_categories = {}
         for category, coords in categories.items():

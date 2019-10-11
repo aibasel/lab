@@ -18,7 +18,6 @@
 
 import logging
 import os
-import sys
 
 try:
     import matplotlib
@@ -33,7 +32,6 @@ from lab import tools
 from downward.reports import PlanningReport
 
 
-MIN_AXIS = 0.05
 MIN_VALUE = 0.1
 
 
@@ -131,14 +129,6 @@ class Matplotlib(object):
             if X and Y:
                 has_points = True
 
-        if report.xlim_right:
-            xlim_right = report.xlim_right
-        elif all_x_numeric:
-            xlim_right = max(all_x) * 1.25 if all_x else None
-        else:
-            xlim_right = len(all_x) + 1
-        axes.set_xlim(report.xlim_left or 0, xlim_right)
-        axes.set_ylim(report.ylim_bottom or 0, report.ylim_top or report.max_y * 1.1)
         MatplotlibPlot.change_axis_formatter(axes.yaxis)
         return has_points
 
@@ -195,10 +185,6 @@ class PgfPlots(object):
     @classmethod
     def _get_axis_options(cls, report):
         axis = {}
-        axis['xmin'] = report.xlim_left
-        axis['xmax'] = report.xlim_right
-        axis['ymin'] = report.ylim_bottom
-        axis['ymax'] = report.ylim_top
         axis['xlabel'] = report.xlabel
         axis['ylabel'] = report.ylabel
         axis['title'] = report.title
@@ -303,10 +289,6 @@ class PlotReport(PlanningReport):
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
         self.ylabel = ylabel
-        self.xlim_left = None
-        self.xlim_right = None
-        self.ylim_bottom = None
-        self.ylim_top = None
         self.matplotlib_options = matplotlib_options or {}
         if 'legend.loc' in self.matplotlib_options:
             logging.warning('The "legend.loc" parameter is ignored.')
@@ -357,31 +339,12 @@ class PlotReport(PlanningReport):
             new_categories[category] = coords
         return new_categories
 
-    def set_min_max_values(self, categories):
-        min_x = sys.maxsize
-        min_y = sys.maxsize
-        max_x = MIN_VALUE
-        max_y = MIN_VALUE
-        for coordinates in categories.values():
-            for x, y in coordinates:
-                if x is not None:
-                    min_x = min(min_x, x)
-                    max_x = max(max_x, x)
-                if y is not None:
-                    min_y = min(min_y, y)
-                    max_y = max(max_y, y)
-        # Make sure we don't get too low for log plots.
-        min_x = max(min_x, MIN_VALUE)
-        min_y = max(min_y, MIN_VALUE)
-        self.min_x, self.min_y, self.max_x, self.max_y = min_x, min_y, max_x, max_y
-
     def has_multiple_categories(self):
         return any(key is not None for key in self.categories.keys())
 
     def _write_plot(self, runs, filename):
         # Map category names to coord tuples
         categories = self._fill_categories(runs)
-        self.set_min_max_values(categories)
         self.categories = self._prepare_categories(categories)
         self.styles = self._get_category_styles(self.categories)
         self.writer.write(self, filename)
