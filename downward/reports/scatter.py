@@ -31,21 +31,34 @@ from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
 class ScatterMatplotlib(Matplotlib):
     @classmethod
     def _plot(cls, report, axes, categories, styles):
-        # Display grid
+        has_points = False
+
+        # Display grid.
         axes.grid(b=True, linestyle='-', color='0.75')
 
-        has_points = False
-        # Generate the scatter plots
+        # Draw points for which both algorithms have a value.
         for category, coords in sorted(categories.items()):
-            X, Y = zip(*coords)
-            axes.scatter(X, Y, s=42, label=category, **styles[category])
-            if X and Y:
+            coords = [(x, y) for (x, y) in coords if x is not None and y is not None]
+            if coords:
+                X, Y = zip(*coords)
+                axes.scatter(X, Y, s=42, label=category, **styles[category])
                 has_points = True
 
-        # Plot a diagonal black line.
+        axes.autoscale(enable=False)
         xmin, xmax = axes.get_xbound()
         ymin, ymax = axes.get_ybound()
-        axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k'))
+
+        if report.show_missing:
+            # Draw points on axis boundaries for which at least one algorithm has no value.
+            for category, coords in sorted(categories.items()):
+                coords = [(xmax if x is None else x, ymax if y is None else y) for (x, y) in coords if None in (x, y)]
+                if coords:
+                    X, Y = zip(*coords)
+                    axes.scatter(X, Y, s=42, clip_on=False, label=category, **styles[category])
+                    has_points = True
+
+        # Plot a diagonal black line.
+        axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
 
         for axis in [axes.xaxis, axes.yaxis]:
             MatplotlibPlot.change_axis_formatter(
@@ -204,13 +217,7 @@ class ScatterPlotReport(PlotReport):
         # Find max-value to fit plot and to draw missing values.
         self.missing_val = 1000
 
-        new_categories = {}
-        for category, coords in categories.items():
-            X, Y = zip(*coords)
-            X, Y = self._handle_none_values(X, Y, self.missing_val)
-            coords = zip(X, Y)
-            new_categories[category] = coords
-        return new_categories
+        return categories
 
     def write(self):
         if not len(self.algorithms) == 2:
