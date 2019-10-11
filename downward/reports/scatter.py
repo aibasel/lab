@@ -87,12 +87,8 @@ class ScatterPgfPlots(PgfPlots):
         missing_value = cls._get_missing_value(max_value)
         lines = []
         options = cls._get_axis_options(report)
-        # Add line for missing values.
-        for axis in ['x', 'y']:
-            options['extra {} ticks'.format(axis)] = missing_value
-            options['extra {} tick style'.format(axis)] = 'grid=major'
-            options['extra {} tick labels'.format(axis)] = 'uns.'
-            options['{}max'.format(axis)] = str(missing_value)
+        options['xmax'] = str(missing_value)
+        options['ymax'] = str(missing_value)
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
             plot = {'only marks': True}
