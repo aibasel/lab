@@ -74,7 +74,9 @@ class ScatterPgfPlots(PgfPlots):
         return '(%s, %s)' % (format_value(coord[0]), format_value(coord[1]))
 
     @classmethod
-    def _get_missing_value(cls, max_value):
+    def _get_missing_value(cls, max_value, scale):
+        if scale == 'linear':
+            return max_value * 1.1
         return int(10 ** math.ceil(math.log10(max_value)))
 
     @classmethod
@@ -84,7 +86,7 @@ class ScatterPgfPlots(PgfPlots):
     @classmethod
     def _get_plot(cls, report):
         max_value = cls._get_max_value(report.categories)
-        missing_value = cls._get_missing_value(max_value)
+        missing_value = cls._get_missing_value(max_value, report.xscale)
         lines = []
         options = cls._get_axis_options(report)
         options['xmax'] = str(missing_value)
