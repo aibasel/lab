@@ -272,9 +272,15 @@ class PlotReport(PlanningReport):
     def _prepare_categories(self, categories):
         for coords in categories.values():
             for x, y in coords:
+                # Plot integer 0 values at 0.1 in log plots.
+                if self.xscale == 'log' and x == 0 and isinstance(x, int):
+                    x = 0.1
+                if self.yscale == 'log' and y == 0 and isinstance(y, int):
+                    y = 0.1
+
                 if (self.xscale == 'log' and x <= 0) or (self.yscale == 'log' and y <= 0):
                     logging.critical(
-                        'Logarithmic axes can only show positve values. '
+                        'Logarithmic axes can only show positive values. '
                         'Use a symlog or linear scale instead. ')
         return categories
 
