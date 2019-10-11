@@ -85,6 +85,11 @@ class ScatterPgfPlots(PgfPlots):
 
     @classmethod
     def _get_plot(cls, report):
+        """
+        Automatically drawing points on pgfplots axis boundaries is
+        difficult, so we compute and set xmax = ymax = missing_value
+        ourselves.
+        """
         max_value = cls._get_max_value(report.categories)
         missing_value = cls._get_missing_value(max_value, report.xscale)
         lines = []
