@@ -62,18 +62,6 @@ class MatplotlibPlot(object):
         if matplotlib_options:
             matplotlib.rcParams.update(matplotlib_options)
 
-    @staticmethod
-    def change_axis_formatter(axis, missing_val=None):
-        formatter = axis.get_major_formatter()
-        old_format_call = formatter.__call__
-
-        def new_format_call(x, pos):
-            if x == missing_val:
-                return 'Missing'
-            return old_format_call(x, pos)
-
-        formatter.__call__ = new_format_call
-
     def create_legend(self):
         self.legend = self.axes.legend(
             scatterpoints=1, loc='center', bbox_to_anchor=(1.3, 0.5))

@@ -60,9 +60,6 @@ class ScatterMatplotlib(Matplotlib):
         # Plot a diagonal black line.
         axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
 
-        for axis in [axes.xaxis, axes.yaxis]:
-            MatplotlibPlot.change_axis_formatter(
-                axis, report.missing_val if report.show_missing else None)
         return has_points
 
 
