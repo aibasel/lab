@@ -11,6 +11,7 @@ Downward Lab
 ^^^^^^^^^^^^
 * Scatter plots: simplify code by letting Matplotlib compute axis limits automatically.
 * Scatter plots: draw points for algorithm pairs with missing values on axis boundaries.
+* Scatter plots: allow drawing negative values on linear and symlog axes.
 
 
 v4.2 (2019-09-27)
