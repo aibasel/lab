@@ -76,14 +76,13 @@ class ScatterPgfPlots(PgfPlots):
         return '(%s, %s)' % (format_value(coord[0]), format_value(coord[1]))
 
     @classmethod
-    def _get_missing_value(cls, max_value, scale):
+    def _get_missing_value(cls, categories, scale):
+        if not any(None in coord for coords in categories.values() for coord in coords):
+            return None
+        max_value = max(max(coord) for coords in categories.values() for coord in coords)
         if scale == 'linear':
             return max_value * 1.1
         return int(10 ** math.ceil(math.log10(max_value)))
-
-    @classmethod
-    def _get_max_value(cls, categories):
-        return max(max(coord) for coords in categories.values() for coord in coords)
 
     @classmethod
     def _get_plot(cls, report):
@@ -92,12 +91,12 @@ class ScatterPgfPlots(PgfPlots):
         difficult, so we compute and set xmax = ymax = missing_value
         ourselves.
         """
-        max_value = cls._get_max_value(report.categories)
-        missing_value = cls._get_missing_value(max_value, report.xscale)
+        missing_value = cls._get_missing_value(report.categories, report.xscale)
         lines = []
         options = cls._get_axis_options(report)
-        options['xmax'] = str(missing_value)
-        options['ymax'] = str(missing_value)
+        if missing_value is not None:
+            options['xmax'] = str(missing_value)
+            options['ymax'] = str(missing_value)
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
             plot = {'only marks': True}
