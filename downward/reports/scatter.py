@@ -18,6 +18,7 @@
 
 from collections import defaultdict
 import logging
+import math
 import os
 
 import matplotlib.lines as mlines
@@ -65,22 +66,40 @@ class ScatterMatplotlib(Matplotlib):
 
 class ScatterPgfPlots(PgfPlots):
     @classmethod
-    def _format_coord(cls, coord):
+    def _format_coord(cls, coord, missing_value):
         def format_value(v):
+            if v is None:
+                v = missing_value
             return str(v) if isinstance(v, int) else '%f' % v
         return '(%s, %s)' % (format_value(coord[0]), format_value(coord[1]))
 
     @classmethod
+    def _get_missing_value(cls, max_value):
+        return int(10 ** math.ceil(math.log10(max_value)))
+
+    @classmethod
+    def _get_max_value(cls, categories):
+        return max(max(coord) for coords in categories.values() for coord in coords)
+
+    @classmethod
     def _get_plot(cls, report):
+        max_value = cls._get_max_value(report.categories)
+        missing_value = cls._get_missing_value(max_value)
         lines = []
         options = cls._get_axis_options(report)
+        # Add line for missing values.
+        for axis in ['x', 'y']:
+            options['extra {} ticks'.format(axis)] = missing_value
+            options['extra {} tick style'.format(axis)] = 'grid=major'
+            options['extra {} tick labels'.format(axis)] = 'uns.'
+            options['{}max'.format(axis)] = str(missing_value)
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
             plot = {'only marks': True}
             lines.append(
                 '\\addplot+[%s] coordinates {\n%s\n};' % (
                     cls._format_options(plot),
-                    ' '.join(cls._format_coord(c) for c in coords)))
+                    ' '.join(cls._format_coord(c, missing_value) for c in coords)))
             if category:
                 lines.append('\\addlegendentry{%s}' % category)
             elif report.has_multiple_categories:
@@ -93,15 +112,6 @@ class ScatterPgfPlots(PgfPlots):
 
         lines.append('\\end{axis}')
         return lines
-
-    @classmethod
-    def _get_axis_options(cls, report):
-        opts = PgfPlots._get_axis_options(report)
-        # Add line for missing values.
-        for axis in ['x', 'y']:
-            opts['extra %s ticks' % axis] = report.missing_val
-            opts['extra %s tick style' % axis] = 'grid=major'
-        return opts
 
 
 class ScatterPlotReport(PlotReport):
@@ -206,14 +216,6 @@ class ScatterPlotReport(PlotReport):
                 continue
             category = self.get_category(run1, run2)
             categories[category].append((val1, val2))
-        return categories
-
-    def _prepare_categories(self, categories):
-        categories = PlotReport._prepare_categories(self, categories)
-
-        # Find max-value to fit plot and to draw missing values.
-        self.missing_val = 1000
-
         return categories
 
     def write(self):
