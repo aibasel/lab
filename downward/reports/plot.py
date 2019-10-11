@@ -38,10 +38,7 @@ class MatplotlibPlot(object):
         self.create_canvas_and_axes()
 
     def create_canvas_and_axes(self):
-        # Create a figure.
         fig = figure.Figure()
-
-        # Create a canvas and add the figure to it
         self.canvas = backend_agg.FigureCanvasAgg(fig)
         self.axes = fig.add_subplot(111)
 
@@ -226,7 +223,6 @@ class PlotReport(PlanningReport):
             self.attribute = self.attributes[0]
         self.title = title if title is not None else (self.attribute or '')
 
-        self.category_styles = {}
         self._set_scales(xscale, yscale)
         self.xlabel = xlabel
         self.ylabel = ylabel
@@ -250,21 +246,17 @@ class PlotReport(PlanningReport):
     def _get_category_styles(self, categories):
         """
         Create dictionary mapping from category name to marker style.
-        Pick random style for categories for which no style is defined.
 
         Note: Matplotlib 2.0 will gain the option to automatically
         cycle through marker styles. We might want to use that feature
         in the future.
 
         """
-        styles = self.category_styles.copy()
-        unused_styles = [{'marker': m, 'c': c} for m in 'ox+s^v<>D' for c in 'rgbcmyk'
-                         if not any(s.get('marker') == m and
-                                    s.get('c') == c for s in styles.values())]
-        missing_category_styles = (set(categories.keys()) - set(styles.keys()))
-        for i, missing in enumerate(missing_category_styles):
-            styles[missing] = unused_styles[i % len(unused_styles)]
-        return styles
+        available_styles = [{'marker': m, 'c': c} for m in 'ox+s^v<>D' for c in 'rgbcmyk']
+        category_styles = {}
+        for i, category in enumerate(sorted(categories)):
+            category_styles[category] = available_styles[i % len(available_styles)]
+        return category_styles
 
     def _fill_categories(self, runs):
         raise NotImplementedError
