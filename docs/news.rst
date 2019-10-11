@@ -1,6 +1,18 @@
 News
 ====
 
+v4.3 (unreleased)
+-----------------
+
+Lab
+^^^
+
+Downward Lab
+^^^^^^^^^^^^
+* Scatter plots: simplify code by letting Matplotlib compute axis limits automatically.
+* Scatter plots: draw points for algorithm pairs with missing values on axis boundaries.
+
+
 v4.2 (2019-09-27)
 -----------------
 
