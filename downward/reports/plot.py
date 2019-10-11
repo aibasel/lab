@@ -87,38 +87,7 @@ class Matplotlib(object):
 
     @classmethod
     def _plot(cls, report, axes, categories, styles):
-        # Find all x-values.
-        all_x = set()
-        for coordinates in categories.values():
-            X, Y = zip(*coordinates)
-            all_x |= set(X)
-        all_x = sorted(all_x)
-
-        # Map all x-values to positions on the x-axis.
-        indices = {val: i for i, val in enumerate(all_x, start=1)}
-
-        # Only use xticks for non-numeric values.
-        all_x_numeric = all(isinstance(x, (int, float)) for x in all_x)
-        if not all_x_numeric:
-            # Reserve space on the x-axis for all x-values and the labels.
-            axes.set_xticks(range(1, len(all_x) + 1))
-            axes.set_xticklabels(all_x)
-
-        has_points = False
-        # Plot all categories.
-        for category, coords in sorted(categories.items()):
-            if not coords:
-                continue
-
-            X, Y = zip(*coords)
-            if not all_x_numeric:
-                X = [indices[value] for value in X]
-            axes.plot(X, Y, label=category, **styles[category])
-            if X and Y:
-                has_points = True
-
-        MatplotlibPlot.change_axis_formatter(axes.yaxis)
-        return has_points
+        raise NotImplementedError
 
     @classmethod
     def write(cls, report, filename, scatter=False):
@@ -147,14 +116,7 @@ class Matplotlib(object):
 class PgfPlots(object):
     @classmethod
     def _get_plot(cls, report):
-        lines = []
-        opts = cls._format_options(cls._get_axis_options(report))
-        lines.append('\\begin{axis}[%s]' % opts)
-        for category, coords in sorted(report.categories.items()):
-            lines.append('\\addplot coordinates {%s};' % ' '.join(str(c) for c in coords))
-            lines.append('\\addlegendentry{%s}' % category)
-        lines.append('\\end{axis}')
-        return lines
+        raise NotImplementedError
 
     @classmethod
     def write(cls, report, filename):
