@@ -25,8 +25,7 @@ import matplotlib.lines as mlines
 
 from lab import tools
 
-from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
-    PlotReport
+from downward.reports.plot import Matplotlib, PgfPlots, PlotReport
 
 
 class ScatterMatplotlib(Matplotlib):
@@ -50,12 +49,15 @@ class ScatterMatplotlib(Matplotlib):
         ymin, ymax = axes.get_ybound()
 
         if report.show_missing:
-            # Draw points on axis boundaries for which at least one algorithm has no value.
+            # Draw missing values on axis boundaries.
             for category, coords in sorted(categories.items()):
-                coords = [(xmax if x is None else x, ymax if y is None else y) for (x, y) in coords if None in (x, y)]
+                coords = [
+                    (xmax if x is None else x, ymax if y is None else y)
+                    for (x, y) in coords if None in (x, y)]
                 if coords:
                     X, Y = zip(*coords)
-                    axes.scatter(X, Y, s=42, clip_on=False, label=category, **styles[category])
+                    axes.scatter(
+                        X, Y, s=42, clip_on=False, label=category, **styles[category])
                     has_points = True
 
         # Plot a diagonal black line.
@@ -131,8 +133,8 @@ class ScatterPlotReport(PlotReport):
         Use the *filter_algorithm* keyword argument to select exactly
         two algorithms.
 
-        If only one of the two algorithms has a value for a run, only
-        add a coordinate if *show_missing* is True.
+        If *show_missing* is False, we only draw a point for an
+        algorithm pair if both algorithms have a value.
 
         *get_category* can be a function that takes **two** runs
         (dictionaries of properties) and returns a category name. This
@@ -195,13 +197,6 @@ class ScatterPlotReport(PlotReport):
         PlotReport._set_scales(self, xscale or self.attribute.scale or 'log', yscale)
         if self.xscale != self.yscale:
             logging.critical('Scatterplots must use the same scale on both axes.')
-
-    def _handle_none_values(self, X, Y, replacement):
-        assert len(X) == len(Y), (X, Y)
-        if self.show_missing:
-            return ([x if x is not None else replacement for x in X],
-                    [y if y is not None else replacement for y in Y])
-        return zip(*[(x, y) for x, y in zip(X, Y) if x is not None and y is not None])
 
     def _fill_categories(self, runs):
         # We discard the *runs* parameter.
