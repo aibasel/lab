@@ -73,6 +73,7 @@ class MatplotlibPlot(object):
 class Matplotlib(object):
     XAXIS_LABEL_PADDING = 5
     YAXIS_LABEL_PADDING = 5
+    TITLE_PADDING = 10
 
     @classmethod
     def _plot(cls, report, axes, categories, styles):
@@ -83,7 +84,7 @@ class Matplotlib(object):
         MatplotlibPlot.set_rc_params(report.matplotlib_options)
         plot = MatplotlibPlot()
         if report.title:
-            plot.axes.set_title(report.title)
+            plot.axes.set_title(report.title, pad=cls.TITLE_PADDING)
         if report.xlabel:
             plot.axes.set_xlabel(report.xlabel, labelpad=cls.XAXIS_LABEL_PADDING)
         if report.ylabel:
