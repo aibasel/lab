@@ -18,7 +18,15 @@
 
 import itertools
 import logging
+import math
 import os
+
+try:
+    # Python 2
+    from itertools import izip
+except ImportError:
+    # Python 3+
+    izip = zip
 
 try:
     import matplotlib
@@ -253,12 +261,11 @@ class PlotReport(PlanningReport):
         colors = ['C{}'.format(c) for c in range(10)]
 
         num_styles = len(shapes) * len(colors)
-        styles = [{'marker': shape, 'c': color}
-            for shape, color in itertools.islice(itertools.izip(
-                itertools.cycle(shapes),
-                itertools.cycle(colors)), num_styles)
-        ]
-        assert len(set((s['marker'], s['c']) for s in styles)) == num_styles, (
+        styles = [
+            {'marker': shape, 'c': color}
+            for shape, color in itertools.islice(izip(
+                itertools.cycle(shapes), itertools.cycle(colors)), num_styles)]
+        assert len({(s['marker'], s['c']) for s in styles}) == num_styles, (
             "The number of shapes and the number of colors must be coprime.")
 
         category_styles = {}
@@ -266,7 +273,7 @@ class PlotReport(PlanningReport):
             category_styles[category] = styles[i % len(styles)]
         return category_styles
 
-    def _fill_categories(self, runs):
+    def _fill_categories(self):
         raise NotImplementedError
 
     def _prepare_categories(self, categories):
@@ -281,15 +288,26 @@ class PlotReport(PlanningReport):
                 if (self.xscale == 'log' and x <= 0) or (self.yscale == 'log' and y <= 0):
                     logging.critical(
                         'Logarithmic axes can only show positive values. '
-                        'Use a symlog or linear scale instead. ')
+                        'Use a symlog or linear scale instead.')
         return categories
 
     def has_multiple_categories(self):
         return any(key is not None for key in self.categories.keys())
 
+    def _compute_missing_value(self, categories):
+        if not self.show_missing:
+            return None
+        if not any(None in coord for coords in categories.values() for coord in coords):
+            return None
+        max_value = max(max(coord) for coords in categories.values() for coord in coords)
+        if self.xscale == 'linear':
+            return max_value * 1.1
+        return int(10 ** math.ceil(math.log10(max_value)))
+
     def _write_plot(self, runs, filename):
-        # Map category names to coord tuples
-        categories = self._fill_categories(runs)
+        # Map category names to coord tuples.
+        categories = self._fill_categories()
+        self.missing_value = self._compute_missing_value(categories)
         self.categories = self._prepare_categories(categories)
         self.styles = self._get_category_styles(self.categories)
         self.writer.write(self, filename)

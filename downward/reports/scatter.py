@@ -18,7 +18,6 @@
 
 from collections import defaultdict
 import logging
-import math
 import os
 
 import matplotlib.lines as mlines
@@ -33,33 +32,21 @@ class ScatterMatplotlib(Matplotlib):
     def _plot(cls, report, axes, categories, styles):
         has_points = False
 
-        # Display grid.
         axes.grid(b=True, linestyle='-', color='0.75')
 
-        # Draw points for which both algorithms have a value.
         for category, coords in sorted(categories.items()):
-            coords = [(x, y) for (x, y) in coords if x is not None and y is not None]
             if coords:
                 X, Y = zip(*coords)
-                axes.scatter(X, Y, label=category, **styles[category])
+                axes.scatter(X, Y, clip_on=False, label=category, **styles[category])
                 has_points = True
 
-        axes.autoscale(enable=False)
-        xmin, xmax = axes.get_xbound()
-        ymin, ymax = axes.get_ybound()
-
-        if report.show_missing:
-            # Draw missing values on axis boundaries.
-            for category, coords in sorted(categories.items()):
-                coords = [
-                    (xmax if x is None else x, ymax if y is None else y)
-                    for (x, y) in coords if None in (x, y)]
-                if coords:
-                    X, Y = zip(*coords)
-                    axes.scatter(X, Y, clip_on=False, label=category, **styles[category])
-                    has_points = True
+        if report.missing_value is not None:
+            axes.set_xbound(upper=report.missing_value)
+            axes.set_ybound(upper=report.missing_value)
 
         # Plot a diagonal black line.
+        xmin, xmax = axes.get_xbound()
+        ymin, ymax = axes.get_ybound()
         axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
 
         return has_points
@@ -67,42 +54,24 @@ class ScatterMatplotlib(Matplotlib):
 
 class ScatterPgfPlots(PgfPlots):
     @classmethod
-    def _format_coord(cls, coord, missing_value):
-        def format_value(v):
-            if v is None:
-                v = missing_value
-            return str(v)
-        return '({}, {})'.format(format_value(coord[0]), format_value(coord[1]))
-
-    @classmethod
-    def _get_missing_value(cls, categories, scale):
-        if not any(None in coord for coords in categories.values() for coord in coords):
-            return None
-        max_value = max(max(coord) for coords in categories.values() for coord in coords)
-        if scale == 'linear':
-            return max_value * 1.1
-        return int(10 ** math.ceil(math.log10(max_value)))
-
-    @classmethod
     def _get_plot(cls, report):
         """
         Automatically drawing points on pgfplots axis boundaries is
         difficult, so we compute and set xmax = ymax = missing_value
         ourselves.
         """
-        missing_value = cls._get_missing_value(report.categories, report.xscale)
         lines = []
         options = cls._get_axis_options(report)
-        if missing_value is not None:
-            options['xmax'] = str(missing_value)
-            options['ymax'] = str(missing_value)
+        if report.missing_value is not None:
+            options['xmax'] = report.missing_value
+            options['ymax'] = report.missing_value
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
             plot = {'only marks': True}
             lines.append(
                 '\\addplot+[%s] coordinates {\n%s\n};' % (
                     cls._format_options(plot),
-                    ' '.join(cls._format_coord(c, missing_value) for c in coords)))
+                    ' '.join(str(c) for c in coords)))
             if category:
                 lines.append('\\addlegendentry{%s}' % category)
             elif report.has_multiple_categories:
@@ -196,23 +165,34 @@ class ScatterPlotReport(PlotReport):
         if self.xscale != self.yscale:
             logging.critical('Scatterplots must use the same scale on both axes.')
 
-    def _fill_categories(self, runs):
-        # We discard the *runs* parameter.
-        # Map category names to value tuples
+    def _fill_categories(self):
+        # Map category names to coordinate lists.
         categories = defaultdict(list)
         for runs in self.problem_runs.values():
-            if len(runs) != 2:
+            # TODO: Show value even if one algorithm is missing.
+            if len(runs) < 2:
                 continue
             run1, run2 = runs
             assert (run1['algorithm'] == self.algorithms[0] and
                     run2['algorithm'] == self.algorithms[1])
             val1 = run1.get(self.attribute)
             val2 = run2.get(self.attribute)
-            if val1 is None and val2 is None and not self.show_missing:
-                continue
             category = self.get_category(run1, run2)
             categories[category].append((val1, val2))
         return categories
+
+    def _prepare_categories(self, categories):
+        PlotReport._prepare_categories(self, categories)
+        new_categories = {}
+        for category, coords in categories.items():
+            if self.show_missing:
+                coords = [
+                    (x if x is not None else self.missing_value,
+                     y if y is not None else self.missing_value) for x, y in coords]
+            else:
+                coords = [coord for coord in coords if None not in coord]
+            new_categories[category] = coords
+        return new_categories
 
     def write(self):
         if not len(self.algorithms) == 2:
