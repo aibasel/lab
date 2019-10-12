@@ -222,7 +222,7 @@ class PlotReport(PlanningReport):
         defaults by executing ::
 
             import matplotlib
-            print matplotlib.rcParamsDefault
+            print(matplotlib.rcParamsDefault)
 
         """
         kwargs.setdefault('format', 'png')
@@ -277,7 +277,9 @@ class PlotReport(PlanningReport):
         raise NotImplementedError
 
     def _prepare_categories(self, categories):
-        for coords in categories.values():
+        new_categories = {}
+        for category, coords in categories.items():
+            new_coords = []
             for x, y in coords:
                 # Plot integer 0 values at 0.1 in log plots.
                 if self.xscale == 'log' and x == 0 and isinstance(x, int):
@@ -289,7 +291,10 @@ class PlotReport(PlanningReport):
                     logging.critical(
                         'Logarithmic axes can only show positive values. '
                         'Use a symlog or linear scale instead.')
-        return categories
+                else:
+                    new_coords.append((x, y))
+            new_categories[category] = new_coords
+        return new_categories
 
     def has_multiple_categories(self):
         return any(key is not None for key in self.categories.keys())

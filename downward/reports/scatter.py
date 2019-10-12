@@ -182,7 +182,7 @@ class ScatterPlotReport(PlotReport):
         return categories
 
     def _prepare_categories(self, categories):
-        PlotReport._prepare_categories(self, categories)
+        categories = PlotReport._prepare_categories(self, categories)
         new_categories = {}
         for category, coords in categories.items():
             if self.show_missing:
