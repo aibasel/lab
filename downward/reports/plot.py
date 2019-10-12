@@ -252,7 +252,8 @@ class PlotReport(PlanningReport):
         in the future.
 
         """
-        available_styles = [{'marker': m, 'c': c} for m in 'ox+s^v<>D' for c in 'rgbcmyk']
+        available_styles = [
+            {'marker': m, 'c': 'C{}'.format(c)} for m in 'x+os^v<>D' for c in range(10)]
         category_styles = {}
         for i, category in enumerate(sorted(categories)):
             category_styles[category] = available_styles[i % len(available_styles)]
