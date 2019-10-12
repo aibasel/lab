@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import itertools
 import logging
 import os
 
@@ -246,17 +247,22 @@ class PlotReport(PlanningReport):
     def _get_category_styles(self, categories):
         """
         Create dictionary mapping from category name to marker style.
-
-        Note: Matplotlib 2.0 will gain the option to automatically
-        cycle through marker styles. We might want to use that feature
-        in the future.
-
         """
-        available_styles = [
-            {'marker': m, 'c': 'C{}'.format(c)} for m in 'x+os^v<>D' for c in range(10)]
+        shapes = 'x+os^v<>D'
+        colors = ['C{}'.format(c) for c in range(10)]
+
+        num_styles = len(shapes) * len(colors)
+        styles = [{'marker': shape, 'c': color}
+            for shape, color in itertools.islice(itertools.izip(
+                itertools.cycle(shapes),
+                itertools.cycle(colors)), num_styles)
+        ]
+        assert len(set((s['marker'], s['c']) for s in styles)) == num_styles, (
+            "The number of shapes and the number of colors must be coprime.")
+
         category_styles = {}
         for i, category in enumerate(sorted(categories)):
-            category_styles[category] = available_styles[i % len(available_styles)]
+            category_styles[category] = styles[i % len(styles)]
         return category_styles
 
     def _fill_categories(self, runs):
