@@ -41,7 +41,7 @@ class ScatterMatplotlib(Matplotlib):
             coords = [(x, y) for (x, y) in coords if x is not None and y is not None]
             if coords:
                 X, Y = zip(*coords)
-                axes.scatter(X, Y, s=42, label=category, **styles[category])
+                axes.scatter(X, Y, label=category, **styles[category])
                 has_points = True
 
         axes.autoscale(enable=False)
@@ -56,8 +56,7 @@ class ScatterMatplotlib(Matplotlib):
                     for (x, y) in coords if None in (x, y)]
                 if coords:
                     X, Y = zip(*coords)
-                    axes.scatter(
-                        X, Y, s=42, clip_on=False, label=category, **styles[category])
+                    axes.scatter(X, Y, clip_on=False, label=category, **styles[category])
                     has_points = True
 
         # Plot a diagonal black line.
