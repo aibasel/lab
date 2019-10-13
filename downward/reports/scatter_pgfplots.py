@@ -76,7 +76,7 @@ class ScatterPgfplots(object):
         axis['xmode'] = convert_scale[report.xscale]
         axis['ymode'] = convert_scale[report.yscale]
 
-        # Height is set in inches.
+        # Plot size is set in inches.
         figsize = report.matplotlib_options.get('figure.figsize')
         if figsize:
             width, height = figsize
