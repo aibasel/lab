@@ -25,11 +25,6 @@ from lab import tools
 class ScatterPgfplots(object):
     @classmethod
     def _get_plot(cls, report):
-        """
-        Automatically drawing points on pgfplots axis boundaries is
-        difficult, so we compute and set xmax = ymax = missing_value
-        ourselves.
-        """
         lines = []
         options = cls._get_axis_options(report)
         if report.missing_value is not None:
