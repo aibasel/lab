@@ -306,6 +306,8 @@ class PlotReport(PlanningReport):
         if not any(None in coord for coords in categories.values() for coord in coords):
             return None
         max_value = max(max(coord) for coords in categories.values() for coord in coords)
+        if max_value is None:
+            return 1
         if self.xscale == 'linear':
             return max_value * 1.1
         return int(10 ** math.ceil(math.log10(max_value)))
