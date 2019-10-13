@@ -287,7 +287,8 @@ class PlotReport(PlanningReport):
                 if self.yscale == 'log' and y == 0 and isinstance(y, int):
                     y = 0.1
 
-                if (self.xscale == 'log' and x <= 0) or (self.yscale == 'log' and y <= 0):
+                if (self.xscale == 'log' and x is not None and x <= 0) or (
+                    self.yscale == 'log' and y is not None and y <= 0):
                     logging.critical(
                         'Logarithmic axes can only show positive values. '
                         'Use a symlog or linear scale instead.')
