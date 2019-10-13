@@ -100,11 +100,7 @@ class Matplotlib(object):
 
         plot.axes.set_xscale(report.xscale)
         plot.axes.set_yscale(report.yscale)
-        has_points = cls._plot(report, plot.axes, report.categories, report.styles)
-
-        if not has_points:
-            logging.info('Found no valid points for plot %s' % filename)
-            return
+        cls._plot(report, plot.axes)
 
         if report.has_multiple_categories():
             plot.create_legend()
@@ -317,6 +313,8 @@ class PlotReport(PlanningReport):
         categories = self._fill_categories()
         self.missing_value = self._compute_missing_value(categories)
         self.categories = self._prepare_categories(categories)
+        if not self.categories:
+            logging.critical("Plot contains no points.")
         self.styles = self._get_category_styles(self.categories)
         self.writer.write(self, filename)
 

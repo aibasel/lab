@@ -29,16 +29,13 @@ from downward.reports.plot import Matplotlib, PgfPlots, PlotReport
 
 class ScatterMatplotlib(Matplotlib):
     @classmethod
-    def _plot(cls, report, axes, categories, styles):
-        has_points = False
-
+    def _plot(cls, report, axes):
         axes.grid(b=True, linestyle='-', color='0.75')
 
-        for category, coords in sorted(categories.items()):
-            if coords:
-                X, Y = zip(*coords)
-                axes.scatter(X, Y, clip_on=False, label=category, **styles[category])
-                has_points = True
+        for category, coords in sorted(report.categories.items()):
+            x_vals, y_vals = zip(*coords)
+            axes.scatter(
+                x_vals, y_vals, clip_on=False, label=category, **report.styles[category])
 
         if report.missing_value is not None:
             axes.set_xbound(upper=report.missing_value)
@@ -48,8 +45,6 @@ class ScatterMatplotlib(Matplotlib):
         xmin, xmax = axes.get_xbound()
         ymin, ymax = axes.get_ybound()
         axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
-
-        return has_points
 
 
 class ScatterPgfPlots(PgfPlots):
@@ -191,7 +186,8 @@ class ScatterPlotReport(PlotReport):
                      y if y is not None else self.missing_value) for x, y in coords]
             else:
                 coords = [coord for coord in coords if None not in coord]
-            new_categories[category] = coords
+            if coords:
+                new_categories[category] = coords
         return new_categories
 
     def write(self):
