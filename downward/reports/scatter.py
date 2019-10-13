@@ -166,19 +166,19 @@ class ScatterPlotReport(PlotReport):
             logging.critical('Scatterplots must use the same scale on both axes.')
 
     def _fill_categories(self):
-        # Map category names to coordinate lists.
+        """Map category names to coordinate lists."""
         categories = defaultdict(list)
         for runs in self.problem_runs.values():
-            # TODO: Show value even if one algorithm is missing.
-            if len(runs) < 2:
-                continue
-            run1, run2 = runs
-            assert (run1['algorithm'] == self.algorithms[0] and
-                    run2['algorithm'] == self.algorithms[1])
-            val1 = run1.get(self.attribute)
-            val2 = run2.get(self.attribute)
+            try:
+                run1, run2 = runs
+            except ValueError:
+                logging.critical(
+                    'Scatter plot needs exactly two runs for {domain}:{problem}. '
+                    'Instead of filtering a whole run, try setting only some of its '
+                    'attribute values to None in a filter.'.format(**runs[0]))
             category = self.get_category(run1, run2)
-            categories[category].append((val1, val2))
+            categories[category].append(
+                (run1.get(self.attribute), run2.get(self.attribute)))
         return categories
 
     def _prepare_categories(self, categories):
