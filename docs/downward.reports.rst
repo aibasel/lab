@@ -14,8 +14,6 @@ Tables
 Plots
 -----
 
-.. autoclass:: downward.reports.plot.PlotReport
-
 .. autoclass:: downward.reports.scatter.ScatterPlotReport
 
 .. image:: images/example-scatter-plot.png

@@ -17,83 +17,39 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
+import itertools
 import logging
+import math
 import os
 
-import matplotlib.lines as mlines
+try:
+    # Python 2
+    from itertools import izip
+except ImportError:
+    # Python 3+
+    izip = zip
 
 from lab import tools
 
-from downward.reports.plot import Matplotlib, PgfPlots, PlotReport
+from downward.reports import PlanningReport
+from downward.reports.scatter_matplotlib import ScatterMatplotlib
+from downward.reports.scatter_pgfplots import ScatterPgfplots
 
 
-class ScatterMatplotlib(Matplotlib):
-    @classmethod
-    def _plot(cls, report, axes):
-        axes.grid(b=True, linestyle='-', color='0.75')
-
-        for category, coords in sorted(report.categories.items()):
-            x_vals, y_vals = zip(*coords)
-            axes.scatter(
-                x_vals, y_vals, clip_on=False, label=category, **report.styles[category])
-
-        if report.missing_value is not None:
-            axes.set_xbound(upper=report.missing_value)
-            axes.set_ybound(upper=report.missing_value)
-
-        # Plot a diagonal black line.
-        xmin, xmax = axes.get_xbound()
-        ymin, ymax = axes.get_ybound()
-        axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
-
-
-class ScatterPgfPlots(PgfPlots):
-    @classmethod
-    def _get_plot(cls, report):
-        """
-        Automatically drawing points on pgfplots axis boundaries is
-        difficult, so we compute and set xmax = ymax = missing_value
-        ourselves.
-        """
-        lines = []
-        options = cls._get_axis_options(report)
-        if report.missing_value is not None:
-            options['xmax'] = report.missing_value
-            options['ymax'] = report.missing_value
-        lines.append('\\begin{axis}[%s]' % cls._format_options(options))
-        for category, coords in sorted(report.categories.items()):
-            plot = {'only marks': True}
-            lines.append(
-                '\\addplot+[%s] coordinates {\n%s\n};' % (
-                    cls._format_options(plot),
-                    ' '.join(str(c) for c in coords)))
-            if category:
-                lines.append('\\addlegendentry{%s}' % category)
-            elif report.has_multiple_categories:
-                # None is treated as the default category if using multiple
-                # categories. Add a corresponding entry to the legend.
-                lines.append('\\addlegendentry{default}')
-
-        # Add black diagonal line.
-        lines.append('\\draw[color=black] (rel axis cs:0,0) -- (rel axis cs:1,1);')
-
-        lines.append('\\end{axis}')
-        return lines
-
-
-class ScatterPlotReport(PlotReport):
+class ScatterPlotReport(PlanningReport):
     """
-    Generate a scatter plot for a specific attribute.
+    Generate a scatter plot for an attribute.
     """
-    def __init__(self, show_missing=True, get_category=None, **kwargs):
+    def __init__(
+            self, show_missing=True, get_category=None, title=None,
+            xscale=None, yscale=None, xlabel='', ylabel='',
+            matplotlib_options=None, **kwargs):
         """
-        See :class:`.PlotReport` for inherited arguments.
-
         The keyword argument *attributes* must contain exactly one
         attribute.
 
         Use the *filter_algorithm* keyword argument to select exactly
-        two algorithms.
+        two algorithms (see example below).
 
         If *show_missing* is False, we only draw a point for an
         algorithm pair if both algorithms have a value.
@@ -139,26 +95,84 @@ class ScatterPlotReport(PlotReport):
         ...         ),
         ...     name="scatterplot-expansions")
 
+        The inherited *format* parameter can be set to 'png' (default),
+        'eps', 'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the
+        latter a pgfplots plot is created.
+
+        If *title* is given it will be used for the name of the plot.
+        Otherwise, the only given attribute will be the title. If none
+        is given, there will be no title.
+
+        *xscale* and *yscale* can have the values 'linear', 'log' or
+        'symlog'. If omitted sensible defaults will be used.
+
+        *xlabel* and *ylabel* are the axis labels.
+
+        *matplotlib_options* may be a dictionary of matplotlib rc
+        parameters (see http://matplotlib.org/users/customizing.html):
+
+        >>> from downward.reports.scatter import ScatterPlotReport
+        >>> matplotlib_options = {
+        ...     'font.family': 'serif',
+        ...     'font.weight': 'normal',
+        ...     # Used if more specific sizes not set.
+        ...     'font.size': 20,
+        ...     'axes.labelsize': 20,
+        ...     'axes.titlesize': 30,
+        ...     'legend.fontsize': 22,
+        ...     'xtick.labelsize': 10,
+        ...     'ytick.labelsize': 10,
+        ...     'lines.markersize': 10,
+        ...     'lines.markeredgewidth': 0.25,
+        ...     'lines.linewidth': 1,
+        ...     # Width and height in inches.
+        ...     'figure.figsize': [8, 8],
+        ...     'savefig.dpi': 100,
+        ... }
+        >>> report = ScatterPlotReport(
+        ...     attributes=['initial_h_value'],
+        ...     matplotlib_options=matplotlib_options)
+
+        You can see the full list of matplotlib options and their
+        defaults by executing ::
+
+            import matplotlib
+            print(matplotlib.rcParamsDefault)
+
         """
-        # If the size has not been set explicitly, make it a square.
-        matplotlib_options = kwargs.get('matplotlib_options', {})
-        matplotlib_options.setdefault('figure.figsize', [8, 8])
-        kwargs['matplotlib_options'] = matplotlib_options
-        PlotReport.__init__(self, **kwargs)
-        if not self.attribute:
+        kwargs.setdefault('format', 'png')
+        PlanningReport.__init__(self, **kwargs)
+        if len(self.attributes) != 1:
             logging.critical('ScatterPlotReport needs exactly one attribute')
-        # By default all values are in the same category.
+        self.attribute = self.attributes[0]
+        # By default all values are in the same category "None".
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
         if self.output_format == 'tex':
-            self.writer = ScatterPgfPlots
+            self.writer = ScatterPgfplots
         else:
             self.writer = ScatterMatplotlib
+        self.title = title if title is not None else (self.attribute or '')
+        self._set_scales(xscale, yscale)
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        # If the size has not been set explicitly, make it a square.
+        self.matplotlib_options = matplotlib_options or {'figure.figsize': [8, 8]}
+        if 'legend.loc' in self.matplotlib_options:
+            logging.warning('The "legend.loc" parameter is ignored.')
 
     def _set_scales(self, xscale, yscale):
-        PlotReport._set_scales(self, xscale or self.attribute.scale or 'log', yscale)
+        self.xscale = xscale or self.attribute.scale or 'log'
+        self.yscale = yscale or self.attribute.scale or 'log'
+        scales = ['linear', 'log', 'symlog']
+        for scale in [self.xscale, self.yscale]:
+            if scale not in scales:
+                logging.critical("Scale {} not in {}".format(scale, scales))
         if self.xscale != self.yscale:
-            logging.critical('Scatterplots must use the same scale on both axes.')
+            logging.critical('Scatter plots must use the same scale on both axes.')
+
+    def has_multiple_categories(self):
+        return any(key is not None for key in self.categories.keys())
 
     def _fill_categories(self):
         """Map category names to coordinate lists."""
@@ -176,8 +190,40 @@ class ScatterPlotReport(PlotReport):
                 (run1.get(self.attribute), run2.get(self.attribute)))
         return categories
 
-    def _prepare_categories(self, categories):
-        categories = PlotReport._prepare_categories(self, categories)
+    def _compute_missing_value(self, categories):
+        if not self.show_missing:
+            return None
+        if not any(None in coord for coords in categories.values() for coord in coords):
+            return None
+        max_value = max(max(coord) for coords in categories.values() for coord in coords)
+        if max_value is None:
+            return 1
+        if self.xscale == 'linear':
+            return max_value * 1.1
+        return int(10 ** math.ceil(math.log10(max_value)))
+
+    def _handle_non_positive_values(self, categories):
+        """Plot integer 0 values at 0.1 in log plots and abort if any value is < 0."""
+        assert self.xscale == self.yscale == 'log'
+        new_categories = {}
+        for category, coords in categories.items():
+            new_coords = []
+            for x, y in coords:
+                if x == 0 and isinstance(x, int):
+                    x = 0.1
+                if y == 0 and isinstance(y, int):
+                    y = 0.1
+
+                if (x is not None and x <= 0) or (y is not None and y <= 0):
+                    logging.critical(
+                        'Logarithmic axes can only show positive values. '
+                        'Use a symlog or linear scale instead.')
+                else:
+                    new_coords.append((x, y))
+            new_categories[category] = new_coords
+        return new_categories
+
+    def _handle_missing_values(self, categories):
         new_categories = {}
         for category, coords in categories.items():
             if self.show_missing:
@@ -189,6 +235,38 @@ class ScatterPlotReport(PlotReport):
             if coords:
                 new_categories[category] = coords
         return new_categories
+
+    def _get_category_styles(self, categories):
+        """
+        Create dictionary mapping from category name to marker style.
+        """
+        shapes = 'x+os^v<>D'
+        colors = ['C{}'.format(c) for c in range(10)]
+
+        num_styles = len(shapes) * len(colors)
+        styles = [
+            {'marker': shape, 'c': color}
+            for shape, color in itertools.islice(izip(
+                itertools.cycle(shapes), itertools.cycle(colors)), num_styles)]
+        assert len({(s['marker'], s['c']) for s in styles}) == num_styles, (
+            "The number of shapes and the number of colors must be coprime.")
+
+        category_styles = {}
+        for i, category in enumerate(sorted(categories)):
+            category_styles[category] = styles[i % len(styles)]
+        return category_styles
+
+    def _write_plot(self, runs, filename):
+        # Map category names to coord tuples.
+        categories = self._fill_categories()
+        self.missing_value = self._compute_missing_value(categories)
+        if self.xscale == 'log':
+            categories = self._handle_non_positive_values(categories)
+        self.categories = self._handle_missing_values(categories)
+        if not self.categories:
+            logging.critical("Plot contains no points.")
+        self.styles = self._get_category_styles(self.categories)
+        self.writer.write(self, filename)
 
     def write(self):
         if not len(self.algorithms) == 2:
