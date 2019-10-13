@@ -281,7 +281,7 @@ class RunFilter(object):
         self.filters = make_list(filter or [])
         for arg_name, arg_value in kwargs.items():
             if not arg_name.startswith('filter_'):
-                logging.critical('Invalid keyword argument name "%s"' % arg_name)
+                logging.critical('Invalid filter keyword argument name "%s"' % arg_name)
             attribute = arg_name[len('filter_'):]
             # Add a filter for the specified property.
             self.filters.append(self._build_filter(attribute, arg_value))
