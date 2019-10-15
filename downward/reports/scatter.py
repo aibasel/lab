@@ -204,28 +204,45 @@ class ScatterPlotReport(PlanningReport):
         return categories
 
     def _turn_into_relative_coords(self, categories):
+        y_rel_max = 0
+        for coords in categories.values():
+            for x, y in coords:
+                if x is not None and y is not None:
+                    y_rel_max = max(y_rel_max, y / float(x))
+        y_rel_missing = y_rel_max * 1.1
+        x_missing = self._compute_missing_value(categories, 0, self.xscale)
+
         new_categories = {}
         for category, coords in categories.items():
             new_coords = []
             for coord in coords:
-                # TODO: Handle missing values and zeros.
-                if None in coord or 0 in coord:
-                    continue
                 x, y = coord
-                y = y / float(x)
+                # TODO: handle zeros.
+                if y == 0:
+                    continue
+
+                if x is None and y is None:
+                    x, y = x_missing, y_rel_missing
+                elif x is None and y is not None:
+                    x, y = x_missing, 1
+                elif x is not None and y is None:
+                    x, y = x, y_rel_missing
+                elif x is not None and y is not None:
+                    x, y = x, y / float(x)
+
                 new_coords.append((x, y))
             new_categories[category] = new_coords
         return new_categories
 
-    def _compute_missing_value(self, categories):
+    def _compute_missing_value(self, categories, axis, scale):
         if not self.show_missing:
             return None
-        if not any(None in coord for coords in categories.values() for coord in coords):
+        if not any(coord[axis] is None for coords in categories.values() for coord in coords):
             return None
-        max_value = max(max(coord) for coords in categories.values() for coord in coords)
+        max_value = max(coord[axis] for coords in categories.values() for coord in coords)
         if max_value is None:
             return 1
-        if self.xscale == 'linear':
+        if scale == 'linear':
             return max_value * 1.1
         return int(10 ** math.ceil(math.log10(max_value)))
 
@@ -286,14 +303,16 @@ class ScatterPlotReport(PlanningReport):
     def _write_plot(self, runs, filename):
         # Map category names to coord tuples.
         categories = self._fill_categories()
-        self.missing_value = self._compute_missing_value(categories)
+        self.missing_value = max(
+            self._compute_missing_value(categories, 0, self.xscale),
+            self._compute_missing_value(categories, 1, self.yscale))
         if self.xscale == 'log':
             categories = self._handle_non_positive_values(categories)
+        if self.relative:
+            categories = self._turn_into_relative_coords(categories)
         self.categories = self._handle_missing_values(categories)
         if not self.categories:
             logging.critical("Plot contains no points.")
-        if self.relative:
-            self.categories = self._turn_into_relative_coords(self.categories)
         self.styles = self._get_category_styles(self.categories)
         self.writer.write(self, filename)
 
