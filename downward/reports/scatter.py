@@ -41,10 +41,16 @@ class ScatterPlotReport(PlanningReport):
     Generate a scatter plot for an attribute.
     """
     def __init__(
-            self, show_missing=True, get_category=None, title=None,
-            xscale=None, yscale=None, xlabel='', ylabel='',
+            self, relative=False, show_missing=True, get_category=None,
+            title=None, xscale=None, yscale=None, xlabel='', ylabel='',
             matplotlib_options=None, **kwargs):
         """
+        If *relative=False*, create a "standard" scatter plot with a
+        diagonal line. If *relative=True*, create a relative scatter
+        plot where each point *(x, y)* corresponds to a task for which
+        the first algorithm yields a value of *x* and the second
+        algorithm yields *x * y*.
+
         The keyword argument *attributes* must contain exactly one
         attribute.
 
@@ -142,6 +148,7 @@ class ScatterPlotReport(PlanningReport):
         """
         kwargs.setdefault('format', 'png')
         PlanningReport.__init__(self, **kwargs)
+        self.relative = relative
         if len(self.attributes) != 1:
             logging.critical('ScatterPlotReport needs exactly one attribute')
         self.attribute = self.attributes[0]
@@ -189,6 +196,20 @@ class ScatterPlotReport(PlanningReport):
             categories[category].append(
                 (run1.get(self.attribute), run2.get(self.attribute)))
         return categories
+
+    def _turn_into_relative_coords(self, categories):
+        new_categories = {}
+        for category, coords in categories.items():
+            new_coords = []
+            for coord in coords:
+                # TODO: Handle missing values and zeros.
+                if None in coord or 0 in coord:
+                    continue
+                x, y = coord
+                y = y / float(x)
+                new_coords.append((x, y))
+            new_categories[category] = new_coords
+        return new_categories
 
     def _compute_missing_value(self, categories):
         if not self.show_missing:
@@ -265,6 +286,8 @@ class ScatterPlotReport(PlanningReport):
         self.categories = self._handle_missing_values(categories)
         if not self.categories:
             logging.critical("Plot contains no points.")
+        if self.relative:
+            self.categories = self._turn_into_relative_coords(self.categories)
         self.styles = self._get_category_styles(self.categories)
         self.writer.write(self, filename)
 
