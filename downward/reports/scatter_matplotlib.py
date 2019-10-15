@@ -52,7 +52,8 @@ class MatplotlibPlot(object):
         """Plot a diagonal black line."""
         xmin, xmax = self.axes.get_xbound()
         ymin, ymax = self.axes.get_ybound()
-        self.axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
+        self.axes.add_line(
+            mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
 
     def plot_horizontal_line(self):
         """Plot a black line at y=1."""

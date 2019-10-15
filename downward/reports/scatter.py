@@ -238,7 +238,8 @@ class ScatterPlotReport(PlanningReport):
     def _compute_missing_value(self, categories, axis, scale):
         if not self.show_missing:
             return None
-        if not any(coord[axis] is None for coords in categories.values() for coord in coords):
+        if not any(
+            coord[axis] is None for coords in categories.values() for coord in coords):
             return None
         max_value = max(coord[axis] for coords in categories.values() for coord in coords)
         if max_value is None:
@@ -269,9 +270,14 @@ class ScatterPlotReport(PlanningReport):
         return new_categories
 
     def _handle_missing_values(self, categories):
-        missing_value = max(
-            self._compute_missing_value(categories, 0, self.xscale),
-            self._compute_missing_value(categories, 1, self.yscale))
+        x_missing = self._compute_missing_value(categories, 0, self.xscale)
+        y_missing = self._compute_missing_value(categories, 1, self.yscale)
+        if x_missing is None:
+            missing_value = y_missing
+        elif y_missing is None:
+            missing_value = x_missing
+        else:
+            missing_value = max(x_missing, y_missing)
         self.x_upper = missing_value
         self.y_upper = missing_value
 
