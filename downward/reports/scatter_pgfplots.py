@@ -44,8 +44,12 @@ class ScatterPgfplots(object):
                 # categories. Add a corresponding entry to the legend.
                 lines.append('\\addlegendentry{default}')
 
-        # Add black diagonal line.
-        lines.append('\\draw[color=black] (rel axis cs:0,0) -- (rel axis cs:1,1);')
+        if report.relative:
+            # Add black line at y=1.
+            lines.append('\\draw[color=black] (axis cs:0,1) -- (axis cs:800000000,1);')
+        else:
+            # Add black diagonal line.
+            lines.append('\\draw[color=black] (rel axis cs:0,0) -- (rel axis cs:1,1);')
 
         lines.append('\\end{axis}')
         return lines

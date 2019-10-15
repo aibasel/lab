@@ -48,6 +48,18 @@ class MatplotlibPlot(object):
         self.legend = self.axes.legend(
             scatterpoints=1, loc='center', bbox_to_anchor=(1.3, 0.5))
 
+    def plot_diagonal_line(self):
+        """Plot a diagonal black line."""
+        xmin, xmax = self.axes.get_xbound()
+        ymin, ymax = self.axes.get_ybound()
+        self.axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
+
+    def plot_horizontal_line(self):
+        """Plot a black line at y=1."""
+        xmin, xmax = self.axes.get_xbound()
+        ymin, ymax = self.axes.get_ybound()
+        self.axes.add_line(mlines.Line2D([xmin, xmax], [1, 1], color='k', alpha=0.5))
+
     def print_figure(self, filename):
         # Save the generated scatter plot to a file.
         # Legend is still bugged in matplotlib, but there is a patch see:
@@ -81,11 +93,6 @@ class ScatterMatplotlib(object):
             axes.set_xbound(upper=report.missing_value)
             axes.set_ybound(upper=report.missing_value)
 
-        # Plot a diagonal black line.
-        xmin, xmax = axes.get_xbound()
-        ymin, ymax = axes.get_ybound()
-        axes.add_line(mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
-
     @classmethod
     def write(cls, report, filename):
         MatplotlibPlot.set_rc_params(report.matplotlib_options)
@@ -100,6 +107,11 @@ class ScatterMatplotlib(object):
         plot.axes.set_xscale(report.xscale)
         plot.axes.set_yscale(report.yscale)
         cls._plot(report, plot.axes)
+
+        if report.relative:
+            plot.plot_horizontal_line()
+        else:
+            plot.plot_diagonal_line()
 
         if report.has_multiple_categories():
             plot.create_legend()
