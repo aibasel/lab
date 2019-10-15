@@ -173,6 +173,15 @@ exp.add_report(
     name='report-scatter',
     outfile=os.path.join('plots', 'scatter.png'))
 
+exp.add_report(
+    ScatterPlotReport(
+        relative=True,
+        attributes=['cost'],
+        filter_algorithm=['iter-hadd', 'lama11'],
+        yscale='log'),
+    name='report-relative-scatter',
+    outfile=os.path.join('plots', 'relative-scatter.png'))
+
 matplotlib_options = {
     'font.family': 'serif',
     'font.weight': 'normal',
