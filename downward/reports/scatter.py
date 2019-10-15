@@ -110,7 +110,8 @@ class ScatterPlotReport(PlanningReport):
         is given, there will be no title.
 
         *xscale* and *yscale* can have the values 'linear', 'log' or
-        'symlog'. If omitted sensible defaults will be used.
+        'symlog'. If omitted sensible defaults will be used. The value
+        for *yscale* is ignored and set to 'log' if *relative=True*.
 
         *xlabel* and *ylabel* are the axis labels.
 
@@ -170,12 +171,17 @@ class ScatterPlotReport(PlanningReport):
 
     def _set_scales(self, xscale, yscale):
         self.xscale = xscale or self.attribute.scale or 'log'
-        self.yscale = yscale or self.attribute.scale or 'log'
+        if self.relative:
+            if yscale != 'log':
+                logging.critical('Relative scatter plots must use yscale=log.')
+            self.yscale = 'log'
+        else:
+            self.yscale = yscale or self.attribute.scale or 'log'
         scales = ['linear', 'log', 'symlog']
         for scale in [self.xscale, self.yscale]:
             if scale not in scales:
                 logging.critical("Scale {} not in {}".format(scale, scales))
-        if self.xscale != self.yscale:
+        if not self.relative and self.xscale != self.yscale:
             logging.critical('Scatter plots must use the same scale on both axes.')
 
     def has_multiple_categories(self):
