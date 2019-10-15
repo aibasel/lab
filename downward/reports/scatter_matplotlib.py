@@ -57,7 +57,6 @@ class MatplotlibPlot(object):
     def plot_horizontal_line(self):
         """Plot a black line at y=1."""
         xmin, xmax = self.axes.get_xbound()
-        ymin, ymax = self.axes.get_ybound()
         self.axes.add_line(mlines.Line2D([xmin, xmax], [1, 1], color='k', alpha=0.5))
 
     def print_figure(self, filename):
@@ -89,9 +88,8 @@ class ScatterMatplotlib(object):
             axes.scatter(
                 x_vals, y_vals, clip_on=False, label=category, **report.styles[category])
 
-        if report.missing_value is not None:
-            axes.set_xbound(upper=report.missing_value)
-            axes.set_ybound(upper=report.missing_value)
+        axes.set_xbound(upper=report.x_upper)
+        axes.set_ybound(upper=report.y_upper)
 
     @classmethod
     def write(cls, report, filename):

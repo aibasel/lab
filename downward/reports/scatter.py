@@ -207,20 +207,22 @@ class ScatterPlotReport(PlanningReport):
         y_rel_max = 0
         for coords in categories.values():
             for x, y in coords:
+                if (x is not None and x <= 0) or (y is not None and y <= 0):
+                    logging.critical("Relative scatter plots need values > 0.")
                 if x is not None and y is not None:
                     y_rel_max = max(y_rel_max, y / float(x))
-        y_rel_missing = y_rel_max * 1.1
+        y_rel_missing = y_rel_max * 1.5 if y_rel_max != 0 else None
         x_missing = self._compute_missing_value(categories, 0, self.xscale)
+        self.x_upper = x_missing
+        self.y_upper = y_rel_missing
 
         new_categories = {}
         for category, coords in categories.items():
             new_coords = []
             for coord in coords:
-                x, y = coord
-                # TODO: handle zeros.
-                if y == 0:
+                if not self.show_missing and None in coord:
                     continue
-
+                x, y = coord
                 if x is None and y is None:
                     x, y = x_missing, y_rel_missing
                 elif x is None and y is not None:
@@ -229,9 +231,9 @@ class ScatterPlotReport(PlanningReport):
                     x, y = x, y_rel_missing
                 elif x is not None and y is not None:
                     x, y = x, y / float(x)
-
                 new_coords.append((x, y))
-            new_categories[category] = new_coords
+            if new_coords:
+                new_categories[category] = new_coords
         return new_categories
 
     def _compute_missing_value(self, categories, axis, scale):
