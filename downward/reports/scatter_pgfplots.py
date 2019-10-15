@@ -27,9 +27,10 @@ class ScatterPgfplots(object):
     def _get_plot(cls, report):
         lines = []
         options = cls._get_axis_options(report)
-        if report.missing_value is not None:
-            options['xmax'] = report.missing_value
-            options['ymax'] = report.missing_value
+        if report.x_upper is not None:
+            options['xmax'] = report.x_upper
+        if report.y_upper is not None:
+            options['ymax'] = report.y_upper
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
             plot = {'only marks': True}

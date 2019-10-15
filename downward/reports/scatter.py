@@ -199,8 +199,9 @@ class ScatterPlotReport(PlanningReport):
                     'Instead of filtering a whole run, try setting only some of its '
                     'attribute values to None in a filter.'.format(**runs[0]))
             category = self.get_category(run1, run2)
-            categories[category].append(
-                (run1.get(self.attribute), run2.get(self.attribute)))
+            coord = (run1.get(self.attribute), run2.get(self.attribute))
+            if self.show_missing or None not in coord:
+                categories[category].append(coord)
         return categories
 
     def _turn_into_relative_coords(self, categories):
@@ -220,8 +221,6 @@ class ScatterPlotReport(PlanningReport):
         for category, coords in categories.items():
             new_coords = []
             for coord in coords:
-                if not self.show_missing and None in coord:
-                    continue
                 x, y = coord
                 if x is None and y is None:
                     x, y = x_missing, y_rel_missing
@@ -270,14 +269,21 @@ class ScatterPlotReport(PlanningReport):
         return new_categories
 
     def _handle_missing_values(self, categories):
+        missing_value = max(
+            self._compute_missing_value(categories, 0, self.xscale),
+            self._compute_missing_value(categories, 1, self.yscale))
+        self.x_upper = missing_value
+        self.y_upper = missing_value
+
+        if not self.show_missing:
+            # Coords with None values have already been filtered.
+            return categories
+
         new_categories = {}
         for category, coords in categories.items():
-            if self.show_missing:
-                coords = [
-                    (x if x is not None else self.missing_value,
-                     y if y is not None else self.missing_value) for x, y in coords]
-            else:
-                coords = [coord for coord in coords if None not in coord]
+            coords = [
+                (x if x is not None else missing_value,
+                 y if y is not None else missing_value) for x, y in coords]
             if coords:
                 new_categories[category] = coords
         return new_categories
@@ -304,15 +310,13 @@ class ScatterPlotReport(PlanningReport):
 
     def _write_plot(self, runs, filename):
         # Map category names to coord tuples.
-        categories = self._fill_categories()
-        self.missing_value = max(
-            self._compute_missing_value(categories, 0, self.xscale),
-            self._compute_missing_value(categories, 1, self.yscale))
-        if self.xscale == 'log':
-            categories = self._handle_non_positive_values(categories)
+        self.categories = self._fill_categories()
         if self.relative:
-            categories = self._turn_into_relative_coords(categories)
-        self.categories = self._handle_missing_values(categories)
+            self.categories = self._turn_into_relative_coords(self.categories)
+        else:
+            if self.xscale == 'log':
+                self.categories = self._handle_non_positive_values(self.categories)
+            self.categories = self._handle_missing_values(self.categories)
         if not self.categories:
             logging.critical("Plot contains no points.")
         self.styles = self._get_category_styles(self.categories)
