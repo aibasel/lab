@@ -107,9 +107,9 @@ class ScatterMatplotlib(object):
         plot.axes.set_yscale(report.yscale)
         cls._plot(report, plot.axes)
 
-        if report.relative:
+        if report.plot_horizontal_line:
             plot.plot_horizontal_line()
-        else:
+        if report.plot_diagonal_line:
             plot.plot_diagonal_line()
 
         if report.has_multiple_categories():

@@ -318,8 +318,12 @@ class ScatterPlotReport(PlanningReport):
         # Map category names to coord tuples.
         self.categories = self._fill_categories()
         if self.relative:
+            self.plot_diagonal_line = False
+            self.plot_horizontal_line = True
             self.categories = self._turn_into_relative_coords(self.categories)
         else:
+            self.plot_diagonal_line = True
+            self.plot_horizontal_line = False
             if self.xscale == 'log':
                 self.categories = self._handle_non_positive_values(self.categories)
             self.categories = self._handle_missing_values(self.categories)
