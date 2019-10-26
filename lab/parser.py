@@ -206,7 +206,7 @@ class Parser(object):
         prop_file = os.path.join(run_dir, 'properties')
         self.props = tools.Properties(filename=prop_file)
 
-        for filename, file_parser in self.file_parsers.items():
+        for filename, file_parser in list(self.file_parsers.items()):
             # If filename is absolute it will not be changed here.
             path = os.path.join(run_dir, filename)
             try:
