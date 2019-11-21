@@ -97,7 +97,7 @@ function show_table(link) {
     toggle_button.innerHTML = "Hide table";
 }
 
-function show_overview_tables() {
+function show_main_tables() {
     var names = ["unexplained-errors", "info", "summary"];
     for (var i = 0; i < names.length; i++) {
         var link = document.getElementById(names[i]);
@@ -105,9 +105,17 @@ function show_overview_tables() {
             show_table(link);
         }
     }
+
+    // If there is only one table, show it and hide the button.
+    var buttons = document.getElementsByTagName('button');
+    var tables = document.getElementsByTagName('table');
+    if (buttons.length == 1 && tables.length == 1) {
+        tables[0].style.display = "";
+        buttons[0].style.display = "none";
+    }
 }
 
-document.addEventListener("DOMContentLoaded", show_overview_tables);
+document.addEventListener("DOMContentLoaded", show_main_tables);
 </script>
 """
 
