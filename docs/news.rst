@@ -6,6 +6,8 @@ v4.3 (unreleased)
 
 Lab
 ^^^
+* Remove broken ``--log-level`` command line parameter. You can use
+  ``tools.configure_logging(logging.DEBUG)`` to enable debug messages instead.
 
 Downward Lab
 ^^^^^^^^^^^^
