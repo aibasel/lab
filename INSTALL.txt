@@ -1,5 +1,5 @@
-Install Lab in a virtual environment
-------------------------------------
+Install Lab
+-----------
 
 We recommend installing Lab in a `Python virtual environment
 <https://docs.python.org/3/tutorial/venv.html>`_. This has the advantage
@@ -25,34 +25,14 @@ virtual environment::
     hg clone https://bitbucket.org/jendrikseipp/lab /path/to/lab
     pip install --editable /path/to/lab
 
-The ``--editable`` flag in the last command is optional. It installs the
-project in "editable mode", which is needed if you want to change the
-Lab source code, since any changes under ``/path/to/lab`` are
-immediately reflected in the installed package.
+The ``--editable`` flag installs the project in "editable mode", which
+makes any changes under ``/path/to/lab`` appear immediately in the
+installed package.
 
 Please note that before running an experiment script you need to
 activate the virtual environment with::
 
     source lab-venv/bin/activate
-
-
-Install Lab globally
---------------------
-
-Alternatively, you can install Lab and its dependencies globally::
-
-    # Install dependencies.
-    sudo apt install mercurial python python-matplotlib python-simplejson
-    # Clone Lab repository.
-    hg clone https://bitbucket.org/jendrikseipp/lab /path/to/lab
-
-Add to your ``.bashrc`` to make Lab available on the ``PYTHONPATH``::
-
-    export PYTHONPATH=/path/to/lab
-
-Update shell configuration::
-
-    source ~/.bashrc
 
 
 Notes about requirements
