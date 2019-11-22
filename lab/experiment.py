@@ -365,6 +365,8 @@ class Experiment(_Buildable):
 
         """
         tools.configure_logging()
+        if sys.version_info < (3, 5):
+            tools.show_deprecation_warning("Support for Python < 3.5 is deprecated.")
 
         _Buildable.__init__(self)
         path = path or _get_default_experiment_dir()

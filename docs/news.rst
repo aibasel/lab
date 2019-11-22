@@ -6,6 +6,7 @@ v4.3 (unreleased)
 
 Lab
 ^^^
+* Deprecate support for Python 2.7. A later version of Lab will only work on Python 3.5+.
 * If there is only a single HTML table, show it when the page loads.
 * Remove broken ``--log-level`` command line parameter. You can use
   ``tools.configure_logging(logging.DEBUG)`` to enable debug messages instead.
