@@ -9,10 +9,12 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* Scatter plots: simplify code by letting Matplotlib compute axis limits automatically.
+* Scatter plots: add *relative* parameter for drawing relative scatter plots.
 * Scatter plots: draw points for algorithm pairs with missing values on axis boundaries.
 * Scatter plots: allow drawing negative values on linear and symlog axes.
+* Scatter plots: remove *xscale* and *yscale* parameters in favor of new *scale* parameter.
 * Scatter plots: fold PlotReport class into ScatterPlotReport.
+* Scatter plots: simplify code by letting Matplotlib compute axis limits automatically.
 
 
 v4.2 (2019-09-27)

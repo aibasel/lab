@@ -42,7 +42,7 @@ class ScatterPlotReport(PlanningReport):
     """
     def __init__(
             self, relative=False, show_missing=True, get_category=None,
-            title=None, xscale=None, yscale=None, xlabel='', ylabel='',
+            title=None, scale=None, xlabel='', ylabel='',
             matplotlib_options=None, **kwargs):
         """
         If *relative* is False, create a "standard" scatter plot with a
@@ -111,9 +111,10 @@ class ScatterPlotReport(PlanningReport):
         Otherwise, the only given attribute will be the title. If none
         is given, there will be no title.
 
-        *xscale* and *yscale* can have the values 'linear', 'log' or
-        'symlog'. If omitted, sensible defaults will be used. Relative
-        scatter plots always use a logarithmic scaling for the *y* axis.
+        *scale* can have the values 'linear', 'log' or 'symlog'. If
+        omitted, a sensible default will be used for some standard
+        attributes and 'log' otherwise. Relative scatter plots always
+        use a logarithmic scaling for the *y* axis.
 
         *xlabel* and *ylabel* are the axis labels.
 
@@ -150,6 +151,14 @@ class ScatterPlotReport(PlanningReport):
 
         """
         kwargs.setdefault('format', 'png')
+
+        # Backwards compatibility.
+        xscale = kwargs.pop('xscale', None)
+        yscale = kwargs.pop('yscale', None)
+        if xscale or yscale:
+            logging.warning('Use "scale" parameter instead of "xscale" and "yscale".')
+        scale = scale or xscale or yscale
+
         PlanningReport.__init__(self, **kwargs)
         self.relative = relative
         if len(self.attributes) != 1:
@@ -163,7 +172,7 @@ class ScatterPlotReport(PlanningReport):
         else:
             self.writer = ScatterMatplotlib
         self.title = title if title is not None else (self.attribute or '')
-        self._set_scales(xscale, yscale)
+        self._set_scales(scale)
         self.xlabel = xlabel
         self.ylabel = ylabel
         # If the size has not been set explicitly, make it a square.
@@ -171,16 +180,9 @@ class ScatterPlotReport(PlanningReport):
         if 'legend.loc' in self.matplotlib_options:
             logging.warning('The "legend.loc" parameter is ignored.')
 
-    def _set_scales(self, xscale, yscale):
-        self.xscale = xscale or self.attribute.scale or 'log'
-        if self.relative:
-            if yscale and yscale != 'log':
-                logging.critical('Relative scatter plots must use yscale=log.')
-            self.yscale = 'log'
-        else:
-            self.yscale = yscale or self.attribute.scale or 'log'
-            if self.xscale != self.yscale:
-                logging.critical('Scatter plots must use the same scale on both axes.')
+    def _set_scales(self, scale):
+        self.xscale = scale or self.attribute.scale or 'log'
+        self.yscale = 'log' if self.relative else self.xscale
         scales = ['linear', 'log', 'symlog']
         for scale in [self.xscale, self.yscale]:
             if scale not in scales:
@@ -330,6 +332,7 @@ class ScatterPlotReport(PlanningReport):
             self.plot_diagonal_line = True
             self.plot_horizontal_line = False
             if self.xscale == 'log':
+                assert self.yscale == 'log'
                 self.categories = self._handle_non_positive_values(self.categories)
             self.categories = self._handle_missing_values(self.categories)
         if not self.categories:

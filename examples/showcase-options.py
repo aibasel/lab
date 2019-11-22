@@ -178,7 +178,7 @@ exp.add_report(
         relative=True,
         attributes=['cost'],
         filter_algorithm=['iter-hadd', 'lama11'],
-        yscale='log'),
+        scale='log'),
     name='report-relative-scatter',
     outfile=os.path.join('plots', 'relative-scatter.png'))
 
@@ -205,8 +205,7 @@ for format in ["png", "tex"]:
             format=format,
             filter=only_two_algorithms,
             get_category=get_domain,
-            xscale='linear',
-            yscale='linear',
+            scale='linear',
             matplotlib_options=matplotlib_options),
         outfile=os.path.join('plots', 'scatter-domain.' + format))
 exp.add_report(
