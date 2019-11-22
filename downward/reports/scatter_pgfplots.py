@@ -27,9 +27,10 @@ class ScatterPgfplots(object):
     def _get_plot(cls, report):
         lines = []
         options = cls._get_axis_options(report)
-        if report.missing_value is not None:
-            options['xmax'] = report.missing_value
-            options['ymax'] = report.missing_value
+        if report.x_upper is not None:
+            options['xmax'] = report.x_upper
+        if report.y_upper is not None:
+            options['ymax'] = report.y_upper
         lines.append('\\begin{axis}[%s]' % cls._format_options(options))
         for category, coords in sorted(report.categories.items()):
             plot = {'only marks': True}
@@ -44,8 +45,12 @@ class ScatterPgfplots(object):
                 # categories. Add a corresponding entry to the legend.
                 lines.append('\\addlegendentry{default}')
 
-        # Add black diagonal line.
-        lines.append('\\draw[color=black] (rel axis cs:0,0) -- (rel axis cs:1,1);')
+        if report.plot_horizontal_line:
+            # Add black line at y=1.
+            lines.append('\\draw[color=black] (axis cs:0,1) -- (axis cs:800000000,1);')
+        if report.plot_diagonal_line:
+            # Add black diagonal line.
+            lines.append('\\draw[color=black] (rel axis cs:0,0) -- (rel axis cs:1,1);')
 
         lines.append('\\end{axis}')
         return lines
