@@ -45,11 +45,13 @@ class ScatterPlotReport(PlanningReport):
             title=None, xscale=None, yscale=None, xlabel='', ylabel='',
             matplotlib_options=None, **kwargs):
         """
-        If *relative=False*, create a "standard" scatter plot with a
-        diagonal line. If *relative=True*, create a relative scatter
+        If *relative* is False, create a "standard" scatter plot with a
+        diagonal line. If *relative* is True, create a relative scatter
         plot where each point *(x, y)* corresponds to a task for which
         the first algorithm yields a value of *x* and the second
-        algorithm yields *x * y*.
+        algorithm yields *x * y*. Relative scatter plots are less common
+        in the literature, but often show small differences between
+        algorithms better than "standard" scatter plots.
 
         The keyword argument *attributes* must contain exactly one
         attribute.
@@ -110,8 +112,8 @@ class ScatterPlotReport(PlanningReport):
         is given, there will be no title.
 
         *xscale* and *yscale* can have the values 'linear', 'log' or
-        'symlog'. If omitted sensible defaults will be used. The value
-        for *yscale* is ignored and set to 'log' if *relative=True*.
+        'symlog'. If omitted, sensible defaults will be used. Relative
+        scatter plots always use a logarithmic scaling for the *y* axis.
 
         *xlabel* and *ylabel* are the axis labels.
 
@@ -172,17 +174,17 @@ class ScatterPlotReport(PlanningReport):
     def _set_scales(self, xscale, yscale):
         self.xscale = xscale or self.attribute.scale or 'log'
         if self.relative:
-            if yscale != 'log':
+            if yscale and yscale != 'log':
                 logging.critical('Relative scatter plots must use yscale=log.')
             self.yscale = 'log'
         else:
             self.yscale = yscale or self.attribute.scale or 'log'
+            if self.xscale != self.yscale:
+                logging.critical('Scatter plots must use the same scale on both axes.')
         scales = ['linear', 'log', 'symlog']
         for scale in [self.xscale, self.yscale]:
             if scale not in scales:
                 logging.critical("Scale {} not in {}".format(scale, scales))
-        if not self.relative and self.xscale != self.yscale:
-            logging.critical('Scatter plots must use the same scale on both axes.')
 
     def has_multiple_categories(self):
         return any(key is not None for key in self.categories.keys())
@@ -205,6 +207,7 @@ class ScatterPlotReport(PlanningReport):
         return categories
 
     def _turn_into_relative_coords(self, categories):
+        assert self.relative
         y_rel_max = 0
         for coords in categories.values():
             for x, y in coords:
@@ -250,6 +253,7 @@ class ScatterPlotReport(PlanningReport):
 
     def _handle_non_positive_values(self, categories):
         """Plot integer 0 values at 0.1 in log plots and abort if any value is < 0."""
+        assert not self.relative
         assert self.xscale == self.yscale == 'log'
         new_categories = {}
         for category, coords in categories.items():
@@ -270,6 +274,7 @@ class ScatterPlotReport(PlanningReport):
         return new_categories
 
     def _handle_missing_values(self, categories):
+        assert not self.relative
         x_missing = self._compute_missing_value(categories, 0, self.xscale)
         y_missing = self._compute_missing_value(categories, 1, self.yscale)
         if x_missing is None:
