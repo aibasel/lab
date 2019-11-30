@@ -7,6 +7,7 @@ Example experiment using a simple vertex cover solver.
 import glob
 import os
 import platform
+import sys
 
 from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.experiment import Experiment
