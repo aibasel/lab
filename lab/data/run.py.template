@@ -13,7 +13,7 @@ tools.configure_logging()
 logging.info('node: {}'.format(platform.node()))
 
 run_log = open('run.log', 'w')
-run_err = open('run.err', 'w')
+run_err = open('run.err', 'w', buffering=1)  # line buffering
 redirects = {'stdout': run_log, 'stderr': run_err}
 
 # Make sure we're in the run directory.
