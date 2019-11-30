@@ -59,7 +59,7 @@ for algo in ALGORITHMS:
         run.add_resource('task', task, symlink=True)
         run.add_command(
             'solve',
-            ['{solver}', '--seed', str(SEED), '{task}', algo],
+            [sys.executable, '-u', '{solver}', '--seed', str(SEED), '{task}', algo],
             time_limit=TIME_LIMIT,
             memory_limit=MEMORY_LIMIT)
         # AbsoluteReport needs the following attributes:

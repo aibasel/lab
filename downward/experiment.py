@@ -52,7 +52,7 @@ class FastDownwardRun(Run):
 
         self.add_command(
             'planner',
-            [tools.get_python_executable()] +
+            [tools.get_python_executable(), '-u'] +
             ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
             algo.driver_options + ['{domain}', '{problem}'] + algo.component_options)
 
