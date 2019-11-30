@@ -422,9 +422,9 @@ class CellFormatter(object):
     def format_value(self, value):
         result = str(value)
         if self.link:
-            result = "[''%s'' %s]" % (result, self.link)
+            result = "[''{}'' {}]".format(result, self.link)
         if self.count:
-            result = '%s (%s)' % (result, self.count)
+            result = '{} ({})'.format(result, self.count)
         if self.bold:
             result = '**%s**' % result
         return result
@@ -736,7 +736,7 @@ class Table(collections.defaultdict):
         value_text = format_value(value)
 
         if color is not None:
-            value_text = '{%s|color:%s}' % (value_text, color)
+            value_text = '{{{}|color:{}}}'.format(value_text, color)
         if bold:
             value_text = '**%s**' % value_text
         if justify_right:
@@ -783,7 +783,7 @@ def extract_summary_rows(from_table, to_table, link=None):
     to **to_table**.
     """
     for name, row in from_table.get_summary_rows().items():
-        row_name = '%s - %s' % (from_table.title, name)
+        row_name = '{} - {}'.format(from_table.title, name)
         if link is not None:
             formatter = CellFormatter(link=link)
             to_table.cell_formatters[row_name][to_table.header_column] = formatter

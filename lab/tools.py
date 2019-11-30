@@ -227,12 +227,12 @@ def find_file(filenames, dir='.'):
         path = os.path.join(dir, filename)
         if os.path.exists(path):
             return path
-    raise IOError('none found in %r: %r' % (dir, filenames))
+    raise IOError('none found in {!r}: {!r}'.format(dir, filenames))
 
 
 def run_command(cmd, **kwargs):
     """Run command cmd and return the output."""
-    logging.info('Executing %s %s' % (' '.join(cmd), kwargs))
+    logging.info('Executing {} {}'.format(' '.join(cmd), kwargs))
     return subprocess.call(cmd, **kwargs)
 
 
@@ -264,7 +264,7 @@ class Properties(dict):
             try:
                 self.update(json.load(f))
             except ValueError as e:
-                logging.critical("JSON parse error in file '%s': %s" % (filename, e))
+                logging.critical("JSON parse error in file '{}': {}".format(filename, e))
 
     def add_unexplained_error(self, error):
         add_unexplained_error(self, error)

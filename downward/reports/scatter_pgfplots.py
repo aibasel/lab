@@ -35,7 +35,7 @@ class ScatterPgfplots(object):
         for category, coords in sorted(report.categories.items()):
             plot = {'only marks': True}
             lines.append(
-                '\\addplot+[%s] coordinates {\n%s\n};' % (
+                '\\addplot+[{}] coordinates {{\n{}\n}};'.format(
                     cls._format_options(plot),
                     ' '.join(str(c) for c in coords)))
             if category:
@@ -105,7 +105,7 @@ class ScatterPgfplots(object):
             elif isinstance(value, tools.string_type):
                 if ' ' in value or '=' in value:
                     value = '{%s}' % value
-                opts.append("%s=%s" % (key, value.replace("_", "-")))
+                opts.append("{}={}".format(key, value.replace("_", "-")))
             else:
-                opts.append("%s=%s" % (key, value))
+                opts.append("{}={}".format(key, value))
         return ", ".join(opts)

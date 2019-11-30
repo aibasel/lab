@@ -304,12 +304,12 @@ class _Buildable(object):
                     continue
                 source = self._get_rel_path(resource.source)
                 os.symlink(source, dest)
-                logging.debug('Linking from %s to %s' % (source, dest))
+                logging.debug('Linking from {} to {}'.format(source, dest))
                 continue
 
             # Even if the directory containing a resource has already been added,
             # we copy the resource since we might want to overwrite it.
-            logging.debug('Copying %s to %s' % (resource.source, dest))
+            logging.debug('Copying {} to {}'.format(resource.source, dest))
             tools.copy(resource.source, dest)
 
 
@@ -587,7 +587,7 @@ class Experiment(_Buildable):
         """
         name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
         eval_dir = eval_dir or self.eval_dir
-        outfile = outfile or '%s.%s' % (name, report.output_format)
+        outfile = outfile or '{}.{}'.format(name, report.output_format)
         if not os.path.isabs(outfile):
             outfile = os.path.join(eval_dir, outfile)
         self.add_step(name, report, eval_dir, outfile)

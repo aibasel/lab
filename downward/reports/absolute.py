@@ -183,7 +183,7 @@ class AbsoluteReport(PlanningReport):
                                      'domain-wise table can be generated.\n' %
                                      attribute)
 
-            toc_lines.append("- **[''%s'' #%s]**" % (attribute, attribute))
+            toc_lines.append("- **[''{}'' #{}]**".format(attribute, attribute))
             toc_lines.append('  - ' + ' '.join(toc_line))
             sections.append((attribute, '\n'.join(parts)))
 
@@ -193,9 +193,9 @@ class AbsoluteReport(PlanningReport):
 
         toc = '\n'.join(toc_lines)
 
-        content = '\n'.join('= %s =[%s]\n\n%s' % (attr, attr, section)
+        content = '\n'.join('= {} =[{}]\n\n{}'.format(attr, attr, section)
                             for (attr, section) in sections)
-        return '%s\n\n\n%s' % (toc, content)
+        return '{}\n\n\n{}'.format(toc, content)
 
     def _get_general_info(self):
         table = reports.Table(title='algorithm')
@@ -273,7 +273,7 @@ class AbsoluteReport(PlanningReport):
                 count = ','.join(num_values_list)
             link = None
             if self.use_domain_links:
-                link = '#%s-%s' % (attribute, domain)
+                link = '#{}-{}'.format(attribute, domain)
             formatter = reports.CellFormatter(link=link, count=count)
             table.cell_formatters[domain][table.header_column] = formatter
 

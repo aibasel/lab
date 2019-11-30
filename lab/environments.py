@@ -218,8 +218,8 @@ class GridEnvironment(Environment):
         return self._get_step_job_body(step)
 
     def _get_job(self, step, is_last):
-        return '%s\n\n%s' % (self._get_job_header(step, is_last),
-                             self._get_job_body(step))
+        return '{}\n\n{}'.format(self._get_job_header(step, is_last),
+                                 self._get_job_body(step))
 
     def write_main_script(self):
         # The main script is written by the run_steps() method.
