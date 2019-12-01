@@ -113,9 +113,7 @@ class Attribute(str):
         """
         self.absolute = absolute
         self.min_wins = min_wins
-        if not isinstance(functions, collections.Iterable):
-            functions = [functions]
-        self.functions = functions
+        self.functions = tools.make_list(functions)
         self.scale = scale
         self.digits = digits
 
