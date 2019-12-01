@@ -226,7 +226,7 @@ class Report(object):
            :pyobject: QualityFilters
 
         """
-        self.attributes = tools.make_list(attributes or [])
+        self.attributes = tools.make_list(attributes)
         if format not in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png', 'py']:
             raise ValueError('invalid format: {}'.format(format))
         self.output_format = format

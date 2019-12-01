@@ -152,11 +152,14 @@ class deprecated(object):
 
 
 def make_list(value):
-    if isinstance(value, list):
-        return value
-    if isinstance(value, (tuple, set)):
+    if value is None:
+        return []
+    elif isinstance(value, list):
+        return value.copy()
+    elif isinstance(value, (tuple, set)):
         return list(value)
-    return [value]
+    else:
+        return [value]
 
 
 def makedirs(path):
@@ -278,7 +281,7 @@ class Properties(dict):
 
 class RunFilter(object):
     def __init__(self, filter, **kwargs):
-        self.filters = make_list(filter or [])
+        self.filters = make_list(filter)
         for arg_name, arg_value in kwargs.items():
             if not arg_name.startswith('filter_'):
                 logging.critical('Invalid filter keyword argument name "%s"' % arg_name)
