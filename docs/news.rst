@@ -10,6 +10,7 @@ Lab
 * If there is only a single HTML table, show it when the page loads.
 * Remove broken ``--log-level`` command line parameter. You can use
   ``tools.configure_logging(logging.DEBUG)`` to enable debug messages instead.
+* Pass old hard memory limit when setting soft memory limit.
 
 Downward Lab
 ^^^^^^^^^^^^

@@ -27,9 +27,7 @@ import time
 from lab import tools
 
 
-def set_limit(kind, soft_limit, hard_limit=None):
-    if hard_limit is None:
-        hard_limit = soft_limit
+def set_limit(kind, soft_limit, hard_limit):
     try:
         resource.setrlimit(kind, (soft_limit, hard_limit))
     except (OSError, ValueError) as err:
@@ -91,9 +89,10 @@ class Call(object):
             if time_limit is not None:
                 set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
             if memory_limit is not None:
+                _, hard_mem_limit = resource.getrlimit(resource.RLIMIT_AS)
                 # Convert memory from MiB to Bytes.
-                set_limit(resource.RLIMIT_AS, memory_limit * 1024 * 1024)
-            set_limit(resource.RLIMIT_CORE, 0)
+                set_limit(resource.RLIMIT_AS, memory_limit * 1024 * 1024, hard_mem_limit)
+            set_limit(resource.RLIMIT_CORE, 0, 0)
 
         try:
             self.process = subprocess.Popen(
