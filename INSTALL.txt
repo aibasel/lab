@@ -1,12 +1,12 @@
 Install Lab
 -----------
 
-We recommend installing Lab in a `Python virtual environment
+Lab supports Python 2.7 (deprecated) or Python >= 3.5. We recommend
+installing Lab in a `Python virtual environment
 <https://docs.python.org/3/tutorial/venv.html>`_. This has the advantage
 that there are no modifications to the system-wide configuration, and
 that you can create multiple environments with different Lab versions
-(e.g., for different papers) without conflicts. Using Python 3, you
-would proceed like this::
+(e.g., for different papers) without conflicts ::
 
     # Install required packages, including virtualenv.
     sudo apt install mercurial python3 python3-venv
@@ -33,11 +33,3 @@ Please note that before running an experiment script you need to
 activate the virtual environment with::
 
     source lab-venv/bin/activate
-
-
-Notes about requirements
-------------------------
-
-* Lab needs Python 2.7 or Python >= 3.5.
-* matplotlib is only needed for reports that generate graphs.
-* simplejson is optional, but speeds up generating reports.

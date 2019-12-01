@@ -39,7 +39,7 @@ setup(
     entry_points={
     },
     install_requires=[
-        'matplotlib',
-        'simplejson',
+        'matplotlib',  # for scatter plots
+        'simplejson',  # optional, speeds up reading properties files
     ],
 )
