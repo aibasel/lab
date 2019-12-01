@@ -9,7 +9,9 @@ import os.path
 import platform
 from subprocess import call
 
+from lab import reports
 from lab.environments import LocalEnvironment, BaselSlurmEnvironment
+from lab.reports import Attribute
 from lab.reports.filter import FilterReport
 
 from downward.experiment import FastDownwardExperiment
@@ -145,7 +147,9 @@ exp.add_report(
 quality_filters = QualityFilters()
 exp.add_report(
     AbsoluteReport(
-        attributes=['coverage', 'cost', 'quality'],
+        attributes=[
+            'coverage', 'cost',
+            Attribute('quality', function=reports.arithmetic_mean)],
         filter=[quality_filters.store_costs, quality_filters.add_quality]),
     name='report-abs-builtin-filters')
 exp.add_report(
