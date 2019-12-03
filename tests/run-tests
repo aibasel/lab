@@ -25,8 +25,8 @@ echo "Checking Lab at $LAB with $PYTHON_VERSION"
 
 python -m pytest tests
 
-# Doctests produce deprecation warnings for Python 2.7.
-if [[ ${PYTHON_VERSION} != "Python 2.7."* ]]; then
+# Doctests produce deprecation warnings for Python < 3.6.
+if [ ${PYTHON_VERSION} != "Python 2.7."* ] && [ ${PYTHON_VERSION} != "Python 3.5."* ]; then
     ./tests/run-doctests
 fi
 
