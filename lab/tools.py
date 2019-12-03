@@ -155,7 +155,7 @@ def make_list(value):
     if value is None:
         return []
     elif isinstance(value, list):
-        return value.copy()
+        return value[:]
     elif isinstance(value, (tuple, set)):
         return list(value)
     else:
