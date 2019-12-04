@@ -1,22 +1,13 @@
 #! /bin/bash
 
-# Test setup: see bitbucket-pipelines.yml
-
 set -exuo pipefail
 
-if [[ $# -gt 1 ]]; then
-    echo "usage: ./run-tests [--skip-experiments]"
-    exit 2
-fi
-
-# We need two environment variables for the doctests and experiments.
+# We need two environment variables for the doctests.
 : "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS}"
 : "${DOWNWARD_REPO?Please set DOWNWARD_REPO}"
 
-
 # Change into top directory.
-cd "$(dirname "$0")"
-cd ..
+cd $(dirname "$0")/../
 
 # Print some debugging information.
 LAB=`realpath .`
@@ -29,26 +20,3 @@ python -m pytest tests
 if [ ${PYTHON_VERSION} != "Python 2.7."* ] && [ ${PYTHON_VERSION} != "Python 3.5."* ]; then
     ./tests/run-doctests
 fi
-
-# Skip experiments if any argument (e.g., --skip-experiments) was passed.
-if [[ $# -gt 0 ]]; then
-    exit
-fi
-
-cd examples
-
-cd ff
-./ff.py --all
-cd ..
-
-cd vertex-cover
-./exp.py --all
-cd ..
-
-./report-external-results.py --all
-
-./lmcut.py --all
-
-./showcase-options.py --all
-
-echo "Experiment tests passed"

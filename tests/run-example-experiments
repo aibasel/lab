@@ -1,0 +1,22 @@
+#! /bin/bash
+
+set -exuo pipefail
+
+# We need two environment variables for the experiments.
+: "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS}"
+: "${DOWNWARD_REPO?Please set DOWNWARD_REPO}"
+
+# Change into examples directory.
+cd $(dirname "$0")/../examples
+
+pushd ff
+./ff.py --all
+popd
+
+pushd vertex-cover
+./exp.py --all
+popd
+
+./report-external-results.py --all
+./lmcut.py --all
+./showcase-options.py --all
