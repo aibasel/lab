@@ -1,12 +1,12 @@
 News
 ====
 
-v5.0 (unreleased)
+v5.0 (2019-12-04)
 -----------------
 
 Lab
 ^^^
-* Deprecate support for Python <= 3.5. A later version of Lab will only work on Python >= 3.6.
+* Deprecate support for Python versions 2.7 to 3.5.
 * Allow only a single aggregation function for ``Attribute`` objects.
 * If there is only a single HTML table, show it when the page loads.
 * Remove broken ``--log-level`` command line parameter. You can call
