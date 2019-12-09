@@ -1,6 +1,18 @@
 News
 ====
 
+v5.1 (unreleased)
+-----------------
+
+Lab
+^^^
+* No news.
+
+Downward Lab
+^^^^^^^^^^^^
+* Support Fast Downward Git repos (Patrick Ferber).
+
+
 v5.0 (2019-12-04)
 -----------------
 

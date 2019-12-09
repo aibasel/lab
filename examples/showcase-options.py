@@ -14,6 +14,7 @@ from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.reports import Attribute
 from lab.reports.filter import FilterReport
 
+from downward import cached_revision
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import ComparativeReport
@@ -31,7 +32,8 @@ else:
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.path.expanduser('~/lab/revision-cache')
-REV = 'default'
+VCS = cached_revision.get_version_control_system(REPO)
+REV = 'default' if VCS == cached_revision.MERCURIAL else 'master'
 
 
 class QualityFilters(object):

@@ -258,14 +258,17 @@ class FastDownwardExperiment(Experiment):
 
         Example experiment setup:
 
-        >>> import os.path
+        >>> import os
+        >>> import cached_revision
         >>> exp = FastDownwardExperiment()
         >>> repo = os.environ["DOWNWARD_REPO"]
+        >>> vcs = cached_revision.get_version_control_system(repo)
+        >>> rev = "default" if vcs == cached_revision.MERCURIAL else "master"
 
         Test iPDB in the latest revision on the default branch:
 
         >>> exp.add_algorithm(
-        ...     "ipdb", repo, "default",
+        ...     "ipdb", repo, rev,
         ...     ["--search", "astar(ipdb())"])
 
         Test LM-Cut in an issue experiment:
@@ -277,7 +280,7 @@ class FastDownwardExperiment(Experiment):
         Run blind search in debug mode:
 
         >>> exp.add_algorithm(
-        ...     "blind", repo, "default",
+        ...     "blind", repo, rev,
         ...     ["--search", "astar(blind())"],
         ...     build_options=["--debug"],
         ...     driver_options=["--debug"])
@@ -285,7 +288,7 @@ class FastDownwardExperiment(Experiment):
         Run FF in 64-bit mode:
 
         >>> exp.add_algorithm(
-        ...     "ff", repo, "default",
+        ...     "ff", repo, rev,
         ...     ["--search", "lazy_greedy([ff()])"],
         ...     build_options=["release64"],
         ...     driver_options=["--build", "release64"])
@@ -293,7 +296,7 @@ class FastDownwardExperiment(Experiment):
         Run LAMA-2011 with custom planner time limit:
 
         >>> exp.add_algorithm(
-        ...     "lama", repo, "default",
+        ...     "lama", repo, rev,
         ...     [],
         ...     driver_options=[
         ...         "--alias", "seq-saq-lama-2011",
