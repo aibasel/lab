@@ -11,7 +11,7 @@ pipelines:
           - apt-get -y upgrade
 
           # Install dependencies of this script.
-          - apt-get -y install git mercurial python2.7 python2.7-dev python3.6 python3.7 python-tox software-properties-common wget
+          - apt-get -y install git mercurial python2.7 python2.7-dev python3.6 python3.7 python3.8 python-tox software-properties-common wget
           - add-apt-repository -y --update ppa:deadsnakes/ppa
           - apt-get -y install python3.5
 
@@ -67,9 +67,9 @@ pipelines:
           # Test Mercurial repository.
           - echo "Test Mercurial Fast Downward Repository"
           - export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
-          - TOX_LATEST_PYTHON=python3.7 tox
+          - TOX_LATEST_PYTHON=python3.8 tox
 
           # Test Git repository.
           - echo "Test Git Fast Downward Repository"
           - export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
-          - TOX_LATEST_PYTHON=python3.7 tox
+          - TOX_LATEST_PYTHON=python3.8 tox

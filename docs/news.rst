@@ -6,7 +6,7 @@ v5.1 (unreleased)
 
 Lab
 ^^^
-* No news.
+* Test Lab on Python 3.8.
 
 Downward Lab
 ^^^^^^^^^^^^
