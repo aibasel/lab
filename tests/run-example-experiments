@@ -18,5 +18,10 @@ pushd vertex-cover
 popd
 
 ./report-external-results.py --all
-./lmcut.py --all
-./showcase-options.py --all
+
+# Fast Downward only supports Python >= 3.6.
+RESULT="$(python -c 'import sys; print(sys.version_info >= (3, 6))')"
+if [ $RESULT == True ]; then
+    ./lmcut.py --all
+    ./showcase-options.py --all
+fi

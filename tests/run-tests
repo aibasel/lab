@@ -16,7 +16,7 @@ echo "Checking Lab at $LAB with $PYTHON_VERSION"
 
 python -m pytest tests
 
-# Doctests produce deprecation warnings for Python < 3.6.
-if [ ${PYTHON_VERSION} != "Python 2.7."* ] && [ ${PYTHON_VERSION} != "Python 3.5."* ]; then
+RESULT="$(python -c 'import sys; print(sys.version_info >= (3, 6))')"
+if [ $RESULT == True ]; then
     ./tests/run-doctests
 fi
