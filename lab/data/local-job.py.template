@@ -29,7 +29,9 @@ def process_task(task_id):
         with open(os.path.join(run_dir, 'driver.err'), 'w') as driver_err:
             logging.info('Starting run {run_id} (TASK_ID {task_id}) in {run_dir}'.format(**locals()))
             try:
-                subprocess.check_call(['./run'], cwd=run_dir, stdout=driver_log, stderr=driver_err)
+                subprocess.check_call(
+                    [tools.get_python_executable(), 'run'],
+                    cwd=run_dir, stdout=driver_log, stderr=driver_err)
             except subprocess.CalledProcessError as err:
                 error = True
     if os.path.getsize(driver_err.name) != 0:
