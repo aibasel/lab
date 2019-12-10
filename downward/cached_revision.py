@@ -34,7 +34,7 @@ VERSION_CONTROL_SYSTEMS = [GIT, MERCURIAL]
 _ID_CACHE = {}
 
 
-def get_id(cmd):
+def _get_id(cmd):
     cmd = tuple(cmd)
     if cmd not in _ID_CACHE:
         try:
@@ -54,7 +54,7 @@ def hg_id(repo, args=None, rev=None):
     if rev:
         args.extend(['-r', str(rev)])
     cmd = ['hg', 'id', '--repository', repo] + args
-    return get_id(cmd)
+    return _get_id(cmd)
 
 
 def git_id(repo, args=None, rev=None):
@@ -62,36 +62,11 @@ def git_id(repo, args=None, rev=None):
     if rev:
         args.append(rev)
     cmd = ['git', '--git-dir', os.path.join(repo, '.git'), 'rev-parse', '--short'] + args
-    return get_id(cmd)
+    return _get_id(cmd)
 
 
-def raise_unknown_vcs_error(vcs):
+def _raise_unknown_vcs_error(vcs):
     raise AssertionError('Unknown version control system "{}".'.format(vcs))
-
-
-def get_global_rev(repo, vcs, rev=None):
-    if vcs == MERCURIAL:
-        return hg_id(repo, args=['-i'], rev=rev)
-    elif vcs == GIT:
-        return git_id(repo, rev=rev)
-    else:
-        raise_unknown_vcs_error(vcs)
-
-
-def get_rev_id(repo, vcs, rev=None):
-    if vcs == MERCURIAL:
-        return hg_id(repo, rev=rev)
-    elif vcs == GIT:
-        return git_id(repo, rev=rev)
-    else:
-        raise_unknown_vcs_error(vcs)
-
-
-def _compute_md5_hash(mylist):
-    m = hashlib.md5()
-    for s in mylist:
-        m.update(tools.get_bytes(s))
-    return m.hexdigest()[:8]
 
 
 def get_version_control_system(repo):
@@ -106,6 +81,33 @@ def get_version_control_system(repo):
         logging.critical(
             'Repo {} must contain one of the following subdirectories: {}'.format(
                 repo, ", ".join(".{}".format(x) for x in VERSION_CONTROL_SYSTEMS)))
+
+
+def get_global_rev(repo, rev=None):
+    vcs = get_version_control_system(repo)
+    if vcs == MERCURIAL:
+        return hg_id(repo, args=['-i'], rev=rev)
+    elif vcs == GIT:
+        return git_id(repo, rev=rev)
+    else:
+        _raise_unknown_vcs_error(vcs)
+
+
+def get_rev_id(repo, rev=None):
+    vcs = get_version_control_system(repo)
+    if vcs == MERCURIAL:
+        return hg_id(repo, rev=rev)
+    elif vcs == GIT:
+        return git_id(repo, rev=rev)
+    else:
+        _raise_unknown_vcs_error(vcs)
+
+
+def _compute_md5_hash(mylist):
+    m = hashlib.md5()
+    for s in mylist:
+        m.update(tools.get_bytes(s))
+    return m.hexdigest()[:8]
 
 
 class CachedRevision(object):
@@ -123,11 +125,10 @@ class CachedRevision(object):
             logging.critical(
                 '{} is not a local Fast Downward repository.'.format(repo))
         self.repo = repo
-        self.vcs = get_version_control_system(repo)
         self.build_options = build_options
         self.local_rev = local_rev
-        self.global_rev = get_global_rev(repo, self.vcs, local_rev)
-        self.summary = get_rev_id(self.repo, self.vcs, local_rev)
+        self.global_rev = get_global_rev(repo, local_rev)
+        self.summary = get_rev_id(self.repo, local_rev)
         self._path = None
         self._hashed_name = self._compute_hashed_name()
 
@@ -160,12 +161,13 @@ class CachedRevision(object):
         else:
             tools.makedirs(self.path)
             exclude_dirs = ['experiments', 'misc']
-            if self.vcs == MERCURIAL:
+            vcs = get_version_control_system(self.repo)
+            if vcs == MERCURIAL:
                 retcode = tools.run_command(
                     ['hg', 'archive', '-r', self.global_rev] +
                     ['-X{}'.format(d) for d in exclude_dirs] + [self.path],
                     cwd=self.repo)
-            elif self.vcs == GIT:
+            elif vcs == GIT:
                 tar_archive = os.path.join(self.path, 'downward.tgz')
                 cmd = ['git', 'archive', '--format', 'tar', self.global_rev]
                 with open(tar_archive, 'w') as f:
@@ -179,8 +181,7 @@ class CachedRevision(object):
                     for exclude_dir in exclude_dirs:
                         tools.remove_path(os.path.join(self.path, exclude_dir))
             else:
-                raise AssertionError(
-                    'Unknown version control system "{}".'.format(self.vcs))
+                _raise_unknown_vcs_error(vcs)
 
             if retcode != 0:
                 shutil.rmtree(self.path)
