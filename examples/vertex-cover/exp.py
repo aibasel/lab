@@ -7,7 +7,6 @@ Example experiment using a simple vertex cover solver.
 import glob
 import os
 import platform
-import sys
 
 from lab.environments import LocalEnvironment, BaselSlurmEnvironment
 from lab.experiment import Experiment
@@ -60,7 +59,7 @@ for algo in ALGORITHMS:
         run.add_resource('task', task, symlink=True)
         run.add_command(
             'solve',
-            [sys.executable, '-u', '{solver}', '--seed', str(SEED), '{task}', algo],
+            ['{solver}', '--seed', str(SEED), '{task}', algo],
             time_limit=TIME_LIMIT,
             memory_limit=MEMORY_LIMIT)
         # AbsoluteReport needs the following attributes:
