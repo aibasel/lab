@@ -1,6 +1,18 @@
 News
 ====
 
+v5.2 (unreleased)
+-----------------
+
+Lab
+^^^
+* Use line buffering for run.err files.
+
+Downward Lab
+^^^^^^^^^^^^
+* No news.
+
+
 v5.1 (2019-12-10)
 -----------------
 
