@@ -11,6 +11,7 @@ Lab
 Downward Lab
 ^^^^^^^^^^^^
 * Preserve line breaks for error logs in tables.
+* If an error log in a table has more than 100 lines, omit surplus lines from the middle of the log.
 
 
 v5.1 (2019-12-10)

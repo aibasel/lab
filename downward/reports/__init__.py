@@ -77,6 +77,8 @@ class PlanningReport(Report):
         'error', 'planner_wall_clock_time', 'raw_memory', 'node'
     ]
 
+    ERROR_LOG_MAX_LINES = 100
+
     def __init__(self, **kwargs):
         """
         See :class:`~lab.reports.Report` for inherited parameters.
@@ -178,9 +180,21 @@ class PlanningReport(Report):
             for run in self.runs.values()}
 
     def _format_unexplained_errors(self, errors):
-        return markup.escape(errors).replace(
-            '\\n', '\\\\').replace(
+        """
+        Preserve line breaks and white space. If text has more than
+        ERROR_LOG_MAX_LINES lines, omit lines in the middle of the text.
+        """
+        linebreak = '\\\\'
+        text = "''{}''".format(errors).replace(
+            '\\n', linebreak).replace(
             ' ', markup.ESCAPE_WHITESPACE)
+        lines = text.split(linebreak)
+        if len(lines) <= self.ERROR_LOG_MAX_LINES:
+            return text
+        index = (self.ERROR_LOG_MAX_LINES - 2) // 2
+        text = linebreak.join(lines[:index] + ['', '[...]', ''] + lines[-index:])
+        assert text.startswith("''") and text.endswith("''"), text
+        return text
 
     def _get_warnings_text_and_table(self):
         """
