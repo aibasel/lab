@@ -494,8 +494,8 @@ def get_unexplained_errors_message(run):
         return ''
     else:
         return (
-            'Unexplained error(s): {unexplained_errors}. Please inspect'
-            ' output and error logs under "{run_dir}".'.format(**run))
+            'Unexplained error(s) in {run_dir}: please inspect'
+            ' output and error logs.'.format(**run))
 
 
 def get_slurm_err_content(src_dir):
