@@ -10,7 +10,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* No news.
+* Preserve line breaks for error logs in tables.
 
 
 v5.1 (2019-12-10)

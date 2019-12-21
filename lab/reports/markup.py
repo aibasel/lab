@@ -23,6 +23,7 @@ from lab.external import txt2tags
 
 TABLE_HEAD_BG = '#aaa'
 ESCAPE_WORDBREAK = 'xWBRx'
+ESCAPE_WHITESPACE = 'xWHITESPACEx'
 
 CSS = """\
 <style type="text/css">
@@ -161,6 +162,8 @@ def _get_config(target):
         # Allow line-breaking at additional places.
         config['postproc'].append([ESCAPE_WORDBREAK, r'<wbr>'])
 
+        config['postproc'].append([ESCAPE_WHITESPACE, r'&nbsp;'])
+
         # Hide tables by default.
         config['postproc'].append([
             r'<table border="1">',
@@ -223,6 +226,7 @@ def _get_config(target):
     # Disable some filters for all other targets.
     config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR', r'\1'])
     config['postproc'].append([ESCAPE_WORDBREAK, r''])
+    config['postproc'].append([ESCAPE_WHITESPACE, r' '])
 
     return config
 
