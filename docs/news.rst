@@ -12,6 +12,7 @@ Downward Lab
 ^^^^^^^^^^^^
 * Preserve line breaks for error logs in tables.
 * If an error log in a table has more than 100 lines, omit surplus lines from the middle of the log.
+* Always print number of runs with unexplained errors when generating any type of report.
 
 
 v5.1 (2019-12-10)

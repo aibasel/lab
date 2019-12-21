@@ -141,6 +141,13 @@ class PlanningReport(Report):
 
         self.algorithms = self._get_algorithm_order()
 
+        num_unexplained_errors = sum(int(bool(
+            tools.get_unexplained_errors_message(run))) for run in self.runs.values())
+        func = logging.info if num_unexplained_errors == 0 else logging.error
+        func(
+            'Report contains {num_unexplained_errors} runs with unexplained'
+            ' errors.'.format(**locals()))
+
         if len(problems) * len(self.algorithms) != len(self.runs):
             logging.warning(
                 'Not every algorithm has been run on every task. '
@@ -211,12 +218,10 @@ class PlanningReport(Report):
             'output-to-slurm.err' in run.get('unexplained_errors', [])
             for run in self.runs.values())
 
-        num_unexplained_errors = 0
         for run in self.runs.values():
             error_message = tools.get_unexplained_errors_message(run)
             if error_message:
                 logging.error(error_message)
-                num_unexplained_errors += 1
                 run_dir = run['run_dir']
                 for attr in self.ERROR_ATTRIBUTES:
                     value = run.get(attr, '?')
@@ -225,11 +230,6 @@ class PlanningReport(Report):
                         # Use formatted value as-is.
                         table.cell_formatters[run_dir][attr] = reports.CellFormatter()
                     table.add_cell(run_dir, attr, value)
-
-        if num_unexplained_errors:
-            logging.error(
-                'There were {num_unexplained_errors} runs with unexplained'
-                ' errors.'.format(**locals()))
 
         errors = []
 
