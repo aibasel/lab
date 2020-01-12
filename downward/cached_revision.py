@@ -72,14 +72,11 @@ def _raise_unknown_vcs_error(vcs):
 def get_version_control_system(repo):
     vcs = [x for x in VERSION_CONTROL_SYSTEMS
            if os.path.exists(os.path.join(repo, '.{}'.format(x)))]
-    if len(vcs) == 0:
-        logging.critical('Detecting version control system failed: '
-                         'No candidate system found.')
-    elif len(vcs) == 1:
+    if len(vcs) == 1:
         return vcs[0]
     else:
         logging.critical(
-            'Repo {} must contain one of the following subdirectories: {}'.format(
+            'Repo {} must contain exactly one of the following subdirectories: {}'.format(
                 repo, ", ".join(".{}".format(x) for x in VERSION_CONTROL_SYSTEMS)))
 
 
