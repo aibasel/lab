@@ -107,12 +107,6 @@ class FastDownwardExperiment(Experiment):
         >>> exp.add_step('start', exp.start_runs)
         >>> exp.add_fetcher(name='fetch')
 
-    .. note::
-
-        By default, "output.sas" translator output files are deleted
-        after the driver exits. To keep these files use ``del
-        exp.commands['remove-output-sas']`` in your experiment script.
-
     """
 
     # Built-in parsers that can be passed to exp.add_parser().
@@ -177,8 +171,6 @@ class FastDownwardExperiment(Experiment):
 
         # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
-
-        self.add_command('remove-output-sas', ['rm', '-f', 'output.sas'])
 
     def _get_tasks(self):
         tasks = []

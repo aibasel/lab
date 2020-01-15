@@ -1,6 +1,19 @@
 News
 ====
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* No changes so far.
+
+Downward Lab
+^^^^^^^^^^^^
+* Remove call to ``rm -f output.sas``. Newer Fast Downward versions remove the temporary file
+  automatically. If you want to keep the file, add ``"--keep-sas-file"`` to the ``driver_options``.
+
+
 v5.2 (2020-01-07)
 -----------------
 
