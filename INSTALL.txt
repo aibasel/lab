@@ -6,7 +6,7 @@ installing Lab in a `Python virtual environment
 <https://docs.python.org/3/tutorial/venv.html>`_. This has the advantage
 that there are no modifications to the system-wide configuration, and
 that you can create multiple environments with different Lab versions
-(e.g., for different papers) without conflicts ::
+(e.g., for different papers) without conflicts::
 
     # Install required packages, including virtualenv.
     sudo apt install mercurial python3 python3-venv
