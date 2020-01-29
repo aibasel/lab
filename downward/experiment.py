@@ -190,7 +190,7 @@ class FastDownwardExperiment(Experiment):
             exp.add_suite(benchmarks_dir, ["gripper:prob01.pddl"])
 
         One source for benchmarks is
-        http://bitbucket.org/aibasel/downward-benchmarks. After cloning
+        https://github.com/aibasel/downward-benchmarks. After cloning
         the repo, you can generate suites with the ``suites.py``
         script. We recommend using the suite ``optimal_strips`` for
         optimal planning and ``satisficing`` for satisficing planning::
