@@ -35,7 +35,7 @@ pipelines:
 
           # Clone benchmarks.
           - export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
-          - hg clone https://bitbucket.org/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+          - git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
           # Download and compile FF (used by example experiment).
           - apt-get -y install g++ make flex bison
