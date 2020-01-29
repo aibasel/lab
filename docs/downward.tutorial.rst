@@ -14,11 +14,11 @@ Download benchmarks
 ::
 
     DOWNWARD_BENCHMARKS=/path/to/downward-benchmarks
-    hg clone https://bitbucket.org/aibasel/downward-benchmarks \
+    git clone https://github.com/aibasel/downward-benchmarks \
         ${DOWNWARD_BENCHMARKS}
 
 Some example experiments need the ``DOWNWARD_BENCHMARKS`` environment
-variable so we recommend adding it to your ``~/.bashrc`` file.
+variable so we recommend exporting it in your ``~/.bashrc`` file.
 
 
 Install Fast Downward
