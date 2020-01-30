@@ -246,7 +246,9 @@ class ScatterPlotReport(PlanningReport):
         if not any(
             coord[axis] is None for coords in categories.values() for coord in coords):
             return None
-        max_value = max(coord[axis] for coords in categories.values() for coord in coords)
+        max_value = max(
+            coord[axis] for coords in categories.values() for coord in coords
+            if coord[axis] is not None)
         if max_value is None:
             return 1
         if scale == 'linear':
