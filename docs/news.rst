@@ -6,7 +6,7 @@ next (unreleased)
 
 Lab
 ^^^
-* No changes so far.
+* Bugfix for filters: retrieve new run ID from modified runs (Silvan Sievers).
 
 Downward Lab
 ^^^^^^^^^^^^

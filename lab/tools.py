@@ -321,11 +321,11 @@ class RunFilter(object):
         for filter_ in self.filters:
             for old_run_id, run in list(props.items()):
                 del props[old_run_id]
-                modified_run = self.apply_filter_to_run(filter_, run)
-                if modified_run:
+                new_run = self.apply_filter_to_run(filter_, run)
+                if new_run:
                     # Filters may change a run's ID. Don't complain if ID is missing.
-                    new_run_id = '-'.join(run['id']) if 'id' in run else old_run_id
-                    props[new_run_id] = modified_run
+                    new_run_id = '-'.join(new_run['id']) if 'id' in run else old_run_id
+                    props[new_run_id] = new_run
 
 
 def fast_updatetree(src, dst, symlinks=False, ignore=None):
