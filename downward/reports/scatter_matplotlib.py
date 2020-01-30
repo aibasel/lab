@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import sys
 
 try:
     import matplotlib
@@ -48,17 +49,25 @@ class MatplotlibPlot(object):
         self.legend = self.axes.legend(
             scatterpoints=1, loc='center', bbox_to_anchor=(1.3, 0.5))
 
+    @staticmethod
+    def _get_max_supported_value(scale):
+        if scale == 'linear':
+            return 10**12  # Larger values cause numerical problems.
+        else:
+            assert scale in {'log', 'symlog'}, scale
+            return sys.maxsize
+
     def plot_diagonal_line(self):
         """Plot a diagonal black line."""
-        xmin, xmax = self.axes.get_xbound()
-        ymin, ymax = self.axes.get_ybound()
+        assert self.axes.get_xscale() == self.axes.get_yscale()
+        M = self._get_max_supported_value(self.axes.get_xscale())
         self.axes.add_line(
-            mlines.Line2D([xmin, xmax], [ymin, ymax], color='k', alpha=0.5))
+            mlines.Line2D([-M, M], [-M, M], color='k', alpha=0.5))
 
     def plot_horizontal_line(self):
         """Plot a black line at y=1."""
-        xmin, xmax = self.axes.get_xbound()
-        self.axes.add_line(mlines.Line2D([xmin, xmax], [1, 1], color='k', alpha=0.5))
+        M = self._get_max_supported_value(self.axes.get_xscale())
+        self.axes.add_line(mlines.Line2D([-M, M], [1, 1], color='k', alpha=0.5))
 
     def print_figure(self, filename):
         # Save the generated scatter plot to a file.

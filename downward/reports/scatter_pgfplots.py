@@ -47,13 +47,29 @@ class ScatterPgfplots(object):
 
         if report.plot_horizontal_line:
             # Add black line at y=1.
-            lines.append('\\draw[color=black] (axis cs:0,1) -- (axis cs:800000000,1);')
+            line_min, line_max = cls._get_supported_range(options['xmode'])
+            lines.append(
+                '\\draw[color=black] (axis cs:{line_min},1) -- '
+                '(axis cs:{line_max},1);'.format(**locals()))
         if report.plot_diagonal_line:
             # Add black diagonal line.
-            lines.append('\\draw[color=black] (rel axis cs:0,0) -- (rel axis cs:1,1);')
+            assert options['xmode'] == options['ymode']
+            line_min, line_max = cls._get_supported_range(options['xmode'])
+            lines.append(
+                '\\draw[color=black] (axis cs:{line_min},{line_min}) -- '
+                '(axis cs:{line_max},{line_max});'.format(**locals()))
 
         lines.append('\\end{axis}')
         return lines
+
+    @classmethod
+    def _get_supported_range(cls, mode):
+        # These are approximate values found by trial and error.
+        if mode == 'normal':
+            return "-1e3", "1e3"
+        else:
+            assert mode == 'log'
+            return "1e-70", "1e70"
 
     @classmethod
     def write(cls, report, filename):
