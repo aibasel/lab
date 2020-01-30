@@ -61,7 +61,7 @@ def get_string(s):
         return s
     elif isinstance(s, bytes):
         # Bytes object in Python 3 (if-case handles Python 2 byte strings).
-        return s.decode('utf-8')
+        return s.decode("utf-8")
     else:
         # Unicode string in Python 2.
         return s
@@ -73,7 +73,7 @@ def get_bytes(s):
         return s
     else:
         # Unicode string in Python 2 or 3 (if-case handles Python 2 byte strings).
-        return s.encode('utf-8')
+        return s.encode("utf-8")
 
 
 def get_script_path():
@@ -86,14 +86,14 @@ def get_lab_path():
 
 
 def get_python_executable():
-    return sys.executable or 'python'
+    return sys.executable or "python"
 
 
 def configure_logging(level=logging.INFO):
     # Python adds a default handler if some log is written before this
     # function is called. We therefore remove all handlers that have
     # been added automatically.
-    root_logger = logging.getLogger('')
+    root_logger = logging.getLogger("")
     for handler in root_logger.handlers:
         root_logger.removeHandler(handler)
 
@@ -101,10 +101,11 @@ def configure_logging(level=logging.INFO):
         """
         Logging handler that exits when a critical error is encountered.
         """
+
         def emit(self, record):
             logging.StreamHandler.emit(self, record)
             if record.levelno >= logging.CRITICAL:
-                sys.exit('aborting')
+                sys.exit("aborting")
 
     class StdoutFilter(logging.Filter):
         def filter(self, record):
@@ -114,7 +115,7 @@ def configure_logging(level=logging.INFO):
         def filter(self, record):
             return record.levelno > logging.WARNING
 
-    formatter = logging.Formatter('%(asctime)-s %(levelname)-8s %(message)s')
+    formatter = logging.Formatter("%(asctime)-s %(levelname)-8s %(message)s")
 
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setFormatter(formatter)
@@ -139,15 +140,17 @@ class deprecated(object):
     The *msg* argument is optional, but the decorator always has to be
     called with brackets.
     """
-    def __init__(self, msg=''):
+
+    def __init__(self, msg=""):
         self.msg = msg
 
     def __call__(self, func):
         @functools.wraps(func)
         def new_func(*args, **kwargs):
-            msg = self.msg or '%s is deprecated.' % (func.__name__)
+            msg = self.msg or "%s is deprecated." % (func.__name__)
             show_deprecation_warning(msg)
             return func(*args, **kwargs)
+
         return new_func
 
 
@@ -174,14 +177,15 @@ def makedirs(path):
 
 
 def confirm_or_abort(question):
-    answer = user_input('%s (y/N): ' % question).strip()
-    if not answer.lower() == 'y':
-        sys.exit('Aborted')
+    answer = user_input("%s (y/N): " % question).strip()
+    if not answer.lower() == "y":
+        sys.exit("Aborted")
 
 
 def confirm_overwrite_or_abort(path):
     confirm_or_abort(
-        'The path "%s" already exists. Do you want to overwrite it?' % path)
+        'The path "%s" already exists. Do you want to overwrite it?' % path
+    )
 
 
 def remove_path(path):
@@ -195,13 +199,14 @@ def remove_path(path):
 
 
 def write_file(filename, content):
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         f.write(content)
 
 
 def fill_template(template_name, **parameters):
-    template = get_string(pkgutil.get_data(
-        'lab', os.path.join('data', template_name + '.template')))
+    template = get_string(
+        pkgutil.get_data("lab", os.path.join("data", template_name + ".template"))
+    )
     return template % parameters
 
 
@@ -212,6 +217,7 @@ def natural_sort(alist):
     >>> natural_sort(['file10.txt', 'file2.txt'])
     ['file2.txt', 'file10.txt']
     """
+
     def to_int_if_number(text):
         if text.isdigit():
             return int(text)
@@ -225,17 +231,17 @@ def natural_sort(alist):
     return sorted(alist, key=extract_numbers)
 
 
-def find_file(filenames, dir='.'):
+def find_file(filenames, dir="."):
     for filename in filenames:
         path = os.path.join(dir, filename)
         if os.path.exists(path):
             return path
-    raise IOError('none found in {!r}: {!r}'.format(dir, filenames))
+    raise IOError("none found in {!r}: {!r}".format(dir, filenames))
 
 
 def run_command(cmd, **kwargs):
     """Run command cmd and return the output."""
-    logging.info('Executing {} {}'.format(' '.join(cmd), kwargs))
+    logging.info("Executing {} {}".format(" ".join(cmd), kwargs))
     return subprocess.call(cmd, **kwargs)
 
 
@@ -245,7 +251,7 @@ def add_unexplained_error(dictionary, error):
     dictionary['unexplained_errors']. Create the list if it does not
     exist yet.
     """
-    key = 'unexplained_errors'
+    key = "unexplained_errors"
     dictionary.setdefault(key, [])
     if error not in dictionary[key]:
         dictionary[key].append(error)
@@ -258,7 +264,7 @@ class Properties(dict):
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, indent=2, separators=(',', ': '), sort_keys=True)
+        return json.dumps(self, indent=2, separators=(",", ": "), sort_keys=True)
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
@@ -267,7 +273,9 @@ class Properties(dict):
             try:
                 self.update(json.load(f))
             except ValueError as e:
-                logging.critical("JSON parse error in file '{}': {}".format(filename, e))
+                logging.critical(
+                    "JSON parse error in file '{}': {}".format(filename, e)
+                )
 
     def add_unexplained_error(self, error):
         add_unexplained_error(self, error)
@@ -283,9 +291,9 @@ class RunFilter(object):
     def __init__(self, filter, **kwargs):
         self.filters = make_list(filter)
         for arg_name, arg_value in kwargs.items():
-            if not arg_name.startswith('filter_'):
+            if not arg_name.startswith("filter_"):
                 logging.critical('Invalid filter keyword argument name "%s"' % arg_name)
-            attribute = arg_name[len('filter_'):]
+            attribute = arg_name[len("filter_") :]
             # Add a filter for the specified property.
             self.filters.append(self._build_filter(attribute, arg_value))
 
@@ -298,6 +306,7 @@ class RunFilter(object):
                 return run.get(prop) in value
             else:
                 return run.get(prop) == value
+
         return property_filter
 
     @staticmethod
@@ -307,7 +316,7 @@ class RunFilter(object):
         modified_run = run
         result = filter_(modified_run)
         if not isinstance(result, (dict, bool)):
-            logging.critical('Filters must return a dictionary or boolean')
+            logging.critical("Filters must return a dictionary or boolean")
         # If a dict is returned, use it as the new run,
         # otherwise take the old one.
         if isinstance(result, dict):
@@ -324,7 +333,7 @@ class RunFilter(object):
                 new_run = self.apply_filter_to_run(filter_, run)
                 if new_run:
                     # Filters may change a run's ID. Don't complain if ID is missing.
-                    new_run_id = '-'.join(new_run['id']) if 'id' in run else old_run_id
+                    new_run_id = "-".join(new_run["id"]) if "id" in run else old_run_id
                     props[new_run_id] = new_run
 
 
@@ -359,8 +368,9 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
                 linkto = os.readlink(srcname)
                 if not os.path.isabs(linkto):
                     # Calculate new relative link path.
-                    abs_link = os.path.abspath(os.path.join(os.path.dirname(srcname),
-                                                            linkto))
+                    abs_link = os.path.abspath(
+                        os.path.join(os.path.dirname(srcname), linkto)
+                    )
                     linkto = os.path.relpath(abs_link, os.path.dirname(dstname))
                 os.symlink(linkto, dstname)
             elif os.path.isdir(srcname):
@@ -393,8 +403,11 @@ def copy(src, dest, ignores=None):
         ignore = shutil.ignore_patterns(*ignores) if ignores else None
         fast_updatetree(src, dest, ignore=ignore)
     else:
-        logging.critical('Path {} cannot be copied to {}'.format(
-            os.path.abspath(src), os.path.abspath(dest)))
+        logging.critical(
+            "Path {} cannot be copied to {}".format(
+                os.path.abspath(src), os.path.abspath(dest)
+            )
+        )
 
 
 def get_color(fraction, min_wins):
@@ -465,11 +478,12 @@ def product(values):
 
 
 def rgb_fractions_to_html_color(r, g, b):
-    return 'rgb(%d,%d,%d)' % (r * 255, g * 255, b * 255)
+    return "rgb(%d,%d,%d)" % (r * 255, g * 255, b * 255)
 
 
 def get_terminal_size():
     import struct
+
     try:
         import fcntl
         import termios
@@ -477,8 +491,8 @@ def get_terminal_size():
         return (None, None)
 
     try:
-        data = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, 4 * '00')
-        height, width = struct.unpack('4H', data)[:2]
+        data = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, 4 * "00")
+        height, width = struct.unpack("4H", data)[:2]
         return (width, height)
     except Exception:
         return (None, None)
@@ -489,35 +503,39 @@ def get_unexplained_errors_message(run):
     Return an error message if an unexplained error occured in the given run,
     otherwise return None.
     """
-    unexplained_errors = run.get('unexplained_errors', [])
-    if not unexplained_errors or unexplained_errors == ['output-to-slurm.err']:
-        return ''
+    unexplained_errors = run.get("unexplained_errors", [])
+    if not unexplained_errors or unexplained_errors == ["output-to-slurm.err"]:
+        return ""
     else:
         return (
-            'Unexplained error(s) in {run_dir}: please inspect'
-            ' output and error logs.'.format(**run))
+            "Unexplained error(s) in {run_dir}: please inspect"
+            " output and error logs.".format(**run)
+        )
 
 
 def get_slurm_err_content(src_dir):
-    grid_steps_dir = src_dir.rstrip('/') + '-grid-steps'
+    grid_steps_dir = src_dir.rstrip("/") + "-grid-steps"
     if os.path.exists(grid_steps_dir):
-        slurm_err_filename = os.path.join(grid_steps_dir, 'slurm.err')
+        slurm_err_filename = os.path.join(grid_steps_dir, "slurm.err")
         if os.path.exists(slurm_err_filename):
             try:
                 with open(slurm_err_filename) as f:
                     return f.read()
             except IOError:
-                logging.error('Failed to read slurm.err file.')
+                logging.error("Failed to read slurm.err file.")
         else:
-            logging.error('File slurm.err is missing.')
-    return ''
+            logging.error("File slurm.err is missing.")
+    return ""
 
 
 def filter_slurm_err_content(content):
     filtered = re.sub(
         r"slurmstepd: error: task/cgroup: unable to add task\[pid=\d+\]"
-        r" to memory cg '\(null\)'\n", '', content)
-    filtered = re.sub(r"\x00", '', filtered)
+        r" to memory cg '\(null\)'\n",
+        "",
+        content,
+    )
+    filtered = re.sub(r"\x00", "", filtered)
     return "\n".join(line for line in filtered.splitlines() if line.strip())
 
 
@@ -526,21 +544,22 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
     Help message formatter which preserves the description format and adds
     default values to argument help messages.
     """
+
     def __init__(self, prog, **kwargs):
         # Use the whole terminal width.
         width, _ = get_terminal_size()
         argparse.HelpFormatter.__init__(self, prog, width=width, **kwargs)
 
     def _fill_text(self, text, width, indent):
-        return '\n'.join([indent + line for line in text.splitlines()])
+        return "\n".join([indent + line for line in text.splitlines()])
 
     def _get_help_string(self, action):
         help = action.help
-        if '%(default)' not in action.help and 'default' not in action.help:
+        if "%(default)" not in action.help and "default" not in action.help:
             if action.default is not argparse.SUPPRESS:
                 defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
                 if action.option_strings or action.nargs in defaulting_nargs:
-                    help += ' (default: %(default)s)'
+                    help += " (default: %(default)s)"
         return help
 
 

@@ -25,6 +25,7 @@ from downward.reports.absolute import AbsoluteReport
 
 class ComparativeReport(AbsoluteReport):
     """Compare pairs of algorithms."""
+
     def __init__(self, algorithm_pairs, **kwargs):
         """
         See :py:class:`AbsoluteReport <downward.reports.absolute.AbsoluteReport>`
@@ -72,24 +73,26 @@ class ComparativeReport(AbsoluteReport):
             +----------+---------------+----------------+------------+
 
         """
-        if 'filter_algorithm' in kwargs:
+        if "filter_algorithm" in kwargs:
             logging.critical(
                 'ComparativeReport doesn\'t support "filter_algorithm". '
-                'Use "algorithm_pairs" to select and order algorithms.')
+                'Use "algorithm_pairs" to select and order algorithms.'
+            )
         if algorithm_pairs:
             algos = set()
             for tup in algorithm_pairs:
                 for algo in tup[:2]:
                     algos.add(algo)
-            kwargs['filter_algorithm'] = algos
+            kwargs["filter_algorithm"] = algos
         AbsoluteReport.__init__(self, **kwargs)
         self._algorithm_pairs = algorithm_pairs
 
     def _get_empty_table(self, attribute=None, title=None, columns=None):
         table = AbsoluteReport._get_empty_table(
-            self, attribute=attribute, title=title, columns=columns)
+            self, attribute=attribute, title=title, columns=columns
+        )
         summary_functions = [sum, reports.arithmetic_mean]
-        if title == 'Summary':
+        if title == "Summary":
             summary_functions = []
         diff_module = DiffColumnsModule(self._algorithm_pairs, summary_functions)
         table.dynamic_data_modules.append(diff_module)
@@ -100,6 +103,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
     """
     Add multiple columns, each comparing the values of two algorithms.
     """
+
     def __init__(self, algorithm_pairs, summary_functions):
         """
         See :py:class:`.ComparativeReport` for how to choose the
@@ -121,7 +125,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
         self.header_names = []
         diff_column_names = set()
         for tup in algorithm_pairs:
-            diff_name = 'Diff'
+            diff_name = "Diff"
             if len(tup) == 3:
                 diff_name = tup[2]
             # diff_name is printed in the column header and does not have to be unique.
@@ -130,7 +134,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
             col_name = None
             while col_name is None or col_name in diff_column_names:
                 uniq_count += 1
-                col_name = 'diff_column_%s' % uniq_count
+                col_name = "diff_column_%s" % uniq_count
             diff_column_names.add(col_name)
             self.header_names.append(((tup[0], tup[1]), diff_name, col_name))
         self.summary_functions = summary_functions
@@ -163,7 +167,8 @@ class DiffColumnsModule(reports.DynamicDataModule):
                 func_name = self._get_function_name(func)
                 cells[func_name][table.header_column] = func_name.capitalize()
                 cells[func_name][diff_col_name] = (
-                    func(non_none_values) if non_none_values else None)
+                    func(non_none_values) if non_none_values else None
+                )
         return cells
 
     def format(self, table, formatted_cells):
@@ -181,15 +186,15 @@ class DiffColumnsModule(reports.DynamicDataModule):
                 try:
                     value = float(formatted_value)
                 except (ValueError, TypeError):
-                    value = '-'
-                if value == 0 or value == '-' or min_wins is None:
-                    color = 'grey'
-                elif ((value < 0 and min_wins) or (value > 0 and not min_wins)):
-                    color = 'green'
+                    value = "-"
+                if value == 0 or value == "-" or min_wins is None:
+                    color = "grey"
+                elif (value < 0 and min_wins) or (value > 0 and not min_wins):
+                    color = "green"
                 else:
-                    color = 'red'
+                    color = "red"
                 # Add space in front of value to right-justify it.
-                formatted_value = ' {{{}|color:{}}}'.format(value, color)
+                formatted_value = " {{{}|color:{}}}".format(value, color)
                 formatted_cells[row_name][diff_col_name] = formatted_value
 
     def modify_printable_column_order(self, table, column_order):
@@ -200,7 +205,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
         new_column_order = [table.header_column]
         for col_names, _, diff_col_name in self.header_names:
             if len(new_column_order) >= 4:
-                new_column_order.append('DiffDummy')
+                new_column_order.append("DiffDummy")
             for col_name in col_names:
                 new_column_order.append(col_name)
             new_column_order.append(diff_col_name)

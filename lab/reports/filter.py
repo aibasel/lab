@@ -33,10 +33,11 @@ class FilterReport(Report):
     >>> exp.add_report(report, outfile='path/to/new/properties')
 
     """
+
     def __init__(self, **kwargs):
         Report.__init__(self, **kwargs)
 
     def get_text(self):
-        if not self.outfile.endswith('properties'):
-            raise ValueError('outfile must be a path to a properties file')
+        if not self.outfile.endswith("properties"):
+            raise ValueError("outfile must be a path to a properties file")
         return str(self.props)

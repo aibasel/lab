@@ -29,6 +29,7 @@ class Step(object):
         exp.add_step('show-disk-usage', subprocess.call, ['df'])
 
     """
+
     def __init__(self, name, func, *args, **kwargs):
         assert func is not None
         self.name = name
@@ -36,33 +37,33 @@ class Step(object):
         self.args = args
         self.kwargs = kwargs
         self._funcname = (
-            getattr(func, '__name__', None) or
-            func.__class__.__name__.lower())
+            getattr(func, "__name__", None) or func.__class__.__name__.lower()
+        )
 
     def __call__(self):
         if self.func is None:
-            logging.critical('You cannot run the same step more than once')
-        logging.info('Running step {}: {}'.format(self.name, self))
+            logging.critical("You cannot run the same step more than once")
+        logging.info("Running step {}: {}".format(self.name, self))
         try:
             retval = self.func(*self.args, **self.kwargs)
             # Free memory
             self.func = None
             if retval:
-                logging.critical(
-                    'An error occured in step {}.'.format(self.name))
+                logging.critical("An error occured in step {}.".format(self.name))
             return retval
         except (ValueError, TypeError):
             traceback.print_exc()
-            logging.critical('Could not run step {}'.format(self))
+            logging.critical("Could not run step {}".format(self))
 
     def __str__(self):
-        return '{name}({args}{sep}{kwargs})'.format(
+        return "{name}({args}{sep}{kwargs})".format(
             name=self._funcname,
-            args=', '.join(repr(arg) for arg in self.args),
-            sep=', ' if self.args and self.kwargs else '',
-            kwargs=', '.join([
-                '{}={!r}'.format(k, v)
-                for (k, v) in sorted(self.kwargs.items())]))
+            args=", ".join(repr(arg) for arg in self.args),
+            sep=", " if self.args and self.kwargs else "",
+            kwargs=", ".join(
+                ["{}={!r}".format(k, v) for (k, v) in sorted(self.kwargs.items())]
+            ),
+        )
 
 
 def _get_step_index(steps, step_name):
@@ -78,7 +79,7 @@ def get_step(steps, step_name):
         try:
             return steps[int(step_name) - 1]
         except IndexError:
-            logging.critical('There is no step number {}'.format(step_name))
+            logging.critical("There is no step number {}".format(step_name))
     return steps[_get_step_index(steps, step_name)]
 
 
@@ -87,12 +88,12 @@ def get_steps_text(steps):
     name_width = min(max([len(step.name) for step in steps] + [0]), 50)
     terminal_width, _terminal_height = tools.get_terminal_size()
     terminal_width = terminal_width or 80
-    lines = ['Available steps:', '================']
+    lines = ["Available steps:", "================"]
     for number, step in enumerate(steps, start=1):
-        line = ' '.join([str(number).rjust(2), step.name.ljust(name_width)])
+        line = " ".join([str(number).rjust(2), step.name.ljust(name_width)])
         step_text = str(step)
         if len(line) + len(step_text) < terminal_width:
-            lines.append(line + ' ' + step_text)
+            lines.append(line + " " + step_text)
         else:
-            lines.extend(['', line, step_text, ''])
-    return '\n'.join(lines)
+            lines.extend(["", line, step_text, ""])
+    return "\n".join(lines)

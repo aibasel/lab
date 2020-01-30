@@ -34,7 +34,8 @@ def find_two_approximation(edges):
         selected_edge = {u, v}
         cover |= {u, v}
         remaining_edges = [
-            edge for edge in remaining_edges if not (edge & selected_edge)]
+            edge for edge in remaining_edges if not (edge & selected_edge)
+        ]
     return cover
 
 
@@ -52,8 +53,7 @@ def find_greedy_cover(edges):
     while remaining_edges:
         v = find_vertex_greedily(remaining_edges)
         cover.add(v)
-        remaining_edges = [
-            edge for edge in remaining_edges if v not in edge]
+        remaining_edges = [edge for edge in remaining_edges if v not in edge]
     return cover
 
 

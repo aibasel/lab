@@ -22,14 +22,14 @@ from lab.parser import Parser
 
 def add_planner_memory(content, props):
     try:
-        props['planner_memory'] = max(props['translator_peak_memory'], props['memory'])
+        props["planner_memory"] = max(props["translator_peak_memory"], props["memory"])
     except KeyError:
         pass
 
 
 def add_planner_time(content, props):
     try:
-        props['planner_time'] = props['translator_time_done'] + props['total_time']
+        props["planner_time"] = props["translator_time_done"] + props["total_time"]
     except KeyError:
         pass
 
@@ -41,17 +41,15 @@ class PlannerParser(Parser):
         self.add_function(add_planner_time)
 
         self.add_pattern(
-            'node',
-            r'node: (.+)\n',
-            type=str,
-            file='driver.log',
-            required=True)
+            "node", r"node: (.+)\n", type=str, file="driver.log", required=True
+        )
         self.add_pattern(
-            'planner_wall_clock_time',
-            r'planner wall-clock time: (.+)s',
+            "planner_wall_clock_time",
+            r"planner wall-clock time: (.+)s",
             type=float,
-            file='driver.log',
-            required=True)
+            file="driver.log",
+            required=True,
+        )
 
 
 def main():

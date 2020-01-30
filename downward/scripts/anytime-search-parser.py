@@ -35,7 +35,7 @@ def _get_flags(flags_string):
 
 
 class AnytimeParser(Parser):
-    def add_repeated_pattern(self, name, regex, file='run.log', type=int, flags='M'):
+    def add_repeated_pattern(self, name, regex, file="run.log", type=int, flags="M"):
         """
         *regex* must contain at most one group.
         """
@@ -58,13 +58,13 @@ def reduce_to_min(list_name, single_name):
 
 
 def coverage(content, props):
-    props['coverage'] = int('cost' in props)
+    props["coverage"] = int("cost" in props)
 
 
 def main():
     parser = AnytimeParser()
-    parser.add_repeated_pattern('cost:all', r'Plan cost: (.+)\n', type=float)
-    parser.add_function(reduce_to_min('cost:all', 'cost'))
+    parser.add_repeated_pattern("cost:all", r"Plan cost: (.+)\n", type=float)
+    parser.add_function(reduce_to_min("cost:all", "cost"))
     parser.add_function(coverage)
     parser.parse()
 

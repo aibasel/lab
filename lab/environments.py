@@ -28,22 +28,23 @@ from lab import tools
 
 def _get_job_prefix(exp_name):
     assert exp_name
-    escape_char = 'j' if exp_name[0].isdigit() else ''
-    return ''.join([escape_char, exp_name, '-'])
+    escape_char = "j" if exp_name[0].isdigit() else ""
+    return "".join([escape_char, exp_name, "-"])
 
 
 def is_build_step(step):
     """Return true iff the given step is the "build" step."""
-    return step._funcname == 'build'
+    return step._funcname == "build"
 
 
 def is_run_step(step):
     """Return true iff the given step is the "run" step."""
-    return step._funcname == 'start_runs'
+    return step._funcname == "start_runs"
 
 
 class Environment(object):
     """Abstract base class for all environments."""
+
     def __init__(self, randomize_task_order=True):
         """
         If *randomize_task_order* is True (default), tasks for runs are
@@ -81,7 +82,7 @@ class LocalEnvironment(Environment):
     Environment for running experiments locally on a single machine.
     """
 
-    EXP_RUN_SCRIPT = 'run'
+    EXP_RUN_SCRIPT = "run"
 
     def __init__(self, processes=None, **kwargs):
         """
@@ -102,15 +103,15 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         script = tools.fill_template(
-            'local-job.py',
-            task_order=self._get_task_order(),
-            processes=self.processes)
+            "local-job.py", task_order=self._get_task_order(), processes=self.processes
+        )
 
-        self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
+        self.exp.add_new_file("", self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
     def start_runs(self):
         tools.run_command(
-            [tools.get_python_executable(), self.EXP_RUN_SCRIPT], cwd=self.exp.path)
+            [tools.get_python_executable(), self.EXP_RUN_SCRIPT], cwd=self.exp.path
+        )
 
     def run_steps(self, steps):
         for step in steps:
@@ -119,13 +120,14 @@ class LocalEnvironment(Environment):
 
 class GridEnvironment(Environment):
     """Abstract base class for grid environments."""
+
     # Must be overridden in derived classes.
     JOB_HEADER_TEMPLATE_FILE = None
     RUN_JOB_BODY_TEMPLATE_FILE = None
     STEP_JOB_BODY_TEMPLATE_FILE = None
 
     # Can be overridden in derived classes.
-    MAX_TASKS = float('inf')
+    MAX_TASKS = float("inf")
 
     def __init__(self, email=None, extra_options=None, **kwargs):
         """
@@ -158,24 +160,26 @@ class GridEnvironment(Environment):
         """
         Environment.__init__(self, **kwargs)
         self.email = email
-        self.extra_options = extra_options or '## (not used)'
+        self.extra_options = extra_options or "## (not used)"
 
     def start_runs(self):
         # The queue will start the experiment by itself.
         pass
 
     def _get_job_name(self, step):
-        return '%s%02d-%s' % (
+        return "%s%02d-%s" % (
             _get_job_prefix(self.exp.name),
             self.exp.steps.index(step) + 1,
-            step.name)
+            step.name,
+        )
 
     def _get_num_runs(self):
         num_runs = len(self.exp.runs)
         if num_runs > self.MAX_TASKS:
-            logging.critical('You are trying to submit a job with %d tasks, '
-                             'but only %d are allowed.' %
-                             (num_runs, self.MAX_TASKS))
+            logging.critical(
+                "You are trying to submit a job with %d tasks, "
+                "but only %d are allowed." % (num_runs, self.MAX_TASKS)
+            )
         return num_runs
 
     def _get_num_tasks(self, step):
@@ -186,11 +190,11 @@ class GridEnvironment(Environment):
 
     def _get_job_params(self, step, is_last):
         return {
-            'errfile': 'driver.err',
-            'extra_options': self.extra_options,
-            'logfile': 'driver.log',
-            'name': self._get_job_name(step),
-            'num_tasks': self._get_num_tasks(step),
+            "errfile": "driver.err",
+            "extra_options": self.extra_options,
+            "logfile": "driver.log",
+            "name": self._get_job_name(step),
+            "num_tasks": self._get_num_tasks(step),
         }
 
     def _get_job_header(self, step, is_last):
@@ -200,9 +204,10 @@ class GridEnvironment(Environment):
     def _get_run_job_body(self):
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
-            task_order=' '.join(str(i) for i in self._get_task_order()),
-            exp_path='../' + self.exp.name,
-            python=tools.get_python_executable())
+            task_order=" ".join(str(i) for i in self._get_task_order()),
+            exp_path="../" + self.exp.name,
+            python=tools.get_python_executable(),
+        )
 
     def _get_step_job_body(self, step):
         return tools.fill_template(
@@ -210,7 +215,8 @@ class GridEnvironment(Environment):
             cwd=os.getcwd(),
             python=tools.get_python_executable(),
             script=sys.argv[0],
-            step_name=step.name)
+            step_name=step.name,
+        )
 
     def _get_job_body(self, step):
         if is_run_step(step):
@@ -218,8 +224,9 @@ class GridEnvironment(Environment):
         return self._get_step_job_body(step)
 
     def _get_job(self, step, is_last):
-        return '{}\n\n{}'.format(self._get_job_header(step, is_last),
-                                 self._get_job_body(step))
+        return "{}\n\n{}".format(
+            self._get_job_header(step, is_last), self._get_job_body(step)
+        )
 
     def write_main_script(self):
         # The main script is written by the run_steps() method.
@@ -234,12 +241,13 @@ class GridEnvironment(Environment):
         self.exp.build(write_to_disk=False)
 
         # Prepare job dir.
-        job_dir = self.exp.path + '-grid-steps'
+        job_dir = self.exp.path + "-grid-steps"
         if os.path.exists(job_dir):
             tools.confirm_or_abort(
                 'The path "%s" already exists, so the experiment has '
-                'already been submitted. Are you sure you want to '
-                'delete the grid-steps and submit it again?' % job_dir)
+                "already been submitted. Are you sure you want to "
+                "delete the grid-steps and submit it again?" % job_dir
+            )
             tools.remove_path(job_dir)
 
         # Overwrite exp dir if it exists.
@@ -250,7 +258,8 @@ class GridEnvironment(Environment):
         if os.path.exists(self.exp.eval_dir):
             tools.confirm_or_abort(
                 'The evaluation directory "%s" already exists. '
-                'Do you want to remove it?' % self.exp.eval_dir)
+                "Do you want to remove it?" % self.exp.eval_dir
+            )
             tools.remove_path(self.exp.eval_dir)
 
         # Create job dir only when we need it.
@@ -263,7 +272,8 @@ class GridEnvironment(Environment):
             job_content = self._get_job(step, is_last=(step == steps[-1]))
             tools.write_file(job_file, job_content)
             prev_job_id = self._submit_job(
-                job_name, job_file, job_dir, dependency=prev_job_id)
+                job_name, job_file, job_dir, dependency=prev_job_id
+            )
 
     def _submit_job(self, job_name, job_file, job_dir, dependency=None):
         raise NotImplementedError
@@ -271,20 +281,28 @@ class GridEnvironment(Environment):
 
 class SlurmEnvironment(GridEnvironment):
     """Abstract base class for slurm grid environments."""
+
     # Must be overridden in derived classes.
     DEFAULT_PARTITION = None
     DEFAULT_QOS = None
     DEFAULT_MEMORY_PER_CPU = None
 
     # Can be overridden in derived classes.
-    DEFAULT_EXPORT = ['PATH']
-    DEFAULT_SETUP = ''
-    JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header'
-    RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body'
-    STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body'
+    DEFAULT_EXPORT = ["PATH"]
+    DEFAULT_SETUP = ""
+    JOB_HEADER_TEMPLATE_FILE = "slurm-job-header"
+    RUN_JOB_BODY_TEMPLATE_FILE = "slurm-run-job-body"
+    STEP_JOB_BODY_TEMPLATE_FILE = "slurm-step-job-body"
 
-    def __init__(self, partition=None, qos=None, memory_per_cpu=None,
-                 export=None, setup=None, **kwargs):
+    def __init__(
+        self,
+        partition=None,
+        qos=None,
+        memory_per_cpu=None,
+        export=None,
+        setup=None,
+        **kwargs
+    ):
         """
 
         *partition* must be a valid Slurm partition name. In Basel you
@@ -402,37 +420,37 @@ class SlurmEnvironment(GridEnvironment):
         # Let all tasks write into the same two files. We could use %a
         # (which is replaced by the array ID) to prevent mangled up logs,
         # but we don't want so many files.
-        job_params['logfile'] = 'slurm.log'
-        job_params['errfile'] = 'slurm.err'
+        job_params["logfile"] = "slurm.log"
+        job_params["errfile"] = "slurm.err"
 
-        job_params['partition'] = self.partition
-        job_params['qos'] = self.qos
-        job_params['memory_per_cpu'] = self.memory_per_cpu
+        job_params["partition"] = self.partition
+        job_params["qos"] = self.qos
+        job_params["memory_per_cpu"] = self.memory_per_cpu
         memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
-        job_params['soft_memory_limit'] = int(memory_per_cpu_kb * 0.98)
+        job_params["soft_memory_limit"] = int(memory_per_cpu_kb * 0.98)
         # Prioritize array jobs from autonice users.
-        job_params['nice'] = 5000 if is_run_step(step) else 0
-        job_params['environment_setup'] = self.setup
+        job_params["nice"] = 5000 if is_run_step(step) else 0
+        job_params["environment_setup"] = self.setup
 
         if is_last and self.email:
-            job_params['mailtype'] = 'END,FAIL,REQUEUE,STAGE_OUT'
-            job_params['mailuser'] = self.email
+            job_params["mailtype"] = "END,FAIL,REQUEUE,STAGE_OUT"
+            job_params["mailuser"] = self.email
         else:
-            job_params['mailtype'] = 'NONE'
-            job_params['mailuser'] = ''
+            job_params["mailtype"] = "NONE"
+            job_params["mailuser"] = ""
 
         return job_params
 
     def _submit_job(self, job_name, job_file, job_dir, dependency=None):
-        submit = ['sbatch']
+        submit = ["sbatch"]
         if self.export:
-            submit += ['--export', ",".join(self.export)]
+            submit += ["--export", ",".join(self.export)]
         if dependency:
-            submit.extend(['-d', 'afterany:' + dependency, '--kill-on-invalid-dep=yes'])
+            submit.extend(["-d", "afterany:" + dependency, "--kill-on-invalid-dep=yes"])
         submit.append(job_file)
-        logging.info('Executing %s' % (' '.join(submit)))
+        logging.info("Executing %s" % (" ".join(submit)))
         out = subprocess.check_output(submit, cwd=job_dir).decode()
-        logging.info('Output: {}'.format(out.strip()))
+        logging.info("Output: {}".format(out.strip()))
         match = re.match(r"Submitted batch job (\d*)", out)
         assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
         return match.group(1)
@@ -441,10 +459,9 @@ class SlurmEnvironment(GridEnvironment):
 class BaselSlurmEnvironment(SlurmEnvironment):
     """Environment for Basel's AI group."""
 
-    DEFAULT_PARTITION = 'infai_1'
-    DEFAULT_QOS = 'normal'
+    DEFAULT_PARTITION = "infai_1"
+    DEFAULT_QOS = "normal"
     # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
-    DEFAULT_MEMORY_PER_CPU = '3872M'
-    DEFAULT_SETUP = (
-        'export PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path())
+    DEFAULT_MEMORY_PER_CPU = "3872M"
+    DEFAULT_SETUP = 'export PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path()

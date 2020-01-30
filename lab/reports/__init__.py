@@ -64,9 +64,10 @@ def finite_sum(values):
 
 def function_name(f):
     names = {
-        'arithmetic_mean': 'arithmetic mean',
-        'finite_sum': 'finite sum',
-        'geometric_mean': 'geometric mean'}
+        "arithmetic_mean": "arithmetic mean",
+        "finite_sum": "finite sum",
+        "geometric_mean": "geometric mean",
+    }
     return names.get(f.__name__, f.__name__)
 
 
@@ -77,14 +78,14 @@ def get_aggregation_function(function, functions):
     if function and functions:
         logging.critical(
             'You cannot use "function" and "functions" kwargs for '
-            'Attribute at the same time.')
+            "Attribute at the same time."
+        )
     elif functions:
         tools.show_deprecation_warning(
-            '"functions" kwarg for Attribute is deprecated. Use '
-            '"function" instead.')
+            '"functions" kwarg for Attribute is deprecated. Use ' '"function" instead.'
+        )
         if len(functions) > 1:
-            logging.critical(
-                'Using multiple aggregation functions is unsupported.')
+            logging.critical("Using multiple aggregation functions is unsupported.")
         return functions[0]
     else:
         return function
@@ -92,12 +93,20 @@ def get_aggregation_function(function, functions):
 
 class Attribute(str):
     """A string subclass for attributes in reports."""
+
     def __new__(cls, name, **kwargs):
         return str.__new__(cls, name)
 
     def __init__(
-            self, name, absolute=False, min_wins=True, function=None,
-            functions=None, scale=None, digits=2):
+        self,
+        name,
+        absolute=False,
+        min_wins=True,
+        function=None,
+        functions=None,
+        scale=None,
+        digits=2,
+    ):
         """
         Use this class if your **custom** attribute needs a non-default
         value for:
@@ -130,22 +139,29 @@ class Attribute(str):
         """
         self.absolute = absolute
         self.min_wins = min_wins
-        self.function = get_aggregation_function(
-            function, tools.make_list(functions)) or sum
+        self.function = (
+            get_aggregation_function(function, tools.make_list(functions)) or sum
+        )
         self.scale = scale
         self.digits = digits
 
     def copy(self, name):
         return Attribute(
-            name, absolute=self.absolute, min_wins=self.min_wins,
-            function=self.function, scale=self.scale, digits=self.digits)
+            name,
+            absolute=self.absolute,
+            min_wins=self.min_wins,
+            function=self.function,
+            scale=self.scale,
+            digits=self.digits,
+        )
 
 
 class Report(object):
     """
     Base class for all reports.
     """
-    def __init__(self, attributes=None, format='html', filter=None, **kwargs):
+
+    def __init__(self, attributes=None, format="html", filter=None, **kwargs):
         """
         Inherit from this or a child class to implement a custom report.
 
@@ -243,8 +259,8 @@ class Report(object):
 
         """
         self.attributes = tools.make_list(attributes)
-        if format not in txt2tags.TARGETS + ['eps', 'pdf', 'pgf', 'png', 'py']:
-            raise ValueError('invalid format: {}'.format(format))
+        if format not in txt2tags.TARGETS + ["eps", "pdf", "pgf", "png", "py"]:
+            raise ValueError("invalid format: {}".format(format))
         self.output_format = format
         self.toc = True
         self.run_filter = tools.RunFilter(filter, **kwargs)
@@ -260,9 +276,11 @@ class Report(object):
 
         The report will be written to *outfile*.
         """
-        if not eval_dir.endswith('-eval'):
-            logging.info('The source directory does not end with "-eval". '
-                         'Are you sure this is an evaluation directory?')
+        if not eval_dir.endswith("-eval"):
+            logging.info(
+                'The source directory does not end with "-eval". '
+                "Are you sure this is an evaluation directory?"
+            )
         self.eval_dir = os.path.abspath(eval_dir)
         # It would be nice if we could infer "format" from "outfile", but the
         # former is needed before the latter is available.
@@ -277,15 +295,14 @@ class Report(object):
         self._scan_data()
 
         # Turn string attributes into instances of Attribute.
-        self.attributes = [self._prepare_attribute(attr)
-                           for attr in self.attributes]
+        self.attributes = [self._prepare_attribute(attr) for attr in self.attributes]
 
         # Expand glob characters.
         self.attributes = self._glob_attributes(self.attributes)
 
         if not self.attributes:
-            logging.info('Available attributes: %s' % ', '.join(self.all_attributes))
-            logging.info('Using all numerical attributes.')
+            logging.info("Available attributes: %s" % ", ".join(self.all_attributes))
+            logging.info("Using all numerical attributes.")
             self.attributes = self._get_numerical_attributes()
 
         self.attributes = sorted(self.attributes)
@@ -314,13 +331,15 @@ class Report(object):
             matches = fnmatch.filter(self.all_attributes, attr)
             if not matches:
                 logging.warning(
-                    'There is no attribute "%s" in the properties file.' % attr)
+                    'There is no attribute "%s" in the properties file.' % attr
+                )
             # Use the attribute options from the pattern for all matches, but
             # don't try to guess options for attributes that appear in the list.
-            expanded_attrs.extend([attr.copy(match) for match in matches
-                                   if match not in attributes])
+            expanded_attrs.extend(
+                [attr.copy(match) for match in matches if match not in attributes]
+            )
         if attributes and not expanded_attrs:
-            logging.critical('No attributes match your patterns.')
+            logging.critical("No attributes match your patterns.")
         return expanded_attrs
 
     @property
@@ -328,8 +347,11 @@ class Report(object):
         return sorted(self._all_attributes.keys())
 
     def _get_numerical_attributes(self):
-        return [attr for attr in self._all_attributes.keys()
-                if self.attribute_is_numeric(attr)]
+        return [
+            attr
+            for attr in self._all_attributes.keys()
+            if self.attribute_is_numeric(attr)
+        ]
 
     def attribute_is_numeric(self, attribute):
         """Return true if the values for *attribute* are ints or floats.
@@ -337,8 +359,9 @@ class Report(object):
         If the attribute is None in all runs it may be numeric.
 
         """
-        return (self._all_attributes[attribute] is None or
-                issubclass(self._all_attributes[attribute], numbers.Number))
+        return self._all_attributes[attribute] is None or issubclass(
+            self._all_attributes[attribute], numbers.Number
+        )
 
     def get_markup(self):
         """
@@ -352,7 +375,7 @@ class Report(object):
                 if key not in self.attributes:
                     continue
                 if isinstance(value, (list, tuple)):
-                    key = '-'.join([str(item) for item in value])
+                    key = "-".join([str(item) for item in value])
                 row[key] = value
             table.add_row(run_id, row)
         return str(table)
@@ -368,13 +391,14 @@ class Report(object):
         name, _ = os.path.splitext(os.path.basename(self.outfile))
         doc = Document(title=name)
         doc.add_text(
-            self.get_markup() or
-            'No tables were generated. '
-            'This happens when no significant changes occured or '
-            'if for all attributes and all problems never all '
-            'algorithms had a value for this attribute in a '
-            'domain-wise report.')
-        return doc.render(self.output_format, {'toc': self.toc})
+            self.get_markup()
+            or "No tables were generated. "
+            "This happens when no significant changes occured or "
+            "if for all attributes and all problems never all "
+            "algorithms had a value for this attribute in a "
+            "domain-wise report."
+        )
+        return doc.render(self.output_format, {"toc": self.toc})
 
     def write(self):
         """
@@ -390,7 +414,7 @@ class Report(object):
         content = self.get_text()
         tools.makedirs(os.path.dirname(self.outfile))
         tools.write_file(self.outfile, content)
-        logging.info('Wrote file://%s' % self.outfile)
+        logging.info("Wrote file://%s" % self.outfile)
 
     def _get_type(self, attribute):
         for run in self.props.values():
@@ -402,8 +426,8 @@ class Report(object):
 
     def _get_type_map(self, attributes):
         return {
-            self._prepare_attribute(attr): self._get_type(attr)
-            for attr in attributes}
+            self._prepare_attribute(attr): self._get_type(attr) for attr in attributes
+        }
 
     def _scan_data(self):
         attributes = set()
@@ -412,24 +436,25 @@ class Report(object):
         self._all_attributes = self._get_type_map(attributes)
 
     def _load_data(self):
-        props_file = os.path.join(self.eval_dir, 'properties')
+        props_file = os.path.join(self.eval_dir, "properties")
         if not os.path.exists(props_file):
-            logging.critical('Properties file not found at %s' % props_file)
+            logging.critical("Properties file not found at %s" % props_file)
 
-        logging.info('Reading properties file')
+        logging.info("Reading properties file")
         self.props = tools.Properties(filename=props_file)
-        logging.info('Reading properties file finished')
+        logging.info("Reading properties file finished")
         if not self.props:
-            logging.critical('properties file in evaluation dir is empty.')
+            logging.critical("properties file in evaluation dir is empty.")
 
     def _apply_filter(self):
         self.run_filter.apply(self.props)
         if not self.props:
-            logging.critical('All runs have been filtered -> Nothing to report.')
+            logging.critical("All runs have been filtered -> Nothing to report.")
 
 
 class CellFormatter(object):
     """Formating information for one cell in a table."""
+
     def __init__(self, bold=False, count=None, link=None):
         self.bold = bold
         self.count = count
@@ -440,14 +465,14 @@ class CellFormatter(object):
         if self.link:
             result = "[''{}'' {}]".format(result, self.link)
         if self.count:
-            result = '{} ({})'.format(result, self.count)
+            result = "{} ({})".format(result, self.count)
         if self.bold:
-            result = '**%s**' % result
+            result = "**%s**" % result
         return result
 
 
 class Table(collections.defaultdict):
-    def __init__(self, title='', min_wins=None, colored=False, digits=2):
+    def __init__(self, title="", min_wins=None, colored=False, digits=2):
         """
         The *Table* class can be useful for `Report` subclasses that want to
         return a table as txt2tags markup. It is realized as a dictionary of
@@ -512,8 +537,8 @@ class Table(collections.defaultdict):
         self._cols = None
 
         # For printing.
-        self.header_row = 'column names (never printed)'
-        self.header_column = 'row names (never printed)'
+        self.header_row = "column names (never printed)"
+        self.header_column = "row names (never printed)"
         self.cell_formatters = collections.defaultdict(dict)
         self.row_order = None
         self.column_order = None
@@ -646,7 +671,9 @@ class Table(collections.defaultdict):
         for col_name in self.col_names:
             col_order.append(col_name)
         for module in self.dynamic_data_modules:
-            col_order = module.modify_printable_column_order(self, col_order) or col_order
+            col_order = (
+                module.modify_printable_column_order(self, col_order) or col_order
+            )
         return col_order
 
     def _collect_cells(self):
@@ -680,10 +707,10 @@ class Table(collections.defaultdict):
         if row_name == self.header_row:
             for col_name, value in row.items():
                 # Allow breaking after underlines.
-                value = value.replace('_', '_' + ESCAPE_WORDBREAK)
+                value = value.replace("_", "_" + ESCAPE_WORDBREAK)
                 # Right-align headers (except the left-most one).
                 if col_name != self.header_column:
-                    value = ' ' + value
+                    value = " " + value
                 row[col_name] = value
             return
 
@@ -712,12 +739,18 @@ class Table(collections.defaultdict):
             if col_name in row_slice:
                 if colored:
                     color = tools.rgb_fractions_to_html_color(*colors[col_name])
-                elif highlight and value is not None and (
-                        (is_close(value, min_value) and min_wins) or
-                        (is_close(value, max_value) and not min_wins)):
+                elif (
+                    highlight
+                    and value is not None
+                    and (
+                        (is_close(value, min_value) and min_wins)
+                        or (is_close(value, max_value) and not min_wins)
+                    )
+                ):
                     bold = True
-            row[col_name] = self._format_cell(row_name, col_name, value,
-                                              color=color, bold=bold)
+            row[col_name] = self._format_cell(
+                row_name, col_name, value, color=color, bold=bold
+            )
 
     def _format_cell(self, row_name, col_name, value, color=None, bold=False):
         """
@@ -739,7 +772,7 @@ class Table(collections.defaultdict):
 
         def format_value(value):
             if isinstance(value, float):
-                return '{0:.{1}f}'.format(value, self.digits)
+                return "{0:.{1}f}".format(value, self.digits)
             else:
                 result = str(value)
 
@@ -752,11 +785,11 @@ class Table(collections.defaultdict):
         value_text = format_value(value)
 
         if color is not None:
-            value_text = '{{{}|color:{}}}'.format(value_text, color)
+            value_text = "{{{}|color:{}}}".format(value_text, color)
         if bold:
-            value_text = '**%s**' % value_text
+            value_text = "**%s**" % value_text
         if justify_right:
-            value_text = ' ' + value_text
+            value_text = " " + value_text
         return value_text
 
     def _get_markup(self, cells):
@@ -772,19 +805,19 @@ class Table(collections.defaultdict):
             else:
                 parts.append(self._get_row_markup(row_name, cells[row_name]))
         if self.info:
-            parts.append(' '.join(self.info))
-        return '\n'.join(parts)
+            parts.append(" ".join(self.info))
+        return "\n".join(parts)
 
     def _get_header_markup(self, row_name, row):
         """Return the txt2tags table markup for the headers."""
-        return self._get_row_markup(row_name, row, template='|| %s |')
+        return self._get_row_markup(row_name, row, template="|| %s |")
 
-    def _get_row_markup(self, row_name, row, template=' | %s |'):
+    def _get_row_markup(self, row_name, row, template=" | %s |"):
         """Return the txt2tags table markup for one row."""
         formatted_cells = []
         for col_name in self._get_printable_column_order():
-            formatted_cells.append(row.get(col_name, ''))
-        return template % ' | '.join(formatted_cells)
+            formatted_cells.append(row.get(col_name, ""))
+        return template % " | ".join(formatted_cells)
 
     def __str__(self):
         """Return the txt2tags markup for this table."""
@@ -799,7 +832,7 @@ def extract_summary_rows(from_table, to_table, link=None):
     to **to_table**.
     """
     for name, row in from_table.get_summary_rows().items():
-        row_name = '{} - {}'.format(from_table.title, name)
+        row_name = "{} - {}".format(from_table.title, name)
         if link is not None:
             formatter = CellFormatter(link=link)
             to_table.cell_formatters[row_name][to_table.header_column] = formatter
@@ -812,6 +845,7 @@ def extract_summary_rows(from_table, to_table, link=None):
 
 class DynamicDataModule(object):
     """Interface for modules that dynamically add or modify data in a table."""
+
     def collect(self, table, cells):
         """
         Called after the data collection in the table. Subclasses can

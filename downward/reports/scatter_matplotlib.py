@@ -25,7 +25,7 @@ try:
     from matplotlib.backends import backend_agg
     import matplotlib.lines as mlines
 except ImportError as err:
-    logging.warning('matplotlib not found: {}'.format(err))
+    logging.warning("matplotlib not found: {}".format(err))
 
 
 class MatplotlibPlot(object):
@@ -47,27 +47,27 @@ class MatplotlibPlot(object):
 
     def create_legend(self):
         self.legend = self.axes.legend(
-            scatterpoints=1, loc='center', bbox_to_anchor=(1.3, 0.5))
+            scatterpoints=1, loc="center", bbox_to_anchor=(1.3, 0.5)
+        )
 
     @staticmethod
     def _get_max_supported_value(scale):
-        if scale == 'linear':
-            return 10**12  # Larger values cause numerical problems.
+        if scale == "linear":
+            return 10 ** 12  # Larger values cause numerical problems.
         else:
-            assert scale in {'log', 'symlog'}, scale
+            assert scale in {"log", "symlog"}, scale
             return sys.maxsize
 
     def plot_diagonal_line(self):
         """Plot a diagonal black line."""
         assert self.axes.get_xscale() == self.axes.get_yscale()
         M = self._get_max_supported_value(self.axes.get_xscale())
-        self.axes.add_line(
-            mlines.Line2D([-M, M], [-M, M], color='k', alpha=0.5))
+        self.axes.add_line(mlines.Line2D([-M, M], [-M, M], color="k", alpha=0.5))
 
     def plot_horizontal_line(self):
         """Plot a black line at y=1."""
         M = self._get_max_supported_value(self.axes.get_xscale())
-        self.axes.add_line(mlines.Line2D([-M, M], [1, 1], color='k', alpha=0.5))
+        self.axes.add_line(mlines.Line2D([-M, M], [1, 1], color="k", alpha=0.5))
 
     def print_figure(self, filename):
         # Save the generated scatter plot to a file.
@@ -76,12 +76,12 @@ class MatplotlibPlot(object):
         extra_artists = []
         if self.legend:
             extra_artists.append(self.legend.legendPatch)
-        kwargs = {'bbox_extra_artists': extra_artists}
+        kwargs = {"bbox_extra_artists": extra_artists}
         # Note: Setting bbox_inches keyword breaks pgf export.
-        if not filename.endswith('pgf'):
-            kwargs['bbox_inches'] = 'tight'
+        if not filename.endswith("pgf"):
+            kwargs["bbox_inches"] = "tight"
         self.canvas.print_figure(filename, **kwargs)
-        logging.info('Wrote file://{}'.format(filename))
+        logging.info("Wrote file://{}".format(filename))
 
 
 class ScatterMatplotlib(object):
@@ -91,12 +91,13 @@ class ScatterMatplotlib(object):
 
     @classmethod
     def _plot(cls, report, axes):
-        axes.grid(b=True, linestyle='-', color='0.75')
+        axes.grid(b=True, linestyle="-", color="0.75")
 
         for category, coords in sorted(report.categories.items()):
             x_vals, y_vals = zip(*coords)
             axes.scatter(
-                x_vals, y_vals, clip_on=False, label=category, **report.styles[category])
+                x_vals, y_vals, clip_on=False, label=category, **report.styles[category]
+            )
 
         axes.set_xbound(upper=report.x_upper)
         axes.set_ybound(upper=report.y_upper)

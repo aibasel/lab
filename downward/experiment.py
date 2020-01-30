@@ -32,7 +32,7 @@ from downward import suites
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
+DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, "scripts")
 
 
 class FastDownwardRun(Run):
@@ -45,33 +45,36 @@ class FastDownwardRun(Run):
 
         # Linking to instead of copying the PDDL files makes building
         # the experiment twice as fast.
+        self.add_resource("domain", self.task.domain_file, "domain.pddl", symlink=True)
         self.add_resource(
-            'domain', self.task.domain_file, 'domain.pddl', symlink=True)
-        self.add_resource(
-            'problem', self.task.problem_file, 'problem.pddl', symlink=True)
+            "problem", self.task.problem_file, "problem.pddl", symlink=True
+        )
 
         self.add_command(
-            'planner',
-            [tools.get_python_executable()] +
-            ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
-            algo.driver_options + ['{domain}', '{problem}'] + algo.component_options)
+            "planner",
+            [tools.get_python_executable()]
+            + ["{" + algo.cached_revision.get_planner_resource_name() + "}"]
+            + algo.driver_options
+            + ["{domain}", "{problem}"]
+            + algo.component_options,
+        )
 
     def _set_properties(self):
-        self.set_property('algorithm', self.algo.name)
-        self.set_property('repo', self.algo.cached_revision.repo)
-        self.set_property('local_revision', self.algo.cached_revision.local_rev)
-        self.set_property('global_revision', self.algo.cached_revision.global_rev)
-        self.set_property('revision_summary', self.algo.cached_revision.summary)
-        self.set_property('build_options', self.algo.cached_revision.build_options)
-        self.set_property('driver_options', self.algo.driver_options)
-        self.set_property('component_options', self.algo.component_options)
+        self.set_property("algorithm", self.algo.name)
+        self.set_property("repo", self.algo.cached_revision.repo)
+        self.set_property("local_revision", self.algo.cached_revision.local_rev)
+        self.set_property("global_revision", self.algo.cached_revision.global_rev)
+        self.set_property("revision_summary", self.algo.cached_revision.summary)
+        self.set_property("build_options", self.algo.cached_revision.build_options)
+        self.set_property("driver_options", self.algo.driver_options)
+        self.set_property("component_options", self.algo.component_options)
 
         for key, value in self.task.properties.items():
             self.set_property(key, value)
 
-        self.set_property('experiment_name', self.experiment.name)
+        self.set_property("experiment_name", self.experiment.name)
 
-        self.set_property('id', [self.algo.name, self.task.domain, self.task.problem])
+        self.set_property("id", [self.algo.name, self.task.domain, self.task.problem])
 
 
 class _DownwardAlgorithm(object):
@@ -84,9 +87,10 @@ class _DownwardAlgorithm(object):
     def __eq__(self, other):
         """Return true iff all components (excluding the name) match."""
         return (
-            self.cached_revision == other.cached_revision and
-            self.driver_options == other.driver_options and
-            self.component_options == other.component_options)
+            self.cached_revision == other.cached_revision
+            and self.driver_options == other.driver_options
+            and self.component_options == other.component_options
+        )
 
 
 class FastDownwardExperiment(Experiment):
@@ -112,28 +116,25 @@ class FastDownwardExperiment(Experiment):
     # Built-in parsers that can be passed to exp.add_parser().
 
     #: Parsed attributes: "error", "planner_exit_code", "unsolvable".
-    EXITCODE_PARSER = os.path.join(
-        DOWNWARD_SCRIPTS_DIR, 'exitcode-parser.py')
+    EXITCODE_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "exitcode-parser.py")
 
     #: Parsed attributes: "translator_peak_memory", "translator_time_done", etc.
-    TRANSLATOR_PARSER = os.path.join(
-        DOWNWARD_SCRIPTS_DIR, 'translator-parser.py')
+    TRANSLATOR_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "translator-parser.py")
 
     #: Parsed attributes: "coverage", "memory", "total_time", etc.
-    SINGLE_SEARCH_PARSER = os.path.join(
-        DOWNWARD_SCRIPTS_DIR, 'single-search-parser.py')
+    SINGLE_SEARCH_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "single-search-parser.py")
 
     #: Parsed attributes: "cost", "cost:all", "coverage".
     ANYTIME_SEARCH_PARSER = os.path.join(
-        DOWNWARD_SCRIPTS_DIR, 'anytime-search-parser.py')
+        DOWNWARD_SCRIPTS_DIR, "anytime-search-parser.py"
+    )
 
     #: Used attributes: "memory", "total_time",
     #: "translator_peak_memory", "translator_time_done".
     #:
     #: Parsed attributes: "node", "planner_memory", "planner_time",
     #: "planner_wall_clock_time".
-    PLANNER_PARSER = os.path.join(
-        DOWNWARD_SCRIPTS_DIR, 'planner-parser.py')
+    PLANNER_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "planner-parser.py")
 
     def __init__(self, path=None, environment=None, revision_cache=None):
         """
@@ -165,7 +166,8 @@ class FastDownwardExperiment(Experiment):
         Experiment.__init__(self, path=path, environment=environment)
 
         self.revision_cache = revision_cache or os.path.join(
-            get_default_data_dir(), 'revision-cache')
+            get_default_data_dir(), "revision-cache"
+        )
 
         self._suites = defaultdict(list)
 
@@ -211,11 +213,19 @@ class FastDownwardExperiment(Experiment):
         benchmarks_dir = os.path.abspath(benchmarks_dir)
         if not os.path.exists(benchmarks_dir):
             logging.critical(
-                'Benchmarks directory {} not found.'.format(benchmarks_dir))
+                "Benchmarks directory {} not found.".format(benchmarks_dir)
+            )
         self._suites[benchmarks_dir].extend(suite)
 
-    def add_algorithm(self, name, repo, rev, component_options,
-                      build_options=None, driver_options=None):
+    def add_algorithm(
+        self,
+        name,
+        repo,
+        rev,
+        component_options,
+        build_options=None,
+        driver_options=None,
+    ):
         """
         Add a Fast Downward algorithm to the experiment, i.e., a
         planner configuration in a given repository at a given
@@ -296,23 +306,29 @@ class FastDownwardExperiment(Experiment):
 
         """
         if not isinstance(name, tools.string_type):
-            logging.critical('Algorithm name must be a string: {}'.format(name))
+            logging.critical("Algorithm name must be a string: {}".format(name))
         if name in self._algorithms:
-            logging.critical('Algorithm names must be unique: {}'.format(name))
+            logging.critical("Algorithm names must be unique: {}".format(name))
         build_options = build_options or []
-        driver_options = ([
-            '--validate',
-            '--overall-time-limit', '30m',
-            '--overall-memory-limit', '3584M'] +
-            (driver_options or []))
+        driver_options = [
+            "--validate",
+            "--overall-time-limit",
+            "30m",
+            "--overall-memory-limit",
+            "3584M",
+        ] + (driver_options or [])
         algorithm = _DownwardAlgorithm(
-            name, CachedRevision(repo, rev, build_options),
-            driver_options, component_options)
+            name,
+            CachedRevision(repo, rev, build_options),
+            driver_options,
+            component_options,
+        )
         for algo in self._algorithms.values():
             if algorithm == algo:
                 logging.critical(
-                    'Algorithms {algo.name} and {algorithm.name} are '
-                    'identical.'.format(**locals()))
+                    "Algorithms {algo.name} and {algorithm.name} are "
+                    "identical.".format(**locals())
+                )
         self._algorithms[name] = algorithm
 
     def build(self, **kwargs):
@@ -322,7 +338,7 @@ class FastDownwardExperiment(Experiment):
 
         """
         if not self._algorithms:
-            logging.critical('You must add at least one algorithm.')
+            logging.critical("You must add at least one algorithm.")
 
         # We convert the problems in suites to strings to avoid errors when converting
         # properties to JSON later. The clean but more complex solution would be to add
@@ -330,9 +346,10 @@ class FastDownwardExperiment(Experiment):
         # Problem.
         serialized_suites = {
             benchmarks_dir: [str(problem) for problem in benchmarks]
-            for benchmarks_dir, benchmarks in self._suites.items()}
-        self.set_property('suite', serialized_suites)
-        self.set_property('algorithms', list(self._algorithms.keys()))
+            for benchmarks_dir, benchmarks in self._suites.items()
+        }
+        self.set_property("suite", serialized_suites)
+        self.set_property("algorithms", list(self._algorithms.keys()))
 
         self._cache_revisions()
         self._add_code()
@@ -354,14 +371,14 @@ class FastDownwardExperiment(Experiment):
         """Add the compiled code to the experiment."""
         for cached_rev in self._get_unique_cached_revisions():
             self.add_resource(
-                '',
-                cached_rev.get_cached_path(),
-                cached_rev.get_exp_path())
+                "", cached_rev.get_cached_path(), cached_rev.get_exp_path()
+            )
             # Overwrite the script to set an environment variable.
             self.add_resource(
                 cached_rev.get_planner_resource_name(),
-                cached_rev.get_cached_path('fast-downward.py'),
-                cached_rev.get_exp_path('fast-downward.py'))
+                cached_rev.get_cached_path("fast-downward.py"),
+                cached_rev.get_exp_path("fast-downward.py"),
+            )
 
     def _add_runs(self):
         for algo in self._algorithms.values():

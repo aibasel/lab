@@ -39,42 +39,56 @@ class PlanningReport(Report):
     default. You may want to adjust the two lists in derived classes.
 
     """
+
     #: List of predefined :py:class:`~Attribute` instances. If
     #: PlanningReport receives ``attributes=['coverage']``, it converts
     #: the plain string ``'coverage'`` to the attribute instance
     #: ``Attribute('coverage', absolute=True, min_wins=False, scale='linear')``.
     #: The list can be overriden in subclasses.
     PREDEFINED_ATTRIBUTES = [
-        Attribute('cost', scale='linear'),
-        Attribute('coverage', absolute=True, min_wins=False, scale='linear'),
-        Attribute('dead_ends', min_wins=False),
-        Attribute('evaluations', function=geometric_mean),
-        Attribute('expansions', function=geometric_mean),
-        Attribute('generated', function=geometric_mean),
+        Attribute("cost", scale="linear"),
+        Attribute("coverage", absolute=True, min_wins=False, scale="linear"),
+        Attribute("dead_ends", min_wins=False),
+        Attribute("evaluations", function=geometric_mean),
+        Attribute("expansions", function=geometric_mean),
+        Attribute("generated", function=geometric_mean),
         Attribute(
-            'initial_h_value', min_wins=False, scale='linear',
-            function=reports.finite_sum),
-        Attribute('plan_length', scale='linear'),
-        Attribute('planner_time', function=geometric_mean),
-        Attribute('quality', absolute=True, min_wins=False),
-        Attribute('score_*', min_wins=False, digits=4),
-        Attribute('search_time', function=geometric_mean),
-        Attribute('total_time', function=geometric_mean),
-        Attribute('unsolvable', absolute=True, min_wins=False),
+            "initial_h_value",
+            min_wins=False,
+            scale="linear",
+            function=reports.finite_sum,
+        ),
+        Attribute("plan_length", scale="linear"),
+        Attribute("planner_time", function=geometric_mean),
+        Attribute("quality", absolute=True, min_wins=False),
+        Attribute("score_*", min_wins=False, digits=4),
+        Attribute("search_time", function=geometric_mean),
+        Attribute("total_time", function=geometric_mean),
+        Attribute("unsolvable", absolute=True, min_wins=False),
     ]
 
     #: Attributes shown in the algorithm info table. Can be overriden in
     #: subclasses.
     INFO_ATTRIBUTES = [
-        'local_revision', 'global_revision', 'revision_summary',
-        'build_options', 'driver_options', 'component_options'
+        "local_revision",
+        "global_revision",
+        "revision_summary",
+        "build_options",
+        "driver_options",
+        "component_options",
     ]
 
     #: Attributes shown in the unexplained-errors table. Can be overriden
     #: in subclasses.
     ERROR_ATTRIBUTES = [
-        'domain', 'problem', 'algorithm', 'unexplained_errors',
-        'error', 'planner_wall_clock_time', 'raw_memory', 'node'
+        "domain",
+        "problem",
+        "algorithm",
+        "unexplained_errors",
+        "error",
+        "planner_wall_clock_time",
+        "raw_memory",
+        "node",
     ]
 
     ERROR_LOG_MAX_LINES = 100
@@ -102,11 +116,11 @@ class PlanningReport(Report):
 
         """
         # Set non-default options for some attributes.
-        attributes = tools.make_list(kwargs.get('attributes'))
-        kwargs['attributes'] = [self._prepare_attribute(attr) for attr in attributes]
+        attributes = tools.make_list(kwargs.get("attributes"))
+        kwargs["attributes"] = [self._prepare_attribute(attr) for attr in attributes]
 
         # Remember the order of algorithms if it is given as a keyword argument filter.
-        self.filter_algorithm = tools.make_list(kwargs.get('filter_algorithm'))
+        self.filter_algorithm = tools.make_list(kwargs.get("filter_algorithm"))
 
         Report.__init__(self, **kwargs)
 
@@ -116,7 +130,7 @@ class PlanningReport(Report):
             if attr in predefined:
                 return predefined[attr]
             for pattern in predefined.values():
-                if (fnmatch(attr, pattern)):
+                if fnmatch(attr, pattern):
                     return pattern.copy(attr)
         return Report._prepare_attribute(self, attr)
 
@@ -131,7 +145,7 @@ class PlanningReport(Report):
         self.domain_algorithm_runs = defaultdict(list)
         self.runs = {}
         for run in self.props.values():
-            domain, problem, algo = run['domain'], run['problem'], run['algorithm']
+            domain, problem, algo = run["domain"], run["problem"], run["algorithm"]
             problems.add((domain, problem))
             self.problem_runs[(domain, problem)].append(run)
             self.domain_algorithm_runs[(domain, algo)].append(run)
@@ -141,30 +155,40 @@ class PlanningReport(Report):
 
         self.algorithms = self._get_algorithm_order()
 
-        num_unexplained_errors = sum(int(bool(
-            tools.get_unexplained_errors_message(run))) for run in self.runs.values())
+        num_unexplained_errors = sum(
+            int(bool(tools.get_unexplained_errors_message(run)))
+            for run in self.runs.values()
+        )
         func = logging.info if num_unexplained_errors == 0 else logging.error
         func(
-            'Report contains {num_unexplained_errors} runs with unexplained'
-            ' errors.'.format(**locals()))
+            "Report contains {num_unexplained_errors} runs with unexplained"
+            " errors.".format(**locals())
+        )
 
         if len(problems) * len(self.algorithms) != len(self.runs):
             logging.warning(
-                'Not every algorithm has been run on every task. '
-                'However, if you applied a filter this is to be '
-                'expected. If not, there might be old properties in the '
-                'eval-dir that got included in the report. '
-                'Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)' %
-                (len(self.algorithms), self.algorithms, len(problems),
-                 len(self.domains), list(self.domains.keys()), len(self.runs)))
+                "Not every algorithm has been run on every task. "
+                "However, if you applied a filter this is to be "
+                "expected. If not, there might be old properties in the "
+                "eval-dir that got included in the report. "
+                "Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)"
+                % (
+                    len(self.algorithms),
+                    self.algorithms,
+                    len(problems),
+                    len(self.domains),
+                    list(self.domains.keys()),
+                    len(self.runs),
+                )
+            )
 
         # Sort each entry in problem_runs by algorithm.
         algo_to_index = {
-            algorithm: index
-            for index, algorithm in enumerate(self.algorithms)}
+            algorithm: index for index, algorithm in enumerate(self.algorithms)
+        }
 
         def run_key(run):
-            return algo_to_index[run['algorithm']]
+            return algo_to_index[run["algorithm"]]
 
         for problem_runs in self.problem_runs.values():
             problem_runs.sort(key=run_key)
@@ -175,31 +199,34 @@ class PlanningReport(Report):
         info = {}
         for runs in self.problem_runs.values():
             for run in runs:
-                info[run['algorithm']] = {
-                    attr: run.get(attr, '?') for attr in self.INFO_ATTRIBUTES}
+                info[run["algorithm"]] = {
+                    attr: run.get(attr, "?") for attr in self.INFO_ATTRIBUTES
+                }
             # We only need to scan the algorithms for one task.
             break
         return info
 
     def _get_node_names(self):
         return {
-            run.get("node", "<attribute 'node' missing>")
-            for run in self.runs.values()}
+            run.get("node", "<attribute 'node' missing>") for run in self.runs.values()
+        }
 
     def _format_unexplained_errors(self, errors):
         """
         Preserve line breaks and white space. If text has more than
         ERROR_LOG_MAX_LINES lines, omit lines in the middle of the text.
         """
-        linebreak = '\\\\'
-        text = "''{}''".format(errors).replace(
-            '\\n', linebreak).replace(
-            ' ', markup.ESCAPE_WHITESPACE)
+        linebreak = "\\\\"
+        text = (
+            "''{}''".format(errors)
+            .replace("\\n", linebreak)
+            .replace(" ", markup.ESCAPE_WHITESPACE)
+        )
         lines = text.split(linebreak)
         if len(lines) <= self.ERROR_LOG_MAX_LINES:
             return text
         index = (self.ERROR_LOG_MAX_LINES - 2) // 2
-        text = linebreak.join(lines[:index] + ['', '[...]', ''] + lines[-index:])
+        text = linebreak.join(lines[:index] + ["", "[...]", ""] + lines[-index:])
         assert text.startswith("''") and text.endswith("''"), text
         return text
 
@@ -209,23 +236,24 @@ class PlanningReport(Report):
         each run where an unexplained error occured.
         """
         if not self.ERROR_ATTRIBUTES:
-            logging.critical('The list of error attributes must not be empty.')
+            logging.critical("The list of error attributes must not be empty.")
 
-        table = reports.Table(title='Unexplained errors')
+        table = reports.Table(title="Unexplained errors")
         table.set_column_order(self.ERROR_ATTRIBUTES)
 
         wrote_to_slurm_err = any(
-            'output-to-slurm.err' in run.get('unexplained_errors', [])
-            for run in self.runs.values())
+            "output-to-slurm.err" in run.get("unexplained_errors", [])
+            for run in self.runs.values()
+        )
 
         for run in self.runs.values():
             error_message = tools.get_unexplained_errors_message(run)
             if error_message:
                 logging.error(error_message)
-                run_dir = run['run_dir']
+                run_dir = run["run_dir"]
                 for attr in self.ERROR_ATTRIBUTES:
-                    value = run.get(attr, '?')
-                    if attr == 'unexplained_errors':
+                    value = run.get(attr, "?")
+                    if attr == "unexplained_errors":
                         value = self._format_unexplained_errors(value)
                         # Use formatted value as-is.
                         table.cell_formatters[run_dir][attr] = reports.CellFormatter()
@@ -234,33 +262,34 @@ class PlanningReport(Report):
         errors = []
 
         if wrote_to_slurm_err:
-            src_dir = self.eval_dir.rstrip('/')[:-len('-eval')]
-            slurm_err_file = src_dir + '-grid-steps/slurm.err'
+            src_dir = self.eval_dir.rstrip("/")[: -len("-eval")]
+            slurm_err_file = src_dir + "-grid-steps/slurm.err"
             try:
                 slurm_err_content = tools.get_slurm_err_content(src_dir)
             except IOError:
                 slurm_err_content = (
-                    'The slurm.err file was missing while creating the report.')
+                    "The slurm.err file was missing while creating the report."
+                )
             else:
                 slurm_err_content = tools.filter_slurm_err_content(slurm_err_content)
 
-            logging.error(
-                'There was output to {slurm_err_file}.'.format(**locals()))
+            logging.error("There was output to {slurm_err_file}.".format(**locals()))
 
             errors.append(
                 ' Contents of {slurm_err_file} without "memory cg"'
-                ' errors:\n```\n{slurm_err_content}\n```'.format(**locals()))
+                " errors:\n```\n{slurm_err_content}\n```".format(**locals())
+            )
 
         if table:
             errors.append(str(table))
 
-        infai_1_nodes = {'ase{:02d}.cluster.bc2.ch'.format(i) for i in range(1, 25)}
-        infai_2_nodes = {'ase{:02d}.cluster.bc2.ch'.format(i) for i in range(31, 55)}
+        infai_1_nodes = {"ase{:02d}.cluster.bc2.ch".format(i) for i in range(1, 25)}
+        infai_2_nodes = {"ase{:02d}.cluster.bc2.ch".format(i) for i in range(31, 55)}
         nodes = self._get_node_names()
         if nodes & infai_1_nodes and nodes & infai_2_nodes:
-            errors.append('Report combines runs from infai_1 and infai_2 partitions.')
+            errors.append("Report combines runs from infai_1 and infai_2 partitions.")
 
-        return '\n'.join(errors)
+        return "\n".join(errors)
 
     def _get_algorithm_order(self):
         """
@@ -274,16 +303,16 @@ class PlanningReport(Report):
         self._scan_planning_data.
 
         """
-        all_algos = {run['algorithm'] for run in self.props.values()}
+        all_algos = {run["algorithm"] for run in self.props.values()}
         if self.filter_algorithm:
             # Other filters may have changed the set of available algorithms by either
             # removing all runs for one algorithm or changing run['algorithm'] for a run.
             # Maintain the original order of algorithms and only keep algorithms that
             # still have runs after filtering. Then add all new algorithms
             # sorted naturally at the end.
-            algo_order = (
-                [c for c in self.filter_algorithm if c in all_algos] +
-                tools.natural_sort(all_algos - set(self.filter_algorithm)))
+            algo_order = [
+                c for c in self.filter_algorithm if c in all_algos
+            ] + tools.natural_sort(all_algos - set(self.filter_algorithm))
         else:
             algo_order = tools.natural_sort(all_algos)
         return algo_order

@@ -26,14 +26,19 @@ from lab import tools
 
 def _check_eval_dir(eval_dir):
     if os.path.exists(eval_dir):
-        answer = tools.user_input(
-            '{} already exists. Do you want to (o)verwrite it, '
-            '(m)erge the results, or (c)ancel? '.format(eval_dir)).strip().lower()
-        if answer == 'o':
+        answer = (
+            tools.user_input(
+                "{} already exists. Do you want to (o)verwrite it, "
+                "(m)erge the results, or (c)ancel? ".format(eval_dir)
+            )
+            .strip()
+            .lower()
+        )
+        if answer == "o":
             tools.remove_path(eval_dir)
-        elif answer == 'm':
+        elif answer == "m":
             pass
-        elif answer == 'c':
+        elif answer == "c":
             sys.exit()
         else:
             # Abort for "cancel" and invalid answers.
@@ -54,33 +59,38 @@ class Fetcher(object):
         is more convenient.
 
     """
+
     def fetch_dir(self, run_dir):
         static_props = tools.Properties(
-            filename=os.path.join(run_dir, lab.experiment.STATIC_RUN_PROPERTIES_FILENAME))
-        dynamic_props = tools.Properties(filename=os.path.join(run_dir, 'properties'))
+            filename=os.path.join(
+                run_dir, lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
+            )
+        )
+        dynamic_props = tools.Properties(filename=os.path.join(run_dir, "properties"))
 
         props = tools.Properties()
         props.update(static_props)
         props.update(dynamic_props)
 
-        driver_log = os.path.join(run_dir, 'driver.log')
+        driver_log = os.path.join(run_dir, "driver.log")
         if not os.path.exists(driver_log):
             props.add_unexplained_error(
-                'driver.log is missing. Probably the run was never started.')
+                "driver.log is missing. Probably the run was never started."
+            )
 
-        driver_err = os.path.join(run_dir, 'driver.err')
-        run_err = os.path.join(run_dir, 'run.err')
+        driver_err = os.path.join(run_dir, "driver.err")
+        run_err = os.path.join(run_dir, "run.err")
         for logfile in [driver_err, run_err]:
             if os.path.exists(logfile):
                 with open(logfile) as f:
                     content = f.read()
                 if content:
                     props.add_unexplained_error(
-                        '{}: {}'.format(os.path.basename(logfile), content))
+                        "{}: {}".format(os.path.basename(logfile), content)
+                    )
         return props
 
-    def __call__(self, src_dir, eval_dir=None, merge=None, filter=None,
-                 **kwargs):
+    def __call__(self, src_dir, eval_dir=None, merge=None, filter=None, **kwargs):
         """
         This method can be used to copy properties from an exp-dir or
         eval-dir into an eval-dir. If the destination eval-dir already
@@ -94,11 +104,11 @@ class Fetcher(object):
 
         """
         if not os.path.isdir(src_dir):
-            logging.critical('{} is missing or not a directory'.format(src_dir))
+            logging.critical("{} is missing or not a directory".format(src_dir))
         run_filter = tools.RunFilter(filter, **kwargs)
 
-        eval_dir = eval_dir or src_dir.rstrip('/') + '-eval'
-        logging.info('Fetching properties from {} to {}'.format(src_dir, eval_dir))
+        eval_dir = eval_dir or src_dir.rstrip("/") + "-eval"
+        logging.info("Fetching properties from {} to {}".format(src_dir, eval_dir))
 
         if merge is None:
             _check_eval_dir(eval_dir)
@@ -109,31 +119,33 @@ class Fetcher(object):
             tools.remove_path(eval_dir)
 
         # Load properties in the eval_dir if there are any already.
-        combined_props = tools.Properties(os.path.join(eval_dir, 'properties'))
+        combined_props = tools.Properties(os.path.join(eval_dir, "properties"))
         fetch_from_eval_dir = not os.path.exists(
-            os.path.join(src_dir, 'runs-00001-00100'))
+            os.path.join(src_dir, "runs-00001-00100")
+        )
         if fetch_from_eval_dir:
-            src_props = tools.Properties(filename=os.path.join(src_dir, 'properties'))
+            src_props = tools.Properties(filename=os.path.join(src_dir, "properties"))
             run_filter.apply(src_props)
             combined_props.update(src_props)
-            logging.info('Fetched properties of {} runs.'.format(len(src_props)))
+            logging.info("Fetched properties of {} runs.".format(len(src_props)))
         else:
             slurm_err_content = tools.get_slurm_err_content(src_dir)
             if slurm_err_content:
-                logging.error('There was output to *-grid-steps/slurm.err')
+                logging.error("There was output to *-grid-steps/slurm.err")
 
             new_props = tools.Properties()
-            run_dirs = sorted(glob(os.path.join(src_dir, 'runs-*-*', '*')))
+            run_dirs = sorted(glob(os.path.join(src_dir, "runs-*-*", "*")))
             total_dirs = len(run_dirs)
             logging.info(
-                'Scanning properties from {:d} run directories'.format(total_dirs))
+                "Scanning properties from {:d} run directories".format(total_dirs)
+            )
             for index, run_dir in enumerate(run_dirs, start=1):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(loglevel, 'Scanning: {:6d}/{:d}'.format(index, total_dirs))
+                logging.log(loglevel, "Scanning: {:6d}/{:d}".format(index, total_dirs))
                 props = self.fetch_dir(run_dir)
                 if slurm_err_content:
-                    props.add_unexplained_error('output-to-slurm.err')
-                id_string = '-'.join(props['id'])
+                    props.add_unexplained_error("output-to-slurm.err")
+                id_string = "-".join(props["id"])
                 new_props[id_string] = props
             run_filter.apply(new_props)
             combined_props.update(new_props)
@@ -148,5 +160,6 @@ class Fetcher(object):
         tools.makedirs(eval_dir)
         combined_props.write()
         logging.info(
-            'Wrote properties file (contains {unexplained_errors} '
-            'runs with unexplained errors).'.format(**locals()))
+            "Wrote properties file (contains {unexplained_errors} "
+            "runs with unexplained errors).".format(**locals())
+        )

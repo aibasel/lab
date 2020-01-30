@@ -25,18 +25,23 @@ class Domain(object):
     def __init__(self, benchmarks_dir, domain):
         self.domain = domain
         directory = os.path.join(benchmarks_dir, domain)
-        problem_files = tools.natural_sort([
-            p for p in os.listdir(directory)
-            if 'domain' not in p and not p.endswith('.py')])
+        problem_files = tools.natural_sort(
+            [
+                p
+                for p in os.listdir(directory)
+                if "domain" not in p and not p.endswith(".py")
+            ]
+        )
         self.problems = [
             Problem(domain, problem, benchmarks_dir=benchmarks_dir)
-            for problem in problem_files]
+            for problem in problem_files
+        ]
 
     def __str__(self):
         return self.domain
 
     def __repr__(self):
-        return '<Domain %s>' % self.domain
+        return "<Domain %s>" % self.domain
 
     def __hash__(self):
         return hash(self.domain)
@@ -49,8 +54,15 @@ class Domain(object):
 
 
 class Problem(object):
-    def __init__(self, domain, problem, benchmarks_dir='',
-                 domain_file=None, problem_file=None, properties=None):
+    def __init__(
+        self,
+        domain,
+        problem,
+        benchmarks_dir="",
+        domain_file=None,
+        problem_file=None,
+        properties=None,
+    ):
         """
         *domain* and *problem* are the display names of the domain and
         problem, *domain_file* and *problem_file* are paths to the
@@ -85,24 +97,27 @@ class Problem(object):
         self.domain_file = domain_file
         if self.domain_file is None:
             domain_basenames = [
-                'domain.pddl',
-                self.problem[:3] + '-domain.pddl',
-                'domain_' + self.problem,
-                'domain-' + self.problem,
+                "domain.pddl",
+                self.problem[:3] + "-domain.pddl",
+                "domain_" + self.problem,
+                "domain-" + self.problem,
             ]
             domain_dir = os.path.join(benchmarks_dir, self.domain)
             self.domain_file = tools.find_file(domain_basenames, domain_dir)
 
         self.problem_file = problem_file or os.path.join(
-                benchmarks_dir, self.domain, self.problem)
+            benchmarks_dir, self.domain, self.problem
+        )
 
         self.properties = properties or {}
-        self.properties.setdefault('domain', self.domain)
-        self.properties.setdefault('problem', self.problem)
+        self.properties.setdefault("domain", self.domain)
+        self.properties.setdefault("problem", self.problem)
 
     def __str__(self):
-        return ('<Problem {domain}({domain_file}):{problem}({problem_file}):'
-                '{properties}>'.format(**self.__dict__))
+        return (
+            "<Problem {domain}({domain_file}):{problem}({problem_file}):"
+            "{properties}>".format(**self.__dict__)
+        )
 
 
 def _generate_problems(benchmarks_dir, description):
@@ -115,8 +130,8 @@ def _generate_problems(benchmarks_dir, description):
     elif isinstance(description, Domain):
         for problem in description:
             yield problem
-    elif ':' in description:
-        domain_name, problem_name = description.split(':', 1)
+    elif ":" in description:
+        domain_name, problem_name = description.split(":", 1)
         yield Problem(domain_name, problem_name, benchmarks_dir=benchmarks_dir)
     else:
         for problem in Domain(benchmarks_dir, description):

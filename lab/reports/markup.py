@@ -21,11 +21,12 @@ import re
 from lab.external import txt2tags
 
 
-TABLE_HEAD_BG = '#aaa'
-ESCAPE_WORDBREAK = 'xWBRx'
-ESCAPE_WHITESPACE = 'xWHITESPACEx'
+TABLE_HEAD_BG = "#aaa"
+ESCAPE_WORDBREAK = "xWBRx"
+ESCAPE_WHITESPACE = "xWHITESPACEx"
 
-CSS = """\
+CSS = (
+    """\
 <style type="text/css">
     body {
         font-family: Ubuntu, Helvetica, Arial, sans-serif;
@@ -63,7 +64,9 @@ CSS = """\
         background-color: black;
     }
 </style>
-""" % globals()
+"""
+    % globals()
+)
 
 JAVASCRIPT = """\
 <script type="text/javascript">
@@ -134,136 +137,147 @@ def _get_config(target):
 
     # The Pre (and Post) processing config is a list of lists:
     # [ [this, that], [foo, bar], [patt, replace] ]
-    config['postproc'] = []
-    config['preproc'] = []
+    config["postproc"] = []
+    config["preproc"] = []
 
-    config['preproc'].append([r'\{(.*?)\|color:(.+?)\}',
-                              r'BEGINCOLOR\1SEP\2ENDCOLOR'])
+    config["preproc"].append([r"\{(.*?)\|color:(.+?)\}", r"BEGINCOLOR\1SEP\2ENDCOLOR"])
 
-    if target in ['xhtml', 'html']:
-        config['encoding'] = 'UTF-8'       # document encoding
-        config['toc'] = 0
-        config['css-inside'] = 1
-        config['css-sugar'] = 1
+    if target in ["xhtml", "html"]:
+        config["encoding"] = "UTF-8"  # document encoding
+        config["toc"] = 0
+        config["css-inside"] = 1
+        config["css-sugar"] = 1
 
         # Custom css
-        config['postproc'].append([r'</head>', CSS + '</head>'])
+        config["postproc"].append([r"</head>", CSS + "</head>"])
 
         # Add javascript.
-        config['postproc'].append([r'</head>', JAVASCRIPT + '</head>'])
+        config["postproc"].append([r"</head>", JAVASCRIPT + "</head>"])
 
         # Allow line breaks, r'\\\\' are 2 \ for regexes
-        config['postproc'].append([r'\\\\', r'<br />'])
+        config["postproc"].append([r"\\\\", r"<br />"])
 
         # {{red text|color:red}} -> <span style="color:red">red text</span>
-        config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR',
-                                   r'<span style="color:\2">\1</span>'])
+        config["postproc"].append(
+            [r"BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR", r'<span style="color:\2">\1</span>']
+        )
 
         # Allow line-breaking at additional places.
-        config['postproc'].append([ESCAPE_WORDBREAK, r'<wbr>'])
+        config["postproc"].append([ESCAPE_WORDBREAK, r"<wbr>"])
 
-        config['postproc'].append([ESCAPE_WHITESPACE, r'&nbsp;'])
+        config["postproc"].append([ESCAPE_WHITESPACE, r"&nbsp;"])
 
         # Hide tables by default.
-        config['postproc'].append([
-            r'<table border="1">',
-            r'<button type="button" class="toggle-table" '
-            'onclick="toggle_table(this)">Show table</button><p></p>\n\n'
-            '<table border="1" style="display:none">'])
+        config["postproc"].append(
+            [
+                r'<table border="1">',
+                r'<button type="button" class="toggle-table" '
+                'onclick="toggle_table(this)">Show table</button><p></p>\n\n'
+                '<table border="1" style="display:none">',
+            ]
+        )
         # Automatically show tables when their links are clicked.
-        config['postproc'].append([
-            r'<a href="#(.+?)">',
-            r'''<a href="#\1" onclick="show_table(document.getElementById('\1'));">'''])
+        config["postproc"].append(
+            [
+                r'<a href="#(.+?)">',
+                r'<a href="#\1" onclick="show_table(document.getElementById(\'\1\'));">',
+            ]
+        )
 
-    elif target == 'tex':
+    elif target == "tex":
         # AUtomatically add \usepackage directives.
-        config['style'] = []
-        config['style'].append('booktabs')
-        config['style'].append('color')
-        config['style'].append('geometry')
-        config['style'].append('rotating')
+        config["style"] = []
+        config["style"].append("booktabs")
+        config["style"].append("color")
+        config["style"].append("geometry")
+        config["style"].append("rotating")
 
         # Do not clear the title page
-        config['postproc'].append([r'\\clearpage', r''])
+        config["postproc"].append([r"\\clearpage", r""])
 
         # Make some color names available e.g. Gray (case-sensitive).
-        config['postproc'].append([r'usepackage{color}',
-                                   r'usepackage[usenames,dvipsnames]{color}'])
+        config["postproc"].append(
+            [r"usepackage{color}", r"usepackage[usenames,dvipsnames]{color}"]
+        )
 
         # Use landscape orientation.
-        config['postproc'].append([r'usepackage{geometry}',
-                                   r'usepackage[landscape,margin=1.5cm,a4paper]'
-                                   '{geometry}'])
+        config["postproc"].append(
+            [
+                r"usepackage{geometry}",
+                r"usepackage[landscape,margin=1.5cm,a4paper]" "{geometry}",
+            ]
+        )
 
-        config['encoding'] = 'utf8'
-        config['preproc'].append(['€', 'Euro'])
+        config["encoding"] = "utf8"
+        config["preproc"].append(["€", "Euro"])
 
         # Latex only allows whitespace and underscores in filenames if
         # the filename is surrounded by "...". This is in turn only possible
         # if the extension is omitted
-        config['preproc'].append([r'\[""', r'["""'])
-        config['preproc'].append([r'""\.', r'""".'])
+        config["preproc"].append([r'\[""', r'["""'])
+        config["preproc"].append([r'""\.', r'""".'])
 
         # For images we have to omit the file:// prefix
-        config['postproc'].append([r'includegraphics\{(.*)"file://',
-                                   r'includegraphics{"\1'])
+        config["postproc"].append(
+            [r'includegraphics\{(.*)"file://', r'includegraphics{"\1']
+        )
 
         # Allow line breaks, r'\\\\' are 2 \ for regexes
-        config['postproc'].append([r'\$\\backslash\$\$\\backslash\$', r'\\\\'])
+        config["postproc"].append([r"\$\\backslash\$\$\\backslash\$", r"\\\\"])
 
         # Add default \numtasks command.
-        config['postproc'].append([
-            r'\\title',
-            r'\\newcommand{\\numtasks}[1]{\\small{(#1)}}\n\n\\title'])
+        config["postproc"].append(
+            [r"\\title", r"\\newcommand{\\numtasks}[1]{\\small{(#1)}}\n\n\\title"]
+        )
 
         # (35) --> \numtasks{35}
-        config['postproc'].append([r'\((\d+?)\)', r'\\numtasks{\1}'])
+        config["postproc"].append([r"\((\d+?)\)", r"\\numtasks{\1}"])
 
-    elif target == 'txt':
+    elif target == "txt":
         # Allow line breaks, r'\\\\' are 2 \ for regexes
-        config['postproc'].append([r'\\\\', '\n'])
+        config["postproc"].append([r"\\\\", "\n"])
 
     # Disable some filters for all other targets.
-    config['postproc'].append([r'BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR', r'\1'])
-    config['postproc'].append([ESCAPE_WORDBREAK, r''])
-    config['postproc'].append([ESCAPE_WHITESPACE, r' '])
+    config["postproc"].append([r"BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR", r"\1"])
+    config["postproc"].append([ESCAPE_WORDBREAK, r""])
+    config["postproc"].append([ESCAPE_WHITESPACE, r" "])
 
     return config
 
 
 class Document(object):
-    def __init__(self, title='', author='', date='%%date(%Y-%m-%d)'):
+    def __init__(self, title="", author="", date="%%date(%Y-%m-%d)"):
         self.title = title
         self.author = author
         self.date = date
 
-        self.text = ''
+        self.text = ""
 
     def add_text(self, text):
-        self.text += text + '\n'
+        self.text += text + "\n"
 
     def __str__(self):
         return self.text
 
     def render(self, target, options=None):
         # We always want xhtml
-        if target == 'html':
-            target = 'xhtml'
+        if target == "html":
+            target = "xhtml"
 
         # Bug in txt2tags: Titles are not escaped
-        if target == 'tex':
-            self.title = self.title.replace('_', r'\_')
+        if target == "tex":
+            self.title = self.title.replace("_", r"\_")
 
         # Here is the marked body text, it must be a list.
-        txt = self.text.split('\n')
+        txt = self.text.split("\n")
 
         # Set the three header fields
         headers = [self.title, self.author, self.date]
 
         config = _get_config(target)
 
-        config['outfile'] = txt2tags.MODULEOUT  # results as list
-        config['target'] = target
+        config["outfile"] = txt2tags.MODULEOUT  # results as list
+        config["target"] = target
 
         if options is not None:
             config.update(options)
@@ -277,7 +291,7 @@ class Document(object):
             toc = txt2tags.toc_formatter(toc, config)
             full_doc = headers + toc + body + footer
             finished = txt2tags.finish_him(full_doc, config)
-            result = '\n'.join(finished)
+            result = "\n".join(finished)
 
         # Txt2tags error, show the messsage to the user
         except txt2tags.error as msg:
@@ -289,8 +303,8 @@ class Document(object):
             result = txt2tags.getUnknownErrorMessage()
             logging.error(result)
 
-        if target == 'tex':
-            hline = '\\hline '
+        if target == "tex":
+            hline = "\\hline "
             lines = result.splitlines()
             new_lines = []
             table_row = 0
@@ -298,23 +312,24 @@ class Document(object):
                 # Remove vertical lines (recommended by booktabs docs).
                 def remove_vertical_lines(match):
                     alignment = match.group(1)
-                    return 'begin{tabular}{@{}%s@{}}' % alignment.replace('|', '')
-                line = re.sub(r'begin{tabular}{(.*)}', remove_vertical_lines, line)
+                    return "begin{tabular}{@{}%s@{}}" % alignment.replace("|", "")
+
+                line = re.sub(r"begin{tabular}{(.*)}", remove_vertical_lines, line)
 
                 # Remove \hlines in latex output. Use booktabs commands instead.
                 if line.startswith(hline):
                     table_row += 1
                     if table_row == 2:
-                        new_lines.append('\\midrule')
-                    new_lines.append(line[len(hline):])
+                        new_lines.append("\\midrule")
+                    new_lines.append(line[len(hline) :])
                 else:
                     # Reinsert the last line (or two if the last row is a
                     # summary row).
                     if table_row >= 3:
-                        if new_lines[-2].startswith('\\textbf'):
-                            new_lines.insert(-2, '\\midrule')
+                        if new_lines[-2].startswith("\\textbf"):
+                            new_lines.insert(-2, "\\midrule")
                     table_row = 0
                     new_lines.append(line)
-            result = '\n'.join(new_lines)
+            result = "\n".join(new_lines)
 
         return result

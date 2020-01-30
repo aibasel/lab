@@ -40,10 +40,19 @@ class ScatterPlotReport(PlanningReport):
     """
     Generate a scatter plot for an attribute.
     """
+
     def __init__(
-            self, relative=False, show_missing=True, get_category=None,
-            title=None, scale=None, xlabel='', ylabel='',
-            matplotlib_options=None, **kwargs):
+        self,
+        relative=False,
+        show_missing=True,
+        get_category=None,
+        title=None,
+        scale=None,
+        xlabel="",
+        ylabel="",
+        matplotlib_options=None,
+        **kwargs
+    ):
         """
         If *relative* is False, create a "standard" scatter plot with a
         diagonal line. If *relative* is True, create a relative scatter
@@ -150,11 +159,11 @@ class ScatterPlotReport(PlanningReport):
             print(matplotlib.rcParamsDefault)
 
         """
-        kwargs.setdefault('format', 'png')
+        kwargs.setdefault("format", "png")
 
         # Backwards compatibility.
-        xscale = kwargs.pop('xscale', None)
-        yscale = kwargs.pop('yscale', None)
+        xscale = kwargs.pop("xscale", None)
+        yscale = kwargs.pop("yscale", None)
         if xscale or yscale:
             logging.warning('Use "scale" parameter instead of "xscale" and "yscale".')
         scale = scale or xscale or yscale
@@ -162,28 +171,28 @@ class ScatterPlotReport(PlanningReport):
         PlanningReport.__init__(self, **kwargs)
         self.relative = relative
         if len(self.attributes) != 1:
-            logging.critical('ScatterPlotReport needs exactly one attribute')
+            logging.critical("ScatterPlotReport needs exactly one attribute")
         self.attribute = self.attributes[0]
         # By default all values are in the same category "None".
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
-        if self.output_format == 'tex':
+        if self.output_format == "tex":
             self.writer = ScatterPgfplots
         else:
             self.writer = ScatterMatplotlib
-        self.title = title if title is not None else (self.attribute or '')
+        self.title = title if title is not None else (self.attribute or "")
         self._set_scales(scale)
         self.xlabel = xlabel
         self.ylabel = ylabel
         # If the size has not been set explicitly, make it a square.
-        self.matplotlib_options = matplotlib_options or {'figure.figsize': [8, 8]}
-        if 'legend.loc' in self.matplotlib_options:
+        self.matplotlib_options = matplotlib_options or {"figure.figsize": [8, 8]}
+        if "legend.loc" in self.matplotlib_options:
             logging.warning('The "legend.loc" parameter is ignored.')
 
     def _set_scales(self, scale):
-        self.xscale = scale or self.attribute.scale or 'log'
-        self.yscale = 'log' if self.relative else self.xscale
-        scales = ['linear', 'log', 'symlog']
+        self.xscale = scale or self.attribute.scale or "log"
+        self.yscale = "log" if self.relative else self.xscale
+        scales = ["linear", "log", "symlog"]
         for scale in [self.xscale, self.yscale]:
             if scale not in scales:
                 logging.critical("Scale {} not in {}".format(scale, scales))
@@ -199,9 +208,10 @@ class ScatterPlotReport(PlanningReport):
                 run1, run2 = runs
             except ValueError:
                 logging.critical(
-                    'Scatter plot needs exactly two runs for {domain}:{problem}. '
-                    'Instead of filtering a whole run, try setting only some of its '
-                    'attribute values to None in a filter.'.format(**runs[0]))
+                    "Scatter plot needs exactly two runs for {domain}:{problem}. "
+                    "Instead of filtering a whole run, try setting only some of its "
+                    "attribute values to None in a filter.".format(**runs[0])
+                )
             category = self.get_category(run1, run2)
             coord = (run1.get(self.attribute), run2.get(self.attribute))
             if self.show_missing or None not in coord:
@@ -244,21 +254,25 @@ class ScatterPlotReport(PlanningReport):
         if not self.show_missing:
             return None
         if not any(
-            coord[axis] is None for coords in categories.values() for coord in coords):
+            coord[axis] is None for coords in categories.values() for coord in coords
+        ):
             return None
         max_value = max(
-            coord[axis] for coords in categories.values() for coord in coords
-            if coord[axis] is not None)
+            coord[axis]
+            for coords in categories.values()
+            for coord in coords
+            if coord[axis] is not None
+        )
         if max_value is None:
             return 1
-        if scale == 'linear':
+        if scale == "linear":
             return max_value * 1.1
         return int(10 ** math.ceil(math.log10(max_value)))
 
     def _handle_non_positive_values(self, categories):
         """Plot integer 0 values at 0.1 in log plots and abort if any value is < 0."""
         assert not self.relative
-        assert self.xscale == self.yscale == 'log'
+        assert self.xscale == self.yscale == "log"
         new_categories = {}
         for category, coords in categories.items():
             new_coords = []
@@ -270,8 +284,9 @@ class ScatterPlotReport(PlanningReport):
 
                 if (x is not None and x <= 0) or (y is not None and y <= 0):
                     logging.critical(
-                        'Logarithmic axes can only show positive values. '
-                        'Use a symlog or linear scale instead.')
+                        "Logarithmic axes can only show positive values. "
+                        "Use a symlog or linear scale instead."
+                    )
                 else:
                     new_coords.append((x, y))
             new_categories[category] = new_coords
@@ -297,8 +312,12 @@ class ScatterPlotReport(PlanningReport):
         new_categories = {}
         for category, coords in categories.items():
             coords = [
-                (x if x is not None else missing_value,
-                 y if y is not None else missing_value) for x, y in coords]
+                (
+                    x if x is not None else missing_value,
+                    y if y is not None else missing_value,
+                )
+                for x, y in coords
+            ]
             if coords:
                 new_categories[category] = coords
         return new_categories
@@ -307,16 +326,19 @@ class ScatterPlotReport(PlanningReport):
         """
         Create dictionary mapping from category name to marker style.
         """
-        shapes = 'x+os^v<>D'
-        colors = ['C{}'.format(c) for c in range(10)]
+        shapes = "x+os^v<>D"
+        colors = ["C{}".format(c) for c in range(10)]
 
         num_styles = len(shapes) * len(colors)
         styles = [
-            {'marker': shape, 'c': color}
-            for shape, color in itertools.islice(izip(
-                itertools.cycle(shapes), itertools.cycle(colors)), num_styles)]
-        assert len({(s['marker'], s['c']) for s in styles}) == num_styles, (
-            "The number of shapes and the number of colors must be coprime.")
+            {"marker": shape, "c": color}
+            for shape, color in itertools.islice(
+                izip(itertools.cycle(shapes), itertools.cycle(colors)), num_styles
+            )
+        ]
+        assert (
+            len({(s["marker"], s["c"]) for s in styles}) == num_styles
+        ), "The number of shapes and the number of colors must be coprime."
 
         category_styles = {}
         for i, category in enumerate(sorted(categories)):
@@ -333,8 +355,8 @@ class ScatterPlotReport(PlanningReport):
         else:
             self.plot_diagonal_line = True
             self.plot_horizontal_line = False
-            if self.xscale == 'log':
-                assert self.yscale == 'log'
+            if self.xscale == "log":
+                assert self.yscale == "log"
                 self.categories = self._handle_non_positive_values(self.categories)
             self.categories = self._handle_missing_values(self.categories)
         if not self.categories:
@@ -345,11 +367,12 @@ class ScatterPlotReport(PlanningReport):
     def write(self):
         if not len(self.algorithms) == 2:
             logging.critical(
-                'Scatter plots need exactly 2 algorithms: %s' % self.algorithms)
+                "Scatter plots need exactly 2 algorithms: %s" % self.algorithms
+            )
         self.xlabel = self.xlabel or self.algorithms[0]
         self.ylabel = self.ylabel or self.algorithms[1]
 
-        suffix = '.' + self.output_format
+        suffix = "." + self.output_format
         if not self.outfile.endswith(suffix):
             self.outfile += suffix
         tools.makedirs(os.path.dirname(self.outfile))

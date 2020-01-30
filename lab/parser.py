@@ -69,7 +69,7 @@ class _Pattern(object):
             try:
                 flag |= getattr(re, char)
             except AttributeError:
-                logging.critical('Unknown pattern flag: {}'.format(char))
+                logging.critical("Unknown pattern flag: {}".format(char))
 
         self.regex = re.compile(regex, flag)
 
@@ -80,8 +80,10 @@ class _Pattern(object):
             try:
                 value = match.group(self.group)
             except IndexError:
-                logging.error('Attribute %s not found for pattern %s in '
-                              'file %s' % (self.attribute, self, filename))
+                logging.error(
+                    "Attribute %s not found for pattern %s in "
+                    "file %s" % (self.attribute, self, filename)
+                )
             else:
                 value = self.type_(value)
                 found_props[self.attribute] = value
@@ -98,6 +100,7 @@ class _FileParser(object):
     Private class that parses a given file according to the added patterns
     and functions.
     """
+
     def __init__(self):
         self.filename = None
         self.content = None
@@ -106,7 +109,7 @@ class _FileParser(object):
 
     def load_file(self, filename):
         self.filename = filename
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             self.content = f.read()
 
     def add_pattern(self, pattern):
@@ -133,13 +136,14 @@ class Parser(object):
     Parse files in the current directory and write results into the
     run's ``properties`` file.
     """
+
     def __init__(self):
         tools.configure_logging()
         self.file_parsers = defaultdict(_FileParser)
 
     def add_pattern(
-            self, attribute, regex, file='run.log', type=int, flags='',
-            required=False):
+        self, attribute, regex, file="run.log", type=int, flags="", required=False
+    ):
         r"""
         Look for *regex* in *file*, cast what is found in brackets to
         *type* and store it in the properties dictionary under
@@ -163,12 +167,15 @@ class Parser(object):
 
         """
         if type == bool:
-            logging.warning('Casting any non-empty string to boolean will always '
-                            'evaluate to true. Are you sure you want to use type=bool?')
+            logging.warning(
+                "Casting any non-empty string to boolean will always "
+                "evaluate to true. Are you sure you want to use type=bool?"
+            )
         self.file_parsers[file].add_pattern(
-            _Pattern(attribute, regex, required, type, flags))
+            _Pattern(attribute, regex, required, type, flags)
+        )
 
-    def add_function(self, function, file='run.log'):
+    def add_function(self, function, file="run.log"):
         r"""Call ``function(open(file).read(), properties)`` during parsing.
 
         Functions are applied **after** all patterns have been
@@ -202,8 +209,8 @@ class Parser(object):
         The found values are written to the run's ``properties`` file.
 
         """
-        run_dir = os.path.abspath('.')
-        prop_file = os.path.join(run_dir, 'properties')
+        run_dir = os.path.abspath(".")
+        prop_file = os.path.join(run_dir, "properties")
         self.props = tools.Properties(filename=prop_file)
 
         for filename, file_parser in list(self.file_parsers.items()):
@@ -213,8 +220,11 @@ class Parser(object):
                 file_parser.load_file(path)
             except IOError as err:
                 if err.errno == errno.ENOENT:
-                    logging.info('File "{path}" is missing and thus not parsed.'.format(
-                        **locals()))
+                    logging.info(
+                        'File "{path}" is missing and thus not parsed.'.format(
+                            **locals()
+                        )
+                    )
                     del self.file_parsers[filename]
                 else:
                     logging.error('Failed to read "{path}": {err}'.format(**locals()))

@@ -32,15 +32,24 @@ def set_limit(kind, soft_limit, hard_limit):
         resource.setrlimit(kind, (soft_limit, hard_limit))
     except (OSError, ValueError) as err:
         logging.error(
-            'Resource limit for %s could not be set to %s (%s)' %
-            (kind, (soft_limit, hard_limit), err))
+            "Resource limit for %s could not be set to %s (%s)"
+            % (kind, (soft_limit, hard_limit), err)
+        )
 
 
 class Call(object):
-    def __init__(self, args, name, time_limit=None, memory_limit=None,
-                 soft_stdout_limit=None, hard_stdout_limit=None,
-                 soft_stderr_limit=None, hard_stderr_limit=None,
-                 **kwargs):
+    def __init__(
+        self,
+        args,
+        name,
+        time_limit=None,
+        memory_limit=None,
+        soft_stdout_limit=None,
+        hard_stdout_limit=None,
+        soft_stderr_limit=None,
+        hard_stderr_limit=None,
+        **kwargs
+    ):
         """Make system calls with time and memory constraints.
 
         *args* and *kwargs* are passed to `subprocess.Popen
@@ -50,7 +59,7 @@ class Call(object):
         ``lab.experiment._Buildable.add_command()``.
 
         """
-        assert 'stdin' not in kwargs, 'redirecting stdin is not supported'
+        assert "stdin" not in kwargs, "redirecting stdin is not supported"
         self.name = name
 
         if time_limit is None:
@@ -64,22 +73,25 @@ class Call(object):
 
         # Allow passing filenames instead of file handles.
         self.opened_files = []
-        for stream_name in ['stdout', 'stderr']:
+        for stream_name in ["stdout", "stderr"]:
             stream = kwargs.get(stream_name)
             if isinstance(stream, tools.string_type):
-                file = open(stream, mode='w')
+                file = open(stream, mode="w")
                 kwargs[stream_name] = file
                 self.opened_files.append(file)
 
         # Allow redirecting and limiting the output to streams.
         self.redirected_streams_and_limits = {}
         for stream_name, soft_limit, hard_limit in [
-                ('stdout', get_bytes(soft_stdout_limit), get_bytes(hard_stdout_limit)),
-                ('stderr', get_bytes(soft_stderr_limit), get_bytes(hard_stderr_limit))]:
+            ("stdout", get_bytes(soft_stdout_limit), get_bytes(hard_stdout_limit)),
+            ("stderr", get_bytes(soft_stderr_limit), get_bytes(hard_stderr_limit)),
+        ]:
             stream = kwargs.pop(stream_name, None)
             if stream:
                 self.redirected_streams_and_limits[stream_name] = (
-                    stream, (soft_limit, hard_limit))
+                    stream,
+                    (soft_limit, hard_limit),
+                )
                 kwargs[stream_name] = subprocess.PIPE
 
         def prepare_call():
@@ -91,16 +103,20 @@ class Call(object):
             if memory_limit is not None:
                 _, hard_mem_limit = resource.getrlimit(resource.RLIMIT_AS)
                 # Convert memory from MiB to Bytes.
-                set_limit(resource.RLIMIT_AS, memory_limit * 1024 * 1024, hard_mem_limit)
+                set_limit(
+                    resource.RLIMIT_AS, memory_limit * 1024 * 1024, hard_mem_limit
+                )
             set_limit(resource.RLIMIT_CORE, 0, 0)
 
         try:
-            self.process = subprocess.Popen(
-                args, preexec_fn=prepare_call, **kwargs)
+            self.process = subprocess.Popen(args, preexec_fn=prepare_call, **kwargs)
         except OSError as err:
             if err.errno == errno.ENOENT:
-                sys.exit('Error: Call {name} failed. "{path}" not found'.format(
-                    path=args[0], **locals()))
+                sys.exit(
+                    'Error: Call {name} failed. "{path}" not found'.format(
+                        path=args[0], **locals()
+                    )
+                )
             else:
                 raise
 
@@ -135,8 +151,10 @@ class Call(object):
 
         select_POLLIN_POLLPRI = select.POLLIN | select.POLLPRI
 
-        for stream_name, (new_stream, limits) in (
-                self.redirected_streams_and_limits.items()):
+        for (
+            stream_name,
+            (new_stream, limits),
+        ) in self.redirected_streams_and_limits.items():
             old_stream = getattr(self.process, stream_name)
             register_and_append(old_stream, select_POLLIN_POLLPRI)
             fd = old_stream.fileno()
@@ -159,17 +177,21 @@ class Call(object):
                     if fd_to_outfile[fd]:
                         outfile = fd_to_outfile[fd]
                         _, hard_limit = fd_to_limits[fd]
-                        if (hard_limit is not None and
-                                fd_to_bytes[fd] + len(data) > hard_limit):
+                        if (
+                            hard_limit is not None
+                            and fd_to_bytes[fd] + len(data) > hard_limit
+                        ):
                             # Don't write to this outfile in subsequent rounds.
                             fd_to_outfile[fd] = None
                             logging.error(
-                                '{} wrote {} KiB (hard limit) to {} ->'
-                                ' abort command'.format(
-                                    self.name, hard_limit / 1024, outfile.name))
+                                "{} wrote {} KiB (hard limit) to {} ->"
+                                " abort command".format(
+                                    self.name, hard_limit / 1024, outfile.name
+                                )
+                            )
                             self.process.terminate()
                             # Strip extra bytes.
-                            data = data[:hard_limit - fd_to_bytes[fd]]
+                            data = data[: hard_limit - fd_to_bytes[fd]]
                         outfile.write(tools.get_string(data))
                         fd_to_bytes[fd] += len(data)
                 else:
@@ -182,11 +204,15 @@ class Call(object):
             if outfile is not None:
                 soft_limit, _ = fd_to_limits[fd]
                 bytes_written = fd_to_bytes[fd]
-                if (soft_limit is not None and bytes_written > soft_limit):
+                if soft_limit is not None and bytes_written > soft_limit:
                     logging.error(
-                        '{} finished and wrote {} KiB to {} (soft limit: {} KiB)'.format(
-                            self.name, bytes_written / 1024, outfile.name,
-                            soft_limit / 1024))
+                        "{} finished and wrote {} KiB to {} (soft limit: {} KiB)".format(
+                            self.name,
+                            bytes_written / 1024,
+                            outfile.name,
+                            soft_limit / 1024,
+                        )
+                    )
 
     def wait(self):
         wall_clock_start_time = time.time()
@@ -201,11 +227,14 @@ class Call(object):
         for file in self.opened_files:
             file.close()
         wall_clock_time = time.time() - wall_clock_start_time
-        logging.info('{} wall-clock time: {:.2f}s'.format(self.name, wall_clock_time))
-        if (self.wall_clock_time_limit is not None and
-                wall_clock_time > self.wall_clock_time_limit):
+        logging.info("{} wall-clock time: {:.2f}s".format(self.name, wall_clock_time))
+        if (
+            self.wall_clock_time_limit is not None
+            and wall_clock_time > self.wall_clock_time_limit
+        ):
             logging.error(
-                'wall-clock time for %s too high: %.2f > %d' %
-                (self.name, wall_clock_time, self.wall_clock_time_limit))
-        logging.info('{} exit code: {}'.format(self.name, retcode))
+                "wall-clock time for %s too high: %.2f > %d"
+                % (self.name, wall_clock_time, self.wall_clock_time_limit)
+            )
+        logging.info("{} exit code: {}".format(self.name, retcode))
         return retcode

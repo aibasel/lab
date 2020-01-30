@@ -26,8 +26,8 @@ import tarfile
 
 from lab import tools
 
-GIT = 'git'
-MERCURIAL = 'hg'
+GIT = "git"
+MERCURIAL = "hg"
 VERSION_CONTROL_SYSTEMS = [GIT, MERCURIAL]
 
 
@@ -42,7 +42,9 @@ def _get_id(cmd):
         except subprocess.CalledProcessError:
             logging.critical(
                 'Call failed: "{}". Please check path and revision.'.format(
-                    ' '.join(cmd)))
+                    " ".join(cmd)
+                )
+            )
         else:
             assert result
             _ID_CACHE[cmd] = result
@@ -52,8 +54,8 @@ def _get_id(cmd):
 def hg_id(repo, args=None, rev=None):
     args = args or []
     if rev:
-        args.extend(['-r', str(rev)])
-    cmd = ['hg', 'id', '--repository', repo] + args
+        args.extend(["-r", str(rev)])
+    cmd = ["hg", "id", "--repository", repo] + args
     return _get_id(cmd)
 
 
@@ -61,7 +63,13 @@ def git_id(repo, args=None, rev=None):
     args = args or []
     if rev:
         args.append(rev)
-    cmd = ['git', '--git-dir', os.path.join(repo, '.git'), 'rev-parse', '--short'] + args
+    cmd = [
+        "git",
+        "--git-dir",
+        os.path.join(repo, ".git"),
+        "rev-parse",
+        "--short",
+    ] + args
     return _get_id(cmd)
 
 
@@ -70,20 +78,25 @@ def _raise_unknown_vcs_error(vcs):
 
 
 def get_version_control_system(repo):
-    vcs = [x for x in VERSION_CONTROL_SYSTEMS
-           if os.path.exists(os.path.join(repo, '.{}'.format(x)))]
+    vcs = [
+        x
+        for x in VERSION_CONTROL_SYSTEMS
+        if os.path.exists(os.path.join(repo, ".{}".format(x)))
+    ]
     if len(vcs) == 1:
         return vcs[0]
     else:
         logging.critical(
-            'Repo {} must contain exactly one of the following subdirectories: {}'.format(
-                repo, ", ".join(".{}".format(x) for x in VERSION_CONTROL_SYSTEMS)))
+            "Repo {} must contain exactly one of the following subdirectories: {}".format(
+                repo, ", ".join(".{}".format(x) for x in VERSION_CONTROL_SYSTEMS)
+            )
+        )
 
 
 def get_global_rev(repo, rev=None):
     vcs = get_version_control_system(repo)
     if vcs == MERCURIAL:
-        return hg_id(repo, args=['-i'], rev=rev)
+        return hg_id(repo, args=["-i"], rev=rev)
     elif vcs == GIT:
         return git_id(repo, rev=rev)
     else:
@@ -112,6 +125,7 @@ class CachedRevision(object):
 
     It provides methods for caching and compiling given revisions.
     """
+
     def __init__(self, repo, local_rev, build_options):
         """
         * *repo*: Path to Fast Downward repository.
@@ -119,8 +133,7 @@ class CachedRevision(object):
         * *build_options*: List of build.py options.
         """
         if not os.path.isdir(repo):
-            logging.critical(
-                '{} is not a local Fast Downward repository.'.format(repo))
+            logging.critical("{} is not a local Fast Downward repository.".format(repo))
         self.repo = repo
         self.build_options = build_options
         self.local_rev = local_rev
@@ -142,7 +155,9 @@ class CachedRevision(object):
 
     def _compute_hashed_name(self):
         if self.build_options:
-            return '{}_{}'.format(self.global_rev, _compute_md5_hash(self.build_options))
+            return "{}_{}".format(
+                self.global_rev, _compute_md5_hash(self.build_options)
+            )
         else:
             return self.global_rev
 
@@ -152,22 +167,25 @@ class CachedRevision(object):
             logging.info('Revision is already cached: "%s"' % self.path)
             if not os.path.exists(self._get_sentinel_file()):
                 logging.critical(
-                    'The build for the cached revision at {} is corrupted '
-                    'or was made with an older Lab version. Please delete '
-                    'it and try again.'.format(self.path))
+                    "The build for the cached revision at {} is corrupted "
+                    "or was made with an older Lab version. Please delete "
+                    "it and try again.".format(self.path)
+                )
         else:
             tools.makedirs(self.path)
-            exclude_dirs = ['experiments', 'misc']
+            exclude_dirs = ["experiments", "misc"]
             vcs = get_version_control_system(self.repo)
             if vcs == MERCURIAL:
                 retcode = tools.run_command(
-                    ['hg', 'archive', '-r', self.global_rev] +
-                    ['-X{}'.format(d) for d in exclude_dirs] + [self.path],
-                    cwd=self.repo)
+                    ["hg", "archive", "-r", self.global_rev]
+                    + ["-X{}".format(d) for d in exclude_dirs]
+                    + [self.path],
+                    cwd=self.repo,
+                )
             elif vcs == GIT:
-                tar_archive = os.path.join(self.path, 'downward.tgz')
-                cmd = ['git', 'archive', '--format', 'tar', self.global_rev]
-                with open(tar_archive, 'w') as f:
+                tar_archive = os.path.join(self.path, "downward.tgz")
+                cmd = ["git", "archive", "--format", "tar", self.global_rev]
+                with open(tar_archive, "w") as f:
                     retcode = tools.run_command(cmd, stdout=f, cwd=self.repo)
 
                 if retcode == 0:
@@ -182,7 +200,7 @@ class CachedRevision(object):
 
             if retcode != 0:
                 shutil.rmtree(self.path)
-                logging.critical('Failed to make checkout.')
+                logging.critical("Failed to make checkout.")
             self._compile()
             self._cleanup()
 
@@ -190,42 +208,41 @@ class CachedRevision(object):
         return os.path.join(self.path, *rel_path)
 
     def get_exp_path(self, *rel_path):
-        return os.path.join('code-' + self._hashed_name, *rel_path)
+        return os.path.join("code-" + self._hashed_name, *rel_path)
 
     def get_planner_resource_name(self):
-        return 'fast_downward_' + self._hashed_name
+        return "fast_downward_" + self._hashed_name
 
     def _get_sentinel_file(self):
-        return self.get_cached_path('build_successful')
+        return self.get_cached_path("build_successful")
 
     def _compile(self):
-        if not os.path.exists(os.path.join(self.path, 'build.py')):
-            logging.critical('build.py not found. Please merge with master.')
-        retcode = tools.run_command(
-            ['./build.py'] + self.build_options, cwd=self.path)
+        if not os.path.exists(os.path.join(self.path, "build.py")):
+            logging.critical("build.py not found. Please merge with master.")
+        retcode = tools.run_command(["./build.py"] + self.build_options, cwd=self.path)
         if retcode == 0:
-            tools.write_file(self._get_sentinel_file(), '')
+            tools.write_file(self._get_sentinel_file(), "")
         else:
-            logging.critical('Build failed in {}'.format(self.path))
+            logging.critical("Build failed in {}".format(self.path))
 
     def _cleanup(self):
         # Only keep the bin directories in "builds" dir.
         for path in glob.glob(os.path.join(self.path, "builds", "*", "*")):
-            if os.path.basename(path) != 'bin':
+            if os.path.basename(path) != "bin":
                 tools.remove_path(path)
 
         # Remove unneeded files.
-        tools.remove_path(self.get_cached_path('build.py'))
+        tools.remove_path(self.get_cached_path("build.py"))
 
         # Strip binaries.
         binaries = []
         for path in glob.glob(os.path.join(self.path, "builds", "*", "bin", "*")):
-            if os.path.basename(path) in ['downward', 'preprocess']:
+            if os.path.basename(path) in ["downward", "preprocess"]:
                 binaries.append(path)
-        subprocess.call(['strip'] + binaries)
+        subprocess.call(["strip"] + binaries)
 
         # Compress src directory.
         subprocess.call(
-            ['tar', '-cf', 'src.tar', '--remove-files', 'src'],
-            cwd=self.path)
-        subprocess.call(['xz', 'src.tar'], cwd=self.path)
+            ["tar", "-cf", "src.tar", "--remove-files", "src"], cwd=self.path
+        )
+        subprocess.call(["xz", "src.tar"], cwd=self.path)

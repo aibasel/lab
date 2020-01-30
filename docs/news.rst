@@ -6,6 +6,7 @@ next (unreleased)
 
 Lab
 ^^^
+* Format source code with black (https://github.com/psf/black).
 * Bugfix for filters: retrieve new run ID from modified runs (Silvan Sievers).
 
 Downward Lab
