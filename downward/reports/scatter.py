@@ -36,8 +36,6 @@ except ImportError:
     izip = zip
 
 
-
-
 class ScatterPlotReport(PlanningReport):
     """
     Generate a scatter plot for an attribute.

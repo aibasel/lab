@@ -1,8 +1,8 @@
 import datetime
 import os
 
-from lab.reports import geometric_mean
 from lab import tools
+from lab.reports import geometric_mean
 
 
 base = os.path.join("/tmp", str(datetime.datetime.now()))
