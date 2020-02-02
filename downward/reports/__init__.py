@@ -24,10 +24,8 @@ from collections import defaultdict
 from fnmatch import fnmatch
 import logging
 
-from lab import reports
-from lab.reports import markup
-from lab.reports import Attribute, Report, geometric_mean
-from lab import tools
+from lab import reports, tools
+from lab.reports import Attribute, geometric_mean, markup, Report
 
 
 class PlanningReport(Report):

@@ -8,11 +8,10 @@ import glob
 import os
 import platform
 
-from lab.environments import LocalEnvironment, BaselSlurmEnvironment
+from downward.reports.absolute import AbsoluteReport
+from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
 from lab.reports import Attribute
-
-from downward.reports.absolute import AbsoluteReport
 
 
 # Create custom report class with suitable info and error attributes.

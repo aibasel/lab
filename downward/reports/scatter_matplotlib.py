@@ -19,6 +19,7 @@
 import logging
 import sys
 
+
 try:
     import matplotlib
     from matplotlib import figure

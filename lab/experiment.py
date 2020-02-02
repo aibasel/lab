@@ -24,10 +24,9 @@ import os
 import subprocess
 import sys
 
-from lab import environments
-from lab import tools
+from lab import environments, tools
 from lab.fetcher import Fetcher
-from lab.steps import Step, get_step, get_steps_text
+from lab.steps import get_step, get_steps_text, Step
 
 
 # How many tasks to group into one top-level directory.

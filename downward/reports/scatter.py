@@ -22,6 +22,12 @@ import logging
 import math
 import os
 
+from downward.reports import PlanningReport
+from downward.reports.scatter_matplotlib import ScatterMatplotlib
+from downward.reports.scatter_pgfplots import ScatterPgfplots
+from lab import tools
+
+
 try:
     # Python 2
     from itertools import izip
@@ -29,11 +35,7 @@ except ImportError:
     # Python 3+
     izip = zip
 
-from lab import tools
 
-from downward.reports import PlanningReport
-from downward.reports.scatter_matplotlib import ScatterMatplotlib
-from downward.reports.scatter_pgfplots import ScatterPgfplots
 
 
 class ScatterPlotReport(PlanningReport):

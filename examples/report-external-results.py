@@ -17,10 +17,9 @@ the attribute names and values that you want to make reports for, e.g.
 import json
 import os.path
 
-from lab.experiment import Experiment
-from lab import tools
-
 from downward.reports.absolute import AbsoluteReport
+from lab import tools
+from lab.experiment import Experiment
 
 
 EXP_DIR = "data/custom"

@@ -22,9 +22,8 @@ Parse Fast Downward exit code and store a message describing the outcome
 in the "error" attribute.
 """
 
-from lab.parser import Parser
-
 from downward import outcomes
+from lab.parser import Parser
 
 
 def parse_exit_code(content, props):

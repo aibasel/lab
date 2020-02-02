@@ -20,8 +20,8 @@ import logging
 import os
 import sys
 
-import lab.experiment
 from lab import tools
+import lab.experiment
 
 
 def _check_eval_dir(eval_dir):

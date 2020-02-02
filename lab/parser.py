@@ -48,11 +48,11 @@ re-parse your results.
 
 """
 
+from collections import defaultdict
 import errno
+import logging
 import os.path
 import re
-from collections import defaultdict
-import logging
 
 from lab import tools
 

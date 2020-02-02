@@ -9,17 +9,16 @@ import os.path
 import platform
 from subprocess import call
 
-from lab import reports
-from lab.environments import LocalEnvironment, BaselSlurmEnvironment
-from lab.reports import Attribute
-from lab.reports.filter import FilterReport
-
 from downward import cached_revision
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import ComparativeReport
 from downward.reports.scatter import ScatterPlotReport
 from downward.reports.taskwise import TaskwiseReport
+from lab import reports
+from lab.environments import BaselSlurmEnvironment, LocalEnvironment
+from lab.reports import Attribute
+from lab.reports.filter import FilterReport
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))

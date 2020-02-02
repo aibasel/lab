@@ -26,6 +26,7 @@ import tarfile
 
 from lab import tools
 
+
 GIT = "git"
 MERCURIAL = "hg"
 VERSION_CONTROL_SYSTEMS = [GIT, MERCURIAL]

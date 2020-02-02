@@ -18,9 +18,8 @@
 
 import logging
 
-from lab.reports import Table
-
 from downward.reports import PlanningReport
+from lab.reports import Table
 
 
 class TaskwiseReport(PlanningReport):

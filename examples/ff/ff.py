@@ -8,11 +8,10 @@ Example experiment for the FF planner
 import os
 import platform
 
-from lab.environments import LocalEnvironment, BaselSlurmEnvironment
-from lab.experiment import Experiment
-
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
+from lab.environments import BaselSlurmEnvironment, LocalEnvironment
+from lab.experiment import Experiment
 
 
 # Create custom report class with suitable info and error attributes.

@@ -18,9 +18,8 @@
 
 import logging
 
-from lab import reports
-
 from downward.reports.absolute import AbsoluteReport
+from lab import reports
 
 
 class ComparativeReport(AbsoluteReport):

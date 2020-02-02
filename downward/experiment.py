@@ -24,11 +24,10 @@ from collections import defaultdict, OrderedDict
 import logging
 import os.path
 
-from lab.experiment import Run, Experiment, get_default_data_dir
-from lab import tools
-
-from downward.cached_revision import CachedRevision
 from downward import suites
+from downward.cached_revision import CachedRevision
+from lab import tools
+from lab.experiment import Experiment, get_default_data_dir, Run
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))

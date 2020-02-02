@@ -20,10 +20,9 @@ from collections import defaultdict
 import logging
 import re
 
-from lab import reports
-
 from downward import outcomes
 from downward.reports import PlanningReport
+from lab import reports
 
 
 def _abbreviate_node_names(nodes):
