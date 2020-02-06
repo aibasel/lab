@@ -1,6 +1,18 @@
 News
 ====
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Use newer txt2tags version and remove bundled copy.
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes.
+
+
 v5.3 (2020-03-02)
 -----------------
 
