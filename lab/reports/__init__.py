@@ -28,8 +28,9 @@ import numbers
 import os
 import sys
 
+import txt2tags
+
 from lab import tools
-from lab.external import txt2tags
 from lab.reports import markup
 from lab.reports.markup import Document, ESCAPE_WORDBREAK
 

@@ -20,14 +20,7 @@ setup(
     author_email="jendrikseipp@gmail.com",
     url="https://bitbucket.org/jendrikseipp/lab",
     license="GPL3+",
-    packages=[
-        "downward",
-        "downward.reports",
-        "lab",
-        "lab.calls",
-        "lab.external",
-        "lab.reports",
-    ],
+    packages=["downward", "downward.reports", "lab", "lab.calls", "lab.reports"],
     package_data={"downward": ["scripts/*.py"], "lab": ["data/*", "scripts/*.py"]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -45,6 +38,7 @@ setup(
     install_requires=[
         "matplotlib",  # for scatter plots
         "simplejson",  # optional, speeds up reading properties files
+        "txt2tags>=3.6",  # for HTML and Latex reports
     ],
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
 )
