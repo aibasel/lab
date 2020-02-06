@@ -19,14 +19,10 @@
 import logging
 import sys
 
-
-try:
-    import matplotlib
-    from matplotlib import figure
-    from matplotlib.backends import backend_agg
-    import matplotlib.lines as mlines
-except ImportError as err:
-    logging.warning("matplotlib not found: {}".format(err))
+import matplotlib
+from matplotlib import figure
+from matplotlib.backends import backend_agg
+import matplotlib.lines as mlines
 
 
 class MatplotlibPlot(object):
