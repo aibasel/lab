@@ -7,6 +7,7 @@ next (unreleased)
 Lab
 ^^^
 * Use newer txt2tags version and remove bundled copy.
+* Call parsers with active Python interpreter.
 
 Downward Lab
 ^^^^^^^^^^^^
