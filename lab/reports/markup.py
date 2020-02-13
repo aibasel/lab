@@ -21,7 +21,6 @@ import logging
 import txt2tags
 
 
-TABLE_HEAD_BG = "#aaa"
 ESCAPE_WORDBREAK = "xWBRx"
 ESCAPE_WHITESPACE = "xWHITESPACEx"
 
@@ -34,11 +33,11 @@ CSS = (
     table {
         border-collapse: collapse;
     }
-    th {
+    table th {
         text-align: left;
         padding-top: 5px;
         padding-bottom: 4px;
-        background-color: %(TABLE_HEAD_BG)s;
+        background-color: #aaa;
         color: #ffffff;
     }
 </style>
