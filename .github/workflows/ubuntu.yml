@@ -23,10 +23,15 @@ jobs:
         pwd
         realpath ~
         ls ~
-    - name: Run tests
+    - name: Install tox
       run: |
         python -m pip install --upgrade pip tox
-
+    - name: Check style
+      if: matrix.python-version == '3.6'
+      run: |
+        tox -e docs,style
+    - name: Run tests
+      run: |
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
 
@@ -40,8 +45,8 @@ jobs:
         hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
 
         # Clone temporary Git version of Fast Downward.
-        #export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
-        #git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
+        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
+        git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
 
         # Clone benchmarks.
         export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
@@ -77,10 +82,5 @@ jobs:
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
         tox -e py
 
-        #export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
-        #tox -e py
-
-    - name: Check style
-      if: matrix.python-version == '3.6'
-      run: |
-        tox -e docs,style
+        export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
+        tox -e py

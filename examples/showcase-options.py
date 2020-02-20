@@ -30,7 +30,6 @@ else:
     ENV = LocalEnvironment(processes=2)
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
-REV_CACHE = os.path.expanduser("~/lab/revision-cache")
 VCS = cached_revision.get_version_control_system(REPO)
 REV = "default" if VCS == cached_revision.MERCURIAL else "master"
 
