@@ -48,7 +48,7 @@ jobs:
         pwd
         ls
         echo Aha
-        ls revision-cache
+        #ls revision-cache
 
         # Create and move to directory for dependencies.
         mkdir ../deps
@@ -97,5 +97,5 @@ jobs:
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
         tox -e py
 
-        export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
-        tox -e py
+        #export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
+        #tox -e py
