@@ -24,8 +24,9 @@ jobs:
         mkdir ../deps
         pushd ../deps
 
-        sudo apt-get update
-        sudo apt-get -y upgrade
+        # Updating the installed packages takes very long, so we don't do it for now.
+        #sudo apt-get update
+        #sudo apt-get -y upgrade
 
         # Install dependencies of this script.
         sudo apt-get -y install git mercurial python2.7 python2.7-dev python3.6 python3.7 python3.8 python-tox software-properties-common wget
