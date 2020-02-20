@@ -24,16 +24,16 @@ jobs:
         mkdir ../deps
         pushd ../deps
 
-        apt-get update
-        apt-get -y upgrade
+        sudo apt-get update
+        sudo apt-get -y upgrade
 
         # Install dependencies of this script.
-        apt-get -y install git mercurial python2.7 python2.7-dev python3.6 python3.7 python3.8 python-tox software-properties-common wget
-        add-apt-repository -y --update ppa:deadsnakes/ppa
-        apt-get -y install python3.5
+        sudo apt-get -y install git mercurial python2.7 python2.7-dev python3.6 python3.7 python3.8 python-tox software-properties-common wget
+        sudo add-apt-repository -y --update ppa:deadsnakes/ppa
+        sudo apt-get -y install python3.5
 
         # Clone Fast Downward.
-        apt-get -y install mercurial g++ cmake make python
+        sudo apt-get -y install mercurial g++ cmake make python
         export HG_DOWNWARD_REPO=`realpath fast-downward`
         hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
 
@@ -55,7 +55,7 @@ jobs:
         git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
         # Download and compile FF (used by example experiment).
-        apt-get -y install g++ make flex bison
+        sudo apt-get -y install g++ make flex bison
         wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
         tar -xzvf FF-v2.3.tgz
         cd FF-v2.3/
@@ -65,7 +65,7 @@ jobs:
         rm -rf FF-v2.3/
 
         # Setup VAL.
-        apt-get -y install g++ make flex bison
+        sudo apt-get -y install g++ make flex bison
         git clone https://github.com/KCL-Planning/VAL.git
         cd VAL
         git checkout a5565396007eee73ac36527fbf904142b3077c74
