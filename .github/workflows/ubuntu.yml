@@ -71,13 +71,9 @@ jobs:
 
         popd
 
-    #- name: Test Mercurial repo
-    #  run: |
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
         tox -e py
 
-    #- name: Test Git repo
-    #  run: |
         export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
         tox -e py
 
