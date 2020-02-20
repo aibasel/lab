@@ -26,10 +26,11 @@ else:
 # Use path to your Fast Downward repository.
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
+REVISION_CACHE = os.path.expanduser("~/lab/revision-cache")
 VCS = cached_revision.get_version_control_system(REPO)
 REV = "default" if VCS == cached_revision.MERCURIAL else "master"
 
-exp = FastDownwardExperiment(environment=ENV)
+exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 
 # Add built-in parsers to the experiment.
 exp.add_parser(exp.EXITCODE_PARSER)
