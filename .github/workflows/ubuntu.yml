@@ -20,18 +20,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
 
-        # Create and move to directory for dependencies.
-        mkdir ../deps
-        pushd ../deps
-
         # Updating the installed packages takes very long, so we don't do it for now.
         #sudo apt-get update
         #sudo apt-get -y upgrade
 
         # Install dependencies of this script.
-        sudo apt-get -y install git mercurial python2.7 python2.7-dev python3.6 python3.7 python3.8 python-tox software-properties-common wget
-        sudo add-apt-repository -y --update ppa:deadsnakes/ppa
-        sudo apt-get -y install python3.5
+        sudo apt-get -y install git mercurial wget
+
+        # Create and move to directory for dependencies.
+        mkdir ../deps
+        pushd ../deps
 
         # Clone Fast Downward.
         sudo apt-get -y install mercurial g++ cmake make python
@@ -46,7 +44,7 @@ jobs:
         mkdir git-fast-downward
         cd git-fast-downward
         git init
-        python2 ../fast-export/hg-fast-export.py -r ${HG_DOWNWARD_REPO}
+        PYTHON=python2 ../fast-export/hg-fast-export.py -r ${HG_DOWNWARD_REPO}
         git checkout master
         cd ..
         export GIT_DOWNWARD_REPO=`realpath fast-downward`
@@ -82,15 +80,15 @@ jobs:
 
         popd
 
-        # Test Mercurial repository.
-        echo "Test Mercurial Fast Downward Repository"
+    - name: Test Mercurial repo
+      run: |
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
-        TOX_LATEST_PYTHON=python3.8 tox
+        tox -e py
 
-        # Test Git repository.
-        echo "Test Git Fast Downward Repository"
+    - name: Test Git repo
+      run: |
         export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
-        TOX_LATEST_PYTHON=python3.8 tox
+        tox -e py
 
     - name: Show Python version
       run: |
@@ -98,4 +96,4 @@ jobs:
     - name: Test with tox
       run: |
         pip install tox
-        tox -e py
+        tox -e style
