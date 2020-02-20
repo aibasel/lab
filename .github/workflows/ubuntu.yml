@@ -41,6 +41,9 @@ jobs:
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
 
+        pwd
+        ls
+        echo Aha
         ls revision-cache
 
         # Create and move to directory for dependencies.
