@@ -20,6 +20,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
 
+        python --version
         python2 --version
 
         # Updating the installed packages takes very long, so we don't do it for now.
