@@ -41,6 +41,10 @@ jobs:
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
 
+        export LAB_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
+        python3 -c "import os; print(os.environ.get('LAB_REVISION_CACHE'))"
+        echo CACHE: $LAB_REVISION_CACHE
+
         pwd
         ls
         echo Aha
@@ -89,9 +93,6 @@ jobs:
         export PATH="$(pwd):$PATH"
 
         popd
-
-        export LAB_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
-        echo CACHE: $LAB_REVISION_CACHE
 
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
         tox -e py
