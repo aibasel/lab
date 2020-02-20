@@ -42,7 +42,7 @@ if REMOTE:
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
     SUITE = BHOSLIB_GRAPHS + RANDOM_GRAPHS
 else:
-    ENV = LocalEnvironment(processes=4)
+    ENV = LocalEnvironment(processes=2)
     # Use smaller suite for local tests.
     SUITE = BHOSLIB_GRAPHS[:1] + RANDOM_GRAPHS[:1]
 ATTRIBUTES = [

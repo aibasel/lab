@@ -33,7 +33,7 @@ BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 if REMOTE:
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
 else:
-    ENV = LocalEnvironment(processes=4)
+    ENV = LocalEnvironment(processes=2)
 SUITE = ["grid", "gripper:prob01.pddl", "miconic:s1-0.pddl", "mystery:prob07.pddl"]
 ATTRIBUTES = [
     "coverage",
