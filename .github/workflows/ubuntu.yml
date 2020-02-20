@@ -1,6 +1,6 @@
 name: Lab
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -19,6 +19,78 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+
+        # Create and move to directory for dependencies.
+        mkdir ../deps
+        pushd ../deps
+
+        apt-get update
+        apt-get -y upgrade
+
+        # Install dependencies of this script.
+        apt-get -y install git mercurial python2.7 python2.7-dev python3.6 python3.7 python3.8 python-tox software-properties-common wget
+        add-apt-repository -y --update ppa:deadsnakes/ppa
+        apt-get -y install python3.5
+
+        # Clone Fast Downward.
+        apt-get -y install mercurial g++ cmake make python
+        export HG_DOWNWARD_REPO=`realpath fast-downward`
+        hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
+
+        # Convert Fast Downward repository to Git.
+        git clone https://github.com/frej/fast-export.git
+        cd fast-export
+        git checkout v180317  # Later versions require newer Mercurial version.
+        cd ..
+        mkdir git-fast-downward
+        cd git-fast-downward
+        git init
+        ../fast-export/hg-fast-export.sh -r ${HG_DOWNWARD_REPO}
+        git checkout master
+        cd ..
+        export GIT_DOWNWARD_REPO=`realpath fast-downward`
+
+        # Clone benchmarks.
+        export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
+        git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+
+        # Download and compile FF (used by example experiment).
+        apt-get -y install g++ make flex bison
+        wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+        tar -xzvf FF-v2.3.tgz
+        cd FF-v2.3/
+        make -j8
+        cp ff ../
+        cd ..
+        rm -rf FF-v2.3/
+
+        # Setup VAL.
+        apt-get -y install g++ make flex bison
+        git clone https://github.com/KCL-Planning/VAL.git
+        cd VAL
+        git checkout a5565396007eee73ac36527fbf904142b3077c74
+        make clean  # Remove old build artifacts and binaries.
+        sed -i 's/-Werror //g' Makefile  # Ignore warnings.
+        make -j8
+        mv validate ../
+        cd ../
+        rm -rf VAL
+
+        # Add binaries to PATH.
+        export PATH="$(pwd):$PATH"
+
+        popd
+
+        # Test Mercurial repository.
+        echo "Test Mercurial Fast Downward Repository"
+        export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
+        TOX_LATEST_PYTHON=python3.8 tox
+
+        # Test Git repository.
+        echo "Test Git Fast Downward Repository"
+        export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
+        TOX_LATEST_PYTHON=python3.8 tox
+
     - name: Show Python version
       run: |
         python --version
