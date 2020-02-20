@@ -71,19 +71,20 @@ jobs:
 
         popd
 
-    - name: Test Mercurial repo
-      run: |
+    #- name: Test Mercurial repo
+    #  run: |
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
         tox -e py
 
-    - name: Test Git repo
-      run: |
+    #- name: Test Git repo
+    #  run: |
         export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
         tox -e py
 
     - name: Show Python version
       run: |
         python --version
+        python -c "import multiprocessing as m; print(m.cpu_count())"
     - name: Test with tox
       run: |
         pip install tox
