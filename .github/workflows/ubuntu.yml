@@ -20,16 +20,15 @@ jobs:
       run: |
         python --version
         python3 -c "import multiprocessing as m; print('CPUs:', m.cpu_count())"
-    - name: Install dependencies
+    - name: Run tests
       run: |
+        pwd
+        realpath ~
+        ls ~
         python -m pip install --upgrade pip tox
 
-        # Updating the installed packages takes very long, so we don't do it for now.
-        #sudo apt-get update
-        #sudo apt-get -y upgrade
-
-        # Install dependencies of this script.
-        sudo apt-get -y install git mercurial wget
+        # Updating the installed packages takes very long, so we don't do it.
+        # sudo apt-get update && sudo apt-get -y upgrade
 
         # Create and move to directory for dependencies.
         mkdir ../deps
@@ -40,7 +39,7 @@ jobs:
         export HG_DOWNWARD_REPO=`realpath fast-downward`
         hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
 
-        # Convert temporary Git version of Fast Downward.
+        # Clone temporary Git version of Fast Downward.
         export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
         git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
 
@@ -58,7 +57,7 @@ jobs:
         cd ..
         rm -rf FF-v2.3/
 
-        # Setup VAL.
+        # Download and compile VAL.
         sudo apt-get -y install g++ make flex bison
         git clone https://github.com/KCL-Planning/VAL.git
         cd VAL
@@ -81,7 +80,7 @@ jobs:
         export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
         tox -e py
 
-    - name: Test with tox
+    - name: Check style
       if: matrix.python-version == '3.6'
       run: |
         tox -e docs,style
