@@ -20,9 +20,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
 
-        python --version
-        python2 --version
-
         # Updating the installed packages takes very long, so we don't do it for now.
         #sudo apt-get update
         #sudo apt-get -y upgrade
@@ -39,19 +36,9 @@ jobs:
         export HG_DOWNWARD_REPO=`realpath fast-downward`
         hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
 
-        # Convert Fast Downward repository to Git.
-        git clone https://github.com/frej/fast-export.git
-        cd fast-export
-        git checkout v180317  # Later versions require newer Mercurial version.
-        cd ..
-        mkdir git-fast-downward
-        cd git-fast-downward
-        git init
-        # This version of Mercurial needs Python 2.
-        PYTHON=python2 ../fast-export/hg-fast-export.sh -r ${HG_DOWNWARD_REPO}
-        git checkout master
-        cd ..
-        export GIT_DOWNWARD_REPO=`realpath fast-downward`
+        # Convert temporary Git version of Fast Downward.
+        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
+        git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
 
         # Clone benchmarks.
         export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
