@@ -30,7 +30,7 @@ REVISION_CACHE = os.path.expanduser("~/lab/revision-cache")
 VCS = cached_revision.get_version_control_system(REPO)
 REV = "default" if VCS == cached_revision.MERCURIAL else "master"
 
-exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
+exp = FastDownwardExperiment(environment=ENV, revision_cache=None)
 
 # Add built-in parsers to the experiment.
 exp.add_parser(exp.EXITCODE_PARSER)
