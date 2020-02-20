@@ -70,14 +70,14 @@ def main():
     random.seed(args.seed)
     edges = get_edges(args.input_file)
     print("Algorithm: {}".format(args.algorithm))
-    start_time = time.clock()
+    start_time = time.process_time()
     if args.algorithm == "2approx":
         cover = find_two_approximation(edges)
     elif args.algorithm == "greedy":
         cover = find_greedy_cover(edges)
     else:
         raise ValueError("Unknown algorithm selected")
-    solve_time = time.clock() - start_time
+    solve_time = time.process_time() - start_time
     print("Cover: {}".format(cover))
     print("Cover size: {}".format(len(cover)))
     print("Solve time: {}s".format(solve_time))
