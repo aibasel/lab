@@ -272,12 +272,6 @@ class FastDownwardExperiment(Experiment):
         ...     "ipdb", repo, rev,
         ...     ["--search", "astar(ipdb())"])
 
-        Test LM-Cut in an issue experiment:
-
-        >>> exp.add_algorithm(
-        ...     "issue123-v1-lmcut", repo, "issue123-v1",
-        ...     ["--search", "astar(lmcut())"])
-
         Run blind search in debug mode:
 
         >>> exp.add_algorithm(

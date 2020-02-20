@@ -1,0 +1,83 @@
+name: Lab
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Show environment
+      run: |
+        python --version
+        python3 -c "import multiprocessing as m; print('CPUs:', m.cpu_count())"
+    - name: Install tox
+      run: |
+        python -m pip install --upgrade pip tox
+    - name: Check style
+      if: matrix.python-version == '3.6'
+      run: |
+        tox -e docs,style
+    - name: Run tests
+      run: |
+        # Updating the installed packages takes very long, so we don't do it.
+        # sudo apt-get update && sudo apt-get -y upgrade
+
+        # Create and move to directory for dependencies.
+        mkdir ../deps
+        pushd ../deps
+
+        # Clone Fast Downward.
+        sudo apt-get -y install mercurial g++ cmake make python
+        export HG_DOWNWARD_REPO=`realpath fast-downward`
+        hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
+
+        # Clone temporary Git version of Fast Downward.
+        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
+        git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
+
+        # Clone benchmarks.
+        export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
+        git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+
+        # Download and compile FF (used by example experiment).
+        sudo apt-get -y install g++ make flex bison
+        wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+        tar -xzvf FF-v2.3.tgz
+        cd FF-v2.3/
+        make -j8
+        cp ff ../
+        cd ..
+        rm -rf FF-v2.3/
+
+        # Download and compile VAL.
+        sudo apt-get -y install g++ make flex bison
+        git clone https://github.com/KCL-Planning/VAL.git
+        cd VAL
+        git checkout a5565396007eee73ac36527fbf904142b3077c74
+        make clean  # Remove old build artifacts and binaries.
+        sed -i 's/-Werror //g' Makefile  # Ignore warnings.
+        make -j8
+        mv validate ../
+        cd ../
+        rm -rf VAL
+
+        # Add binaries to PATH.
+        export PATH="$(pwd):$PATH"
+
+        popd
+
+        export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
+        tox -e py
+
+        export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
+        tox -e py
