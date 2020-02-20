@@ -42,7 +42,7 @@ jobs:
         python -m pip install mercurial
         git clone https://github.com/frej/fast-export.git
         cd fast-export
-        git checkout v180317  # Later versions require newer Mercurial version.
+        #git checkout v180317  # Later versions require newer Mercurial version.
         cd ..
         mkdir git-fast-downward
         cd git-fast-downward
