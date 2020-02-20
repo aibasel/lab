@@ -39,10 +39,9 @@ jobs:
         hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
 
         # Convert Fast Downward repository to Git.
-        python -m pip install mercurial==4.6
         git clone https://github.com/frej/fast-export.git
         cd fast-export
-        #git checkout v180317  # Later versions require newer Mercurial version.
+        git checkout v180317  # Later versions require newer Mercurial version.
         cd ..
         mkdir git-fast-downward
         cd git-fast-downward
