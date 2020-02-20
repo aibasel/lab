@@ -41,6 +41,8 @@ jobs:
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
 
+        ls revision-cache
+
         # Create and move to directory for dependencies.
         mkdir ../deps
         pushd ../deps
