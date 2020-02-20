@@ -29,7 +29,7 @@ BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 VCS = cached_revision.get_version_control_system(REPO)
 REV = "default" if VCS == cached_revision.MERCURIAL else "master"
 
-exp = FastDownwardExperiment(environment=ENV, revision_cache=None)
+exp = FastDownwardExperiment(environment=ENV)
 
 # Add built-in parsers to the experiment.
 exp.add_parser(exp.EXITCODE_PARSER)

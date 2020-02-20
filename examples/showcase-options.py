@@ -85,7 +85,7 @@ class QualityFilters(object):
         return run
 
 
-exp = FastDownwardExperiment(environment=ENV, revision_cache=None)
+exp = FastDownwardExperiment(environment=ENV)
 
 exp.add_parser(exp.EXITCODE_PARSER)
 exp.add_parser(exp.TRANSLATOR_PARSER)
