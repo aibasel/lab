@@ -44,7 +44,7 @@ jobs:
         mkdir git-fast-downward
         cd git-fast-downward
         git init
-        PYTHON=python2 ../fast-export/hg-fast-export.py -r ${HG_DOWNWARD_REPO}
+        PYTHON=python2 ../fast-export/hg-fast-export.sh -r ${HG_DOWNWARD_REPO}
         git checkout master
         cd ..
         export GIT_DOWNWARD_REPO=`realpath fast-downward`
