@@ -24,7 +24,7 @@ jobs:
       with:
         path: revision-cache
         # TODO: Remove Python version from key once all versions compile Fast Downward.
-        key: ${{ runner.os }}-downward-revision-cache-${{ matrix.python-version }}-${{ env.DOWNWARD_REVISION }}
+        key: ${{ runner.os }}-revision-cache-${{ matrix.python-version }}-${{ env.DOWNWARD_REVISION }}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
