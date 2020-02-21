@@ -509,7 +509,7 @@ def get_unexplained_errors_message(run):
         return ""
     else:
         return (
-            "Unexplained error(s) in {run_dir}: {unexplained_errors}, please inspect"
+            "Unexplained error(s) in {run_dir}: please inspect"
             " output and error logs.".format(**run)
         )
 

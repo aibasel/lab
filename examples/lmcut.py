@@ -26,8 +26,8 @@ else:
 # Use path to your Fast Downward repository.
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
+# If REVISION_CACHE is None, the default ./data/revision-cache is used.
 REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
-print("REVISION_CACHE:", REVISION_CACHE)
 VCS = cached_revision.get_version_control_system(REPO)
 REV = "default" if VCS == cached_revision.MERCURIAL else "master"
 
