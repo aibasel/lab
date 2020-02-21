@@ -35,7 +35,7 @@ jobs:
     - name: Check style
       if: matrix.python-version == '3.6'
       run: |
-        tox -e docs,style
+        tox -e docs#,style
     - name: Run tests
       run: |
         # Updating the installed packages takes very long, so we don't do it.
