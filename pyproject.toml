@@ -19,6 +19,7 @@ exclude = '''
   # Custom
   | data
   | external
+  | revision-cache
 )/
 '''
 
