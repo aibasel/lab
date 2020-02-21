@@ -18,6 +18,7 @@ jobs:
         # Set environment variable with the latest revision hash on the default branch.
         echo "::set-env name=DOWNWARD_REVISION::`hg id -r default http://hg.fast-downward.org`"
 
+    # Compile each Fast Downward revision only once and cache the results.
     - name: Cache revisions
       id: cache-revisions
       uses: actions/cache@v1
