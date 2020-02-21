@@ -50,6 +50,7 @@ jobs:
         echo Aha
         mkdir -p ${DOWNWARD_REVISION_CACHE}
         ls ${DOWNWARD_REVISION_CACHE}
+        echo Oho
 
         # Create and move to directory for dependencies.
         mkdir ../deps
