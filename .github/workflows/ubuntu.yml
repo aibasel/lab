@@ -18,7 +18,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: revision-cache
-        key: ${{ runner.os }}-lab-revision-cache
+        key: ${{ runner.os }}-downward-revision-cache
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
@@ -41,14 +41,16 @@ jobs:
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
 
-        export LAB_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
-        python3 -c "import os; print(os.environ.get('LAB_REVISION_CACHE'))"
-        echo CACHE: $LAB_REVISION_CACHE
+        export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
+        python3 -c "import os; print(os.environ.get('DOWNWARD_REVISION_CACHE'))"
+        echo CACHE: $DOWNWARD_REVISION_CACHE
 
         pwd
         ls
         echo Aha
         #ls revision-cache
+        mkdir -p ${DOWNWARD_REVISION_CACHE}
+        ls ${DOWNWARD_REVISION_CACHE}
 
         # Create and move to directory for dependencies.
         mkdir ../deps
