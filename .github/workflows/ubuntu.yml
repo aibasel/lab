@@ -18,7 +18,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: revision-cache
-        key: ${{ runner.os }}-revision-cache
+        key: ${{ runner.os }}-lab-revision-cache
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
