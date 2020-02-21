@@ -46,7 +46,6 @@ jobs:
         echo CACHE: $DOWNWARD_REVISION_CACHE
 
         pwd
-        ls
         echo Aha
         mkdir -p ${DOWNWARD_REVISION_CACHE}
         ls ${DOWNWARD_REVISION_CACHE}
