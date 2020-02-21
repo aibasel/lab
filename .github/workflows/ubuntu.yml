@@ -48,7 +48,6 @@ jobs:
         pwd
         ls
         echo Aha
-        #ls revision-cache
         mkdir -p ${DOWNWARD_REVISION_CACHE}
         ls ${DOWNWARD_REVISION_CACHE}
 
