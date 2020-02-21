@@ -12,25 +12,52 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Set revision
+      run: |
+        # Set environment variable with the latest revision hash on the default branch.
+        echo "::set-env name=DOWNWARD_REVISION::`hg id -r default http://hg.fast-downward.org`"
+
+    # Compile each Fast Downward revision only once and cache the results.
+    - name: Cache revisions
+      id: cache-revisions
+      uses: actions/cache@v1
+      with:
+        path: revision-cache
+        # TODO: Remove Python version from key once all versions compile Fast Downward.
+        key: ${{ runner.os }}-revision-cache-${{ matrix.python-version }}-${{ env.DOWNWARD_REVISION }}
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Show environment
       run: |
         python --version
         python3 -c "import multiprocessing as m; print('CPUs:', m.cpu_count())"
+
     - name: Install tox
       run: |
         python -m pip install --upgrade pip tox
+
     - name: Check style
       if: matrix.python-version == '3.6'
       run: |
         tox -e docs,style
+
     - name: Run tests
       run: |
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
+
+        export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
+        echo CACHE: $DOWNWARD_REVISION_CACHE
+
+        # Ensure that directory is present even if Python version doesn't create it.
+        # TODO: remove this once we drop the old Python versions.
+        mkdir -p ${DOWNWARD_REVISION_CACHE}
+        ls ${DOWNWARD_REVISION_CACHE}
 
         # Create and move to directory for dependencies.
         mkdir ../deps
