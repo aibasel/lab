@@ -13,12 +13,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set revision
+      run: |
+        echo "::set-env name=DOWNWARD_REVISION::default"
+
     - name: Cache revisions
       id: cache-revisions
       uses: actions/cache@v1
       with:
         path: revision-cache
-        key: ${{ runner.os }}-downward-revision-cache-${{ matrix.python-version }}-abcdef
+        key: ${{ runner.os }}-downward-revision-cache-${{ matrix.python-version }}-${DOWNWARD_REVISION}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
