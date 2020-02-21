@@ -13,26 +13,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Create revision cache
-      run: |
-        export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
-        echo CACHE: $DOWNWARD_REVISION_CACHE
-
-        pwd
-        ls
-        echo Aha
-        mkdir ${DOWNWARD_REVISION_CACHE}
-        ls ${DOWNWARD_REVISION_CACHE}
-        echo Oho
-        touch ${DOWNWARD_REVISION_CACHE}/dummy
-        ls ${DOWNWARD_REVISION_CACHE}
-
     - name: Cache revisions
       id: cache-revisions
       uses: actions/cache@v1
       with:
         path: revision-cache
-        key: ${{ runner.os }}-downward-revision-cache-${{ hashFiles('revision-cache/*') }}
+        key: ${{ runner.os }}-downward-revision-cache-${{ matrix.python-version }}-abcdef
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
