@@ -15,7 +15,7 @@ jobs:
 
     - name: Set revision
       run: |
-        echo "::set-env name=DOWNWARD_REVISION::default"
+        echo "::set-env name=DOWNWARD_REVISION::`hg id -r default http://hg.fast-downward.org`"
 
     - name: Cache revisions
       id: cache-revisions
