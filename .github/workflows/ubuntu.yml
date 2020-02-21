@@ -22,7 +22,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: revision-cache
-        key: ${{ runner.os }}-downward-revision-cache-${{ matrix.python-version }}-${DOWNWARD_REVISION}
+        key: ${{ runner.os }}-downward-revision-cache-${{ matrix.python-version }}-${{ DOWNWARD_REVISION }}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
