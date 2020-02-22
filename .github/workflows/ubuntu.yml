@@ -83,10 +83,21 @@ jobs:
         rm -rf VAL
         echo Done building VAL
 
+    - name: Clone benchmarks
+      working-directory: ../deps
+      run: |
+        export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
+        git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+        echo "::set-env name=DOWNWARD_BENCHMARKS::${DOWNWARD_BENCHMARKS}"
+
     - name: Run tests
       run: |
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
+
+        echo PATH: "$PATH"
+        ls ../deps
+        echo Aha
 
         export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
         echo CACHE: $DOWNWARD_REVISION_CACHE
@@ -106,10 +117,6 @@ jobs:
         # Clone temporary Git version of Fast Downward.
         export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
         time git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
-
-        # Clone benchmarks.
-        export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
-        time git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
         popd
 
