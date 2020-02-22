@@ -46,6 +46,44 @@ jobs:
       run: |
         tox -e docs,style
 
+    - name: Setup directory for dependencies
+      run: |
+        mkdir ../deps
+        # Add directory to PATH.
+        echo "::add-path::$(pwd)"
+
+    - name: Compile FF
+      run: |
+        pushd ../deps
+
+        echo Build FF
+        sudo apt-get -y install g++ make flex bison
+        wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+        tar -xzvf FF-v2.3.tgz
+        cd FF-v2.3/
+        make -j
+        cp ff ../
+        cd ..
+        rm -rf FF-v2.3/
+        echo Done building FF
+
+    - name: Compile VAL
+      run: |
+        pushd ../deps
+
+        echo Build VAL
+        sudo apt-get -y install g++ make flex bison
+        git clone https://github.com/KCL-Planning/VAL.git
+        cd VAL
+        git checkout a5565396007eee73ac36527fbf904142b3077c74
+        make clean  # Remove old build artifacts and binaries.
+        sed -i 's/-Werror //g' Makefile  # Ignore warnings.
+        make -j
+        mv validate ../
+        cd ../
+        rm -rf VAL
+        echo Done building VAL
+
     - name: Run tests
       run: |
         # Updating the installed packages takes very long, so we don't do it.
@@ -75,35 +113,6 @@ jobs:
         # Clone benchmarks.
         export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
         time git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
-
-        # Download and compile FF (used by example experiment).
-        echo Build FF
-        sudo apt-get -y install g++ make flex bison
-        wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
-        tar -xzvf FF-v2.3.tgz
-        cd FF-v2.3/
-        make -j
-        cp ff ../
-        cd ..
-        rm -rf FF-v2.3/
-        echo Done building FF
-
-        # Download and compile VAL.
-        echo Build VAL
-        sudo apt-get -y install g++ make flex bison
-        git clone https://github.com/KCL-Planning/VAL.git
-        cd VAL
-        git checkout a5565396007eee73ac36527fbf904142b3077c74
-        make clean  # Remove old build artifacts and binaries.
-        sed -i 's/-Werror //g' Makefile  # Ignore warnings.
-        make -j
-        mv validate ../
-        cd ../
-        rm -rf VAL
-        echo Done building VAL
-
-        # Add binaries to PATH.
-        export PATH="$(pwd):$PATH"
 
         popd
 
