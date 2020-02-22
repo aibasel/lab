@@ -90,6 +90,22 @@ jobs:
         git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
         echo "::set-env name=DOWNWARD_BENCHMARKS::${DOWNWARD_BENCHMARKS}"
 
+    - name: Clone Fast Downward Mercurial
+      working-directory: ../deps
+      run: |
+        sudo apt-get -y install mercurial g++ cmake make python
+        export HG_DOWNWARD_REPO=`realpath fast-downward`
+        hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
+        echo "::set-env name=HG_DOWNWARD_REPO::${HG_DOWNWARD_REPO}"
+
+    - name: Clone Fast Downward Git
+      working-directory: ../deps
+      run: |
+        # Clone temporary Git version of Fast Downward.
+        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
+        git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
+        echo "::set-env name=GIT_DOWNWARD_REPO::${GIT_DOWNWARD_REPO}"
+
     - name: Run tests
       run: |
         # Updating the installed packages takes very long, so we don't do it.
@@ -106,19 +122,6 @@ jobs:
         # TODO: remove this once we drop the old Python versions.
         mkdir -p ${DOWNWARD_REVISION_CACHE}
         ls ${DOWNWARD_REVISION_CACHE}
-
-        pushd ../deps
-
-        # Clone Fast Downward.
-        time sudo apt-get -y install mercurial g++ cmake make python
-        export HG_DOWNWARD_REPO=`realpath fast-downward`
-        time hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
-
-        # Clone temporary Git version of Fast Downward.
-        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
-        time git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
-
-        popd
 
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
         time tox -e py
