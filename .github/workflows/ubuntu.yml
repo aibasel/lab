@@ -56,7 +56,6 @@ jobs:
     - name: Compile FF
       working-directory: ../deps
       run: |
-        echo Build FF
         sudo apt-get -y install g++ make flex bison
         wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
         tar -xzvf FF-v2.3.tgz
@@ -65,12 +64,10 @@ jobs:
         cp ff ../
         cd ..
         rm -rf FF-v2.3/ FF-v2.3.tgz
-        echo Done building FF
 
     - name: Compile VAL
       working-directory: ../deps
       run: |
-        echo Build VAL
         sudo apt-get -y install g++ make flex bison
         git clone https://github.com/KCL-Planning/VAL.git
         cd VAL
@@ -81,7 +78,6 @@ jobs:
         mv validate ../
         cd ../
         rm -rf VAL
-        echo Done building VAL
 
     - name: Clone benchmarks
       working-directory: ../deps
@@ -110,10 +106,6 @@ jobs:
       run: |
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
-
-        echo PATH: "$PATH"
-        ls ../deps
-        echo Aha
 
         export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
         echo CACHE: $DOWNWARD_REVISION_CACHE
