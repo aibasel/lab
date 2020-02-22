@@ -64,7 +64,7 @@ jobs:
         make -j
         cp ff ../
         cd ..
-        rm -rf FF-v2.3/
+        rm -rf FF-v2.3/ FF-v2.3.tgz
         echo Done building FF
 
     - name: Compile VAL
