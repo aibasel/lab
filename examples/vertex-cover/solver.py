@@ -8,7 +8,13 @@ import argparse
 import collections
 import random
 import re
-import time
+
+
+try:
+    from time import process_time as clock
+except ImportError:
+    # Python < 3.3
+    from time import clock
 
 
 def get_edges(input_file):
@@ -70,14 +76,14 @@ def main():
     random.seed(args.seed)
     edges = get_edges(args.input_file)
     print("Algorithm: {}".format(args.algorithm))
-    start_time = time.process_time()
+    start_time = clock()
     if args.algorithm == "2approx":
         cover = find_two_approximation(edges)
     elif args.algorithm == "greedy":
         cover = find_greedy_cover(edges)
     else:
         raise ValueError("Unknown algorithm selected")
-    solve_time = time.process_time() - start_time
+    solve_time = clock() - start_time
     print("Cover: {}".format(cover))
     print("Cover size: {}".format(len(cover)))
     print("Solve time: {}s".format(solve_time))

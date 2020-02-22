@@ -46,6 +46,62 @@ jobs:
       run: |
         tox -e docs,style
 
+    - name: Setup directory for dependencies
+      run: |
+        mkdir ../deps
+        pushd ../deps
+        # Add directory to PATH.
+        echo "::add-path::$(pwd)"
+
+    - name: Compile FF
+      working-directory: ../deps
+      run: |
+        sudo apt-get -y install g++ make flex bison
+        wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+        tar -xzvf FF-v2.3.tgz
+        cd FF-v2.3/
+        make -j
+        cp ff ../
+        cd ..
+        rm -rf FF-v2.3/ FF-v2.3.tgz
+
+    - name: Compile VAL
+      working-directory: ../deps
+      run: |
+        sudo apt-get -y install g++ make flex bison
+        git clone https://github.com/KCL-Planning/VAL.git
+        cd VAL
+        git checkout a5565396007eee73ac36527fbf904142b3077c74
+        make clean  # Remove old build artifacts and binaries.
+        sed -i 's/-Werror //g' Makefile  # Ignore warnings.
+        make -j
+        mv validate ../
+        cd ../
+        rm -rf VAL
+
+    - name: Clone benchmarks
+      working-directory: ../deps
+      run: |
+        export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
+        git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+        echo "::set-env name=DOWNWARD_BENCHMARKS::${DOWNWARD_BENCHMARKS}"
+
+    - name: Clone Fast Downward Mercurial
+      working-directory: ../deps
+      run: |
+        sudo apt-get -y install mercurial g++ cmake make python
+        export HG_DOWNWARD_REPO=`realpath fast-downward`
+        hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
+        echo "::set-env name=HG_DOWNWARD_REPO::${HG_DOWNWARD_REPO}"
+
+    - name: Clone Fast Downward Git
+      working-directory: ../deps
+      run: |
+        # Clone temporary Git version of Fast Downward.
+        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
+        git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
+        echo "::set-env name=GIT_DOWNWARD_REPO::${GIT_DOWNWARD_REPO}"
+
     - name: Run tests
       run: |
         # Updating the installed packages takes very long, so we don't do it.
@@ -59,52 +115,8 @@ jobs:
         mkdir -p ${DOWNWARD_REVISION_CACHE}
         ls ${DOWNWARD_REVISION_CACHE}
 
-        # Create and move to directory for dependencies.
-        mkdir ../deps
-        pushd ../deps
-
-        # Clone Fast Downward.
-        sudo apt-get -y install mercurial g++ cmake make python
-        export HG_DOWNWARD_REPO=`realpath fast-downward`
-        hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
-
-        # Clone temporary Git version of Fast Downward.
-        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
-        git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
-
-        # Clone benchmarks.
-        export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
-        git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
-
-        # Download and compile FF (used by example experiment).
-        sudo apt-get -y install g++ make flex bison
-        wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
-        tar -xzvf FF-v2.3.tgz
-        cd FF-v2.3/
-        make -j8
-        cp ff ../
-        cd ..
-        rm -rf FF-v2.3/
-
-        # Download and compile VAL.
-        sudo apt-get -y install g++ make flex bison
-        git clone https://github.com/KCL-Planning/VAL.git
-        cd VAL
-        git checkout a5565396007eee73ac36527fbf904142b3077c74
-        make clean  # Remove old build artifacts and binaries.
-        sed -i 's/-Werror //g' Makefile  # Ignore warnings.
-        make -j8
-        mv validate ../
-        cd ../
-        rm -rf VAL
-
-        # Add binaries to PATH.
-        export PATH="$(pwd):$PATH"
-
-        popd
-
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
-        tox -e py
+        time tox -e py
 
         export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
-        tox -e py
+        time tox -e py
