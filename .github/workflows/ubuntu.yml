@@ -49,13 +49,13 @@ jobs:
     - name: Setup directory for dependencies
       run: |
         mkdir ../deps
+        pushd ../deps
         # Add directory to PATH.
         echo "::add-path::$(pwd)"
 
     - name: Compile FF
+      working-directory: ../deps
       run: |
-        pushd ../deps
-
         echo Build FF
         sudo apt-get -y install g++ make flex bison
         wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
@@ -68,9 +68,8 @@ jobs:
         echo Done building FF
 
     - name: Compile VAL
+      working-directory: ../deps
       run: |
-        pushd ../deps
-
         echo Build VAL
         sudo apt-get -y install g++ make flex bison
         git clone https://github.com/KCL-Planning/VAL.git
@@ -97,8 +96,6 @@ jobs:
         mkdir -p ${DOWNWARD_REVISION_CACHE}
         ls ${DOWNWARD_REVISION_CACHE}
 
-        # Create and move to directory for dependencies.
-        mkdir ../deps
         pushd ../deps
 
         # Clone Fast Downward.
