@@ -10,6 +10,7 @@ Lab
 * Call parsers with active Python interpreter.
 * Don't call deprecated ``time.clock()`` (removed in Python 3.8).
 * Don't add Lab to ``PYTHONPATH`` in ``BaselSlurmEnvironment``.
+* Revision cache: only delete "misc" and "experiments" dirs if they exist (Maximilian Fickert).
 
 Downward Lab
 ^^^^^^^^^^^^
