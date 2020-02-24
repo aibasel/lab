@@ -195,7 +195,9 @@ class CachedRevision(object):
                     tools.remove_path(tar_archive)
 
                     for exclude_dir in exclude_dirs:
-                        tools.remove_path(os.path.join(self.path, exclude_dir))
+                        path = os.path.join(self.path, exclude_dir)
+                        if os.path.exists(path):
+                            tools.remove_path(path)
             else:
                 _raise_unknown_vcs_error(vcs)
 
