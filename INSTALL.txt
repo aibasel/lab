@@ -22,7 +22,7 @@ If you want to install the latest development version and/or need to
 change Lab itself, you can clone the Lab repo and install it in the
 virtual environment::
 
-    hg clone https://bitbucket.org/jendrikseipp/lab /path/to/lab
+    git clone https://github.com/aibasel/lab.git /path/to/lab
     pip install --editable /path/to/lab
 
 The ``--editable`` flag installs the project in "editable mode", which
@@ -33,3 +33,6 @@ Please note that before running an experiment script you need to
 activate the virtual environment with::
 
     source lab-venv/bin/activate
+
+We recommend clearing the ``PYTHONPATH`` variable before activating the
+virtual environment.
