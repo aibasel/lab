@@ -18,7 +18,7 @@ setup(
     keywords="benchmarks cluster grid",
     author="Jendrik Seipp",
     author_email="jendrikseipp@gmail.com",
-    url="https://bitbucket.org/jendrikseipp/lab",
+    url="https://github.com/aibasel/lab",
     license="GPL3+",
     packages=["downward", "downward.reports", "lab", "lab.calls", "lab.reports"],
     package_data={"downward": ["scripts/*.py"], "lab": ["data/*", "scripts/*.py"]},

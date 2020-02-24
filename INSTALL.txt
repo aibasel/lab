@@ -9,7 +9,7 @@ that you can create multiple environments with different Lab versions
 (e.g., for different papers) without conflicts::
 
     # Install required packages, including virtualenv.
-    sudo apt install mercurial python3 python3-venv
+    sudo apt install python3 python3-venv
 
     # Create and activate a Python 3 virtual environment for Lab.
     python3 -m venv lab-venv  # or any other path instead of lab-venv

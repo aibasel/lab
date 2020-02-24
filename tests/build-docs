@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Test setup: see bitbucket-pipelines.yml
-
 set -exuo pipefail
 
 # Check if documentation builds.
