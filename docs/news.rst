@@ -9,6 +9,7 @@ Lab
 * Use newer txt2tags version and remove bundled copy.
 * Call parsers with active Python interpreter.
 * Don't call deprecated ``time.clock()`` (removed in Python 3.8).
+* Don't add Lab to ``PYTHONPATH`` in ``BaselSlurmEnvironment``.
 
 Downward Lab
 ^^^^^^^^^^^^

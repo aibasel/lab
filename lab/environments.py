@@ -363,15 +363,9 @@ class SlurmEnvironment(GridEnvironment):
 
         You can alter the environment in which the experiment runs with
         the **setup** argument. If given, it must be a string of Bash
-        commands. If omitted,
-        :class:`~lab.environments.BaselSlurmEnvironment` adds Lab to the
-        PYTHONPATH (this is unneeded if you run Lab inside a virtual
-        environment). Examples::
+        commands. Example::
 
-            # Activate virtual environment on grid node.
-            setup="source /path/to/virtual-env/bin/activate"
-
-            # Load module.
+            # Load Singularity module.
             setup="module load Singularity/2.6.1 2> /dev/null"
 
         See :py:class:`~lab.environments.GridEnvironment` for inherited
@@ -464,4 +458,3 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = "3872M"
-    DEFAULT_SETUP = 'export PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path()
