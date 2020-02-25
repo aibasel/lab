@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath("../"))
 
 # -- Mock some libraries that are not available on rtfd.org --------------------
 
-autodoc_mock_imports = ["matplotlib"]
+autodoc_mock_imports = ["matplotlib", "txt2tags"]
 
 
 # -- General configuration -----------------------------------------------------
