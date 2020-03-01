@@ -1,7 +1,7 @@
 News
 ====
 
-next (unreleased)
+v5.4 (2020-03-01)
 -----------------
 
 Lab
@@ -10,14 +10,13 @@ Lab
 * Call parsers with active Python interpreter.
 * Don't call deprecated ``time.clock()`` (removed in Python 3.8).
 * Don't add Lab to ``PYTHONPATH`` in ``BaselSlurmEnvironment``.
-* Revision cache: only delete "misc" and "experiments" dirs if they exist (Maximilian Fickert).
 
 Downward Lab
 ^^^^^^^^^^^^
-* No changes.
+* Revision cache: only delete "misc" and "experiments" dirs if they exist (Maximilian Fickert).
 
 
-v5.3 (2020-03-02)
+v5.3 (2020-02-03)
 -----------------
 
 Lab
