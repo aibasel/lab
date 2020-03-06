@@ -33,3 +33,4 @@ General documentation
    news
    faq
    ff
+   singularity

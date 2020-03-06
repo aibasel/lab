@@ -1,7 +1,7 @@
 .. _ff:
 
-Using Downward Lab for other planners
-=====================================
+Running other planners
+======================
 .. highlight:: python
 
 The script below shows how to run the `FF planner
