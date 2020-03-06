@@ -32,8 +32,9 @@ add ``exp.add_parse_again_step()`` to your experiment script
 How can I make reports and plots for results obtained without Lab?
 ------------------------------------------------------------------
 
-See ``examples/report-external-results.py`` in the GitHub repository for
-an example.
+See `examples/report-external-results.py
+<https://github.com/aibasel/lab/blob/master/examples/report-external-results.py>`_
+for an example.
 
 
 Which experiment class should I use for which Fast Downward revision?
