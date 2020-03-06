@@ -18,10 +18,11 @@ uses the generic experimentation package **Lab**.
 
 ::
 
-    @Misc{seipp-et-al-misc2017,
+    @Misc{seipp-et-al-zenodo2017,
       author =       "Jendrik Seipp and Florian Pommerening and
                       Silvan Sievers and Malte Helmert",
       title =        "{Downward} {Lab}",
+      publisher =    "Zenodo",
       year =         "2017",
       doi =          "10.5281/zenodo.790461",
       url =          "https://doi.org/10.5281/zenodo.790461",
