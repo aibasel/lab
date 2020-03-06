@@ -84,8 +84,10 @@ function show_main_tables() {
     var names = ["unexplained-errors", "info", "summary"];
     for (var i = 0; i < names.length; i++) {
         var section = document.getElementById(names[i]);
-        if (section) {
+        try {
             show_table(section);
+        } catch (e) {
+            console.log("No table found for " + names[i]);
         }
     }
 

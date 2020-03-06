@@ -6,7 +6,7 @@ next (unreleased)
 
 Lab
 ^^^
-* No news so far.
+* Fix: gracefully handle missing HTML info or summary tables.
 
 Downward Lab
 ^^^^^^^^^^^^
