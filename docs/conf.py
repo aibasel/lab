@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# lab documentation build configuration file, created by
+# Lab documentation build configuration file, created by
 # sphinx-quickstart on Thu Jan 19 16:59:00 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -52,8 +52,8 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"lab"
-copyright = u"2011-2016 Jendrik Seipp"
+project = u"Lab"
+copyright = u"2011-2020 Jendrik Seipp et al."
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -196,7 +196,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "lab.tex", u"lab Documentation", u"Jendrik Seipp", "manual")
+    ("index", "lab.tex", u"Lab Documentation", u"Jendrik Seipp et al.", "manual")
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -224,7 +224,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "lab", u"lab Documentation", [u"Jendrik Seipp"], 1)]
+man_pages = [("index", "Lab", u"Lab Documentation", [u"Jendrik Seipp et al."], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -238,11 +238,11 @@ man_pages = [("index", "lab", u"lab Documentation", [u"Jendrik Seipp"], 1)]
 texinfo_documents = [
     (
         "index",
-        "lab",
-        u"lab Documentation",
-        u"Jendrik Seipp",
-        "lab",
-        "One line description of project.",
+        "Lab",
+        u"Lab Documentation",
+        u"Jendrik Seipp et al.",
+        "Lab",
+        "Experiment framework",
         "Miscellaneous",
     )
 ]
