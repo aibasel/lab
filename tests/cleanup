@@ -2,4 +2,5 @@
 
 rm -rf examples/data
 rm -rf examples/ff/data
+rm -rf examples/singularity/data
 rm -rf examples/vertex-cover/data

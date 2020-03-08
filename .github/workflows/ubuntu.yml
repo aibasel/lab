@@ -109,6 +109,13 @@ jobs:
         git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
         echo "::set-env name=GIT_DOWNWARD_REPO::${GIT_DOWNWARD_REPO}"
 
+    - name: Download example Singularity image
+      working-directory: ../deps
+      run: |
+        wget --no-verbose https://ai.dmi.unibas.ch/_tmp_files/seipp/lama-first.img
+        export SINGULARITY_IMAGES=`realpath .`
+        echo "::set-env name=SINGULARITY_IMAGES::${SINGULARITY_IMAGES}"
+
     - name: Run tests
       run: |
         # Updating the installed packages takes very long, so we don't do it.
