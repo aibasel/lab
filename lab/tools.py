@@ -291,12 +291,14 @@ class Properties(dict):
 class RunFilter(object):
     def __init__(self, filter, **kwargs):
         self.filters = make_list(filter)
+        self.filtered_attributes = []  # Only needed for sanity checks.
         for arg_name, arg_value in kwargs.items():
             if not arg_name.startswith("filter_"):
                 logging.critical('Invalid filter keyword argument name "%s"' % arg_name)
             attribute = arg_name[len("filter_") :]
             # Add a filter for the specified property.
             self.filters.append(self._build_filter(attribute, arg_value))
+            self.filtered_attributes.append(attribute)
 
     def _build_filter(self, prop, value):
         # Do not define this function inplace to force early binding.
@@ -319,9 +321,8 @@ class RunFilter(object):
         modified_run = run
         result = filter_(modified_run)
         if not isinstance(result, (dict, bool)):
-            logging.critical("Filters must return a dictionary or boolean")
-        # If a dict is returned, use it as the new run,
-        # otherwise take the old one.
+            logging.critical("Filters must return a dictionary or Boolean")
+        # If a dict is returned, use it as the new run, otherwise take the old one.
         if isinstance(result, dict):
             modified_run = result
         if not result:
@@ -330,6 +331,12 @@ class RunFilter(object):
         return modified_run
 
     def apply(self, props):
+        for attribute in self.filtered_attributes:
+            if not any(attribute in run for run in props.values()):
+                logging.critical(
+                    'No run has the attribute "{attribute}" (from '
+                    '"filter_{attribute}"). Is this a typo?'.format(**locals())
+                )
         for filter_ in self.filters:
             for old_run_id, run in list(props.items()):
                 del props[old_run_id]

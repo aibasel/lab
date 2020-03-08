@@ -8,6 +8,8 @@ Lab
 ^^^
 * Fix: gracefully handle missing HTML info or summary tables.
 * Abort if a function is passed to a filter_* kwarg.
+* Abort if a filter checks missing attribute names
+  (e.g., when passing ``filter_algorithms`` instead of ``filter_algorithm``).
 
 Downward Lab
 ^^^^^^^^^^^^
