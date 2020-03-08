@@ -13,6 +13,10 @@ pushd ff
 ./ff.py --all
 popd
 
+pushd singularity
+./singularity-exp.py 1 2 3 4
+popd
+
 pushd vertex-cover
 ./exp.py --all
 popd

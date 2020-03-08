@@ -42,7 +42,7 @@ NODE = platform.node()
 RUNNING_ON_CLUSTER = NODE.endswith((".scicore.unibas.ch", ".cluster.bc2.ch"))
 DIR = os.path.abspath(os.path.dirname(__file__))
 REPO = os.path.dirname(DIR)
-IMAGES_DIR = os.path.expanduser("~/projects/Downward/ipc-2018-images/agl/")
+IMAGES_DIR = os.environ["SINGULARITY_IMAGES"]
 assert os.path.isdir(IMAGES_DIR), IMAGES_DIR
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 if RUNNING_ON_CLUSTER:
@@ -84,7 +84,7 @@ def get_image(name):
     return planner, image
 
 
-IMAGES = [get_image("dual_bfws"), get_image("saarplan")]
+IMAGES = [get_image("lama-first")]
 
 for planner, image in IMAGES:
     exp.add_resource(planner, image, symlink=True)
