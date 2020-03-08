@@ -7,6 +7,7 @@ next (unreleased)
 Lab
 ^^^
 * Fix: gracefully handle missing HTML info or summary tables.
+* Abort if a function is passed to a filter_* kwarg.
 
 Downward Lab
 ^^^^^^^^^^^^

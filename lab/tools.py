@@ -305,6 +305,8 @@ class RunFilter(object):
             # membership testing for str.
             if isinstance(value, (list, tuple, set)):
                 return run.get(prop) in value
+            elif callable(value):
+                logging.critical("filter_{} doesn't accept functions.".format(prop))
             else:
                 return run.get(prop) == value
 
