@@ -10,7 +10,7 @@ function set_version {
     sed -i -e "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" lab/__init__.py
 }
 
-cd ~/projects/Downward/lab
+cd $(dirname "$0")/../
 
 # Check for uncommited changes.
 set +e
@@ -30,7 +30,6 @@ fi
 
 tox
 
-VERSION="$1"
 set_version "$VERSION"
 git commit -am "Update version number to ${VERSION} for release."
 
