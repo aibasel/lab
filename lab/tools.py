@@ -218,8 +218,8 @@ def natural_sort(alist):
     >>> natural_sort(['file10.txt', 'file2.txt'])
     ['file2.txt', 'file10.txt']
 
-    >>> natural_sort(['1G', '3M', '2000K', '1M', '1K', '100'])
-    ['100', '1K', '1M', '2000K', '3M', '1G']
+    >>> natural_sort(['check', 'infinity', '1G', '3M', '2000K', '1M', '1K', '100'])
+    ['100', '1K', '1M', '2000K', '3M', '1G', 'infinity', 'check']
     """
 
     def to_int_if_number(text):
@@ -227,6 +227,8 @@ def natural_sort(alist):
             return ""
         if text.isdigit():
             return int(text)
+        elif text.lower() == "infinity":
+            return sys.maxsize
 
         suffixes = {"K": 3, "M": 6, "G": 9}
         number, suffix = text[:-1], text[-1]
@@ -236,7 +238,7 @@ def natural_sort(alist):
             return text.lower()
 
     def extract_numbers(text):
-        parts = re.split("([0-9]+[KMG]?)", text)
+        parts = re.split("([0-9]+[KMG]?|infinity)", text)
         return [to_int_if_number(part) for part in parts]
 
     return sorted(alist, key=extract_numbers)
