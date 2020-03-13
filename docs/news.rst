@@ -1,14 +1,14 @@
 News
 ====
 
-next (unreleased)
+v5.5 (2020-03-13)
 -----------------
 
 Lab
 ^^^
 * Sort numbers with suffixes (5K, 2M, 8G) and "infinity" correctly in tables.
-* Fix: gracefully handle missing HTML info or summary tables.
-* Abort if a function is passed to a filter_* kwarg.
+* Gracefully handle missing "info" or "summary" tables in HTML reports.
+* Abort if a function is passed to a ``filter_*`` kwarg.
 * Abort if a filter checks missing attribute names
   (e.g., when passing ``filter_algorithms`` instead of ``filter_algorithm``).
 
