@@ -23,6 +23,7 @@ import subprocess
 from lab.cached_revision import CachedRevision
 from lab import tools
 
+
 class CachedFastDownwardRevision(CachedRevision):
     """This class represents Fast Downward checkouts.
 
@@ -35,7 +36,9 @@ class CachedFastDownwardRevision(CachedRevision):
         * *local_rev*: Fast Downward revision.
         * *build_options*: List of build.py options.
         """
-        super().__init__(repo, local_rev, "build.py", build_options, ["experiments", "misc"])
+        super().__init__(
+            repo, local_rev, "build.py", build_options, ["experiments", "misc"]
+        )
 
     def get_planner_resource_name(self):
         return "fast_downward_" + self._hashed_name

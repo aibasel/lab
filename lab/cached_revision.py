@@ -224,7 +224,9 @@ class CachedRevision(object):
         build = self.get_cached_path(self.build_script)
         if not os.path.exists(build):
             logging.critical("build script {} not found.".format(build))
-        retcode = tools.run_command([self.build_script] + self.build_options, cwd=self.path)
+        retcode = tools.run_command(
+            [self.build_script] + self.build_options, cwd=self.path
+        )
         if retcode == 0:
             tools.write_file(self._get_sentinel_file(), "")
         else:
