@@ -6,8 +6,8 @@ VERSION="$1"
 CHANGES="/tmp/lab-$VERSION-changes"
 
 function set_version {
-    VERSION="$1"
-    sed -i -e "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" lab/__init__.py
+    local version="$1"
+    sed -i -e "s/__version__ = \".*\"/__version__ = \"$version\"/" lab/__init__.py
 }
 
 cd $(dirname "$0")/../
