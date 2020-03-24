@@ -25,7 +25,7 @@ import logging
 import os.path
 
 from downward import suites
-from downward.cached_revision import CachedRevision
+from downward.cached_revision import CachedFastDownwardRevision
 from lab import tools
 from lab.experiment import Experiment, get_default_data_dir, Run
 
@@ -312,7 +312,7 @@ class FastDownwardExperiment(Experiment):
         ] + (driver_options or [])
         algorithm = _DownwardAlgorithm(
             name,
-            CachedRevision(repo, rev, build_options),
+            CachedFastDownwardRevision(repo, rev, build_options),
             driver_options,
             component_options,
         )
