@@ -125,7 +125,7 @@ class CachedRevision(object):
     It provides methods for caching and compiling given revisions.
     """
 
-    def __init__(self, repo, local_rev, build_script, build_options, exclude_dirs=[]):
+    def __init__(self, repo, local_rev, build_script, build_options, exclude_dirs):
         """
         * *repo*: Path to solver repository.
         * *local_rev*: Solver revision.

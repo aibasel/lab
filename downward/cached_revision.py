@@ -20,8 +20,8 @@ import glob
 import os.path
 import subprocess
 
-from lab.cached_revision import CachedRevision
 from lab import tools
+from lab.cached_revision import CachedRevision
 
 
 class CachedFastDownwardRevision(CachedRevision):
