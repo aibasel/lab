@@ -152,13 +152,13 @@ class CachedRevision(object):
         >>> vcs = get_version_control_system(repo)
         >>> rev = "default" if vcs == MERCURIAL else "master"
         >>> cr = CachedRevision(repo, rev, "build.py", exclude=["experiments", "misc"])
-        >>> cr.cache(revision_cache)
+        >>> cached_repo = cr.cache(revision_cache)
 
         You can now copy the cached repo to your experiment:
 
         >>> from lab.experiment import Experiment
         >>> exp = Experiment()
-        >>> exp.add_resource("", cr.get_cached_path(), cr.get_experiment_path())
+        >>> exp.add_resource("", cached_repo, cr.get_experiment_path())
 
         """
         if not os.path.isdir(repo):
@@ -168,21 +168,16 @@ class CachedRevision(object):
         self.local_rev = rev
         self.global_rev = get_global_rev(repo, rev)
         self.summary = get_rev_id(self.repo, rev)
-        self._path = None
-        self._hashed_name = self._compute_hashed_name()
+        self.path = None
+        self.hashed_name = self._compute_hashed_name()
         self.build_script = build_script
         self.exclude = exclude or []
 
     def __eq__(self, other):
-        return self._hashed_name == other._hashed_name
+        return self.hashed_name == other.hashed_name
 
     def __hash__(self):
-        return hash(self._hashed_name)
-
-    @property
-    def path(self):
-        assert self._path is not None
-        return self._path
+        return hash(self.hashed_name)
 
     def _compute_hashed_name(self):
         if self.build_options:
@@ -193,14 +188,13 @@ class CachedRevision(object):
             return self.global_rev
 
     def cache(self, revision_cache):
-        self._path = os.path.join(revision_cache, self._hashed_name)
+        self.path = os.path.join(revision_cache, self.hashed_name)
         if os.path.exists(self.path):
             logging.info('Revision is already cached: "%s"' % self.path)
             if not os.path.exists(self._get_sentinel_file()):
                 logging.critical(
-                    "The build for the cached revision at {} is corrupted "
-                    "or was made with an older Lab version. Please delete "
-                    "it and try again.".format(self.path)
+                    "The build for the cached revision at {} is corrupted. "
+                    "Please delete it and try again.".format(self.path)
                 )
         else:
             tools.makedirs(self.path)
@@ -235,28 +229,30 @@ class CachedRevision(object):
                 logging.critical("Failed to make checkout.")
             self._compile()
             self._cleanup()
+        return self.path
 
-    def get_cached_path(self, *rel_path):
+    def _get_cached_path(self, *rel_path):
         return os.path.join(self.path, *rel_path)
 
     def get_experiment_path(self, *rel_path):
-        return os.path.join("code-" + self._hashed_name, *rel_path)
+        return os.path.join("code-" + self.hashed_name, *rel_path)
 
     def get_solver_resource_name(self):
-        return "solver_" + self._hashed_name
+        return "solver_" + self.hashed_name
 
     def _get_sentinel_file(self):
-        return self.get_cached_path("build_successful")
+        return self._get_cached_path("build_successful")
 
     def _compile(self):
-        build = self.get_cached_path(self.build_script)
+        build = self._get_cached_path(self.build_script)
+        cached_path = self._get_cached_path()
         if not os.path.exists(build):
             logging.critical("build script {} not found.".format(build))
-        retcode = tools.run_command([build] + self.build_options, cwd=self.path)
+        retcode = tools.run_command([build] + self.build_options, cwd=cached_path)
         if retcode == 0:
             tools.write_file(self._get_sentinel_file(), "")
         else:
-            logging.critical("Build failed in {}".format(self.path))
+            logging.critical("Build failed in {}".format(self.cached_path))
 
     def _cleanup(self):
         pass

@@ -41,7 +41,7 @@ class CachedFastDownwardRevision(CachedRevision):
         )
 
     def get_solver_resource_name(self):
-        return "fast_downward_" + self._hashed_name
+        return "fast_downward_" + self.hashed_name
 
     def _cleanup(self):
         # Only keep the bin directories in "builds" dir.
@@ -50,7 +50,7 @@ class CachedFastDownwardRevision(CachedRevision):
                 tools.remove_path(path)
 
         # Remove unneeded files.
-        tools.remove_path(self.get_cached_path("build.py"))
+        tools.remove_path(self._get_cached_path("build.py"))
 
         # Strip binaries.
         binaries = []
