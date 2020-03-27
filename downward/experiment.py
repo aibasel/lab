@@ -52,7 +52,7 @@ class FastDownwardRun(Run):
         self.add_command(
             "planner",
             [tools.get_python_executable()]
-            + ["{" + algo.cached_revision.get_planner_resource_name() + "}"]
+            + ["{" + algo.cached_revision.get_solver_resource_name() + "}"]
             + algo.driver_options
             + ["{domain}", "{problem}"]
             + algo.component_options,
@@ -368,7 +368,7 @@ class FastDownwardExperiment(Experiment):
             )
             # Overwrite the script to set an environment variable.
             self.add_resource(
-                cached_rev.get_planner_resource_name(),
+                cached_rev.get_solver_resource_name(),
                 cached_rev.get_cached_path("fast-downward.py"),
                 cached_rev.get_exp_path("fast-downward.py"),
             )

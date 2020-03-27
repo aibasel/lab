@@ -40,7 +40,7 @@ class CachedFastDownwardRevision(CachedRevision):
             repo, local_rev, "build.py", build_options, ["experiments", "misc"]
         )
 
-    def get_planner_resource_name(self):
+    def get_solver_resource_name(self):
         return "fast_downward_" + self._hashed_name
 
     def _cleanup(self):

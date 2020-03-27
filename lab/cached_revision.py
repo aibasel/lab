@@ -214,7 +214,7 @@ class CachedRevision(object):
     def get_exp_path(self, *rel_path):
         return os.path.join("code-" + self._hashed_name, *rel_path)
 
-    def get_planner_resource_name(self):
+    def get_solver_resource_name(self):
         return "solver_" + self._hashed_name
 
     def _get_sentinel_file(self):
