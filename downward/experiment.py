@@ -364,13 +364,13 @@ class FastDownwardExperiment(Experiment):
         """Add the compiled code to the experiment."""
         for cached_rev in self._get_unique_cached_revisions():
             self.add_resource(
-                "", cached_rev.get_cached_path(), cached_rev.get_exp_path()
+                "", cached_rev.get_cached_path(), cached_rev.get_experiment_path()
             )
             # Overwrite the script to set an environment variable.
             self.add_resource(
                 cached_rev.get_solver_resource_name(),
                 cached_rev.get_cached_path("fast-downward.py"),
-                cached_rev.get_exp_path("fast-downward.py"),
+                cached_rev.get_experiment_path("fast-downward.py"),
             )
 
     def _add_runs(self):

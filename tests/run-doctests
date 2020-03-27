@@ -3,7 +3,7 @@
 set -exuo pipefail
 
 cd lab
-python -m doctest reports/__init__.py reports/filter.py experiment.py parser.py tools.py
+python -m doctest reports/__init__.py reports/filter.py cached_revision.py experiment.py parser.py tools.py
 cd ../downward
 python -m doctest experiment.py reports/__init__.py reports/absolute.py \
     reports/compare.py reports/scatter.py reports/taskwise.py

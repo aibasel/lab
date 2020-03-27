@@ -68,6 +68,12 @@ Custom command line arguments
 .. autoclass:: lab.environments.BaselSlurmEnvironment
 
 
+:class:`CachedRevision`
+-----------------------
+
+.. autoclass:: lab.cached_revision.CachedRevision
+
+
 Various
 -------
 

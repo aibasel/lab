@@ -120,30 +120,58 @@ def _compute_md5_hash(mylist):
 
 
 class CachedRevision(object):
-    """This class represents checkouts of the used solver.
+    """This class represents checkouts of a solver.
 
-    It provides methods for caching and compiling given revisions.
+    It provides methods for compiling and caching given revisions.
+
+    .. warning::
+
+        The API for this class is experimental and subject to change.
+        Feedback is welcome!
     """
 
-    def __init__(self, repo, local_rev, build_script, build_options, exclude_dirs):
+    def __init__(self, repo, rev, build_script, build_options=None, exclude=None):
         """
         * *repo*: Path to solver repository.
-        * *local_rev*: Solver revision.
+        * *rev*: Solver revision.
         * *build_script*: Name of the build script.
-        * *build_options*: List of options of the build script.
-        * *exclude_dirs*: Directories in repo that can be excluded.
+        * *build_options*: List of options passed to the build script.
+        * *exclude*: Paths in repo that are not needed for building and
+          running the solver.
+
+        The following example caches a Fast Downward revision. When you
+        use the :class:`FastDownwardExperiment
+        <downward.experiment.FastDownwardExperiment>` class, you don't
+        need to cache revisions yourself since the class will do it
+        transparently for you.
+
+        >>> import os
+        >>> from lab.cached_revision import get_version_control_system, MERCURIAL
+        >>> repo = os.environ["DOWNWARD_REPO"]
+        >>> revision_cache = os.environ.get("DOWNWARD_REVISION_CACHE")
+        >>> vcs = get_version_control_system(repo)
+        >>> rev = "default" if vcs == MERCURIAL else "master"
+        >>> cr = CachedRevision(repo, rev, "build.py", exclude=["experiments", "misc"])
+        >>> cr.cache(revision_cache)
+
+        You can now copy the cached repo to your experiment:
+
+        >>> from lab.experiment import Experiment
+        >>> exp = Experiment()
+        >>> exp.add_resource("", cr.get_cached_path(), cr.get_experiment_path())
+
         """
         if not os.path.isdir(repo):
             logging.critical("{} is not a local solver repository.".format(repo))
         self.repo = repo
-        self.build_options = build_options
-        self.local_rev = local_rev
-        self.global_rev = get_global_rev(repo, local_rev)
-        self.summary = get_rev_id(self.repo, local_rev)
+        self.build_options = build_options or []
+        self.local_rev = rev
+        self.global_rev = get_global_rev(repo, rev)
+        self.summary = get_rev_id(self.repo, rev)
         self._path = None
         self._hashed_name = self._compute_hashed_name()
         self.build_script = build_script
-        self.exclude_dirs = exclude_dirs
+        self.exclude = exclude or []
 
     def __eq__(self, other):
         return self._hashed_name == other._hashed_name
@@ -180,7 +208,7 @@ class CachedRevision(object):
             if vcs == MERCURIAL:
                 retcode = tools.run_command(
                     ["hg", "archive", "-r", self.global_rev]
-                    + ["-X{}".format(d) for d in self.exclude_dirs]
+                    + ["-X{}".format(d) for d in self.exclude]
                     + [self.path],
                     cwd=self.repo,
                 )
@@ -195,7 +223,7 @@ class CachedRevision(object):
                         tf.extractall(self.path)
                     tools.remove_path(tar_archive)
 
-                    for exclude_dir in self.exclude_dirs:
+                    for exclude_dir in self.exclude:
                         path = os.path.join(self.path, exclude_dir)
                         if os.path.exists(path):
                             tools.remove_path(path)
@@ -211,7 +239,7 @@ class CachedRevision(object):
     def get_cached_path(self, *rel_path):
         return os.path.join(self.path, *rel_path)
 
-    def get_exp_path(self, *rel_path):
+    def get_experiment_path(self, *rel_path):
         return os.path.join("code-" + self._hashed_name, *rel_path)
 
     def get_solver_resource_name(self):
@@ -224,9 +252,7 @@ class CachedRevision(object):
         build = self.get_cached_path(self.build_script)
         if not os.path.exists(build):
             logging.critical("build script {} not found.".format(build))
-        retcode = tools.run_command(
-            [self.build_script] + self.build_options, cwd=self.path
-        )
+        retcode = tools.run_command([build] + self.build_options, cwd=self.path)
         if retcode == 0:
             tools.write_file(self._get_sentinel_file(), "")
         else:

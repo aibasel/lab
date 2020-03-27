@@ -1,6 +1,18 @@
 News
 ====
 
+v5.6 (unreleased)
+-----------------
+
+Lab
+^^^
+* Move ``CachedRevision`` from ``downward`` to ``lab`` package (Thomas Keller).
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes.
+
+
 v5.5 (2020-03-13)
 -----------------
 
