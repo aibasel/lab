@@ -25,7 +25,7 @@ import logging
 import os.path
 
 from downward import suites
-from downward.cached_revision import CachedRevision
+from downward.cached_revision import CachedFastDownwardRevision
 from lab import tools
 from lab.experiment import Experiment, get_default_data_dir, Run
 
@@ -260,11 +260,11 @@ class FastDownwardExperiment(Experiment):
         Example experiment setup:
 
         >>> import os
-        >>> import cached_revision
+        >>> from lab.cached_revision import get_version_control_system, MERCURIAL
         >>> exp = FastDownwardExperiment()
         >>> repo = os.environ["DOWNWARD_REPO"]
-        >>> vcs = cached_revision.get_version_control_system(repo)
-        >>> rev = "default" if vcs == cached_revision.MERCURIAL else "master"
+        >>> vcs = get_version_control_system(repo)
+        >>> rev = "default" if vcs == MERCURIAL else "master"
 
         Test iPDB in the latest revision on the default branch:
 
@@ -312,7 +312,7 @@ class FastDownwardExperiment(Experiment):
         ] + (driver_options or [])
         algorithm = _DownwardAlgorithm(
             name,
-            CachedRevision(repo, rev, build_options),
+            CachedFastDownwardRevision(repo, rev, build_options),
             driver_options,
             component_options,
         )
