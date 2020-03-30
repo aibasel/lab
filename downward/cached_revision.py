@@ -30,14 +30,14 @@ class CachedFastDownwardRevision(CachedRevision):
     It provides methods for caching and compiling given revisions.
     """
 
-    def __init__(self, repo, local_rev, build_options):
+    def __init__(self, repo, rev, build_options):
         """
         * *repo*: Path to Fast Downward repository.
-        * *local_rev*: Fast Downward revision.
+        * *rev*: Fast Downward revision.
         * *build_options*: List of build.py options.
         """
         CachedRevision.__init__(
-            self, repo, local_rev, "build.py", build_options, ["experiments", "misc"]
+            self, repo, rev, ["./build.py"] + build_options, ["experiments", "misc"]
         )
 
     def get_solver_resource_name(self):

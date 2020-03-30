@@ -64,7 +64,7 @@ class FastDownwardRun(Run):
         self.set_property("local_revision", self.algo.cached_revision.local_rev)
         self.set_property("global_revision", self.algo.cached_revision.global_rev)
         self.set_property("revision_summary", self.algo.cached_revision.summary)
-        self.set_property("build_options", self.algo.cached_revision.build_options)
+        self.set_property("build_options", self.algo.cached_revision.build_cmd)
         self.set_property("driver_options", self.algo.driver_options)
         self.set_property("component_options", self.algo.component_options)
 

@@ -130,14 +130,14 @@ class CachedRevision(object):
         Feedback is welcome!
     """
 
-    def __init__(self, repo, rev, build_script, build_options=None, exclude=None):
+    def __init__(self, repo, rev, build_cmd, exclude=None):
         """
         * *repo*: Path to solver repository.
         * *rev*: Solver revision.
-        * *build_script*: Name of the build script.
-        * *build_options*: List of options passed to the build script.
-        * *exclude*: Paths in repo that are not needed for building and
-          running the solver.
+        * *build_cmd*: List containing build script and any build options
+          (e.g., ``["build.py", "release"]``, ``["make"]``).
+        * *exclude*: List of paths in repo that are not needed for building
+          and running the solver.
 
         The following example caches a Fast Downward revision. When you
         use the :class:`FastDownwardExperiment
@@ -151,7 +151,7 @@ class CachedRevision(object):
         >>> revision_cache = os.environ.get("DOWNWARD_REVISION_CACHE")
         >>> vcs = get_version_control_system(repo)
         >>> rev = "default" if vcs == MERCURIAL else "master"
-        >>> cr = CachedRevision(repo, rev, "build.py", exclude=["experiments", "misc"])
+        >>> cr = CachedRevision(repo, rev, ["./build.py"], exclude=["experiments"])
         >>> cached_repo = cr.cache(revision_cache)
 
         You can now copy the cached repo to your experiment:
@@ -164,13 +164,12 @@ class CachedRevision(object):
         if not os.path.isdir(repo):
             logging.critical("{} is not a local solver repository.".format(repo))
         self.repo = repo
-        self.build_options = build_options or []
+        self.build_cmd = build_cmd
         self.local_rev = rev
         self.global_rev = get_global_rev(repo, rev)
         self.summary = get_rev_id(self.repo, rev)
         self.path = None
         self.hashed_name = self._compute_hashed_name()
-        self.build_script = build_script
         self.exclude = exclude or []
 
     def __eq__(self, other):
@@ -180,12 +179,7 @@ class CachedRevision(object):
         return hash(self.hashed_name)
 
     def _compute_hashed_name(self):
-        if self.build_options:
-            return "{}_{}".format(
-                self.global_rev, _compute_md5_hash(self.build_options)
-            )
-        else:
-            return self.global_rev
+        return "{}_{}".format(self.global_rev, _compute_md5_hash(self.build_cmd))
 
     def cache(self, revision_cache):
         self.path = os.path.join(revision_cache, self.hashed_name)
@@ -244,11 +238,8 @@ class CachedRevision(object):
         return self._get_cached_path("build_successful")
 
     def _compile(self):
-        build = self._get_cached_path(self.build_script)
         cached_path = self._get_cached_path()
-        if not os.path.exists(build):
-            logging.critical("build script {} not found.".format(build))
-        retcode = tools.run_command([build] + self.build_options, cwd=cached_path)
+        retcode = tools.run_command(self.build_cmd, cwd=cached_path)
         if retcode == 0:
             tools.write_file(self._get_sentinel_file(), "")
         else:
