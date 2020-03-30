@@ -169,8 +169,8 @@ class CachedRevision(object):
         self.global_rev = get_global_rev(repo, rev)
         self.summary = get_rev_id(self.repo, rev)
         self.path = None
-        self.hashed_name = self._compute_hashed_name()
         self.exclude = exclude or []
+        self.hashed_name = self._compute_hashed_name()
 
     def __eq__(self, other):
         return self.hashed_name == other.hashed_name
@@ -179,7 +179,9 @@ class CachedRevision(object):
         return hash(self.hashed_name)
 
     def _compute_hashed_name(self):
-        return "{}_{}".format(self.global_rev, _compute_md5_hash(self.build_cmd))
+        return "{}_{}".format(
+            self.global_rev, _compute_md5_hash(self.build_cmd + self.exclude)
+        )
 
     def cache(self, revision_cache):
         self.path = os.path.join(revision_cache, self.hashed_name)
