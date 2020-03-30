@@ -132,11 +132,11 @@ class CachedRevision(object):
 
     def __init__(self, repo, rev, build_cmd, exclude=None):
         """
-        * *repo*: Path to solver repository.
-        * *rev*: Solver revision.
-        * *build_cmd*: List containing build script and any build options
-          (e.g., ``["build.py", "release"]``, ``["make"]``).
-        * *exclude*: List of paths in repo that are not needed for building
+        * *repo*: path to solver repository.
+        * *rev*: solver revision.
+        * *build_cmd*: list with build script and any build options
+          (e.g., ``["./build.py", "release"]``, ``["make"]``).
+        * *exclude*: list of paths in repo that are not needed for building
           and running the solver.
 
         The following example caches a Fast Downward revision. When you
@@ -152,13 +152,15 @@ class CachedRevision(object):
         >>> vcs = get_version_control_system(repo)
         >>> rev = "default" if vcs == MERCURIAL else "master"
         >>> cr = CachedRevision(repo, rev, ["./build.py"], exclude=["experiments"])
-        >>> cached_repo = cr.cache(revision_cache)
+        >>> cr.cache(revision_cache)
 
         You can now copy the cached repo to your experiment:
 
         >>> from lab.experiment import Experiment
         >>> exp = Experiment()
-        >>> exp.add_resource("", cached_repo, cr.get_experiment_path())
+        >>> cache_path = os.path.join(revision_cache, cr.name)
+        >>> dest_path = os.path.join(exp.path, "code-" + cr.name)
+        >>> exp.add_resource("solver_" +  cr.name, cache_path, dest_path)
 
         """
         if not os.path.isdir(repo):
@@ -170,13 +172,13 @@ class CachedRevision(object):
         self.summary = get_rev_id(self.repo, rev)
         self.path = None
         self.exclude = exclude or []
-        self.hashed_name = self._compute_hashed_name()
+        self.name = self._compute_hashed_name()
 
     def __eq__(self, other):
-        return self.hashed_name == other.hashed_name
+        return self.name == other.name
 
     def __hash__(self):
-        return hash(self.hashed_name)
+        return hash(self.name)
 
     def _compute_hashed_name(self):
         return "{}_{}".format(
@@ -184,7 +186,7 @@ class CachedRevision(object):
         )
 
     def cache(self, revision_cache):
-        self.path = os.path.join(revision_cache, self.hashed_name)
+        self.path = os.path.join(revision_cache, self.name)
         if os.path.exists(self.path):
             logging.info('Revision is already cached: "%s"' % self.path)
             if not os.path.exists(self._get_sentinel_file()):
@@ -225,27 +227,16 @@ class CachedRevision(object):
                 logging.critical("Failed to make checkout.")
             self._compile()
             self._cleanup()
-        return self.path
-
-    def _get_cached_path(self, *rel_path):
-        return os.path.join(self.path, *rel_path)
-
-    def get_experiment_path(self, *rel_path):
-        return os.path.join("code-" + self.hashed_name, *rel_path)
-
-    def get_solver_resource_name(self):
-        return "solver_" + self.hashed_name
 
     def _get_sentinel_file(self):
-        return self._get_cached_path("build_successful")
+        return os.path.join(self.path, "build_successful")
 
     def _compile(self):
-        cached_path = self._get_cached_path()
-        retcode = tools.run_command(self.build_cmd, cwd=cached_path)
+        retcode = tools.run_command(self.build_cmd, cwd=self.path)
         if retcode == 0:
             tools.write_file(self._get_sentinel_file(), "")
         else:
-            logging.critical("Build failed in {}".format(self.cached_path))
+            logging.critical("Build failed in {}".format(self.path))
 
     def _cleanup(self):
         pass

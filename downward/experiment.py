@@ -34,6 +34,10 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, "scripts")
 
 
+def _get_solver_resource_name(cached_rev):
+    return "fast_downward_" + cached_rev.name
+
+
 class FastDownwardRun(Run):
     def __init__(self, exp, algo, task):
         Run.__init__(self, exp)
@@ -52,7 +56,7 @@ class FastDownwardRun(Run):
         self.add_command(
             "planner",
             [tools.get_python_executable()]
-            + ["{" + algo.cached_revision.get_solver_resource_name() + "}"]
+            + ["{" + _get_solver_resource_name(algo.cached_revision) + "}"]
             + algo.driver_options
             + ["{domain}", "{problem}"]
             + algo.component_options,
@@ -363,14 +367,14 @@ class FastDownwardExperiment(Experiment):
     def _add_code(self):
         """Add the compiled code to the experiment."""
         for cached_rev in self._get_unique_cached_revisions():
-            self.add_resource(
-                "", cached_rev._get_cached_path(), cached_rev.get_experiment_path()
-            )
+            cache_path = os.path.join(self.revision_cache, cached_rev.name)
+            dest_path = "code-" + cached_rev.name
+            self.add_resource("", cache_path, dest_path)
             # Overwrite the script to set an environment variable.
             self.add_resource(
-                cached_rev.get_solver_resource_name(),
-                cached_rev._get_cached_path("fast-downward.py"),
-                cached_rev.get_experiment_path("fast-downward.py"),
+                _get_solver_resource_name(cached_rev),
+                os.path.join(cache_path, "fast-downward.py"),
+                os.path.join(dest_path, "fast-downward.py"),
             )
 
     def _add_runs(self):
