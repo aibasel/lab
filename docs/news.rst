@@ -7,6 +7,8 @@ v5.6 (unreleased)
 Lab
 ^^^
 * Move ``CachedRevision`` from ``downward`` to ``lab`` package (Thomas Keller).
+  Please note that the interface to the class is experimental and may change
+  in the future.
 
 Downward Lab
 ^^^^^^^^^^^^
