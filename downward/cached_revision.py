@@ -39,6 +39,7 @@ class CachedFastDownwardRevision(CachedRevision):
         CachedRevision.__init__(
             self, repo, rev, ["./build.py"] + build_options, ["experiments", "misc"]
         )
+        self.build_options = build_options
 
     def _cleanup(self):
         # Only keep the bin directories in "builds" dir.
