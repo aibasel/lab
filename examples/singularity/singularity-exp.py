@@ -17,7 +17,6 @@ images to a local filesystem (e.g., /tmp/) before running experiments.
 
 import os
 import platform
-import subprocess
 
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
