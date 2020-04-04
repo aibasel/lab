@@ -9,8 +9,10 @@ set -exuo pipefail
 # Change into examples directory.
 cd $(dirname "$0")/../examples
 
-check_no_errors () {
-    properties="data/$1-eval/properties"
+check () {
+    expname="$1"
+    "./${expname}.py" --all
+    properties="data/$expname-eval/properties"
     if [[ ! -f "$properties" ]]; then
         echo "File not found: $properties"
         exit 1
@@ -26,30 +28,24 @@ check_no_errors () {
 }
 
 pushd ff
-./ff.py --all
-check_no_errors ff
+check ff
 popd
 
 pushd singularity
-./singularity-exp.py 1 2 3 4
-check_no_errors singularity-exp
+check singularity-exp
 popd
 
 pushd vertex-cover
-./exp.py --all
-check_no_errors exp
+check exp
 popd
 
-./report-external-results.py --all
-check_no_errors report-external-results
+check report-external-results
 
 # Fast Downward only supports Python >= 3.6.
 RESULT="$(python -c 'import sys; print(sys.version_info >= (3, 6))')"
 if [ $RESULT == True ]; then
-    ./lmcut.py --all
-    check_no_errors lmcut
-    ./showcase-options.py --all
-    check_no_errors showcase-options
+    check lmcut
+    check showcase-options
 fi
 
 echo "Finished running example experiments"
