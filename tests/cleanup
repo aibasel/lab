@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+set -exuo pipefail
+
+# Change into repo root directory.
+cd $(dirname "$0")/../
+
 rm -rf examples/data
 rm -rf examples/ff/data
 rm -rf examples/singularity/data
