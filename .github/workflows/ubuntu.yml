@@ -122,7 +122,6 @@ jobs:
 
         export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
         echo CACHE: ${DOWNWARD_REVISION_CACHE}
-        ls ${DOWNWARD_REVISION_CACHE}
 
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
         time tox -e py
