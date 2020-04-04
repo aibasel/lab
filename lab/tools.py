@@ -40,21 +40,6 @@ try:
 except ImportError:
     import json
 
-try:
-    # Python 2
-    user_input = raw_input
-except NameError:
-    # Python 3
-    user_input = input
-
-
-try:
-    # Python 2
-    string_type = basestring
-except NameError:
-    # Python 3
-    string_type = str
-
 
 def get_string(s):
     if isinstance(s, str):
@@ -65,7 +50,7 @@ def get_string(s):
         return s.decode("utf-8")
     else:
         # Unicode string in Python 2.
-        return s
+        raise AssertionError
 
 
 def get_bytes(s):
@@ -178,7 +163,7 @@ def makedirs(path):
 
 
 def confirm_or_abort(question):
-    answer = user_input("%s (y/N): " % question).strip()
+    answer = input("%s (y/N): " % question).strip()
     if not answer.lower() == "y":
         sys.exit("Aborted")
 

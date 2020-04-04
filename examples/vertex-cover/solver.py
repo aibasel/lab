@@ -8,13 +8,7 @@ import argparse
 import collections
 import random
 import re
-
-
-try:
-    from time import process_time as clock
-except ImportError:
-    # Python < 3.3
-    from time import clock
+from time import process_time as clock
 
 
 def get_edges(input_file):

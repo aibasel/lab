@@ -77,7 +77,7 @@ def get_run_dir(task_id):
 
 
 def _check_name(name, typ, extra_chars=""):
-    if not isinstance(name, tools.string_type):
+    if not isinstance(name, str):
         logging.critical("Name for {typ} must be a string: {name}".format(**locals()))
     if not name:
         logging.critical("Name for {typ} must not be empty".format(**locals()))
@@ -378,8 +378,6 @@ class Experiment(_Buildable):
 
         """
         tools.configure_logging()
-        if sys.version_info < (3, 6):
-            tools.show_deprecation_warning("Support for Python < 3.6 is deprecated.")
 
         _Buildable.__init__(self)
         path = path or _get_default_experiment_dir()
@@ -442,7 +440,7 @@ class Experiment(_Buildable):
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
-        if not isinstance(name, tools.string_type):
+        if not isinstance(name, str):
             logging.critical("Step name must be a string: {}".format(name))
         if not name:
             logging.critical("Step name must not be empty")
@@ -521,16 +519,14 @@ class Experiment(_Buildable):
                     if resource.is_parser:
                         parser_filename = self.env_vars_relative[resource.name]
                         rel_parser = os.path.join("../../", parser_filename)
-                        # TODO: use subprocess.DEVNULL once we require Python 3.
-                        with open(os.devnull, "w") as devnull:
-                            # Since parsers often produce output which we would
-                            # rather not want to see for each individual run, we
-                            # suppress it here.
-                            subprocess.check_call(
-                                [tools.get_python_executable(), rel_parser],
-                                cwd=run_dir,
-                                stdout=devnull,
-                            )
+                        # Since parsers often produce output which we would
+                        # rather not want to see for each individual run, we
+                        # suppress it here.
+                        subprocess.check_call(
+                            [tools.get_python_executable(), rel_parser],
+                            cwd=run_dir,
+                            stdout=subprocess.DEVNULL,
+                        )
 
         self.add_step("parse-again", run_parsers)
 
@@ -753,7 +749,7 @@ class Run(_Buildable):
 
             # Support running globally installed binaries.
             def format_arg(arg):
-                if isinstance(arg, tools.string_type):
+                if isinstance(arg, str):
                     try:
                         return repr(arg.format(**env_vars))
                     except KeyError as err:
@@ -762,7 +758,7 @@ class Run(_Buildable):
                     return repr(str(arg))
 
             def format_key_value_pair(key, val):
-                if isinstance(val, tools.string_type):
+                if isinstance(val, str):
                     formatted_value = format_arg(val)
                 else:
                     formatted_value = repr(val)
@@ -804,5 +800,5 @@ class Run(_Buildable):
         if not isinstance(run_id, (list, tuple)):
             logging.critical("id must be a list: {}".format(run_id))
         for id_part in run_id:
-            if not isinstance(id_part, tools.string_type):
+            if not isinstance(id_part, str):
                 logging.critical("run IDs must be a list of strings: {}".format(run_id))

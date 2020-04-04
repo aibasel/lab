@@ -1,12 +1,12 @@
 Install Lab
 -----------
 
-Lab supports Python 2.7 (deprecated) or Python >= 3.5. We recommend
-installing Lab in a `Python virtual environment
-<https://docs.python.org/3/tutorial/venv.html>`_. This has the advantage
-that there are no modifications to the system-wide configuration, and
-that you can create multiple environments with different Lab versions
-(e.g., for different papers) without conflicts::
+Lab supports Python 3.6+. We recommend installing Lab in a `Python
+virtual environment <https://docs.python.org/3/tutorial/venv.html>`_.
+This has the advantage that there are no modifications to the
+system-wide configuration, and that you can create multiple environments
+with different Lab versions (e.g., for different papers) without
+conflicts::
 
     # Install required packages, including virtualenv.
     sudo apt install python3 python3-venv

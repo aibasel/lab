@@ -211,7 +211,7 @@ class FastDownwardExperiment(Experiment):
             >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
 
         """
-        if isinstance(suite, tools.string_type):
+        if isinstance(suite, str):
             suite = [suite]
         benchmarks_dir = os.path.abspath(benchmarks_dir)
         if not os.path.exists(benchmarks_dir):
@@ -302,7 +302,7 @@ class FastDownwardExperiment(Experiment):
         ...         "--overall-time-limit", "5m"])
 
         """
-        if not isinstance(name, tools.string_type):
+        if not isinstance(name, str):
             logging.critical("Algorithm name must be a string: {}".format(name))
         if name in self._algorithms:
             logging.critical("Algorithm names must be unique: {}".format(name))

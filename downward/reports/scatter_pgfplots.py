@@ -124,7 +124,7 @@ class ScatterPgfplots(object):
                 continue
             if isinstance(value, bool) or value is None:
                 opts.append(key)
-            elif isinstance(value, tools.string_type):
+            elif isinstance(value, str):
                 if " " in value or "=" in value:
                     value = "{%s}" % value
                 opts.append("{}={}".format(key, value.replace("_", "-")))

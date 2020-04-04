@@ -28,14 +28,6 @@ from downward.reports.scatter_pgfplots import ScatterPgfplots
 from lab import tools
 
 
-try:
-    # Python 2
-    from itertools import izip
-except ImportError:
-    # Python 3+
-    izip = zip
-
-
 class ScatterPlotReport(PlanningReport):
     """
     Generate a scatter plot for an attribute.
@@ -333,7 +325,7 @@ class ScatterPlotReport(PlanningReport):
         styles = [
             {"marker": shape, "c": color}
             for shape, color in itertools.islice(
-                izip(itertools.cycle(shapes), itertools.cycle(colors)), num_styles
+                zip(itertools.cycle(shapes), itertools.cycle(colors)), num_styles
             )
         ]
         assert (

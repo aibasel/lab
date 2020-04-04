@@ -27,7 +27,7 @@ import lab.experiment
 def _check_eval_dir(eval_dir):
     if os.path.exists(eval_dir):
         answer = (
-            tools.user_input(
+            input(
                 "{} already exists. Do you want to (o)verwrite it, "
                 "(m)erge the results, or (c)ancel? ".format(eval_dir)
             )

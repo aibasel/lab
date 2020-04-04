@@ -40,12 +40,7 @@ check exp
 popd
 
 check report-external-results
-
-# Fast Downward only supports Python >= 3.6.
-RESULT="$(python -c 'import sys; print(sys.version_info >= (3, 6))')"
-if [ $RESULT == True ]; then
-    check lmcut
-    check showcase-options
-fi
+check lmcut
+check showcase-options
 
 echo "Finished running example experiments"

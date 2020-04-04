@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -31,8 +31,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: revision-cache
-        # TODO: Remove Python version from key once all versions compile Fast Downward.
-        key: ${{ runner.os }}-revision-cache-${{ matrix.python-version }}-${{ env.DOWNWARD_REVISION }}
+        key: ${{ runner.os }}-revision-cache-${{ env.DOWNWARD_REVISION }}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
@@ -122,11 +121,7 @@ jobs:
         # sudo apt-get update && sudo apt-get -y upgrade
 
         export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
-        echo CACHE: $DOWNWARD_REVISION_CACHE
-
-        # Ensure that directory is present even if Python version doesn't create it.
-        # TODO: remove this once we drop the old Python versions.
-        mkdir -p ${DOWNWARD_REVISION_CACHE}
+        echo CACHE: ${DOWNWARD_REVISION_CACHE}
         ls ${DOWNWARD_REVISION_CACHE}
 
         export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
