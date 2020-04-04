@@ -9,6 +9,7 @@ Lab
 * Move ``CachedRevision`` from ``downward`` to ``lab`` package (Thomas Keller).
   Please note that the interface to the class is experimental and may change
   in the future.
+* Let tests fail if any example experiment produces unexplained errors.
 
 Downward Lab
 ^^^^^^^^^^^^

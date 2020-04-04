@@ -22,9 +22,6 @@ from lab import tools
 from lab.experiment import Experiment
 
 
-EXP_DIR = "data/custom"
-
-
 PROPERTIES = {
     "ff-gripper-prob01.pddl": {
         "domain": "gripper",
@@ -49,8 +46,7 @@ def write_properties(eval_dir):
         json.dump(PROPERTIES, f)
 
 
-# Create new experiment. The file <EXP_DIR>-eval/properties must exist.
-exp = Experiment(EXP_DIR)
+exp = Experiment()
 exp.add_report(AbsoluteReport(attributes=["coverage", "expansions"]))
 
 write_properties(exp.eval_dir)
