@@ -1,7 +1,7 @@
 News
 ====
 
-v5.6 (unreleased)
+v6.0 (2020-04-05)
 -----------------
 
 Lab
@@ -9,7 +9,7 @@ Lab
 * Bump minimum Python version to 3.6.
 * Move ``CachedRevision`` from ``downward`` to ``lab`` package (Thomas Keller).
   Please note that the interface to the class is experimental and may change
-  in the future.
+  in the future. Feedback is welcome!
 * Let tests fail if any example experiment produces unexplained errors.
 
 Downward Lab
