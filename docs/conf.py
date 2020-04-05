@@ -52,8 +52,8 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"Lab"
-copyright = u"2011-2020 Jendrik Seipp et al."
+project = "Lab"
+copyright = "2011-2020 Jendrik Seipp et al."
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -196,7 +196,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "lab.tex", u"Lab Documentation", u"Jendrik Seipp et al.", "manual")
+    ("index", "lab.tex", "Lab Documentation", "Jendrik Seipp et al.", "manual")
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -224,7 +224,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "Lab", u"Lab Documentation", [u"Jendrik Seipp et al."], 1)]
+man_pages = [("index", "Lab", "Lab Documentation", ["Jendrik Seipp et al."], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -239,8 +239,8 @@ texinfo_documents = [
     (
         "index",
         "Lab",
-        u"Lab Documentation",
-        u"Jendrik Seipp et al.",
+        "Lab Documentation",
+        "Jendrik Seipp et al.",
         "Lab",
         "Experiment framework",
         "Miscellaneous",
