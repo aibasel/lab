@@ -39,25 +39,21 @@ except ImportError:
     import json
 
 
+DEFAULT_ENCODING = "utf-8"
+
+
 def get_string(s):
-    if isinstance(s, str):
-        # Byte string in Python 2 or unicode string in Python 3.
-        return s
-    elif isinstance(s, bytes):
-        # Bytes object in Python 3 (if-case handles Python 2 byte strings).
-        return s.decode("utf-8")
+    if isinstance(s, bytes):
+        return s.decode(DEFAULT_ENCODING)
     else:
-        # Unicode string in Python 2.
-        raise AssertionError
+        raise ValueError("tools.get_string() only accepts byte strings")
 
 
 def get_bytes(s):
-    if isinstance(s, bytes):
-        # Byte string in Python 2 or bytes object in Python 3.
-        return s
+    if isinstance(s, str):
+        return s.encode(DEFAULT_ENCODING)
     else:
-        # Unicode string in Python 2 or 3 (if-case handles Python 2 byte strings).
-        return s.encode("utf-8")
+        raise ValueError("tools.get_bytes() only accepts unicode strings")
 
 
 def get_script_path():

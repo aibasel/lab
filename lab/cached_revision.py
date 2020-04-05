@@ -34,17 +34,13 @@ _ID_CACHE = {}
 def _get_id(cmd):
     cmd = tuple(cmd)
     if cmd not in _ID_CACHE:
+        p = subprocess.run(cmd, stdout=subprocess.PIPE)
         try:
-            result = tools.get_string(subprocess.check_output(cmd).strip())
-        except subprocess.CalledProcessError:
-            logging.critical(
-                'Call failed: "{}". Please check path and revision.'.format(
-                    " ".join(cmd)
-                )
-            )
+            p.check_returncode()
+        except subprocess.CalledProcessError as err:
+            logging.critical(f"{err} Please check path and revision.")
         else:
-            assert result
-            _ID_CACHE[cmd] = result
+            _ID_CACHE[cmd] = tools.get_string(p.stdout).strip()
     return _ID_CACHE[cmd]
 
 
