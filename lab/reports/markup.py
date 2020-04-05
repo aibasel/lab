@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -215,7 +213,7 @@ def _get_config(target):
     return config
 
 
-class Document(object):
+class Document:
     def __init__(self, title="", author="", date=""):
         self.title = title
         self.author = author

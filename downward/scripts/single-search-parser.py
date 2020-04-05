@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
@@ -20,8 +19,6 @@
 """
 Regular expressions and functions for parsing single-search runs of Fast Downward.
 """
-
-from __future__ import print_function
 
 import math
 import re
@@ -91,7 +88,7 @@ def add_initial_h_values(content, props):
             init_h = int(init_h)
         if heuristic in initial_h_values:
             props.add_unexplained_error(
-                "multiple initial h values found for {}".format(heuristic)
+                f"multiple initial h values found for {heuristic}"
             )
         initial_h_values[heuristic] = init_h
 

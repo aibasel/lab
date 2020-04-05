@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -27,7 +25,7 @@ import lab.experiment
 def _check_eval_dir(eval_dir):
     if os.path.exists(eval_dir):
         answer = (
-            tools.user_input(
+            input(
                 "{} already exists. Do you want to (o)verwrite it, "
                 "(m)erge the results, or (c)ancel? ".format(eval_dir)
             )
@@ -42,10 +40,10 @@ def _check_eval_dir(eval_dir):
             sys.exit()
         else:
             # Abort for "cancel" and invalid answers.
-            logging.critical('Invalid answer: "{}"'.format(answer))
+            logging.critical(f'Invalid answer: "{answer}"')
 
 
-class Fetcher(object):
+class Fetcher:
     """
     Collect data from the runs of an experiment and store it in an
     evaluation directory.
@@ -104,11 +102,11 @@ class Fetcher(object):
 
         """
         if not os.path.isdir(src_dir):
-            logging.critical("{} is missing or not a directory".format(src_dir))
+            logging.critical(f"{src_dir} is missing or not a directory")
         run_filter = tools.RunFilter(filter, **kwargs)
 
         eval_dir = eval_dir or src_dir.rstrip("/") + "-eval"
-        logging.info("Fetching properties from {} to {}".format(src_dir, eval_dir))
+        logging.info(f"Fetching properties from {src_dir} to {eval_dir}")
 
         if merge is None:
             _check_eval_dir(eval_dir)
@@ -136,12 +134,10 @@ class Fetcher(object):
             new_props = tools.Properties()
             run_dirs = sorted(glob(os.path.join(src_dir, "runs-*-*", "*")))
             total_dirs = len(run_dirs)
-            logging.info(
-                "Scanning properties from {:d} run directories".format(total_dirs)
-            )
+            logging.info(f"Scanning properties from {total_dirs:d} run directories")
             for index, run_dir in enumerate(run_dirs, start=1):
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(loglevel, "Scanning: {:6d}/{:d}".format(index, total_dirs))
+                logging.log(loglevel, f"Scanning: {index:6d}/{total_dirs:d}")
                 props = self.fetch_dir(run_dir)
                 if slurm_err_content:
                     props.add_unexplained_error("output-to-slurm.err")

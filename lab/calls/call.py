@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -32,12 +30,12 @@ def set_limit(kind, soft_limit, hard_limit):
         resource.setrlimit(kind, (soft_limit, hard_limit))
     except (OSError, ValueError) as err:
         logging.error(
-            "Resource limit for %s could not be set to %s (%s)"
-            % (kind, (soft_limit, hard_limit), err)
+            f"Resource limit for {kind} could not be set to "
+            f"[{soft_limit}, {hard_limit}] ({err})"
         )
 
 
-class Call(object):
+class Call:
     def __init__(
         self,
         args,
@@ -48,7 +46,7 @@ class Call(object):
         hard_stdout_limit=None,
         soft_stderr_limit=None,
         hard_stderr_limit=None,
-        **kwargs
+        **kwargs,
     ):
         """Make system calls with time and memory constraints.
 
@@ -75,7 +73,7 @@ class Call(object):
         self.opened_files = []
         for stream_name in ["stdout", "stderr"]:
             stream = kwargs.get(stream_name)
-            if isinstance(stream, tools.string_type):
+            if isinstance(stream, str):
                 file = open(stream, mode="w")
                 kwargs[stream_name] = file
                 self.opened_files.append(file)
@@ -164,7 +162,7 @@ class Call(object):
         while fd_to_infile:
             try:
                 ready = poller.poll()
-            except select.error as e:
+            except OSError as e:
                 if e.args[0] == errno.EINTR:
                     continue
                 raise
@@ -227,7 +225,7 @@ class Call(object):
         for file in self.opened_files:
             file.close()
         wall_clock_time = time.time() - wall_clock_start_time
-        logging.info("{} wall-clock time: {:.2f}s".format(self.name, wall_clock_time))
+        logging.info(f"{self.name} wall-clock time: {wall_clock_time:.2f}s")
         if (
             self.wall_clock_time_limit is not None
             and wall_clock_time > self.wall_clock_time_limit
@@ -236,5 +234,5 @@ class Call(object):
                 "wall-clock time for %s too high: %.2f > %d"
                 % (self.name, wall_clock_time, self.wall_clock_time_limit)
             )
-        logging.info("{} exit code: {}".format(self.name, retcode))
+        logging.info(f"{self.name} exit code: {retcode}")
         return retcode

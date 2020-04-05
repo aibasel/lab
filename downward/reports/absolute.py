@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -195,7 +193,7 @@ class AbsoluteReport(PlanningReport):
                             "domain-wise table can be generated.\n" % attribute
                         )
 
-            toc_lines.append("- **[''{}'' #{}]**".format(attribute, attribute))
+            toc_lines.append(f"- **[''{attribute}'' #{attribute}]**")
             toc_lines.append("  - " + " ".join(toc_line))
             sections.append((attribute, "\n".join(parts)))
 
@@ -206,10 +204,9 @@ class AbsoluteReport(PlanningReport):
         toc = "\n".join(toc_lines)
 
         content = "\n".join(
-            "= {} =[{}]\n\n{}".format(attr, attr, section)
-            for (attr, section) in sections
+            f"= {attr} =[{attr}]\n\n{section}" for (attr, section) in sections
         )
-        return "{}\n\n\n{}".format(toc, content)
+        return f"{toc}\n\n\n{content}"
 
     def _get_general_info(self):
         table = reports.Table(title="algorithm")
@@ -296,7 +293,7 @@ class AbsoluteReport(PlanningReport):
                 count = ",".join(num_values_list)
             link = None
             if self.use_domain_links:
-                link = "#{}-{}".format(attribute, domain)
+                link = f"#{attribute}-{domain}"
             formatter = reports.CellFormatter(link=link, count=count)
             table.cell_formatters[domain][table.header_column] = formatter
 

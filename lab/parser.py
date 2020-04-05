@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -57,7 +55,7 @@ import re
 from lab import tools
 
 
-class _Pattern(object):
+class _Pattern:
     def __init__(self, attribute, regex, required, type_, flags):
         self.attribute = attribute
         self.type_ = type_
@@ -69,7 +67,7 @@ class _Pattern(object):
             try:
                 flag |= getattr(re, char)
             except AttributeError:
-                logging.critical("Unknown pattern flag: {}".format(char))
+                logging.critical(f"Unknown pattern flag: {char}")
 
         self.regex = re.compile(regex, flag)
 
@@ -88,14 +86,14 @@ class _Pattern(object):
                 value = self.type_(value)
                 found_props[self.attribute] = value
         elif self.required:
-            logging.error('Pattern "{}" not found in {}'.format(self, filename))
+            logging.error(f'Pattern "{self}" not found in {filename}')
         return found_props
 
     def __str__(self):
         return self.regex.pattern
 
 
-class _FileParser(object):
+class _FileParser:
     """
     Private class that parses a given file according to the added patterns
     and functions.
@@ -109,7 +107,7 @@ class _FileParser(object):
 
     def load_file(self, filename):
         self.filename = filename
-        with open(filename, "r") as f:
+        with open(filename) as f:
             self.content = f.read()
 
     def add_pattern(self, pattern):
@@ -131,7 +129,7 @@ class _FileParser(object):
             function(self.content, props)
 
 
-class Parser(object):
+class Parser:
     """
     Parse files in the current directory and write results into the
     run's ``properties`` file.
@@ -218,7 +216,7 @@ class Parser(object):
             path = os.path.join(run_dir, filename)
             try:
                 file_parser.load_file(path)
-            except IOError as err:
+            except OSError as err:
                 if err.errno == errno.ENOENT:
                     logging.info(
                         'File "{path}" is missing and thus not parsed.'.format(

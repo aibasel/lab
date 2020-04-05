@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -40,41 +38,22 @@ try:
 except ImportError:
     import json
 
-try:
-    # Python 2
-    user_input = raw_input
-except NameError:
-    # Python 3
-    user_input = input
 
-
-try:
-    # Python 2
-    string_type = basestring
-except NameError:
-    # Python 3
-    string_type = str
+DEFAULT_ENCODING = "utf-8"
 
 
 def get_string(s):
-    if isinstance(s, str):
-        # Byte string in Python 2 or unicode string in Python 3.
-        return s
-    elif isinstance(s, bytes):
-        # Bytes object in Python 3 (if-case handles Python 2 byte strings).
-        return s.decode("utf-8")
+    if isinstance(s, bytes):
+        return s.decode(DEFAULT_ENCODING)
     else:
-        # Unicode string in Python 2.
-        return s
+        raise ValueError("tools.get_string() only accepts byte strings")
 
 
 def get_bytes(s):
-    if isinstance(s, bytes):
-        # Byte string in Python 2 or bytes object in Python 3.
-        return s
+    if isinstance(s, str):
+        return s.encode(DEFAULT_ENCODING)
     else:
-        # Unicode string in Python 2 or 3 (if-case handles Python 2 byte strings).
-        return s.encode("utf-8")
+        raise ValueError("tools.get_bytes() only accepts unicode strings")
 
 
 def get_script_path():
@@ -135,7 +114,7 @@ def show_deprecation_warning(msg):
     logging.warning(msg)
 
 
-class deprecated(object):
+class deprecated:
     """Decorator for marking deprecated functions or classes.
 
     The *msg* argument is optional, but the decorator always has to be
@@ -178,7 +157,7 @@ def makedirs(path):
 
 
 def confirm_or_abort(question):
-    answer = user_input("%s (y/N): " % question).strip()
+    answer = input("%s (y/N): " % question).strip()
     if not answer.lower() == "y":
         sys.exit("Aborted")
 
@@ -249,7 +228,7 @@ def find_file(filenames, dir="."):
         path = os.path.join(dir, filename)
         if os.path.exists(path):
             return path
-    raise IOError("none found in {!r}: {!r}".format(dir, filenames))
+    raise OSError(f"none found in {dir!r}: {filenames!r}")
 
 
 def run_command(cmd, **kwargs):
@@ -286,9 +265,7 @@ class Properties(dict):
             try:
                 self.update(json.load(f))
             except ValueError as e:
-                logging.critical(
-                    "JSON parse error in file '{}': {}".format(filename, e)
-                )
+                logging.critical(f"JSON parse error in file '{filename}': {e}")
 
     def add_unexplained_error(self, error):
         add_unexplained_error(self, error)
@@ -300,7 +277,7 @@ class Properties(dict):
         write_file(self.filename, str(self))
 
 
-class RunFilter(object):
+class RunFilter:
     def __init__(self, filter, **kwargs):
         self.filters = make_list(filter)
         self.filtered_attributes = []  # Only needed for sanity checks.
@@ -320,7 +297,7 @@ class RunFilter(object):
             if isinstance(value, (list, tuple, set)):
                 return run.get(prop) in value
             elif callable(value):
-                logging.critical("filter_{} doesn't accept functions.".format(prop))
+                logging.critical(f"filter_{prop} doesn't accept functions.")
             else:
                 return run.get(prop) == value
 
@@ -400,7 +377,7 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
             else:
                 shutil.copy2(srcname, dstname)
             # XXX What about devices, sockets etc.?
-        except (IOError, os.error) as why:
+        except OSError as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
@@ -543,7 +520,7 @@ def get_slurm_err_content(src_dir):
             try:
                 with open(slurm_err_filename) as f:
                     return f.read()
-            except IOError:
+            except OSError:
                 logging.error("Failed to read slurm.err file.")
         else:
             logging.error("File slurm.err is missing.")

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -36,17 +34,13 @@ _ID_CACHE = {}
 def _get_id(cmd):
     cmd = tuple(cmd)
     if cmd not in _ID_CACHE:
+        p = subprocess.run(cmd, stdout=subprocess.PIPE)
         try:
-            result = tools.get_string(subprocess.check_output(cmd).strip())
-        except subprocess.CalledProcessError:
-            logging.critical(
-                'Call failed: "{}". Please check path and revision.'.format(
-                    " ".join(cmd)
-                )
-            )
+            p.check_returncode()
+        except subprocess.CalledProcessError as err:
+            logging.critical(f"{err} Please check path and revision.")
         else:
-            assert result
-            _ID_CACHE[cmd] = result
+            _ID_CACHE[cmd] = tools.get_string(p.stdout).strip()
     return _ID_CACHE[cmd]
 
 
@@ -73,21 +67,21 @@ def git_id(repo, args=None, rev=None):
 
 
 def _raise_unknown_vcs_error(vcs):
-    raise AssertionError('Unknown version control system "{}".'.format(vcs))
+    raise AssertionError(f'Unknown version control system "{vcs}".')
 
 
 def get_version_control_system(repo):
     vcs = [
         x
         for x in VERSION_CONTROL_SYSTEMS
-        if os.path.exists(os.path.join(repo, ".{}".format(x)))
+        if os.path.exists(os.path.join(repo, f".{x}"))
     ]
     if len(vcs) == 1:
         return vcs[0]
     else:
         logging.critical(
             "Repo {} must contain exactly one of the following subdirectories: {}".format(
-                repo, ", ".join(".{}".format(x) for x in VERSION_CONTROL_SYSTEMS)
+                repo, ", ".join(f".{x}" for x in VERSION_CONTROL_SYSTEMS)
             )
         )
 
@@ -119,7 +113,7 @@ def _compute_md5_hash(mylist):
     return m.hexdigest()[:8]
 
 
-class CachedRevision(object):
+class CachedRevision:
     """This class represents checkouts of a solver.
 
     It provides methods for compiling and caching given revisions.
@@ -164,7 +158,7 @@ class CachedRevision(object):
 
         """
         if not os.path.isdir(repo):
-            logging.critical("{} is not a local solver repository.".format(repo))
+            logging.critical(f"{repo} is not a local solver repository.")
         self.repo = repo
         self.build_cmd = build_cmd
         self.local_rev = rev
@@ -200,7 +194,7 @@ class CachedRevision(object):
             if vcs == MERCURIAL:
                 retcode = tools.run_command(
                     ["hg", "archive", "-r", self.global_rev]
-                    + ["-X{}".format(d) for d in self.exclude]
+                    + [f"-X{d}" for d in self.exclude]
                     + [self.path],
                     cwd=self.repo,
                 )
@@ -236,7 +230,7 @@ class CachedRevision(object):
         if retcode == 0:
             tools.write_file(self._get_sentinel_file(), "")
         else:
-            logging.critical("Build failed in {}".format(self.path))
+            logging.critical(f"Build failed in {self.path}")
 
     def _cleanup(self):
         pass

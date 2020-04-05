@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -42,7 +40,7 @@ def is_run_step(step):
     return step._funcname == "start_runs"
 
 
-class Environment(object):
+class Environment:
     """Abstract base class for all environments."""
 
     def __init__(self, randomize_task_order=True):
@@ -301,7 +299,7 @@ class SlurmEnvironment(GridEnvironment):
         memory_per_cpu=None,
         export=None,
         setup=None,
-        **kwargs
+        **kwargs,
     ):
         """
 
@@ -395,7 +393,7 @@ class SlurmEnvironment(GridEnvironment):
     def _get_memory_in_kb(limit):
         match = re.match(r"^(\d+)(k|m|g)?$", limit, flags=re.I)
         if not match:
-            logging.critical("malformed memory_per_cpu parameter: {}".format(limit))
+            logging.critical(f"malformed memory_per_cpu parameter: {limit}")
         memory = int(match.group(1))
         suffix = match.group(2)
         if suffix is not None:
@@ -444,7 +442,7 @@ class SlurmEnvironment(GridEnvironment):
         submit.append(job_file)
         logging.info("Executing %s" % (" ".join(submit)))
         out = subprocess.check_output(submit, cwd=job_dir).decode()
-        logging.info("Output: {}".format(out.strip()))
+        logging.info(f"Output: {out.strip()}")
         match = re.match(r"Submitted batch job (\d*)", out)
         assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
         return match.group(1)
