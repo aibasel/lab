@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -43,7 +41,7 @@ class ScatterPlotReport(PlanningReport):
         xlabel="",
         ylabel="",
         matplotlib_options=None,
-        **kwargs
+        **kwargs,
     ):
         """
         If *relative* is False, create a "standard" scatter plot with a
@@ -187,7 +185,7 @@ class ScatterPlotReport(PlanningReport):
         scales = ["linear", "log", "symlog"]
         for scale in [self.xscale, self.yscale]:
             if scale not in scales:
-                logging.critical("Scale {} not in {}".format(scale, scales))
+                logging.critical(f"Scale {scale} not in {scales}")
 
     def has_multiple_categories(self):
         return any(key is not None for key in self.categories.keys())
@@ -319,7 +317,7 @@ class ScatterPlotReport(PlanningReport):
         Create dictionary mapping from category name to marker style.
         """
         shapes = "x+os^v<>D"
-        colors = ["C{}".format(c) for c in range(10)]
+        colors = [f"C{c}" for c in range(10)]
 
         num_styles = len(shapes) * len(colors)
         styles = [

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -80,7 +78,7 @@ class FastDownwardRun(Run):
         self.set_property("id", [self.algo.name, self.task.domain, self.task.problem])
 
 
-class _DownwardAlgorithm(object):
+class _DownwardAlgorithm:
     def __init__(self, name, cached_revision, driver_options, component_options):
         self.name = name
         self.cached_revision = cached_revision
@@ -215,9 +213,7 @@ class FastDownwardExperiment(Experiment):
             suite = [suite]
         benchmarks_dir = os.path.abspath(benchmarks_dir)
         if not os.path.exists(benchmarks_dir):
-            logging.critical(
-                "Benchmarks directory {} not found.".format(benchmarks_dir)
-            )
+            logging.critical(f"Benchmarks directory {benchmarks_dir} not found.")
         self._suites[benchmarks_dir].extend(suite)
 
     def add_algorithm(
@@ -303,9 +299,9 @@ class FastDownwardExperiment(Experiment):
 
         """
         if not isinstance(name, str):
-            logging.critical("Algorithm name must be a string: {}".format(name))
+            logging.critical(f"Algorithm name must be a string: {name}")
         if name in self._algorithms:
-            logging.critical("Algorithm names must be unique: {}".format(name))
+            logging.critical(f"Algorithm names must be unique: {name}")
         build_options = build_options or []
         driver_options = [
             "--validate",

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -93,7 +91,7 @@ def _check_name(name, typ, extra_chars=""):
         )
 
 
-class _Resource(object):
+class _Resource:
     def __init__(self, name, source, dest, symlink, is_parser):
         self.name = name
         self.source = source
@@ -102,7 +100,7 @@ class _Resource(object):
         self.is_parser = is_parser
 
 
-class _Buildable(object):
+class _Buildable:
     """Abstract base class for Experiment and Run."""
 
     def __init__(self):
@@ -136,9 +134,7 @@ class _Buildable(object):
     def _check_alias(self, name):
         _check_name(name, "parser or resource", extra_chars="_")
         if name in self.env_vars_relative:
-            logging.critical(
-                "Parser and resource names must be unique: {!r}".format(name)
-            )
+            logging.critical(f"Parser and resource names must be unique: {name!r}")
 
     def add_resource(self, name, source, dest="", symlink=False):
         """Include the file or directory *source* in the experiment or run.
@@ -204,7 +200,7 @@ class _Buildable(object):
         hard_stdout_limit=10 * 1024,
         soft_stderr_limit=64,
         hard_stderr_limit=10 * 1024,
-        **kwargs
+        **kwargs,
     ):
         """Call an executable.
 
@@ -255,14 +251,14 @@ class _Buildable(object):
         """
         _check_name(name, "command", extra_chars="_-")
         if name in self.commands:
-            logging.critical("Command names must be unique: {}".format(name))
+            logging.critical(f"Command names must be unique: {name}")
 
         if not isinstance(command, list):
             logging.critical(
                 "The command for {name} is not a list: {command}".format(**locals())
             )
         if not command:
-            logging.critical('Command "{}" must not be empty'.format(name))
+            logging.critical(f'Command "{name}" must not be empty')
 
         if "stdin" in kwargs:
             logging.critical("redirecting stdin is not supported")
@@ -306,7 +302,7 @@ class _Buildable(object):
             if only_parsers and not resource.is_parser:
                 continue
             if not os.path.exists(resource.source):
-                logging.critical("Resource not found: {}".format(resource.source))
+                logging.critical(f"Resource not found: {resource.source}")
             dest = self._get_abs_path(resource.dest)
             if not dest.startswith(self.path):
                 # Only copy resources that reside in the experiment/run dir.
@@ -317,12 +313,12 @@ class _Buildable(object):
                     continue
                 source = self._get_rel_path(resource.source)
                 os.symlink(source, dest)
-                logging.debug("Linking from {} to {}".format(source, dest))
+                logging.debug(f"Linking from {source} to {dest}")
                 continue
 
             # Even if the directory containing a resource has already been added,
             # we copy the resource since we might want to overwrite it.
-            logging.debug("Copying {} to {}".format(resource.source, dest))
+            logging.debug(f"Copying {resource.source} to {dest}")
             tools.copy(resource.source, dest)
 
 
@@ -441,11 +437,11 @@ class Experiment(_Buildable):
 
         """
         if not isinstance(name, str):
-            logging.critical("Step name must be a string: {}".format(name))
+            logging.critical(f"Step name must be a string: {name}")
         if not name:
             logging.critical("Step name must not be empty")
         if any(step.name == name for step in self.steps):
-            raise ValueError("Step names must be unique: {}".format(name))
+            raise ValueError(f"Step names must be unique: {name}")
         self.steps.append(Step(name, function, *args, **kwargs))
 
     def add_parser(self, path_to_parser):
@@ -482,7 +478,7 @@ class Experiment(_Buildable):
         self.resources.append(
             _Resource(name, path_to_parser, dest, symlink=False, is_parser=True)
         )
-        self.add_command(name, [tools.get_python_executable(), "{{{}}}".format(name)])
+        self.add_command(name, [tools.get_python_executable(), f"{{{name}}}"])
 
     def add_parse_again_step(self):
         """
@@ -496,7 +492,7 @@ class Experiment(_Buildable):
 
         def run_parsers():
             if not os.path.isdir(self.path):
-                logging.critical("{} is missing or not a directory".format(self.path))
+                logging.critical(f"{self.path} is missing or not a directory")
 
             # Copy all parsers from their source to their destination again.
             self._build_resources(only_parsers=True)
@@ -504,17 +500,13 @@ class Experiment(_Buildable):
             run_dirs = sorted(glob(os.path.join(self.path, "runs-*-*", "*")))
 
             total_dirs = len(run_dirs)
-            logging.info(
-                "Parsing properties in {:d} run directories".format(total_dirs)
-            )
+            logging.info(f"Parsing properties in {total_dirs:d} run directories")
             for index, run_dir in enumerate(run_dirs, start=1):
                 if os.path.exists(os.path.join(run_dir, "properties")):
                     # print "removing path {}".format(os.path.join(run_dir, 'properties'))
                     tools.remove_path(os.path.join(run_dir, "properties"))
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(
-                    loglevel, "Parsing run: {:6d}/{:d}".format(index, total_dirs)
-                )
+                logging.log(loglevel, f"Parsing run: {index:6d}/{total_dirs:d}")
                 for resource in self.resources:
                     if resource.is_parser:
                         parser_filename = self.env_vars_relative[resource.name]
@@ -604,7 +596,7 @@ class Experiment(_Buildable):
         """
         name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
         eval_dir = eval_dir or self.eval_dir
-        outfile = outfile or "{}.{}".format(name, report.output_format)
+        outfile = outfile or f"{name}.{report.output_format}"
         if not os.path.isabs(outfile):
             outfile = os.path.join(eval_dir, outfile)
         self.add_step(name, report, eval_dir, outfile)
@@ -753,7 +745,7 @@ class Run(_Buildable):
                     try:
                         return repr(arg.format(**env_vars))
                     except KeyError as err:
-                        logging.critical("Resource {} is undefined.".format(err))
+                        logging.critical(f"Resource {err} is undefined.")
                 else:
                     return repr(str(arg))
 
@@ -762,7 +754,7 @@ class Run(_Buildable):
                     formatted_value = format_arg(val)
                 else:
                     formatted_value = repr(val)
-                return "{}={}".format(key, formatted_value)
+                return f"{key}={formatted_value}"
 
             cmd_string = "[{}]".format(", ".join([format_arg(arg) for arg in cmd]))
             kwargs_string = ", ".join(
@@ -798,7 +790,7 @@ class Run(_Buildable):
         if run_id is None:
             logging.critical("Each run must have an id")
         if not isinstance(run_id, (list, tuple)):
-            logging.critical("id must be a list: {}".format(run_id))
+            logging.critical(f"id must be a list: {run_id}")
         for id_part in run_id:
             if not isinstance(id_part, str):
-                logging.critical("run IDs must be a list of strings: {}".format(run_id))
+                logging.critical(f"run IDs must be a list of strings: {run_id}")

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -157,7 +155,7 @@ class Attribute(str):
         )
 
 
-class Report(object):
+class Report:
     """
     Base class for all reports.
     """
@@ -261,7 +259,7 @@ class Report(object):
         """
         self.attributes = tools.make_list(attributes)
         if format not in txt2tags.TARGETS + ["eps", "pdf", "pgf", "png", "py"]:
-            raise ValueError("invalid format: {}".format(format))
+            raise ValueError(f"invalid format: {format}")
         self.output_format = format
         self.toc = True
         self.run_filter = tools.RunFilter(filter, **kwargs)
@@ -313,7 +311,7 @@ class Report(object):
         counter = collections.Counter(self.attributes)
         duplicates = [name for name, count in sorted(counter.items()) if count > 1]
         if duplicates:
-            logging.critical("Duplicate attributes detected: {}".format(duplicates))
+            logging.critical(f"Duplicate attributes detected: {duplicates}")
 
         self.write()
 
@@ -453,7 +451,7 @@ class Report(object):
             logging.critical("All runs have been filtered -> Nothing to report.")
 
 
-class CellFormatter(object):
+class CellFormatter:
     """Formating information for one cell in a table."""
 
     def __init__(self, bold=False, count=None, link=None):
@@ -464,9 +462,9 @@ class CellFormatter(object):
     def format_value(self, value):
         result = str(value)
         if self.link:
-            result = "[''{}'' {}]".format(result, self.link)
+            result = f"[''{result}'' {self.link}]"
         if self.count:
-            result = "{} ({})".format(result, self.count)
+            result = f"{result} ({self.count})"
         if self.bold:
             result = "**%s**" % result
         return result
@@ -786,7 +784,7 @@ class Table(collections.defaultdict):
         value_text = format_value(value)
 
         if color is not None:
-            value_text = "{{{}|color:{}}}".format(value_text, color)
+            value_text = f"{{{value_text}|color:{color}}}"
         if bold:
             value_text = "**%s**" % value_text
         if justify_right:
@@ -833,7 +831,7 @@ def extract_summary_rows(from_table, to_table, link=None):
     to **to_table**.
     """
     for name, row in from_table.get_summary_rows().items():
-        row_name = "{} - {}".format(from_table.title, name)
+        row_name = f"{from_table.title} - {name}"
         if link is not None:
             formatter = CellFormatter(link=link)
             to_table.cell_formatters[row_name][to_table.header_column] = formatter
@@ -844,7 +842,7 @@ def extract_summary_rows(from_table, to_table, link=None):
             to_table.add_cell(row_name, col_name, value)
 
 
-class DynamicDataModule(object):
+class DynamicDataModule:
     """Interface for modules that dynamically add or modify data in a table."""
 
     def collect(self, table, cells):

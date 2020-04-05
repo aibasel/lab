@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -21,7 +19,7 @@ import os
 from lab import tools
 
 
-class Domain(object):
+class Domain:
     def __init__(self, benchmarks_dir, domain):
         self.domain = domain
         directory = os.path.join(benchmarks_dir, domain)
@@ -53,7 +51,7 @@ class Domain(object):
         return iter(self.problems)
 
 
-class Problem(object):
+class Problem:
     def __init__(
         self,
         domain,
@@ -128,14 +126,12 @@ def _generate_problems(benchmarks_dir, description):
     if isinstance(description, Problem):
         yield description
     elif isinstance(description, Domain):
-        for problem in description:
-            yield problem
+        yield from description
     elif ":" in description:
         domain_name, problem_name = description.split(":", 1)
         yield Problem(domain_name, problem_name, benchmarks_dir=benchmarks_dir)
     else:
-        for problem in Domain(benchmarks_dir, description):
-            yield problem
+        yield from Domain(benchmarks_dir, description)
 
 
 def build_suite(benchmarks_dir, descriptions):

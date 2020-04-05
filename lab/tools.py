@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -120,7 +118,7 @@ def show_deprecation_warning(msg):
     logging.warning(msg)
 
 
-class deprecated(object):
+class deprecated:
     """Decorator for marking deprecated functions or classes.
 
     The *msg* argument is optional, but the decorator always has to be
@@ -234,7 +232,7 @@ def find_file(filenames, dir="."):
         path = os.path.join(dir, filename)
         if os.path.exists(path):
             return path
-    raise IOError("none found in {!r}: {!r}".format(dir, filenames))
+    raise OSError(f"none found in {dir!r}: {filenames!r}")
 
 
 def run_command(cmd, **kwargs):
@@ -271,9 +269,7 @@ class Properties(dict):
             try:
                 self.update(json.load(f))
             except ValueError as e:
-                logging.critical(
-                    "JSON parse error in file '{}': {}".format(filename, e)
-                )
+                logging.critical(f"JSON parse error in file '{filename}': {e}")
 
     def add_unexplained_error(self, error):
         add_unexplained_error(self, error)
@@ -285,7 +281,7 @@ class Properties(dict):
         write_file(self.filename, str(self))
 
 
-class RunFilter(object):
+class RunFilter:
     def __init__(self, filter, **kwargs):
         self.filters = make_list(filter)
         self.filtered_attributes = []  # Only needed for sanity checks.
@@ -305,7 +301,7 @@ class RunFilter(object):
             if isinstance(value, (list, tuple, set)):
                 return run.get(prop) in value
             elif callable(value):
-                logging.critical("filter_{} doesn't accept functions.".format(prop))
+                logging.critical(f"filter_{prop} doesn't accept functions.")
             else:
                 return run.get(prop) == value
 
@@ -385,7 +381,7 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
             else:
                 shutil.copy2(srcname, dstname)
             # XXX What about devices, sockets etc.?
-        except (IOError, os.error) as why:
+        except OSError as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
@@ -528,7 +524,7 @@ def get_slurm_err_content(src_dir):
             try:
                 with open(slurm_err_filename) as f:
                     return f.read()
-            except IOError:
+            except OSError:
                 logging.error("Failed to read slurm.err file.")
         else:
             logging.error("File slurm.err is missing.")

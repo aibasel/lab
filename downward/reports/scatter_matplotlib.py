@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -25,7 +23,7 @@ from matplotlib.backends import backend_agg
 import matplotlib.lines as mlines
 
 
-class MatplotlibPlot(object):
+class MatplotlibPlot:
     def __init__(self):
         self.legend = None
         self.create_canvas_and_axes()
@@ -78,10 +76,10 @@ class MatplotlibPlot(object):
         if not filename.endswith("pgf"):
             kwargs["bbox_inches"] = "tight"
         self.canvas.print_figure(filename, **kwargs)
-        logging.info("Wrote file://{}".format(filename))
+        logging.info(f"Wrote file://{filename}")
 
 
-class ScatterMatplotlib(object):
+class ScatterMatplotlib:
     XAXIS_LABEL_PADDING = 5
     YAXIS_LABEL_PADDING = 5
     TITLE_PADDING = 10

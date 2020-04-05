@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -22,7 +20,7 @@ import os.path
 from lab import tools
 
 
-class ScatterPgfplots(object):
+class ScatterPgfplots:
     @classmethod
     def _get_plot(cls, report):
         lines = []
@@ -129,5 +127,5 @@ class ScatterPgfplots(object):
                     value = "{%s}" % value
                 opts.append("{}={}".format(key, value.replace("_", "-")))
             else:
-                opts.append("{}={}".format(key, value))
+                opts.append(f"{key}={value}")
         return ", ".join(opts)

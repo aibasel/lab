@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
@@ -58,7 +57,7 @@ def parse_statistics(content, props):
         if match:
             attr = match.group(1).lower().replace(" ", "_")
             # Support strings, numbers, tuples, lists, dicts, booleans, and None.
-            props["translator_{}".format(attr)] = ast.literal_eval(match.group(2))
+            props[f"translator_{attr}"] = ast.literal_eval(match.group(2))
         if line.startswith("Done!"):
             return
 
@@ -95,7 +94,7 @@ class TranslatorParser(Parser):
             "propositions removed",
         ]:
             attribute = "translator_" + value.lower().replace(" ", "_")
-            self.add_pattern(attribute, "\n(.+) {}\n".format(value), type=int)
+            self.add_pattern(attribute, f"\n(.+) {value}\n", type=int)
 
 
 if __name__ == "__main__":

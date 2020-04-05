@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -193,7 +191,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
                 else:
                     color = "red"
                 # Add space in front of value to right-justify it.
-                formatted_value = " {{{}|color:{}}}".format(value, color)
+                formatted_value = f" {{{value}|color:{color}}}"
                 formatted_cells[row_name][diff_col_name] = formatted_value
 
     def modify_printable_column_order(self, table, column_order):
