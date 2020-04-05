@@ -30,8 +30,8 @@ def set_limit(kind, soft_limit, hard_limit):
         resource.setrlimit(kind, (soft_limit, hard_limit))
     except (OSError, ValueError) as err:
         logging.error(
-            "Resource limit for %s could not be set to %s (%s)"
-            % (kind, (soft_limit, hard_limit), err)
+            f"Resource limit for {kind} could not be set to "
+            f"[{soft_limit}, {hard_limit}] ({err})"
         )
 
 
