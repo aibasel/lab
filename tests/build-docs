@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-set -exuo pipefail
+set -euo pipefail
 
-# Check if documentation builds.
-cd docs
-rm -rf _build/
+cd $(dirname "$0")/../docs
 make -B html
 echo "Docs: file://$(pwd)/_build/html/index.html"
-cd ..
