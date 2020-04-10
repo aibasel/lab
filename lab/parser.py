@@ -153,7 +153,7 @@ class Parser:
             properties[attribute] = type(match.group(1))
 
         *flags* must be a string of Python regular expression flags (see
-        https://docs.python.org/2/library/re.html). E.g., ``flags='M'``
+        https://docs.python.org/3/library/re.html). E.g., ``flags='M'``
         lets "^" and "$" match at the beginning and end of each line,
         respectively.
 
