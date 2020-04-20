@@ -4,6 +4,6 @@ set -exuo pipefail
 
 python -m black --check .
 # E203: whitespace before ':' (not compliant with PEP 8)
-python -m flake8 --extend-ignore E203 --exclude=build,data,revision-cache,conf.py,.git,.tox, --max-line-length=90
+python -m flake8 --extend-ignore E203 --exclude=build,data,revision-cache,conf.py,.git,.tox,.venv --max-line-length=90
 python -m isort --check-only --recursive --skip data downward/ examples/ lab/ tests/ setup.py
 python -m pyupgrade --py36-plus `find downward lab tests -name "*.py"`
