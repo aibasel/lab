@@ -480,23 +480,6 @@ def rgb_fractions_to_html_color(r, g, b):
     return "rgb(%d,%d,%d)" % (r * 255, g * 255, b * 255)
 
 
-def get_terminal_size():
-    import struct
-
-    try:
-        import fcntl
-        import termios
-    except ImportError:
-        return (None, None)
-
-    try:
-        data = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, 4 * "00")
-        height, width = struct.unpack("4H", data)[:2]
-        return (width, height)
-    except Exception:
-        return (None, None)
-
-
 def get_unexplained_errors_message(run):
     """
     Return an error message if an unexplained error occured in the given run,
@@ -546,7 +529,7 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
 
     def __init__(self, prog, **kwargs):
         # Use the whole terminal width.
-        width, _ = get_terminal_size()
+        width = shutil.get_terminal_size().columns
         argparse.HelpFormatter.__init__(self, prog, width=width, **kwargs)
 
     def _fill_text(self, text, width, indent):

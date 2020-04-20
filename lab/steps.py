@@ -14,9 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import shutil
 import traceback
-
-from lab import tools
 
 
 class Step:
@@ -82,8 +81,7 @@ def get_step(steps, step_name):
 def get_steps_text(steps):
     # Use width 0 if no steps have been added.
     name_width = min(max([len(step.name) for step in steps] + [0]), 50)
-    terminal_width, _terminal_height = tools.get_terminal_size()
-    terminal_width = terminal_width or 80
+    terminal_width = shutil.get_terminal_size().columns
     lines = ["Available steps:", "================"]
     for number, step in enumerate(steps, start=1):
         line = " ".join([str(number).rjust(2), step.name.ljust(name_width)])
