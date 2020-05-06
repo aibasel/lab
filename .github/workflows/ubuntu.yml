@@ -128,3 +128,11 @@ jobs:
 
         export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
         time tox -e py
+
+    - name: Test installation with pip
+      run: |
+        pip install .
+        pushd /tmp
+        python -c "import lab"
+        popd
+        pip uninstall -y lab
