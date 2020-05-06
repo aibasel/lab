@@ -37,7 +37,6 @@ setup(
         "matplotlib",  # for scatter plots
         "simplejson",  # optional, speeds up reading properties files
         "txt2tags>=3.6",  # for HTML and Latex reports
-        "wheel",
     ],
     python_requires=">=3.6",
 )
