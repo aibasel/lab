@@ -16,6 +16,7 @@ conflicts::
     source lab-venv/bin/activate
 
     # Install Lab in the virtual environment.
+    pip install -U pip  # Upgrade to latest pip version.
     pip install lab  # or a specific version with lab==x.y
 
 If you want to install the latest development version and/or need to
