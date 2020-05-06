@@ -38,5 +38,6 @@ setup(
         "simplejson",  # optional, speeds up reading properties files
         "txt2tags>=3.6",  # for HTML and Latex reports
     ],
+    setup_requires=["wheel"],
     python_requires=">=3.6",
 )

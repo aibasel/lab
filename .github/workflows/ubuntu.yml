@@ -53,7 +53,7 @@ jobs:
         pushd /tmp
         python -c "import lab"
         popd
-        pip uninstall lab
+        pip uninstall -y lab
 
     - name: Check style
       if: matrix.python-version == '3.6'
