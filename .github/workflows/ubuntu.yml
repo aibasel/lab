@@ -50,6 +50,10 @@ jobs:
     - name: Test installation with pip
       run: |
         pip install .
+        pushd /tmp
+        python -c "import lab"
+        popd
+        pip uninstall lab
 
     - name: Check style
       if: matrix.python-version == '3.6'
