@@ -2,7 +2,6 @@ import datetime
 import os
 
 from lab import tools
-from lab.reports import geometric_mean
 
 
 base = os.path.join("/tmp", str(datetime.datetime.now()))
@@ -44,16 +43,6 @@ def test_copy_dir_to_dir():
     assert os.path.isfile(
         os.path.join(base, "dest_dir_also_not_existing", "nested_src_file")
     )
-
-
-def geometric_mean_old(values):
-    return tools.product(values) ** (1.0 / len(values))
-
-
-def test_geometric_mean1():
-    lists = [1, 2, 4, 5], [0.4, 0.8], [2, 8], [10 ** (-5), 5000]
-    for l in lists:
-        assert round(geometric_mean_old(l), 2) == round(geometric_mean(l), 2)
 
 
 def test_colors():
