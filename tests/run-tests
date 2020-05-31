@@ -2,9 +2,10 @@
 
 set -exuo pipefail
 
-# We need two environment variables for the doctests.
-: "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS}"
-: "${DOWNWARD_REPO?Please set DOWNWARD_REPO}"
+# We need some environment variables for the doctests.
+: "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS variable}"
+: "${DOWNWARD_REPO?Please set DOWNWARD_REPO variable}"
+: "${DOWNWARD_REVISION_CACHE?Please set DOWNWARD_REVISION_CACHE variable}"
 
 # Change into top directory.
 cd $(dirname "$0")/../
