@@ -16,7 +16,4 @@ echo "Checking Lab at $LAB with $PYTHON_VERSION"
 
 python -m pytest tests
 
-RESULT="$(python -c 'import sys; print(sys.version_info >= (3, 6))')"
-if [ $RESULT == True ]; then
-    ./tests/run-doctests
-fi
+./tests/run-doctests
