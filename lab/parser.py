@@ -62,14 +62,8 @@ class _Pattern:
         self.required = required
         self.group = 1
 
-        flag = 0
-        for char in flags:
-            try:
-                flag |= getattr(re, char)
-            except AttributeError:
-                logging.critical(f"Unknown pattern flag: {char}")
-
-        self.regex = re.compile(regex, flag)
+        flags = tools.get_pattern_flags(flags)
+        self.regex = re.compile(regex, flags)
 
     def search(self, content, filename):
         found_props = {}
@@ -200,6 +194,18 @@ class Parser:
 
         """
         self.file_parsers[file].add_function(function)
+
+    def add_repeated_pattern(self, name, regex, file="run.log", type=int, flags=""):
+        """
+        *regex* must contain at most one group.
+        """
+        flags = tools.get_pattern_flags(flags)
+
+        def find_all_occurences(content, props):
+            matches = re.findall(regex, content, flags=flags)
+            props[name] = [type(m) for m in matches]
+
+        self.add_function(find_all_occurences, file=file)
 
     def parse(self):
         """Search all patterns and apply all functions.

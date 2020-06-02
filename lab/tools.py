@@ -56,6 +56,16 @@ def get_bytes(s):
         raise ValueError("tools.get_bytes() only accepts unicode strings")
 
 
+def get_pattern_flags(s):
+    flags = 0
+    for char in s:
+        try:
+            flags |= getattr(re, char)
+        except AttributeError:
+            logging.critical(f"Unknown pattern flag: {char}")
+    return flags
+
+
 def get_script_path():
     """Get absolute path to main script."""
     return os.path.abspath(sys.argv[0])

@@ -21,30 +21,7 @@ Parse anytime-search runs of Fast Downward. This includes iterated
 searches and portfolios.
 """
 
-import re
-
 from lab.parser import Parser
-
-
-def _get_flags(flags_string):
-    flags = 0
-    for char in flags_string:
-        flags |= getattr(re, char)
-    return flags
-
-
-class AnytimeParser(Parser):
-    def add_repeated_pattern(self, name, regex, file="run.log", type=int, flags="M"):
-        """
-        *regex* must contain at most one group.
-        """
-        flags = _get_flags(flags)
-
-        def find_all_occurences(content, props):
-            matches = re.findall(regex, content, flags=flags)
-            props[name] = [type(m) for m in matches]
-
-        self.add_function(find_all_occurences, file=file)
 
 
 def reduce_to_min(list_name, single_name):
@@ -61,8 +38,8 @@ def coverage(content, props):
 
 
 def main():
-    parser = AnytimeParser()
-    parser.add_repeated_pattern("cost:all", r"Plan cost: (.+)\n", type=float)
+    parser = Parser()
+    parser.add_repeated_pattern("cost:all", r"Plan cost: (.+)\n", type=float, flags="M")
     parser.add_function(reduce_to_min("cost:all", "cost"))
     parser.add_function(coverage)
     parser.parse()
