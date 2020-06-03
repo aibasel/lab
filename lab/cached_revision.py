@@ -142,19 +142,20 @@ class CachedRevision:
         >>> import os
         >>> from lab.cached_revision import get_version_control_system, MERCURIAL
         >>> repo = os.environ["DOWNWARD_REPO"]
-        >>> revision_cache = os.environ["DOWNWARD_REVISION_CACHE"]
-        >>> vcs = get_version_control_system(repo)
-        >>> rev = "default" if vcs == MERCURIAL else "master"
-        >>> cr = CachedRevision(repo, rev, ["./build.py"], exclude=["experiments"])
-        >>> cr.cache(revision_cache)
+        >>> revision_cache = os.environ.get("DOWNWARD_REVISION_CACHE")
+        >>> if revision_cache:
+        ...     vcs = get_version_control_system(repo)
+        ...     rev = "default" if vcs == MERCURIAL else "master"
+        ...     cr = CachedRevision(repo, rev, ["./build.py"], exclude=["experiments"])
+        ...     cr.cache(revision_cache)
 
         You can now copy the cached repo to your experiment:
 
-        >>> from lab.experiment import Experiment
-        >>> exp = Experiment()
-        >>> cache_path = os.path.join(revision_cache, cr.name)
-        >>> dest_path = os.path.join(exp.path, "code-" + cr.name)
-        >>> exp.add_resource("solver_" +  cr.name, cache_path, dest_path)
+        ...     from lab.experiment import Experiment
+        ...     exp = Experiment()
+        ...     cache_path = os.path.join(revision_cache, cr.name)
+        ...     dest_path = os.path.join(exp.path, "code-" + cr.name)
+        ...     exp.add_resource("solver_" +  cr.name, cache_path, dest_path)
 
         """
         if not os.path.isdir(repo):

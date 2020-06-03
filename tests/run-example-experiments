@@ -2,7 +2,7 @@
 
 set -exuo pipefail
 
-# We need two environment variables for the experiments.
+# We require these environment variables for the experiments.
 : "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS}"
 : "${DOWNWARD_REPO?Please set DOWNWARD_REPO}"
 

@@ -52,7 +52,7 @@ jobs:
       run: |
         tox -e docs,style
 
-    - name: Setup directory for dependencies
+    - name: Set up directory for dependencies
       run: |
         mkdir ../deps
         pushd ../deps
