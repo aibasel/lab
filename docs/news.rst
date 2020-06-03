@@ -1,6 +1,19 @@
 News
 ====
 
+v6.1 (unreleased)
+-----------------
+
+Lab
+^^^
+* Add :meth:`Parser.add_repeated_pattern() <lab.parser.Parser.add_repeated_pattern>`
+  method (Thomas Keller).
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes.
+
+
 v6.0 (2020-04-05)
 -----------------
 

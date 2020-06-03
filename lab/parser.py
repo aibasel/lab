@@ -55,6 +55,16 @@ import re
 from lab import tools
 
 
+def _get_pattern_flags(s):
+    flags = 0
+    for char in s:
+        try:
+            flags |= getattr(re, char)
+        except AttributeError:
+            logging.critical(f"Unknown pattern flag: {char}")
+    return flags
+
+
 class _Pattern:
     def __init__(self, attribute, regex, required, type_, flags):
         self.attribute = attribute
@@ -62,14 +72,8 @@ class _Pattern:
         self.required = required
         self.group = 1
 
-        flag = 0
-        for char in flags:
-            try:
-                flag |= getattr(re, char)
-            except AttributeError:
-                logging.critical(f"Unknown pattern flag: {char}")
-
-        self.regex = re.compile(regex, flag)
+        flags = _get_pattern_flags(flags)
+        self.regex = re.compile(regex, flags)
 
     def search(self, content, filename):
         found_props = {}
@@ -153,7 +157,7 @@ class Parser:
             properties[attribute] = type(match.group(1))
 
         *flags* must be a string of Python regular expression flags (see
-        https://docs.python.org/3/library/re.html). E.g., ``flags='M'``
+        https://docs.python.org/3/library/re.html). E.g., ``flags="M"``
         lets "^" and "$" match at the beginning and end of each line,
         respectively.
 
@@ -173,6 +177,31 @@ class Parser:
             _Pattern(attribute, regex, required, type, flags)
         )
 
+    def add_repeated_pattern(self, name, regex, file="run.log", type=int, flags=""):
+        r"""
+        Look for **all occurences** of *regex* in *file*, cast what is
+        found in brackets to *type* and store the list of found items in
+        the properties dictionary under *attribute*.
+
+        *regex* must contain exactly one bracket group.
+
+        *flags* must be a string of Python regular expression flags (see
+        https://docs.python.org/3/library/re.html). E.g., ``flags="I"``
+        makes the matching case-insensitive.
+
+        >>> parser = Parser()
+        >>> parser.add_repeated_pattern("all_plan_costs", r"Plan cost: (\d+)\n")
+        >>> parser.add_repeated_pattern("all_f_values", r"f=(\d+)\n")
+
+        """
+        flags = _get_pattern_flags(flags)
+
+        def find_all_occurences(content, props):
+            matches = re.findall(regex, content, flags=flags)
+            props[name] = [type(m) for m in matches]
+
+        self.add_function(find_all_occurences, file=file)
+
     def add_function(self, function, file="run.log"):
         r"""Call ``function(open(file).read(), properties)`` during parsing.
 
@@ -187,12 +216,12 @@ class Parser:
 
         >>> import re
         >>> from lab.parser import Parser
-        >>> # Example content: f=14, f=12, f=10
-        >>> def find_f_values(content, props):
-        ...     props['f_values'] = re.findall(r'f=(\d+)', content)
+        >>> def parse_states_over_time(content, props):
+        ...     matches = re.findall(r"(.+)s: (\d+) states\n", content)
+        ...     props["states_over_time"] = [(int(t), int(s)) for t, s in matches]
         ...
         >>> parser = Parser()
-        >>> parser.add_function(find_f_values)
+        >>> parser.add_function(parse_states_over_time)
 
         You can use ``props.add_unexplained_error("message")`` when your
         parsing function detects that something went wrong during the
