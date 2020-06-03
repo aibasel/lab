@@ -12,10 +12,14 @@ from downward import suites
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
+from lab.reports import Attribute
 
 
 # Create custom report class with suitable info and error attributes.
 class BaseReport(AbsoluteReport):
+    PREDEFINED_ATTRIBUTES = AbsoluteReport.PREDEFINED_ATTRIBUTES + [
+        Attribute("trivially_unsolvable", min_wins=False),
+    ]
     INFO_ATTRIBUTES = ["time_limit", "memory_limit"]
     ERROR_ATTRIBUTES = [
         "domain",
