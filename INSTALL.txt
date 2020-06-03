@@ -11,9 +11,13 @@ conflicts::
     # Install required packages, including virtualenv.
     sudo apt install python3 python3-venv
 
+    # Create a new directory for your experiments.
+    mkdir experiments-for-my-paper
+    cd experiments-for-my-paper
+
     # Create and activate a Python 3 virtual environment for Lab.
-    python3 -m venv lab-venv  # or any other path instead of lab-venv
-    source lab-venv/bin/activate
+    python3 -m venv .venv  # or any other path instead of .venv
+    source .venv/bin/activate
 
     # Install Lab in the virtual environment.
     pip install -U pip  # Upgrade to latest pip version.
@@ -33,7 +37,7 @@ installed package.
 Please note that before running an experiment script you need to
 activate the virtual environment with::
 
-    source lab-venv/bin/activate
+    source .venv/bin/activate
 
 We recommend clearing the ``PYTHONPATH`` variable before activating the
 virtual environment.

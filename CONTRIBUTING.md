@@ -2,18 +2,22 @@ First off, thanks for taking the time to contribute to Lab!
 
 # Setting up a development environment
 
+Follow the installation instructions for the [Downward Lab
+tutorial](https://lab.readthedocs.io/en/latest/downward.tutorial.html), in
+particular, you'll need to make VAL available under the name `validate` on
+your PATH and define the `DOWNWARD_BENCHMARKS` and `DOWNWARD_REPO`
+environment variables. Also, make sure to install the latest Lab revision
+from GitHub in editable mode:
+
     git clone https://github.com/aibasel/lab.git
     cd lab
-    # Create and activate a virtual environment.
     python3 -m venv --prompt lab-dev .venv
     source .venv/bin/activate
-    # Get the latest pip version.
     pip install -U pip
-    # Install Lab in development mode.
     pip install --editable .
-    # Check that Lab can be imported.
-    cd examples
-    ./lmcut.py --help
+
+For details on how to set everything up, please see the [GitHub actions
+file](.github/workflows/ubuntu.yml).
 
 # Running tests
 
@@ -22,10 +26,33 @@ First off, thanks for taking the time to contribute to Lab!
     source .venv/bin/activate
     # Install tox.
     pip install -U tox
-    # Run all tests.
-    tox
-    # Run subset of tests.
-    tox -e py,style
+    # Run the core tests.
+    tox -e py,style,docs
 
-Running all tests requires a lot of setup steps. They can be found under .github/workflows/ubuntu.yml. Unless you modify the FF or Singularity example experiments, it is ok to have the tests for these two fail locally. The GitHub actions will execute all tests remotely.
+The above `tox` command runs the most important tests. To test the FF and
+Singularity experiments, you need some additional setup steps, which we
+describe next. However, unless you modify these two experiments, it is ok
+to skip their tests locally.
 
+## Test FF experiment
+
+    sudo apt-get -y install g++ make flex bison
+    wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+    tar -xzvf FF-v2.3.tgz
+    cd FF-v2.3/
+    make -j
+
+and add the resulting `ff` binary to your `PATH`. Now you can run the example FF experiment with `tox -e ff`.
+
+## Test Singularity experiment
+
+    mkdir -p new/path/for/Singularity-images
+    cd new/path/for/Singularity-images
+    wget --no-verbose https://ai.dmi.unibas.ch/_tmp_files/seipp/lama-first.img
+    export SINGULARITY_IMAGES=`realpath .`
+
+Now you can run the example Singularity experiment with `tox -e singularity`.
+
+## Run all tests
+
+Once you have installed all dependecies, you can run all tests by executing `tox` without any options.

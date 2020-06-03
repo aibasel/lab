@@ -57,9 +57,6 @@ Install VAL
     make
     sudo cp validate /usr/local/bin  # Add binary to a directory on PATH.
 
-**MacOS**: clone the repo, add ``VAL/bin/MacOSExecutables/validate`` to
-your ``PATH`` and make it executable (``chmod + x``).
-
 
 Run tutorial experiment
 -----------------------
