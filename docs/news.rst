@@ -14,7 +14,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* No changes.
+* Sort bracketed task counts per domain in table reports (Jendrik Seipp).
 
 
 v6.0 (2020-04-05)

@@ -281,16 +281,15 @@ class AbsoluteReport(PlanningReport):
         # name) if that number is the same for all algorithms. If not all algorithms
         # have values for the same number of problems, we write the full list of
         # different problem numbers.
-        num_values_lists = defaultdict(list)
         for domain in self.domains:
-            for algo in self.algorithms:
-                values = domain_algo_values.get((domain, algo), [])
-                num_values_lists[domain].append(str(len(values)))
-        for domain, num_values_list in num_values_lists.items():
-            if len(set(num_values_list)) == 1:
-                count = num_values_list[0]
+            task_counts = [
+                str(len(domain_algo_values.get((domain, algo), [])))
+                for algo in self.algorithms
+            ]
+            if len(set(task_counts)) == 1:
+                count = task_counts[0]
             else:
-                count = ",".join(num_values_list)
+                count = ", ".join(task_counts)
             link = None
             if self.use_domain_links:
                 link = f"#{attribute}-{domain}"
