@@ -154,7 +154,7 @@ class AbsoluteReport(PlanningReport):
                     )
                     tables.append((pseudo_attribute, table))
             elif self.attribute_is_numeric(attribute):
-                domain_table = self._get_table(attribute)
+                domain_table = self._get_suite_table(attribute)
                 tables.append(("", domain_table))
                 reports.extract_summary_rows(
                     domain_table, summary, link="#" + attribute
@@ -169,7 +169,7 @@ class AbsoluteReport(PlanningReport):
                     )
                 )
             for domain in sorted(self.domains.keys()):
-                tables.append((domain, self._get_table(attribute, domain)))
+                tables.append((domain, self._get_domain_table(attribute, domain)))
 
             parts = []
             toc_line = []
@@ -309,11 +309,6 @@ class AbsoluteReport(PlanningReport):
             for run in self.domain_algorithm_runs[domain, algo]:
                 table.add_cell(run["problem"], algo, run.get(attribute))
         return table
-
-    def _get_table(self, attribute, domain=None):
-        if domain:
-            return self._get_domain_table(attribute, domain)
-        return self._get_suite_table(attribute)
 
     def _get_empty_table(self, attribute=None, title=None, columns=None):
         """Return an empty table."""
