@@ -265,8 +265,11 @@ class AbsoluteReport(PlanningReport):
         self._add_table_info(attribute, func_name, table)
         domain_algo_values = defaultdict(list)
         for (domain, _), runs in self.problem_runs.items():
-            if not attribute.absolute and any(
-                run.get(attribute) is None for run in runs
+            # If the attribute is absolute, no runs must have been filtered and
+            # no values must be missing.
+            if not attribute.absolute and (
+                len(runs) < len(self.algorithms)
+                or any(run.get(attribute) is None for run in runs)
             ):
                 continue
             num_probs += 1
