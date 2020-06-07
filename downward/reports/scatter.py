@@ -243,18 +243,14 @@ class ScatterPlotReport(PlanningReport):
     def _compute_missing_value(self, categories, axis, scale):
         if not self.show_missing:
             return None
-        if not any(
-            coord[axis] is None for coords in categories.values() for coord in coords
-        ):
+        values = [coord[axis] for coords in categories.values() for coord in coords]
+        real_values = [value for value in values if value is not None]
+        if len(real_values) == len(values):
+            # The list doesn't contain None values.
             return None
-        max_value = max(
-            coord[axis]
-            for coords in categories.values()
-            for coord in coords
-            if coord[axis] is not None
-        )
-        if max_value is None:
+        if not real_values:
             return 1
+        max_value = max(real_values)
         if scale == "linear":
             return max_value * 1.1
         return int(10 ** math.ceil(math.log10(max_value)))
