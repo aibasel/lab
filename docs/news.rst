@@ -14,6 +14,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
+* Print number of tasks above and below separator lines in scatter plots (Jendrik Seipp).
 * Ignore tasks for which runs have been filtered out in aggregate reports (Jendrik Seipp).
 * Sort bracketed task counts per domain in table reports (Jendrik Seipp).
 * Gracefully handle empty scatter plots (Jendrik Seipp).

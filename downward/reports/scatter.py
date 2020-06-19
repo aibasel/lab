@@ -308,6 +308,26 @@ class ScatterPlotReport(PlanningReport):
                 new_categories[category] = coords
         return new_categories
 
+    def _compute_num_tasks_on_sides_of_line(self, categories):
+        min_wins = self.attribute.min_wins
+        x_wins = 0
+        y_wins = 0
+        for coords in categories.values():
+            for x, y in coords:
+                if x is None or y is None:
+                    continue
+                if x > y:
+                    if min_wins:
+                        y_wins += 1
+                    else:
+                        x_wins += 1
+                elif x < y:
+                    if min_wins:
+                        x_wins += 1
+                    else:
+                        y_wins += 1
+        return x_wins, y_wins
+
     def _get_category_styles(self, categories):
         """
         Create dictionary mapping from category name to marker style.
@@ -331,9 +351,18 @@ class ScatterPlotReport(PlanningReport):
             category_styles[category] = styles[i % len(styles)]
         return category_styles
 
+    def _get_axis_label(self, label, algo, num_wins):
+        if label:
+            return label
+        if self.attribute.min_wins is None:
+            return algo
+        comp = "lower" if self.attribute.min_wins else "higher"
+        return f"{algo} ({comp} for {num_wins} tasks)"
+
     def _write_plot(self, runs, filename):
         # Map category names to coord tuples.
         self.categories = self._fill_categories()
+        x_wins, y_wins = self._compute_num_tasks_on_sides_of_line(self.categories)
         if self.relative:
             self.plot_diagonal_line = False
             self.plot_horizontal_line = True
@@ -347,6 +376,10 @@ class ScatterPlotReport(PlanningReport):
             self.categories = self._handle_missing_values(self.categories)
         if not self.categories:
             logging.critical("Plot contains no points.")
+
+        self.xlabel = self._get_axis_label(self.xlabel, self.algorithms[0], x_wins)
+        self.ylabel = self._get_axis_label(self.ylabel, self.algorithms[1], y_wins)
+
         self.styles = self._get_category_styles(self.categories)
         self.writer.write(self, filename)
 
@@ -355,9 +388,6 @@ class ScatterPlotReport(PlanningReport):
             logging.critical(
                 "Scatter plots need exactly 2 algorithms: %s" % self.algorithms
             )
-        self.xlabel = self.xlabel or self.algorithms[0]
-        self.ylabel = self.ylabel or self.algorithms[1]
-
         suffix = "." + self.output_format
         if not self.outfile.endswith(suffix):
             self.outfile += suffix
