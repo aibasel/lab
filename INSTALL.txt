@@ -15,8 +15,8 @@ conflicts::
     mkdir experiments-for-my-paper
     cd experiments-for-my-paper
 
-    # If PYTHONPATH is set, clear it to obtain a clean environment.
-    export PYTHONPATH=""
+    # If PYTHONPATH is set, unset it to obtain a clean environment.
+    unset PYTHONPATH
 
     # Create and activate a Python 3 virtual environment for Lab.
     python3 -m venv --prompt my-paper .venv
