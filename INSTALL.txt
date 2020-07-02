@@ -15,13 +15,16 @@ conflicts::
     mkdir experiments-for-my-paper
     cd experiments-for-my-paper
 
+    # If PYTHONPATH is set, clear it to obtain a clean environment.
+    export PYTHONPATH=""
+
     # Create and activate a Python 3 virtual environment for Lab.
-    python3 -m venv .venv  # or any other path instead of .venv
+    python3 -m venv --prompt my-paper .venv
     source .venv/bin/activate
 
     # Install Lab in the virtual environment.
-    pip install -U pip  # Upgrade to latest pip version.
-    pip install lab  # or a specific version with lab==x.y
+    pip install -U pip wheel
+    pip install lab  # or preferably a specific version with lab==x.y
 
 If you want to install the latest development version and/or need to
 change Lab itself, you can clone the Lab repo and install it in the
