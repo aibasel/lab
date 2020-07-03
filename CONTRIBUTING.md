@@ -13,7 +13,7 @@ from GitHub in editable mode:
     cd lab
     python3 -m venv --prompt lab-dev .venv
     source .venv/bin/activate
-    pip install -U pip
+    pip install -U pip wheel
     pip install --editable .
 
 For details on how to set everything up, please see the [GitHub actions
