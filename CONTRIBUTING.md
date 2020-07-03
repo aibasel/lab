@@ -56,3 +56,7 @@ Now you can run the example Singularity experiment with `tox -e singularity`.
 ## Run all tests
 
 Once you have installed all dependecies, you can run all tests by executing `tox` without any options.
+
+# Fixing the code style
+
+    tox -e fix-style
