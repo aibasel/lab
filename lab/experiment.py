@@ -242,11 +242,16 @@ class _Buildable:
         >>> exp = Experiment()
         >>> run = exp.add_run()
         >>> # Add commands to a *specific* run.
-        >>> run.add_command('list-directory', ['ls', '-al'])
-        >>> run.add_command(
-        ...     'solver', ['mysolver', 'input-file'], time_limit=60)
+        >>> run.add_command('solver', ['mysolver', 'input-file'], time_limit=60)
         >>> # Add a command to *all* runs.
         >>> exp.add_command('cleanup', ['rm', 'my-temp-file'])
+
+        Make sure to call all Python programs from the currently active
+        Python interpreter, i.e., ``sys.executable``. Otherwise, the
+        system Python version might be used instead of the Python version
+        from the virtual environment.
+
+        >>> run.add_command('myplanner', [sys.executable, 'planner.py', 'input-file'])
 
         """
         _check_name(name, "command", extra_chars="_-")
