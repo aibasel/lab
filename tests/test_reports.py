@@ -1,5 +1,6 @@
-from lab import reports, tools
 import pytest
+
+from lab import reports, tools
 
 
 @pytest.mark.parametrize(

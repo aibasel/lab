@@ -19,8 +19,8 @@ import sys
 
 import matplotlib
 from matplotlib import figure
+from matplotlib import lines as mlines
 from matplotlib.backends import backend_agg
-import matplotlib.lines as mlines
 
 
 class MatplotlibPlot:
