@@ -18,6 +18,8 @@ Downward Lab
 * Ignore tasks for which runs have been filtered out in aggregate reports (Jendrik Seipp).
 * Sort bracketed task counts per domain in table reports (Jendrik Seipp).
 * Gracefully handle empty scatter plots (Jendrik Seipp).
+* Make ``score_*`` attributes absolute, i.e., include tasks for which not all algorithms
+  have a value in aggregations (Jendrik Seipp).
 
 
 v6.0 (2020-04-05)

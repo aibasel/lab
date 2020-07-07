@@ -57,7 +57,7 @@ class PlanningReport(Report):
         Attribute("plan_length", scale="linear"),
         Attribute("planner_time", function=geometric_mean),
         Attribute("quality", absolute=True, min_wins=False),
-        Attribute("score_*", min_wins=False, digits=4),
+        Attribute("score_*", absolute=True, min_wins=False, digits=4),
         Attribute("search_time", function=geometric_mean),
         Attribute("total_time", function=geometric_mean),
         Attribute("unsolvable", absolute=True, min_wins=False),
