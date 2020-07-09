@@ -145,7 +145,7 @@ class CachedRevision:
         >>> revision_cache = os.environ.get("DOWNWARD_REVISION_CACHE")
         >>> if revision_cache:
         ...     vcs = get_version_control_system(repo)
-        ...     rev = "default" if vcs == MERCURIAL else "master"
+        ...     rev = "default" if vcs == MERCURIAL else "main"
         ...     cr = CachedRevision(repo, rev, ["./build.py"], exclude=["experiments"])
         ...     cr.cache(revision_cache)
 

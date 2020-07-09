@@ -264,7 +264,7 @@ class FastDownwardExperiment(Experiment):
         >>> exp = FastDownwardExperiment()
         >>> repo = os.environ["DOWNWARD_REPO"]
         >>> vcs = get_version_control_system(repo)
-        >>> rev = "default" if vcs == MERCURIAL else "master"
+        >>> rev = "default" if vcs == MERCURIAL else "main"
 
         Test iPDB in the latest revision on the default branch:
 

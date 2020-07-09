@@ -24,15 +24,17 @@ variable so we recommend exporting it in your ``~/.bashrc`` file.
 Install Fast Downward
 ---------------------
 (See also http://www.fast-downward.org/ObtainingAndRunningFastDownward
-and http://www.fast-downward.org/LPBuildInstructions)
+and http://www.fast-downward.org/LPBuildInstructions.)
+
+Lab supports Git and Mercurial repositories.
 
 .. highlight:: bash
 
 ::
 
     DOWNWARD_REPO=/path/to/fast-downward-repo
-    sudo apt-get install mercurial g++ cmake make python
-    hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
+    sudo apt install cmake g++ git make python3
+    git clone https://github.com/aibasel/downward.git ${DOWNWARD_REPO}
     # Optionally check that Fast Downward works:
     cd ${DOWNWARD_REPO}
     ./build.py
@@ -46,7 +48,7 @@ Install VAL
 
 ::
 
-    sudo apt-get install g++ make flex bison
+    sudo apt install g++ make flex bison
     git clone https://github.com/KCL-Planning/VAL.git
     cd VAL
     # Newer VAL versions need time stamps, so we use an old version
