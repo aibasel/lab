@@ -22,8 +22,9 @@ jobs:
 
     - name: Set revision
       run: |
-        # Set environment variable with the latest revision hash on the default branch.
-        echo "::set-env name=DOWNWARD_REVISION::`hg id -r default http://hg.fast-downward.org`"
+        # Set environment variables with the latest revision hashes.
+        echo "::set-env name=GIT_DOWNWARD_REV::`git ls-remote --exit-code --quiet https://github.com/aibasel/downward.git HEAD | cut -f1`"
+        # echo "::set-env name=HG_DOWNWARD_REV::`hg id -r default http://hg.fast-downward.org`"  # Unneeded since repo doesn't change anymore.
 
     # Compile each Fast Downward revision only once and cache the results.
     - name: Cache revisions
@@ -31,7 +32,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: revision-cache
-        key: ${{ runner.os }}-revision-cache-${{ env.DOWNWARD_REVISION }}
+        key: ${{ runner.os }}-revision-cache-${{ env.GIT_DOWNWARD_REV }}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
@@ -95,7 +96,7 @@ jobs:
     - name: Clone Fast Downward Mercurial
       working-directory: ../deps
       run: |
-        sudo apt-get -y install mercurial g++ cmake make python
+        sudo apt-get -y install cmake g++ git make python3
         export HG_DOWNWARD_REPO=`realpath fast-downward`
         hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
         echo "::set-env name=HG_DOWNWARD_REPO::${HG_DOWNWARD_REPO}"
@@ -103,9 +104,8 @@ jobs:
     - name: Clone Fast Downward Git
       working-directory: ../deps
       run: |
-        # Clone temporary Git version of Fast Downward.
         export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
-        git clone https://github.com/aibasel/git-downward.git ${GIT_DOWNWARD_REPO}
+        git clone https://github.com/aibasel/downward.git ${GIT_DOWNWARD_REPO}
         echo "::set-env name=GIT_DOWNWARD_REPO::${GIT_DOWNWARD_REPO}"
 
     - name: Download example Singularity image
