@@ -104,7 +104,7 @@ jobs:
       working-directory: ../deps
       run: |
         export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
-        git clone https://github.com/aibasel/downward.git ${GIT_DOWNWARD_REPO}
+        git clone --depth 1 https://github.com/aibasel/downward.git ${GIT_DOWNWARD_REPO}
         echo "::set-env name=GIT_DOWNWARD_REPO::${GIT_DOWNWARD_REPO}"
 
     - name: Download example Singularity image
