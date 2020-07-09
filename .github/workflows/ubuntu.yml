@@ -89,7 +89,7 @@ jobs:
       working-directory: ../deps
       run: |
         export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
-        git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+        git clone --depth 1 https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
         echo "::set-env name=DOWNWARD_BENCHMARKS::${DOWNWARD_BENCHMARKS}"
 
     - name: Clone Fast Downward Mercurial
