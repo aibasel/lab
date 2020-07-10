@@ -63,10 +63,11 @@ else:
 ATTRIBUTES = [
     "cost",
     "coverage",
-    "run_dir",
-    "total_time",
-    "singularity_runtime",
     "error",
+    "g_values_over_time",
+    "run_dir",
+    "singularity_runtime",
+    "total_time",
 ]
 
 exp = Experiment(environment=ENVIRONMENT)
