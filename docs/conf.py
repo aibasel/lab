@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab documentation build configuration file, created by
 # sphinx-quickstart on Thu Jan 19 16:59:00 2012.
 #
