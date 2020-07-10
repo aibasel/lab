@@ -35,7 +35,7 @@ class CachedFastDownwardRevision(CachedRevision):
         * *build_options*: List of build.py options.
         """
         CachedRevision.__init__(
-            self, repo, rev, ["./build.py"] + build_options, ["experiments", "misc"]
+            self, repo, rev, ["./build.py"] + build_options, []
         )
         self.build_options = build_options
 
