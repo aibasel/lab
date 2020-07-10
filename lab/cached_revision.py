@@ -131,7 +131,8 @@ class CachedRevision:
         * *build_cmd*: list with build script and any build options
           (e.g., ``["./build.py", "release"]``, ``["make"]``).
         * *exclude*: list of paths in repo that are not needed for building
-          and running the solver.
+          and running the solver. Instead of this parameter, you can also
+          use a ``.gitattributes`` file for Git repositories.
 
         The following example caches a Fast Downward revision. When you
         use the :class:`FastDownwardExperiment
