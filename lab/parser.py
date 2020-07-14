@@ -177,31 +177,6 @@ class Parser:
             _Pattern(attribute, regex, required, type, flags)
         )
 
-    def add_repeated_pattern(self, name, regex, file="run.log", type=int, flags=""):
-        r"""
-        Look for **all occurences** of *regex* in *file*, cast what is
-        found in brackets to *type* and store the list of found items in
-        the properties dictionary under *attribute*.
-
-        *regex* must contain exactly one bracket group.
-
-        *flags* must be a string of Python regular expression flags (see
-        https://docs.python.org/3/library/re.html). E.g., ``flags="I"``
-        makes the matching case-insensitive.
-
-        >>> parser = Parser()
-        >>> parser.add_repeated_pattern("all_plan_costs", r"Plan cost: (\d+)\n")
-        >>> parser.add_repeated_pattern("all_f_values", r"f=(\d+)\n")
-
-        """
-        flags = _get_pattern_flags(flags)
-
-        def find_all_occurences(content, props):
-            matches = re.findall(regex, content, flags=flags)
-            props[name] = [type(m) for m in matches]
-
-        self.add_function(find_all_occurences, file=file)
-
     def add_function(self, function, file="run.log"):
         r"""Call ``function(open(file).read(), properties)`` during parsing.
 
@@ -218,7 +193,7 @@ class Parser:
         >>> from lab.parser import Parser
         >>> def parse_states_over_time(content, props):
         ...     matches = re.findall(r"(.+)s: (\d+) states\n", content)
-        ...     props["states_over_time"] = [(int(t), int(s)) for t, s in matches]
+        ...     props["states_over_time"] = [(float(t), int(s)) for t, s in matches]
         ...
         >>> parser = Parser()
         >>> parser.add_function(parse_states_over_time)

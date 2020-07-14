@@ -6,8 +6,6 @@ v6.1 (unreleased)
 
 Lab
 ^^^
-* Add :meth:`Parser.add_repeated_pattern() <lab.parser.Parser.add_repeated_pattern>`
-  method (Thomas Keller).
 * Separate tests for Singularity and FF example experiments from other tests (Jendrik Seipp).
 * Skip ``cached_revision`` doctests if ``DOWNWARD_REVISION_CACHE`` variable is not set (Jendrik Seipp).
 * Add ``.github/CONTRIBUTING.md`` file (Jendrik Seipp).
