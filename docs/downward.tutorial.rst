@@ -14,8 +14,7 @@ Download benchmarks
 ::
 
     DOWNWARD_BENCHMARKS=/path/to/downward-benchmarks
-    git clone https://github.com/aibasel/downward-benchmarks \
-        ${DOWNWARD_BENCHMARKS}
+    git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
 Some example experiments need the ``DOWNWARD_BENCHMARKS`` environment
 variable so we recommend exporting it in your ``~/.bashrc`` file.
@@ -38,8 +37,7 @@ Lab supports Git and Mercurial repositories.
     # Optionally check that Fast Downward works:
     cd ${DOWNWARD_REPO}
     ./build.py
-    ./fast-downward.py ${DOWNWARD_BENCHMARKS}/grid/prob01.pddl \
-        --search "astar(lmcut())"
+    ./fast-downward.py ${DOWNWARD_BENCHMARKS}/grid/prob01.pddl --search "astar(lmcut())"
 
 
 Install VAL
