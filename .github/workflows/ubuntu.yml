@@ -80,9 +80,6 @@ jobs:
         git checkout 8d61593 # newer versions don't accept IPC format plans
         bash ./scripts/linux/build_linux64.sh all release
         ln -s `realpath build/linux64/release/bin/Validate` ../validate
-        cd ../
-        ls -la
-        ./validate
 
     - name: Clone benchmarks
       working-directory: ../deps
@@ -117,7 +114,6 @@ jobs:
       run: |
         # Updating the installed packages takes very long, so we don't do it.
         # sudo apt-get update && sudo apt-get -y upgrade
-        which validate
 
         export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
         echo CACHE: ${DOWNWARD_REVISION_CACHE}
