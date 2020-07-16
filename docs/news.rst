@@ -18,6 +18,7 @@ Downward Lab
 * Gracefully handle empty scatter plots (Jendrik Seipp).
 * Make ``score_*`` attributes absolute, i.e., include tasks for which not all algorithms
   have a value in aggregations (Jendrik Seipp).
+* Update VAL installation instructions (Silvan Sievers).
 
 
 v6.0 (2020-04-05)
