@@ -46,16 +46,13 @@ Install VAL
 
 ::
 
-    sudo apt install g++ make flex bison
+    sudo apt install bison cmake flex g++ make
     git clone https://github.com/KCL-Planning/VAL.git
     cd VAL
-    # Newer VAL versions need time stamps, so we use an old version
-    # (https://github.com/KCL-Planning/VAL/issues/46).
-    git checkout a5565396007eee73ac36527fbf904142b3077c74
-    make clean  # Remove old binaries.
-    sed -i 's/-Werror //g' Makefile  # Ignore warnings.
-    make
-    sudo cp validate /usr/local/bin  # Add binary to a directory on PATH.
+    git checkout 8d61593  # Newer versions are incompatible with Fast Downward.
+    bash scripts/linux/build_linux64.sh all release
+    # Add binary to a directory on PATH.
+    sudo ln -s `realpath build/linux64/release/bin/Validate` /usr/local/bin/validate
 
 
 Run tutorial experiment
