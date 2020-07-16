@@ -51,7 +51,7 @@ Install VAL
     cd VAL
     git checkout 8d61593 # newer versions don't accept IPC format plans
     bash ./scripts/linux/build_linux64.sh all release
-    sudo cp build/linux64/release/bin/Validate /usr/local/bin  # Add binary to a directory on PATH.
+    sudo cp build/linux64/release/bin/Validate /usr/local/bin/validate  # Add binary to a directory on PATH.
 
 
 Run tutorial experiment
