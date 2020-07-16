@@ -81,6 +81,7 @@ jobs:
         bash ./scripts/linux/build_linux64.sh all release
         ln -s build/linux64/release/bin/Validate ../validate
         cd ../
+        ls -la
         ./validate
 
     - name: Clone benchmarks
