@@ -74,7 +74,7 @@ jobs:
     - name: Compile VAL
       working-directory: ../deps
       run: |
-        sudo apt install g++ make flex bison
+        sudo apt-get -y install g++ make flex bison
         git clone https://github.com/KCL-Planning/VAL.git
         cd VAL
         git checkout 8d61593 # newer versions don't accept IPC format plans
