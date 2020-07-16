@@ -4,7 +4,7 @@ Downward Lab tutorial
 =====================
 
 .. highlight:: bash
-.. include:: ../INSTALL.txt
+.. include:: ../INSTALL.rst
 
 
 Download benchmarks

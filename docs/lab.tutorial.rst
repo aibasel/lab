@@ -4,7 +4,7 @@ Lab tutorial
 ============
 
 .. highlight:: bash
-.. include:: ../INSTALL.txt
+.. include:: ../INSTALL.rst
 
 
 Run tutorial experiment

@@ -5,7 +5,7 @@ from setuptools import setup
 from lab import __version__ as version
 
 
-with open("README.rst") as f1, open("INSTALL.txt") as f2:
+with open("README.rst") as f1, open("INSTALL.rst") as f2:
     long_description = f1.read() + "\n\n" + f2.read()
 
 
