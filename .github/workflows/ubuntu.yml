@@ -74,12 +74,16 @@ jobs:
     - name: Compile VAL
       working-directory: ../deps
       run: |
-        sudo apt-get -y install bison cmake flex g++ make
+        sudo apt-get -y install g++ make flex bison
         git clone https://github.com/KCL-Planning/VAL.git
         cd VAL
-        git checkout 8d61593  # Newer versions require time stamps (https://github.com/KCL-Planning/VAL/issues/46).
-        bash scripts/linux/build_linux64.sh all release
-        ln -s `realpath build/linux64/release/bin/Validate` ../validate
+        git checkout a5565396007eee73ac36527fbf904142b3077c74
+        make clean  # Remove old build artifacts and binaries.
+        sed -i 's/-Werror //g' Makefile  # Ignore warnings.
+        make -j
+        mv validate ../
+        cd ../
+        rm -rf VAL
 
     - name: Clone benchmarks
       working-directory: ../deps
