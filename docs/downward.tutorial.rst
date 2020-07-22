@@ -13,7 +13,7 @@ Download benchmarks
 
 ::
 
-    DOWNWARD_BENCHMARKS=/path/to/downward-benchmarks
+    export DOWNWARD_BENCHMARKS=/path/to/downward-benchmarks
     git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
 Some example experiments need the ``DOWNWARD_BENCHMARKS`` environment
@@ -31,7 +31,7 @@ Lab supports Git and Mercurial repositories.
 
 ::
 
-    DOWNWARD_REPO=/path/to/fast-downward-repo
+    export DOWNWARD_REPO=/path/to/fast-downward-repo
     sudo apt install cmake g++ git make python3
     git clone https://github.com/aibasel/downward.git ${DOWNWARD_REPO}
     # Optionally check that Fast Downward works:
@@ -62,10 +62,9 @@ Run tutorial experiment
 -----------------------
 .. highlight:: python
 
-The script below is an example Fast Downward experiment. It is located
-at ``${LAB}/examples/lmcut.py``. After setting ``REPO`` to
-``FAST_DOWNWARD`` and ``BENCHMARKS_DIR`` to ``BENCHMARKS``, you can see
-the available steps with ::
+The script below is an example Fast Downward experiment. It is located at
+``${LAB}/examples/lmcut.py``. After adapting ``REPO`` and
+``BENCHMARKS_DIR`` to your setup, you can see the available steps with ::
 
     ./lmcut.py
 
