@@ -27,7 +27,7 @@ def process_task(task_id):
     error = False
     with open(os.path.join(run_dir, 'driver.log'), 'w') as driver_log:
         with open(os.path.join(run_dir, 'driver.err'), 'w') as driver_err:
-            logging.info('Starting run {run_id} (TASK_ID {task_id}) in {run_dir}'.format(**locals()))
+            logging.info(f"Starting run {run_id} (TASK_ID {task_id}) in {run_dir}")
             try:
                 subprocess.check_call(
                     [tools.get_python_executable(), 'run'],

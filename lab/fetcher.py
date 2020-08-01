@@ -156,6 +156,6 @@ class Fetcher:
         tools.makedirs(eval_dir)
         combined_props.write()
         logging.info(
-            "Wrote properties file (contains {unexplained_errors} "
-            "runs with unexplained errors).".format(**locals())
+            f"Wrote properties file (contains {unexplained_errors} "
+            f"runs with unexplained errors)."
         )

@@ -321,8 +321,8 @@ class RunFilter:
         for attribute in self.filtered_attributes:
             if not any(attribute in run for run in props.values()):
                 logging.critical(
-                    'No run has the attribute "{attribute}" (from '
-                    '"filter_{attribute}"). Is this a typo?'.format(**locals())
+                    f'No run has the attribute "{attribute}" (from '
+                    f'"filter_{attribute}"). Is this a typo?'
                 )
         for filter_ in self.filters:
             for old_run_id, run in list(props.items()):

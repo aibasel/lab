@@ -110,11 +110,7 @@ class Call:
             self.process = subprocess.Popen(args, preexec_fn=prepare_call, **kwargs)
         except OSError as err:
             if err.errno == errno.ENOENT:
-                sys.exit(
-                    'Error: Call {name} failed. "{path}" not found'.format(
-                        path=args[0], **locals()
-                    )
-                )
+                sys.exit(f'Error: Call {name} failed. "{args[0]}" not found.')
             else:
                 raise
 

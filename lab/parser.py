@@ -222,14 +222,10 @@ class Parser:
                 file_parser.load_file(path)
             except OSError as err:
                 if err.errno == errno.ENOENT:
-                    logging.info(
-                        'File "{path}" is missing and thus not parsed.'.format(
-                            **locals()
-                        )
-                    )
+                    logging.info(f'File "{path}" is missing and thus not parsed.')
                     del self.file_parsers[filename]
                 else:
-                    logging.error('Failed to read "{path}": {err}'.format(**locals()))
+                    logging.error(f'Failed to read "{path}": {err}')
 
         for file_parser in self.file_parsers.values():
             self.props.update(file_parser.search_patterns())

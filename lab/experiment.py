@@ -71,14 +71,14 @@ def _get_default_experiment_dir():
 def get_run_dir(task_id):
     lower = ((task_id - 1) // SHARD_SIZE) * SHARD_SIZE + 1
     upper = ((task_id + SHARD_SIZE - 1) // SHARD_SIZE) * SHARD_SIZE
-    return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
+    return f"runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}"
 
 
 def _check_name(name, typ, extra_chars=""):
     if not isinstance(name, str):
-        logging.critical("Name for {typ} must be a string: {name}".format(**locals()))
+        logging.critical(f"Name for {typ} must be a string: {name}")
     if not name:
-        logging.critical("Name for {typ} must not be empty".format(**locals()))
+        logging.critical(f"Name for {typ} must not be empty")
     alpha_num_name = name
     for c in extra_chars:
         alpha_num_name = alpha_num_name.replace(c, "")
@@ -680,10 +680,10 @@ class Experiment(_Buildable):
             logging.critical("No runs have been added to the experiment.")
         num_runs = len(self.runs)
         self.set_property("runs", num_runs)
-        logging.info("Building %d runs" % num_runs)
+        logging.info(f"Building {num_runs} runs")
         for index, run in enumerate(self.runs, 1):
             if index % 100 == 0:
-                logging.info("Build run %6d/%d" % (index, num_runs))
+                logging.info(f"Build run {index:6}/{num_runs}")
             for name, (command, kwargs) in self.commands.items():
                 run.add_command(name, command, **kwargs)
             run.build(index)

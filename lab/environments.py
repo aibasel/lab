@@ -442,7 +442,7 @@ class SlurmEnvironment(GridEnvironment):
         out = subprocess.check_output(submit, cwd=job_dir).decode()
         logging.info(f"Output: {out.strip()}")
         match = re.match(r"Submitted batch job (\d*)", out)
-        assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
+        assert match, f"Submitting job with sbatch failed: '{out}'"
         return match.group(1)
 
 
