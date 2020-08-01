@@ -86,7 +86,7 @@ class ScatterPgfplots:
         )
         tools.makedirs(os.path.dirname(filename))
         tools.write_file(filename, "\n".join(lines))
-        logging.info("Wrote file://%s" % filename)
+        logging.info(f"Wrote file://{filename}")
 
     @classmethod
     def _get_axis_options(cls, report):
@@ -104,8 +104,8 @@ class ScatterPgfplots:
         figsize = report.matplotlib_options.get("figure.figsize")
         if figsize:
             width, height = figsize
-            axis["width"] = "%.2fin" % width
-            axis["height"] = "%.2fin" % height
+            axis["width"] = f"{width:.2f}in"
+            axis["height"] = f"{height:.2f}in"
 
         if report.has_multiple_categories():
             axis["legend style"] = cls._format_options(
@@ -125,7 +125,7 @@ class ScatterPgfplots:
             elif isinstance(value, str):
                 if " " in value or "=" in value:
                     value = "{%s}" % value
-                opts.append("{}={}".format(key, value.replace("_", "-")))
+                opts.append(f"{key}={value.replace('_', '-')}")
             else:
                 opts.append(f"{key}={value}")
         return ", ".join(opts)

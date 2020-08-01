@@ -386,7 +386,7 @@ class ScatterPlotReport(PlanningReport):
     def write(self):
         if not len(self.algorithms) == 2:
             logging.critical(
-                "Scatter plots need exactly 2 algorithms: %s" % self.algorithms
+                f"Scatter plots need exactly 2 algorithms: {self.algorithms}"
             )
         suffix = "." + self.output_format
         if not self.outfile.endswith(suffix):

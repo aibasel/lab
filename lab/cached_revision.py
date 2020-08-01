@@ -177,14 +177,12 @@ class CachedRevision:
         return hash(self.name)
 
     def _compute_hashed_name(self):
-        return "{}_{}".format(
-            self.global_rev, _compute_md5_hash(self.build_cmd + self.exclude)
-        )
+        return f"{self.global_rev}_{_compute_md5_hash(self.build_cmd + self.exclude)}"
 
     def cache(self, revision_cache):
         self.path = os.path.join(revision_cache, self.name)
         if os.path.exists(self.path):
-            logging.info('Revision is already cached: "%s"' % self.path)
+            logging.info(f'Revision is already cached: "{self.path}"')
             if not os.path.exists(self._get_sentinel_file()):
                 logging.critical(
                     "The build for the cached revision at {} is corrupted. "

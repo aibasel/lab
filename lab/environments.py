@@ -222,9 +222,7 @@ class GridEnvironment(Environment):
         return self._get_step_job_body(step)
 
     def _get_job(self, step, is_last):
-        return "{}\n\n{}".format(
-            self._get_job_header(step, is_last), self._get_job_body(step)
-        )
+        return f"{self._get_job_header(step, is_last)}\n\n{self._get_job_body(step)}"
 
     def write_main_script(self):
         # The main script is written by the run_steps() method.
@@ -440,7 +438,7 @@ class SlurmEnvironment(GridEnvironment):
         if dependency:
             submit.extend(["-d", "afterany:" + dependency, "--kill-on-invalid-dep=yes"])
         submit.append(job_file)
-        logging.info("Executing %s" % (" ".join(submit)))
+        logging.info(f"Executing {' '.join(submit)}")
         out = subprocess.check_output(submit, cwd=job_dir).decode()
         logging.info(f"Output: {out.strip()}")
         match = re.match(r"Submitted batch job (\d*)", out)

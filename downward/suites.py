@@ -39,7 +39,7 @@ class Domain:
         return self.domain
 
     def __repr__(self):
-        return "<Domain %s>" % self.domain
+        return f"<Domain {self.domain}>"
 
     def __hash__(self):
         return hash(self.domain)

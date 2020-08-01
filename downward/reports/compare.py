@@ -131,7 +131,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
             col_name = None
             while col_name is None or col_name in diff_column_names:
                 uniq_count += 1
-                col_name = "diff_column_%s" % uniq_count
+                col_name = f"diff_column_{uniq_count}"
             diff_column_names.add(col_name)
             self.header_names.append(((tup[0], tup[1]), diff_name, col_name))
         self.summary_functions = summary_functions

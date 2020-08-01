@@ -44,7 +44,7 @@ def _abbreviate_node_names(nodes):
         if match:
             infai_node_id = int(match.group(1))
             if sequence_buffer:
-                if sequence_buffer[-1] == "ase{:02d}".format(infai_node_id - 1):
+                if sequence_buffer[-1] == f"ase{infai_node_id - 1:02d}":
                     sequence_buffer.append(node)
                 elif len(sequence_buffer) in [1, 2]:
                     flush_buffer()
@@ -116,7 +116,7 @@ class AbsoluteReport(PlanningReport):
         toc_lines.append("- **[Summary #summary]**")
 
         for attribute in self.attributes:
-            logging.info("Creating table(s) for %s" % attribute)
+            logging.info(f"Creating table(s) for {attribute}")
             tables = []
             if attribute == "error":
                 seen_errors = set()
@@ -176,16 +176,14 @@ class AbsoluteReport(PlanningReport):
             for (domain, table) in tables:
                 if domain:
                     assert table
-                    toc_line.append(
-                        "[''%(domain)s'' #%(attribute)s-%(domain)s]" % locals()
-                    )
+                    toc_line.append(f"[''{domain}'' #{attribute}-{domain}]")
                     parts.append(
                         "== %(domain)s ==[%(attribute)s-%(domain)s]\n"
                         "%(table)s\n" % locals()
                     )
                 else:
                     if table:
-                        parts.append("%(table)s\n" % locals())
+                        parts.append(f"{table}\n")
                     else:
                         parts.append(
                             "No task was found where all algorithms "
@@ -248,7 +246,7 @@ class AbsoluteReport(PlanningReport):
         summary_names = [name.lower() for name, _ in table.summary_funcs.items()]
         if len(summary_names) == 1:
             table.info.append(
-                "The last row reports the %s across all domains." % summary_names[0]
+                f"The last row reports the {summary_names[0]} across all domains."
             )
         elif len(summary_names) > 1:
             table.info.append(
@@ -335,7 +333,7 @@ class AbsoluteReport(PlanningReport):
             kwargs = {}
         table = reports.Table(title=title, **kwargs)
         table.set_column_order(columns)
-        link = "#%s" % title
+        link = f"#{title}"
         formatter = reports.CellFormatter(link=link)
         table.cell_formatters[table.header_row][table.header_column] = formatter
         return table

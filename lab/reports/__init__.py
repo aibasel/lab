@@ -300,7 +300,7 @@ class Report:
         self.attributes = self._glob_attributes(self.attributes)
 
         if not self.attributes:
-            logging.info("Available attributes: %s" % ", ".join(self.all_attributes))
+            logging.info(f"Available attributes: {', '.join(self.all_attributes)}")
             logging.info("Using all numerical attributes.")
             self.attributes = self._get_numerical_attributes()
 
@@ -330,7 +330,7 @@ class Report:
             matches = fnmatch.filter(self.all_attributes, attr)
             if not matches:
                 logging.warning(
-                    'There is no attribute "%s" in the properties file.' % attr
+                    f'There is no attribute "{attr}" in the properties file.'
                 )
             # Use the attribute options from the pattern for all matches, but
             # don't try to guess options for attributes that appear in the list.
@@ -413,7 +413,7 @@ class Report:
         content = self.get_text()
         tools.makedirs(os.path.dirname(self.outfile))
         tools.write_file(self.outfile, content)
-        logging.info("Wrote file://%s" % self.outfile)
+        logging.info(f"Wrote file://{self.outfile}")
 
     def _get_type(self, attribute):
         for run in self.props.values():
@@ -437,7 +437,7 @@ class Report:
     def _load_data(self):
         props_file = os.path.join(self.eval_dir, "properties")
         if not os.path.exists(props_file):
-            logging.critical("Properties file not found at %s" % props_file)
+            logging.critical(f"Properties file not found at {props_file}")
 
         logging.info("Reading properties file")
         self.props = tools.Properties(filename=props_file)
@@ -466,7 +466,7 @@ class CellFormatter:
         if self.count:
             result = f"{result} ({self.count})"
         if self.bold:
-            result = "**%s**" % result
+            result = f"**{result}**"
         return result
 
 
@@ -786,7 +786,7 @@ class Table(collections.defaultdict):
         if color is not None:
             value_text = f"{{{value_text}|color:{color}}}"
         if bold:
-            value_text = "**%s**" % value_text
+            value_text = f"**{value_text}**"
         if justify_right:
             value_text = " " + value_text
         return value_text

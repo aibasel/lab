@@ -298,7 +298,7 @@ class _Buildable:
         for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
-            logging.debug('Writing file "%s"' % filename)
+            logging.debug(f'Writing file "{filename}"')
             tools.write_file(filename, content)
             os.chmod(filename, permissions)
 
@@ -384,7 +384,7 @@ class Experiment(_Buildable):
         path = path or _get_default_experiment_dir()
         self.path = os.path.abspath(path)
         if any(char in self.path for char in (":", ",")):
-            logging.critical("Path contains commas or colons: %s" % self.path)
+            logging.critical(f"Path contains commas or colons: {self.path}")
         self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
 
@@ -476,7 +476,7 @@ class Experiment(_Buildable):
         name = name.replace("-", "_")
         self._check_alias(name)
         if not os.path.isfile(path_to_parser):
-            logging.critical("Parser %s could not be found." % path_to_parser)
+            logging.critical(f"Parser {path_to_parser} could not be found.")
 
         dest = os.path.basename(path_to_parser)
         self.env_vars_relative[name] = dest
@@ -576,7 +576,7 @@ class Experiment(_Buildable):
         """
         src = src or self.path
         dest = dest or self.eval_dir
-        name = name or "fetch-%s" % os.path.basename(src.rstrip("/"))
+        name = name or f"fetch-{os.path.basename(src.rstrip('/'))}"
         self.add_step(name, Fetcher(), src, dest, merge=merge, filter=filter, **kwargs)
 
     def add_report(self, report, name="", eval_dir="", outfile=""):
@@ -653,7 +653,7 @@ class Experiment(_Buildable):
         if not write_to_disk:
             return
 
-        logging.info('Experiment path: "%s"' % self.path)
+        logging.info(f'Experiment path: "{self.path}"')
         self._remove_experiment_dir()
         tools.makedirs(self.path)
         self.environment.write_main_script()
@@ -761,7 +761,7 @@ class Run(_Buildable):
                     formatted_value = repr(val)
                 return f"{key}={formatted_value}"
 
-            cmd_string = "[{}]".format(", ".join([format_arg(arg) for arg in cmd]))
+            cmd_string = f"[{', '.join([format_arg(arg) for arg in cmd])}]"
             kwargs_string = ", ".join(
                 format_key_value_pair(key, value)
                 for key, value in sorted(kwargs.items())
@@ -769,7 +769,7 @@ class Run(_Buildable):
             parts = [cmd_string]
             if kwargs_string:
                 parts.append(kwargs_string)
-            return "Call({}, **redirects).wait()\n".format(", ".join(parts))
+            return f"Call({', '.join(parts)}, **redirects).wait()\n"
 
         calls_text = "\n".join(
             make_call(name, cmd, kwargs)
