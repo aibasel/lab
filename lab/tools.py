@@ -473,7 +473,7 @@ def product(values):
 
 
 def rgb_fractions_to_html_color(r, g, b):
-    return "rgb(%d,%d,%d)" % (r * 255, g * 255, b * 255)
+    return f"rgb({int(r * 255)},{int(g * 255)},{int(b * 255)})"
 
 
 def get_unexplained_errors_message(run):

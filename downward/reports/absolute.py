@@ -161,9 +161,9 @@ class AbsoluteReport(PlanningReport):
                 tables.append(
                     (
                         "",
-                        "Domain-wise reports only support numeric "
-                        "attributes, but %s has type %s."
-                        % (attribute, self._all_attributes[attribute].__name__),
+                        f"Domain-wise reports only support numeric "
+                        f"attributes, but {attribute} has type "
+                        f"{self._all_attributes[attribute].__name__}.",
                     )
                 )
             for domain in sorted(self.domains.keys()):
@@ -181,9 +181,9 @@ class AbsoluteReport(PlanningReport):
                         parts.append(f"{table}\n")
                     else:
                         parts.append(
-                            "No task was found where all algorithms "
-                            'have a value for "%s". Therefore no '
-                            "domain-wise table can be generated.\n" % attribute
+                            f"No task was found where all algorithms "
+                            f'have a value for "{attribute}". Therefore no '
+                            f"domain-wise table can be generated.\n"
                         )
 
             toc_lines.append(f"- **[''{attribute}'' #{attribute}]**")
@@ -230,24 +230,22 @@ class AbsoluteReport(PlanningReport):
         """
         if not attribute.absolute:
             table.info.append(
-                "Only instances where all algorithms have a "
-                'value for "%s" are considered.' % attribute
+                f"Only instances where all algorithms have a "
+                f'value for "{attribute}" are considered.'
             )
             table.info.append(
-                'Each table entry gives the %s of "%s" for that '
-                "domain." % (func_name, attribute)
+                f'Each table entry gives the {func_name} of "{attribute}" for that '
+                f"domain."
             )
 
         summary_names = [name.lower() for name, _ in table.summary_funcs.items()]
         if len(summary_names) == 1:
             table.info.append(
-                f"The last row reports the {summary_names[0]} across all domains."
+                f"The bottom row reports the {summary_names[0]} across all domains."
             )
         elif len(summary_names) > 1:
-            table.info.append(
-                "The last rows report the %s across all domains."
-                % " and ".join(summary_names)
-            )
+            names = " and ".join(summary_names)
+            table.info.append(f"The bottom rows report the {names} across all domains.")
 
     def _get_suite_table(self, attribute):
         assert self.attribute_is_numeric(attribute), attribute

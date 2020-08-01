@@ -227,8 +227,8 @@ class Call:
             and wall_clock_time > self.wall_clock_time_limit
         ):
             logging.error(
-                "wall-clock time for %s too high: %.2f > %d"
-                % (self.name, wall_clock_time, self.wall_clock_time_limit)
+                f"wall-clock time for {self.name} too high: "
+                f"{wall_clock_time:.2f} > {self.wall_clock_time_limit}"
             )
         logging.info(f"{self.name} exit code: {retcode}")
         return retcode

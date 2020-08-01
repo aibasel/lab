@@ -29,7 +29,7 @@ class ScatterPgfplots:
             options["xmax"] = report.x_upper
         if report.y_upper is not None:
             options["ymax"] = report.y_upper
-        lines.append("\\begin{axis}[%s]" % cls._format_options(options))
+        lines.append(f"\\begin{{axis}}[{cls._format_options(options)}]")
         for category, coords in sorted(report.categories.items()):
             plot = {"only marks": True}
             lines.append(
@@ -38,7 +38,7 @@ class ScatterPgfplots:
                 )
             )
             if category:
-                lines.append("\\addlegendentry{%s}" % category)
+                lines.append(f"\\addlegendentry{{{category}}}")
             elif report.has_multiple_categories():
                 # None is treated as the default category if using multiple
                 # categories. Add a corresponding entry to the legend.
@@ -124,7 +124,7 @@ class ScatterPgfplots:
                 opts.append(key)
             elif isinstance(value, str):
                 if " " in value or "=" in value:
-                    value = "{%s}" % value
+                    value = f"{{{value}}}"
                 opts.append(f"{key}={value.replace('_', '-')}")
             else:
                 opts.append(f"{key}={value}")

@@ -165,18 +165,17 @@ class GridEnvironment(Environment):
         pass
 
     def _get_job_name(self, step):
-        return "%s%02d-%s" % (
-            _get_job_prefix(self.exp.name),
-            self.exp.steps.index(step) + 1,
-            step.name,
+        return (
+            f"{_get_job_prefix(self.exp.name)}"
+            f"{self.exp.steps.index(step) + 1:02d}-{step.name}"
         )
 
     def _get_num_runs(self):
         num_runs = len(self.exp.runs)
         if num_runs > self.MAX_TASKS:
             logging.critical(
-                "You are trying to submit a job with %d tasks, "
-                "but only %d are allowed." % (num_runs, self.MAX_TASKS)
+                f"You are trying to submit a job with {num_runs} tasks, "
+                f"but only {self.MAX_TASKS} are allowed."
             )
         return num_runs
 
@@ -240,9 +239,9 @@ class GridEnvironment(Environment):
         job_dir = self.exp.path + "-grid-steps"
         if os.path.exists(job_dir):
             tools.confirm_or_abort(
-                'The path "%s" already exists, so the experiment has '
-                "already been submitted. Are you sure you want to "
-                "delete the grid-steps and submit it again?" % job_dir
+                f'The path "{job_dir}" already exists, so the experiment has '
+                f"already been submitted. Are you sure you want to "
+                f"delete the grid-steps and submit it again?"
             )
             tools.remove_path(job_dir)
 
@@ -253,8 +252,8 @@ class GridEnvironment(Environment):
         # Remove eval dir if it exists.
         if os.path.exists(self.exp.eval_dir):
             tools.confirm_or_abort(
-                'The evaluation directory "%s" already exists. '
-                "Do you want to remove it?" % self.exp.eval_dir
+                f'The evaluation directory "{self.exp.eval_dir}" already exists. '
+                f"Do you want to remove it?"
             )
             tools.remove_path(self.exp.eval_dir)
 

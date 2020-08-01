@@ -83,11 +83,11 @@ def _check_name(name, typ, extra_chars=""):
     for c in extra_chars:
         alpha_num_name = alpha_num_name.replace(c, "")
     if not name[0].isalpha():
-        logging.critical("Name for {typ} must start with a letter.".format(**locals()))
+        logging.critical(f"Name for {typ} must start with a letter.")
     if not alpha_num_name.isalnum():
         logging.critical(
-            "Name for {typ} may only use characters from"
-            " [A-Z], [a-z], [0-9], [{extra_chars}]: {name}".format(**locals())
+            f"Name for {typ} may only use characters from"
+            f" [A-Z], [a-z], [0-9], [{extra_chars}]: {name}"
         )
 
 
@@ -259,9 +259,7 @@ class _Buildable:
             logging.critical(f"Command names must be unique: {name}")
 
         if not isinstance(command, list):
-            logging.critical(
-                "The command for {name} is not a list: {command}".format(**locals())
-            )
+            logging.critical(f"The command for {name} is not a list: {command}")
         if not command:
             logging.critical(f'Command "{name}" must not be empty')
 

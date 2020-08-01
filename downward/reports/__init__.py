@@ -163,19 +163,14 @@ class PlanningReport(Report):
 
         if len(problems) * len(self.algorithms) != len(self.runs):
             logging.warning(
-                "Not every algorithm has been run on every task. "
-                "However, if you applied a filter this is to be "
-                "expected. If not, there might be old properties in the "
-                "eval-dir that got included in the report. "
-                "Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)"
-                % (
-                    len(self.algorithms),
-                    self.algorithms,
-                    len(problems),
-                    len(self.domains),
-                    list(self.domains.keys()),
-                    len(self.runs),
-                )
+                f"Not every algorithm has been run on every task. "
+                f"However, if you applied a filter this is to be "
+                f"expected. If not, there might be old properties in the "
+                f"eval-dir that got included in the report. "
+                f"Algorithms ({len(self.algorithms)}): {self.algorithms}, "
+                f"problems ({len(problems)}), "
+                f"domains ({len(self.domains)}): {list(self.domains.keys())}, "
+                f"runs ({len(self.runs)})"
             )
 
         # Sort each entry in problem_runs by algorithm.

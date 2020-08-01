@@ -83,8 +83,8 @@ class _Pattern:
                 value = match.group(self.group)
             except IndexError:
                 logging.error(
-                    "Attribute %s not found for pattern %s in "
-                    "file %s" % (self.attribute, self, filename)
+                    f"Attribute {self.attribute} not found for pattern {self} in "
+                    f"file {filename}."
                 )
             else:
                 value = self.type_(value)
