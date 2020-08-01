@@ -28,7 +28,7 @@ from lab.parser import Parser
 
 
 def _get_states_pattern(attribute, name):
-    return (attribute, r"{name} (\d+) state\(s\)\.".format(**locals()), int)
+    return (attribute, rf"{name} (\d+) state\(s\)\.", int)
 
 
 PATTERNS = [

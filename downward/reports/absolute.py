@@ -142,9 +142,7 @@ class AbsoluteReport(PlanningReport):
                         if self.use_domain_links:
                             table.cell_formatters[domain][
                                 table.header_column
-                            ] = reports.CellFormatter(
-                                link="#error-{domain}".format(**locals())
-                            )
+                            ] = reports.CellFormatter(link=f"#error-{domain}")
                         for algorithm in self.algorithms:
                             count = error_counter.get((algorithm, domain, error), 0)
                             table.add_cell(domain, algorithm, count)
@@ -177,10 +175,7 @@ class AbsoluteReport(PlanningReport):
                 if domain:
                     assert table
                     toc_line.append(f"[''{domain}'' #{attribute}-{domain}]")
-                    parts.append(
-                        "== %(domain)s ==[%(attribute)s-%(domain)s]\n"
-                        "%(table)s\n" % locals()
-                    )
+                    parts.append(f"== {domain} ==[{attribute}-{domain}]\n{table}\n")
                 else:
                     if table:
                         parts.append(f"{table}\n")

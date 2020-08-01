@@ -157,8 +157,8 @@ class PlanningReport(Report):
         )
         func = logging.info if num_unexplained_errors == 0 else logging.error
         func(
-            "Report contains {num_unexplained_errors} runs with unexplained"
-            " errors.".format(**locals())
+            f"Report contains {num_unexplained_errors} runs with unexplained"
+            f" errors."
         )
 
         if len(problems) * len(self.algorithms) != len(self.runs):
@@ -267,11 +267,11 @@ class PlanningReport(Report):
             else:
                 slurm_err_content = tools.filter_slurm_err_content(slurm_err_content)
 
-            logging.error("There was output to {slurm_err_file}.".format(**locals()))
+            logging.error(f"There was output to {slurm_err_file}.")
 
             errors.append(
-                ' Contents of {slurm_err_file} without "memory cg"'
-                " errors:\n```\n{slurm_err_content}\n```".format(**locals())
+                f' Contents of {slurm_err_file} without "memory cg"'
+                f" errors:\n```\n{slurm_err_content}\n```"
             )
 
         if table:

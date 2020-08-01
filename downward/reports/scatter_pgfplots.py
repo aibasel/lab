@@ -48,16 +48,16 @@ class ScatterPgfplots:
             # Add black line at y=1.
             line_min, line_max = cls._get_supported_range(options["xmode"])
             lines.append(
-                "\\draw[color=black] (axis cs:{line_min},1) -- "
-                "(axis cs:{line_max},1);".format(**locals())
+                f"\\draw[color=black] (axis cs:{line_min},1) -- "
+                f"(axis cs:{line_max},1);"
             )
         if report.plot_diagonal_line:
             # Add black diagonal line.
             assert options["xmode"] == options["ymode"]
             line_min, line_max = cls._get_supported_range(options["xmode"])
             lines.append(
-                "\\draw[color=black] (axis cs:{line_min},{line_min}) -- "
-                "(axis cs:{line_max},{line_max});".format(**locals())
+                f"\\draw[color=black] (axis cs:{line_min},{line_min}) -- "
+                f"(axis cs:{line_max},{line_max});"
             )
 
         lines.append("\\end{axis}")

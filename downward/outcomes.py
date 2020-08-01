@@ -84,5 +84,5 @@ def get_outcome(exitcode, use_legacy_exit_codes):
     elif not use_legacy_exit_codes and exitcode in EXITCODE_TO_OUTCOME:
         return EXITCODE_TO_OUTCOME[exitcode]
     else:
-        msg = "exitcode-{exitcode}".format(**locals())
+        msg = f"exitcode-{exitcode}"
         return Outcome(exitcode, msg, explained=False, min_wins=True)

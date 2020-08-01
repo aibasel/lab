@@ -319,8 +319,7 @@ class FastDownwardExperiment(Experiment):
         for algo in self._algorithms.values():
             if algorithm == algo:
                 logging.critical(
-                    "Algorithms {algo.name} and {algorithm.name} are "
-                    "identical.".format(**locals())
+                    f"Algorithms {algo.name} and {algorithm.name} are identical."
                 )
         self._algorithms[name] = algorithm
 
