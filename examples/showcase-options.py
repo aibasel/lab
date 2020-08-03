@@ -156,7 +156,7 @@ def only_two_algorithms(run):
 
 
 def eval_dir(num):
-    return os.path.join(exp.eval_dir, "test%d" % num)
+    return os.path.join(exp.eval_dir, f"test{num}")
 
 
 exp.add_fetcher(dest=eval_dir(1), name="fetcher-test1", filter=only_two_algorithms)

@@ -44,7 +44,7 @@ def _abbreviate_node_names(nodes):
         if match:
             infai_node_id = int(match.group(1))
             if sequence_buffer:
-                if sequence_buffer[-1] == "ase{:02d}".format(infai_node_id - 1):
+                if sequence_buffer[-1] == f"ase{infai_node_id - 1:02d}":
                     sequence_buffer.append(node)
                 elif len(sequence_buffer) in [1, 2]:
                     flush_buffer()
@@ -116,7 +116,7 @@ class AbsoluteReport(PlanningReport):
         toc_lines.append("- **[Summary #summary]**")
 
         for attribute in self.attributes:
-            logging.info("Creating table(s) for %s" % attribute)
+            logging.info(f"Creating table(s) for {attribute}")
             tables = []
             if attribute == "error":
                 seen_errors = set()
@@ -142,9 +142,7 @@ class AbsoluteReport(PlanningReport):
                         if self.use_domain_links:
                             table.cell_formatters[domain][
                                 table.header_column
-                            ] = reports.CellFormatter(
-                                link="#error-{domain}".format(**locals())
-                            )
+                            ] = reports.CellFormatter(link=f"#error-{domain}")
                         for algorithm in self.algorithms:
                             count = error_counter.get((algorithm, domain, error), 0)
                             table.add_cell(domain, algorithm, count)
@@ -163,9 +161,9 @@ class AbsoluteReport(PlanningReport):
                 tables.append(
                     (
                         "",
-                        "Domain-wise reports only support numeric "
-                        "attributes, but %s has type %s."
-                        % (attribute, self._all_attributes[attribute].__name__),
+                        f"Domain-wise reports only support numeric "
+                        f"attributes, but {attribute} has type "
+                        f"{self._all_attributes[attribute].__name__}.",
                     )
                 )
             for domain in sorted(self.domains.keys()):
@@ -176,21 +174,16 @@ class AbsoluteReport(PlanningReport):
             for (domain, table) in tables:
                 if domain:
                     assert table
-                    toc_line.append(
-                        "[''%(domain)s'' #%(attribute)s-%(domain)s]" % locals()
-                    )
-                    parts.append(
-                        "== %(domain)s ==[%(attribute)s-%(domain)s]\n"
-                        "%(table)s\n" % locals()
-                    )
+                    toc_line.append(f"[''{domain}'' #{attribute}-{domain}]")
+                    parts.append(f"== {domain} ==[{attribute}-{domain}]\n{table}\n")
                 else:
                     if table:
-                        parts.append("%(table)s\n" % locals())
+                        parts.append(f"{table}\n")
                     else:
                         parts.append(
-                            "No task was found where all algorithms "
-                            'have a value for "%s". Therefore no '
-                            "domain-wise table can be generated.\n" % attribute
+                            f"No task was found where all algorithms "
+                            f'have a value for "{attribute}". Therefore no '
+                            f"domain-wise table can be generated.\n"
                         )
 
             toc_lines.append(f"- **[''{attribute}'' #{attribute}]**")
@@ -216,9 +209,8 @@ class AbsoluteReport(PlanningReport):
                     table.add_cell(algo, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
 
-        node_info = "Used nodes: {{{}}}".format(
-            ", ".join(_abbreviate_node_names(self._get_node_names()))
-        )
+        used_nodes = ", ".join(_abbreviate_node_names(self._get_node_names()))
+        node_info = f"Used nodes: {{{used_nodes}}}"
 
         if table:
             return str(table) + "\n" + node_info
@@ -237,24 +229,22 @@ class AbsoluteReport(PlanningReport):
         """
         if not attribute.absolute:
             table.info.append(
-                "Only instances where all algorithms have a "
-                'value for "%s" are considered.' % attribute
+                f"Only instances where all algorithms have a "
+                f'value for "{attribute}" are considered.'
             )
             table.info.append(
-                'Each table entry gives the %s of "%s" for that '
-                "domain." % (func_name, attribute)
+                f'Each table entry gives the {func_name} of "{attribute}" for that '
+                f"domain."
             )
 
         summary_names = [name.lower() for name, _ in table.summary_funcs.items()]
         if len(summary_names) == 1:
             table.info.append(
-                "The last row reports the %s across all domains." % summary_names[0]
+                f"The bottom row reports the {summary_names[0]} across all domains."
             )
         elif len(summary_names) > 1:
-            table.info.append(
-                "The last rows report the %s across all domains."
-                % " and ".join(summary_names)
-            )
+            names = " and ".join(summary_names)
+            table.info.append(f"The bottom rows report the {names} across all domains.")
 
     def _get_suite_table(self, attribute):
         assert self.attribute_is_numeric(attribute), attribute
@@ -335,7 +325,7 @@ class AbsoluteReport(PlanningReport):
             kwargs = {}
         table = reports.Table(title=title, **kwargs)
         table.set_column_order(columns)
-        link = "#%s" % title
+        link = f"#{title}"
         formatter = reports.CellFormatter(link=link)
         table.cell_formatters[table.header_row][table.header_column] = formatter
         return table

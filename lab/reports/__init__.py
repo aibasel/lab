@@ -300,7 +300,7 @@ class Report:
         self.attributes = self._glob_attributes(self.attributes)
 
         if not self.attributes:
-            logging.info("Available attributes: %s" % ", ".join(self.all_attributes))
+            logging.info(f"Available attributes: {', '.join(self.all_attributes)}")
             logging.info("Using all numerical attributes.")
             self.attributes = self._get_numerical_attributes()
 
@@ -330,7 +330,7 @@ class Report:
             matches = fnmatch.filter(self.all_attributes, attr)
             if not matches:
                 logging.warning(
-                    'There is no attribute "%s" in the properties file.' % attr
+                    f'There is no attribute "{attr}" in the properties file.'
                 )
             # Use the attribute options from the pattern for all matches, but
             # don't try to guess options for attributes that appear in the list.
@@ -413,7 +413,7 @@ class Report:
         content = self.get_text()
         tools.makedirs(os.path.dirname(self.outfile))
         tools.write_file(self.outfile, content)
-        logging.info("Wrote file://%s" % self.outfile)
+        logging.info(f"Wrote file://{self.outfile}")
 
     def _get_type(self, attribute):
         for run in self.props.values():
@@ -437,7 +437,7 @@ class Report:
     def _load_data(self):
         props_file = os.path.join(self.eval_dir, "properties")
         if not os.path.exists(props_file):
-            logging.critical("Properties file not found at %s" % props_file)
+            logging.critical(f"Properties file not found at {props_file}")
 
         logging.info("Reading properties file")
         self.props = tools.Properties(filename=props_file)
@@ -466,7 +466,7 @@ class CellFormatter:
         if self.count:
             result = f"{result} ({self.count})"
         if self.bold:
-            result = "**%s**" % result
+            result = f"**{result}**"
         return result
 
 
@@ -771,7 +771,7 @@ class Table(collections.defaultdict):
 
         def format_value(value):
             if isinstance(value, float):
-                return "{0:.{1}f}".format(value, self.digits)
+                return f"{value:.{self.digits}f}"
             else:
                 result = str(value)
 
@@ -786,7 +786,7 @@ class Table(collections.defaultdict):
         if color is not None:
             value_text = f"{{{value_text}|color:{color}}}"
         if bold:
-            value_text = "**%s**" % value_text
+            value_text = f"**{value_text}**"
         if justify_right:
             value_text = " " + value_text
         return value_text
@@ -809,14 +809,14 @@ class Table(collections.defaultdict):
 
     def _get_header_markup(self, row_name, row):
         """Return the txt2tags table markup for the headers."""
-        return self._get_row_markup(row_name, row, template="|| %s |")
+        return self._get_row_markup(row_name, row, template="|| {} |")
 
-    def _get_row_markup(self, row_name, row, template=" | %s |"):
+    def _get_row_markup(self, row_name, row, template=" | {} |"):
         """Return the txt2tags table markup for one row."""
         formatted_cells = []
         for col_name in self._get_printable_column_order():
             formatted_cells.append(row.get(col_name, ""))
-        return template % " | ".join(formatted_cells)
+        return template.format(" | ".join(formatted_cells))
 
     def __str__(self):
         """Return the txt2tags markup for this table."""

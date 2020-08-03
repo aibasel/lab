@@ -127,7 +127,7 @@ class deprecated:
     def __call__(self, func):
         @functools.wraps(func)
         def new_func(*args, **kwargs):
-            msg = self.msg or "%s is deprecated." % (func.__name__)
+            msg = self.msg or f"{func.__name__} is deprecated."
             show_deprecation_warning(msg)
             return func(*args, **kwargs)
 
@@ -157,15 +157,13 @@ def makedirs(path):
 
 
 def confirm_or_abort(question):
-    answer = input("%s (y/N): " % question).strip()
+    answer = input(f"{question} (y/N): ").strip()
     if not answer.lower() == "y":
         sys.exit("Aborted")
 
 
 def confirm_overwrite_or_abort(path):
-    confirm_or_abort(
-        'The path "%s" already exists. Do you want to overwrite it?' % path
-    )
+    confirm_or_abort(f'The path "{path}" already exists. Do you want to overwrite it?')
 
 
 def remove_path(path):
@@ -233,7 +231,7 @@ def find_file(filenames, dir="."):
 
 def run_command(cmd, **kwargs):
     """Run command cmd and return the output."""
-    logging.info("Executing {} {}".format(" ".join(cmd), kwargs))
+    logging.info(f"Executing {' '.join(cmd)} {kwargs}")
     return subprocess.call(cmd, **kwargs)
 
 
@@ -283,7 +281,7 @@ class RunFilter:
         self.filtered_attributes = []  # Only needed for sanity checks.
         for arg_name, arg_value in kwargs.items():
             if not arg_name.startswith("filter_"):
-                logging.critical('Invalid filter keyword argument name "%s"' % arg_name)
+                logging.critical(f'Invalid filter keyword argument name "{arg_name}"')
             attribute = arg_name[len("filter_") :]
             # Add a filter for the specified property.
             self.filters.append(self._build_filter(attribute, arg_value))
@@ -323,8 +321,8 @@ class RunFilter:
         for attribute in self.filtered_attributes:
             if not any(attribute in run for run in props.values()):
                 logging.critical(
-                    'No run has the attribute "{attribute}" (from '
-                    '"filter_{attribute}"). Is this a typo?'.format(**locals())
+                    f'No run has the attribute "{attribute}" (from '
+                    f'"filter_{attribute}"). Is this a typo?'
                 )
         for filter_ in self.filters:
             for old_run_id, run in list(props.items()):
@@ -403,9 +401,7 @@ def copy(src, dest, ignores=None):
         fast_updatetree(src, dest, ignore=ignore)
     else:
         logging.critical(
-            "Path {} cannot be copied to {}".format(
-                os.path.abspath(src), os.path.abspath(dest)
-            )
+            f"Path {os.path.abspath(src)} cannot be copied to {os.path.abspath(dest)}"
         )
 
 
@@ -477,7 +473,7 @@ def product(values):
 
 
 def rgb_fractions_to_html_color(r, g, b):
-    return "rgb(%d,%d,%d)" % (r * 255, g * 255, b * 255)
+    return f"rgb({int(r * 255)},{int(g * 255)},{int(b * 255)})"
 
 
 def get_unexplained_errors_message(run):
@@ -490,8 +486,8 @@ def get_unexplained_errors_message(run):
         return ""
     else:
         return (
-            "Unexplained error(s) in {run_dir}: please inspect"
-            " output and error logs.".format(**run)
+            f"Unexplained error(s) in {run['run_dir']}: please inspect"
+            f" output and error logs."
         )
 
 

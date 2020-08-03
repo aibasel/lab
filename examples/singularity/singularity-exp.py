@@ -100,7 +100,7 @@ for planner, _ in IMAGES:
             "run-planner",
             [
                 "{run_singularity}",
-                "{%s}" % planner,
+                f"{{{planner}}}",
                 "{domain}",
                 "{problem}",
                 "sas_plan",
@@ -113,7 +113,7 @@ for planner, _ in IMAGES:
         run.set_property("algorithm", planner)
         run.set_property("id", [planner, task.domain, task.problem])
 
-report = os.path.join(exp.eval_dir, "{}.html".format(exp.name))
+report = os.path.join(exp.eval_dir, f"{exp.name}.html")
 exp.add_report(BaseReport(attributes=ATTRIBUTES), outfile=report)
 
 exp.run_steps()

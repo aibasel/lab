@@ -157,25 +157,20 @@ class PlanningReport(Report):
         )
         func = logging.info if num_unexplained_errors == 0 else logging.error
         func(
-            "Report contains {num_unexplained_errors} runs with unexplained"
-            " errors.".format(**locals())
+            f"Report contains {num_unexplained_errors} runs with unexplained"
+            f" errors."
         )
 
         if len(problems) * len(self.algorithms) != len(self.runs):
             logging.warning(
-                "Not every algorithm has been run on every task. "
-                "However, if you applied a filter this is to be "
-                "expected. If not, there might be old properties in the "
-                "eval-dir that got included in the report. "
-                "Algorithms (%d): %s, problems (%d), domains (%d): %s, runs (%d)"
-                % (
-                    len(self.algorithms),
-                    self.algorithms,
-                    len(problems),
-                    len(self.domains),
-                    list(self.domains.keys()),
-                    len(self.runs),
-                )
+                f"Not every algorithm has been run on every task. "
+                f"However, if you applied a filter this is to be "
+                f"expected. If not, there might be old properties in the "
+                f"eval-dir that got included in the report. "
+                f"Algorithms ({len(self.algorithms)}): {self.algorithms}, "
+                f"problems ({len(problems)}), "
+                f"domains ({len(self.domains)}): {list(self.domains.keys())}, "
+                f"runs ({len(self.runs)})"
             )
 
         # Sort each entry in problem_runs by algorithm.
@@ -267,11 +262,11 @@ class PlanningReport(Report):
             else:
                 slurm_err_content = tools.filter_slurm_err_content(slurm_err_content)
 
-            logging.error("There was output to {slurm_err_file}.".format(**locals()))
+            logging.error(f"There was output to {slurm_err_file}.")
 
             errors.append(
-                ' Contents of {slurm_err_file} without "memory cg"'
-                " errors:\n```\n{slurm_err_content}\n```".format(**locals())
+                f' Contents of {slurm_err_file} without "memory cg"'
+                f" errors:\n```\n{slurm_err_content}\n```"
             )
 
         if table:

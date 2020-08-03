@@ -71,23 +71,23 @@ def _get_default_experiment_dir():
 def get_run_dir(task_id):
     lower = ((task_id - 1) // SHARD_SIZE) * SHARD_SIZE + 1
     upper = ((task_id + SHARD_SIZE - 1) // SHARD_SIZE) * SHARD_SIZE
-    return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
+    return f"runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}"
 
 
 def _check_name(name, typ, extra_chars=""):
     if not isinstance(name, str):
-        logging.critical("Name for {typ} must be a string: {name}".format(**locals()))
+        logging.critical(f"Name for {typ} must be a string: {name}")
     if not name:
-        logging.critical("Name for {typ} must not be empty".format(**locals()))
+        logging.critical(f"Name for {typ} must not be empty")
     alpha_num_name = name
     for c in extra_chars:
         alpha_num_name = alpha_num_name.replace(c, "")
     if not name[0].isalpha():
-        logging.critical("Name for {typ} must start with a letter.".format(**locals()))
+        logging.critical(f"Name for {typ} must start with a letter.")
     if not alpha_num_name.isalnum():
         logging.critical(
-            "Name for {typ} may only use characters from"
-            " [A-Z], [a-z], [0-9], [{extra_chars}]: {name}".format(**locals())
+            f"Name for {typ} may only use characters from"
+            f" [A-Z], [a-z], [0-9], [{extra_chars}]: {name}"
         )
 
 
@@ -259,9 +259,7 @@ class _Buildable:
             logging.critical(f"Command names must be unique: {name}")
 
         if not isinstance(command, list):
-            logging.critical(
-                "The command for {name} is not a list: {command}".format(**locals())
-            )
+            logging.critical(f"The command for {name} is not a list: {command}")
         if not command:
             logging.critical(f'Command "{name}" must not be empty')
 
@@ -298,7 +296,7 @@ class _Buildable:
         for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
-            logging.debug('Writing file "%s"' % filename)
+            logging.debug(f'Writing file "{filename}"')
             tools.write_file(filename, content)
             os.chmod(filename, permissions)
 
@@ -384,7 +382,7 @@ class Experiment(_Buildable):
         path = path or _get_default_experiment_dir()
         self.path = os.path.abspath(path)
         if any(char in self.path for char in (":", ",")):
-            logging.critical("Path contains commas or colons: %s" % self.path)
+            logging.critical(f"Path contains commas or colons: {self.path}")
         self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
 
@@ -476,7 +474,7 @@ class Experiment(_Buildable):
         name = name.replace("-", "_")
         self._check_alias(name)
         if not os.path.isfile(path_to_parser):
-            logging.critical("Parser %s could not be found." % path_to_parser)
+            logging.critical(f"Parser {path_to_parser} could not be found.")
 
         dest = os.path.basename(path_to_parser)
         self.env_vars_relative[name] = dest
@@ -508,7 +506,6 @@ class Experiment(_Buildable):
             logging.info(f"Parsing properties in {total_dirs:d} run directories")
             for index, run_dir in enumerate(run_dirs, start=1):
                 if os.path.exists(os.path.join(run_dir, "properties")):
-                    # print "removing path {}".format(os.path.join(run_dir, 'properties'))
                     tools.remove_path(os.path.join(run_dir, "properties"))
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, f"Parsing run: {index:6d}/{total_dirs:d}")
@@ -576,7 +573,7 @@ class Experiment(_Buildable):
         """
         src = src or self.path
         dest = dest or self.eval_dir
-        name = name or "fetch-%s" % os.path.basename(src.rstrip("/"))
+        name = name or f"fetch-{os.path.basename(src.rstrip('/'))}"
         self.add_step(name, Fetcher(), src, dest, merge=merge, filter=filter, **kwargs)
 
     def add_report(self, report, name="", eval_dir="", outfile=""):
@@ -653,7 +650,7 @@ class Experiment(_Buildable):
         if not write_to_disk:
             return
 
-        logging.info('Experiment path: "%s"' % self.path)
+        logging.info(f'Experiment path: "{self.path}"')
         self._remove_experiment_dir()
         tools.makedirs(self.path)
         self.environment.write_main_script()
@@ -680,10 +677,10 @@ class Experiment(_Buildable):
             logging.critical("No runs have been added to the experiment.")
         num_runs = len(self.runs)
         self.set_property("runs", num_runs)
-        logging.info("Building %d runs" % num_runs)
+        logging.info(f"Building {num_runs} runs")
         for index, run in enumerate(self.runs, 1):
             if index % 100 == 0:
-                logging.info("Build run %6d/%d" % (index, num_runs))
+                logging.info(f"Build run {index:6}/{num_runs}")
             for name, (command, kwargs) in self.commands.items():
                 run.add_command(name, command, **kwargs)
             run.build(index)
@@ -734,8 +731,8 @@ class Run(_Buildable):
         doubly_used_vars = set(exp_vars) & set(run_vars)
         if doubly_used_vars:
             logging.critical(
-                "Resource names cannot be shared between experiments "
-                "and runs, they must be unique: {}".format(doubly_used_vars)
+                f"Resource names cannot be shared between experiments "
+                f"and runs, they must be unique: {doubly_used_vars}"
             )
         env_vars = exp_vars
         env_vars.update(run_vars)
@@ -761,7 +758,7 @@ class Run(_Buildable):
                     formatted_value = repr(val)
                 return f"{key}={formatted_value}"
 
-            cmd_string = "[{}]".format(", ".join([format_arg(arg) for arg in cmd]))
+            cmd_string = f"[{', '.join([format_arg(arg) for arg in cmd])}]"
             kwargs_string = ", ".join(
                 format_key_value_pair(key, value)
                 for key, value in sorted(kwargs.items())
@@ -769,7 +766,7 @@ class Run(_Buildable):
             parts = [cmd_string]
             if kwargs_string:
                 parts.append(kwargs_string)
-            return "Call({}, **redirects).wait()\n".format(", ".join(parts))
+            return f"Call({', '.join(parts)}, **redirects).wait()\n"
 
         calls_text = "\n".join(
             make_call(name, cmd, kwargs)

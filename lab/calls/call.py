@@ -110,11 +110,7 @@ class Call:
             self.process = subprocess.Popen(args, preexec_fn=prepare_call, **kwargs)
         except OSError as err:
             if err.errno == errno.ENOENT:
-                sys.exit(
-                    'Error: Call {name} failed. "{path}" not found'.format(
-                        path=args[0], **locals()
-                    )
-                )
+                sys.exit(f'Error: Call {name} failed. "{args[0]}" not found.')
             else:
                 raise
 
@@ -182,10 +178,8 @@ class Call:
                             # Don't write to this outfile in subsequent rounds.
                             fd_to_outfile[fd] = None
                             logging.error(
-                                "{} wrote {} KiB (hard limit) to {} ->"
-                                " abort command".format(
-                                    self.name, hard_limit / 1024, outfile.name
-                                )
+                                f"{self.name} wrote {hard_limit / 1024} KiB (hard limit) "
+                                f"to {outfile.name} -> abort command"
                             )
                             self.process.terminate()
                             # Strip extra bytes.
@@ -204,12 +198,8 @@ class Call:
                 bytes_written = fd_to_bytes[fd]
                 if soft_limit is not None and bytes_written > soft_limit:
                     logging.error(
-                        "{} finished and wrote {} KiB to {} (soft limit: {} KiB)".format(
-                            self.name,
-                            bytes_written / 1024,
-                            outfile.name,
-                            soft_limit / 1024,
-                        )
+                        f"{self.name} finished and wrote {bytes_written / 1024} KiB "
+                        f"to {outfile.name} (soft limit: {soft_limit / 1024} KiB)"
                     )
 
     def wait(self):
@@ -231,8 +221,8 @@ class Call:
             and wall_clock_time > self.wall_clock_time_limit
         ):
             logging.error(
-                "wall-clock time for %s too high: %.2f > %d"
-                % (self.name, wall_clock_time, self.wall_clock_time_limit)
+                f"wall-clock time for {self.name} too high: "
+                f"{wall_clock_time:.2f} > {self.wall_clock_time_limit}"
             )
         logging.info(f"{self.name} exit code: {retcode}")
         return retcode

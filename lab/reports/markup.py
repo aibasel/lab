@@ -22,8 +22,7 @@ import txt2tags
 ESCAPE_WORDBREAK = "xWBRx"
 ESCAPE_WHITESPACE = "xWHITESPACEx"
 
-CSS = (
-    """\
+CSS = """\
 <style type="text/css">
     body {
         font-family: Ubuntu, Helvetica, Arial, sans-serif;
@@ -40,8 +39,6 @@ CSS = (
     }
 </style>
 """
-    % globals()
-)
 
 JAVASCRIPT = """\
 <script type="text/javascript">
@@ -104,7 +101,7 @@ document.addEventListener("DOMContentLoaded", show_main_tables);
 
 
 def escape(text):
-    return '""%s""' % text
+    return f'""{text}""'
 
 
 def _get_config(target):

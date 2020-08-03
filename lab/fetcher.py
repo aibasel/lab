@@ -26,8 +26,8 @@ def _check_eval_dir(eval_dir):
     if os.path.exists(eval_dir):
         answer = (
             input(
-                "{} already exists. Do you want to (o)verwrite it, "
-                "(m)erge the results, or (c)ancel? ".format(eval_dir)
+                f"{eval_dir} already exists. Do you want to (o)verwrite it, "
+                f"(m)erge the results, or (c)ancel? "
             )
             .strip()
             .lower()
@@ -84,7 +84,7 @@ class Fetcher:
                     content = f.read()
                 if content:
                     props.add_unexplained_error(
-                        "{}: {}".format(os.path.basename(logfile), content)
+                        f"{os.path.basename(logfile)}: {content}"
                     )
         return props
 
@@ -125,7 +125,7 @@ class Fetcher:
             src_props = tools.Properties(filename=os.path.join(src_dir, "properties"))
             run_filter.apply(src_props)
             combined_props.update(src_props)
-            logging.info("Fetched properties of {} runs.".format(len(src_props)))
+            logging.info(f"Fetched properties of {len(src_props)} runs.")
         else:
             slurm_err_content = tools.get_slurm_err_content(src_dir)
             if slurm_err_content:
@@ -156,6 +156,6 @@ class Fetcher:
         tools.makedirs(eval_dir)
         combined_props.write()
         logging.info(
-            "Wrote properties file (contains {unexplained_errors} "
-            "runs with unexplained errors).".format(**locals())
+            f"Wrote properties file (contains {unexplained_errors} "
+            f"runs with unexplained errors)."
         )

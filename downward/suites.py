@@ -39,7 +39,7 @@ class Domain:
         return self.domain
 
     def __repr__(self):
-        return "<Domain %s>" % self.domain
+        return f"<Domain {self.domain}>"
 
     def __hash__(self):
         return hash(self.domain)
@@ -113,8 +113,8 @@ class Problem:
 
     def __str__(self):
         return (
-            "<Problem {domain}({domain_file}):{problem}({problem_file}):"
-            "{properties}>".format(**self.__dict__)
+            f"<Problem {self.domain}({self.domain_file}):{self.problem}"
+            f"({self.problem_file}):{self.properties}>"
         )
 
 

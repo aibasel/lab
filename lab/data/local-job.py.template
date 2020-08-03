@@ -25,12 +25,12 @@ def process_task(task_id):
     run_id = get_run_id(task_id)
     run_dir = get_run_dir(run_id)
     error = False
-    with open(os.path.join(run_dir, 'driver.log'), 'w') as driver_log:
-        with open(os.path.join(run_dir, 'driver.err'), 'w') as driver_err:
-            logging.info('Starting run {run_id} (TASK_ID {task_id}) in {run_dir}'.format(**locals()))
+    with open(os.path.join(run_dir, "driver.log"), "w") as driver_log:
+        with open(os.path.join(run_dir, "driver.err"), "w") as driver_err:
+            logging.info(f"Starting run {run_id} (TASK_ID {task_id}) in {run_dir}")
             try:
                 subprocess.check_call(
-                    [tools.get_python_executable(), 'run'],
+                    [tools.get_python_executable(), "run"],
                     cwd=run_dir, stdout=driver_log, stderr=driver_err)
             except subprocess.CalledProcessError as err:
                 error = True
@@ -51,16 +51,16 @@ def main():
         # (see https://stackoverflow.com/questions/1408356).
         result.wait(timeout=99999)
     except KeyboardInterrupt:
-        logging.warning('Main script interrupted')
+        logging.warning("Main script interrupted")
         pool.terminate()
     finally:
         pool.close()
-        logging.info('Joining pool processes')
+        logging.info("Joining pool processes")
         pool.join()
 
     if any(result.get()):
         sys.exit("Error: At least one run failed.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

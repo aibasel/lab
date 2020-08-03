@@ -12,6 +12,8 @@ function set_version {
 
 cd $(dirname "$0")/../
 
+source .venv/bin/activate
+
 # Check for uncommited changes.
 set +e
 git diff --quiet && git diff --cached --quiet
