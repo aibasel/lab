@@ -809,14 +809,14 @@ class Table(collections.defaultdict):
 
     def _get_header_markup(self, row_name, row):
         """Return the txt2tags table markup for the headers."""
-        return self._get_row_markup(row_name, row, template="|| %s |")
+        return self._get_row_markup(row_name, row, template="|| {} |")
 
-    def _get_row_markup(self, row_name, row, template=" | %s |"):
+    def _get_row_markup(self, row_name, row, template=" | {} |"):
         """Return the txt2tags table markup for one row."""
         formatted_cells = []
         for col_name in self._get_printable_column_order():
             formatted_cells.append(row.get(col_name, ""))
-        return template % " | ".join(formatted_cells)
+        return template.format(" | ".join(formatted_cells))
 
     def __str__(self):
         """Return the txt2tags markup for this table."""

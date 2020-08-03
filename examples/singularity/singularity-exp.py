@@ -100,7 +100,7 @@ for planner, _ in IMAGES:
             "run-planner",
             [
                 "{run_singularity}",
-                "{%s}" % planner,
+                f"{{{planner}}}",
                 "{domain}",
                 "{problem}",
                 "sas_plan",
