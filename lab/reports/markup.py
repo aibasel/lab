@@ -22,8 +22,7 @@ import txt2tags
 ESCAPE_WORDBREAK = "xWBRx"
 ESCAPE_WHITESPACE = "xWHITESPACEx"
 
-CSS = (
-    """\
+CSS = """\
 <style type="text/css">
     body {
         font-family: Ubuntu, Helvetica, Arial, sans-serif;
@@ -40,8 +39,6 @@ CSS = (
     }
 </style>
 """
-    % globals()
-)
 
 JAVASCRIPT = """\
 <script type="text/javascript">

@@ -9,11 +9,11 @@ from lab import tools
 
 tools.configure_logging()
 
-logging.info('node: {}'.format(platform.node()))
+logging.info(f"node: {platform.node()}")
 
-run_log = open('run.log', 'w')
-run_err = open('run.err', 'w', buffering=1)  # line buffering
-redirects = {'stdout': run_log, 'stderr': run_err}
+run_log = open("run.log", "w")
+run_err = open("run.err", "w", buffering=1)  # line buffering
+redirects = {"stdout": run_log, "stderr": run_err}
 
 # Make sure we're in the run directory.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
