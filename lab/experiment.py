@@ -506,7 +506,6 @@ class Experiment(_Buildable):
             logging.info(f"Parsing properties in {total_dirs:d} run directories")
             for index, run_dir in enumerate(run_dirs, start=1):
                 if os.path.exists(os.path.join(run_dir, "properties")):
-                    # print "removing path {}".format(os.path.join(run_dir, 'properties'))
                     tools.remove_path(os.path.join(run_dir, "properties"))
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
                 logging.log(loglevel, f"Parsing run: {index:6d}/{total_dirs:d}")
@@ -732,8 +731,8 @@ class Run(_Buildable):
         doubly_used_vars = set(exp_vars) & set(run_vars)
         if doubly_used_vars:
             logging.critical(
-                "Resource names cannot be shared between experiments "
-                "and runs, they must be unique: {}".format(doubly_used_vars)
+                f"Resource names cannot be shared between experiments "
+                f"and runs, they must be unique: {doubly_used_vars}"
             )
         env_vars = exp_vars
         env_vars.update(run_vars)

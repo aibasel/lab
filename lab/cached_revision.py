@@ -79,10 +79,10 @@ def get_version_control_system(repo):
     if len(vcs) == 1:
         return vcs[0]
     else:
+        dirs = ", ".join(f".{x}" for x in VERSION_CONTROL_SYSTEMS)
         logging.critical(
-            "Repo {} must contain exactly one of the following subdirectories: {}".format(
-                repo, ", ".join(f".{x}" for x in VERSION_CONTROL_SYSTEMS)
-            )
+            f"Repo {repo} must contain exactly one of the following "
+            f"subdirectories: {dirs}"
         )
 
 
@@ -185,8 +185,8 @@ class CachedRevision:
             logging.info(f'Revision is already cached: "{self.path}"')
             if not os.path.exists(self._get_sentinel_file()):
                 logging.critical(
-                    "The build for the cached revision at {} is corrupted. "
-                    "Please delete it and try again.".format(self.path)
+                    f"The build for the cached revision at {self.path} is corrupted. "
+                    f"Please delete it and try again."
                 )
         else:
             tools.makedirs(self.path)

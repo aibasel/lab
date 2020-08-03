@@ -209,9 +209,8 @@ class AbsoluteReport(PlanningReport):
                     table.add_cell(algo, attr, info[attr])
         table.set_column_order(self.INFO_ATTRIBUTES)
 
-        node_info = "Used nodes: {{{}}}".format(
-            ", ".join(_abbreviate_node_names(self._get_node_names()))
-        )
+        used_nodes = ", ".join(_abbreviate_node_names(self._get_node_names()))
+        node_info = f"Used nodes: {{{used_nodes}}}"
 
         if table:
             return str(table) + "\n" + node_info

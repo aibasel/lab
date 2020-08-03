@@ -26,8 +26,8 @@ def _check_eval_dir(eval_dir):
     if os.path.exists(eval_dir):
         answer = (
             input(
-                "{} already exists. Do you want to (o)verwrite it, "
-                "(m)erge the results, or (c)ancel? ".format(eval_dir)
+                f"{eval_dir} already exists. Do you want to (o)verwrite it, "
+                f"(m)erge the results, or (c)ancel? "
             )
             .strip()
             .lower()

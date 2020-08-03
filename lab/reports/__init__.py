@@ -771,7 +771,7 @@ class Table(collections.defaultdict):
 
         def format_value(value):
             if isinstance(value, float):
-                return "{0:.{1}f}".format(value, self.digits)
+                return f"{value:.{self.digits}f}"
             else:
                 result = str(value)
 

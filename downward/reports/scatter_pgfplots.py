@@ -31,10 +31,10 @@ class ScatterPgfplots:
             options["ymax"] = report.y_upper
         lines.append(f"\\begin{{axis}}[{cls._format_options(options)}]")
         for category, coords in sorted(report.categories.items()):
-            plot = {"only marks": True}
             lines.append(
                 "\\addplot+[{}] coordinates {{\n{}\n}};".format(
-                    cls._format_options(plot), " ".join(str(c) for c in coords)
+                    cls._format_options({"only marks": True}),
+                    " ".join(str(c) for c in coords),
                 )
             )
             if category:
