@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import functools
 import hashlib
 import logging
 import os.path
@@ -28,20 +29,15 @@ MERCURIAL = "hg"
 VERSION_CONTROL_SYSTEMS = [GIT, MERCURIAL]
 
 
-_ID_CACHE = {}
-
-
+@functools.lru_cache(maxsize=None)
 def _get_id(cmd):
-    cmd = tuple(cmd)
-    if cmd not in _ID_CACHE:
-        p = subprocess.run(cmd, stdout=subprocess.PIPE)
-        try:
-            p.check_returncode()
-        except subprocess.CalledProcessError as err:
-            logging.critical(f"{err} Please check path and revision.")
-        else:
-            _ID_CACHE[cmd] = tools.get_string(p.stdout).strip()
-    return _ID_CACHE[cmd]
+    p = subprocess.run(cmd, stdout=subprocess.PIPE)
+    try:
+        p.check_returncode()
+    except subprocess.CalledProcessError as err:
+        logging.critical(f"{err} Please check path and revision.")
+    else:
+        return tools.get_string(p.stdout).strip()
 
 
 def hg_id(repo, args=None, rev=None):
@@ -49,7 +45,7 @@ def hg_id(repo, args=None, rev=None):
     if rev:
         args.extend(["-r", str(rev)])
     cmd = ["hg", "id", "--repository", repo] + args
-    return _get_id(cmd)
+    return _get_id(tuple(cmd))
 
 
 def git_id(repo, args=None, rev=None):
@@ -63,7 +59,7 @@ def git_id(repo, args=None, rev=None):
         "rev-parse",
         "--short",
     ] + args
-    return _get_id(cmd)
+    return _get_id(tuple(cmd))
 
 
 def _raise_unknown_vcs_error(vcs):
