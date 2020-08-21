@@ -1,14 +1,14 @@
 Lab and Downward Lab
 ====================
 
-**Lab** is a Python package for running code on a large set of
-benchmarks. Experiments can be conducted on a single machine or on a
-cluster. The package also contains code for parsing results and creating
-reports. Currently, Lab and Downward Lab are distributed together.
+**Lab** is a Python package for evaluating code on benchmark sets.
+Experiments can run on a single machine or on a computer cluster. The
+package also contains code for parsing results and creating reports.
 
 The **Downward Lab** Python package facilitates running experiments for
 the `Fast Downward <http://www.fast-downward.org>`_ planning system. It
-uses the generic experimentation package **Lab**.
+uses the generic experimentation package **Lab**. Currently, Lab and
+Downward Lab are distributed together.
 
 **Code**: https://github.com/aibasel/lab
 
