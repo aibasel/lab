@@ -621,7 +621,7 @@ class Experiment(_Buildable):
         assert not args.steps or not args.run_all_steps
         if not args.steps and not args.run_all_steps:
             ARGPARSER.print_help()
-            sys.exit(0)
+            return
         # Run all steps if --all is passed.
         steps = [get_step(self.steps, name) for name in args.steps] or self.steps
         # Use LocalEnvironment if the main experiment step is inactive.
