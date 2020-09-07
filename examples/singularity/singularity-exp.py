@@ -50,8 +50,9 @@ if RUNNING_ON_CLUSTER:
         email="my.name@unibas.ch",
         memory_per_cpu="3872M",
         export=["PATH"],
-        setup=BaselSlurmEnvironment.DEFAULT_SETUP
-        + "\nmodule load Singularity/2.6.1 2> /dev/null",
+        setup=BaselSlurmEnvironment.DEFAULT_SETUP,
+        # Until recently, we had to load the Singularity module here
+        # by adding "module load Singularity/2.6.1 2> /dev/null".
     )
     TIME_LIMIT = 1800
 else:
@@ -83,7 +84,7 @@ def get_image(name):
     return planner, image
 
 
-IMAGES = [get_image("lama-first")]
+IMAGES = [get_image("fd1906-lama-first")]
 
 for planner, image in IMAGES:
     exp.add_resource(planner, image, symlink=True)
