@@ -728,8 +728,8 @@ class Table(collections.defaultdict):
         else:
             min_value, max_value = None, None
 
-        def is_close(a, b, rel_tol=1e-09, abs_tol=0.0):
-            return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+        def is_close(a, b):
+            return math.isclose(a, b)
 
         for col_name, value in row.items():
             color = None
