@@ -6,6 +6,7 @@ v6.1 (unreleased)
 
 Lab
 ^^^
+* Take float precision into account when highlighting table cells (Jendrik Seipp).
 * Separate tests for Singularity and FF example experiments from other tests (Jendrik Seipp).
 * Skip ``cached_revision`` doctests if ``DOWNWARD_REVISION_CACHE`` variable is not set (Jendrik Seipp).
 * Add ``.github/CONTRIBUTING.md`` file (Jendrik Seipp).

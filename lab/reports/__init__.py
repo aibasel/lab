@@ -729,7 +729,8 @@ class Table(collections.defaultdict):
             min_value, max_value = None, None
 
         def is_close(a, b):
-            return math.isclose(a, b)
+            # Highlight based on precision visible in table, not actual values.
+            return math.isclose(a, b, abs_tol=10 ** -self.digits)
 
         for col_name, value in row.items():
             color = None
