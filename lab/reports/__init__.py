@@ -701,6 +701,18 @@ class Table(collections.defaultdict):
         for dynamic_data_module in self.dynamic_data_modules:
             dynamic_data_module.format(self, cells)
 
+    def _format_value(self, value):
+        if isinstance(value, float):
+            return f"{value:.{self.digits}f}"
+        else:
+            result = str(value)
+
+        # Only escape text if it doesn't contain LaTeX or HTML markup.
+        if "''" in result:
+            return result
+        else:
+            return markup.escape(result)
+
     def _format_row(self, row_name, row):
         """Format all entries in **row** (in place)."""
         if row_name == self.header_row:
@@ -730,7 +742,7 @@ class Table(collections.defaultdict):
 
         def is_close(a, b):
             # Highlight based on precision visible in table, not actual values.
-            return math.isclose(a, b, abs_tol=10 ** -self.digits)
+            return self._format_value(a) == self._format_value(b)
 
         for col_name, value in row.items():
             color = None
@@ -770,19 +782,7 @@ class Table(collections.defaultdict):
 
         justify_right = isinstance(value, (float, int))
 
-        def format_value(value):
-            if isinstance(value, float):
-                return f"{value:.{self.digits}f}"
-            else:
-                result = str(value)
-
-            # Only escape text if it doesn't contain LaTeX or HTML markup.
-            if "''" in result:
-                return result
-            else:
-                return markup.escape(result)
-
-        value_text = format_value(value)
+        value_text = self._format_value(value)
 
         if color is not None:
             value_text = f"{{{value_text}|color:{color}}}"
