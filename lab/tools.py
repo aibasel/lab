@@ -18,6 +18,7 @@ import colorsys
 import functools
 import logging
 import os
+from pathlib import Path
 import pkgutil
 import re
 import shutil
@@ -248,13 +249,26 @@ def add_unexplained_error(dictionary, error):
 
 
 class Properties(dict):
+    class _PropertiesEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, Path):
+                return str(o)
+            else:
+                return super().default(o)
+
     def __init__(self, filename=None):
         self.filename = filename
         self.load(filename)
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, indent=2, separators=(",", ": "), sort_keys=True)
+        return json.dumps(
+            self,
+            cls=self._PropertiesEncoder,
+            indent=2,
+            separators=(",", ": "),
+            sort_keys=True,
+        )
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
