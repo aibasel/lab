@@ -55,13 +55,14 @@ PATTERNS = [
 def check_single_search(content, props):
     if "Cumulative statistics:" in content:
         props.add_unexplained_error(
-            "single-search parser can't be used for iterated search"
+            "Single-search parser can't be used for iterated search."
         )
     for _, pattern, _ in PATTERNS:
         results = re.findall(pattern, content)
         if len(results) > 1:
             props.add_unexplained_error(
-                "single-search parser can't be used for anytime planner"
+                f"Found multiple occurences of {pattern} in logfile. "
+                f"Single-search parser can't be used for anytime planner."
             )
 
 
