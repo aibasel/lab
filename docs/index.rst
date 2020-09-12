@@ -6,6 +6,7 @@ Documentation for Lab
 
 .. toctree::
    :maxdepth: 1
+   :caption: Lab
 
    lab.tutorial
    lab.experiment
@@ -18,6 +19,7 @@ Documentation for Downward Lab
 
 .. toctree::
    :maxdepth: 1
+   :caption: Downward Lab
 
    downward.tutorial
    downward.experiment
@@ -29,6 +31,7 @@ General documentation
 
 .. toctree::
    :maxdepth: 1
+   :caption: General
 
    news
    faq
