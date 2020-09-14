@@ -49,7 +49,7 @@ def parse_translator_timestamps(content, props):
 def parse_statistics(content, props):
     """Parse all translator output of the following form:
 
-        Translator xxx: yyy
+    Translator xxx: yyy
     """
     pattern = re.compile(r"^Translator (.+): (.+?)(?: KB|)$")
     for line in content.splitlines():

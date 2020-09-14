@@ -42,8 +42,7 @@ def find_two_approximation(edges):
 def find_greedy_cover(edges):
     def find_vertex_greedily(remaining_edges):
         num_incident_edges = collections.defaultdict(int)
-        for edge in remaining_edges:
-            u, v, = edge
+        for u, v in remaining_edges:
             num_incident_edges[u] += 1
             num_incident_edges[v] += 1
         return max(num_incident_edges, key=lambda v: num_incident_edges[v])
