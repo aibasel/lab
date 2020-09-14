@@ -1,7 +1,7 @@
 News
 ====
 
-v6.1 (unreleased)
+v6.1 (2020-09-14)
 -----------------
 
 Lab
@@ -11,13 +11,13 @@ Lab
 * For developers: add ``.github/CONTRIBUTING.md`` file (Jendrik Seipp).
 * For developers: separate tests for Singularity and FF example experiments from other tests (Jendrik Seipp).
 * For developers: skip ``cached_revision`` doctests if ``DOWNWARD_REVISION_CACHE`` variable is not set (Jendrik Seipp).
-* For developers: use f-strings to format strings (Jendrik Seipp).
+* For developers: use f-strings in code (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
 * Print number of tasks above and below separator lines in scatter plots (Jendrik Seipp).
 * Ignore tasks for which runs have been filtered out in aggregate reports (Jendrik Seipp).
-* Sort bracketed task counts per domain in table reports (Jendrik Seipp).
+* Fix order of bracketed task counts per domain in table reports (Jendrik Seipp).
 * Gracefully handle empty scatter plots (Jendrik Seipp).
 * Make ``score_*`` attributes absolute, i.e., include tasks for which not all algorithms
   have a value in aggregations (Jendrik Seipp).
