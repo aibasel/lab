@@ -62,9 +62,10 @@ Run tutorial experiment
 -----------------------
 .. highlight:: python
 
-The script below is an example Fast Downward experiment. It is located at
-``${LAB}/examples/lmcut.py``. After adapting ``REPO`` and
-``BENCHMARKS_DIR`` to your setup, you can see the available steps with ::
+The script below is an example Fast Downward experiment. After adapting
+``REPO`` and ``BENCHMARKS_DIR`` to your setup, saving the file as
+``lmcut.py`` and making it executable, you can see the available steps
+with ::
 
     ./lmcut.py
 
@@ -83,6 +84,7 @@ Run individual steps with ::
 You can use this file as a basis for your own experiments.
 
 .. literalinclude:: ../examples/lmcut.py
+   :caption:
 
-Have a look at other Fast Downward experiments in the ``examples``
-directory and the `downward API <downward.experiment.html>`_.
+The `Downward Lab API <downward.experiment.html>`_ shows you how to adjust
+this example to your needs.

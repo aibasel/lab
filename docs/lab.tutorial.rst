@@ -12,10 +12,10 @@ Run tutorial experiment
 .. highlight:: python
 
 The following script shows a simple experiment that runs a naive vertex
-cover solver on a set of benchmarks. You can find the whole experiment
-under ``examples/vertex-cover/``.
+cover solver on a set of benchmarks.
 
 .. literalinclude:: ../examples/vertex-cover/exp.py
+   :caption:
 
 You can see the available steps with ::
 
@@ -31,6 +31,7 @@ Select steps by name or index::
 Here is the parser that the experiment uses:
 
 .. literalinclude:: ../examples/vertex-cover/parser.py
+   :caption:
 
-Have a look at other example experiments under ``examples/`` or go
-directly to the `Lab API <lab.experiment.html>`_.
+Find out how to create your own experiments by browsing the `Lab API
+<lab.experiment.html>`_.

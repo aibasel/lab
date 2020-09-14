@@ -16,33 +16,32 @@
 """
 Parse logs and output files.
 
-A parser can be any program that analyzes files in the run's
-directory (e.g. ``run.log``) and manipulates the ``properties``
-file in the same directory.
+A parser can be any program that analyzes files in the run's directory
+(e.g. ``run.log``) and manipulates the ``properties`` file in the same
+directory.
 
-To make parsing easier, however, you can use the ``Parser`` class. The
-parser ``examples/ff/ff-parser.py`` serves as an example:
+To make parsing easier, however, you can use the ``Parser`` class. Here is
+an example parser for the FF planner:
 
 .. literalinclude:: ../examples/ff/ff-parser.py
+   :caption:
 
-You can add this parser to alls runs by using
-:meth:`add_parser() <lab.experiment.Experiment.add_parser>`:
+You can add this parser to alls runs by using :meth:`add_parser()
+<lab.experiment.Experiment.add_parser>`:
 
->>> import os.path
->>> from lab import experiment
->>> exp = experiment.Experiment()
->>> # The path can be absolute or relative to the working directory
->>> # at build time.
->>> parser = os.path.abspath(
-...     os.path.join(__file__, '../../examples/ff/ff-parser.py'))
+>>> from pathlib import Path
+>>> from lab.experiment import Experiment
+>>> exp = Experiment()
+>>> # The path can be absolute or relative to the working directory at build time.
+>>> parser = Path(__file__).resolve().parents[1] / "examples/ff/ff-parser.py"
 >>> exp.add_parser(parser)
 
-All added parsers will be run in the order in which they were added
-after executing the run's commands.
+All added parsers will be run in the order in which they were added after
+executing the run's commands.
 
 If you need to change your parsers and execute them again, use the
-:meth:`~lab.experiment.Experiment.add_parse_again_step` method to
-re-parse your results.
+:meth:`~lab.experiment.Experiment.add_parse_again_step` method to re-parse
+your results.
 
 """
 
