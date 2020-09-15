@@ -12,8 +12,6 @@ function set_version {
 
 cd $(dirname "$0")/../
 
-source .venv/bin/activate
-
 # Check for uncommited changes.
 set +e
 git diff --quiet && git diff --cached --quiet
@@ -35,7 +33,7 @@ tox
 set_version "$VERSION"
 git commit -am "Update version number to ${VERSION} for release."
 
-sudo python3 -m pip install -U twine wheel
+# Requirements: python3 -m pip install --user --update twine wheel
 python3 setup.py sdist bdist_wheel --universal
 python3 -m twine upload dist/lab-${VERSION}.tar.gz dist/lab-${VERSION}-py2.py3-none-any.whl
 
