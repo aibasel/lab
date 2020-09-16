@@ -130,7 +130,7 @@ def _generate_problems(benchmarks_dir, description):
         problem_file = os.path.join(benchmarks_dir, domain_name, problem_name)
         domain_file = None
         if description.endswith(".pddl"):
-            find_domain_file(benchmarks_dir, domain_name, problem_name)
+            domain_file = find_domain_file(benchmarks_dir, domain_name, problem_name)
         yield Problem(
             domain_name,
             problem_name,
