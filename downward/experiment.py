@@ -204,7 +204,7 @@ class FastDownwardExperiment(Experiment):
 
         You can copy the generated list into your experiment script::
 
-            >>> benchmarks_dir = REPO = os.environ["DOWNWARD_BENCHMARKS"]
+            >>> benchmarks_dir = os.environ["DOWNWARD_BENCHMARKS"]
             >>> exp = FastDownwardExperiment()
             >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
 
