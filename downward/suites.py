@@ -35,9 +35,11 @@ def find_domain_file(benchmarks_dir, domain, problem):
     return tools.find_file(domain_basenames, domain_dir)
 
 
-def get_pddl_task(benchmarks_dir, domain_name, problem_name):
+def get_problem(benchmarks_dir, domain_name, problem_name):
     problem_file = os.path.join(benchmarks_dir, domain_name, problem_name)
-    domain_file = find_domain_file(benchmarks_dir, domain_name, problem_name)
+    domain_file = None
+    if problem_file.endswith(".pddl"):
+        domain_file = find_domain_file(benchmarks_dir, domain_name, problem_name)
     return Problem(
         domain_name, problem_name, problem_file=problem_file, domain_file=domain_file
     )
@@ -55,7 +57,7 @@ class Domain:
             ]
         )
         self.problems = [
-            get_pddl_task(benchmarks_dir, domain, problem) for problem in problem_files
+            get_problem(benchmarks_dir, domain, problem) for problem in problem_files
         ]
 
     def __str__(self):
@@ -127,15 +129,10 @@ def _generate_problems(benchmarks_dir, description):
         yield from description
     elif ":" in description:
         domain_name, problem_name = description.split(":", 1)
-        problem_file = os.path.join(benchmarks_dir, domain_name, problem_name)
-        domain_file = None
-        if description.endswith(".pddl"):
-            domain_file = find_domain_file(benchmarks_dir, domain_name, problem_name)
-        yield Problem(
+        yield get_problem(
+            benchmarks_dir,
             domain_name,
             problem_name,
-            problem_file=problem_file,
-            domain_file=domain_file,
         )
     else:
         yield from Domain(benchmarks_dir, description)
