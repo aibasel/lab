@@ -129,11 +129,7 @@ def _generate_problems(benchmarks_dir, description):
         yield from description
     elif ":" in description:
         domain_name, problem_name = description.split(":", 1)
-        yield get_problem(
-            benchmarks_dir,
-            domain_name,
-            problem_name,
-        )
+        yield get_problem(benchmarks_dir, domain_name, problem_name)
     else:
         yield from Domain(benchmarks_dir, description)
 
