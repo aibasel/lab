@@ -179,49 +179,16 @@ class FastDownwardExperiment(Experiment):
             get_default_data_dir(), "revision-cache"
         )
 
-        self._tasks = []
         self._suites = defaultdict(list)
 
         # Use OrderedDict to ensure that names are unique and ordered.
         self._algorithms = OrderedDict()
 
     def _get_tasks(self):
-        tasks = self._tasks[:]
+        tasks = []
         for benchmarks_dir, suite in self._suites.items():
             tasks.extend(suites.build_suite(benchmarks_dir, suite))
         return tasks
-
-    def add_task(
-        self, domain, problem, problem_file, domain_file=None, properties=None
-    ):
-        """
-        Add a PDDL or SAS planning task to the experiment. ::
-
-            # PDDL task:
-            exp.add_task(
-                domain="gripper",
-                problem="prob01",
-                problem_file="/path/to/gripper/prob01.pddl",
-                domain_file="/path/to/gripper/domain.pddl")
-
-            # SAS task:
-            exp.add_task(
-                domain="gripper",
-                problem="prob01",
-                problem_file="/path/to/gripper/prob01.sas")
-
-        See :meth:`.add_suite` for where to find PDDL benchmarks.
-
-        """
-        self._tasks.append(
-            suites.Problem(
-                domain,
-                problem,
-                problem_file,
-                domain_file=domain_file,
-                properties=properties,
-            )
-        )
 
     def add_suite(self, benchmarks_dir, suite):
         """Add PDDL or SAS+ benchmarks to the experiment.

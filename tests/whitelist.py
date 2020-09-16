@@ -1,4 +1,3 @@
-from downward.experiment import FastDownwardExperiment
 import lab
 from lab import reports
 from lab.calls.call import Call
@@ -11,5 +10,3 @@ lab.tools.deprecated
 lab.tools.get_lab_path
 
 Call
-
-FastDownwardExperiment.add_task
