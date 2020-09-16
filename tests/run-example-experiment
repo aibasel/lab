@@ -1,0 +1,32 @@
+#! /bin/bash
+
+set -euo pipefail
+
+check () {
+    expname="$1"
+    "./${expname}.py" --all
+    properties="data/$expname-eval/properties"
+    if [[ ! -f "$properties" ]]; then
+        echo "File not found: $properties"
+        exit 1
+    fi
+    set +e
+    grep "\"unexplained_errors\": \[$" "$properties"
+    exitcode="$?"
+    set -e
+    if [[ "$exitcode" == 0 ]]; then
+        echo "Unexplained error detected in $properties"
+        exit 1
+    fi
+}
+
+SCRIPT="$1"
+DIR=$(dirname "$SCRIPT")
+FILENAME=$(basename "$SCRIPT")
+FILENAME="${FILENAME%.*}"
+
+cd $(dirname "$0")/../examples
+
+rm -rf "$DIR/data"
+pushd "$DIR"
+check "$FILENAME"

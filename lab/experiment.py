@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -24,10 +22,9 @@ import os
 import subprocess
 import sys
 
-from lab import environments
-from lab import tools
+from lab import environments, tools
 from lab.fetcher import Fetcher
-from lab.steps import Step, get_step, get_steps_text
+from lab.steps import get_step, get_steps_text, Step
 
 
 # How many tasks to group into one top-level directory.
@@ -38,14 +35,18 @@ ARGPARSER = tools.get_argument_parser()
 ARGPARSER.epilog = "The list of available steps will be added later."
 steps_group = ARGPARSER.add_mutually_exclusive_group()
 steps_group.add_argument(
-    'steps', metavar='step', nargs='*', default=[],
-    help='Name or number of a step below. If none is given, print help.')
+    "steps",
+    metavar="step",
+    nargs="*",
+    default=[],
+    help="Name or number of a step below. If none is given, print help.",
+)
 steps_group.add_argument(
-    '--all', dest='run_all_steps', action='store_true',
-    help='Run all steps.')
+    "--all", dest="run_all_steps", action="store_true", help="Run all steps."
+)
 
-STATIC_EXPERIMENT_PROPERTIES_FILENAME = 'static-experiment-properties'
-STATIC_RUN_PROPERTIES_FILENAME = 'static-properties'
+STATIC_EXPERIMENT_PROPERTIES_FILENAME = "static-experiment-properties"
+STATIC_RUN_PROPERTIES_FILENAME = "static-properties"
 
 
 def get_default_data_dir():
@@ -64,34 +65,33 @@ def _get_default_experiment_name():
 
 def _get_default_experiment_dir():
     """E.g. "ham/spam/eggs.py" => "ham/spam/data/eggs"."""
-    return os.path.join(
-        get_default_data_dir(), _get_default_experiment_name())
+    return os.path.join(get_default_data_dir(), _get_default_experiment_name())
 
 
 def get_run_dir(task_id):
-    lower = ((task_id - 1) / SHARD_SIZE) * SHARD_SIZE + 1
-    upper = ((task_id + SHARD_SIZE - 1) / SHARD_SIZE) * SHARD_SIZE
-    return "runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}".format(**locals())
+    lower = ((task_id - 1) // SHARD_SIZE) * SHARD_SIZE + 1
+    upper = ((task_id + SHARD_SIZE - 1) // SHARD_SIZE) * SHARD_SIZE
+    return f"runs-{lower:0>5}-{upper:0>5}/{task_id:0>5}"
 
 
-def _check_name(name, typ, extra_chars=''):
-    if not isinstance(name, basestring):
-        logging.critical('Name for {typ} must be a string: {name}'.format(**locals()))
+def _check_name(name, typ, extra_chars=""):
+    if not isinstance(name, str):
+        logging.critical(f"Name for {typ} must be a string: {name}")
     if not name:
-        logging.critical('Name for {typ} must not be empty'.format(**locals()))
+        logging.critical(f"Name for {typ} must not be empty")
     alpha_num_name = name
     for c in extra_chars:
-        alpha_num_name = alpha_num_name.replace(c, '')
+        alpha_num_name = alpha_num_name.replace(c, "")
     if not name[0].isalpha():
-        logging.critical(
-            'Name for {typ} must start with a letter.'.format(**locals()))
+        logging.critical(f"Name for {typ} must start with a letter.")
     if not alpha_num_name.isalnum():
         logging.critical(
-            'Name for {typ} may only use characters from'
-            ' [A-Z], [a-z], [0-9], [{extra_chars}]: {name}'.format(**locals()))
+            f"Name for {typ} may only use characters from"
+            f" [A-Z], [a-z], [0-9], [{extra_chars}]: {name}"
+        )
 
 
-class _Resource(object):
+class _Resource:
     def __init__(self, name, source, dest, symlink, is_parser):
         self.name = name
         self.source = source
@@ -100,8 +100,9 @@ class _Resource(object):
         self.is_parser = is_parser
 
 
-class _Buildable(object):
+class _Buildable:
     """Abstract base class for Experiment and Run."""
+
     def __init__(self):
         self.resources = []
         self.new_files = []
@@ -131,12 +132,11 @@ class _Buildable(object):
         self.properties[name] = value
 
     def _check_alias(self, name):
-        _check_name(name, 'parser or resource', extra_chars='_')
+        _check_name(name, "parser or resource", extra_chars="_")
         if name in self.env_vars_relative:
-            logging.critical(
-                'Parser and resource names must be unique: {!r}'.format(name))
+            logging.critical(f"Parser and resource names must be unique: {name!r}")
 
-    def add_resource(self, name, source, dest='', symlink=False):
+    def add_resource(self, name, source, dest="", symlink=False):
         """Include the file or directory *source* in the experiment or run.
 
         *name* is an alias for the resource in commands. It must start with a
@@ -162,15 +162,14 @@ class _Buildable(object):
         >>> run.add_command('plan', ['{planner}', '{domain}', '{task}'])
 
         """
-        if dest == '':
+        if dest == "":
             dest = os.path.basename(source)
         if dest is None:
             dest = os.path.abspath(source)
         if name:
             self._check_alias(name)
             self.env_vars_relative[name] = dest
-        self.resources.append(
-            _Resource(name, source, dest, symlink, is_parser=False))
+        self.resources.append(_Resource(name, source, dest, symlink, is_parser=False))
 
     def add_new_file(self, name, dest, content, permissions=0o644):
         """
@@ -191,10 +190,18 @@ class _Buildable(object):
             self.env_vars_relative[name] = dest
         self.new_files.append((dest, content, permissions))
 
-    def add_command(self, name, command, time_limit=None, memory_limit=None,
-                    soft_stdout_limit=1024, hard_stdout_limit=10 * 1024,
-                    soft_stderr_limit=64, hard_stderr_limit=10 * 1024,
-                    **kwargs):
+    def add_command(
+        self,
+        name,
+        command,
+        time_limit=None,
+        memory_limit=None,
+        soft_stdout_limit=1024,
+        hard_stdout_limit=10 * 1024,
+        soft_stderr_limit=64,
+        hard_stderr_limit=10 * 1024,
+        **kwargs,
+    ):
         """Call an executable.
 
         If invoked on a *run*, this method adds the command to the
@@ -235,38 +242,43 @@ class _Buildable(object):
         >>> exp = Experiment()
         >>> run = exp.add_run()
         >>> # Add commands to a *specific* run.
-        >>> run.add_command('list-directory', ['ls', '-al'])
-        >>> run.add_command(
-        ...     'solver', ['mysolver', 'input-file'], time_limit=60)
+        >>> run.add_command('solver', ['mysolver', 'input-file'], time_limit=60)
         >>> # Add a command to *all* runs.
         >>> exp.add_command('cleanup', ['rm', 'my-temp-file'])
 
+        Make sure to call all Python programs from the currently active
+        Python interpreter, i.e., ``sys.executable``. Otherwise, the
+        system Python version might be used instead of the Python version
+        from the virtual environment.
+
+        >>> run.add_command('myplanner', [sys.executable, 'planner.py', 'input-file'])
+
         """
-        _check_name(name, "command", extra_chars='_-')
+        _check_name(name, "command", extra_chars="_-")
         if name in self.commands:
-            logging.critical('Command names must be unique: {}'.format(name))
+            logging.critical(f"Command names must be unique: {name}")
 
         if not isinstance(command, list):
-            logging.critical(
-                'The command for {name} is not a list: {command}'.format(**locals()))
+            logging.critical(f"The command for {name} is not a list: {command}")
         if not command:
-            logging.critical('Command "{}" must not be empty'.format(name))
+            logging.critical(f'Command "{name}" must not be empty')
 
-        if 'stdin' in kwargs:
-            logging.critical('redirecting stdin is not supported')
-        kwargs['time_limit'] = time_limit
-        kwargs['memory_limit'] = memory_limit
-        kwargs['soft_stdout_limit'] = soft_stdout_limit
-        kwargs['hard_stdout_limit'] = hard_stdout_limit
-        kwargs['soft_stderr_limit'] = soft_stderr_limit
-        kwargs['hard_stderr_limit'] = hard_stderr_limit
+        if "stdin" in kwargs:
+            logging.critical("redirecting stdin is not supported")
+        kwargs["time_limit"] = time_limit
+        kwargs["memory_limit"] = memory_limit
+        kwargs["soft_stdout_limit"] = soft_stdout_limit
+        kwargs["hard_stdout_limit"] = hard_stdout_limit
+        kwargs["soft_stderr_limit"] = soft_stderr_limit
+        kwargs["hard_stderr_limit"] = hard_stderr_limit
         self.commands[name] = (command, kwargs)
 
     @property
     def _env_vars(self):
-        return dict(
-            (name, self._get_abs_path(dest))
-            for name, dest in self.env_vars_relative.items())
+        return {
+            name: self._get_abs_path(dest)
+            for name, dest in self.env_vars_relative.items()
+        }
 
     def _get_abs_path(self, rel_path):
         """Return absolute path by applying rel_path to the base dir."""
@@ -284,7 +296,7 @@ class _Buildable(object):
         for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
             tools.makedirs(os.path.dirname(filename))
-            logging.debug('Writing file "%s"' % filename)
+            logging.debug(f'Writing file "{filename}"')
             tools.write_file(filename, content)
             os.chmod(filename, permissions)
 
@@ -293,7 +305,7 @@ class _Buildable(object):
             if only_parsers and not resource.is_parser:
                 continue
             if not os.path.exists(resource.source):
-                logging.critical('Resource not found: {}'.format(resource.source))
+                logging.critical(f"Resource not found: {resource.source}")
             dest = self._get_abs_path(resource.dest)
             if not dest.startswith(self.path):
                 # Only copy resources that reside in the experiment/run dir.
@@ -304,12 +316,12 @@ class _Buildable(object):
                     continue
                 source = self._get_rel_path(resource.source)
                 os.symlink(source, dest)
-                logging.debug('Linking from %s to %s' % (source, dest))
+                logging.debug(f"Linking from {source} to {dest}")
                 continue
 
             # Even if the directory containing a resource has already been added,
             # we copy the resource since we might want to overwrite it.
-            logging.debug('Copying %s to %s' % (resource.source, dest))
+            logging.debug(f"Copying {resource.source} to {dest}")
             tools.copy(resource.source, dest)
 
 
@@ -364,20 +376,20 @@ class Experiment(_Buildable):
         :ref:`Environment <environments>`.
 
         """
-        tools.configure_logging(ARGPARSER.parse_args().log_level)
+        tools.configure_logging()
 
         _Buildable.__init__(self)
         path = path or _get_default_experiment_dir()
         self.path = os.path.abspath(path)
-        if any(char in self.path for char in (':', ',')):
-            logging.critical('Path contains commas or colons: %s' % self.path)
+        if any(char in self.path for char in (":", ",")):
+            logging.critical(f"Path contains commas or colons: {self.path}")
         self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
 
         self.steps = []
         self.runs = []
 
-        self.set_property('experiment_file', self._script)
+        self.set_property("experiment_file", self._script)
 
     @property
     def name(self):
@@ -392,7 +404,7 @@ class Experiment(_Buildable):
         default.
 
         """
-        return self.path + '-eval'
+        return self.path + "-eval"
 
     @property
     def _script(self):
@@ -427,12 +439,12 @@ class Experiment(_Buildable):
         >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
 
         """
-        if not isinstance(name, basestring):
-            logging.critical('Step name must be a string: {}'.format(name))
+        if not isinstance(name, str):
+            logging.critical(f"Step name must be a string: {name}")
         if not name:
-            logging.critical('Step name must not be empty')
+            logging.critical("Step name must not be empty")
         if any(step.name == name for step in self.steps):
-            raise ValueError("Step names must be unique: {}".format(name))
+            raise ValueError(f"Step names must be unique: {name}")
         self.steps.append(Step(name, function, *args, **kwargs))
 
     def add_parser(self, path_to_parser):
@@ -446,10 +458,10 @@ class Experiment(_Buildable):
         execute them again you can use the :meth:`.add_parse_again_step`
         method.
 
-        *path_to_parser* must be the path to an executable file. The
-        parser is executed in the run directory and manipulates the
-        run's "properties" file. The last part of the filename (without
-        the extension) is used as a resource name. Therefore, it must be
+        *path_to_parser* must be the path to a Python script. The script
+        is executed in the run directory and manipulates the run's
+        "properties" file. The last part of the filename (without the
+        extension) is used as a resource name. Therefore, it must be
         unique among all parsers and other resources. Also, it must
         start with a letter and contain only letters, numbers,
         underscores and dashes (which are converted to underscores
@@ -459,18 +471,17 @@ class Experiment(_Buildable):
 
         """
         name, _ = os.path.splitext(os.path.basename(path_to_parser))
-        name = name.replace('-', '_')
+        name = name.replace("-", "_")
         self._check_alias(name)
         if not os.path.isfile(path_to_parser):
-            logging.critical('Parser %s could not be found.' % path_to_parser)
-        if not os.access(path_to_parser, os.X_OK):
-            logging.critical('Parser %s is not executable.' % path_to_parser)
+            logging.critical(f"Parser {path_to_parser} could not be found.")
 
         dest = os.path.basename(path_to_parser)
         self.env_vars_relative[name] = dest
-        self.resources.append(_Resource(
-            name, path_to_parser, dest, symlink=False, is_parser=True))
-        self.add_command(name, ["{{{}}}".format(name)])
+        self.resources.append(
+            _Resource(name, path_to_parser, dest, symlink=False, is_parser=True)
+        )
+        self.add_command(name, [tools.get_python_executable(), f"{{{name}}}"])
 
     def add_parse_again_step(self):
         """
@@ -481,39 +492,41 @@ class Experiment(_Buildable):
         Do not forget to run the default fetch step again to overwrite
         existing data in the -eval dir of the experiment.
         """
+
         def run_parsers():
             if not os.path.isdir(self.path):
-                logging.critical('{} is missing or not a directory'.format(self.path))
+                logging.critical(f"{self.path} is missing or not a directory")
 
             # Copy all parsers from their source to their destination again.
             self._build_resources(only_parsers=True)
 
-            run_dirs = sorted(glob(os.path.join(self.path, 'runs-*-*', '*')))
+            run_dirs = sorted(glob(os.path.join(self.path, "runs-*-*", "*")))
 
             total_dirs = len(run_dirs)
-            logging.info(
-                'Parsing properties in {:d} run directories'.format(total_dirs))
+            logging.info(f"Parsing properties in {total_dirs:d} run directories")
             for index, run_dir in enumerate(run_dirs, start=1):
-                if os.path.exists(os.path.join(run_dir, 'properties')):
-                    # print "removing path {}".format(os.path.join(run_dir, 'properties'))
-                    tools.remove_path(os.path.join(run_dir, 'properties'))
+                if os.path.exists(os.path.join(run_dir, "properties")):
+                    tools.remove_path(os.path.join(run_dir, "properties"))
                 loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(loglevel, 'Parsing run: {:6d}/{:d}'.format(index, total_dirs))
+                logging.log(loglevel, f"Parsing run: {index:6d}/{total_dirs:d}")
                 for resource in self.resources:
                     if resource.is_parser:
                         parser_filename = self.env_vars_relative[resource.name]
-                        rel_parser = os.path.join('../../', parser_filename)
-                        with open(os.devnull, 'w') as devnull:
-                            # Since parsers often produce output which we would
-                            # rather not want to see for each individual run, we
-                            # suppress it here.
-                            subprocess.check_call(
-                                [rel_parser], cwd=run_dir, stdout=devnull)
+                        rel_parser = os.path.join("../../", parser_filename)
+                        # Since parsers often produce output which we would
+                        # rather not want to see for each individual run, we
+                        # suppress it here.
+                        subprocess.check_call(
+                            [tools.get_python_executable(), rel_parser],
+                            cwd=run_dir,
+                            stdout=subprocess.DEVNULL,
+                        )
 
-        self.add_step('parse-again', run_parsers)
+        self.add_step("parse-again", run_parsers)
 
-    def add_fetcher(self, src=None, dest=None, merge=None, name=None,
-                    filter=None, **kwargs):
+    def add_fetcher(
+        self, src=None, dest=None, merge=None, name=None, filter=None, **kwargs
+    ):
         """
         Add a step that fetches results from experiment or evaluation
         directories into a new or existing evaluation directory.
@@ -560,12 +573,10 @@ class Experiment(_Buildable):
         """
         src = src or self.path
         dest = dest or self.eval_dir
-        name = name or 'fetch-%s' % os.path.basename(src.rstrip('/'))
-        self.add_step(
-            name, Fetcher(), src, dest, merge=merge, filter=filter,
-            **kwargs)
+        name = name or f"fetch-{os.path.basename(src.rstrip('/'))}"
+        self.add_step(name, Fetcher(), src, dest, merge=merge, filter=filter, **kwargs)
 
-    def add_report(self, report, name='', eval_dir='', outfile=''):
+    def add_report(self, report, name="", eval_dir="", outfile=""):
         """Add *report* to the list of experiment steps.
 
         This method is a shortcut for ``add_step(name, report,
@@ -587,7 +598,7 @@ class Experiment(_Buildable):
         """
         name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
         eval_dir = eval_dir or self.eval_dir
-        outfile = outfile or '%s.%s' % (name, report.output_format)
+        outfile = outfile or f"{name}.{report.output_format}"
         if not os.path.isabs(outfile):
             outfile = os.path.join(eval_dir, outfile)
         self.add_step(name, report, eval_dir, outfile)
@@ -610,7 +621,7 @@ class Experiment(_Buildable):
         assert not args.steps or not args.run_all_steps
         if not args.steps and not args.run_all_steps:
             ARGPARSER.print_help()
-            sys.exit(0)
+            return
         # Run all steps if --all is passed.
         steps = [get_step(self.steps, name) for name in args.steps] or self.steps
         # Use LocalEnvironment if the main experiment step is inactive.
@@ -639,7 +650,7 @@ class Experiment(_Buildable):
         if not write_to_disk:
             return
 
-        logging.info('Experiment path: "%s"' % self.path)
+        logging.info(f'Experiment path: "{self.path}"')
         self._remove_experiment_dir()
         tools.makedirs(self.path)
         self.environment.write_main_script()
@@ -663,17 +674,17 @@ class Experiment(_Buildable):
         Uses the relative directory information and writes all runs to disc.
         """
         if not self.runs:
-            logging.critical('No runs have been added to the experiment.')
+            logging.critical("No runs have been added to the experiment.")
         num_runs = len(self.runs)
-        self.set_property('runs', num_runs)
-        logging.info('Building %d runs' % num_runs)
+        self.set_property("runs", num_runs)
+        logging.info(f"Building {num_runs} runs")
         for index, run in enumerate(self.runs, 1):
             if index % 100 == 0:
-                logging.info('Build run %6d/%d' % (index, num_runs))
+                logging.info(f"Build run {index:6}/{num_runs}")
             for name, (command, kwargs) in self.commands.items():
                 run.add_command(name, command, **kwargs)
             run.build(index)
-        logging.info('Finished building runs')
+        logging.info("Finished building runs")
 
 
 class Run(_Buildable):
@@ -683,6 +694,7 @@ class Run(_Buildable):
 
     A run consists of one or more commands.
     """
+
     def __init__(self, experiment):
         """
         *experiment* must be an :class:`~lab.experiment.Experiment` instance.
@@ -698,7 +710,7 @@ class Run(_Buildable):
 
         """
         rel_run_dir = get_run_dir(run_id)
-        self.set_property('run_dir', rel_run_dir)
+        self.set_property("run_dir", rel_run_dir)
         self.path = os.path.join(self.experiment.path, rel_run_dir)
         os.makedirs(self.path)
 
@@ -712,53 +724,57 @@ class Run(_Buildable):
 
     def _build_run_script(self):
         if not self.commands:
-            logging.critical('Please add at least one command')
+            logging.critical("Please add at least one command")
 
         exp_vars = self.experiment._env_vars
         run_vars = self._env_vars
         doubly_used_vars = set(exp_vars) & set(run_vars)
         if doubly_used_vars:
             logging.critical(
-                'Resource names cannot be shared between experiments '
-                'and runs, they must be unique: {}'.format(doubly_used_vars))
+                f"Resource names cannot be shared between experiments "
+                f"and runs, they must be unique: {doubly_used_vars}"
+            )
         env_vars = exp_vars
         env_vars.update(run_vars)
         env_vars = self._prepare_env_vars(env_vars)
 
         def make_call(name, cmd, kwargs):
-            kwargs['name'] = name
+            kwargs["name"] = name
 
             # Support running globally installed binaries.
             def format_arg(arg):
-                if isinstance(arg, basestring):
+                if isinstance(arg, str):
                     try:
                         return repr(arg.format(**env_vars))
                     except KeyError as err:
-                        logging.critical('Resource {} is undefined.'.format(err))
+                        logging.critical(f"Resource {err} is undefined.")
                 else:
                     return repr(str(arg))
 
             def format_key_value_pair(key, val):
-                if isinstance(val, basestring):
+                if isinstance(val, str):
                     formatted_value = format_arg(val)
                 else:
                     formatted_value = repr(val)
-                return '{}={}'.format(key, formatted_value)
+                return f"{key}={formatted_value}"
 
-            cmd_string = '[{}]'.format(', '.join([format_arg(arg) for arg in cmd]))
-            kwargs_string = ', '.join(format_key_value_pair(key, value)
-                                      for key, value in sorted(kwargs.items()))
+            cmd_string = f"[{', '.join([format_arg(arg) for arg in cmd])}]"
+            kwargs_string = ", ".join(
+                format_key_value_pair(key, value)
+                for key, value in sorted(kwargs.items())
+            )
             parts = [cmd_string]
             if kwargs_string:
                 parts.append(kwargs_string)
-            return ('Call({}, **redirects).wait()\n'.format(', '.join(parts)))
+            return f"Call({', '.join(parts)}, **redirects).wait()\n"
 
-        calls_text = '\n'.join(
+        calls_text = "\n".join(
             make_call(name, cmd, kwargs)
-            for name, (cmd, kwargs) in self.commands.items())
-        run_script = tools.fill_template('run.py', calls=calls_text)
+            for name, (cmd, kwargs) in self.commands.items()
+        )
+        run_script = tools.fill_template("run.py", calls=calls_text)
 
-        self.add_new_file('', 'run', run_script, permissions=0o755)
+        self.add_new_file("", "run", run_script, permissions=0o755)
 
     def _prepare_env_vars(self, env_vars):
         """Use relative filenames for paths in the experiment dir."""
@@ -772,11 +788,11 @@ class Run(_Buildable):
         return new_env_vars
 
     def _check_id(self):
-        run_id = self.properties.get('id')
+        run_id = self.properties.get("id")
         if run_id is None:
-            logging.critical('Each run must have an id')
+            logging.critical("Each run must have an id")
         if not isinstance(run_id, (list, tuple)):
-            logging.critical('id must be a list: {}'.format(run_id))
+            logging.critical(f"id must be a list: {run_id}")
         for id_part in run_id:
-            if not isinstance(id_part, basestring):
-                logging.critical('run IDs must be a list of strings: {}'.format(run_id))
+            if not isinstance(id_part, str):
+                logging.critical(f"run IDs must be a list of strings: {run_id}")

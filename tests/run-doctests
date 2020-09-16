@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -exuo pipefail
+
+# We need some environment variables for the doctests.
+: "${DOWNWARD_BENCHMARKS?Please set DOWNWARD_BENCHMARKS variable}"
+: "${DOWNWARD_REPO?Please set DOWNWARD_REPO variable}"
+
+# Change into top directory.
+cd $(dirname "$0")/../
+
+pushd lab
+python -m doctest reports/__init__.py reports/filter.py cached_revision.py experiment.py parser.py tools.py
+popd
+
+pushd downward
+python -m doctest experiment.py reports/__init__.py reports/absolute.py \
+    reports/compare.py reports/scatter.py reports/taskwise.py
+popd
+
+pushd examples
+python -m doctest examples/showcase-options.py
+popd

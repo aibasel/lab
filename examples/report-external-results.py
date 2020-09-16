@@ -17,13 +17,9 @@ the attribute names and values that you want to make reports for, e.g.
 import json
 import os.path
 
-from lab.experiment import Experiment
-from lab import tools
-
 from downward.reports.absolute import AbsoluteReport
-
-
-EXP_DIR = "data/custom"
+from lab import tools
+from lab.experiment import Experiment
 
 
 PROPERTIES = {
@@ -46,13 +42,12 @@ PROPERTIES = {
 
 def write_properties(eval_dir):
     tools.makedirs(eval_dir)
-    with open(os.path.join(eval_dir, 'properties'), 'w') as f:
+    with open(os.path.join(eval_dir, "properties"), "w") as f:
         json.dump(PROPERTIES, f)
 
 
-# Create new experiment. The file <EXP_DIR>-eval/properties must exist.
-exp = Experiment(EXP_DIR)
-exp.add_report(AbsoluteReport(attributes=['coverage', 'expansions']))
+exp = Experiment()
+exp.add_report(AbsoluteReport(attributes=["coverage", "expansions"]))
 
 write_properties(exp.eval_dir)
 exp.run_steps()

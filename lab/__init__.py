@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,4 +14,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #: Lab version number. A "+" is appended to all non-tagged revisions.
-__version__ = '3.0+'
+__version__ = "6.1+"

@@ -1,0 +1,4 @@
+/* Make page wider (https://stackoverflow.com/a/57840173/1277298). Default: 800px */
+.wy-nav-content {
+    max-width: 900px !important;
+}

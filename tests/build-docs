@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+cd $(dirname "$0")/../docs
+make -B html
+echo "Docs: file://$(pwd)/_build/html/index.html"

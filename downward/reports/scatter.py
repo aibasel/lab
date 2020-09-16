@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -17,116 +15,51 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
+import itertools
 import logging
 import math
 import os
 
+from downward.reports import PlanningReport
+from downward.reports.scatter_matplotlib import ScatterMatplotlib
+from downward.reports.scatter_pgfplots import ScatterPgfplots
 from lab import tools
 
-from downward.reports.plot import MatplotlibPlot, Matplotlib, PgfPlots, \
-    PlotReport, MIN_AXIS
 
-
-class ScatterMatplotlib(Matplotlib):
-    @classmethod
-    def _plot(cls, report, axes, categories, styles):
-        # Display grid
-        axes.grid(b=True, linestyle='-', color='0.75')
-
-        has_points = False
-        # Generate the scatter plots
-        for category, coords in sorted(categories.items()):
-            X, Y = zip(*coords)
-            axes.scatter(X, Y, s=42, label=category, **styles[category])
-            if X and Y:
-                has_points = True
-
-        if report.xscale == 'linear' or report.yscale == 'linear':
-            plot_size = report.missing_val * 1.01
-        else:
-            plot_size = report.missing_val * 1.5
-
-        # Plot a diagonal black line. Starting at (0,0) often raises errors.
-        axes.plot([0.001, plot_size], [0.001, plot_size], 'k')
-
-        axes.set_xlim(report.xlim_left or -1, report.xlim_right or plot_size)
-        axes.set_ylim(report.ylim_bottom or -1, report.ylim_top or plot_size)
-
-        for axis in [axes.xaxis, axes.yaxis]:
-            MatplotlibPlot.change_axis_formatter(
-                axis, report.missing_val if report.show_missing else None)
-        return has_points
-
-
-class ScatterPgfPlots(PgfPlots):
-    @classmethod
-    def _format_coord(cls, coord):
-        def format_value(v):
-            return str(v) if isinstance(v, int) else '%f' % v
-        return '(%s, %s)' % (format_value(coord[0]), format_value(coord[1]))
-
-    @classmethod
-    def _get_plot(cls, report):
-        lines = []
-        options = cls._get_axis_options(report)
-        lines.append('\\begin{axis}[%s]' % cls._format_options(options))
-        for category, coords in sorted(report.categories.items()):
-            plot = {'only marks': True}
-            lines.append(
-                '\\addplot+[%s] coordinates {\n%s\n};' % (
-                    cls._format_options(plot),
-                    ' '.join(cls._format_coord(c) for c in coords)))
-            if category:
-                lines.append('\\addlegendentry{%s}' % category)
-            elif report.has_multiple_categories:
-                # None is treated as the default category if using multiple
-                # categories. Add a corresponding entry to the legend.
-                lines.append('\\addlegendentry{default}')
-        # Add black line.
-        start = min(report.min_x, report.min_y)
-        if report.xlim_left is not None:
-            start = min(start, report.xlim_left)
-        if report.ylim_bottom is not None:
-            start = min(start, report.ylim_bottom)
-        end = max(report.max_x, report.max_y)
-        if report.xlim_right:
-            end = max(end, report.xlim_right)
-        if report.ylim_top:
-            end = max(end, report.ylim_top)
-        if report.show_missing:
-            end = max(end, report.missing_val)
-        lines.append(
-            '\\addplot[color=black] coordinates {(%f, %f) (%d, %d)};' %
-            (start, start, end, end))
-        lines.append('\\end{axis}')
-        return lines
-
-    @classmethod
-    def _get_axis_options(cls, report):
-        opts = PgfPlots._get_axis_options(report)
-        # Add line for missing values.
-        for axis in ['x', 'y']:
-            opts['extra %s ticks' % axis] = report.missing_val
-            opts['extra %s tick style' % axis] = 'grid=major'
-        return opts
-
-
-class ScatterPlotReport(PlotReport):
+class ScatterPlotReport(PlanningReport):
     """
-    Generate a scatter plot for a specific attribute.
+    Generate a scatter plot for an attribute.
     """
-    def __init__(self, show_missing=True, get_category=None, **kwargs):
+
+    def __init__(
+        self,
+        relative=False,
+        show_missing=True,
+        get_category=None,
+        title=None,
+        scale=None,
+        xlabel="",
+        ylabel="",
+        matplotlib_options=None,
+        **kwargs,
+    ):
         """
-        See :class:`.PlotReport` for inherited arguments.
+        If *relative* is False, create a "standard" scatter plot with a
+        diagonal line. If *relative* is True, create a relative scatter
+        plot where each point *(x, y)* corresponds to a task for which
+        the first algorithm yields a value of *x* and the second
+        algorithm yields *x * y*. Relative scatter plots are less common
+        in the literature, but often show small differences between
+        algorithms better than "standard" scatter plots.
 
         The keyword argument *attributes* must contain exactly one
         attribute.
 
         Use the *filter_algorithm* keyword argument to select exactly
-        two algorithms.
+        two algorithms (see example below).
 
-        If only one of the two algorithms has a value for a run, only
-        add a coordinate if *show_missing* is True.
+        If *show_missing* is False, we only draw a point for an
+        algorithm pair if both algorithms have a value.
 
         *get_category* can be a function that takes **two** runs
         (dictionaries of properties) and returns a category name. This
@@ -169,86 +102,293 @@ class ScatterPlotReport(PlotReport):
         ...         ),
         ...     name="scatterplot-expansions")
 
+        The inherited *format* parameter can be set to 'png' (default),
+        'eps', 'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the
+        latter a pgfplots plot is created.
+
+        If *title* is given it will be used for the name of the plot.
+        Otherwise, the only given attribute will be the title. If none
+        is given, there will be no title.
+
+        *scale* can have the values 'linear', 'log' or 'symlog'. If
+        omitted, a sensible default will be used for some standard
+        attributes and 'log' otherwise. Relative scatter plots always
+        use a logarithmic scaling for the *y* axis.
+
+        *xlabel* and *ylabel* are the axis labels.
+
+        *matplotlib_options* may be a dictionary of matplotlib rc
+        parameters (see http://matplotlib.org/users/customizing.html):
+
+        >>> from downward.reports.scatter import ScatterPlotReport
+        >>> matplotlib_options = {
+        ...     'font.family': 'serif',
+        ...     'font.weight': 'normal',
+        ...     # Used if more specific sizes not set.
+        ...     'font.size': 20,
+        ...     'axes.labelsize': 20,
+        ...     'axes.titlesize': 30,
+        ...     'legend.fontsize': 22,
+        ...     'xtick.labelsize': 10,
+        ...     'ytick.labelsize': 10,
+        ...     'lines.markersize': 10,
+        ...     'lines.markeredgewidth': 0.25,
+        ...     'lines.linewidth': 1,
+        ...     # Width and height in inches.
+        ...     'figure.figsize': [8, 8],
+        ...     'savefig.dpi': 100,
+        ... }
+        >>> report = ScatterPlotReport(
+        ...     attributes=['initial_h_value'],
+        ...     matplotlib_options=matplotlib_options)
+
+        You can see the full list of matplotlib options and their
+        defaults by executing ::
+
+            import matplotlib
+            print(matplotlib.rcParamsDefault)
+
         """
-        # If the size has not been set explicitly, make it a square.
-        matplotlib_options = kwargs.get('matplotlib_options', {})
-        matplotlib_options.setdefault('figure.figsize', [8, 8])
-        kwargs['matplotlib_options'] = matplotlib_options
-        PlotReport.__init__(self, **kwargs)
-        if not self.attribute:
-            logging.critical('ScatterPlotReport needs exactly one attribute')
-        # By default all values are in the same category.
+        kwargs.setdefault("format", "png")
+
+        # Backwards compatibility.
+        xscale = kwargs.pop("xscale", None)
+        yscale = kwargs.pop("yscale", None)
+        if xscale or yscale:
+            logging.warning('Use "scale" parameter instead of "xscale" and "yscale".')
+        scale = scale or xscale or yscale
+
+        PlanningReport.__init__(self, **kwargs)
+        self.relative = relative
+        if len(self.attributes) != 1:
+            logging.critical("ScatterPlotReport needs exactly one attribute")
+        self.attribute = self.attributes[0]
+        # By default all values are in the same category "None".
         self.get_category = get_category or (lambda run1, run2: None)
         self.show_missing = show_missing
-        self.xlim_left = self.xlim_left or MIN_AXIS
-        self.ylim_bottom = self.ylim_bottom or MIN_AXIS
-        if self.output_format == 'tex':
-            self.writer = ScatterPgfPlots
+        if self.output_format == "tex":
+            self.writer = ScatterPgfplots
         else:
             self.writer = ScatterMatplotlib
+        self.title = title if title is not None else (self.attribute or "")
+        self._set_scales(scale)
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        # If the size has not been set explicitly, make it a square.
+        self.matplotlib_options = matplotlib_options or {"figure.figsize": [8, 8]}
+        if "legend.loc" in self.matplotlib_options:
+            logging.warning('The "legend.loc" parameter is ignored.')
 
-    def _set_scales(self, xscale, yscale):
-        PlotReport._set_scales(self, xscale or self.attribute.scale or 'log', yscale)
-        if self.xscale != self.yscale:
-            logging.critical('Scatterplots must use the same scale on both axes.')
+    def _set_scales(self, scale):
+        self.xscale = scale or self.attribute.scale or "log"
+        self.yscale = "log" if self.relative else self.xscale
+        scales = ["linear", "log", "symlog"]
+        for scale in [self.xscale, self.yscale]:
+            if scale not in scales:
+                logging.critical(f"Scale {scale} not in {scales}")
 
-    def _get_missing_val(self, max_value):
-        """
-        Separate the missing values by plotting them at (max_value * 10)
-        rounded to the next power of 10.
-        """
-        assert max_value is not None
-        if self.yscale == 'linear':
-            return max_value * 1.1
-        return int(10 ** math.ceil(math.log10(max_value)))
+    def has_multiple_categories(self):
+        return any(key is not None for key in self.categories.keys())
 
-    def _handle_none_values(self, X, Y, replacement):
-        assert len(X) == len(Y), (X, Y)
-        if self.show_missing:
-            return ([x if x is not None else replacement for x in X],
-                    [y if y is not None else replacement for y in Y])
-        return zip(*[(x, y) for x, y in zip(X, Y) if x is not None and y is not None])
-
-    def _fill_categories(self, runs):
-        # We discard the *runs* parameter.
-        # Map category names to value tuples
+    def _fill_categories(self):
+        """Map category names to coordinate lists."""
         categories = defaultdict(list)
-        for (domain, problem), runs in self.problem_runs.items():
-            if len(runs) != 2:
-                continue
-            run1, run2 = runs
-            assert (run1['algorithm'] == self.algorithms[0] and
-                    run2['algorithm'] == self.algorithms[1])
-            val1 = run1.get(self.attribute)
-            val2 = run2.get(self.attribute)
-            if val1 is None and val2 is None:
-                continue
+        for runs in self.problem_runs.values():
+            try:
+                run1, run2 = runs
+            except ValueError:
+                logging.critical(
+                    "Scatter plot needs exactly two runs for {domain}:{problem}. "
+                    "Instead of filtering a whole run, try setting only some of its "
+                    "attribute values to None in a filter.".format(**runs[0])
+                )
             category = self.get_category(run1, run2)
-            categories[category].append((val1, val2))
+            coord = (run1.get(self.attribute), run2.get(self.attribute))
+            if self.show_missing or None not in coord:
+                categories[category].append(coord)
         return categories
 
-    def _prepare_categories(self, categories):
-        categories = PlotReport._prepare_categories(self, categories)
-
-        # Find max-value to fit plot and to draw missing values.
-        self.missing_val = self._get_missing_val(max(self.max_x, self.max_y))
+    def _turn_into_relative_coords(self, categories):
+        assert self.relative
+        y_rel_max = 0
+        for coords in categories.values():
+            for x, y in coords:
+                if (x is not None and x <= 0) or (y is not None and y <= 0):
+                    logging.critical("Relative scatter plots need values > 0.")
+                if x is not None and y is not None:
+                    y_rel_max = max(y_rel_max, y / float(x))
+        y_rel_missing = y_rel_max * 1.5 if y_rel_max != 0 else None
+        x_missing = self._compute_missing_value(categories, 0, self.xscale)
+        self.x_upper = x_missing
+        self.y_upper = y_rel_missing
 
         new_categories = {}
         for category, coords in categories.items():
-            X, Y = zip(*coords)
-            X, Y = self._handle_none_values(X, Y, self.missing_val)
-            coords = zip(X, Y)
-            new_categories[category] = coords
+            new_coords = []
+            for coord in coords:
+                x, y = coord
+                if x is None and y is None:
+                    x, y = x_missing, y_rel_missing
+                elif x is None and y is not None:
+                    x, y = x_missing, 1
+                elif x is not None and y is None:
+                    x, y = x, y_rel_missing
+                elif x is not None and y is not None:
+                    x, y = x, y / float(x)
+                new_coords.append((x, y))
+            if new_coords:
+                new_categories[category] = new_coords
         return new_categories
+
+    def _compute_missing_value(self, categories, axis, scale):
+        if not self.show_missing:
+            return None
+        values = [coord[axis] for coords in categories.values() for coord in coords]
+        real_values = [value for value in values if value is not None]
+        if len(real_values) == len(values):
+            # The list doesn't contain None values.
+            return None
+        if not real_values:
+            return 1
+        max_value = max(real_values)
+        if scale == "linear":
+            return max_value * 1.1
+        return int(10 ** math.ceil(math.log10(max_value)))
+
+    def _handle_non_positive_values(self, categories):
+        """Plot integer 0 values at 0.1 in log plots and abort if any value is < 0."""
+        assert not self.relative
+        assert self.xscale == self.yscale == "log"
+        new_categories = {}
+        for category, coords in categories.items():
+            new_coords = []
+            for x, y in coords:
+                if x == 0 and isinstance(x, int):
+                    x = 0.1
+                if y == 0 and isinstance(y, int):
+                    y = 0.1
+
+                if (x is not None and x <= 0) or (y is not None and y <= 0):
+                    logging.critical(
+                        "Logarithmic axes can only show positive values. "
+                        "Use a symlog or linear scale instead."
+                    )
+                else:
+                    new_coords.append((x, y))
+            new_categories[category] = new_coords
+        return new_categories
+
+    def _handle_missing_values(self, categories):
+        assert not self.relative
+        x_missing = self._compute_missing_value(categories, 0, self.xscale)
+        y_missing = self._compute_missing_value(categories, 1, self.yscale)
+        if x_missing is None:
+            missing_value = y_missing
+        elif y_missing is None:
+            missing_value = x_missing
+        else:
+            missing_value = max(x_missing, y_missing)
+        self.x_upper = missing_value
+        self.y_upper = missing_value
+
+        if not self.show_missing:
+            # Coords with None values have already been filtered.
+            return categories
+
+        new_categories = {}
+        for category, coords in categories.items():
+            coords = [
+                (
+                    x if x is not None else missing_value,
+                    y if y is not None else missing_value,
+                )
+                for x, y in coords
+            ]
+            if coords:
+                new_categories[category] = coords
+        return new_categories
+
+    def _compute_num_tasks_on_sides_of_line(self, categories):
+        min_wins = self.attribute.min_wins
+        x_wins = 0
+        y_wins = 0
+        for coords in categories.values():
+            for x, y in coords:
+                if x is None or y is None:
+                    continue
+                if x > y:
+                    if min_wins:
+                        y_wins += 1
+                    else:
+                        x_wins += 1
+                elif x < y:
+                    if min_wins:
+                        x_wins += 1
+                    else:
+                        y_wins += 1
+        return x_wins, y_wins
+
+    def _get_category_styles(self, categories):
+        """
+        Create dictionary mapping from category name to marker style.
+        """
+        shapes = "x+os^v<>D"
+        colors = [f"C{c}" for c in range(10)]
+
+        num_styles = len(shapes) * len(colors)
+        styles = [
+            {"marker": shape, "c": color}
+            for shape, color in itertools.islice(
+                zip(itertools.cycle(shapes), itertools.cycle(colors)), num_styles
+            )
+        ]
+        assert (
+            len({(s["marker"], s["c"]) for s in styles}) == num_styles
+        ), "The number of shapes and the number of colors must be coprime."
+
+        category_styles = {}
+        for i, category in enumerate(sorted(categories)):
+            category_styles[category] = styles[i % len(styles)]
+        return category_styles
+
+    def _get_axis_label(self, label, algo, num_wins):
+        if label:
+            return label
+        if self.attribute.min_wins is None:
+            return algo
+        comp = "lower" if self.attribute.min_wins else "higher"
+        return f"{algo} ({comp} for {num_wins} tasks)"
+
+    def _write_plot(self, runs, filename):
+        # Map category names to coord tuples.
+        self.categories = self._fill_categories()
+        x_wins, y_wins = self._compute_num_tasks_on_sides_of_line(self.categories)
+        if self.relative:
+            self.plot_diagonal_line = False
+            self.plot_horizontal_line = True
+            self.categories = self._turn_into_relative_coords(self.categories)
+        else:
+            self.plot_diagonal_line = True
+            self.plot_horizontal_line = False
+            if self.xscale == "log":
+                assert self.yscale == "log"
+                self.categories = self._handle_non_positive_values(self.categories)
+            self.categories = self._handle_missing_values(self.categories)
+        if not self.categories:
+            logging.critical("Plot contains no points.")
+
+        self.xlabel = self._get_axis_label(self.xlabel, self.algorithms[0], x_wins)
+        self.ylabel = self._get_axis_label(self.ylabel, self.algorithms[1], y_wins)
+
+        self.styles = self._get_category_styles(self.categories)
+        self.writer.write(self, filename)
 
     def write(self):
         if not len(self.algorithms) == 2:
             logging.critical(
-                'Scatter plots need exactly 2 algorithms: %s' % self.algorithms)
-        self.xlabel = self.xlabel or self.algorithms[0]
-        self.ylabel = self.ylabel or self.algorithms[1]
-
-        suffix = '.' + self.output_format
+                f"Scatter plots need exactly 2 algorithms: {self.algorithms}"
+            )
+        suffix = "." + self.output_format
         if not self.outfile.endswith(suffix):
             self.outfile += suffix
         tools.makedirs(os.path.dirname(self.outfile))

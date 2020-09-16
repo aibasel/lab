@@ -32,7 +32,9 @@ add ``exp.add_parse_again_step()`` to your experiment script
 How can I make reports and plots for results obtained without Lab?
 ------------------------------------------------------------------
 
-See ``examples/report-external-results.py`` for an example.
+See `report-external-results.py
+<https://github.com/aibasel/lab/blob/master/examples/report-external-results.py>`_
+for an example.
 
 
 Which experiment class should I use for which Fast Downward revision?
@@ -41,4 +43,4 @@ Which experiment class should I use for which Fast Downward revision?
 * Before CMake: use DownwardExperiment in Lab 1.x
 * With CMake and optional validation: use FastDownwardExperiment in Lab 1.x
 * With CMake and mandatory validation: use FastDownwardExperiment in Lab 2.x
-* New translator exit codes (issue739): use FastDownwardExperiment in Lab 3.x
+* New translator exit codes (issue739): use FastDownwardExperiment in Lab >= 3.x

@@ -23,3 +23,6 @@
 %(extra_options)s
 
 %(environment_setup)s
+
+# Set a soft memory limit to guard against the cgroup mechanism failing (see SlurmEnvironment docs).
+ulimit -Sv %(soft_memory_limit)d

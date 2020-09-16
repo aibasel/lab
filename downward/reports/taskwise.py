@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -18,9 +16,8 @@
 
 import logging
 
-from lab.reports import Table
-
 from downward.reports import PlanningReport
+from lab.reports import Table
 
 
 class TaskwiseReport(PlanningReport):
@@ -48,6 +45,7 @@ class TaskwiseReport(PlanningReport):
         +---------------------+------------+-------------+
 
     """
+
     def __init__(self, **kwargs):
         PlanningReport.__init__(self, **kwargs)
 
@@ -55,13 +53,14 @@ class TaskwiseReport(PlanningReport):
         table = Table(title=domain)
         for run in runs:
             for attr in self.attributes:
-                table.add_cell(run['problem'], attr, run.get(attr))
+                table.add_cell(run["problem"], attr, run.get(attr))
         return table
 
     def get_markup(self):
         if len(self.algorithms) != 1:
-            logging.critical('Taskwise reports need exactly one algorithm.')
+            logging.critical("Taskwise reports need exactly one algorithm.")
         tables = [
             self._get_table(domain, runs)
-            for (domain, _), runs in sorted(self.domain_algorithm_runs.items())]
-        return '\n'.join(str(table) for table in tables)
+            for (domain, _), runs in sorted(self.domain_algorithm_runs.items())
+        ]
+        return "\n".join(str(table) for table in tables)

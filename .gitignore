@@ -1,0 +1,11 @@
+*~
+*.py[cod]
+.tox/
+build/
+dist/
+docs/_build/
+examples/data/
+examples/ff/data/
+examples/singularity/data/
+examples/vertex-cover/data/
+lab.egg-info/

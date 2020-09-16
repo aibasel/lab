@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,11 +18,13 @@ import colorsys
 import functools
 import logging
 import os
+from pathlib import Path
 import pkgutil
 import re
 import shutil
 import subprocess
 import sys
+
 
 # Use simplejson where it's available, because it is compatible (just separately
 # maintained), puts no blanks at line endings and loads json much faster:
@@ -40,6 +40,23 @@ except ImportError:
     import json
 
 
+DEFAULT_ENCODING = "utf-8"
+
+
+def get_string(s):
+    if isinstance(s, bytes):
+        return s.decode(DEFAULT_ENCODING)
+    else:
+        raise ValueError("tools.get_string() only accepts byte strings")
+
+
+def get_bytes(s):
+    if isinstance(s, str):
+        return s.encode(DEFAULT_ENCODING)
+    else:
+        raise ValueError("tools.get_bytes() only accepts unicode strings")
+
+
 def get_script_path():
     """Get absolute path to main script."""
     return os.path.abspath(sys.argv[0])
@@ -49,11 +66,15 @@ def get_lab_path():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def get_python_executable():
+    return sys.executable or "python"
+
+
 def configure_logging(level=logging.INFO):
     # Python adds a default handler if some log is written before this
     # function is called. We therefore remove all handlers that have
     # been added automatically.
-    root_logger = logging.getLogger('')
+    root_logger = logging.getLogger("")
     for handler in root_logger.handlers:
         root_logger.removeHandler(handler)
 
@@ -61,10 +82,11 @@ def configure_logging(level=logging.INFO):
         """
         Logging handler that exits when a critical error is encountered.
         """
+
         def emit(self, record):
             logging.StreamHandler.emit(self, record)
             if record.levelno >= logging.CRITICAL:
-                sys.exit('aborting')
+                sys.exit("aborting")
 
     class StdoutFilter(logging.Filter):
         def filter(self, record):
@@ -74,7 +96,7 @@ def configure_logging(level=logging.INFO):
         def filter(self, record):
             return record.levelno > logging.WARNING
 
-    formatter = logging.Formatter('%(asctime)-s %(levelname)-8s %(message)s')
+    formatter = logging.Formatter("%(asctime)-s %(levelname)-8s %(message)s")
 
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setFormatter(formatter)
@@ -93,30 +115,35 @@ def show_deprecation_warning(msg):
     logging.warning(msg)
 
 
-class deprecated(object):
+class deprecated:
     """Decorator for marking deprecated functions or classes.
 
     The *msg* argument is optional, but the decorator always has to be
     called with brackets.
     """
-    def __init__(self, msg=''):
+
+    def __init__(self, msg=""):
         self.msg = msg
 
     def __call__(self, func):
         @functools.wraps(func)
         def new_func(*args, **kwargs):
-            msg = self.msg or '%s is deprecated.' % (func.__name__)
+            msg = self.msg or f"{func.__name__} is deprecated."
             show_deprecation_warning(msg)
             return func(*args, **kwargs)
+
         return new_func
 
 
 def make_list(value):
-    if isinstance(value, list):
-        return value
-    if isinstance(value, (tuple, set)):
+    if value is None:
+        return []
+    elif isinstance(value, list):
+        return value[:]
+    elif isinstance(value, (tuple, set)):
         return list(value)
-    return [value]
+    else:
+        return [value]
 
 
 def makedirs(path):
@@ -131,14 +158,13 @@ def makedirs(path):
 
 
 def confirm_or_abort(question):
-    answer = raw_input('%s (y/N): ' % question).strip()
-    if not answer.lower() == 'y':
-        sys.exit('Aborted')
+    answer = input(f"{question} (y/N): ").strip()
+    if not answer.lower() == "y":
+        sys.exit("Aborted")
 
 
 def confirm_overwrite_or_abort(path):
-    confirm_or_abort(
-        'The path "%s" already exists. Do you want to overwrite it?' % path)
+    confirm_or_abort(f'The path "{path}" already exists. Do you want to overwrite it?')
 
 
 def remove_path(path):
@@ -152,13 +178,14 @@ def remove_path(path):
 
 
 def write_file(filename, content):
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         f.write(content)
 
 
 def fill_template(template_name, **parameters):
-    template = pkgutil.get_data(
-        'lab', os.path.join('data', template_name + '.template'))
+    template = get_string(
+        pkgutil.get_data("lab", os.path.join("data", template_name + ".template"))
+    )
     return template % parameters
 
 
@@ -168,31 +195,44 @@ def natural_sort(alist):
 
     >>> natural_sort(['file10.txt', 'file2.txt'])
     ['file2.txt', 'file10.txt']
+
+    >>> natural_sort(['check', 'infinity', '1G', '3M', '2000K', '1M', '1K', '100'])
+    ['100', '1K', '1M', '2000K', '3M', '1G', 'infinity', 'check']
     """
+
     def to_int_if_number(text):
+        if not text:
+            return ""
         if text.isdigit():
             return int(text)
+        elif text.lower() == "infinity":
+            return sys.maxsize
+
+        suffixes = {"K": 3, "M": 6, "G": 9}
+        number, suffix = text[:-1], text[-1]
+        if number.isdigit() and suffix in suffixes:
+            return int(number) * 10 ** suffixes[suffix]
         else:
             return text.lower()
 
     def extract_numbers(text):
-        parts = re.split("([0-9]+)", text)
-        return map(to_int_if_number, parts)
+        parts = re.split("([0-9]+[KMG]?|infinity)", text)
+        return [to_int_if_number(part) for part in parts]
 
     return sorted(alist, key=extract_numbers)
 
 
-def find_file(filenames, dir='.'):
+def find_file(filenames, dir="."):
     for filename in filenames:
         path = os.path.join(dir, filename)
         if os.path.exists(path):
             return path
-    raise IOError('none found in %r: %r' % (dir, filenames))
+    raise OSError(f"none found in {dir!r}: {filenames!r}")
 
 
 def run_command(cmd, **kwargs):
     """Run command cmd and return the output."""
-    logging.info('Executing %s %s' % (' '.join(cmd), kwargs))
+    logging.info(f"Executing {' '.join(cmd)} {kwargs}")
     return subprocess.call(cmd, **kwargs)
 
 
@@ -202,20 +242,33 @@ def add_unexplained_error(dictionary, error):
     dictionary['unexplained_errors']. Create the list if it does not
     exist yet.
     """
-    key = 'unexplained_errors'
+    key = "unexplained_errors"
     dictionary.setdefault(key, [])
     if error not in dictionary[key]:
         dictionary[key].append(error)
 
 
 class Properties(dict):
+    class _PropertiesEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, Path):
+                return str(o)
+            else:
+                return super().default(o)
+
     def __init__(self, filename=None):
         self.filename = filename
         self.load(filename)
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, indent=2, separators=(',', ': '), sort_keys=True)
+        return json.dumps(
+            self,
+            cls=self._PropertiesEncoder,
+            indent=2,
+            separators=(",", ": "),
+            sort_keys=True,
+        )
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
@@ -224,7 +277,7 @@ class Properties(dict):
             try:
                 self.update(json.load(f))
             except ValueError as e:
-                logging.critical("JSON parse error in file '%s': %s" % (filename, e))
+                logging.critical(f"JSON parse error in file '{filename}': {e}")
 
     def add_unexplained_error(self, error):
         add_unexplained_error(self, error)
@@ -236,15 +289,17 @@ class Properties(dict):
         write_file(self.filename, str(self))
 
 
-class RunFilter(object):
+class RunFilter:
     def __init__(self, filter, **kwargs):
-        self.filters = make_list(filter or [])
+        self.filters = make_list(filter)
+        self.filtered_attributes = []  # Only needed for sanity checks.
         for arg_name, arg_value in kwargs.items():
-            if not arg_name.startswith('filter_'):
-                logging.critical('Invalid keyword argument name "%s"' % arg_name)
-            attribute = arg_name[len('filter_'):]
+            if not arg_name.startswith("filter_"):
+                logging.critical(f'Invalid filter keyword argument name "{arg_name}"')
+            attribute = arg_name[len("filter_") :]
             # Add a filter for the specified property.
             self.filters.append(self._build_filter(attribute, arg_value))
+            self.filtered_attributes.append(attribute)
 
     def _build_filter(self, prop, value):
         # Do not define this function inplace to force early binding.
@@ -253,8 +308,11 @@ class RunFilter(object):
             # membership testing for str.
             if isinstance(value, (list, tuple, set)):
                 return run.get(prop) in value
+            elif callable(value):
+                logging.critical(f"filter_{prop} doesn't accept functions.")
             else:
                 return run.get(prop) == value
+
         return property_filter
 
     @staticmethod
@@ -264,9 +322,8 @@ class RunFilter(object):
         modified_run = run
         result = filter_(modified_run)
         if not isinstance(result, (dict, bool)):
-            logging.critical('Filters must return a dictionary or boolean')
-        # If a dict is returned, use it as the new run,
-        # otherwise take the old one.
+            logging.critical("Filters must return a dictionary or Boolean")
+        # If a dict is returned, use it as the new run, otherwise take the old one.
         if isinstance(result, dict):
             modified_run = result
         if not result:
@@ -275,14 +332,20 @@ class RunFilter(object):
         return modified_run
 
     def apply(self, props):
+        for attribute in self.filtered_attributes:
+            if not any(attribute in run for run in props.values()):
+                logging.critical(
+                    f'No run has the attribute "{attribute}" (from '
+                    f'"filter_{attribute}"). Is this a typo?'
+                )
         for filter_ in self.filters:
-            for old_run_id, run in props.items():
+            for old_run_id, run in list(props.items()):
                 del props[old_run_id]
-                modified_run = self.apply_filter_to_run(filter_, run)
-                if modified_run:
+                new_run = self.apply_filter_to_run(filter_, run)
+                if new_run:
                     # Filters may change a run's ID. Don't complain if ID is missing.
-                    new_run_id = '-'.join(run['id']) if 'id' in run else old_run_id
-                    props[new_run_id] = modified_run
+                    new_run_id = "-".join(new_run["id"]) if "id" in run else old_run_id
+                    props[new_run_id] = new_run
 
 
 def fast_updatetree(src, dst, symlinks=False, ignore=None):
@@ -316,8 +379,9 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
                 linkto = os.readlink(srcname)
                 if not os.path.isabs(linkto):
                     # Calculate new relative link path.
-                    abs_link = os.path.abspath(os.path.join(os.path.dirname(srcname),
-                                                            linkto))
+                    abs_link = os.path.abspath(
+                        os.path.join(os.path.dirname(srcname), linkto)
+                    )
                     linkto = os.path.relpath(abs_link, os.path.dirname(dstname))
                 os.symlink(linkto, dstname)
             elif os.path.isdir(srcname):
@@ -325,11 +389,11 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
             else:
                 shutil.copy2(srcname, dstname)
             # XXX What about devices, sockets etc.?
-        except (IOError, os.error), why:
+        except OSError as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except Exception, err:
+        except Exception as err:
             errors.append(err.args[0])
     if errors:
         raise Exception(errors)
@@ -350,8 +414,9 @@ def copy(src, dest, ignores=None):
         ignore = shutil.ignore_patterns(*ignores) if ignores else None
         fast_updatetree(src, dest, ignore=ignore)
     else:
-        logging.critical('Path {} cannot be copied to {}'.format(
-            os.path.abspath(src), os.path.abspath(dest)))
+        logging.critical(
+            f"Path {os.path.abspath(src)} cannot be copied to {os.path.abspath(dest)}"
+        )
 
 
 def get_color(fraction, min_wins):
@@ -367,7 +432,7 @@ def get_color(fraction, min_wins):
 
 
 def get_colors(cells, min_wins):
-    result = dict((col, (0.5, 0.5, 0.5)) for col in cells.keys())
+    result = {col: (0.5, 0.5, 0.5) for col in cells.keys()}
     min_value, max_value = get_min_max(cells.values())
 
     if min_value == max_value:
@@ -411,8 +476,8 @@ def get_min_max(items):
 def product(values):
     """Compute the product of a sequence of numbers.
 
-    >>> round(product([2, 3, 7]), 2)
-    42.0
+    >>> product([2, 3, 7])
+    42
     """
     assert None not in values
     prod = 1
@@ -422,23 +487,7 @@ def product(values):
 
 
 def rgb_fractions_to_html_color(r, g, b):
-    return 'rgb(%d,%d,%d)' % (r * 255, g * 255, b * 255)
-
-
-def get_terminal_size():
-    import struct
-    try:
-        import fcntl
-        import termios
-    except ImportError:
-        return (None, None)
-
-    try:
-        data = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, 4 * '00')
-        height, width = struct.unpack('4H', data)[:2]
-        return (width, height)
-    except Exception:
-        return (None, None)
+    return f"rgb({int(r * 255)},{int(g * 255)},{int(b * 255)})"
 
 
 def get_unexplained_errors_message(run):
@@ -446,27 +495,39 @@ def get_unexplained_errors_message(run):
     Return an error message if an unexplained error occured in the given run,
     otherwise return None.
     """
-    unexplained_errors = run.get('unexplained_errors', [])
-    if not unexplained_errors or unexplained_errors == ['output-to-slurm.err']:
-        return ''
+    unexplained_errors = run.get("unexplained_errors", [])
+    if not unexplained_errors or unexplained_errors == ["output-to-slurm.err"]:
+        return ""
     else:
         return (
-            'Unexplained error(s): {unexplained_errors}. Please inspect'
-            ' output and error logs under "{run_dir}".'.format(**run))
+            f"Unexplained error(s) in {run['run_dir']}: please inspect"
+            f" output and error logs."
+        )
 
 
 def get_slurm_err_content(src_dir):
-    grid_steps_dir = src_dir.rstrip('/') + '-grid-steps'
-    slurm_err_filename = os.path.join(grid_steps_dir, 'slurm.err')
-    with open(slurm_err_filename) as f:
-        return f.read()
+    grid_steps_dir = src_dir.rstrip("/") + "-grid-steps"
+    if os.path.exists(grid_steps_dir):
+        slurm_err_filename = os.path.join(grid_steps_dir, "slurm.err")
+        if os.path.exists(slurm_err_filename):
+            try:
+                with open(slurm_err_filename) as f:
+                    return f.read()
+            except OSError:
+                logging.error("Failed to read slurm.err file.")
+        else:
+            logging.error("File slurm.err is missing.")
+    return ""
 
 
 def filter_slurm_err_content(content):
     filtered = re.sub(
         r"slurmstepd: error: task/cgroup: unable to add task\[pid=\d+\]"
-        r" to memory cg '\(null\)'\n", '', content)
-    filtered = re.sub(r"\x00", '', filtered)
+        r" to memory cg '\(null\)'\n",
+        "",
+        content,
+    )
+    filtered = re.sub(r"\x00", "", filtered)
     return "\n".join(line for line in filtered.splitlines() if line.strip())
 
 
@@ -475,34 +536,24 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
     Help message formatter which preserves the description format and adds
     default values to argument help messages.
     """
+
     def __init__(self, prog, **kwargs):
         # Use the whole terminal width.
-        width, _ = get_terminal_size()
+        width = shutil.get_terminal_size().columns
         argparse.HelpFormatter.__init__(self, prog, width=width, **kwargs)
 
     def _fill_text(self, text, width, indent):
-        return '\n'.join([indent + line for line in text.splitlines()])
+        return "\n".join([indent + line for line in text.splitlines()])
 
     def _get_help_string(self, action):
         help = action.help
-        if '%(default)' not in action.help and 'default' not in action.help:
+        if "%(default)" not in action.help and "default" not in action.help:
             if action.default is not argparse.SUPPRESS:
                 defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
                 if action.option_strings or action.nargs in defaulting_nargs:
-                    help += ' (default: %(default)s)'
+                    help += " (default: %(default)s)"
         return help
 
 
 def get_argument_parser():
-    def log_level(s):
-        return getattr(logging, s.upper())
-
-    parser = argparse.ArgumentParser(formatter_class=RawAndDefaultsHelpFormatter)
-    parser.add_argument(
-        '-l', '--log-level',
-        type=log_level,
-        dest='log_level',
-        choices=['DEBUG', 'INFO', 'WARNING'],
-        default='INFO',
-        help='Logging verbosity')
-    return parser
+    return argparse.ArgumentParser(formatter_class=RawAndDefaultsHelpFormatter)

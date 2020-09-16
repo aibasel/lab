@@ -1,0 +1,137 @@
+name: Ubuntu
+
+# see https://github.community/t5/GitHub-Actions/How-to-trigger-an-action-on-push-or-pull-request-but-not-both/m-p/35805
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set revision
+      run: |
+        # Set environment variable with the latest revision hash.
+        echo "::set-env name=GIT_DOWNWARD_REV::`git ls-remote --exit-code --quiet https://github.com/aibasel/downward.git HEAD | cut -f1`"
+
+    # Compile each Fast Downward revision only once and cache the results.
+    - name: Cache revisions
+      id: cache-revisions
+      uses: actions/cache@v1
+      with:
+        path: revision-cache
+        key: ${{ runner.os }}-revision-cache-${{ env.GIT_DOWNWARD_REV }}
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Show environment
+      run: |
+        python --version
+        python3 -c "import multiprocessing as m; print('CPUs:', m.cpu_count())"
+
+    - name: Install tox
+      run: |
+        python -m pip install --upgrade pip tox
+
+    - name: Check style
+      if: matrix.python-version == '3.6'
+      run: |
+        tox -e docs,style
+
+    - name: Set up directory for dependencies
+      run: |
+        mkdir ../deps
+        pushd ../deps
+        # Add directory to PATH.
+        echo "::add-path::$(pwd)"
+
+    - name: Compile FF
+      working-directory: ../deps
+      run: |
+        sudo apt-get -y install g++ make flex bison
+        wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+        tar -xzvf FF-v2.3.tgz
+        cd FF-v2.3/
+        make -j
+        cp ff ../
+        cd ..
+        rm -rf FF-v2.3/ FF-v2.3.tgz
+
+    - name: Compile VAL
+      working-directory: ../deps
+      run: |
+        sudo apt-get -y install g++ make flex bison
+        git clone https://github.com/KCL-Planning/VAL.git
+        cd VAL
+        git checkout a5565396007eee73ac36527fbf904142b3077c74
+        make clean  # Remove old build artifacts and binaries.
+        sed -i 's/-Werror //g' Makefile  # Ignore warnings.
+        make -j
+        mv validate ../
+        cd ../
+        rm -rf VAL
+
+    - name: Clone benchmarks
+      working-directory: ../deps
+      run: |
+        export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
+        git clone --depth 1 https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
+        echo "::set-env name=DOWNWARD_BENCHMARKS::${DOWNWARD_BENCHMARKS}"
+
+    - name: Clone Fast Downward Mercurial
+      working-directory: ../deps
+      run: |
+        sudo apt-get -y install cmake g++ git make python3
+        export HG_DOWNWARD_REPO=`realpath fast-downward`
+        hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
+        echo "::set-env name=HG_DOWNWARD_REPO::${HG_DOWNWARD_REPO}"
+
+    - name: Clone Fast Downward Git
+      working-directory: ../deps
+      run: |
+        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
+        git clone --depth 1 https://github.com/aibasel/downward.git ${GIT_DOWNWARD_REPO}
+        echo "::set-env name=GIT_DOWNWARD_REPO::${GIT_DOWNWARD_REPO}"
+
+    - name: Download example Singularity image
+      working-directory: ../deps
+      run: |
+        wget --no-verbose https://ai.dmi.unibas.ch/_tmp_files/seipp/lama-first.img
+        export SINGULARITY_IMAGES=`realpath .`
+        echo "::set-env name=SINGULARITY_IMAGES::${SINGULARITY_IMAGES}"
+
+    - name: Run tests
+      run: |
+        # Updating the installed packages takes very long, so we don't do it.
+        # sudo apt-get update && sudo apt-get -y upgrade
+
+        export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
+        echo CACHE: ${DOWNWARD_REVISION_CACHE}
+
+        export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
+        time tox -e py
+
+        export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
+        time tox -e py
+
+    - name: Test installation with pip
+      run: |
+        pip install .
+        pushd /tmp
+        python -c "import lab"
+        popd
+        pip uninstall -y lab

@@ -1,5 +1,4 @@
-#! /usr/bin/env python2
-# -*- coding: utf-8 -*-
+#! /usr/bin/env python
 #
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
@@ -27,25 +26,18 @@ import re
 from lab.parser import Parser
 
 
-def _get_flags(flags_string):
-    flags = 0
-    for char in flags_string:
-        flags |= getattr(re, char)
-    return flags
+def find_all_matches(attribute, regex, type=int):
+    """
+    Look for all occurences of *regex*, cast what is found in brackets to
+    *type* and store the list of found items in the properties dictionary
+    under *attribute*. *regex* must contain exactly one bracket group.
+    """
 
+    def store_all_occurences(content, props):
+        matches = re.findall(regex, content)
+        props[attribute] = [type(m) for m in matches]
 
-class AnytimeParser(Parser):
-    def add_repeated_pattern(self, name, regex, file='run.log', type=int, flags='M'):
-        """
-        *regex* must contain at most one group.
-        """
-        flags = _get_flags(flags)
-
-        def find_all_occurences(content, props):
-            matches = re.findall(regex, content, flags=flags)
-            props[name] = [type(m) for m in matches]
-
-        self.add_function(find_all_occurences, file=file)
+    return store_all_occurences
 
 
 def reduce_to_min(list_name, single_name):
@@ -58,14 +50,17 @@ def reduce_to_min(list_name, single_name):
 
 
 def coverage(content, props):
-    props['coverage'] = int('cost' in props)
+    props["coverage"] = int("cost" in props)
 
 
 def main():
-    print 'Running anytime parser'
-    parser = AnytimeParser()
-    parser.add_repeated_pattern('cost:all', r'^Plan cost: (.+)$', type=float)
-    parser.add_function(reduce_to_min('cost:all', 'cost'))
+    parser = Parser()
+    parser.add_function(find_all_matches("cost:all", r"Plan cost: (.+)\n", type=float))
+    parser.add_function(
+        find_all_matches("steps:all", r"Plan length: (.+) step\(s\).\n", type=float)
+    )
+    parser.add_function(reduce_to_min("cost:all", "cost"))
+    parser.add_function(reduce_to_min("steps:all", "steps"))
     parser.add_function(coverage)
     parser.parse()
 

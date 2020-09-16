@@ -12,7 +12,7 @@ RUN_DIR=$(print_run_dir $SLURM_ARRAY_TASK_ID)
 cd "%(exp_path)s/$RUN_DIR"
 
 (
-./run
+"%(python)s" run
 RETCODE=$?
 if [[ $RETCODE != 0 ]]; then
     >&2 echo "The run script finished with exit code $RETCODE"

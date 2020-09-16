@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Downward Lab uses the Lab package to conduct experiments with the
 # Fast Downward planning system.
 #
@@ -28,10 +26,10 @@ def find_domain_file(benchmarks_dir, domain, problem):
     full problem name preceeded by 'domain_'.
     """
     domain_basenames = [
-        'domain.pddl',
-        problem[:3] + '-domain.pddl',
-        'domain_' + problem,
-        'domain-' + problem,
+        "domain.pddl",
+        problem[:3] + "-domain.pddl",
+        "domain_" + problem,
+        "domain-" + problem,
     ]
     domain_dir = os.path.join(benchmarks_dir, domain)
     return tools.find_file(domain_basenames, domain_dir)
@@ -41,41 +39,45 @@ def get_pddl_task(benchmarks_dir, domain_name, problem_name):
     problem_file = os.path.join(benchmarks_dir, domain_name, problem_name)
     domain_file = find_domain_file(benchmarks_dir, domain_name, problem_name)
     return Problem(
-        domain_name, problem_name, problem_file=problem_file,
-        domain_file=domain_file)
+        domain_name, problem_name, problem_file=problem_file, domain_file=domain_file
+    )
 
 
-class Domain(object):
+class Domain:
     def __init__(self, benchmarks_dir, domain):
         self.domain = domain
         directory = os.path.join(benchmarks_dir, domain)
-        problem_files = tools.natural_sort([
-            p for p in os.listdir(directory)
-            if 'domain' not in p and not p.endswith('.py')])
+        problem_files = tools.natural_sort(
+            [
+                p
+                for p in os.listdir(directory)
+                if "domain" not in p and not p.endswith(".py")
+            ]
+        )
         self.problems = [
-            get_pddl_task(benchmarks_dir, domain, problem)
-            for problem in problem_files]
+            get_pddl_task(benchmarks_dir, domain, problem) for problem in problem_files
+        ]
 
     def __str__(self):
         return self.domain
 
     def __repr__(self):
-        return '<Domain %s>' % self.domain
+        return f"<Domain {self.domain}>"
 
     def __hash__(self):
         return hash(self.domain)
 
-    def __cmp__(self, other):
-        return cmp(self.domain, other.domain)
+    def __eq__(self, other):
+        return self.domain == other.domain
 
     def __iter__(self):
         return iter(self.problems)
 
 
-class Problem(object):
+class Problem:
     def __init__(
-            self, domain, problem, problem_file, domain_file=None,
-            properties=None):
+        self, domain, problem, problem_file, domain_file=None, properties=None
+    ):
         """
         *domain* and *problem* are the display names of the domain and
         problem, *domain_file* and *problem_file* are paths to the
@@ -104,12 +106,14 @@ class Problem(object):
         self.domain_file = domain_file
 
         self.properties = properties or {}
-        self.properties.setdefault('domain', self.domain)
-        self.properties.setdefault('problem', self.problem)
+        self.properties.setdefault("domain", self.domain)
+        self.properties.setdefault("problem", self.problem)
 
     def __str__(self):
-        return ('<Problem {domain}({domain_file}):{problem}({problem_file}):'
-                '{properties}>'.format(**self.__dict__))
+        return (
+            f"<Problem {self.domain}({self.domain_file}):{self.problem}"
+            f"({self.problem_file}):{self.properties}>"
+        )
 
 
 def _generate_problems(benchmarks_dir, description):
@@ -120,18 +124,19 @@ def _generate_problems(benchmarks_dir, description):
     if isinstance(description, Problem):
         yield description
     elif isinstance(description, Domain):
-        for problem in description:
-            yield problem
-    elif ':' in description:
-        domain_name, problem_name = description.split(':', 1)
+        yield from description
+    elif ":" in description:
+        domain_name, problem_name = description.split(":", 1)
         problem_file = os.path.join(benchmarks_dir, domain_name, problem_name)
         domain_file = find_domain_file(benchmarks_dir, domain_name, problem_name)
         yield Problem(
-            domain_name, problem_name, problem_file=problem_file,
-            domain_file=domain_file)
+            domain_name,
+            problem_name,
+            problem_file=problem_file,
+            domain_file=domain_file,
+        )
     else:
-        for problem in Domain(benchmarks_dir, description):
-            yield problem
+        yield from Domain(benchmarks_dir, description)
 
 
 def build_suite(benchmarks_dir, descriptions):

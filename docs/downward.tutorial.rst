@@ -3,10 +3,8 @@
 Downward Lab tutorial
 =====================
 
-Install Lab and Downward Lab
-----------------------------
 .. highlight:: bash
-.. include:: ../INSTALL.txt
+.. include:: ../INSTALL.rst
 
 
 Download benchmarks
@@ -15,31 +13,31 @@ Download benchmarks
 
 ::
 
-    DOWNWARD_BENCHMARKS=/path/to/downward-benchmarks
-    hg clone https://bitbucket.org/aibasel/downward-benchmarks \
-        ${DOWNWARD_BENCHMARKS}
+    export DOWNWARD_BENCHMARKS=/path/to/downward-benchmarks
+    git clone https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
 
 Some example experiments need the ``DOWNWARD_BENCHMARKS`` environment
-variable so we recommend adding it to your ``~/.bashrc`` file.
+variable so we recommend exporting it in your ``~/.bashrc`` file.
 
 
 Install Fast Downward
 ---------------------
 (See also http://www.fast-downward.org/ObtainingAndRunningFastDownward
-and http://www.fast-downward.org/LPBuildInstructions)
+and http://www.fast-downward.org/LPBuildInstructions.)
+
+Lab supports Git and Mercurial repositories.
 
 .. highlight:: bash
 
 ::
 
-    DOWNWARD_REPO=/path/to/fast-downward-repo
-    sudo apt-get install mercurial g++ cmake make python g++-multilib
-    hg clone http://hg.fast-downward.org ${DOWNWARD_REPO}
+    export DOWNWARD_REPO=/path/to/fast-downward-repo
+    sudo apt install cmake g++ git make python3
+    git clone https://github.com/aibasel/downward.git ${DOWNWARD_REPO}
     # Optionally check that Fast Downward works:
     cd ${DOWNWARD_REPO}
     ./build.py
-    ./fast-downward.py ${DOWNWARD_BENCHMARKS}/grid/prob01.pddl \
-        --search "astar(lmcut())"
+    ./fast-downward.py ${DOWNWARD_BENCHMARKS}/grid/prob01.pddl --search "astar(lmcut())"
 
 
 Install VAL
@@ -48,25 +46,26 @@ Install VAL
 
 ::
 
-    sudo apt-get install g++ make flex bison
+    sudo apt install g++ make flex bison
     git clone https://github.com/KCL-Planning/VAL.git
     cd VAL
-    make clean  # Remove old object files and binaries.
+    # Newer VAL versions need time stamps, so we use an old version
+    # (https://github.com/KCL-Planning/VAL/issues/46).
+    git checkout a5565396007eee73ac36527fbf904142b3077c74
+    make clean  # Remove old binaries.
+    sed -i 's/-Werror //g' Makefile  # Ignore warnings.
     make
     sudo cp validate /usr/local/bin  # Add binary to a directory on PATH.
-
-**MacOS**: clone the repo, add ``VAL/bin/MacOSExecutables/validate`` to
-your ``PATH`` and make it executable (``chmod + x``).
 
 
 Run tutorial experiment
 -----------------------
 .. highlight:: python
 
-The script below is an example Fast Downward experiment. It is located
-at ``${LAB}/examples/lmcut.py``. After setting ``REPO`` to
-``FAST_DOWNWARD`` and ``BENCHMARKS_DIR`` to ``BENCHMARKS``, you can see
-the available steps with ::
+The script below is an example Fast Downward experiment. After adapting
+``REPO`` and ``BENCHMARKS_DIR`` to your setup, saving the file as
+``lmcut.py`` and making it executable, you can see the available steps
+with ::
 
     ./lmcut.py
 
@@ -85,6 +84,7 @@ Run individual steps with ::
 You can use this file as a basis for your own experiments.
 
 .. literalinclude:: ../examples/lmcut.py
+   :caption:
 
-Have a look at other Fast Downward experiments in the ``examples``
-directory and the `downward API <downward.experiment.html>`_.
+The `Downward Lab API <downward.experiment.html>`_ shows you how to adjust
+this example to your needs.

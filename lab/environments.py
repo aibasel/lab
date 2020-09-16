@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Lab is a Python package for evaluating algorithms.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -28,22 +26,23 @@ from lab import tools
 
 def _get_job_prefix(exp_name):
     assert exp_name
-    escape_char = 'j' if exp_name[0].isdigit() else ''
-    return ''.join([escape_char, exp_name, '-'])
+    escape_char = "j" if exp_name[0].isdigit() else ""
+    return "".join([escape_char, exp_name, "-"])
 
 
 def is_build_step(step):
     """Return true iff the given step is the "build" step."""
-    return step._funcname == 'build'
+    return step._funcname == "build"
 
 
 def is_run_step(step):
     """Return true iff the given step is the "run" step."""
-    return step._funcname == 'start_runs'
+    return step._funcname == "start_runs"
 
 
-class Environment(object):
+class Environment:
     """Abstract base class for all environments."""
+
     def __init__(self, randomize_task_order=True):
         """
         If *randomize_task_order* is True (default), tasks for runs are
@@ -58,7 +57,7 @@ class Environment(object):
         self.randomize_task_order = randomize_task_order
 
     def _get_task_order(self):
-        task_order = range(1, len(self.exp.runs) + 1)
+        task_order = list(range(1, len(self.exp.runs) + 1))
         if self.randomize_task_order:
             random.shuffle(task_order)
         return task_order
@@ -81,7 +80,7 @@ class LocalEnvironment(Environment):
     Environment for running experiments locally on a single machine.
     """
 
-    EXP_RUN_SCRIPT = 'run'
+    EXP_RUN_SCRIPT = "run"
 
     def __init__(self, processes=None, **kwargs):
         """
@@ -102,14 +101,15 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         script = tools.fill_template(
-            'local-job.py',
-            task_order=self._get_task_order(),
-            processes=self.processes)
+            "local-job.py", task_order=self._get_task_order(), processes=self.processes
+        )
 
-        self.exp.add_new_file('', self.EXP_RUN_SCRIPT, script, permissions=0o755)
+        self.exp.add_new_file("", self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
     def start_runs(self):
-        tools.run_command([sys.executable, self.EXP_RUN_SCRIPT], cwd=self.exp.path)
+        tools.run_command(
+            [tools.get_python_executable(), self.EXP_RUN_SCRIPT], cwd=self.exp.path
+        )
 
     def run_steps(self, steps):
         for step in steps:
@@ -118,13 +118,14 @@ class LocalEnvironment(Environment):
 
 class GridEnvironment(Environment):
     """Abstract base class for grid environments."""
+
     # Must be overridden in derived classes.
     JOB_HEADER_TEMPLATE_FILE = None
     RUN_JOB_BODY_TEMPLATE_FILE = None
     STEP_JOB_BODY_TEMPLATE_FILE = None
 
     # Can be overridden in derived classes.
-    MAX_TASKS = float('inf')
+    MAX_TASKS = float("inf")
 
     def __init__(self, email=None, extra_options=None, **kwargs):
         """
@@ -146,10 +147,10 @@ class GridEnvironment(Environment):
         will be sent when the last experiment step finishes.
 
         Use *extra_options* to pass additional options. The
-        *extra_options* string may contain newlines. Example that runs
-        each task on its own node with Slurm::
+        *extra_options* string may contain newlines. Slurm example that
+        reserves two cores per run::
 
-            extra_options='#SBATCH --exclusive'
+            extra_options='#SBATCH --cpus-per-task=2'
 
         See :py:class:`~lab.environments.Environment` for inherited
         parameters.
@@ -157,24 +158,25 @@ class GridEnvironment(Environment):
         """
         Environment.__init__(self, **kwargs)
         self.email = email
-        self.extra_options = extra_options or '## (not used)'
+        self.extra_options = extra_options or "## (not used)"
 
     def start_runs(self):
         # The queue will start the experiment by itself.
         pass
 
     def _get_job_name(self, step):
-        return '%s%02d-%s' % (
-            _get_job_prefix(self.exp.name),
-            self.exp.steps.index(step) + 1,
-            step.name)
+        return (
+            f"{_get_job_prefix(self.exp.name)}"
+            f"{self.exp.steps.index(step) + 1:02d}-{step.name}"
+        )
 
     def _get_num_runs(self):
         num_runs = len(self.exp.runs)
         if num_runs > self.MAX_TASKS:
-            logging.critical('You are trying to submit a job with %d tasks, '
-                             'but only %d are allowed.' %
-                             (num_runs, self.MAX_TASKS))
+            logging.critical(
+                f"You are trying to submit a job with {num_runs} tasks, "
+                f"but only {self.MAX_TASKS} are allowed."
+            )
         return num_runs
 
     def _get_num_tasks(self, step):
@@ -185,11 +187,11 @@ class GridEnvironment(Environment):
 
     def _get_job_params(self, step, is_last):
         return {
-            'errfile': 'driver.err',
-            'extra_options': self.extra_options,
-            'logfile': 'driver.log',
-            'name': self._get_job_name(step),
-            'num_tasks': self._get_num_tasks(step),
+            "errfile": "driver.err",
+            "extra_options": self.extra_options,
+            "logfile": "driver.log",
+            "name": self._get_job_name(step),
+            "num_tasks": self._get_num_tasks(step),
         }
 
     def _get_job_header(self, step, is_last):
@@ -199,16 +201,19 @@ class GridEnvironment(Environment):
     def _get_run_job_body(self):
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
-            task_order=' '.join(str(i) for i in self._get_task_order()),
-            exp_path='../' + self.exp.name)
+            task_order=" ".join(str(i) for i in self._get_task_order()),
+            exp_path="../" + self.exp.name,
+            python=tools.get_python_executable(),
+        )
 
     def _get_step_job_body(self, step):
         return tools.fill_template(
             self.STEP_JOB_BODY_TEMPLATE_FILE,
             cwd=os.getcwd(),
-            python=sys.executable or 'python',
+            python=tools.get_python_executable(),
             script=sys.argv[0],
-            step_name=step.name)
+            step_name=step.name,
+        )
 
     def _get_job_body(self, step):
         if is_run_step(step):
@@ -216,8 +221,7 @@ class GridEnvironment(Environment):
         return self._get_step_job_body(step)
 
     def _get_job(self, step, is_last):
-        return '%s\n\n%s' % (self._get_job_header(step, is_last),
-                             self._get_job_body(step))
+        return f"{self._get_job_header(step, is_last)}\n\n{self._get_job_body(step)}"
 
     def write_main_script(self):
         # The main script is written by the run_steps() method.
@@ -232,12 +236,13 @@ class GridEnvironment(Environment):
         self.exp.build(write_to_disk=False)
 
         # Prepare job dir.
-        job_dir = self.exp.path + '-grid-steps'
+        job_dir = self.exp.path + "-grid-steps"
         if os.path.exists(job_dir):
             tools.confirm_or_abort(
-                'The path "%s" already exists, so the experiment has '
-                'already been submitted. Are you sure you want to '
-                'delete the grid-steps and submit it again?' % job_dir)
+                f'The path "{job_dir}" already exists, so the experiment has '
+                f"already been submitted. Are you sure you want to "
+                f"delete the grid-steps and submit it again?"
+            )
             tools.remove_path(job_dir)
 
         # Overwrite exp dir if it exists.
@@ -247,8 +252,9 @@ class GridEnvironment(Environment):
         # Remove eval dir if it exists.
         if os.path.exists(self.exp.eval_dir):
             tools.confirm_or_abort(
-                'The evalution directory "%s" already exists. '
-                'Do you want to remove it?' % self.exp.eval_dir)
+                f'The evaluation directory "{self.exp.eval_dir}" already exists. '
+                f"Do you want to remove it?"
+            )
             tools.remove_path(self.exp.eval_dir)
 
         # Create job dir only when we need it.
@@ -261,7 +267,8 @@ class GridEnvironment(Environment):
             job_content = self._get_job(step, is_last=(step == steps[-1]))
             tools.write_file(job_file, job_content)
             prev_job_id = self._submit_job(
-                job_name, job_file, job_dir, dependency=prev_job_id)
+                job_name, job_file, job_dir, dependency=prev_job_id
+            )
 
     def _submit_job(self, job_name, job_file, job_dir, dependency=None):
         raise NotImplementedError
@@ -269,20 +276,28 @@ class GridEnvironment(Environment):
 
 class SlurmEnvironment(GridEnvironment):
     """Abstract base class for slurm grid environments."""
+
     # Must be overridden in derived classes.
     DEFAULT_PARTITION = None
     DEFAULT_QOS = None
     DEFAULT_MEMORY_PER_CPU = None
 
     # Can be overridden in derived classes.
-    DEFAULT_EXPORT = ['PATH']
-    DEFAULT_SETUP = ''
-    JOB_HEADER_TEMPLATE_FILE = 'slurm-job-header'
-    RUN_JOB_BODY_TEMPLATE_FILE = 'slurm-run-job-body'
-    STEP_JOB_BODY_TEMPLATE_FILE = 'slurm-step-job-body'
+    DEFAULT_EXPORT = ["PATH"]
+    DEFAULT_SETUP = ""
+    JOB_HEADER_TEMPLATE_FILE = "slurm-job-header"
+    RUN_JOB_BODY_TEMPLATE_FILE = "slurm-run-job-body"
+    STEP_JOB_BODY_TEMPLATE_FILE = "slurm-step-job-body"
 
-    def __init__(self, partition=None, qos=None, memory_per_cpu=None,
-                 export=None, setup=None, **kwargs):
+    def __init__(
+        self,
+        partition=None,
+        qos=None,
+        memory_per_cpu=None,
+        export=None,
+        setup=None,
+        **kwargs,
+    ):
         """
 
         *partition* must be a valid Slurm partition name. In Basel you
@@ -290,22 +305,52 @@ class SlurmEnvironment(GridEnvironment):
 
         * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
         * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
-        * "infai_all": combination of "infai_1" and "infai_2"
-          (only use this when runtime is irrelevant)
 
-        *qos* must be a valid Slurm QOS name.
+        *qos* must be a valid Slurm QOS name. In Basel this must be
+        "normal".
 
         *memory_per_cpu* must be a string specifying the memory
         allocated for each core. The string must end with one of the
-        letters K, M or G. The default is "3872M", which is the maximum
-        amount that allows using all 16 cores in parallel. Processes
-        that surpass the memory limit are terminated with SIGKILL.
-        Unless you need more memory you should not have to change this
-        variable. Instead, we recommend using the ``memory_limit`` kwarg
-        of :py:func:`~lab.experiment.Run.add_command` for imposing a
-        soft memory limit that can be caught from inside your programs.
-        Fast Downward users should set memory limits via the
-        ``driver_options``.
+        letters K, M or G. The default is "3872M". The value for
+        *memory_per_cpu* should not surpass the amount of memory that is
+        available per core, which is "3872M" for infai_1 and "6354M" for
+        infai_2. Processes that surpass the *memory_per_cpu* limit are
+        terminated with SIGKILL. To impose a soft limit that can be
+        caught from within your programs, you can use the
+        ``memory_limit`` kwarg of
+        :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
+        should set memory limits via the ``driver_options``.
+
+        Slurm limits the memory with cgroups. Unfortunately, this often
+        fails on our nodes, so we set our own soft memory limit for all
+        Slurm jobs. We derive the soft memory limit by multiplying the
+        value denoted by the *memory_per_cpu* parameter with 0.98 (the
+        Slurm config file contains "AllowedRAMSpace=99" and we add some
+        slack). We use a soft instead of a hard limit so that child
+        processes can raise the limit.
+
+        Examples that reserve the maximum amount of memory available per core:
+
+        >>> env1 = BaselSlurmEnvironment(partition="infai_1", memory_per_cpu="3872M")
+        >>> env2 = BaselSlurmEnvironment(partition="infai_2", memory_per_cpu="6354M")
+
+        Example that reserves 12 GiB of memory on infai_1:
+
+        >>> # 12 * 1024 / 3872 = 3.17 -> round to next int -> 4 cores per task
+        >>> # 12G / 4 = 3G per core
+        >>> env = BaselSlurmEnvironment(
+        ...     partition="infai_1",
+        ...     memory_per_cpu="3G",
+        ...     extra_options='#SBATCH --cpus-per-task=4')
+
+        Example that reserves 12 GiB of memory on infai_2:
+
+        >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
+        >>> # 12G / 2 = 6G per core
+        >>> env = BaselSlurmEnvironment(
+        ...     partition="infai_2",
+        ...     memory_per_cpu="6G",
+        ...     extra_options='#SBATCH --cpus-per-task=2')
 
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes
@@ -313,9 +358,10 @@ class SlurmEnvironment(GridEnvironment):
 
         You can alter the environment in which the experiment runs with
         the **setup** argument. If given, it must be a string of Bash
-        commands. If omitted,
-        :class:`~lab.environments.BaselSlurmEnvironment` loads a
-        suitable Python version and adds Lab to the PYTHONPATH.
+        commands. Example::
+
+            # Load Singularity module.
+            setup="module load Singularity/2.6.1 2> /dev/null"
 
         See :py:class:`~lab.environments.GridEnvironment` for inherited
         parameters.
@@ -340,54 +386,70 @@ class SlurmEnvironment(GridEnvironment):
         self.export = export
         self.setup = setup
 
+    @staticmethod
+    def _get_memory_in_kb(limit):
+        match = re.match(r"^(\d+)(k|m|g)?$", limit, flags=re.I)
+        if not match:
+            logging.critical(f"malformed memory_per_cpu parameter: {limit}")
+        memory = int(match.group(1))
+        suffix = match.group(2)
+        if suffix is not None:
+            suffix = suffix.lower()
+        if suffix == "k":
+            pass
+        elif suffix is None or suffix == "m":
+            memory *= 1024
+        elif suffix == "g":
+            memory *= 1024 * 1024
+        return memory
+
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
 
         # Let all tasks write into the same two files. We could use %a
         # (which is replaced by the array ID) to prevent mangled up logs,
         # but we don't want so many files.
-        job_params['logfile'] = 'slurm.log'
-        job_params['errfile'] = 'slurm.err'
+        job_params["logfile"] = "slurm.log"
+        job_params["errfile"] = "slurm.err"
 
-        job_params['partition'] = self.partition
-        job_params['qos'] = self.qos
-        job_params['memory_per_cpu'] = self.memory_per_cpu
-        # Ensure that single-core tasks always run before multi-core tasks.
-        job_params['nice'] = 2000 if is_run_step(step) else 0
-        job_params['environment_setup'] = self.setup
+        job_params["partition"] = self.partition
+        job_params["qos"] = self.qos
+        job_params["memory_per_cpu"] = self.memory_per_cpu
+        memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
+        job_params["soft_memory_limit"] = int(memory_per_cpu_kb * 0.98)
+        # Prioritize array jobs from autonice users.
+        job_params["nice"] = 5000 if is_run_step(step) else 0
+        job_params["environment_setup"] = self.setup
 
         if is_last and self.email:
-            job_params['mailtype'] = 'END,FAIL,REQUEUE,STAGE_OUT'
-            job_params['mailuser'] = self.email
+            job_params["mailtype"] = "END,FAIL,REQUEUE,STAGE_OUT"
+            job_params["mailuser"] = self.email
         else:
-            job_params['mailtype'] = 'NONE'
-            job_params['mailuser'] = ''
+            job_params["mailtype"] = "NONE"
+            job_params["mailuser"] = ""
 
         return job_params
 
     def _submit_job(self, job_name, job_file, job_dir, dependency=None):
-        submit = ['sbatch']
+        submit = ["sbatch"]
         if self.export:
-            submit += ['--export', ",".join(self.export)]
+            submit += ["--export", ",".join(self.export)]
         if dependency:
-            submit.extend(['-d', 'afterany:' + dependency, '--kill-on-invalid-dep=yes'])
+            submit.extend(["-d", "afterany:" + dependency, "--kill-on-invalid-dep=yes"])
         submit.append(job_file)
-        logging.info('Executing %s' % (' '.join(submit)))
+        logging.info(f"Executing {' '.join(submit)}")
         out = subprocess.check_output(submit, cwd=job_dir).decode()
-        print out.strip()
+        logging.info(f"Output: {out.strip()}")
         match = re.match(r"Submitted batch job (\d*)", out)
-        assert match, "Submitting job with sbatch failed: '{out}'".format(**locals())
+        assert match, f"Submitting job with sbatch failed: '{out}'"
         return match.group(1)
 
 
 class BaselSlurmEnvironment(SlurmEnvironment):
     """Environment for Basel's AI group."""
 
-    DEFAULT_PARTITION = 'infai_1'
-    DEFAULT_QOS = 'normal'
-    # infai nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
+    DEFAULT_PARTITION = "infai_1"
+    DEFAULT_QOS = "normal"
+    # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
-    DEFAULT_MEMORY_PER_CPU = '3872M'
-    DEFAULT_SETUP = (
-        'module load Python/2.7.11-goolf-1.7.20\n'
-        'PYTHONPATH="%s:$PYTHONPATH"' % tools.get_lab_path())
+    DEFAULT_MEMORY_PER_CPU = "3872M"
