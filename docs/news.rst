@@ -6,7 +6,7 @@ v6.2 (unreleased)
 
 Lab
 ^^^
-* No changes.
+* For developers: run CI tests on Ubuntu 20.04 in addition to 18.04 (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
