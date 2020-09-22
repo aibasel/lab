@@ -19,6 +19,32 @@ import os
 from lab import tools
 
 
+def find_domain_file(benchmarks_dir, domain, problem):
+    """
+    Search for domain file in the directory *benchmarks_dir*/*domain*.
+    Check the following names: 'domain.pddl', 'pXX-domain.pddl', or the
+    full problem name preceeded by 'domain_'.
+    """
+    domain_basenames = [
+        "domain.pddl",
+        problem[:3] + "-domain.pddl",
+        "domain_" + problem,
+        "domain-" + problem,
+    ]
+    domain_dir = os.path.join(benchmarks_dir, domain)
+    return tools.find_file(domain_basenames, domain_dir)
+
+
+def get_problem(benchmarks_dir, domain_name, problem_name):
+    problem_file = os.path.join(benchmarks_dir, domain_name, problem_name)
+    domain_file = None
+    if problem_file.endswith(".pddl"):
+        domain_file = find_domain_file(benchmarks_dir, domain_name, problem_name)
+    return Problem(
+        domain_name, problem_name, problem_file=problem_file, domain_file=domain_file
+    )
+
+
 class Domain:
     def __init__(self, benchmarks_dir, domain):
         self.domain = domain
@@ -31,8 +57,7 @@ class Domain:
             ]
         )
         self.problems = [
-            Problem(domain, problem, benchmarks_dir=benchmarks_dir)
-            for problem in problem_files
+            get_problem(benchmarks_dir, domain, problem) for problem in problem_files
         ]
 
     def __str__(self):
@@ -53,24 +78,13 @@ class Domain:
 
 class Problem:
     def __init__(
-        self,
-        domain,
-        problem,
-        benchmarks_dir="",
-        domain_file=None,
-        problem_file=None,
-        properties=None,
+        self, domain, problem, problem_file, domain_file=None, properties=None
     ):
         """
         *domain* and *problem* are the display names of the domain and
         problem, *domain_file* and *problem_file* are paths to the
-        respective files on the disk. If the latter are not specified,
-        they will be automatically generated according to the following
-        naming conventions: both files are searched in the directory
-        *benchmarks_dir*/*domain*. The default filename of the problem
-        is *problem* and the domain file is searched for under the
-        names 'domain.pddl', 'pXX-domain.pddl', or the full problem
-        name preceeded by 'domain_'.
+        respective files on the disk. If *domain_file* is not given,
+        assume that *problem_file* is a SAS task.
 
         *properties* may be a dictionary of entries that should be
         added to the properties file of each run that uses this
@@ -78,34 +92,20 @@ class Problem:
 
             suite = [
                 Problem('gripper-original', 'prob01.pddl',
-                    domain_file='/path/to/original/domain.pddl',
                     problem_file='/path/to/original/problem.pddl',
+                    domain_file='/path/to/original/domain.pddl',
                     properties={'relaxed': False}),
                 Problem('gripper-relaxed', 'prob01.pddl',
-                    domain_file='/path/to/relaxed/domain.pddl',
                     problem_file='/path/to/relaxed/problem.pddl',
+                    domain_file='/path/to/relaxed/domain.pddl',
                     properties={'relaxed': True}),
-                Problem('gripper', 'prob01.pddl',
-                    benchmarks_dir='/path/to/benchmarks',
+                Problem('gripper', 'prob01.pddl', '/path/to/prob01.pddl')
             ]
         """
         self.domain = domain
         self.problem = problem
-
+        self.problem_file = problem_file
         self.domain_file = domain_file
-        if self.domain_file is None:
-            domain_basenames = [
-                "domain.pddl",
-                self.problem[:3] + "-domain.pddl",
-                "domain_" + self.problem,
-                "domain-" + self.problem,
-            ]
-            domain_dir = os.path.join(benchmarks_dir, self.domain)
-            self.domain_file = tools.find_file(domain_basenames, domain_dir)
-
-        self.problem_file = problem_file or os.path.join(
-            benchmarks_dir, self.domain, self.problem
-        )
 
         self.properties = properties or {}
         self.properties.setdefault("domain", self.domain)
@@ -129,7 +129,7 @@ def _generate_problems(benchmarks_dir, description):
         yield from description
     elif ":" in description:
         domain_name, problem_name = description.split(":", 1)
-        yield Problem(domain_name, problem_name, benchmarks_dir=benchmarks_dir)
+        yield get_problem(benchmarks_dir, domain_name, problem_name)
     else:
         yield from Domain(benchmarks_dir, description)
 

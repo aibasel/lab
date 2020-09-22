@@ -42,23 +42,32 @@ class FastDownwardRun(Run):
         self.algo = algo
         self.task = task
 
-        self._set_properties()
+        self.driver_options = algo.driver_options[:]
 
-        # Linking to instead of copying the PDDL files makes building
-        # the experiment twice as fast.
-        self.add_resource("domain", self.task.domain_file, "domain.pddl", symlink=True)
-        self.add_resource(
-            "problem", self.task.problem_file, "problem.pddl", symlink=True
-        )
+        if self.task.domain_file is None:
+            self.add_resource("task", self.task.problem_file, "task.sas", symlink=True)
+            input_files = ["{task}"]
+            # Without PDDL input files, we can't validate the solution.
+            self.driver_options.remove("--validate")
+        else:
+            self.add_resource(
+                "domain", self.task.domain_file, "domain.pddl", symlink=True
+            )
+            self.add_resource(
+                "problem", self.task.problem_file, "problem.pddl", symlink=True
+            )
+            input_files = ["{domain}", "{problem}"]
 
         self.add_command(
             "planner",
             [tools.get_python_executable()]
             + ["{" + _get_solver_resource_name(algo.cached_revision) + "}"]
-            + algo.driver_options
-            + ["{domain}", "{problem}"]
+            + self.driver_options
+            + input_files
             + algo.component_options,
         )
+
+        self._set_properties()
 
     def _set_properties(self):
         self.set_property("algorithm", self.algo.name)
@@ -67,7 +76,7 @@ class FastDownwardRun(Run):
         self.set_property("global_revision", self.algo.cached_revision.global_rev)
         self.set_property("revision_summary", self.algo.cached_revision.summary)
         self.set_property("build_options", self.algo.cached_revision.build_options)
-        self.set_property("driver_options", self.algo.driver_options)
+        self.set_property("driver_options", self.driver_options)
         self.set_property("component_options", self.algo.component_options)
 
         for key, value in self.task.properties.items():
@@ -182,30 +191,31 @@ class FastDownwardExperiment(Experiment):
         return tasks
 
     def add_suite(self, benchmarks_dir, suite):
-        """Add benchmarks to the experiment.
+        """Add PDDL or SAS+ benchmarks to the experiment.
 
-        *benchmarks_dir* must be a path to a benchmark directory. It
-        must contain domain directories, which in turn hold PDDL files.
+        *benchmarks_dir* must be a path to a benchmark directory. It must
+        contain domain directories, which in turn hold PDDL or SAS+ files.
 
         *suite* must be a list of domain or domain:task names. ::
 
-            exp.add_suite(benchmarks_dir, ["depot", "gripper"])
-            exp.add_suite(benchmarks_dir, ["gripper:prob01.pddl"])
+            >>> benchmarks_dir = os.environ["DOWNWARD_BENCHMARKS"]
+            >>> exp = FastDownwardExperiment()
+            >>> exp.add_suite(benchmarks_dir, ["depot", "gripper"])
+            >>> exp.add_suite(benchmarks_dir, ["gripper:prob01.pddl"])
+            >>> exp.add_suite(benchmarks_dir, ["rubiks-cube:p01.sas"])
 
         One source for benchmarks is
-        https://github.com/aibasel/downward-benchmarks. After cloning
-        the repo, you can generate suites with the ``suites.py``
-        script. We recommend using the suite ``optimal_strips`` for
-        optimal planning and ``satisficing`` for satisficing planning::
+        https://github.com/aibasel/downward-benchmarks. After cloning the
+        repo, you can generate suites with the ``suites.py`` script. We
+        recommend using the suite ``optimal_strips`` for optimal STRIPS planners
+        and ``satisficing`` for satisficing planners::
 
             # Create standard optimal planning suite.
             $ path/to/downward-benchmarks/suites.py optimal_strips
             ['airport', ..., 'zenotravel']
 
-        You can copy the generated list into your experiment script::
+        Then you can copy the generated list into your experiment script::
 
-            >>> benchmarks_dir = os.environ["DOWNWARD_BENCHMARKS"]
-            >>> exp = FastDownwardExperiment()
             >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
 
         """

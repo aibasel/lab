@@ -6,6 +6,7 @@ This experiment demonstrates most of the available options.
 from collections import defaultdict
 import os
 import os.path
+from pathlib import Path
 import platform
 from subprocess import call
 
@@ -20,7 +21,7 @@ from lab.reports import Attribute
 from lab.reports.filter import FilterReport
 
 
-DIR = os.path.dirname(os.path.abspath(__file__))
+DIR = Path(__file__).resolve().parent
 NODE = platform.node()
 REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
 if REMOTE:
@@ -93,6 +94,7 @@ exp.add_parser(exp.ANYTIME_SEARCH_PARSER)
 exp.add_parser(exp.PLANNER_PARSER)
 
 exp.add_suite(BENCHMARKS_DIR, ["gripper:prob01.pddl", "miconic:s1-0.pddl"])
+exp.add_suite(DIR / ".." / "tests" / "benchmarks", ["blocks", "gripper:p01.sas"])
 exp.add_algorithm(
     "iter-hadd",
     REPO,

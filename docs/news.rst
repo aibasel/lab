@@ -1,6 +1,18 @@
 News
 ====
 
+v6.2 (unreleased)
+-----------------
+
+Lab
+^^^
+* No changes.
+
+Downward Lab
+^^^^^^^^^^^^
+* Allow adding SAS+ files with ``FastDownwardExperiment.add_suite()`` (Jendrik Seipp).
+
+
 v6.1 (2020-09-15)
 -----------------
 
