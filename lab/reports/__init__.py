@@ -724,15 +724,26 @@ class Table(collections.defaultdict):
                 row[col_name] = value
             return
 
-        # Get the slice of the row that should be formated (i.e. the data columns).
-        # Note that there might be other columns (e.g. added by dynamic data
-        # modules) that should not be formated.
+        # Get the slice of the row that should be formatted (i.e., the data columns).
+        # Note that there might be other columns (e.g., added by dynamic data
+        # modules) that should not be formatted.
         row_slice = {col_name: row.get(col_name) for col_name in self.col_names}
 
         min_wins = self.get_min_wins(row_name)
         highlight = min_wins is not None
         colored = self.colored and highlight
-        colors = tools.get_colors(row_slice, min_wins) if colored else None
+        if colored:
+
+            def try_to_round(v):
+                try:
+                    return round(v, self.digits)
+                except TypeError:
+                    return v
+
+            rounded_row_slice = {
+                col: try_to_round(val) for col, val in row_slice.items()
+            }
+            colors = tools.get_colors(rounded_row_slice, min_wins)
 
         if highlight:
             min_value, max_value = tools.get_min_max(row_slice.values())
