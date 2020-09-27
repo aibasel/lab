@@ -1,5 +1,5 @@
-News
-====
+Changelog
+=========
 
 v6.2 (unreleased)
 -----------------

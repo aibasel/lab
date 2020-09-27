@@ -3,19 +3,28 @@
 
 .. toctree::
    :maxdepth: 1
-   :caption: Lab
+   :caption: Tutorials
 
    lab.tutorial
-   lab.experiment
-   lab.parser
-   lab.reports
+   downward.tutorial
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: Downward Lab
+   :caption: How-to Guides
 
-   downward.tutorial
+   faq
+   ff
+   singularity
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Reference
+
+   lab.experiment
+   lab.parser
+   lab.reports
    downward.experiment
    downward.reports
 
@@ -25,6 +34,4 @@
    :caption: General
 
    news
-   faq
-   ff
-   singularity
+
