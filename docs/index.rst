@@ -14,6 +14,7 @@
    :caption: How-to Guides
 
    faq
+   lab.parser
    ff
    singularity
 
@@ -23,7 +24,6 @@
    :caption: Reference
 
    lab.experiment
-   lab.parser
    lab.reports
    downward.experiment
    downward.reports

@@ -1,13 +1,4 @@
-.. _parsing:
-
-:mod:`lab.parser` --- Parse logs
-================================
+Parse output
+============
 
 .. automodule:: lab.parser
-
-Parser API
-----------
-
-.. autoclass:: lab.parser.Parser
-   :members:
-   :undoc-members:

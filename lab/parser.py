@@ -14,8 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Parse logs and output files.
-
 A parser can be any program that analyzes files in the run's directory
 (e.g. ``run.log``) and manipulates the ``properties`` file in the same
 directory.
@@ -26,7 +24,7 @@ an example parser for the FF planner:
 .. literalinclude:: ../examples/ff/ff-parser.py
    :caption:
 
-You can add this parser to alls runs by using :meth:`add_parser()
+You can add this parser to all runs by using :meth:`add_parser()
 <lab.experiment.Experiment.add_parser>`:
 
 >>> from pathlib import Path

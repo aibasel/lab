@@ -48,13 +48,23 @@ Custom command line arguments
 
 
 :class:`Run`
--------------------
+------------
 
 .. autoclass:: Run
    :members:
    :undoc-members:
    :inherited-members:
    :exclude-members: build
+
+
+.. _parsing:
+
+:class:`Parser`
+---------------
+
+.. autoclass:: lab.parser.Parser
+   :members:
+   :undoc-members:
 
 
 .. _environments:
