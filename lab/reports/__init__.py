@@ -250,11 +250,6 @@ class Report:
         >>> report = Report(
         ...     filter=rename_algorithms, filter_algorithm=algorithms)
 
-        Compute a new attribute from multiple runs:
-
-        .. literalinclude:: ../examples/showcase-options.py
-           :pyobject: QualityFilters
-
         """
         self.attributes = tools.make_list(attributes)
         if format not in txt2tags.TARGETS + ["eps", "pdf", "pgf", "png", "py"]:

@@ -29,6 +29,20 @@ add ``exp.add_parse_again_step()`` to your experiment script
     ./my-exp.py parse-again
 
 
+How can I compute a new attribute from multiple runs?
+-----------------------------------------------------
+
+Consider for example the IPC quality score. It is often computed over the
+list of runs for each task. Since filters only work on individual runs, we
+can't compute the score with a single filter, but it is possible by using
+two filters as shown below: *store_costs* saves the list of costs per task
+in a dictionary whereas *add_quality* uses the stored costs to compute IPC
+quality scores and adds them to the runs.
+
+.. literalinclude:: ../examples/showcase-options.py
+   :pyobject: QualityFilters
+
+
 How can I make reports and plots for results obtained without Lab?
 ------------------------------------------------------------------
 
