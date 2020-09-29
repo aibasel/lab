@@ -30,17 +30,6 @@ for different papers) without conflicts::
     # Ignore pkg-resources package (https://github.com/pypa/pip/issues/4022).
     pip freeze | grep -v "pkg-resources" > requirements.txt
 
-If you want to install the latest development version and/or need to
-change Lab itself, you can clone the Lab repo and install it in the
-virtual environment::
-
-    git clone https://github.com/aibasel/lab.git /path/to/lab
-    pip install --editable /path/to/lab
-
-The ``--editable`` flag installs the project in "editable mode", which
-makes any changes under ``/path/to/lab`` appear immediately in the
-installed package.
-
 Please note that before running an experiment script you need to
 activate the virtual environment with::
 
