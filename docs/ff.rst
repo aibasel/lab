@@ -1,7 +1,7 @@
 .. _ff:
 
-Running other planners
-======================
+Run other planners
+==================
 .. highlight:: python
 
 The script below shows how to run the `FF planner
