@@ -103,6 +103,20 @@ class PlanningReport(Report):
         :py:class:`Filters <.Report>` can be very helpful so we
         recommend reading up on them to use their full potential.
 
+        Subclasses can use the member variable ``problem_runs`` to access the
+        experiment data. It is a dictionary mapping from tasks (i.e.,
+        ``(domain, problem)`` pairs) to the runs for that task. Each run is a
+        dictionary that maps from attribute names to values.
+
+        >>> class MinRuntimePerTask(PlanningReport):
+        ...     def get_text(self):
+        ...         map = {}
+        ...         for (domain, problem), runs in self.problem_runs.items():
+        ...             times = [run.get("planner_time") for run in runs]
+        ...             times = [t for t in times if t is not None]
+        ...             map[(domain, problem)] = min(times) if times else None
+        ...         return str(map)
+
         """
         # Set non-default options for some attributes.
         attributes = tools.make_list(kwargs.get("attributes"))

@@ -15,6 +15,7 @@ xdg-open "$DOCS/_build/html/index.html"
 while :; do
     # Wait for changes.
     inotifywait -e modify,create,delete -r "$REPO"
+    echo
     # Build html documentation.
     make html
 done
