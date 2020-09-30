@@ -131,9 +131,10 @@ class Attribute(str):
         The ``downward`` package automatically uses appropriate
         settings for most attributes.
 
-        >>> avg_h = Attribute('avg_h', min_wins=False)
+        >>> avg_h = Attribute("avg_h", min_wins=False)
         >>> abstraction_done = Attribute(
-        ...     'abstraction_done', absolute=True, min_wins=False)
+        ...     "abstraction_done", absolute=True, min_wins=False
+        ... )
 
         """
         self.absolute = absolute
@@ -172,7 +173,7 @@ class Report:
         your report. If omitted, use all numerical attributes. Globbing
         characters * and ? are allowed. Example:
 
-        >>> report = Report(attributes=['coverage', 'translator_*'])
+        >>> report = Report(attributes=["coverage", "translator_*"])
 
         When a report is made, both the available and the selected
         attributes are printed on the commandline.
@@ -203,7 +204,7 @@ class Report:
 
         Include only the "cost" attribute in a LaTeX report:
 
-        >>> report = Report(attributes=['cost'], format='tex')
+        >>> report = Report(attributes=["cost"], format="tex")
 
         Only include successful runs in the report:
 
@@ -213,42 +214,38 @@ class Report:
         at most 100:
 
         >>> def low_init_h(run):
-        ...     return run['initial_h_value'] <= 100
+        ...     return run["initial_h_value"] <= 100
         >>> report = Report(filter=low_init_h)
 
         Only include runs from "blocks" and "barman" with a timeout:
 
-        >>> report = Report(
-        ...     filter_domain=['blocks', 'barman'],
-        ...     filter_search_timeout=1)
+        >>> report = Report(filter_domain=["blocks", "barman"], filter_search_timeout=1)
 
         Add a new attribute:
 
         >>> def add_expansions_per_time(run):
-        ...     expansions = run.get('expansions')
-        ...     time = run.get('search_time')
+        ...     expansions = run.get("expansions")
+        ...     time = run.get("search_time")
         ...     if expansions is not None and time:
-        ...         run['expansions_per_time'] = expansions / time
+        ...         run["expansions_per_time"] = expansions / time
         ...     return run
         >>> report = Report(
-        ...     attributes=['expansions_per_time'],
-        ...     filter=[add_expansions_per_time])
+        ...     attributes=["expansions_per_time"], filter=[add_expansions_per_time]
+        ... )
 
         Rename, filter and sort algorithms:
 
         >>> def rename_algorithms(run):
-        ...     name = run['algorithm']
-        ...     paper_names = {
-        ...         'lama11': 'LAMA 2011', 'fdss_sat1': 'FDSS 1'}
-        ...     run['algorithm'] = paper_names[name]
+        ...     name = run["algorithm"]
+        ...     paper_names = {"lama11": "LAMA 2011", "fdss_sat1": "FDSS 1"}
+        ...     run["algorithm"] = paper_names[name]
         ...     return run
 
         >>> # We want LAMA 2011 to be the leftmost column.
         >>> # filter_* filters are evaluated last, so we use the updated
         >>> # algorithm names here.
-        >>> algorithms = ['LAMA 2011', 'FDSS 1']
-        >>> report = Report(
-        ...     filter=rename_algorithms, filter_algorithm=algorithms)
+        >>> algorithms = ["LAMA 2011", "FDSS 1"]
+        >>> report = Report(filter=rename_algorithms, filter_algorithm=algorithms)
 
         """
         self.attributes = tools.make_list(attributes)
@@ -483,12 +480,12 @@ class Table(collections.defaultdict):
 
         Numbers are rounded to *digits* positions after the decimal point.
 
-        >>> t = Table(title='expansions')
-        >>> t.add_cell('prob1', 'cfg1', 10)
-        >>> t.add_cell('prob1', 'cfg2', 20)
-        >>> t.add_row('prob2', {'cfg1': 15, 'cfg2': 25})
+        >>> t = Table(title="expansions")
+        >>> t.add_cell("prob1", "cfg1", 10)
+        >>> t.add_cell("prob1", "cfg2", 20)
+        >>> t.add_row("prob2", {"cfg1": 15, "cfg2": 25})
         >>> def remove_quotes(s):
-        ...     return s.replace('""', '')
+        ...     return s.replace('""', "")
         >>> print(remove_quotes(str(t)))
         || expansions |  cfg1 |  cfg2 |
          | prob1 |  10 |  20 |
@@ -497,17 +494,17 @@ class Table(collections.defaultdict):
         ['prob1', 'prob2']
         >>> t.col_names
         ['cfg1', 'cfg2']
-        >>> t.get_row('prob2')
+        >>> t.get_row("prob2")
         [15, 25]
-        >>> t.get_columns() == {'cfg1': [10, 15], 'cfg2': [20, 25]}
+        >>> t.get_columns() == {"cfg1": [10, 15], "cfg2": [20, 25]}
         True
-        >>> t.add_summary_function('SUM', sum)
+        >>> t.add_summary_function("SUM", sum)
         >>> print(remove_quotes(str(t)))
         || expansions |  cfg1 |  cfg2 |
          | prob1 |  10 |  20 |
          | prob2 |  15 |  25 |
          | **SUM** |  25 |  45 |
-        >>> t.set_column_order(['cfg2', 'cfg1'])
+        >>> t.set_column_order(["cfg2", "cfg1"])
         >>> print(remove_quotes(str(t)))
         || expansions |  cfg2 |  cfg1 |
          | prob1 |  20 |  10 |

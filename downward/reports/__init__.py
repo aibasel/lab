@@ -95,10 +95,10 @@ class PlanningReport(Report):
         >>> # Use a filter function to select algorithms.
         >>> def only_blind_and_lmcut(run):
         ...     return run["algorithm"] in ["blind", "lmcut"]
-        >>> PlanningReport(filter=only_blind_and_lmcut)
+        >>> report = PlanningReport(filter=only_blind_and_lmcut)
 
         >>> # Use "filter_algorithm" to select and *order* algorithms.
-        >>> PlanningReport(filter_algorithm=["lmcut", "blind"])
+        >>> report = PlanningReport(filter_algorithm=["lmcut", "blind"])
 
         :py:class:`Filters <.Report>` can be very helpful so we
         recommend reading up on them to use their full potential.

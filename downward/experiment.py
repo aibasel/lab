@@ -117,9 +117,9 @@ class FastDownwardExperiment(Experiment):
         automatically):
 
         >>> exp = FastDownwardExperiment()
-        >>> exp.add_step('build', exp.build)
-        >>> exp.add_step('start', exp.start_runs)
-        >>> exp.add_fetcher(name='fetch')
+        >>> exp.add_step("build", exp.build)
+        >>> exp.add_step("start", exp.start_runs)
+        >>> exp.add_fetcher(name="fetch")
 
     """
 
@@ -216,7 +216,7 @@ class FastDownwardExperiment(Experiment):
 
         Then you can copy the generated list into your experiment script::
 
-            >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
+            >>> exp.add_suite(benchmarks_dir, ["airport", "zenotravel"])
 
         """
         if isinstance(suite, str):
@@ -278,34 +278,44 @@ class FastDownwardExperiment(Experiment):
 
         Test iPDB in the latest revision on the default branch:
 
-        >>> exp.add_algorithm(
-        ...     "ipdb", repo, rev,
-        ...     ["--search", "astar(ipdb())"])
+        >>> exp.add_algorithm("ipdb", repo, rev, ["--search", "astar(ipdb())"])
 
         Run blind search in debug mode:
 
         >>> exp.add_algorithm(
-        ...     "blind", repo, rev,
+        ...     "blind",
+        ...     repo,
+        ...     rev,
         ...     ["--search", "astar(blind())"],
         ...     build_options=["--debug"],
-        ...     driver_options=["--debug"])
+        ...     driver_options=["--debug"],
+        ... )
 
         Run FF in 64-bit mode:
 
         >>> exp.add_algorithm(
-        ...     "ff", repo, rev,
+        ...     "ff",
+        ...     repo,
+        ...     rev,
         ...     ["--search", "lazy_greedy([ff()])"],
         ...     build_options=["release64"],
-        ...     driver_options=["--build", "release64"])
+        ...     driver_options=["--build", "release64"],
+        ... )
 
         Run LAMA-2011 with custom planner time limit:
 
         >>> exp.add_algorithm(
-        ...     "lama", repo, rev,
+        ...     "lama",
+        ...     repo,
+        ...     rev,
         ...     [],
         ...     driver_options=[
-        ...         "--alias", "seq-saq-lama-2011",
-        ...         "--overall-time-limit", "5m"])
+        ...         "--alias",
+        ...         "seq-saq-lama-2011",
+        ...         "--overall-time-limit",
+        ...         "5m",
+        ...     ],
+        ... )
 
         """
         if not isinstance(name, str):

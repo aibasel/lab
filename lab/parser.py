@@ -162,7 +162,7 @@ class Parser:
         an error message is printed to stderr.
 
         >>> parser = Parser()
-        >>> parser.add_pattern('facts', r'Facts: (\d+)', type=int)
+        >>> parser.add_pattern("facts", r"Facts: (\d+)", type=int)
 
         """
         if type == bool:

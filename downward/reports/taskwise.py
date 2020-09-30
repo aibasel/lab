@@ -30,9 +30,11 @@ class TaskwiseReport(PlanningReport):
 
     >>> from downward.experiment import FastDownwardExperiment
     >>> exp = FastDownwardExperiment()
-    >>> exp.add_report(TaskwiseReport(
-    ...     attributes=["expansions", "search_time"],
-    ...     filter_algorithm=["lmcut"]))
+    >>> exp.add_report(
+    ...     TaskwiseReport(
+    ...         attributes=["expansions", "search_time"], filter_algorithm=["lmcut"]
+    ...     )
+    ... )
 
     Example output:
 

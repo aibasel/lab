@@ -39,11 +39,12 @@ REV = "default" if VCS == cached_revision.MERCURIAL else "main"
 class QualityFilters:
     """Compute the IPC quality score.
 
-        >>> from downward.reports.absolute import AbsoluteReport
-        >>> filters = QualityFilters()
-        >>> report = AbsoluteReport(filter=[filters.store_costs, filters.add_quality])
+    >>> from downward.reports.absolute import AbsoluteReport
+    >>> filters = QualityFilters()
+    >>> report = AbsoluteReport(filter=[filters.store_costs, filters.add_quality])
 
     """
+
     def __init__(self):
         self.tasks_to_costs = defaultdict(list)
 

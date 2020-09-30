@@ -116,17 +116,17 @@ class _Buildable:
         These can be used later, for example, in reports. ::
 
         >>> exp = Experiment()
-        >>> exp.set_property('suite', ['gripper', 'grid'])
+        >>> exp.set_property("suite", ["gripper", "grid"])
         >>> run = exp.add_run()
-        >>> run.set_property('domain', 'gripper')
-        >>> run.set_property('problem', 'prob01.pddl')
+        >>> run.set_property("domain", "gripper")
+        >>> run.set_property("problem", "prob01.pddl")
 
         Each run must have the property *id* which must be a *unique*
         list of strings. They determine where the results for this run
         will land in the combined properties file. ::
 
-        >>> run.set_property('id', ["algo1", "task1"])
-        >>> run.set_property('id', ["algo2", "domain1", "problem1"])
+        >>> run.set_property("id", ["algo1", "task1"])
+        >>> run.set_property("id", ["algo2", "domain1", "problem1"])
 
         """
         self.properties[name] = value
@@ -151,15 +151,15 @@ class _Buildable:
         Example::
 
         >>> exp = Experiment()
-        >>> exp.add_resource('planner', 'path/to/planner')
+        >>> exp.add_resource("planner", "path/to/planner")
 
         includes my-planner in the experiment directory. You can use
         ``{planner}`` to reference my-planner in a run's commands::
 
         >>> run = exp.add_run()
-        >>> run.add_resource('domain', 'path-to/gripper/domain.pddl')
-        >>> run.add_resource('task', 'path-to/gripper/prob01.pddl')
-        >>> run.add_command('plan', ['{planner}', '{domain}', '{task}'])
+        >>> run.add_resource("domain", "path-to/gripper/domain.pddl")
+        >>> run.add_resource("task", "path-to/gripper/prob01.pddl")
+        >>> run.add_command("plan", ["{planner}", "{domain}", "{task}"])
 
         """
         if dest == "":
@@ -181,8 +181,8 @@ class _Buildable:
 
         >>> exp = Experiment()
         >>> run = exp.add_run()
-        >>> run.add_new_file('learn', 'learn.txt', 'a = 5; b = 2; c = 5')
-        >>> run.add_command('print-trainingset', ['cat', '{learn}'])
+        >>> run.add_new_file("learn", "learn.txt", "a = 5; b = 2; c = 5")
+        >>> run.add_command("print-trainingset", ["cat", "{learn}"])
 
         """
         if name:
@@ -242,16 +242,16 @@ class _Buildable:
         >>> exp = Experiment()
         >>> run = exp.add_run()
         >>> # Add commands to a *specific* run.
-        >>> run.add_command('solver', ['mysolver', 'input-file'], time_limit=60)
+        >>> run.add_command("solver", ["mysolver", "input-file"], time_limit=60)
         >>> # Add a command to *all* runs.
-        >>> exp.add_command('cleanup', ['rm', 'my-temp-file'])
+        >>> exp.add_command("cleanup", ["rm", "my-temp-file"])
 
         Make sure to call all Python programs from the currently active
         Python interpreter, i.e., ``sys.executable``. Otherwise, the
         system Python version might be used instead of the Python version
         from the virtual environment.
 
-        >>> run.add_command('myplanner', [sys.executable, 'planner.py', 'input-file'])
+        >>> run.add_command("myplanner", [sys.executable, "planner.py", "input-file"])
 
         """
         _check_name(name, "command", extra_chars="_-")
@@ -332,14 +332,14 @@ class Experiment(_Buildable):
     will have steps for building and executing the experiment:
 
     >>> exp = Experiment()
-    >>> exp.add_step('build', exp.build)
-    >>> exp.add_step('start', exp.start_runs)
+    >>> exp.add_step("build", exp.build)
+    >>> exp.add_step("start", exp.start_runs)
 
     Moreover, there are usually steps for fetching the results and
     making reports:
 
     >>> from lab.reports import Report
-    >>> exp.add_fetcher(name='fetch')
+    >>> exp.add_fetcher(name="fetch")
     >>> exp.add_report(Report(attributes=["error"]))
 
     When calling :meth:`.start_runs`, all **runs** part of the
@@ -349,8 +349,8 @@ class Experiment(_Buildable):
     >>> for algo in ["algo1", "algo2"]:
     ...     for value in range(10):
     ...         run = exp.add_run()
-    ...         run.set_property('id', [algo, str(value)])
-    ...         run.add_command('solve', [algo, str(value)])
+    ...         run.set_property("id", [algo, str(value)])
+    ...         run.add_command("solve", [algo, str(value)])
 
     You can pass the names of selected steps to your experiment script
     or use ``--all`` to execute all steps. At the end of your script,
@@ -432,11 +432,11 @@ class Experiment(_Buildable):
         >>> import shutil
         >>> import subprocess
         >>> from lab.experiment import Experiment
-        >>> exp = Experiment('/tmp/myexp')
-        >>> exp.add_step('build', exp.build)
-        >>> exp.add_step('start', exp.start_runs)
-        >>> exp.add_step('rm-eval-dir', shutil.rmtree, exp.eval_dir)
-        >>> exp.add_step('greet', subprocess.call, ['echo', 'Hello'])
+        >>> exp = Experiment("/tmp/myexp")
+        >>> exp.add_step("build", exp.build)
+        >>> exp.add_step("start", exp.start_runs)
+        >>> exp.add_step("rm-eval-dir", shutil.rmtree, exp.eval_dir)
+        >>> exp.add_step("greet", subprocess.call, ["echo", "Hello"])
 
         """
         if not isinstance(name, str):
@@ -553,22 +553,22 @@ class Experiment(_Buildable):
 
         Example setup:
 
-        >>> exp = Experiment('/tmp/exp')
+        >>> exp = Experiment("/tmp/exp")
 
         Fetch all results and write a single combined properties file
         to the default evaluation directory (this step is added by
         default):
 
-        >>> exp.add_fetcher(name='fetch')
+        >>> exp.add_fetcher(name="fetch")
 
         Merge the results from "other-exp" into this experiment's
         results:
 
-        >>> exp.add_fetcher(src='/path/to/other-exp-eval')
+        >>> exp.add_fetcher(src="/path/to/other-exp-eval")
 
         Fetch only the runs for certain algorithms:
 
-        >>> exp.add_fetcher(filter_algorithm=['algo_1', 'algo_5'])
+        >>> exp.add_fetcher(filter_algorithm=["algo_1", "algo_5"])
 
         """
         src = src or self.path

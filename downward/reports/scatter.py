@@ -72,35 +72,37 @@ class ScatterPlotReport(PlanningReport):
         >>> def domain_as_category(run1, run2):
         ...     # run2['domain'] has the same value, because we always
         ...     # compare two runs of the same problem.
-        ...     return run1['domain']
+        ...     return run1["domain"]
 
         Example grouping by difficulty:
 
         >>> def improvement(run1, run2):
-        ...     time1 = run1.get('search_time', 1800)
-        ...     time2 = run2.get('search_time', 1800)
+        ...     time1 = run1.get("search_time", 1800)
+        ...     time2 = run2.get("search_time", 1800)
         ...     if time1 > time2:
-        ...         return 'better'
+        ...         return "better"
         ...     if time1 == time2:
-        ...         return 'equal'
-        ...     return 'worse'
+        ...         return "equal"
+        ...     return "worse"
 
         >>> from downward.experiment import FastDownwardExperiment
         >>> exp = FastDownwardExperiment()
-        >>> exp.add_report(ScatterPlotReport(
-        ...     attributes=['search_time'],
-        ...     get_category=improvement))
+        >>> exp.add_report(
+        ...     ScatterPlotReport(attributes=["search_time"], get_category=improvement)
+        ... )
 
         Example comparing the number of expanded states for two
         algorithms:
 
-        >>> exp.add_report(ScatterPlotReport(
+        >>> exp.add_report(
+        ...     ScatterPlotReport(
         ...         attributes=["expansions_until_last_jump"],
         ...         filter_algorithm=["algorithm-1", "algorithm-2"],
         ...         get_category=domain_as_category,
         ...         format="png",  # Use "tex" for pgfplots output.
-        ...         ),
-        ...     name="scatterplot-expansions")
+        ...     ),
+        ...     name="scatterplot-expansions",
+        ... )
 
         The inherited *format* parameter can be set to 'png' (default),
         'eps', 'pdf', 'pgf' (needs matplotlib 1.2) or 'tex'. For the
@@ -122,25 +124,25 @@ class ScatterPlotReport(PlanningReport):
 
         >>> from downward.reports.scatter import ScatterPlotReport
         >>> matplotlib_options = {
-        ...     'font.family': 'serif',
-        ...     'font.weight': 'normal',
+        ...     "font.family": "serif",
+        ...     "font.weight": "normal",
         ...     # Used if more specific sizes not set.
-        ...     'font.size': 20,
-        ...     'axes.labelsize': 20,
-        ...     'axes.titlesize': 30,
-        ...     'legend.fontsize': 22,
-        ...     'xtick.labelsize': 10,
-        ...     'ytick.labelsize': 10,
-        ...     'lines.markersize': 10,
-        ...     'lines.markeredgewidth': 0.25,
-        ...     'lines.linewidth': 1,
+        ...     "font.size": 20,
+        ...     "axes.labelsize": 20,
+        ...     "axes.titlesize": 30,
+        ...     "legend.fontsize": 22,
+        ...     "xtick.labelsize": 10,
+        ...     "ytick.labelsize": 10,
+        ...     "lines.markersize": 10,
+        ...     "lines.markeredgewidth": 0.25,
+        ...     "lines.linewidth": 1,
         ...     # Width and height in inches.
-        ...     'figure.figsize': [8, 8],
-        ...     'savefig.dpi': 100,
+        ...     "figure.figsize": [8, 8],
+        ...     "savefig.dpi": 100,
         ... }
         >>> report = ScatterPlotReport(
-        ...     attributes=['initial_h_value'],
-        ...     matplotlib_options=matplotlib_options)
+        ...     attributes=["initial_h_value"], matplotlib_options=matplotlib_options
+        ... )
 
         You can see the full list of matplotlib options and their
         defaults by executing ::
