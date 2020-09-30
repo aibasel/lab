@@ -34,5 +34,7 @@
    :maxdepth: 1
    :caption: General
 
+   lab.concepts
+
    news
 

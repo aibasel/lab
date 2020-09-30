@@ -328,34 +328,8 @@ class _Buildable:
 class Experiment(_Buildable):
     """Base class for Lab experiments.
 
-    An **experiment** consists of multiple **steps**. Most experiments
-    will have steps for building and executing the experiment:
-
-    >>> exp = Experiment()
-    >>> exp.add_step("build", exp.build)
-    >>> exp.add_step("start", exp.start_runs)
-
-    Moreover, there are usually steps for fetching the results and
-    making reports:
-
-    >>> from lab.reports import Report
-    >>> exp.add_fetcher(name="fetch")
-    >>> exp.add_report(Report(attributes=["error"]))
-
-    When calling :meth:`.start_runs`, all **runs** part of the
-    experiment are executed. You can add runs with the :meth:`.add_run`
-    method. Each run needs a unique ID and at least one **command**:
-
-    >>> for algo in ["algo1", "algo2"]:
-    ...     for value in range(10):
-    ...         run = exp.add_run()
-    ...         run.set_property("id", [algo, str(value)])
-    ...         run.add_command("solve", [algo, str(value)])
-
-    You can pass the names of selected steps to your experiment script
-    or use ``--all`` to execute all steps. At the end of your script,
-    call ``exp.run_steps()`` to parse the commandline and execute the
-    selected steps.
+    See :ref:`concepts` for a description of how Lab experiments are
+    structured.
 
     """
 
