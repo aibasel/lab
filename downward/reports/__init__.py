@@ -27,20 +27,13 @@ from lab.reports import Attribute, geometric_mean, markup, Report
 
 
 class PlanningReport(Report):
-    """
-    This is the base class for planner reports.
+    """Base class for planner reports."""
 
-    The :py:attr:`~INFO_ATTRIBUTES` and :py:attr:`~ERROR_ATTRIBUTES`
-    class members hold attributes for Fast Downward experiments by
-    default. You may want to adjust the two lists in derived classes.
-
-    """
-
-    #: List of predefined :py:class:`~Attribute` instances. If
+    #: List of predefined :py:class:`~Attribute` instances. For example, if
     #: PlanningReport receives ``attributes=['coverage']``, it converts
     #: the plain string ``'coverage'`` to the attribute instance
     #: ``Attribute('coverage', absolute=True, min_wins=False, scale='linear')``.
-    #: The list can be overriden in subclasses.
+    #: The class attribute can be overriden in subclasses.
     PREDEFINED_ATTRIBUTES = [
         Attribute("cost", scale="linear"),
         Attribute("coverage", absolute=True, min_wins=False, scale="linear"),
@@ -63,8 +56,8 @@ class PlanningReport(Report):
         Attribute("unsolvable", absolute=True, min_wins=False),
     ]
 
-    #: Attributes shown in the algorithm info table. Can be overriden in
-    #: subclasses.
+    #: Attributes shown in the algorithm info table. This class attribute can
+    #: be overriden in subclasses.
     INFO_ATTRIBUTES = [
         "local_revision",
         "global_revision",
@@ -74,8 +67,8 @@ class PlanningReport(Report):
         "component_options",
     ]
 
-    #: Attributes shown in the unexplained-errors table. Can be overriden
-    #: in subclasses.
+    #: Attributes shown in the unexplained-errors table. This class attribute
+    #: can be overriden in subclasses.
     ERROR_ATTRIBUTES = [
         "domain",
         "problem",
@@ -101,11 +94,11 @@ class PlanningReport(Report):
 
         >>> # Use a filter function to select algorithms.
         >>> def only_blind_and_lmcut(run):
-        ...     return run['algorithm'] in ['blind', 'lmcut']
-        >>> report = PlanningReport(filter=only_blind_and_lmcut)
+        ...     return run["algorithm"] in ["blind", "lmcut"]
+        >>> PlanningReport(filter=only_blind_and_lmcut)
 
         >>> # Use "filter_algorithm" to select and *order* algorithms.
-        >>> r = PlanningReport(filter_algorithm=['lmcut', 'blind'])
+        >>> PlanningReport(filter_algorithm=["lmcut", "blind"])
 
         :py:class:`Filters <.Report>` can be very helpful so we
         recommend reading up on them to use their full potential.
