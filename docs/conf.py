@@ -98,6 +98,7 @@ pygments_style = "sphinx"
 
 # Own options.
 autoclass_content = "both"
+autodoc_inherit_docstrings = False
 
 
 # -- Options for HTML output ---------------------------------------------------

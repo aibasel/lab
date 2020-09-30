@@ -33,7 +33,6 @@ class PlanningReport(Report):
     #: PlanningReport receives ``attributes=['coverage']``, it converts
     #: the plain string ``'coverage'`` to the attribute instance
     #: ``Attribute('coverage', absolute=True, min_wins=False, scale='linear')``.
-    #: The class attribute can be overriden in subclasses.
     PREDEFINED_ATTRIBUTES = [
         Attribute("cost", scale="linear"),
         Attribute("coverage", absolute=True, min_wins=False, scale="linear"),
@@ -56,8 +55,7 @@ class PlanningReport(Report):
         Attribute("unsolvable", absolute=True, min_wins=False),
     ]
 
-    #: Attributes shown in the algorithm info table. This class attribute can
-    #: be overriden in subclasses.
+    #: Attributes shown in the algorithm info table.
     INFO_ATTRIBUTES = [
         "local_revision",
         "global_revision",
@@ -67,8 +65,7 @@ class PlanningReport(Report):
         "component_options",
     ]
 
-    #: Attributes shown in the unexplained-errors table. This class attribute
-    #: can be overriden in subclasses.
+    #: Attributes shown in the unexplained-errors table.
     ERROR_ATTRIBUTES = [
         "domain",
         "problem",

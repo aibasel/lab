@@ -25,7 +25,7 @@ class TaskwiseReport(PlanningReport):
     For each task report all selected attributes in a single row.
 
     If the experiment contains more than one algorithm, use
-    ``filter_algorithm='my_algorithm'`` to select exactly one algorithm
+    ``filter_algorithm=["my_algorithm"]`` to select exactly one algorithm
     for the report.
 
     >>> from downward.experiment import FastDownwardExperiment
