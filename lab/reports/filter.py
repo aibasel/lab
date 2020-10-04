@@ -32,6 +32,7 @@ class FilterReport(Report):
 
     """
 
+    # Without the docstring Sphinx reuses docstring from parent class.
     def __init__(self, **kwargs):
         """"""
         super().__init__(**kwargs)
