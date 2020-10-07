@@ -24,7 +24,5 @@ Downward Lab are distributed together.
       title =        "{Downward} {Lab}",
       publisher =    "Zenodo",
       year =         "2017",
-      doi =          "10.5281/zenodo.790461",
-      url =          "https://doi.org/10.5281/zenodo.790461",
       howpublished = "\url{https://doi.org/10.5281/zenodo.790461}"
     }
