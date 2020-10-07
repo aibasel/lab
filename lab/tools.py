@@ -216,7 +216,7 @@ def natural_sort(alist):
             return text.lower()
 
     def extract_numbers(text):
-        parts = re.split("([0-9]+[KMG]?|infinity)", text)
+        parts = re.split("([0-9]+[KMG]?|infinity)", str(text))
         return [to_int_if_number(part) for part in parts]
 
     return sorted(alist, key=extract_numbers)
