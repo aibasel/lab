@@ -5,15 +5,7 @@ import os
 import project
 
 
-# Use global repo and revision cache when testing this experiment with tox.
-# You can remove the if-case in your own experiments.
-if "TOX_ENV_DIR" in os.environ:
-    REPO = os.environ["DOWNWARD_REPO"]
-    REVISION_CACHE = os.environ["DOWNWARD_REVISION_CACHE"]
-else:
-    REPO = project.get_repo_base()
-    REVISION_CACHE = None
-
+REPO = project.get_repo_base()
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 if project.REMOTE:
     SUITE = project.SUITE_SATISFICING
@@ -40,7 +32,7 @@ ATTRIBUTES = [
     "expansions", "memory", project.EVALUATIONS_PER_TIME,
 ]
 
-exp = project.CommonExperiment(environment=ENV, revision_cache=REVISION_CACHE)
+exp = project.CommonExperiment(environment=ENV)
 for config_nick, config in CONFIGS:
     for rev, rev_nick in REVS:
         algo_name = f"{rev_nick}:{config_nick}" if rev_nick else config_nick
