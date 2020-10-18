@@ -5,7 +5,7 @@ Extended Downward Lab tutorial
 
 This tutorial shows you how to install Downward Lab and how to create a
 simple experiment for Fast Downward that compares two heuristics, the
-causal graph heuristic (CG) and the FF heuristic. There are many ways for
+causal graph (CG) heuristic and the FF heuristic. There are many ways for
 setting up your experiments. This tutorial gives you an opinionated
 alternative that has proven to work well in practice.
 
@@ -21,7 +21,7 @@ experiments, you'll need a **Fast Downward** repository, planning
     sudo apt install bison cmake flex g++ git make python3 python3-venv
 
     # Create directory for holding binaries and scripts.
-    mkdir -p ~/bin
+    mkdir --parents ~/bin
 
     # Make directory for all projects related to Fast Downward.
     mkdir downward-projects
@@ -98,7 +98,7 @@ Add to your ``~/.bashrc`` file::
 
 Add to your ``~/.bash_aliases`` file::
 
-    # Unset PYTHONPATH to obtain isolated virtual environments.
+    # Activate virtualenv and unset PYTHONPATH to obtain isolated virtual environments.
     alias venv="unset PYTHONPATH; source .venv/bin/activate"
 
 Finally, reload ``.bashrc`` (which usually also reloads ``~/.bash_aliases``)::
