@@ -111,30 +111,42 @@ directories containing a ``.venv`` subdirectory.
 
 Run tutorial experiment
 -----------------------
-.. highlight:: python
 
-The script below is an example Fast Downward experiment. After adapting
-``REPO`` and ``BENCHMARKS_DIR`` to your setup, saving the file as
-``lmcut.py`` and making it executable, you can see the available steps
-with ::
+The files below are an experiment script for the example experiment, a
+``project.py`` module that bundles common functionality for all
+experiments related to the project, and a parser script. You can use the
+files as a basis for your own experiments. You can also find these files
+in the `Lab repo
+<https://github.com/aibasel/lab/tree/master/examples/downward>`_. Copy the
+three files into ``experiments/cg-vs-ff``.
 
-    ./lmcut.py
+.. highlight:: bash
+
+Make sure the experiment script and the parser are executable. Then you
+can see the available steps with ::
+
+    ./2020-09-11-A-cg-vs-ff.py
 
 Run all steps with ::
 
-    ./lmcut.py --all
+    ./2020-09-11-A-cg-vs-ff.py --all
 
 
 Run individual steps with ::
 
-    ./lmcut.py build
-    ./lmcut.py 2
-    ./lmcut.py 3 4
+    ./2020-09-11-A-cg-vs-ff.py build
+    ./2020-09-11-A-cg-vs-ff.py 2
+    ./2020-09-11-A-cg-vs-ff.py 3 6 7
 
+.. highlight:: python
 
-You can use this file as a basis for your own experiments.
+.. literalinclude:: ../examples/downward/2020-09-11-A-cg-vs-ff.py
+   :caption:
 
-.. literalinclude:: ../examples/lmcut.py
+.. literalinclude:: ../examples/downward/project.py
+   :caption:
+
+.. literalinclude:: ../examples/downward/parser.py
    :caption:
 
 The `Downward Lab API <downward.experiment.html>`_ shows you how to adjust

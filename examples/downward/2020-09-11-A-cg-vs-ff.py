@@ -65,6 +65,6 @@ for algo1, algo2 in pairs:
                 filter=[project.add_evaluations_per_time],
                 format="tex" if project.TEX else "png",
             ),
-            name=f'{exp.name}-{algo1}-vs-{algo2}-{attr}{"-relative" if project.RELATIVE else ""}')
+            name=f'{exp.name}-{algo1}-vs-{algo2}-{attr}{"-rel" if project.RELATIVE else ""}')
 
 exp.run_steps()

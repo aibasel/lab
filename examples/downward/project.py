@@ -45,35 +45,6 @@ RELATIVE = ARGS.relative
 EVALUATIONS_PER_TIME = Attribute(
     "evaluations_per_time", min_wins=False, function=geometric_mean, digits=1)
 
-
-# Generated with "./suites.py optimal_strips" in aibasel/downward-benchmarks repo.
-SUITE_OPTIMAL_STRIPS = [
-    "agricola-opt18-strips", "airport", "barman-opt11-strips",
-    "barman-opt14-strips", "blocks", "childsnack-opt14-strips",
-    "data-network-opt18-strips", "depot", "driverlog",
-    "elevators-opt08-strips", "elevators-opt11-strips",
-    "floortile-opt11-strips", "floortile-opt14-strips", "freecell",
-    "ged-opt14-strips", "grid", "gripper", "hiking-opt14-strips",
-    "logistics00", "logistics98", "miconic", "movie", "mprime",
-    "mystery", "nomystery-opt11-strips", "openstacks-opt08-strips",
-    "openstacks-opt11-strips", "openstacks-opt14-strips",
-    "openstacks-strips", "organic-synthesis-opt18-strips",
-    "organic-synthesis-split-opt18-strips", "parcprinter-08-strips",
-    "parcprinter-opt11-strips", "parking-opt11-strips",
-    "parking-opt14-strips", "pathways-noneg", "pegsol-08-strips",
-    "pegsol-opt11-strips", "petri-net-alignment-opt18-strips",
-    "pipesworld-notankage", "pipesworld-tankage", "psr-small", "rovers",
-    "satellite", "scanalyzer-08-strips", "scanalyzer-opt11-strips",
-    "snake-opt18-strips", "sokoban-opt08-strips",
-    "sokoban-opt11-strips", "spider-opt18-strips", "storage",
-    "termes-opt18-strips", "tetris-opt14-strips",
-    "tidybot-opt11-strips", "tidybot-opt14-strips", "tpp",
-    "transport-opt08-strips", "transport-opt11-strips",
-    "transport-opt14-strips", "trucks-strips", "visitall-opt11-strips",
-    "visitall-opt14-strips", "woodworking-opt08-strips",
-    "woodworking-opt11-strips", "zenotravel",
-]
-
 # Generated with "./suites.py satisficing" in aibasel/downward-benchmarks repo.
 SUITE_SATISFICING = [
     "agricola-sat18-strips", "airport", "assembly", "barman-sat11-strips",
@@ -136,9 +107,7 @@ def _get_exp_dir_relative_to_repos_dir():
     return Path(repo_name) / "experiments" / project / "data" / expname
 
 
-def add_scp_steps(exp):
-    exp.add_step("remove-eval-dir", shutil.rmtree, exp.eval_dir, ignore_errors=True)
-
+def add_scp_step(exp):
     remote_exp = Path(USER.remote_repos) / _get_exp_dir_relative_to_repos_dir()
     exp.add_step("scp-eval-dir", subprocess.call, [
         "scp",
@@ -212,7 +181,8 @@ class CommonExperiment(FastDownwardExperiment):
         self.add_fetcher(name="fetch")
 
         if not REMOTE:
-            add_scp_steps(self)
+            self.add_step("remove-eval-dir", shutil.rmtree, self.eval_dir, ignore_errors=True)
+            add_scp_step(self)
 
         self.add_parser(self.EXITCODE_PARSER)
         self.add_parser(self.TRANSLATOR_PARSER)
