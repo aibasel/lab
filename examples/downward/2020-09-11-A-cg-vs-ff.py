@@ -16,10 +16,13 @@ else:
 
 CONFIGS = [
     (f"{index:02d}-{h_nick}", ["--search", f"eager_greedy([{h}])"])
-    for index, (h_nick, h) in enumerate([
-        ("cg", "cg(transform=adapt_costs(one))"),
-        ("ff", "ff(transform=adapt_costs(one))"),
-    ], start=1)
+    for index, (h_nick, h) in enumerate(
+        [
+            ("cg", "cg(transform=adapt_costs(one))"),
+            ("ff", "ff(transform=adapt_costs(one))"),
+        ],
+        start=1,
+    )
 ]
 BUILD_OPTIONS = []
 DRIVER_OPTIONS = ["--overall-time-limit", "5m"]
@@ -27,9 +30,17 @@ REVS = [
     ("release-20.06.0", "20.06"),
 ]
 ATTRIBUTES = [
-    "error", "run_dir", "search_start_time", "search_start_memory",
-    "total_time", "initial_h_value", "coverage",
-    "expansions", "memory", project.EVALUATIONS_PER_TIME,
+    "error",
+    "run_dir",
+    "search_start_time",
+    "search_start_memory",
+    "total_time",
+    "initial_h_value",
+    "h_values",
+    "coverage",
+    "expansions",
+    "memory",
+    project.EVALUATIONS_PER_TIME,
 ]
 
 exp = project.CommonExperiment(environment=ENV)
@@ -47,17 +58,18 @@ for config_nick, config in CONFIGS:
 exp.add_suite(BENCHMARKS_DIR, SUITE)
 
 project.add_absolute_report(
-    exp,
-    attributes=ATTRIBUTES,
-    filter=[project.add_evaluations_per_time])
+    exp, attributes=ATTRIBUTES, filter=[project.add_evaluations_per_time]
+)
 
 attributes = ["expansions"]
 pairs = [
     ("20.06:01-cg", "20.06:02-ff"),
 ]
+suffix = "-rel" if project.RELATIVE else ""
 for algo1, algo2 in pairs:
     for attr in attributes:
-        exp.add_report(project.ScatterPlotReport(
+        exp.add_report(
+            project.ScatterPlotReport(
                 relative=project.RELATIVE,
                 get_category=None if project.TEX else lambda run1, run2: run1["domain"],
                 attributes=[attr],
@@ -65,6 +77,7 @@ for algo1, algo2 in pairs:
                 filter=[project.add_evaluations_per_time],
                 format="tex" if project.TEX else "png",
             ),
-            name=f'{exp.name}-{algo1}-vs-{algo2}-{attr}{"-rel" if project.RELATIVE else ""}')
+            name=f"{exp.name}-{algo1}-vs-{algo2}-{attr}{suffix}",
+        )
 
 exp.run_steps()

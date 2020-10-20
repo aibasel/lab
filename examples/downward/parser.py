@@ -34,12 +34,12 @@ class CommonParser(Parser):
 
 def main():
     parser = CommonParser()
-    parser.add_pattern(
+    parser.add_bottom_up_pattern(
         "search_start_time",
         r"\[t=(.+)s, \d+ KB\] g=0, 1 evaluated, 0 expanded",
         type=float,
     )
-    parser.add_pattern(
+    parser.add_bottom_up_pattern(
         "search_start_memory",
         r"\[t=.+s, (\d+) KB\] g=0, 1 evaluated, 0 expanded",
         type=int,
@@ -49,18 +49,11 @@ def main():
         r"f = (\d+) \[1 evaluated, 0 expanded, t=.+s, \d+ KB\]",
         type=int,
     )
-
-    parser.add_pattern(
-        "time_for_computing_cartesian_abstractions",
-        r"Time for initializing additive Cartesian heuristic: (.+)s\n",
-        type=float,
+    parser.add_repeated_pattern(
+        "h_values",
+        r"New best heuristic value for .+: (\d+)\n",
+        type=int,
     )
-    parser.add_pattern(
-        "time_for_computing_cartesian_abstractions",
-        r"Time for building Cartesian abstractions: (.+)s\n",
-        type=float,
-    )
-
     parser.parse()
 
 
