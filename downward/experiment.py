@@ -113,13 +113,12 @@ class FastDownwardExperiment(Experiment):
     .. note::
 
         To build the experiment, execute its runs and fetch the results,
-        add the following steps (previous Lab versions added these steps
-        automatically):
+        add the following steps:
 
         >>> exp = FastDownwardExperiment()
-        >>> exp.add_step('build', exp.build)
-        >>> exp.add_step('start', exp.start_runs)
-        >>> exp.add_fetcher(name='fetch')
+        >>> exp.add_step("build", exp.build)
+        >>> exp.add_step("start", exp.start_runs)
+        >>> exp.add_fetcher(name="fetch")
 
     """
 
@@ -216,7 +215,7 @@ class FastDownwardExperiment(Experiment):
 
         Then you can copy the generated list into your experiment script::
 
-            >>> exp.add_suite(benchmarks_dir, ['airport', 'zenotravel'])
+            >>> exp.add_suite(benchmarks_dir, ["airport", "zenotravel"])
 
         """
         if isinstance(suite, str):
@@ -246,7 +245,7 @@ class FastDownwardExperiment(Experiment):
         *repo* must be a path to a Fast Downward repository.
 
         *rev* must be a valid revision in the given repository (e.g.,
-        ``"default"``, ``"tip"``, ``"issue123"``).
+        ``"e9c2370e6"``, ``"my-branch"``, ``"issue123"``).
 
         *component_options* must be a list of strings. By default these
         options are passed to the search component. Use
@@ -254,18 +253,18 @@ class FastDownwardExperiment(Experiment):
         ``"--search-options"`` within the component options to override
         the default for the following options, until overridden again.
 
-        If given, *build_options* must be a list of strings. They will
-        be passed to the ``build.py`` script. Options can be build names
-        (e.g., ``"release32"``, ``"debug64"``), ``build.py`` options
-        (e.g., ``"--debug"``) or options for Make. If *build_options* is
-        omitted, the ``"release32"`` version is built.
+        If given, *build_options* must be a list of strings. They will be
+        passed to the ``build.py`` script. Options can be build names
+        (e.g., ``"releasenolp"``), ``build.py`` options (e.g.,
+        ``"--debug"``) or options for Make. If *build_options* is omitted,
+        the ``"release"`` version is built.
 
-        If given, *driver_options* must be a list of strings. They will
-        be passed to the ``fast-downward.py`` script. See
-        ``fast-downward.py --help`` for available options. The list is
-        always prepended with ``["--validate", "--overall-time-limit",
-        "30m", "--overall-memory-limit', "3584M"]``. Specifying custom
-        limits overrides the default limits.
+        If given, *driver_options* must be a list of strings. They will be
+        passed to the ``fast-downward.py`` script. See ``fast-downward.py
+        --help`` for available options. The list is always prepended with
+        ``["--validate", "--overall-time-limit", "30m",
+        "--overall-memory-limit', "3584M"]``. Specifying custom limits
+        overrides the default limits.
 
         Example experiment setup:
 
@@ -276,36 +275,35 @@ class FastDownwardExperiment(Experiment):
         >>> vcs = get_version_control_system(repo)
         >>> rev = "default" if vcs == MERCURIAL else "main"
 
-        Test iPDB in the latest revision on the default branch:
+        Run iPDB using the latest revision on the main branch:
 
-        >>> exp.add_algorithm(
-        ...     "ipdb", repo, rev,
-        ...     ["--search", "astar(ipdb())"])
+        >>> exp.add_algorithm("ipdb", repo, rev, ["--search", "astar(ipdb())"])
 
         Run blind search in debug mode:
 
         >>> exp.add_algorithm(
-        ...     "blind", repo, rev,
+        ...     "blind",
+        ...     repo,
+        ...     rev,
         ...     ["--search", "astar(blind())"],
         ...     build_options=["--debug"],
-        ...     driver_options=["--debug"])
-
-        Run FF in 64-bit mode:
-
-        >>> exp.add_algorithm(
-        ...     "ff", repo, rev,
-        ...     ["--search", "lazy_greedy([ff()])"],
-        ...     build_options=["release64"],
-        ...     driver_options=["--build", "release64"])
+        ...     driver_options=["--debug"],
+        ... )
 
         Run LAMA-2011 with custom planner time limit:
 
         >>> exp.add_algorithm(
-        ...     "lama", repo, rev,
+        ...     "lama",
+        ...     repo,
+        ...     rev,
         ...     [],
         ...     driver_options=[
-        ...         "--alias", "seq-saq-lama-2011",
-        ...         "--overall-time-limit", "5m"])
+        ...         "--alias",
+        ...         "seq-saq-lama-2011",
+        ...         "--overall-time-limit",
+        ...         "5m",
+        ...     ],
+        ... )
 
         """
         if not isinstance(name, str):

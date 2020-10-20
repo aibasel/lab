@@ -35,24 +35,13 @@ VCS = cached_revision.get_version_control_system(REPO)
 REV = "default" if VCS == cached_revision.MERCURIAL else "main"
 
 
-class QualityFilters(object):
+# See FAQs in docs for how to use the filters.
+class QualityFilters:
     """Compute the IPC quality score.
 
-    The IPC score is computed over the list of runs for each task. Since
-    filters only work on individual runs, we can't compute the score
-    with a single filter, but it is possible by using two filters:
-    *store_costs* saves the list of costs per task in a dictionary
-    whereas *add_quality* uses the stored costs to compute IPC quality
-    scores and adds them to the runs.
-
-    The *add_quality* filter can only be executed after *store_costs*
-    has been executed. Also, both filters require the "cost" attribute
-    to be parsed.
-
     >>> from downward.reports.absolute import AbsoluteReport
-    >>> quality_filters = QualityFilters()
-    >>> report = AbsoluteReport(filter=[quality_filters.store_costs,
-    ...                                 quality_filters.add_quality])
+    >>> filters = QualityFilters()
+    >>> report = AbsoluteReport(filter=[filters.store_costs, filters.add_quality])
 
     """
 

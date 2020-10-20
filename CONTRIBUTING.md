@@ -1,5 +1,9 @@
 First off, thanks for taking the time to contribute to Lab!
 
+If you want to fix a bug, you can go straight ahead to fixing it. Before
+implementing new features though, we recommend discussing the change in an
+issue first, though.
+
 # Setting up a development environment
 
 Follow the installation instructions for the [Downward Lab

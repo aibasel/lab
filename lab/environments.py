@@ -341,7 +341,8 @@ class SlurmEnvironment(GridEnvironment):
         >>> env = BaselSlurmEnvironment(
         ...     partition="infai_1",
         ...     memory_per_cpu="3G",
-        ...     extra_options='#SBATCH --cpus-per-task=4')
+        ...     extra_options="#SBATCH --cpus-per-task=4",
+        ... )
 
         Example that reserves 12 GiB of memory on infai_2:
 
@@ -350,7 +351,8 @@ class SlurmEnvironment(GridEnvironment):
         >>> env = BaselSlurmEnvironment(
         ...     partition="infai_2",
         ...     memory_per_cpu="6G",
-        ...     extra_options='#SBATCH --cpus-per-task=2')
+        ...     extra_options="#SBATCH --cpus-per-task=2",
+        ... )
 
         Use *export* to specify a list of environment variables that
         should be exported from the login node to the compute nodes

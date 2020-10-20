@@ -5,7 +5,13 @@ Tables
 ------
 
 .. autoclass:: downward.reports.PlanningReport
-   :members: PREDEFINED_ATTRIBUTES, ERROR_ATTRIBUTES, INFO_ATTRIBUTES
+
+  You may want to override the following class attributes in subclasses:
+
+  .. autoattribute:: downward.reports.PlanningReport.PREDEFINED_ATTRIBUTES
+  .. autoattribute:: downward.reports.PlanningReport.ERROR_ATTRIBUTES
+  .. autoattribute:: downward.reports.PlanningReport.INFO_ATTRIBUTES
+
 .. autoclass:: downward.reports.absolute.AbsoluteReport
 .. autoclass:: downward.reports.taskwise.TaskwiseReport
 .. autoclass:: downward.reports.compare.ComparativeReport

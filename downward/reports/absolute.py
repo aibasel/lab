@@ -71,9 +71,7 @@ class AbsoluteReport(PlanningReport):
 
     >>> from downward.experiment import FastDownwardExperiment
     >>> exp = FastDownwardExperiment()
-    >>> exp.add_report(
-    ...     AbsoluteReport(attributes=["expansions"]),
-    ...     outfile='report.html')
+    >>> exp.add_report(AbsoluteReport(attributes=["expansions"]), outfile="report.html")
 
     Example output:
 

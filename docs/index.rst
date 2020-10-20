@@ -1,39 +1,39 @@
 .. include:: ../README.rst
 
 
-Documentation for Lab
----------------------
-
 .. toctree::
    :maxdepth: 1
-   :caption: Lab
+   :caption: Tutorials
 
    lab.tutorial
-   lab.experiment
-   lab.parser
-   lab.reports
+   downward.tutorial
 
-
-Documentation for Downward Lab
-------------------------------
 
 .. toctree::
    :maxdepth: 1
-   :caption: Downward Lab
+   :caption: How-to Guides
 
-   downward.tutorial
+   faq
+   lab.parser
+   ff
+   singularity
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Reference
+
+   lab.experiment
+   lab.reports
    downward.experiment
    downward.reports
 
-
-General documentation
----------------------
 
 .. toctree::
    :maxdepth: 1
    :caption: General
 
+   lab.concepts
+
    news
-   faq
-   ff
-   singularity
+

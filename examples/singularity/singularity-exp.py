@@ -66,8 +66,7 @@ ATTRIBUTES = [
     "error",
     "g_values_over_time",
     "run_dir",
-    "singularity_runtime",
-    "total_time",
+    "runtime",
 ]
 
 exp = Experiment(environment=ENVIRONMENT)

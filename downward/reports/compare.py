@@ -54,10 +54,8 @@ class ComparativeReport(AbsoluteReport):
 
         >>> from downward.experiment import FastDownwardExperiment
         >>> exp = FastDownwardExperiment()
-        >>> algorithm_pairs = [
-        ...     ('default-lmcut', 'issue123-lmcut', 'Diff lmcut')]
-        >>> exp.add_report(ComparativeReport(
-        ...     algorithm_pairs, attributes=['coverage']))
+        >>> algorithm_pairs = [("default-lmcut", "issue123-lmcut", "Diff lmcut")]
+        >>> exp.add_report(ComparativeReport(algorithm_pairs, attributes=["coverage"]))
 
         Example output:
 

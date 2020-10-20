@@ -193,10 +193,10 @@ def natural_sort(alist):
     """Sort alist alphabetically, but special-case numbers to get
     file2.txt before file10.txt.
 
-    >>> natural_sort(['file10.txt', 'file2.txt'])
+    >>> natural_sort(["file10.txt", "file2.txt"])
     ['file2.txt', 'file10.txt']
 
-    >>> natural_sort(['check', 'infinity', '1G', '3M', '2000K', '1M', '1K', '100'])
+    >>> natural_sort(["check", "infinity", "1G", "3M", "2000K", "1M", "1K", "100"])
     ['100', '1K', '1M', '2000K', '3M', '1G', 'infinity', 'check']
     """
 

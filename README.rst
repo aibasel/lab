@@ -1,7 +1,7 @@
 Lab and Downward Lab
 ====================
 
-**Lab** is a Python package for evaluating code on benchmark sets.
+**Lab** is a Python package for evaluating solvers on benchmark sets.
 Experiments can run on a single machine or on a computer cluster. The
 package also contains code for parsing results and creating reports.
 

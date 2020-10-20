@@ -1,7 +1,7 @@
 .. _singularity:
 
-Running Singularity images
-==========================
+Run Singularity images
+======================
 
 The script below shows how to run Singularity planner images using
 Downward Lab.
