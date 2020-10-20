@@ -149,6 +149,9 @@ Run individual steps with ::
 .. literalinclude:: ../examples/downward/parser.py
    :caption:
 
+.. literalinclude:: ../examples/downward/01-evaluation.py
+   :caption:
+
 The `Downward Lab API <downward.experiment.html>`_ shows you how to adjust
 this example to your needs. You may also find the `other example
 experiments <https://github.com/aibasel/lab/tree/master/examples/>`_
