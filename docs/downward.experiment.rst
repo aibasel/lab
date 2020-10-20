@@ -10,7 +10,7 @@ Built-in parsers
 
 The following constants are paths to built-in parsers that can be passed
 to :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. The
-"Required attributes" and "Parsed attributes" lists describe the
+"Used attributes" and "Parsed attributes" lists describe the
 dependencies between the parsers.
 
 .. autoattribute:: downward.experiment.FastDownwardExperiment.EXITCODE_PARSER

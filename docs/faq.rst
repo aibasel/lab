@@ -88,3 +88,18 @@ the Lab repo and install it (preferable in a virtual environment)::
 The ``--editable`` flag installs the project in "editable mode", which
 makes any changes under ``/path/to/lab`` appear immediately in the virtual
 environment.
+
+
+Which best practices do you recommend for working with Lab?
+-----------------------------------------------------------
+
+* automate as much as possible but not too much
+* use fixed solver revisions ("3a27ea77f" instead of "main")
+* use Python virtual environments
+* pin versions of all Python dependencies in ``requirements.txt``
+* collect common experiment code in project module
+* copy experiment scripts for new experiments, don't change them
+* make evaluation locally rather than on remote cluster
+* collect exploratory results from multiple experiments
+* rerun experiments for camera-ready copy in single experiment and
+  with single code revision

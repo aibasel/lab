@@ -7,7 +7,6 @@
 
    lab.tutorial
    downward.tutorial
-   downward.long-tutorial
 
 
 .. toctree::
