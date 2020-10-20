@@ -14,4 +14,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #: Lab version number. A "+" is appended to all non-tagged revisions.
-__version__ = "6.1+"
+__version__ = "6.2"
