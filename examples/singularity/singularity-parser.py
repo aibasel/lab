@@ -51,10 +51,7 @@ def main():
         file="driver.log",
         required=True,
     )
-    parser.add_pattern("search_time", r"Search time: (.+)s", type=float)
-    parser.add_pattern("total_time", r"Total time: (.+)s\n", type=float)
-    # The Singularity runtime only has a granularity of seconds.
-    parser.add_pattern("singularity_runtime", r"Singularity runtime: (.+)s", type=int)
+    parser.add_pattern("runtime", r"Singularity runtime: (.+?)s", type=float)
     parser.add_pattern("raw_memory", r"Peak memory: (\d+) KB", type=int)
     parser.add_pattern("cost", r"\nFinal value: (.+)\n", type=int)
     parser.add_function(coverage)
