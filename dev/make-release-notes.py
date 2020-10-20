@@ -6,8 +6,8 @@ import sys
 _, VERSION, CHANGELOG, LIST = sys.argv
 
 REGEX = fr"""
-News\n
-====\n
+Changelog\n
+=========\n
 \n
 (v{VERSION}\ \(\d\d\d\d-\d\d-\d\d\))\n
 -----------------\n
