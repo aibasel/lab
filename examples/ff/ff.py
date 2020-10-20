@@ -12,14 +12,11 @@ from downward import suites
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
-from lab.reports import Attribute
+from lab.reports import Attribute, geometric_mean
 
 
 # Create custom report class with suitable info and error attributes.
 class BaseReport(AbsoluteReport):
-    PREDEFINED_ATTRIBUTES = AbsoluteReport.PREDEFINED_ATTRIBUTES + [
-        Attribute("trivially_unsolvable", min_wins=False),
-    ]
     INFO_ATTRIBUTES = ["time_limit", "memory_limit"]
     ERROR_ATTRIBUTES = [
         "domain",
@@ -40,12 +37,12 @@ else:
     ENV = LocalEnvironment(processes=2)
 SUITE = ["grid", "gripper:prob01.pddl", "miconic:s1-0.pddl", "mystery:prob07.pddl"]
 ATTRIBUTES = [
-    "coverage",
     "error",
-    "evaluations",
     "plan",
     "times",
-    "trivially_unsolvable",
+    Attribute("coverage", absolute=True, min_wins=False, scale="linear"),
+    Attribute("evaluations", function=geometric_mean),
+    Attribute("trivially_unsolvable", min_wins=False),
 ]
 TIME_LIMIT = 1800
 MEMORY_LIMIT = 2048

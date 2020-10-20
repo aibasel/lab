@@ -91,6 +91,13 @@ def get_repo_base() -> Path:
     sys.exit("repo base could not be found")
 
 
+def remove_file(path : Path):
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
+
+
 def add_evaluations_per_time(run):
     evaluations = run.get("evaluations")
     time = run.get("search_time")
