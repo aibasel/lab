@@ -1,14 +1,14 @@
 Changelog
 =========
 
-v6.2 (unreleased)
+v6.2 (2020-10-20)
 -----------------
 
 Lab
 ^^^
 * Reports: round values to desired precision before determining colors (Jendrik Seipp).
-* For developers: run CI tests on Ubuntu 20.04 in addition to 18.04 (Jendrik Seipp).
 * Restructure and extend documentation (Jendrik Seipp).
+* For developers: run CI tests on Ubuntu 20.04 in addition to 18.04 (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
