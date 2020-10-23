@@ -9,6 +9,10 @@ causal graph (CG) heuristic and the FF heuristic. There are many ways for
 setting up your experiments. This tutorial gives you an opinionated
 alternative that has proven to work well in practice.
 
+.. note::
+
+    During `ICAPS 2020 <https://icaps20.icaps-conference.org/>`_, we gave an online `Downward Lab presentation <https://icaps20subpages.icaps-conference.org/tutorials/evaluating-planners-with-downward-lab/>`_ (version 6.2). The second half of the presentation covers this tutorial and you can find the recording `here <https://www.youtube.com/watch?v=39tIUsxbh9w>`_.
+
 
 Installation
 ------------
