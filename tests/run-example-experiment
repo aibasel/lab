@@ -27,6 +27,7 @@ FILENAME="${FILENAME%.*}"
 
 cd $(dirname "$0")/../examples
 
-rm -rf "$DIR/data"
+rm -rf "$DIR/data/$FILENAME"
+rm -rf "$DIR/data/$FILENAME-eval"
 pushd "$DIR"
 check "$FILENAME"
