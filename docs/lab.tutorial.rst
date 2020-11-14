@@ -5,7 +5,12 @@ Lab tutorial
 
 .. note::
 
-    During `ICAPS 2020 <https://icaps20.icaps-conference.org/>`_, we gave an `online talk about Lab and Downward Lab <https://icaps20subpages.icaps-conference.org/tutorials/evaluating-planners-with-downward-lab/>`_ (version 6.2). The first half of the presentation shows how to use Lab to run experiments for a solver. You can find the recording `here <https://www.youtube.com/watch?v=39tIUsxbh9w>`_.
+    During `ICAPS 2020 <https://icaps20.icaps-conference.org/>`_, we gave
+    an `online talk about Lab and Downward Lab
+    <https://icaps20subpages.icaps-conference.org/tutorials/evaluating-planners-with-downward-lab/>`_
+    (version 6.2). The first half of the presentation shows how to use Lab
+    to run experiments for a solver. You can find the recording `here
+    <https://www.youtube.com/watch?v=39tIUsxbh9w>`_.
 
 .. highlight:: bash
 .. include:: ../INSTALL.rst
