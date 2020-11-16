@@ -30,7 +30,7 @@ USERS = {
         remote_repos="/infai/seipp/projects",
     ),
 }
-USER = USERS[getpass.getuser()]
+USER = USERS.get(getpass.getuser())
 
 
 def parse_args():
