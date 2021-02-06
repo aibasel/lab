@@ -24,7 +24,7 @@ jobs:
     - name: Set revision
       run: |
         # Set environment variable with the latest revision hash.
-        echo "::set-env name=GIT_DOWNWARD_REV::`git ls-remote --exit-code --quiet https://github.com/aibasel/downward.git HEAD | cut -f1`"
+        echo "{GIT_DOWNWARD_REV}={`git ls-remote --exit-code --quiet https://github.com/aibasel/downward.git HEAD | cut -f1`}" >> $GITHUB_ENV
 
     # Compile each Fast Downward revision only once and cache the results.
     - name: Cache revisions
