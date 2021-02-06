@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v6.3 (unreleased)
+-----------------
+
+Lab
+^^^
+* Run tests for Python 3.9.
+
+Downward Lab
+^^^^^^^^^^^^
+* None so far.
+
+
 v6.2 (2020-10-20)
 -----------------
 
