@@ -19,66 +19,59 @@ def parse_translator_timestamps(content, props):
     The last line reads:
 
         Done! [6.860s CPU, 6.923s wall-clock]
+
     """
-    pattern = re.compile(r"^(.+)(\.\.\.|:|!) \[(.+)s CPU, .+s wall-clock\]$")
-    for line in content.splitlines():
-        match = pattern.match(line)
-        if match:
-            section = match.group(1).lower().replace(" ", "_")
-            props["translator_time_" + section] = float(match.group(3))
-        if line.startswith("Done!"):
-            return
+    pattern = re.compile(
+        r"^(.+)(?:\.\.\.|:|!) \[(.+)s CPU, .+s wall-clock\]$", flags=re.M
+    )
+    for section, time in pattern.findall(content):
+        section = section.lower().replace(" ", "_")
+        props[f"translator_time_{section}"] = float(time)
+
+
+def parse_old_statistics(content, props):
+    """Parse translator output of the following form:
+
+    170 relevant atoms
+
+    """
+    names = {
+        "relevant atoms",
+        "auxiliary atoms",
+        "final queue length",
+        "total queue pushes",
+        "uncovered facts",
+        "effect conditions simplified",
+        "implied preconditions added",
+        "operators removed",
+        "axioms removed",
+        "propositions removed",
+    }
+    for count, name in re.findall(r"^(\d+) (.+)$", content, flags=re.M):
+        if name in names:
+            attribute = f"translator_{name.replace(' ', '_')}"
+            props[attribute] = int(count)
 
 
 def parse_statistics(content, props):
     """Parse all translator output of the following form:
 
     Translator xxx: yyy
+
     """
-    pattern = re.compile(r"^Translator (.+): (.+?)(?: KB|)$")
-    for line in content.splitlines():
-        match = pattern.match(line)
-        if match:
-            attr = match.group(1).lower().replace(" ", "_")
-            # Support strings, numbers, tuples, lists, dicts, booleans, and None.
-            props[f"translator_{attr}"] = ast.literal_eval(match.group(2))
-        if line.startswith("Done!"):
-            return
+    pattern = re.compile(r"^Translator (.+): (\d+)(?: KB|)$", flags=re.M)
+    for name, count in pattern.findall(content):
+        attr = name.lower().replace(" ", "_")
+        # Support strings, numbers, tuples, lists, dicts, Booleans, and None.
+        props[f"translator_{attr}"] = ast.literal_eval(count)
 
 
 class TranslatorParser(Parser):
     def __init__(self):
         Parser.__init__(self)
-        self.add_patterns()
         self.add_function(parse_translator_timestamps)
+        self.add_function(parse_old_statistics)
         self.add_function(parse_statistics)
-
-    def add_patterns(self):
-        # Parse the numbers from the following lines of translator output:
-        #    170 relevant atoms
-        #    141 auxiliary atoms
-        #    311 final queue length
-        #    364 total queue pushes
-        #    13 uncovered facts
-        #    0 effect conditions simplified
-        #    0 implied preconditions added
-        #    0 operators removed
-        #    0 axioms removed
-        #    38 propositions removed
-        for value in [
-            "relevant atoms",
-            "auxiliary atoms",
-            "final queue length",
-            "total queue pushes",
-            "uncovered facts",
-            "effect conditions simplified",
-            "implied preconditions added",
-            "operators removed",
-            "axioms removed",
-            "propositions removed",
-        ]:
-            attribute = "translator_" + value.lower().replace(" ", "_")
-            self.add_pattern(attribute, f"\n(.+) {value}\n", type=int)
 
 
 if __name__ == "__main__":
