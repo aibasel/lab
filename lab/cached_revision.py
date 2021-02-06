@@ -57,7 +57,6 @@ def git_id(repo, args=None, rev=None):
         "--git-dir",
         os.path.join(repo, ".git"),
         "rev-parse",
-        "--short",
     ] + args
     return _get_id(tuple(cmd))
 

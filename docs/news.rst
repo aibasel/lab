@@ -6,7 +6,9 @@ v6.3 (unreleased)
 
 Lab
 ^^^
-* Run tests for Python 3.9.
+* Run tests for Python 3.9 (Jendrik Seipp).
+* Use long Git revision hashes for revision cache. The short ones differ in length
+  between Git versions (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
