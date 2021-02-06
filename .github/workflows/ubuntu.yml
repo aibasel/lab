@@ -24,7 +24,7 @@ jobs:
     - name: Set revision
       run: |
         # Set environment variable with the latest revision hash.
-        echo "::set-env name=GIT_DOWNWARD_REV::`git ls-remote --exit-code --quiet https://github.com/aibasel/downward.git HEAD | cut -f1`"
+        echo "GIT_DOWNWARD_REV=`git ls-remote --exit-code --quiet https://github.com/aibasel/downward.git HEAD | cut -f1`" >> $GITHUB_ENV
 
     # Compile each Fast Downward revision only once and cache the results.
     - name: Cache revisions
@@ -58,7 +58,7 @@ jobs:
         mkdir ../deps
         pushd ../deps
         # Add directory to PATH.
-        echo "::add-path::$(pwd)"
+        echo "$(pwd)" >> $GITHUB_PATH
 
     - name: Compile FF
       working-directory: ../deps
@@ -91,7 +91,7 @@ jobs:
       run: |
         export DOWNWARD_BENCHMARKS=`realpath downward-benchmarks`
         git clone --depth 1 https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
-        echo "::set-env name=DOWNWARD_BENCHMARKS::${DOWNWARD_BENCHMARKS}"
+        echo "DOWNWARD_BENCHMARKS=${DOWNWARD_BENCHMARKS}" >> $GITHUB_ENV
 
     - name: Clone Fast Downward Mercurial
       working-directory: ../deps
@@ -99,21 +99,21 @@ jobs:
         sudo apt-get -y install cmake g++ git make python3
         export HG_DOWNWARD_REPO=`realpath fast-downward`
         hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
-        echo "::set-env name=HG_DOWNWARD_REPO::${HG_DOWNWARD_REPO}"
+        echo "HG_DOWNWARD_REPO=${HG_DOWNWARD_REPO}" >> $GITHUB_ENV
 
     - name: Clone Fast Downward Git
       working-directory: ../deps
       run: |
         export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
         git clone --depth 1 https://github.com/aibasel/downward.git ${GIT_DOWNWARD_REPO}
-        echo "::set-env name=GIT_DOWNWARD_REPO::${GIT_DOWNWARD_REPO}"
+        echo "GIT_DOWNWARD_REPO=${GIT_DOWNWARD_REPO}" >> $GITHUB_ENV
 
     - name: Download example Singularity image
       working-directory: ../deps
       run: |
         wget --no-verbose https://ai.dmi.unibas.ch/_tmp_files/seipp/lama-first.img
         export SINGULARITY_IMAGES=`realpath .`
-        echo "::set-env name=SINGULARITY_IMAGES::${SINGULARITY_IMAGES}"
+        echo "SINGULARITY_IMAGES=${SINGULARITY_IMAGES}" >> $GITHUB_ENV
 
     - name: Run tests
       run: |
