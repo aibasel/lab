@@ -1,14 +1,14 @@
 Changelog
 =========
 
-v6.3 (unreleased)
+v6.3 (2021-02-14)
 -----------------
 
 Lab
 ^^^
 * Use long Git revision hashes for revision cache. The short ones differ in length
   between Git versions (Jendrik Seipp).
-* Run tests for Python 3.9 (Jendrik Seipp).
+* Run continuous integration tests for Python 3.9 (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
