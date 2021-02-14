@@ -33,9 +33,11 @@ tox
 set_version "$VERSION"
 git commit -am "Update version number to ${VERSION} for release."
 
-# Requirements: python3 -m pip install --user --update twine wheel
+# Requirements:
+#   pipx install twine
+#   pip install --user wheel
 python3 setup.py sdist bdist_wheel --universal
-python3 -m twine upload dist/lab-${VERSION}.tar.gz dist/lab-${VERSION}-py2.py3-none-any.whl
+twine upload dist/lab-${VERSION}.tar.gz dist/lab-${VERSION}-py2.py3-none-any.whl
 
 git tag -a "v$VERSION" -m "v$VERSION" HEAD
 set_version "${VERSION}+"
@@ -44,6 +46,6 @@ git commit -am "Update version number to ${VERSION}+ after release."
 git push
 git push --tags
 
-# Add changelog to Github release.
+# Add changelog to GitHub release.
 ./dev/make-release-notes.py "$VERSION" docs/news.rst "$CHANGES"
 hub release create v"$VERSION" --file "$CHANGES"
