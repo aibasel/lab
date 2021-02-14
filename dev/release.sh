@@ -48,4 +48,4 @@ git push --tags
 
 # Add changelog to GitHub release.
 ./dev/make-release-notes.py "$VERSION" docs/news.rst "$CHANGES"
-hub release create v"$VERSION" --file "$CHANGES"
+hub release create v"$VERSION" --file="$CHANGES"
