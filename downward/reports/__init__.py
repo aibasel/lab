@@ -43,7 +43,6 @@ class PlanningReport(Report):
     INFO_ATTRIBUTES = [
         "local_revision",
         "global_revision",
-        "revision_summary",
         "build_options",
         "driver_options",
         "component_options",

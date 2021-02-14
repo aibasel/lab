@@ -6,13 +6,13 @@ v6.3 (unreleased)
 
 Lab
 ^^^
-* Run tests for Python 3.9 (Jendrik Seipp).
 * Use long Git revision hashes for revision cache. The short ones differ in length
   between Git versions (Jendrik Seipp).
+* Run tests for Python 3.9 (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
-* None so far.
+* Remove "revision_summary" column from info table (Jendrik Seipp).
 
 
 v6.2 (2020-10-20)

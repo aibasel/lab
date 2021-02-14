@@ -76,16 +76,6 @@ def get_global_rev(repo, rev=None):
         _raise_unknown_vcs_error(vcs)
 
 
-def get_rev_id(repo, rev=None):
-    vcs = get_version_control_system(repo)
-    if vcs == MERCURIAL:
-        return hg_id(repo, rev=rev)
-    elif vcs == GIT:
-        return git_id(repo, rev=rev)
-    else:
-        _raise_unknown_vcs_error(vcs)
-
-
 def _compute_md5_hash(mylist):
     m = hashlib.md5()
     for s in mylist:
@@ -145,7 +135,6 @@ class CachedRevision:
         self.build_cmd = build_cmd
         self.local_rev = rev
         self.global_rev = get_global_rev(repo, rev)
-        self.summary = get_rev_id(self.repo, rev)
         self.path = None
         self.exclude = exclude or []
         self.name = self._compute_hashed_name()
