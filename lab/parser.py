@@ -187,16 +187,17 @@ class Parser:
         """
         self.file_parsers[file].add_function(function)
 
-    def parse(self):
-        """Search all patterns and apply all functions.
+    def fill_file_parsers_from_strings(self, file_contents):
+        """Store the given contents in the file parsers."""
+        for filename, file_parser in list(self.file_parsers.items()):
+            if filename in file_contents:
+                file_parser.content = file_contents[filename]
+            else:
+                logging.info(f'File "{filename}" is missing and thus not parsed.')
+                del self.file_parsers[filename]
 
-        The found values are written to the run's ``properties`` file.
-
-        """
-        run_dir = os.path.abspath(".")
-        prop_file = os.path.join(run_dir, "properties")
-        self.props = tools.Properties(filename=prop_file)
-
+    def fill_file_parsers_from_files(self):
+        """Read file contents and store them in the file parsers."""
         for filename, file_parser in list(self.file_parsers.items()):
             # If filename is absolute it will not be changed here.
             path = os.path.join(run_dir, filename)
@@ -209,10 +210,40 @@ class Parser:
                 else:
                     logging.error(f'Failed to read "{path}": {err}')
 
+    def execute_file_parsers(self):
+        """Search all patterns and apply all functions.
+
+        The found values are stored in self.props.
+        Requires filling the file_parsers first using
+        fill_file_parsers_from_strings or fill_file_parsers_from_files.
+
+        """
         for file_parser in self.file_parsers.values():
             self.props.update(file_parser.search_patterns())
 
         for file_parser in self.file_parsers.values():
             file_parser.apply_functions(self.props)
+
+    def parse_from_strings(self, file_contents):
+        """Search all patterns and apply all functions.
+
+        The found values are stored in self.props.
+
+        """
+        self.fill_file_parsers_from_strings(file_contents)
+        self.execute_file_parsers()
+
+    def parse(self):
+        """Search all patterns and apply all functions.
+
+        The found values are written to the run's ``properties`` file.
+
+        """
+        run_dir = os.path.abspath(".")
+        prop_file = os.path.join(run_dir, "properties")
+        self.props = tools.Properties(filename=prop_file)
+
+        self.fill_file_parsers_from_files()
+        self.execute_file_parsers()
 
         self.props.write()
