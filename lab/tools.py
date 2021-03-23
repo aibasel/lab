@@ -432,15 +432,19 @@ def get_colors(cells, min_wins):
             min_wins = True
 
     # If we land here, both min_value and max_value are not None.
-    diff = float(max_value - min_value)
+    try:
+        diff = float(max_value - min_value)
+    except OverflowError:
+        diff = None
 
-    for col, val in cells.items():
-        if val is not None:
-            if diff == 0:
-                fraction = 0
-            else:
-                fraction = (val - min_value) / diff
-            result[col] = get_color(fraction, min_wins)
+    if diff is not None:
+        for col, val in cells.items():
+            if val is not None:
+                if diff == 0:
+                    fraction = 0
+                else:
+                    fraction = (val - min_value) / diff
+                result[col] = get_color(fraction, min_wins)
     return result
 
 
