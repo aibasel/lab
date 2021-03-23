@@ -137,7 +137,7 @@ class DiffColumnsModule(reports.DynamicDataModule):
                 values = [table[row_name].get(col_name, None) for col_name in col_names]
                 try:
                     diff = float(values[1]) - float(values[0])
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, OverflowError):
                     diff = None
                 if diff is not None:
                     non_none_values.append(diff)

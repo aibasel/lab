@@ -432,7 +432,10 @@ def get_colors(cells, min_wins):
             min_wins = True
 
     # If we land here, both min_value and max_value are not None.
-    diff = float(max_value - min_value)
+    try:
+        diff = float(max_value - min_value)
+    except OverflowError:
+        return result
 
     for col, val in cells.items():
         if val is not None:
