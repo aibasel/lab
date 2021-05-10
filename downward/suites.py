@@ -4,10 +4,11 @@ from lab import tools
 
 
 def find_domain_file(benchmarks_dir, domain, problem):
-    """
-    Search for domain file in the directory *benchmarks_dir*/*domain*.
-    Check the following names: 'domain.pddl', 'pXX-domain.pddl', or the
-    full problem name preceeded by 'domain_'.
+    """Search for domain file in the directory *benchmarks_dir*/*domain*.
+
+    For a given problem filename "p01.pddl", check the following domain
+    filenames: "domain.pddl", "p01-domain.pddl", "domain_p01.pddl" and
+    "domain-p01.pddl".
     """
     domain_basenames = [
         "domain.pddl",
