@@ -1,4 +1,5 @@
 import logging
+import math
 import multiprocessing
 import os
 import random
@@ -41,8 +42,8 @@ class Environment:
         self.exp = None
         self.randomize_task_order = randomize_task_order
 
-    def _get_task_order(self):
-        task_order = list(range(1, len(self.exp.runs) + 1))
+    def _get_task_order(self, num_tasks):
+        task_order = list(range(1, num_tasks + 1))
         if self.randomize_task_order:
             random.shuffle(task_order)
         return task_order
@@ -86,7 +87,9 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         script = tools.fill_template(
-            "local-job.py", task_order=self._get_task_order(), processes=self.processes
+            "local-job.py",
+            task_order=self._get_task_order(len(self.exp.runs)),
+            processes=self.processes,
         )
 
         self.exp.add_new_file("", self.EXP_RUN_SCRIPT, script, permissions=0o755)
@@ -112,7 +115,7 @@ class GridEnvironment(Environment):
     # Can be overridden in derived classes.
     MAX_TASKS = float("inf")
 
-    def __init__(self, email=None, extra_options=None, **kwargs):
+    def __init__(self, email=None, runs_per_task=1, extra_options=None, **kwargs):
         """
 
         If the main experiment step is part of the selected steps, the
@@ -131,6 +134,13 @@ class GridEnvironment(Environment):
         If *email* is provided and the steps run on the grid, a message
         will be sent when the last experiment step finishes.
 
+        Use *runs_per_task* to specify how many solver runs are executed
+        in sequence by one Slurm task. The default value of 1 is fine for
+        the Basel cluster, but many other clusters prefer fewer
+        long-running tasks (> 2 hours) rather than many short-running
+        tasks (< 30 minutes), see `NSC docs
+        <https://www.nsc.liu.se/support/batch-jobs/tetralith/short-jobs/>`_.
+
         Use *extra_options* to pass additional options. The
         *extra_options* string may contain newlines. Slurm example that
         reserves two cores per run::
@@ -143,6 +153,7 @@ class GridEnvironment(Environment):
         """
         Environment.__init__(self, **kwargs)
         self.email = email
+        self.runs_per_task = runs_per_task
         self.extra_options = extra_options or "## (not used)"
 
     def start_runs(self):
@@ -155,20 +166,17 @@ class GridEnvironment(Environment):
             f"{self.exp.steps.index(step) + 1:02d}-{step.name}"
         )
 
-    def _get_num_runs(self):
-        num_runs = len(self.exp.runs)
-        if num_runs > self.MAX_TASKS:
-            logging.critical(
-                f"You are trying to submit a job with {num_runs} tasks, "
-                f"but only {self.MAX_TASKS} are allowed."
-            )
-        return num_runs
-
     def _get_num_tasks(self, step):
         if is_run_step(step):
-            return self._get_num_runs()
+            num_tasks = math.ceil(len(self.exp.runs) / self.runs_per_task)
         else:
-            return 1
+            num_tasks = 1
+        if num_tasks > self.MAX_TASKS:
+            logging.critical(
+                f"You are trying to submit a job with {num_tasks} tasks, "
+                f"but only {self.MAX_TASKS} are allowed. Try increasing runs_per_task."
+            )
+        return num_tasks
 
     def _get_job_params(self, step, is_last):
         return {
@@ -183,12 +191,16 @@ class GridEnvironment(Environment):
         job_params = self._get_job_params(step, is_last)
         return tools.fill_template(self.JOB_HEADER_TEMPLATE_FILE, **job_params)
 
-    def _get_run_job_body(self):
+    def _get_run_job_body(self, run_step):
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
-            task_order=" ".join(str(i) for i in self._get_task_order()),
             exp_path="../" + self.exp.name,
+            num_runs=len(self.exp.runs),
             python=tools.get_python_executable(),
+            runs_per_task=self.runs_per_task,
+            task_order=" ".join(
+                str(i) for i in self._get_task_order(self._get_num_tasks(run_step))
+            ),
         )
 
     def _get_step_job_body(self, step):
@@ -202,7 +214,7 @@ class GridEnvironment(Environment):
 
     def _get_job_body(self, step):
         if is_run_step(step):
-            return self._get_run_job_body()
+            return self._get_run_job_body(step)
         return self._get_step_job_body(step)
 
     def _get_job(self, step, is_last):

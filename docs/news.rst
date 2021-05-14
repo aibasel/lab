@@ -1,6 +1,18 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Add `runs_per_task` option to GridEnvironment (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* None so far.
+
+
 v6.3 (2021-02-14)
 -----------------
 

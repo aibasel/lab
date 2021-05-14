@@ -1,28 +1,52 @@
-declare -a SHUFFLED_TASK_IDS=(%(task_order)s)
-
-function print_run_dir {
-    local RUN_ID=${SHUFFLED_TASK_IDS[$1 - 1]}
-    let "LOWER=((RUN_ID - 1) / 100) * 100 + 1"
-    let "UPPER=((RUN_ID + 100 - 1) / 100) * 100"
-    printf "runs-%%05d-%%05d/%%05d" $LOWER $UPPER $RUN_ID
+function print {
+    local msg=${1}
+    printf "[Slurm task %%05d] %%s\n" "$SLURM_ARRAY_TASK_ID" "$msg"
 }
 
-RUN_DIR=$(print_run_dir $SLURM_ARRAY_TASK_ID)
+function print_run_dir {
+    local run_id=${1}
+    let "lower=((run_id - 1) / 100) * 100 + 1"
+    let "upper=((run_id + 100 - 1) / 100) * 100"
+    printf "runs-%%05d-%%05d/%%05d" $lower $upper $run_id
+}
 
-cd "%(exp_path)s/$RUN_DIR"
+function execute_run {
+    local run_id=${1}
+    local run_dir=$(print_run_dir ${run_id})
+    cd "%(exp_path)s/$run_dir"
 
-(
-"%(python)s" run
-RETCODE=$?
-if [[ $RETCODE != 0 ]]; then
-    >&2 echo "The run script finished with exit code $RETCODE"
-fi
-) > driver.log 2> driver.err
+    (
+    "/home/jendrik/projects/Downward/lab/.venv/bin/python" run
+    RETCODE=$?
+    if [[ $RETCODE != 0 ]]; then
+        >&2 echo "The run script finished with exit code $RETCODE"
+    fi
+    ) > driver.log 2> driver.err
 
-# Delete empty driver files.
-if [[ ! -s driver.log ]]; then
-    rm driver.log
+    # Delete empty driver files.
+    if [[ ! -s driver.log ]]; then
+        rm driver.log
+    fi
+    if [[ ! -s driver.err ]]; then
+        rm driver.err
+    fi
+}
+
+# Shuffle tasks to avoid systematic bias.
+declare -a SHUFFLED_TASK_IDS=(%(task_order)s)
+TASK_ID=${SHUFFLED_TASK_IDS[$SLURM_ARRAY_TASK_ID - 1]}
+
+# Compute which runs belong to the Slurm task.
+NUM_RUNS=%(num_runs)d
+RUNS_PER_TASK=%(runs_per_task)d
+let "FIRST_RUN_ID=(TASK_ID - 1) * RUNS_PER_TASK + 1"
+let "LAST_RUN_ID=FIRST_RUN_ID + RUNS_PER_TASK - 1"
+if [ $LAST_RUN_ID -gt $NUM_RUNS ]; then
+    LAST_RUN_ID="$NUM_RUNS"
 fi
-if [[ ! -s driver.err ]]; then
-    rm driver.err
-fi
+print "shuffled task ID: $TASK_ID, run ID range: [$FIRST_RUN_ID, $LAST_RUN_ID]"
+
+# Execute runs in shuffled order.
+for run_id in $(seq $FIRST_RUN_ID $LAST_RUN_ID | shuf); do
+    execute_run ${run_id}
+done
