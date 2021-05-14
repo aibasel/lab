@@ -112,16 +112,17 @@ def add_evaluations_per_time(run):
     return run
 
 
-def _get_exp_dir_relative_to_repos_dir():
+def _get_exp_dir_relative_to_repo():
     repo_name = get_repo_base().name
     script = Path(tools.get_script_path())
-    project = script.parent.name
+    script_dir = script.parent
+    rel_script_dir = script_dir.relative_to(get_repo_base())
     expname = script.stem
-    return Path(repo_name) / "experiments" / project / "data" / expname
+    return repo_name / rel_script_dir / "data" / expname
 
 
 def add_scp_step(exp):
-    remote_exp = Path(USER.remote_repos) / _get_exp_dir_relative_to_repos_dir()
+    remote_exp = Path(USER.remote_repos) / _get_exp_dir_relative_to_repo()
     exp.add_step(
         "scp-eval-dir",
         subprocess.call,
