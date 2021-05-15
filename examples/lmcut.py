@@ -10,7 +10,22 @@ from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
 from lab import cached_revision
-from lab.environments import BaselSlurmEnvironment, LocalEnvironment
+from lab.environments import BaselSlurmEnvironment, LocalEnvironment, SlurmEnvironment
+
+
+class TetralithEnvironment(SlurmEnvironment):
+    """Environment for NSC Tetralith cluster in Linköping."""
+
+    DEFAULT_PARTITION = "tetralith"
+    DEFAULT_QOS = "normal"
+    DEFAULT_MEMORY_PER_CPU = "4G"  # TODO: find good value.
+    MAX_TASKS = 1000
+
+    def __init__(self, runs_per_task=100, **kwargs):
+        super().__init__(runs_per_task=runs_per_task, **kwargs)
+
+    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+        pass  # TODO: use base class implementation.
 
 
 ATTRIBUTES = ["coverage", "error", "expansions", "total_time"]
@@ -23,6 +38,7 @@ if NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch"):
 else:
     SUITE = ["depot:p01.pddl", "gripper:prob01.pddl", "mystery:prob07.pddl"]
     ENV = LocalEnvironment(processes=2)
+ENV = TetralithEnvironment(email="my.name@unibas.ch")
 # Use path to your Fast Downward repository.
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
