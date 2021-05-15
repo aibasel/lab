@@ -300,6 +300,11 @@ class SlurmEnvironment(GridEnvironment):
     ):
         """
 
+        A note on terminology: for our purposes, there is no real difference
+        between a Slurm "job" and a Slurm "task", so we use the two terms
+        interchangeably (https://slurm.schedmd.com/job_array.html). However,
+        we try to prefer the term "job", to avoid confusion with *planning* tasks.
+
         *partition* must be a valid Slurm partition name. In Basel you
         can choose from
 
