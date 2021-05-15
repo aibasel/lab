@@ -18,7 +18,14 @@ class TetralithEnvironment(SlurmEnvironment):
 
     DEFAULT_PARTITION = "tetralith"
     DEFAULT_QOS = "normal"
-    DEFAULT_MEMORY_PER_CPU = "4G"  # TODO: find good value.
+    # There are 1908 nodes. 1844 nodes have 93.1 GiB (97637616 KiB) of
+	# memory and 64 nodes have 384 GB of memory. All nodes have 32 cores.
+	# So for the vast majority of nodes, we have 2979 MiB per core. The
+	# slurm.conf file sets DefMemPerCPU=2904. Since this is rather low, we
+	# use the default value from the BaselSlurmEnvironment. This also
+	# allows us to keep the default memory limit in the
+	# FastDownwardExperiment class.
+    DEFAULT_MEMORY_PER_CPU = "3872M"
     MAX_TASKS = 1000
 
     def __init__(self, runs_per_task=100, **kwargs):
