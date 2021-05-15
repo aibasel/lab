@@ -11,10 +11,6 @@ function print_run_dir {
 }
 
 function execute_run {
-    local run_id=${1}
-    local run_dir=$(print_run_dir ${run_id})
-    pushd "%(exp_path)s/$run_dir"
-
     (
     "%(python)s" run
     RETCODE=$?
@@ -30,8 +26,6 @@ function execute_run {
     if [[ ! -s driver.err ]]; then
         rm driver.err
     fi
-
-    popd
 }
 
 # Shuffle tasks to avoid systematic bias.
@@ -50,5 +44,6 @@ print "shuffled task ID: $TASK_ID, run ID range: [$FIRST_RUN_ID, $LAST_RUN_ID]"
 
 # Execute runs in shuffled order.
 for run_id in $(seq $FIRST_RUN_ID $LAST_RUN_ID | shuf); do
-    execute_run ${run_id}
+    run_dir=$(print_run_dir ${run_id})
+    (cd "%(exp_path)s/$run_dir" && execute_run ${run_id})
 done
