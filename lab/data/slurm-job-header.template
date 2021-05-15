@@ -14,7 +14,7 @@
 #SBATCH --time=%(time_limit_per_job)s
 ### Set memory limit.
 #SBATCH --mem-per-cpu=%(memory_per_cpu)s
-### Number of tasks in job array.
+### Number of jobs in job array.
 #SBATCH --array=1-%(num_tasks)d
 ### Adjustment to priority ([-2147483645, 2147483645]).
 #SBATCH --nice=%(nice)s

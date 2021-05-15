@@ -6,7 +6,7 @@ next (unreleased)
 
 Lab
 ^^^
-* Add `runs_per_task` option to GridEnvironment (Jendrik Seipp).
+* Add `runs_per_job` option to GridEnvironment (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^

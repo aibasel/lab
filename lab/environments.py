@@ -115,7 +115,7 @@ class GridEnvironment(Environment):
     # Can be overridden in derived classes.
     MAX_TASKS = float("inf")
 
-    def __init__(self, email=None, runs_per_task=1, extra_options=None, **kwargs):
+    def __init__(self, email=None, runs_per_job=1, extra_options=None, **kwargs):
         """
 
         If the main experiment step is part of the selected steps, the
@@ -134,11 +134,11 @@ class GridEnvironment(Environment):
         If *email* is provided and the steps run on the grid, a message
         will be sent when the last experiment step finishes.
 
-        Use *runs_per_task* to specify how many solver runs are executed
-        in sequence by one Slurm task. The default value of 1 is fine for
+        Use *runs_per_job* to specify how many solver runs are executed
+        in sequence by one Slurm job. The default value of 1 is fine for
         the Basel cluster, but many other clusters prefer fewer
-        long-running tasks (between 30 minutes and 24 hours) rather than
-        many short-running tasks (< 30 minutes), see `NSC docs
+        long-running jobs (between 30 minutes and 24 hours) rather than
+        many short-running jobs (< 30 minutes), see `NSC docs
         <https://www.nsc.liu.se/support/batch-jobs/tetralith/short-jobs/>`_.
 
         Use *extra_options* to pass additional options. The
@@ -153,7 +153,7 @@ class GridEnvironment(Environment):
         """
         Environment.__init__(self, **kwargs)
         self.email = email
-        self.runs_per_task = runs_per_task
+        self.runs_per_job = runs_per_job
         self.extra_options = extra_options or "## (not used)"
 
     def start_runs(self):
@@ -168,13 +168,13 @@ class GridEnvironment(Environment):
 
     def _get_num_tasks(self, step):
         if is_run_step(step):
-            num_tasks = math.ceil(len(self.exp.runs) / self.runs_per_task)
+            num_tasks = math.ceil(len(self.exp.runs) / self.runs_per_job)
         else:
             num_tasks = 1
         if num_tasks > self.MAX_TASKS:
             logging.critical(
                 f"You are trying to submit a job with {num_tasks} tasks, "
-                f"but only {self.MAX_TASKS} are allowed. Try increasing runs_per_task."
+                f"but only {self.MAX_TASKS} are allowed. Try increasing runs_per_job."
             )
         return num_tasks
 
@@ -197,7 +197,7 @@ class GridEnvironment(Environment):
             exp_path="../" + self.exp.name,
             num_runs=len(self.exp.runs),
             python=tools.get_python_executable(),
-            runs_per_task=self.runs_per_task,
+            runs_per_job=self.runs_per_job,
             task_order=" ".join(
                 str(i) for i in self._get_task_order(self._get_num_tasks(run_step))
             ),
@@ -418,7 +418,7 @@ class SlurmEnvironment(GridEnvironment):
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
 
-        # Let all tasks write into the same two files. We could use %a
+        # Let all jobs write into the same two files. We could use %a
         # (which is replaced by the array ID) to prevent mangled up logs,
         # but we don't want so many files.
         job_params["logfile"] = "slurm.log"

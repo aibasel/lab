@@ -38,9 +38,9 @@ TASK_ID=${SHUFFLED_TASK_IDS[$SLURM_ARRAY_TASK_ID - 1]}
 
 # Compute which runs belong to the Slurm task.
 NUM_RUNS=%(num_runs)d
-RUNS_PER_TASK=%(runs_per_task)d
-let "FIRST_RUN_ID=(TASK_ID - 1) * RUNS_PER_TASK + 1"
-let "LAST_RUN_ID=FIRST_RUN_ID + RUNS_PER_TASK - 1"
+RUNS_PER_JOB=%(runs_per_job)d
+let "FIRST_RUN_ID=(TASK_ID - 1) * RUNS_PER_JOB + 1"
+let "LAST_RUN_ID=FIRST_RUN_ID + RUNS_PER_JOB - 1"
 if [ $LAST_RUN_ID -gt $NUM_RUNS ]; then
     LAST_RUN_ID="$NUM_RUNS"
 fi

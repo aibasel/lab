@@ -32,8 +32,8 @@ class TetralithEnvironment(SlurmEnvironment):
     DEFAULT_MEMORY_PER_CPU = "3872M"
     MAX_TASKS = 1000
 
-    def __init__(self, runs_per_task=100, **kwargs):
-        super().__init__(runs_per_task=runs_per_task, **kwargs)
+    def __init__(self, runs_per_job=100, **kwargs):
+        super().__init__(runs_per_job=runs_per_job, **kwargs)
 
     def _submit_job(self, job_name, job_file, job_dir, dependency=None):
         pass  # TODO: use base class implementation.
