@@ -137,8 +137,8 @@ class GridEnvironment(Environment):
         Use *runs_per_task* to specify how many solver runs are executed
         in sequence by one Slurm task. The default value of 1 is fine for
         the Basel cluster, but many other clusters prefer fewer
-        long-running tasks (> 2 hours) rather than many short-running
-        tasks (< 30 minutes), see `NSC docs
+        long-running tasks (between 30 minutes and 24 hours) rather than
+        many short-running tasks (< 30 minutes), see `NSC docs
         <https://www.nsc.liu.se/support/batch-jobs/tetralith/short-jobs/>`_.
 
         Use *extra_options* to pass additional options. The
@@ -280,6 +280,7 @@ class SlurmEnvironment(GridEnvironment):
     DEFAULT_MEMORY_PER_CPU = None
 
     # Can be overridden in derived classes.
+    DEFAULT_TIME_LIMIT_PER_JOB = "0"  # No limit.
     DEFAULT_EXPORT = ["PATH"]
     DEFAULT_SETUP = ""
     NICE_VALUE = 0
@@ -291,6 +292,7 @@ class SlurmEnvironment(GridEnvironment):
         self,
         partition=None,
         qos=None,
+        time_limit_per_job=None,
         memory_per_cpu=None,
         export=None,
         setup=None,
@@ -306,6 +308,13 @@ class SlurmEnvironment(GridEnvironment):
 
         *qos* must be a valid Slurm QOS name. In Basel this must be
         "normal".
+
+        *time_limit_per_job* sets the wall-clock time limit for each Slurm job.
+        The BaselSlurmEnvironment class uses a default of "0", i.e., no limit.
+        (Note that there may still be an external limit set in slurm.conf.)
+        The TetralithEnvironment class uses a default of "24:00:00", i.e., 24
+        hours. This is because in certain situations, the scheduler prefers to
+        schedule jobs shorter than 24 hours.
 
         *memory_per_cpu* must be a string specifying the memory
         allocated for each core. The string must end with one of the
@@ -373,6 +382,8 @@ class SlurmEnvironment(GridEnvironment):
             partition = self.DEFAULT_PARTITION
         if qos is None:
             qos = self.DEFAULT_QOS
+        if time_limit_per_job is None:
+            time_limit_per_job = self.DEFAULT_TIME_LIMIT_PER_JOB
         if memory_per_cpu is None:
             memory_per_cpu = self.DEFAULT_MEMORY_PER_CPU
         if export is None:
@@ -382,6 +393,7 @@ class SlurmEnvironment(GridEnvironment):
 
         self.partition = partition
         self.qos = qos
+        self.time_limit_per_job = time_limit_per_job
         self.memory_per_cpu = memory_per_cpu
         self.export = export
         self.setup = setup
@@ -414,6 +426,7 @@ class SlurmEnvironment(GridEnvironment):
 
         job_params["partition"] = self.partition
         job_params["qos"] = self.qos
+        job_params["time_limit_per_job"] = self.time_limit_per_job
         job_params["memory_per_cpu"] = self.memory_per_cpu
         memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
         job_params["soft_memory_limit"] = int(memory_per_cpu_kb * 0.98)
