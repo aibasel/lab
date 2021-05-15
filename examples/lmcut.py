@@ -35,21 +35,20 @@ class TetralithEnvironment(SlurmEnvironment):
     def __init__(self, runs_per_job=100, **kwargs):
         super().__init__(runs_per_job=runs_per_job, **kwargs)
 
-    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
-        pass  # TODO: use base class implementation.
+    #def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+    #    pass  # TODO: use base class implementation.
 
 
 ATTRIBUTES = ["coverage", "error", "expansions", "total_time"]
 
 NODE = platform.node()
-if NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch"):
+if "tetralith" in NODE:
     # Create bigger suites with suites.py from the downward-benchmarks repo.
     SUITE = ["depot", "freecell", "gripper", "zenotravel"]
-    ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
+    ENV = TetralithEnvironment(email="jendrik.seipp@liu.se")
 else:
     SUITE = ["depot:p01.pddl", "gripper:prob01.pddl", "mystery:prob07.pddl"]
     ENV = LocalEnvironment(processes=2)
-ENV = TetralithEnvironment(email="my.name@unibas.ch")
 # Use path to your Fast Downward repository.
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
