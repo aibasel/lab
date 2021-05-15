@@ -282,6 +282,7 @@ class SlurmEnvironment(GridEnvironment):
     # Can be overridden in derived classes.
     DEFAULT_EXPORT = ["PATH"]
     DEFAULT_SETUP = ""
+    NICE_VALUE = 0
     JOB_HEADER_TEMPLATE_FILE = "slurm-job-header"
     RUN_JOB_BODY_TEMPLATE_FILE = "slurm-run-job-body"
     STEP_JOB_BODY_TEMPLATE_FILE = "slurm-step-job-body"
@@ -416,8 +417,7 @@ class SlurmEnvironment(GridEnvironment):
         job_params["memory_per_cpu"] = self.memory_per_cpu
         memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
         job_params["soft_memory_limit"] = int(memory_per_cpu_kb * 0.98)
-        # Prioritize array jobs from autonice users.
-        job_params["nice"] = 5000 if is_run_step(step) else 0
+        job_params["nice"] = self.NICE_VALUE if is_run_step(step) else 0
         job_params["environment_setup"] = self.setup
 
         if is_last and self.email:
@@ -452,3 +452,5 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = "3872M"
+    # Prioritize array jobs from Autonice users on Basel grid.
+    NICE_VALUE = 5000
