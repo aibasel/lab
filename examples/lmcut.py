@@ -5,6 +5,7 @@
 import os
 import os.path
 import platform
+import re
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
@@ -38,11 +39,16 @@ class TetralithEnvironment(SlurmEnvironment):
     #def _submit_job(self, job_name, job_file, job_dir, dependency=None):
     #    pass  # TODO: use base class implementation.
 
+    @classmethod
+    def is_present(cls):
+        node = platform.node()
+        return node == "tetralith2.nsc.liu.se" or re.match(r"n\d+", node)
+
 
 ATTRIBUTES = ["coverage", "error", "expansions", "total_time"]
 
 NODE = platform.node()
-if "tetralith" in NODE:
+if TetralithEnvironment.is_present():
     # Create bigger suites with suites.py from the downward-benchmarks repo.
     SUITE = ["depot", "freecell", "gripper", "zenotravel"]
     ENV = TetralithEnvironment(email="jendrik.seipp@liu.se")
