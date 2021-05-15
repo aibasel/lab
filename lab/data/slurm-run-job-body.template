@@ -13,7 +13,7 @@ function print_run_dir {
 function execute_run {
     local run_id=${1}
     local run_dir=$(print_run_dir ${run_id})
-    cd "%(exp_path)s/$run_dir"
+    pushd "%(exp_path)s/$run_dir"
 
     (
     "%(python)s" run
@@ -30,6 +30,8 @@ function execute_run {
     if [[ ! -s driver.err ]]; then
         rm driver.err
     fi
+
+    popd
 }
 
 # Shuffle tasks to avoid systematic bias.
