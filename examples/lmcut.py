@@ -24,19 +24,19 @@ class TetralithEnvironment(SlurmEnvironment):
     # jobs shorter than 24 hours.
     DEFAULT_TIME_LIMIT_PER_JOB = "24:00:00"
     # There are 1908 nodes. 1844 nodes have 93.1 GiB (97637616 KiB) of
-	# memory and 64 nodes have 384 GB of memory. All nodes have 32 cores.
-	# So for the vast majority of nodes, we have 2979 MiB per core. The
-	# slurm.conf file sets DefMemPerCPU=2904. Since this is rather low, we
-	# use the default value from the BaselSlurmEnvironment. This also
-	# allows us to keep the default memory limit in the
-	# FastDownwardExperiment class.
+    # memory and 64 nodes have 384 GB of memory. All nodes have 32 cores.
+    # So for the vast majority of nodes, we have 2979 MiB per core. The
+    # slurm.conf file sets DefMemPerCPU=2904. Since this is rather low, we
+    # use the default value from the BaselSlurmEnvironment. This also
+    # allows us to keep the default memory limit in the
+    # FastDownwardExperiment class.
     DEFAULT_MEMORY_PER_CPU = "3872M"
     MAX_TASKS = 1000
 
     def __init__(self, runs_per_job=100, **kwargs):
         super().__init__(runs_per_job=runs_per_job, **kwargs)
 
-    #def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+    # def _submit_job(self, job_name, job_file, job_dir, dependency=None):
     #    pass  # TODO: use base class implementation.
 
     @classmethod
@@ -51,6 +51,7 @@ NODE = platform.node()
 if TetralithEnvironment.is_present():
     # Create bigger suites with suites.py from the downward-benchmarks repo.
     SUITE = ["depot", "freecell", "gripper", "zenotravel"]
+    assert BaselSlurmEnvironment
     ENV = TetralithEnvironment(email="jendrik.seipp@liu.se")
 else:
     SUITE = ["depot:p01.pddl", "gripper:prob01.pddl", "mystery:prob07.pddl"]
