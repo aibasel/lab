@@ -6,7 +6,8 @@ next (unreleased)
 
 Lab
 ^^^
-* Add `runs_per_job` option to GridEnvironment (Jendrik Seipp).
+* Automatically group multiple runs into one Slurm task when the number
+  of runs exceeds the maximum number of Slurm tasks (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^

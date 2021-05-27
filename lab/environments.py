@@ -111,11 +111,9 @@ class GridEnvironment(Environment):
     JOB_HEADER_TEMPLATE_FILE = None
     RUN_JOB_BODY_TEMPLATE_FILE = None
     STEP_JOB_BODY_TEMPLATE_FILE = None
+    MAX_TASKS: int = None  # Value between 1 and MaxArraySize-1 (from slurm.conf).
 
-    # Can be overridden in derived classes.
-    MAX_TASKS = float("inf")
-
-    def __init__(self, email=None, runs_per_job=1, extra_options=None, **kwargs):
+    def __init__(self, email=None, extra_options=None, **kwargs):
         """
 
         If the main experiment step is part of the selected steps, the
@@ -134,13 +132,6 @@ class GridEnvironment(Environment):
         If *email* is provided and the steps run on the grid, a message
         will be sent when the last experiment step finishes.
 
-        Use *runs_per_job* to specify how many solver runs are executed
-        in sequence by one Slurm job. The default value of 1 is fine for
-        the Basel cluster, but many other clusters prefer fewer
-        long-running jobs (between 30 minutes and 24 hours) rather than
-        many short-running jobs (< 30 minutes), see `NSC docs
-        <https://www.nsc.liu.se/support/batch-jobs/tetralith/short-jobs/>`_.
-
         Use *extra_options* to pass additional options. The
         *extra_options* string may contain newlines. Slurm example that
         reserves two cores per run::
@@ -153,7 +144,6 @@ class GridEnvironment(Environment):
         """
         Environment.__init__(self, **kwargs)
         self.email = email
-        self.runs_per_job = runs_per_job
         self.extra_options = extra_options or "## (not used)"
 
     def start_runs(self):
@@ -166,15 +156,19 @@ class GridEnvironment(Environment):
             f"{self.exp.steps.index(step) + 1:02d}-{step.name}"
         )
 
+    def _get_num_runs_per_task(self):
+        return math.ceil(len(self.exp.runs) / self.MAX_TASKS)
+
     def _get_num_tasks(self, step):
         if is_run_step(step):
-            num_tasks = math.ceil(len(self.exp.runs) / self.runs_per_job)
+            num_runs = len(self.exp.runs)
+            num_tasks = math.ceil(num_runs / self._get_num_runs_per_task())
         else:
             num_tasks = 1
         if num_tasks > self.MAX_TASKS:
             logging.critical(
-                f"You are trying to submit a job with {num_tasks} tasks, "
-                f"but only {self.MAX_TASKS} are allowed. Try increasing runs_per_job."
+                f"You are trying to submit an array job with {num_tasks} tasks, "
+                f"but only {self.MAX_TASKS} are allowed."
             )
         return num_tasks
 
@@ -197,7 +191,7 @@ class GridEnvironment(Environment):
             exp_path="../" + self.exp.name,
             num_runs=len(self.exp.runs),
             python=tools.get_python_executable(),
-            runs_per_job=self.runs_per_job,
+            runs_per_task=self._get_num_runs_per_task(),
             task_order=" ".join(
                 str(i) for i in self._get_task_order(self._get_num_tasks(run_step))
             ),
@@ -300,11 +294,6 @@ class SlurmEnvironment(GridEnvironment):
     ):
         """
 
-        A note on terminology: for our purposes, there is no real difference
-        between a Slurm "job" and a Slurm "task", so we use the two terms
-        interchangeably (https://slurm.schedmd.com/job_array.html). However,
-        we try to prefer the term "job", to avoid confusion with *planning* tasks.
-
         *partition* must be a valid Slurm partition name. In Basel you
         can choose from
 
@@ -379,6 +368,11 @@ class SlurmEnvironment(GridEnvironment):
 
         See :py:class:`~lab.environments.GridEnvironment` for inherited
         parameters.
+
+        Slurm limits the number of job array tasks. You must set the
+        appropriate value for your cluster in the *MAX_TASKS* class
+        variable. Lab groups `ceil(runs/MAX_TASKS)` runs in one array
+        task.
 
         """
         GridEnvironment.__init__(self, **kwargs)
@@ -470,5 +464,6 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = "3872M"
+    MAX_TASKS = 150000 - 1  # see slurm.conf
     # Prioritize array jobs from Autonice users on Basel grid.
     NICE_VALUE = 5000

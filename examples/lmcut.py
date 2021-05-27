@@ -31,13 +31,10 @@ class TetralithEnvironment(SlurmEnvironment):
     # allows us to keep the default memory limit in the
     # FastDownwardExperiment class.
     DEFAULT_MEMORY_PER_CPU = "3872M"
-    MAX_TASKS = 1000
+    MAX_TASKS = 2000
 
-    def __init__(self, runs_per_job=100, **kwargs):
-        super().__init__(runs_per_job=runs_per_job, **kwargs)
-
-    # def _submit_job(self, job_name, job_file, job_dir, dependency=None):
-    #    pass  # TODO: use base class implementation.
+    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+        pass  # TODO: use base class implementation.
 
     @classmethod
     def is_present(cls):
