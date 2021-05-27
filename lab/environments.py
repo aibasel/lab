@@ -2,6 +2,7 @@ import logging
 import math
 import multiprocessing
 import os
+import platform
 import random
 import re
 import subprocess
@@ -467,3 +468,29 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     MAX_TASKS = 150000 - 1  # see slurm.conf
     # Prioritize jobs from Autonice users on Basel grid.
     NICE_VALUE = 5000
+
+
+class TetralithEnvironment(SlurmEnvironment):
+    """Environment for the NSC Tetralith cluster in Linköping."""
+
+    DEFAULT_PARTITION = "tetralith"
+    DEFAULT_QOS = "normal"
+    # The maximum wall-clock time limit for a task is 7 days. The default
+    # is 2 hours. In certain situations, the scheduler prefers to schedule
+    # tasks shorter than 24 hours.
+    DEFAULT_TIME_LIMIT_PER_TASK = "24:00:00"
+    # There are 1908 nodes. 1844 nodes have 93.1 GiB (97637616 KiB) of
+    # memory and 64 nodes have 384 GB of memory. All nodes have 32 cores.
+    # So for the vast majority of nodes, we have 2979 MiB per core. The
+    # slurm.conf file sets DefMemPerCPU=2904. Since this is rather low, we
+    # use the default value from the BaselSlurmEnvironment. This also
+    # allows us to keep the default memory limit in the
+    # FastDownwardExperiment class.
+    DEFAULT_MEMORY_PER_CPU = "3872M"
+    # See slurm.conf
+    MAX_TASKS = 2000
+
+    @classmethod
+    def is_present(cls):
+        node = platform.node()
+        return node == "tetralith2.nsc.liu.se" or re.match(r"n\d+", node)
