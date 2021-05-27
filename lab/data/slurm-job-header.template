@@ -10,11 +10,11 @@
 #SBATCH --partition=%(partition)s
 ### Set quality-of-service group.
 #SBATCH --qos=%(qos)s
-### Set wall-clock time limit per job.
-#SBATCH --time=%(time_limit_per_job)s
+### Set wall-clock time limit per task.
+#SBATCH --time=%(time_limit_per_task)s
 ### Set memory limit.
 #SBATCH --mem-per-cpu=%(memory_per_cpu)s
-### Number of jobs in job array.
+### Number of tasks in array job.
 #SBATCH --array=1-%(num_tasks)d
 ### Adjustment to priority ([-2147483645, 2147483645]).
 #SBATCH --nice=%(nice)s

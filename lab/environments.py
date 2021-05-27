@@ -274,7 +274,7 @@ class SlurmEnvironment(GridEnvironment):
     DEFAULT_MEMORY_PER_CPU = None
 
     # Can be overridden in derived classes.
-    DEFAULT_TIME_LIMIT_PER_JOB = "0"  # No limit.
+    DEFAULT_TIME_LIMIT_PER_TASK = "0"  # No limit.
     DEFAULT_EXPORT = ["PATH"]
     DEFAULT_SETUP = ""
     NICE_VALUE = 0
@@ -286,7 +286,7 @@ class SlurmEnvironment(GridEnvironment):
         self,
         partition=None,
         qos=None,
-        time_limit_per_job=None,
+        time_limit_per_task=None,
         memory_per_cpu=None,
         export=None,
         setup=None,
@@ -303,12 +303,12 @@ class SlurmEnvironment(GridEnvironment):
         *qos* must be a valid Slurm QOS name. In Basel this must be
         "normal".
 
-        *time_limit_per_job* sets the wall-clock time limit for each Slurm job.
+        *time_limit_per_task* sets the wall-clock time limit for each Slurm task.
         The BaselSlurmEnvironment class uses a default of "0", i.e., no limit.
         (Note that there may still be an external limit set in slurm.conf.)
         The TetralithEnvironment class uses a default of "24:00:00", i.e., 24
         hours. This is because in certain situations, the scheduler prefers to
-        schedule jobs shorter than 24 hours.
+        schedule tasks shorter than 24 hours.
 
         *memory_per_cpu* must be a string specifying the memory
         allocated for each core. The string must end with one of the
@@ -381,8 +381,8 @@ class SlurmEnvironment(GridEnvironment):
             partition = self.DEFAULT_PARTITION
         if qos is None:
             qos = self.DEFAULT_QOS
-        if time_limit_per_job is None:
-            time_limit_per_job = self.DEFAULT_TIME_LIMIT_PER_JOB
+        if time_limit_per_task is None:
+            time_limit_per_task = self.DEFAULT_TIME_LIMIT_PER_TASK
         if memory_per_cpu is None:
             memory_per_cpu = self.DEFAULT_MEMORY_PER_CPU
         if export is None:
@@ -392,7 +392,7 @@ class SlurmEnvironment(GridEnvironment):
 
         self.partition = partition
         self.qos = qos
-        self.time_limit_per_job = time_limit_per_job
+        self.time_limit_per_task = time_limit_per_task
         self.memory_per_cpu = memory_per_cpu
         self.export = export
         self.setup = setup
@@ -417,7 +417,7 @@ class SlurmEnvironment(GridEnvironment):
     def _get_job_params(self, step, is_last):
         job_params = GridEnvironment._get_job_params(self, step, is_last)
 
-        # Let all jobs write into the same two files. We could use %a
+        # Let all tasks write into the same two files. We could use %a
         # (which is replaced by the array ID) to prevent mangled up logs,
         # but we don't want so many files.
         job_params["logfile"] = "slurm.log"
@@ -425,7 +425,7 @@ class SlurmEnvironment(GridEnvironment):
 
         job_params["partition"] = self.partition
         job_params["qos"] = self.qos
-        job_params["time_limit_per_job"] = self.time_limit_per_job
+        job_params["time_limit_per_task"] = self.time_limit_per_task
         job_params["memory_per_cpu"] = self.memory_per_cpu
         memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
         job_params["soft_memory_limit"] = int(memory_per_cpu_kb * 0.98)
@@ -465,5 +465,5 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = "3872M"
     MAX_TASKS = 150000 - 1  # see slurm.conf
-    # Prioritize array jobs from Autonice users on Basel grid.
+    # Prioritize jobs from Autonice users on Basel grid.
     NICE_VALUE = 5000
