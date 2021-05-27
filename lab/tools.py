@@ -531,7 +531,7 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
         argparse.HelpFormatter.__init__(self, prog, width=width, **kwargs)
 
     def _fill_text(self, text, width, indent):
-        return "\n".join([indent + line for line in text.splitlines()])
+        return "\n".join(indent + line for line in text.splitlines())
 
     def _get_help_string(self, action):
         help = action.help

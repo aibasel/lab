@@ -350,7 +350,7 @@ class Report:
                 if key not in self.attributes:
                     continue
                 if isinstance(value, (list, tuple)):
-                    key = "-".join([str(item) for item in value])
+                    key = "-".join(str(item) for item in value)
                 row[key] = value
             table.add_row(run_id, row)
         return str(table)
