@@ -16,7 +16,7 @@ from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 ATTRIBUTES = ["coverage", "error", "expansions", "total_time"]
 
 NODE = platform.node()
-if NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch"):
+if NODE.endswith((".cluster.bc2.ch", ".scicore.unibas.ch")):
     # Create bigger suites with suites.py from the downward-benchmarks repo.
     SUITE = ["depot", "freecell", "gripper", "zenotravel"]
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")

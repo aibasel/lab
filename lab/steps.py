@@ -41,7 +41,7 @@ class Step:
         name = self._funcname
         args = ", ".join(repr(arg) for arg in self.args)
         sep = ", " if self.args and self.kwargs else ""
-        kwargs = ", ".join([f"{k}={v!r}" for (k, v) in sorted(self.kwargs.items())])
+        kwargs = ", ".join(f"{k}={v!r}" for (k, v) in sorted(self.kwargs.items()))
         return f"{name}({args}{sep}{kwargs})"
 
 

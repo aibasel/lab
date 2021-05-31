@@ -1,6 +1,8 @@
 import logging
+import math
 import multiprocessing
 import os
+import platform
 import random
 import re
 import subprocess
@@ -41,8 +43,8 @@ class Environment:
         self.exp = None
         self.randomize_task_order = randomize_task_order
 
-    def _get_task_order(self):
-        task_order = list(range(1, len(self.exp.runs) + 1))
+    def _get_task_order(self, num_tasks):
+        task_order = list(range(1, num_tasks + 1))
         if self.randomize_task_order:
             random.shuffle(task_order)
         return task_order
@@ -86,7 +88,9 @@ class LocalEnvironment(Environment):
 
     def write_main_script(self):
         script = tools.fill_template(
-            "local-job.py", task_order=self._get_task_order(), processes=self.processes
+            "local-job.py",
+            task_order=self._get_task_order(len(self.exp.runs)),
+            processes=self.processes,
         )
 
         self.exp.add_new_file("", self.EXP_RUN_SCRIPT, script, permissions=0o755)
@@ -108,9 +112,7 @@ class GridEnvironment(Environment):
     JOB_HEADER_TEMPLATE_FILE = None
     RUN_JOB_BODY_TEMPLATE_FILE = None
     STEP_JOB_BODY_TEMPLATE_FILE = None
-
-    # Can be overridden in derived classes.
-    MAX_TASKS = float("inf")
+    MAX_TASKS: int = None  # Value between 1 and MaxArraySize-1 (from slurm.conf).
 
     def __init__(self, email=None, extra_options=None, **kwargs):
         """
@@ -155,20 +157,17 @@ class GridEnvironment(Environment):
             f"{self.exp.steps.index(step) + 1:02d}-{step.name}"
         )
 
-    def _get_num_runs(self):
-        num_runs = len(self.exp.runs)
-        if num_runs > self.MAX_TASKS:
-            logging.critical(
-                f"You are trying to submit a job with {num_runs} tasks, "
-                f"but only {self.MAX_TASKS} are allowed."
-            )
-        return num_runs
+    def _get_num_runs_per_task(self):
+        return math.ceil(len(self.exp.runs) / self.MAX_TASKS)
 
     def _get_num_tasks(self, step):
         if is_run_step(step):
-            return self._get_num_runs()
+            num_runs = len(self.exp.runs)
+            num_tasks = math.ceil(num_runs / self._get_num_runs_per_task())
+            logging.info("Grouping {num_runs} runs into {num_tasks} Slurm tasks.")
         else:
-            return 1
+            num_tasks = 1
+        return num_tasks
 
     def _get_job_params(self, step, is_last):
         return {
@@ -183,12 +182,16 @@ class GridEnvironment(Environment):
         job_params = self._get_job_params(step, is_last)
         return tools.fill_template(self.JOB_HEADER_TEMPLATE_FILE, **job_params)
 
-    def _get_run_job_body(self):
+    def _get_run_job_body(self, run_step):
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
-            task_order=" ".join(str(i) for i in self._get_task_order()),
             exp_path="../" + self.exp.name,
+            num_runs=len(self.exp.runs),
             python=tools.get_python_executable(),
+            runs_per_task=self._get_num_runs_per_task(),
+            task_order=" ".join(
+                str(i) for i in self._get_task_order(self._get_num_tasks(run_step))
+            ),
         )
 
     def _get_step_job_body(self, step):
@@ -202,7 +205,7 @@ class GridEnvironment(Environment):
 
     def _get_job_body(self, step):
         if is_run_step(step):
-            return self._get_run_job_body()
+            return self._get_run_job_body(step)
         return self._get_step_job_body(step)
 
     def _get_job(self, step, is_last):
@@ -268,8 +271,10 @@ class SlurmEnvironment(GridEnvironment):
     DEFAULT_MEMORY_PER_CPU = None
 
     # Can be overridden in derived classes.
+    DEFAULT_TIME_LIMIT_PER_TASK = "0"  # No limit.
     DEFAULT_EXPORT = ["PATH"]
     DEFAULT_SETUP = ""
+    NICE_VALUE = 0
     JOB_HEADER_TEMPLATE_FILE = "slurm-job-header"
     RUN_JOB_BODY_TEMPLATE_FILE = "slurm-run-job-body"
     STEP_JOB_BODY_TEMPLATE_FILE = "slurm-step-job-body"
@@ -278,6 +283,7 @@ class SlurmEnvironment(GridEnvironment):
         self,
         partition=None,
         qos=None,
+        time_limit_per_task=None,
         memory_per_cpu=None,
         export=None,
         setup=None,
@@ -293,6 +299,13 @@ class SlurmEnvironment(GridEnvironment):
 
         *qos* must be a valid Slurm QOS name. In Basel this must be
         "normal".
+
+        *time_limit_per_task* sets the wall-clock time limit for each Slurm task.
+        The BaselSlurmEnvironment class uses a default of "0", i.e., no limit.
+        (Note that there may still be an external limit set in slurm.conf.)
+        The TetralithEnvironment class uses a default of "24:00:00", i.e., 24
+        hours. This is because in certain situations, the scheduler prefers to
+        schedule tasks shorter than 24 hours.
 
         *memory_per_cpu* must be a string specifying the memory
         allocated for each core. The string must end with one of the
@@ -353,6 +366,11 @@ class SlurmEnvironment(GridEnvironment):
         See :py:class:`~lab.environments.GridEnvironment` for inherited
         parameters.
 
+        Slurm limits the number of job array tasks. You must set the
+        appropriate value for your cluster in the *MAX_TASKS* class
+        variable. Lab groups `ceil(runs/MAX_TASKS)` runs in one array
+        task.
+
         """
         GridEnvironment.__init__(self, **kwargs)
 
@@ -360,6 +378,8 @@ class SlurmEnvironment(GridEnvironment):
             partition = self.DEFAULT_PARTITION
         if qos is None:
             qos = self.DEFAULT_QOS
+        if time_limit_per_task is None:
+            time_limit_per_task = self.DEFAULT_TIME_LIMIT_PER_TASK
         if memory_per_cpu is None:
             memory_per_cpu = self.DEFAULT_MEMORY_PER_CPU
         if export is None:
@@ -369,6 +389,7 @@ class SlurmEnvironment(GridEnvironment):
 
         self.partition = partition
         self.qos = qos
+        self.time_limit_per_task = time_limit_per_task
         self.memory_per_cpu = memory_per_cpu
         self.export = export
         self.setup = setup
@@ -401,11 +422,11 @@ class SlurmEnvironment(GridEnvironment):
 
         job_params["partition"] = self.partition
         job_params["qos"] = self.qos
+        job_params["time_limit_per_task"] = self.time_limit_per_task
         job_params["memory_per_cpu"] = self.memory_per_cpu
         memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
         job_params["soft_memory_limit"] = int(memory_per_cpu_kb * 0.98)
-        # Prioritize array jobs from autonice users.
-        job_params["nice"] = 5000 if is_run_step(step) else 0
+        job_params["nice"] = self.NICE_VALUE if is_run_step(step) else 0
         job_params["environment_setup"] = self.setup
 
         if is_last and self.email:
@@ -440,3 +461,32 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = "3872M"
+    MAX_TASKS = 150000 - 1  # see slurm.conf
+    # Prioritize jobs from Autonice users on Basel grid.
+    NICE_VALUE = 5000
+
+
+class TetralithEnvironment(SlurmEnvironment):
+    """Environment for the NSC Tetralith cluster in Linköping."""
+
+    DEFAULT_PARTITION = "tetralith"
+    DEFAULT_QOS = "normal"
+    # The maximum wall-clock time limit for a task is 7 days. The default
+    # is 2 hours. In certain situations, the scheduler prefers to schedule
+    # tasks shorter than 24 hours.
+    DEFAULT_TIME_LIMIT_PER_TASK = "24:00:00"
+    # There are 1908 nodes. 1844 nodes have 93.1 GiB (97637616 KiB) of
+    # memory and 64 nodes have 384 GB of memory. All nodes have 32 cores.
+    # So for the vast majority of nodes, we have 2979 MiB per core. The
+    # slurm.conf file sets DefMemPerCPU=2904. Since this is rather low, we
+    # use the default value from the BaselSlurmEnvironment. This also
+    # allows us to keep the default memory limit in the
+    # FastDownwardExperiment class.
+    DEFAULT_MEMORY_PER_CPU = "3872M"
+    # See slurm.conf
+    MAX_TASKS = 2000
+
+    @classmethod
+    def is_present(cls):
+        node = platform.node()
+        return node == "tetralith2.nsc.liu.se" or re.match(r"n\d+", node)

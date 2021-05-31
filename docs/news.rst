@@ -1,6 +1,19 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Automatically group multiple runs into one Slurm task when the number
+  of runs exceeds the maximum number of Slurm tasks (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* None so far.
+
+
 v6.3 (2021-02-14)
 -----------------
 

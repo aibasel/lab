@@ -1,6 +1,7 @@
 import lab
 from lab import reports
 from lab.calls.call import Call
+from lab.environments import TetralithEnvironment
 
 
 reports.Table.add_col
@@ -10,3 +11,5 @@ lab.tools.deprecated
 lab.tools.get_lab_path
 
 Call
+
+TetralithEnvironment.is_present()
