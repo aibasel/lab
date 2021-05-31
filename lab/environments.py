@@ -164,13 +164,9 @@ class GridEnvironment(Environment):
         if is_run_step(step):
             num_runs = len(self.exp.runs)
             num_tasks = math.ceil(num_runs / self._get_num_runs_per_task())
+            logging.info("Grouping {num_runs} runs into {num_tasks} Slurm tasks.")
         else:
             num_tasks = 1
-        if num_tasks > self.MAX_TASKS:
-            logging.critical(
-                f"You are trying to submit an array job with {num_tasks} tasks, "
-                f"but only {self.MAX_TASKS} are allowed."
-            )
         return num_tasks
 
     def _get_job_params(self, step, is_last):
