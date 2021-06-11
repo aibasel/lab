@@ -164,7 +164,7 @@ class GridEnvironment(Environment):
         if is_run_step(step):
             num_runs = len(self.exp.runs)
             num_tasks = math.ceil(num_runs / self._get_num_runs_per_task())
-            logging.info("Grouping {num_runs} runs into {num_tasks} Slurm tasks.")
+            logging.info(f"Grouping {num_runs} runs into {num_tasks} Slurm tasks.")
         else:
             num_tasks = 1
         return num_tasks
