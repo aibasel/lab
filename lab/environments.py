@@ -164,7 +164,6 @@ class GridEnvironment(Environment):
         if is_run_step(step):
             num_runs = len(self.exp.runs)
             num_tasks = math.ceil(num_runs / self._get_num_runs_per_task())
-            logging.info(f"Grouping {num_runs} runs into {num_tasks} Slurm tasks.")
         else:
             num_tasks = 1
         return num_tasks
@@ -183,15 +182,16 @@ class GridEnvironment(Environment):
         return tools.fill_template(self.JOB_HEADER_TEMPLATE_FILE, **job_params)
 
     def _get_run_job_body(self, run_step):
+        num_runs = len(self.exp.runs)
+        num_tasks = self._get_num_tasks(run_step)
+        logging.info(f"Grouping {num_runs} runs into {num_tasks} Slurm tasks.")
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
             exp_path="../" + self.exp.name,
-            num_runs=len(self.exp.runs),
+            num_runs=num_runs,
             python=tools.get_python_executable(),
             runs_per_task=self._get_num_runs_per_task(),
-            task_order=" ".join(
-                str(i) for i in self._get_task_order(self._get_num_tasks(run_step))
-            ),
+            task_order=" ".join(str(i) for i in self._get_task_order(num_tasks)),
         )
 
     def _get_step_job_body(self, step):
