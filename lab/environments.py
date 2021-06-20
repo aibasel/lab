@@ -350,7 +350,7 @@ class SlurmEnvironment(GridEnvironment):
         >>> env = BaselSlurmEnvironment(
         ...     partition="infai_2",
         ...     memory_per_cpu="6G",
-        ...     cpus_per_task=4,
+        ...     cpus_per_task=2,
         ... )
 
         Use *export* to specify a list of environment variables that
