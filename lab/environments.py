@@ -135,9 +135,10 @@ class GridEnvironment(Environment):
 
         Use *extra_options* to pass additional options. The
         *extra_options* string may contain newlines. Slurm example that
-        reserves two cores per run::
+        uses a given set of nodes (additional nodes will be used if the
+        given ones don't satisfy the resource constraints)::
 
-            extra_options='#SBATCH --cpus-per-task=2'
+            extra_options='#SBATCH --nodelist=ase[1-5,7,10]'
 
         See :py:class:`~lab.environments.Environment` for inherited
         parameters.
