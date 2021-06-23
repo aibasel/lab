@@ -14,7 +14,7 @@
 #SBATCH --time=%(time_limit_per_task)s
 ### Set memory limit.
 #SBATCH --mem-per-cpu=%(memory_per_cpu)s
-### Set amount of cores per task.
+### Set number of cores per task.
 #SBATCH --cpus-per-task=%(cpus_per_task)s
 ### Number of tasks in array job.
 #SBATCH --array=1-%(num_tasks)d

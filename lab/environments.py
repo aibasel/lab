@@ -329,8 +329,8 @@ class SlurmEnvironment(GridEnvironment):
         slack). We use a soft instead of a hard limit so that child
         processes can raise the limit.
 
-        *cpus_per_task* sets the amount of cores to be allocated per Slurm
-        task. If it is not used, it defaults to 1.
+        *cpus_per_task* sets the number of cores to be allocated per Slurm
+        task. If it is not given, it defaults to 1.
 
         Examples that reserve the maximum amount of memory available per core:
 
