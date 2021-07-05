@@ -105,48 +105,190 @@ class LocalEnvironment(Environment):
             step()
 
 
-class GridEnvironment(Environment):
-    """Abstract base class for grid environments."""
+class SlurmEnvironment(Environment):
+    """Abstract base class for Slurm environments.
+
+    If the main experiment step is part of the selected steps, the
+    selected steps are submitted to Slurm. Otherwise, the selected steps
+    are run locally.
+
+    .. note::
+
+        If the steps are run by Slurm, this class writes job files to
+        the directory ``<exppath>-grid-steps`` and makes them depend on
+        one another. Please inspect the \\*.log and \\*.err files in
+        this directory if something goes wrong. Since the job files call
+        the experiment script during execution, it mustn't be changed
+        during the experiment.
+
+    If *email* is provided and the steps run on the grid, a message will
+    be sent when the last experiment step finishes.
+
+    Use *extra_options* to pass additional options. The *extra_options*
+    string may contain newlines. Slurm example that uses a given set of
+    nodes (additional nodes will be used if the given ones don't satisfy
+    the resource constraints)::
+
+        extra_options='#SBATCH --nodelist=ase[1-5,7,10]'
+
+    *partition* must be a valid Slurm partition name. In Basel you
+    can choose from
+
+    * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
+    * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
+
+    *qos* must be a valid Slurm QOS name. In Basel this must be
+    "normal".
+
+    *time_limit_per_task* sets the wall-clock time limit for each Slurm task.
+    The BaselSlurmEnvironment subclass uses a default of "0", i.e., no limit.
+    (Note that there may still be an external limit set in slurm.conf.)
+    The TetralithEnvironment class uses a default of "24:00:00", i.e., 24
+    hours. This is because in certain situations, the scheduler prefers to
+    schedule tasks shorter than 24 hours.
+
+    *memory_per_cpu* must be a string specifying the memory
+    allocated for each core. The string must end with one of the
+    letters K, M or G. The default is "3872M". The value for
+    *memory_per_cpu* should not surpass the amount of memory that is
+    available per core, which is "3872M" for infai_1 and "6354M" for
+    infai_2. Processes that surpass the *memory_per_cpu* limit are
+    terminated with SIGKILL. To impose a soft limit that can be
+    caught from within your programs, you can use the
+    ``memory_limit`` kwarg of
+    :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
+    should set memory limits via the ``driver_options``.
+
+    Slurm limits the memory with cgroups. Unfortunately, this often
+    fails on our nodes, so we set our own soft memory limit for all
+    Slurm jobs. We derive the soft memory limit by multiplying the
+    value denoted by the *memory_per_cpu* parameter with 0.98 (the
+    Slurm config file contains "AllowedRAMSpace=99" and we add some
+    slack). We use a soft instead of a hard limit so that child
+    processes can raise the limit.
+
+    *cpus_per_task* sets the number of cores to be allocated per Slurm
+    task (default: 1).
+
+    Examples that reserve the maximum amount of memory available per core:
+
+    >>> env1 = BaselSlurmEnvironment(partition="infai_1", memory_per_cpu="3872M")
+    >>> env2 = BaselSlurmEnvironment(partition="infai_2", memory_per_cpu="6354M")
+
+    Example that reserves 12 GiB of memory on infai_1:
+
+    >>> # 12 * 1024 / 3872 = 3.17 -> round to next int -> 4 cores per task
+    >>> # 12G / 4 = 3G per core
+    >>> env = BaselSlurmEnvironment(
+    ...     partition="infai_1",
+    ...     memory_per_cpu="3G",
+    ...     cpus_per_task=4,
+    ... )
+
+    Example that reserves 12 GiB of memory on infai_2:
+
+    >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
+    >>> # 12G / 2 = 6G per core
+    >>> env = BaselSlurmEnvironment(
+    ...     partition="infai_2",
+    ...     memory_per_cpu="6G",
+    ...     cpus_per_task=2,
+    ... )
+
+    Use *export* to specify a list of environment variables that
+    should be exported from the login node to the compute nodes
+    (default: ["PATH"]).
+
+    You can alter the environment in which the experiment runs with
+    the *setup* argument. If given, it must be a string of Bash
+    commands. Example::
+
+        # Load Singularity module.
+        setup="module load Singularity/2.6.1 2> /dev/null"
+
+    Slurm limits the number of job array tasks. You must set the
+    appropriate value for your cluster in the *MAX_TASKS* class
+    variable. Lab groups `ceil(runs/MAX_TASKS)` runs in one array
+    task.
+
+    See :py:class:`~lab.environments.Environment` for inherited
+    parameters.
+
+    """
 
     # Must be overridden in derived classes.
     JOB_HEADER_TEMPLATE_FILE = None
     RUN_JOB_BODY_TEMPLATE_FILE = None
     STEP_JOB_BODY_TEMPLATE_FILE = None
     MAX_TASKS: int = None  # Value between 1 and MaxArraySize-1 (from slurm.conf).
+    DEFAULT_PARTITION = None
+    DEFAULT_QOS = None
+    DEFAULT_MEMORY_PER_CPU = None
 
-    def __init__(self, email=None, extra_options=None, **kwargs):
-        """
+    # Can be overridden in derived classes.
+    DEFAULT_TIME_LIMIT_PER_TASK = "0"  # No limit.
+    DEFAULT_EXPORT = ["PATH"]
+    DEFAULT_SETUP = ""
+    NICE_VALUE = 0
+    JOB_HEADER_TEMPLATE_FILE = "slurm-job-header"
+    RUN_JOB_BODY_TEMPLATE_FILE = "slurm-run-job-body"
+    STEP_JOB_BODY_TEMPLATE_FILE = "slurm-step-job-body"
 
-        If the main experiment step is part of the selected steps, the
-        selected steps are submitted to the grid engine. Otherwise, the
-        selected steps are run locally.
+    def __init__(
+        self,
+        email=None,
+        extra_options=None,
+        partition=None,
+        qos=None,
+        time_limit_per_task=None,
+        memory_per_cpu=None,
+        cpus_per_task=1,
+        export=None,
+        setup=None,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
 
-        .. note::
-
-            If the steps are run by the grid engine, this class writes
-            job files to the directory ``<exppath>-grid-steps`` and
-            makes them depend on one another. Please inspect the \\*.log
-            and \\*.err files in this directory if something goes wrong.
-            Since the job files call the experiment script during
-            execution, it mustn't be changed during the experiment.
-
-        If *email* is provided and the steps run on the grid, a message
-        will be sent when the last experiment step finishes.
-
-        Use *extra_options* to pass additional options. The
-        *extra_options* string may contain newlines. Slurm example that
-        uses a given set of nodes (additional nodes will be used if the
-        given ones don't satisfy the resource constraints)::
-
-            extra_options='#SBATCH --nodelist=ase[1-5,7,10]'
-
-        See :py:class:`~lab.environments.Environment` for inherited
-        parameters.
-
-        """
-        Environment.__init__(self, **kwargs)
         self.email = email
         self.extra_options = extra_options or "## (not used)"
+
+        if partition is None:
+            partition = self.DEFAULT_PARTITION
+        if qos is None:
+            qos = self.DEFAULT_QOS
+        if time_limit_per_task is None:
+            time_limit_per_task = self.DEFAULT_TIME_LIMIT_PER_TASK
+        if memory_per_cpu is None:
+            memory_per_cpu = self.DEFAULT_MEMORY_PER_CPU
+        if export is None:
+            export = self.DEFAULT_EXPORT
+        if setup is None:
+            setup = self.DEFAULT_SETUP
+
+        self.partition = partition
+        self.qos = qos
+        self.time_limit_per_task = time_limit_per_task
+        self.memory_per_cpu = memory_per_cpu
+        self.cpus_per_task = cpus_per_task
+        self.export = export
+        self.setup = setup
+
+    @staticmethod
+    def _get_memory_in_kb(limit):
+        match = re.match(r"^(\d+)(k|m|g)?$", limit, flags=re.I)
+        if not match:
+            logging.critical(f"malformed memory_per_cpu parameter: {limit}")
+        memory = int(match.group(1))
+        suffix = match.group(2)
+        if suffix is not None:
+            suffix = suffix.lower()
+        if suffix == "k":
+            pass
+        elif suffix is None or suffix == "m":
+            memory *= 1024
+        elif suffix == "g":
+            memory *= 1024 * 1024
+        return memory
 
     def start_runs(self):
         # The queue will start the experiment by itself.
@@ -168,15 +310,6 @@ class GridEnvironment(Environment):
         else:
             num_tasks = 1
         return num_tasks
-
-    def _get_job_params(self, step, is_last):
-        return {
-            "errfile": "driver.err",
-            "extra_options": self.extra_options,
-            "logfile": "driver.log",
-            "name": self._get_job_name(step),
-            "num_tasks": self._get_num_tasks(step),
-        }
 
     def _get_job_header(self, step, is_last):
         job_params = self._get_job_params(step, is_last)
@@ -259,166 +392,14 @@ class GridEnvironment(Environment):
                 job_name, job_file, job_dir, dependency=prev_job_id
             )
 
-    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
-        raise NotImplementedError
-
-
-class SlurmEnvironment(GridEnvironment):
-    """Abstract base class for slurm grid environments."""
-
-    # Must be overridden in derived classes.
-    DEFAULT_PARTITION = None
-    DEFAULT_QOS = None
-    DEFAULT_MEMORY_PER_CPU = None
-
-    # Can be overridden in derived classes.
-    DEFAULT_TIME_LIMIT_PER_TASK = "0"  # No limit.
-    DEFAULT_EXPORT = ["PATH"]
-    DEFAULT_SETUP = ""
-    NICE_VALUE = 0
-    JOB_HEADER_TEMPLATE_FILE = "slurm-job-header"
-    RUN_JOB_BODY_TEMPLATE_FILE = "slurm-run-job-body"
-    STEP_JOB_BODY_TEMPLATE_FILE = "slurm-step-job-body"
-
-    def __init__(
-        self,
-        partition=None,
-        qos=None,
-        time_limit_per_task=None,
-        memory_per_cpu=None,
-        cpus_per_task=1,
-        export=None,
-        setup=None,
-        **kwargs,
-    ):
-        """
-
-        *partition* must be a valid Slurm partition name. In Basel you
-        can choose from
-
-        * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
-        * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
-
-        *qos* must be a valid Slurm QOS name. In Basel this must be
-        "normal".
-
-        *time_limit_per_task* sets the wall-clock time limit for each Slurm task.
-        The BaselSlurmEnvironment class uses a default of "0", i.e., no limit.
-        (Note that there may still be an external limit set in slurm.conf.)
-        The TetralithEnvironment class uses a default of "24:00:00", i.e., 24
-        hours. This is because in certain situations, the scheduler prefers to
-        schedule tasks shorter than 24 hours.
-
-        *memory_per_cpu* must be a string specifying the memory
-        allocated for each core. The string must end with one of the
-        letters K, M or G. The default is "3872M". The value for
-        *memory_per_cpu* should not surpass the amount of memory that is
-        available per core, which is "3872M" for infai_1 and "6354M" for
-        infai_2. Processes that surpass the *memory_per_cpu* limit are
-        terminated with SIGKILL. To impose a soft limit that can be
-        caught from within your programs, you can use the
-        ``memory_limit`` kwarg of
-        :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
-        should set memory limits via the ``driver_options``.
-
-        Slurm limits the memory with cgroups. Unfortunately, this often
-        fails on our nodes, so we set our own soft memory limit for all
-        Slurm jobs. We derive the soft memory limit by multiplying the
-        value denoted by the *memory_per_cpu* parameter with 0.98 (the
-        Slurm config file contains "AllowedRAMSpace=99" and we add some
-        slack). We use a soft instead of a hard limit so that child
-        processes can raise the limit.
-
-        *cpus_per_task* sets the number of cores to be allocated per Slurm
-        task (default: 1).
-
-        Examples that reserve the maximum amount of memory available per core:
-
-        >>> env1 = BaselSlurmEnvironment(partition="infai_1", memory_per_cpu="3872M")
-        >>> env2 = BaselSlurmEnvironment(partition="infai_2", memory_per_cpu="6354M")
-
-        Example that reserves 12 GiB of memory on infai_1:
-
-        >>> # 12 * 1024 / 3872 = 3.17 -> round to next int -> 4 cores per task
-        >>> # 12G / 4 = 3G per core
-        >>> env = BaselSlurmEnvironment(
-        ...     partition="infai_1",
-        ...     memory_per_cpu="3G",
-        ...     cpus_per_task=4,
-        ... )
-
-        Example that reserves 12 GiB of memory on infai_2:
-
-        >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
-        >>> # 12G / 2 = 6G per core
-        >>> env = BaselSlurmEnvironment(
-        ...     partition="infai_2",
-        ...     memory_per_cpu="6G",
-        ...     cpus_per_task=2,
-        ... )
-
-        Use *export* to specify a list of environment variables that
-        should be exported from the login node to the compute nodes
-        (default: ["PATH"]).
-
-        You can alter the environment in which the experiment runs with
-        the **setup** argument. If given, it must be a string of Bash
-        commands. Example::
-
-            # Load Singularity module.
-            setup="module load Singularity/2.6.1 2> /dev/null"
-
-        See :py:class:`~lab.environments.GridEnvironment` for inherited
-        parameters.
-
-        Slurm limits the number of job array tasks. You must set the
-        appropriate value for your cluster in the *MAX_TASKS* class
-        variable. Lab groups `ceil(runs/MAX_TASKS)` runs in one array
-        task.
-
-        """
-        GridEnvironment.__init__(self, **kwargs)
-
-        if partition is None:
-            partition = self.DEFAULT_PARTITION
-        if qos is None:
-            qos = self.DEFAULT_QOS
-        if time_limit_per_task is None:
-            time_limit_per_task = self.DEFAULT_TIME_LIMIT_PER_TASK
-        if memory_per_cpu is None:
-            memory_per_cpu = self.DEFAULT_MEMORY_PER_CPU
-        if export is None:
-            export = self.DEFAULT_EXPORT
-        if setup is None:
-            setup = self.DEFAULT_SETUP
-
-        self.partition = partition
-        self.qos = qos
-        self.time_limit_per_task = time_limit_per_task
-        self.memory_per_cpu = memory_per_cpu
-        self.cpus_per_task = cpus_per_task
-        self.export = export
-        self.setup = setup
-
-    @staticmethod
-    def _get_memory_in_kb(limit):
-        match = re.match(r"^(\d+)(k|m|g)?$", limit, flags=re.I)
-        if not match:
-            logging.critical(f"malformed memory_per_cpu parameter: {limit}")
-        memory = int(match.group(1))
-        suffix = match.group(2)
-        if suffix is not None:
-            suffix = suffix.lower()
-        if suffix == "k":
-            pass
-        elif suffix is None or suffix == "m":
-            memory *= 1024
-        elif suffix == "g":
-            memory *= 1024 * 1024
-        return memory
-
     def _get_job_params(self, step, is_last):
-        job_params = GridEnvironment._get_job_params(self, step, is_last)
+        job_params = {
+            "errfile": "driver.err",
+            "extra_options": self.extra_options,
+            "logfile": "driver.log",
+            "name": self._get_job_name(step),
+            "num_tasks": self._get_num_tasks(step),
+        }
 
         # Let all tasks write into the same two files. We could use %a
         # (which is replaced by the array ID) to prevent mangled up logs,

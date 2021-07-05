@@ -74,7 +74,7 @@ Custom command line arguments
 
 .. autoclass:: lab.environments.Environment
 .. autoclass:: lab.environments.LocalEnvironment
-.. autoclass:: lab.environments.GridEnvironment
+.. autoclass:: lab.environments.SlurmEnvironment
 .. autoclass:: lab.environments.BaselSlurmEnvironment
 .. autoclass:: lab.environments.TetralithEnvironment
 
