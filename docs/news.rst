@@ -8,7 +8,8 @@ Lab
 ^^^
 * Automatically group multiple runs into one Slurm task when the number
   of runs exceeds the maximum number of Slurm tasks (Jendrik Seipp).
-* Add ``time_limit_per_task`` parameter to ``SlurmEnvironment``.
+* Add ``time_limit_per_task`` parameter to ``SlurmEnvironment`` (Jendrik Seipp).
+* Add ``cpus_per_task`` parameter to ``SlurmEnvironment`` (Lucas Galery Käser).
 
 Downward Lab
 ^^^^^^^^^^^^

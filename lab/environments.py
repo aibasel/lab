@@ -135,9 +135,10 @@ class GridEnvironment(Environment):
 
         Use *extra_options* to pass additional options. The
         *extra_options* string may contain newlines. Slurm example that
-        reserves two cores per run::
+        uses a given set of nodes (additional nodes will be used if the
+        given ones don't satisfy the resource constraints)::
 
-            extra_options='#SBATCH --cpus-per-task=2'
+            extra_options='#SBATCH --nodelist=ase[1-5,7,10]'
 
         See :py:class:`~lab.environments.Environment` for inherited
         parameters.
@@ -285,6 +286,7 @@ class SlurmEnvironment(GridEnvironment):
         qos=None,
         time_limit_per_task=None,
         memory_per_cpu=None,
+        cpus_per_task=1,
         export=None,
         setup=None,
         **kwargs,
@@ -327,6 +329,9 @@ class SlurmEnvironment(GridEnvironment):
         slack). We use a soft instead of a hard limit so that child
         processes can raise the limit.
 
+        *cpus_per_task* sets the number of cores to be allocated per Slurm
+        task (default: 1).
+
         Examples that reserve the maximum amount of memory available per core:
 
         >>> env1 = BaselSlurmEnvironment(partition="infai_1", memory_per_cpu="3872M")
@@ -339,7 +344,7 @@ class SlurmEnvironment(GridEnvironment):
         >>> env = BaselSlurmEnvironment(
         ...     partition="infai_1",
         ...     memory_per_cpu="3G",
-        ...     extra_options="#SBATCH --cpus-per-task=4",
+        ...     cpus_per_task=4,
         ... )
 
         Example that reserves 12 GiB of memory on infai_2:
@@ -349,7 +354,7 @@ class SlurmEnvironment(GridEnvironment):
         >>> env = BaselSlurmEnvironment(
         ...     partition="infai_2",
         ...     memory_per_cpu="6G",
-        ...     extra_options="#SBATCH --cpus-per-task=2",
+        ...     cpus_per_task=2,
         ... )
 
         Use *export* to specify a list of environment variables that
@@ -391,6 +396,7 @@ class SlurmEnvironment(GridEnvironment):
         self.qos = qos
         self.time_limit_per_task = time_limit_per_task
         self.memory_per_cpu = memory_per_cpu
+        self.cpus_per_task = cpus_per_task
         self.export = export
         self.setup = setup
 
@@ -424,8 +430,11 @@ class SlurmEnvironment(GridEnvironment):
         job_params["qos"] = self.qos
         job_params["time_limit_per_task"] = self.time_limit_per_task
         job_params["memory_per_cpu"] = self.memory_per_cpu
+        job_params["cpus_per_task"] = self.cpus_per_task
         memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
-        job_params["soft_memory_limit"] = int(memory_per_cpu_kb * 0.98)
+        job_params["soft_memory_limit"] = int(
+            self.cpus_per_task * memory_per_cpu_kb * 0.98
+        )
         job_params["nice"] = self.NICE_VALUE if is_run_step(step) else 0
         job_params["environment_setup"] = self.setup
 
