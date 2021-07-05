@@ -2,7 +2,7 @@
 # Automatically rebuild Sphinx documentation when files change.
 
 DOCS="$( dirname "$0" )"
-REPO="$DOCS/../"
+REPO="$( realpath "$DOCS/../" )"
 
 cd "$REPO/docs"
 
@@ -14,7 +14,7 @@ xdg-open "$DOCS/_build/html/index.html"
 
 while :; do
     # Wait for changes.
-    inotifywait -e modify,create,delete -r "$REPO"
+    inotifywait -e modify,create,delete -r "$REPO/docs" "$REPO/downward" "$REPO/examples" "$REPO/lab"
     echo
     # Build html documentation.
     make html
