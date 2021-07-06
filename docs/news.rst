@@ -1,19 +1,21 @@
 Changelog
 =========
 
-next (unreleased)
+v6.4 (2021-07-06)
 -----------------
 
 Lab
 ^^^
+* Add ``TetralithEnvironment`` for the NSC cluster in Linköping (Jendrik Seipp).
 * Automatically group multiple runs into one Slurm task when the number
   of runs exceeds the maximum number of Slurm tasks (Jendrik Seipp).
 * Add ``time_limit_per_task`` parameter to ``SlurmEnvironment`` (Jendrik Seipp).
-* Add ``cpus_per_task`` parameter to ``SlurmEnvironment`` (Lucas Galery Käser).
+* Add ``cpus_per_task`` parameter to ``SlurmEnvironment`` (#98, Lucas Galery Käser).
+* Catch OverflowError when casting large ints to floats (#95, Silvan Sievers).
 
 Downward Lab
 ^^^^^^^^^^^^
-* None so far.
+* None.
 
 
 v6.3 (2021-02-14)
