@@ -40,7 +40,6 @@ let "LAST_RUN_ID=FIRST_RUN_ID + RUNS_PER_TASK - 1"
 if [ $LAST_RUN_ID -gt $NUM_RUNS ]; then
     LAST_RUN_ID="$NUM_RUNS"
 fi
-print "shuffled task ID: $TASK_ID, run ID range: [$FIRST_RUN_ID, $LAST_RUN_ID]"
 
 # Execute runs in shuffled order.
 for run_id in $(seq $FIRST_RUN_ID $LAST_RUN_ID | shuf); do
