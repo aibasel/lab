@@ -479,4 +479,4 @@ class TetralithEnvironment(SlurmEnvironment):
     @classmethod
     def is_present(cls):
         node = platform.node()
-        return node == "tetralith2.nsc.liu.se" or re.match(r"n\d+", node)
+        return re.match(r"tetralith\d+\.nsc\.liu\.se|n\d+", node)
