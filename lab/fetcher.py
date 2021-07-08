@@ -112,7 +112,11 @@ class Fetcher:
             combined_props.update(src_props)
             logging.info(f"Fetched properties of {len(src_props)} runs.")
         else:
-            slurm_err_content = tools.get_slurm_err_content(src_dir)
+            try:
+                slurm_err_content = tools.get_slurm_err_content(src_dir)
+            except FileNotFoundError:
+                slurm_err_content = ""
+
             if slurm_err_content:
                 logging.error("There was output to *-grid-steps/slurm.err")
 
