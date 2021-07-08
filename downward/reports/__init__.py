@@ -245,8 +245,8 @@ class PlanningReport(Report):
             except FileNotFoundError:
                 slurm_err_file = "*-grid-steps/slurm.err"
                 errors.append(
-                    f"There was output to {slurm_err_file}, but the file was missing when "
-                    f"this report was made."
+                    f"There was output to {slurm_err_file}, but the file was missing "
+                    f"when this report was made."
                 )
             else:
                 slurm_err_content = tools.filter_slurm_err_content(slurm_err_content)
