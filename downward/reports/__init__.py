@@ -242,19 +242,19 @@ class PlanningReport(Report):
             slurm_err_file = src_dir + "-grid-steps/slurm.err"
             try:
                 slurm_err_content = tools.get_slurm_err_content(src_dir)
-            except OSError:
-                slurm_err_content = (
-                    "The slurm.err file was missing while creating the report."
+            except FileNotFoundError:
+                slurm_err_file = "*-grid-steps/slurm.err"
+                errors.append(
+                    f"There was output to {slurm_err_file}, but the file was missing when "
+                    f"this report was made."
                 )
             else:
                 slurm_err_content = tools.filter_slurm_err_content(slurm_err_content)
-
+                errors.append(
+                    f"There was output to {slurm_err_file}. Below is the output without"
+                    f'"memory cg" errors:\n```\n{slurm_err_content}\n```'
+                )
             logging.error(f"There was output to {slurm_err_file}.")
-
-            errors.append(
-                f' Contents of {slurm_err_file} without "memory cg"'
-                f" errors:\n```\n{slurm_err_content}\n```"
-            )
 
         if table:
             errors.append(str(table))
