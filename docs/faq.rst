@@ -18,6 +18,21 @@ How can I combine the results from multiple experiments?
     exp.add_report(AbsoluteReport())
 
 
+Some runs failed. How can I rerun them?
+---------------------------------------
+
+If the failed runs were never started, for example, due to grid node
+failures, you can simply run the "start" experiment step again. It will
+skip all runs that have already been started. Afterwards, run "fetch" and
+make reports as usual.
+
+Lab detects which runs have already been started by checking if the
+``driver.log`` file exists. So if you have failed runs that were already
+started, but you want to rerun them anyway, go to their run directories,
+remove the ``driver.log`` files and then run the "start" experiment step
+again as above.
+
+
 I forgot to parse something. How can I run only the parsers again?
 ------------------------------------------------------------------
 

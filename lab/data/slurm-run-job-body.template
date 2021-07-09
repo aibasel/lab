@@ -11,6 +11,11 @@ function print_run_dir {
 }
 
 function execute_run {
+    if [[ -f driver.log ]]; then
+        echo "The run in $(pwd) has already been started --> skip it"
+        return
+    fi
+
     (
     "%(python)s" run
     RETCODE=$?
@@ -19,10 +24,7 @@ function execute_run {
     fi
     ) > driver.log 2> driver.err
 
-    # Delete empty driver files.
-    if [[ ! -s driver.log ]]; then
-        rm driver.log
-    fi
+    # Delete empty driver.err files. driver.log always has content (for started runs).
     if [[ ! -s driver.err ]]; then
         rm driver.err
     fi

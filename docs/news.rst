@@ -1,6 +1,20 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Allow rerunning experiments. This is useful if some runs were never started,
+  for example, due to grid node failures. All runs that have already been started
+  are skipped. For more information see the corresponding FAQ (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* None so far.
+
+
 v6.4 (2021-07-06)
 -----------------
 
