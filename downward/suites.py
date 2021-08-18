@@ -6,13 +6,15 @@ from lab import tools
 def find_domain_file(benchmarks_dir, domain, problem):
     """Search for domain file in the directory *benchmarks_dir*/*domain*.
 
-    For a given problem filename "p01.pddl", check the following domain
-    filenames: "domain.pddl", "p01-domain.pddl", "domain_p01.pddl" and
-    "domain-p01.pddl".
+    For a given problem filename "<taskname>.<ext>", check the following
+    domain filenames: "domain.pddl", "<taskname>-domain.<ext>",
+    "domain_<taskname>.<ext>" and "domain-<taskname>.<ext>", where ".<ext>"
+    is optional.
     """
+    problem_root, ext = os.path.splitext(problem)
     domain_basenames = [
         "domain.pddl",
-        problem[:3] + "-domain.pddl",
+        problem_root + "-domain" + ext,
         "domain_" + problem,
         "domain-" + problem,
     ]
