@@ -125,11 +125,15 @@ class SlurmEnvironment(Environment):
     be sent when the last experiment step finishes.
 
     Use *extra_options* to pass additional options. The *extra_options*
-    string may contain newlines. Slurm example that uses a given set of
-    nodes (additional nodes will be used if the given ones don't satisfy
-    the resource constraints)::
+    string may contain newlines. The first example below uses only a given
+    set of nodes (additional nodes will be used if the given ones don't
+    satisfy the resource constraints). The second example shows show to
+    specify a project account (needed on NSC if you're part of multiple
+    projects). ::
 
-        extra_options='#SBATCH --nodelist=ase[1-5,7,10]'
+        extra_options="#SBATCH --nodelist=ase[1-5,7,10]"
+        extra_options="#SBATCH --account=snic2021-5-330"
+
 
     *partition* must be a valid Slurm partition name. In Basel you
     can choose from
