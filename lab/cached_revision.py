@@ -9,11 +9,6 @@ import tarfile
 from lab import tools
 
 
-GIT = "git"
-MERCURIAL = "hg"
-VERSION_CONTROL_SYSTEMS = [GIT, MERCURIAL]
-
-
 @functools.lru_cache(maxsize=None)
 def _get_id(cmd):
     p = subprocess.run(cmd, stdout=subprocess.PIPE)
@@ -23,14 +18,6 @@ def _get_id(cmd):
         logging.critical(f"{err} Please check path and revision.")
     else:
         return tools.get_string(p.stdout).strip()
-
-
-def hg_id(repo, args=None, rev=None):
-    args = args or []
-    if rev:
-        args.extend(["-r", str(rev)])
-    cmd = ["hg", "id", "--repository", repo] + args
-    return _get_id(tuple(cmd))
 
 
 def git_id(repo, args=None, rev=None):
@@ -46,34 +33,8 @@ def git_id(repo, args=None, rev=None):
     return _get_id(tuple(cmd))
 
 
-def _raise_unknown_vcs_error(vcs):
-    raise AssertionError(f'Unknown version control system "{vcs}".')
-
-
-def get_version_control_system(repo):
-    vcs = [
-        x
-        for x in VERSION_CONTROL_SYSTEMS
-        if os.path.exists(os.path.join(repo, f".{x}"))
-    ]
-    if len(vcs) == 1:
-        return vcs[0]
-    else:
-        dirs = ", ".join(f".{x}" for x in VERSION_CONTROL_SYSTEMS)
-        logging.critical(
-            f"Repo {repo} must contain exactly one of the following "
-            f"subdirectories: {dirs}"
-        )
-
-
 def get_global_rev(repo, rev=None):
-    vcs = get_version_control_system(repo)
-    if vcs == MERCURIAL:
-        return hg_id(repo, args=["-i"], rev=rev)
-    elif vcs == GIT:
-        return git_id(repo, rev=rev)
-    else:
-        _raise_unknown_vcs_error(vcs)
+    return git_id(repo, rev=rev)
 
 
 def _compute_md5_hash(mylist):
@@ -111,12 +72,10 @@ class CachedRevision:
         transparently for you.
 
         >>> import os
-        >>> from lab.cached_revision import get_version_control_system, MERCURIAL
         >>> repo = os.environ["DOWNWARD_REPO"]
         >>> revision_cache = os.environ.get("DOWNWARD_REVISION_CACHE")
         >>> if revision_cache:
-        ...     vcs = get_version_control_system(repo)
-        ...     rev = "default" if vcs == MERCURIAL else "main"
+        ...     rev = "main"
         ...     cr = CachedRevision(repo, rev, ["./build.py"], exclude=["experiments"])
         ...     # cr.cache(revision_cache)  # Uncomment to actually cache the code.
 
@@ -159,31 +118,20 @@ class CachedRevision:
                 )
         else:
             tools.makedirs(self.path)
-            vcs = get_version_control_system(self.repo)
-            if vcs == MERCURIAL:
-                retcode = tools.run_command(
-                    ["hg", "archive", "-r", self.global_rev]
-                    + [f"-X{d}" for d in self.exclude]
-                    + [self.path],
-                    cwd=self.repo,
-                )
-            elif vcs == GIT:
-                tar_archive = os.path.join(self.path, "solver.tgz")
-                cmd = ["git", "archive", "--format", "tar", self.global_rev]
-                with open(tar_archive, "w") as f:
-                    retcode = tools.run_command(cmd, stdout=f, cwd=self.repo)
+            tar_archive = os.path.join(self.path, "solver.tgz")
+            cmd = ["git", "archive", "--format", "tar", self.global_rev]
+            with open(tar_archive, "w") as f:
+                retcode = tools.run_command(cmd, stdout=f, cwd=self.repo)
 
-                if retcode == 0:
-                    with tarfile.open(tar_archive) as tf:
-                        tf.extractall(self.path)
-                    tools.remove_path(tar_archive)
+            if retcode == 0:
+                with tarfile.open(tar_archive) as tf:
+                    tf.extractall(self.path)
+                tools.remove_path(tar_archive)
 
-                    for exclude_dir in self.exclude:
-                        path = os.path.join(self.path, exclude_dir)
-                        if os.path.exists(path):
-                            tools.remove_path(path)
-            else:
-                _raise_unknown_vcs_error(vcs)
+                for exclude_dir in self.exclude:
+                    path = os.path.join(self.path, exclude_dir)
+                    if os.path.exists(path):
+                        tools.remove_path(path)
 
             if retcode != 0:
                 shutil.rmtree(self.path)

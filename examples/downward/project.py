@@ -86,12 +86,12 @@ def get_repo_base() -> Path:
     """Get base directory of the repository, as an absolute path.
 
     Search upwards in the directory tree from the main script until a
-    directory with a subdirectory named ".git" or ".hg" is found.
+    directory with a subdirectory named ".git" is found.
 
     Abort if the repo base cannot be found."""
     path = Path(tools.get_script_path())
     while path.parent != path:
-        if any((path / d).is_dir() for d in [".git", ".hg"]):
+        if (path / ".git").is_dir():
             return path
         path = path.parent
     sys.exit("repo base could not be found")

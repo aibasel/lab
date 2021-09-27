@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v7.0 (unreleased)
+-----------------
+
+Lab
+^^^
+* Remove support for Mercurial repositories (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* None so far.
+
+
 v6.5 (2021-09-27)
 -----------------
 

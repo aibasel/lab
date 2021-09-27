@@ -93,20 +93,12 @@ jobs:
         git clone --depth 1 https://github.com/aibasel/downward-benchmarks ${DOWNWARD_BENCHMARKS}
         echo "DOWNWARD_BENCHMARKS=${DOWNWARD_BENCHMARKS}" >> $GITHUB_ENV
 
-    - name: Clone Fast Downward Mercurial
-      working-directory: ../deps
-      run: |
-        sudo apt-get -y install cmake g++ git make python3
-        export HG_DOWNWARD_REPO=`realpath fast-downward`
-        hg clone http://hg.fast-downward.org ${HG_DOWNWARD_REPO}
-        echo "HG_DOWNWARD_REPO=${HG_DOWNWARD_REPO}" >> $GITHUB_ENV
-
     - name: Clone Fast Downward Git
       working-directory: ../deps
       run: |
-        export GIT_DOWNWARD_REPO=`realpath fast-downward-git`
-        git clone --depth 1 https://github.com/aibasel/downward.git ${GIT_DOWNWARD_REPO}
-        echo "GIT_DOWNWARD_REPO=${GIT_DOWNWARD_REPO}" >> $GITHUB_ENV
+        export DOWNWARD_REPO=`realpath fast-downward-git`
+        git clone --depth 1 https://github.com/aibasel/downward.git ${DOWNWARD_REPO}
+        echo "DOWNWARD_REPO=${DOWNWARD_REPO}" >> $GITHUB_ENV
 
     - name: Download example Singularity image
       working-directory: ../deps
@@ -123,10 +115,7 @@ jobs:
         export DOWNWARD_REVISION_CACHE="${GITHUB_WORKSPACE}/revision-cache"
         echo CACHE: ${DOWNWARD_REVISION_CACHE}
 
-        export DOWNWARD_REPO=${HG_DOWNWARD_REPO}
-        time tox -e py
-
-        export DOWNWARD_REPO=${GIT_DOWNWARD_REPO}
+        export DOWNWARD_REPO=${DOWNWARD_REPO}
         time tox -e py
 
     - name: Test installation with pip

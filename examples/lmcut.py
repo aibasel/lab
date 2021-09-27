@@ -9,7 +9,6 @@ import platform
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
-from lab import cached_revision
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 
 
@@ -28,8 +27,7 @@ REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 # If REVISION_CACHE is None, the default ./data/revision-cache is used.
 REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
-VCS = cached_revision.get_version_control_system(REPO)
-REV = "default" if VCS == cached_revision.MERCURIAL else "main"
+REV = "main"
 
 exp = FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 

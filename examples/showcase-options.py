@@ -15,7 +15,7 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.compare import ComparativeReport
 from downward.reports.scatter import ScatterPlotReport
 from downward.reports.taskwise import TaskwiseReport
-from lab import cached_revision, reports
+from lab import reports
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.reports import Attribute
 from lab.reports.filter import FilterReport
@@ -31,8 +31,7 @@ else:
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 REV_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
-VCS = cached_revision.get_version_control_system(REPO)
-REV = "default" if VCS == cached_revision.MERCURIAL else "main"
+REV = "main"
 
 
 # See FAQs in docs for how to use the filters.

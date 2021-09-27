@@ -252,11 +252,9 @@ class FastDownwardExperiment(Experiment):
         Example experiment setup:
 
         >>> import os
-        >>> from lab.cached_revision import get_version_control_system, MERCURIAL
         >>> exp = FastDownwardExperiment()
         >>> repo = os.environ["DOWNWARD_REPO"]
-        >>> vcs = get_version_control_system(repo)
-        >>> rev = "default" if vcs == MERCURIAL else "main"
+        >>> rev = "main"
 
         Run iPDB using the latest revision on the main branch:
 
