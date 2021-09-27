@@ -1,18 +1,20 @@
 Changelog
 =========
 
-next (unreleased)
+v6.5 (2021-09-27)
 -----------------
 
 Lab
 ^^^
 * Allow rerunning experiments. This is useful if some runs were never started,
   for example, due to grid node failures. All runs that have already been started
-  are skipped. For more information see the corresponding FAQ (Jendrik Seipp).
+  are skipped. For more information see the corresponding :ref:`FAQ <faq>`
+  (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
-* None so far.
+* Slightly generalize rules for finding domain files, adapted from Fast Downward
+  (Silvan Sievers).
 
 
 v6.4 (2021-07-06)
