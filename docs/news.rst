@@ -10,7 +10,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* None so far.
+* Fix rules for finding domain files for airport domain (Silvan Sievers).
 
 
 v6.5 (2021-09-27)
