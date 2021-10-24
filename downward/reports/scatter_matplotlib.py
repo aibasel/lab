@@ -5,6 +5,7 @@ import matplotlib
 from matplotlib import figure
 from matplotlib import lines as mlines
 from matplotlib.backends import backend_agg
+from matplotlib.ticker import MaxNLocator
 
 
 class MatplotlibPlot:
@@ -98,6 +99,8 @@ class ScatterMatplotlib:
 
         if report.plot_horizontal_line:
             plot.plot_horizontal_line()
+            # Ask for more ticks on y axis in relative plots.
+            plot.axes.yaxis.set_major_locator(MaxNLocator(nbins="auto"))
         if report.plot_diagonal_line:
             plot.plot_diagonal_line()
 

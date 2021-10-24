@@ -11,6 +11,7 @@ Lab
 Downward Lab
 ^^^^^^^^^^^^
 * Fix rules for finding domain files for airport domain (Silvan Sievers).
+* Add more ticks on y axis in relative plots (Jendrik Seipp).
 
 
 v6.5 (2021-09-27)
