@@ -10,7 +10,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* Fix rules for finding domain files for airport domain (Silvan Sievers).
+* Fix rules for finding domain files for airport and psr-small domains (Silvan Sievers).
 * Add more ticks on y axis in relative plots (Jendrik Seipp).
 
 
