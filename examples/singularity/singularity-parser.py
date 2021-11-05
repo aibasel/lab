@@ -12,7 +12,9 @@ def coverage(content, props):
 
 def unsolvable(content, props):
     # Note that this naive test may easily generate false positives.
-    props["unsolvable"] = int("Completely explored state space -- no solution!" in content)
+    props["unsolvable"] = int(
+        "Completely explored state space -- no solution!" in content
+    )
 
 
 def parse_g_value_over_time(content, props):
@@ -32,11 +34,11 @@ def set_outcome(content, props):
     # runsolver decides "out of time" based on CPU rather than (cumulated)
     # WCTIME.
     if (
-        not solved and
-        not unsolvable and
-        not out_of_time and
-        not out_of_memory and
-        props["runtime"] > props["time_limit"]
+        not solved
+        and not unsolvable
+        and not out_of_time
+        and not out_of_memory
+        and props["runtime"] > props["time_limit"]
     ):
         out_of_time = 1
     # In cases where CPU time is very slightly above the threshold so that
@@ -90,8 +92,12 @@ def main():
     )
     parser.add_pattern("runtime", r"Singularity runtime: (.+?)s", type=float)
     parser.add_pattern(
-        "time_limit", r"Enforcing CPUTime limit \(soft limit, will send SIGTERM then SIGKILL\): (\d+) seconds",
-        type=int, file="watch.log", required=True
+        "time_limit",
+        r"Enforcing CPUTime limit \(soft limit, will send "
+        r"SIGTERM then SIGKILL\): (\d+) seconds",
+        type=int,
+        file="watch.log",
+        required=True,
     )
     # Cumulative runtime and virtual memory of the solver and all child processes.
     parser.add_pattern(
