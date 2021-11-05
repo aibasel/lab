@@ -1,6 +1,18 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Revamp Singularity example experiment: use runsolver to limit resource usage (Silvan Sievers and Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes so far.
+
+
 v7.0 (2021-10-24)
 -----------------
 

@@ -12,18 +12,21 @@ if [ -f $PWD/$4 ]; then
     exit 2
 fi
 
+# Ensure that strings like "CPU time limit exceeded" and "Killed" are in English.
+export LANG=C
+
 set +e
-# Some planners print to stderr when running out of memory, so we redirect stderr to stdout.
-{ /usr/bin/time -o /dev/stdout -f "Singularity runtime: %es real, %Us user, %Ss sys" \
-  singularity run -C -H $PWD $1 $PWD/$2 $PWD/$3 $4 ; } 2>&1
+singularity run -C -H "$PWD" "$1" "$PWD/$2" "$PWD/$3" "$4"
 set -e
 
 printf "\nRun VAL\n\n"
 
 if [ -f $PWD/$4 ]; then
     echo "Found plan file."
-    validate $PWD/$2 $PWD/$3 $PWD/$4
+    validate -v "$PWD/$2" "$PWD/$3" "$PWD/$4"
+    exit 0
 else
     echo "No plan file."
-    validate $PWD/$2 $PWD/$3
+    validate -v "$PWD/$2" "$PWD/$3"
+    exit 99
 fi
