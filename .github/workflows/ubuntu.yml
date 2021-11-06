@@ -85,6 +85,18 @@ jobs:
         ls
         which runsolver
 
+    - name: Install Singularity
+      working-directory: ../deps
+      run: |
+        sudo apt-get -y install alien
+        wget https://www.ida.liu.se/~jense56/files/singularity-3.8.3-1.el8.x86_64.rpm -O singularity.rpm
+        sudo alien -d singularity.rpm
+        ls
+        sudo apt-get install ./singularity_3.8.3-1_amd64.deb
+        singularity --version
+        which singularity
+        rm singularity.rpm
+
     - name: Compile VAL
       working-directory: ../deps
       run: |
