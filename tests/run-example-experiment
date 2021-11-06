@@ -11,7 +11,7 @@ check () {
         exit 1
     fi
     set +e
-    grep "\"unexplained_errors\": \[$" "$properties"
+    grep --after-context=10 "\"unexplained_errors\": \[$" "$properties"
     exitcode="$?"
     set -e
     if [[ "$exitcode" == 0 ]]; then

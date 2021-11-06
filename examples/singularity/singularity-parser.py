@@ -13,7 +13,8 @@ def coverage(content, props):
 def unsolvable(content, props):
     # Note that this naive test may easily generate false positives.
     props["unsolvable"] = int(
-        "Completely explored state space -- no solution!" in content
+        not props["coverage"]
+        and "Completely explored state space -- no solution!" in content
     )
 
 
