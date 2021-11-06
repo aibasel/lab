@@ -88,14 +88,11 @@ jobs:
     - name: Install Singularity
       working-directory: ../deps
       run: |
-        sudo apt-get -y install alien
-        wget https://www.ida.liu.se/~jense56/files/singularity-3.8.3-1.el8.x86_64.rpm -O singularity.rpm
-        sudo alien -d singularity.rpm
-        ls
-        sudo apt-get install ./singularity_3.8.3-2_amd64.deb
+        wget --no-verbose http://ftp.se.debian.org/debian/pool/main/s/singularity-container/singularity-container_3.5.2+ds1-1_amd64.deb -O singularity.deb
+        sudo dpkg -i singularity.deb
         singularity --version
         which singularity
-        rm singularity.rpm
+        rm singularity.deb
 
     - name: Compile VAL
       working-directory: ../deps
