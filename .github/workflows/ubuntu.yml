@@ -82,8 +82,6 @@ jobs:
         cp runsolver ../..
         popd
         rm -r runsolver-dir/
-        ls
-        which runsolver
 
     - name: Install Singularity
       working-directory: ../deps
