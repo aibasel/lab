@@ -114,7 +114,7 @@ jobs:
     - name: Download example Singularity image
       working-directory: ../deps
       run: |
-        wget --no-verbose https://ai.dmi.unibas.ch/_tmp_files/seipp/lama-first.img
+        wget --no-verbose https://ai.dmi.unibas.ch/_tmp_files/seipp/lama-first.img -O fd1906-lama-first.img
         export SINGULARITY_IMAGES=`realpath .`
         echo "SINGULARITY_IMAGES=${SINGULARITY_IMAGES}" >> $GITHUB_ENV
 
