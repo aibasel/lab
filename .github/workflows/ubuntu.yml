@@ -82,6 +82,8 @@ jobs:
         cp runsolver ../..
         popd
         rm -r runsolver-dir/
+        ls
+        which runsolver
 
     - name: Compile VAL
       working-directory: ../deps
