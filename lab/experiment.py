@@ -203,7 +203,9 @@ class _Buildable:
         After *time_limit* seconds the signal SIGXCPU is sent to the
         command. The process can catch this signal and exit gracefully.
         If it doesn't catch the SIGXCPU signal, the command is aborted
-        with SIGKILL after five additional seconds.
+        with SIGKILL after five additional seconds. The time spent by a
+        command is the sum of time spent across all threads of the
+        process.
 
         The command is aborted with SIGKILL when it uses more than
         *memory_limit* MiB.
