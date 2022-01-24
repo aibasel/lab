@@ -86,7 +86,7 @@ jobs:
     - name: Install Singularity
       working-directory: ../deps
       run: |
-        wget --no-verbose http://ftp.se.debian.org/debian/pool/main/s/singularity-container/singularity-container_3.5.2+ds2-1_amd64.deb -O singularity.deb
+        wget --no-verbose https://www.ida.liu.se/~jense56/files/singularity-container_3.5.2+ds1-1_amd64.deb -O singularity.deb
         sudo dpkg -i singularity.deb
         rm singularity.deb
 
