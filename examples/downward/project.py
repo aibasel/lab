@@ -18,7 +18,14 @@ from lab.reports import Attribute, geometric_mean
 
 
 # Silence import-unused messages. Experiment scripts may use these imports.
-assert LocalEnvironment and ScatterPlotReport and TaskwiseReport
+assert (
+    BaselSlurmEnvironment
+    and FastDownwardExperiment
+    and LocalEnvironment
+    and ScatterPlotReport
+    and TaskwiseReport
+    and TetralithEnvironment
+)
 
 
 DIR = Path(__file__).resolve().parent
