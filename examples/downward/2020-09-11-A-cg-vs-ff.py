@@ -1,15 +1,18 @@
 #! /usr/bin/env python
 
 import os
+import shutil
 
 import project
 
 
 REPO = project.get_repo_base()
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
+SCP_LOGIN = "myname@myserver.com"
+REMOTE_REPOS_DIR = "/infai/seipp/projects"
 if project.REMOTE:
     SUITE = project.SUITE_SATISFICING
-    ENV = project.BaselSlurmEnvironment(email="my.name@unibas.ch")
+    ENV = project.BaselSlurmEnvironment(email="my.name@myhost.ch")
 else:
     SUITE = ["depot:p01.pddl", "grid:prob01.pddl", "gripper:prob01.pddl"]
     ENV = project.LocalEnvironment(processes=2)
@@ -35,7 +38,6 @@ ATTRIBUTES = [
     "search_start_time",
     "search_start_memory",
     "total_time",
-    "initial_h_value",
     "h_values",
     "coverage",
     "expansions",
@@ -43,7 +45,7 @@ ATTRIBUTES = [
     project.EVALUATIONS_PER_TIME,
 ]
 
-exp = project.CommonExperiment(environment=ENV)
+exp = project.FastDownwardExperiment(environment=ENV)
 for config_nick, config in CONFIGS:
     for rev, rev_nick in REVS:
         algo_name = f"{rev_nick}:{config_nick}" if rev_nick else config_nick
@@ -56,6 +58,20 @@ for config_nick, config in CONFIGS:
             driver_options=DRIVER_OPTIONS,
         )
 exp.add_suite(BENCHMARKS_DIR, SUITE)
+
+exp.add_parser(exp.EXITCODE_PARSER)
+exp.add_parser(exp.TRANSLATOR_PARSER)
+exp.add_parser(exp.SINGLE_SEARCH_PARSER)
+exp.add_parser(project.DIR / "parser.py")
+exp.add_parser(exp.PLANNER_PARSER)
+
+exp.add_step("build", exp.build)
+exp.add_step("start", exp.start_runs)
+exp.add_fetcher(name="fetch")
+
+if not project.REMOTE:
+    exp.add_step("remove-eval-dir", shutil.rmtree, exp.eval_dir, ignore_errors=True)
+    project.add_scp_step(exp, SCP_LOGIN, REMOTE_REPOS_DIR)
 
 project.add_absolute_report(
     exp, attributes=ATTRIBUTES, filter=[project.add_evaluations_per_time]

@@ -1,36 +1,29 @@
-from collections import namedtuple
-import getpass
 from pathlib import Path
 import platform
-import shutil
 import subprocess
 import sys
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
+from downward.reports.taskwise import TaskwiseReport
 from lab import tools
-from lab.environments import BaselSlurmEnvironment, LocalEnvironment
+from lab.environments import (
+    BaselSlurmEnvironment,
+    LocalEnvironment,
+    TetralithEnvironment,
+)
 from lab.experiment import ARGPARSER
 from lab.reports import Attribute, geometric_mean
 
 
 # Silence import-unused messages. Experiment scripts may use these imports.
-assert BaselSlurmEnvironment and LocalEnvironment and ScatterPlotReport
+assert LocalEnvironment and ScatterPlotReport and TaskwiseReport
 
 
 DIR = Path(__file__).resolve().parent
 NODE = platform.node()
-REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
-
-User = namedtuple("User", ["scp_login", "remote_repos"])
-USERS = {
-    "jendrik": User(
-        scp_login="seipp@login.scicore.unibas.ch",
-        remote_repos="/infai/seipp/projects",
-    ),
-}
-USER = USERS.get(getpass.getuser())
+REMOTE = NODE.endswith((".scicore.unibas.ch", ".cluster.bc2.ch"))
 
 
 def parse_args():
@@ -121,8 +114,8 @@ def _get_exp_dir_relative_to_repo():
     return repo_name / rel_script_dir / "data" / expname
 
 
-def add_scp_step(exp):
-    remote_exp = Path(USER.remote_repos) / _get_exp_dir_relative_to_repo()
+def add_scp_step(exp, login, repos_dir):
+    remote_exp = Path(repos_dir) / _get_exp_dir_relative_to_repo()
     exp.add_step(
         "scp-eval-dir",
         subprocess.call,
@@ -130,7 +123,7 @@ def add_scp_step(exp):
             "scp",
             "-r",  # Copy recursively.
             "-C",  # Compress files.
-            f"{USER.scp_login}:{remote_exp}-eval",
+            f"{login}:{remote_exp}-eval",
             f"{exp.path}-eval",
         ],
     )
@@ -172,38 +165,3 @@ def add_absolute_report(exp, *, name=None, outfile=None, **kwargs):
     if not REMOTE:
         exp.add_step(f"open-{name}", subprocess.call, ["xdg-open", outfile])
     exp.add_step(f"publish-{name}", subprocess.call, ["publish", outfile])
-
-
-class CommonExperiment(FastDownwardExperiment):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.add_step("build", self.build)
-        self.add_step("start", self.start_runs)
-        self.add_fetcher(name="fetch")
-
-        if not REMOTE:
-            self.add_step(
-                "remove-eval-dir", shutil.rmtree, self.eval_dir, ignore_errors=True
-            )
-            add_scp_step(self)
-
-        self.add_parser(self.EXITCODE_PARSER)
-        self.add_parser(self.TRANSLATOR_PARSER)
-        self.add_parser(self.SINGLE_SEARCH_PARSER)
-        self.add_parser(self.PLANNER_PARSER)
-        self.add_parser(DIR / "parser.py")
-
-    def _add_runs(self):
-        """
-        Example showing how to modify the automatically generated runs.
-
-        This uses private members, so it might break between different
-        versions of Lab.
-
-        """
-        FastDownwardExperiment._add_runs(self)
-        for run in self.runs:
-            command = run.commands["planner"]
-            # Slightly raise soft limit for output to stdout.
-            command[1]["soft_stdout_limit"] = 1.5 * 1024
