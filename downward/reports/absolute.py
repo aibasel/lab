@@ -211,7 +211,7 @@ class AbsoluteReport(PlanningReport):
         """
         if not attribute.absolute:
             table.info.append(
-                f"Only instances where all algorithms have a "
+                f"Only tasks where all algorithms have a "
                 f'value for "{attribute}" are considered.'
             )
             table.info.append(
@@ -235,7 +235,10 @@ class AbsoluteReport(PlanningReport):
         func_name, func = self._get_aggregation_function(attribute)
         num_probs = 0
         self._add_table_info(attribute, func_name, table)
-        domain_algo_values = defaultdict(list)
+        domain_algo_values = {}
+        for domain in self.domains:
+            for algorithm in self.algorithms:
+                domain_algo_values[(domain, algorithm)] = []
         for (domain, _), runs in self.problem_runs.items():
             # If the attribute is absolute, no runs must have been filtered and
             # no values must be missing.
@@ -258,8 +261,7 @@ class AbsoluteReport(PlanningReport):
         # different problem numbers.
         for domain in self.domains:
             task_counts = [
-                str(len(domain_algo_values.get((domain, algo), [])))
-                for algo in self.algorithms
+                str(len(domain_algo_values[(domain, algo)])) for algo in self.algorithms
             ]
             if len(set(task_counts)) == 1:
                 count = task_counts[0]
@@ -272,7 +274,8 @@ class AbsoluteReport(PlanningReport):
             table.cell_formatters[domain][table.header_column] = formatter
 
         for (domain, algo), values in domain_algo_values.items():
-            table.add_cell(domain, algo, func(values))
+            domain_value = func(values) if values else None
+            table.add_cell(domain, algo, domain_value)
 
         table.num_values = num_probs
         return table

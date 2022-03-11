@@ -6,11 +6,14 @@ v7.1 (unreleased)
 
 Lab
 ^^^
-* Revamp Singularity example experiment: use runsolver to limit resource usage (Silvan Sievers and Jendrik Seipp).
+* Revamp Singularity example experiment: use runsolver to limit resource usage
+  (Silvan Sievers and Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
 * Fix header sizes in HTML reports (Jendrik Seipp).
+* Include domains in attribute overview tables even if none of their tasks has an
+  attribute value for all algorithms (Jendrik Seipp).
 
 
 v7.0 (2021-10-24)
