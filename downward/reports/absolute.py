@@ -143,7 +143,7 @@ class AbsoluteReport(PlanningReport):
                 tables.append(
                     (
                         "",
-                        f"Domain-wise reports only support numeric "
+                        f"Per-domain reports only support numeric "
                         f"attributes, but {attribute} has type "
                         f"{self._all_attributes[attribute].__name__}.",
                     )
@@ -165,7 +165,7 @@ class AbsoluteReport(PlanningReport):
                         parts.append(
                             f"No task was found where all algorithms "
                             f'have a value for "{attribute}". Therefore no '
-                            f"domain-wise table can be generated.\n"
+                            f"per-domain table can be generated.\n"
                         )
 
             toc_lines.append(f"- **[''{attribute}'' #{attribute}]**")

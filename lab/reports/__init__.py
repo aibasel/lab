@@ -96,7 +96,7 @@ class Attribute(str):
         value for:
 
         * *absolute*: if False, only include tasks for which all task
-          runs have values in a domain-wise table (e.g. ``coverage`` is
+          runs have values in a per-domain table (e.g. ``coverage`` is
           absolute, whereas ``expansions`` is not, because we can't
           compare algorithms A and B for task X if B has no value for
           ``expansions``).
@@ -371,7 +371,7 @@ class Report:
             "This happens when no significant changes occured or "
             "if for all attributes and all problems never all "
             "algorithms had a value for this attribute in a "
-            "domain-wise report."
+            "per-domain report."
         )
         return doc.render(self.output_format, {"toc": self.toc})
 
