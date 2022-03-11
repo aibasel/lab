@@ -157,7 +157,7 @@ class AbsoluteReport(PlanningReport):
                 if domain:
                     assert table
                     toc_line.append(f"[''{domain}'' #{attribute}-{domain}]")
-                    parts.append(f"== {domain} ==[{attribute}-{domain}]\n{table}\n")
+                    parts.append(f"=== {domain} ===[{attribute}-{domain}]\n{table}\n")
                 else:
                     if table:
                         parts.append(f"{table}\n")
@@ -179,7 +179,7 @@ class AbsoluteReport(PlanningReport):
         toc = "\n".join(toc_lines)
 
         content = "\n".join(
-            f"= {attr} =[{attr}]\n\n{section}" for (attr, section) in sections
+            f"== {attr} ==[{attr}]\n\n{section}" for (attr, section) in sections
         )
         return f"{toc}\n\n\n{content}"
 

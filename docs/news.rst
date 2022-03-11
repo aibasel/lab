@@ -1,7 +1,7 @@
 Changelog
 =========
 
-next (unreleased)
+v7.1 (unreleased)
 -----------------
 
 Lab
@@ -10,7 +10,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* No changes so far.
+* Fix header sizes in HTML reports (Jendrik Seipp).
 
 
 v7.0 (2021-10-24)
