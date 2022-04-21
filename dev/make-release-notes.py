@@ -5,7 +5,7 @@ import sys
 
 _, VERSION, CHANGELOG, LIST = sys.argv
 
-REGEX = fr"""
+REGEX = rf"""
 Changelog\n
 =========\n
 \n

@@ -33,7 +33,7 @@ class MatplotlibPlot:
     @staticmethod
     def _get_max_supported_value(scale):
         if scale == "linear":
-            return 10 ** 12  # Larger values cause numerical problems.
+            return 10**12  # Larger values cause numerical problems.
         else:
             assert scale in {"log", "symlog"}, scale
             return sys.maxsize

@@ -46,7 +46,10 @@ def add_planner_scores(content, props):
         print("planner_memory_limit missing -> can't compute planner memory score")
     else:
         props["score_planner_memory"] = tools.compute_log_score(
-            success, props.get("planner_memory"), lower_bound=2000, upper_bound=memory_limit_kb
+            success,
+            props.get("planner_memory"),
+            lower_bound=2000,
+            upper_bound=memory_limit_kb,
         )
 
 

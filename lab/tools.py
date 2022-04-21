@@ -241,7 +241,7 @@ def compute_log_score(success, value, lower_bound, upper_bound):
     runs (!success) and worst performance (value >= upper_bound) counts as 0.
     """
     if value is None or not success:
-        return 0.
+        return 0.0
     value = max(value, lower_bound)
     value = min(value, upper_bound)
     raw_score = math.log(value) - math.log(upper_bound)

@@ -172,11 +172,15 @@ exp.add_report(
     name="report-abs-p-filter",
 )
 exp.add_report(
-    AbsoluteReport(attributes=["coverage", "error", "score_planner_time"], format="tex"),
+    AbsoluteReport(
+        attributes=["coverage", "error", "score_planner_time"], format="tex"
+    ),
     outfile="report-abs-combined.tex",
 )
 exp.add_report(
-    AbsoluteReport(attributes=["coverage", "error", "score_planner_memory"], format="html"),
+    AbsoluteReport(
+        attributes=["coverage", "error", "score_planner_memory"], format="html"
+    ),
     outfile="report-abs-combined.html",
 )
 exp.add_report(

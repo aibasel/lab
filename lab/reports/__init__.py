@@ -36,7 +36,7 @@ def geometric_mean(values):
     """
     assert None not in values
     exp = 1.0 / len(values)
-    return tools.product([val ** exp for val in values])
+    return tools.product([val**exp for val in values])
 
 
 def finite_sum(values):
