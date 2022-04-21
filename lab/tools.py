@@ -2,6 +2,7 @@ import argparse
 import colorsys
 import functools
 import logging
+import math
 import os
 from pathlib import Path
 import pkgutil
@@ -231,6 +232,21 @@ def add_unexplained_error(dictionary, error):
     dictionary.setdefault(key, [])
     if error not in dictionary[key]:
         dictionary[key].append(error)
+
+
+def compute_log_score(success, value, lower_bound, upper_bound):
+    """Compute score between 0 and 1.
+
+    Best possible performance (value <= lower_bound) counts as 1, while failed
+    runs (!success) and worst performance (value >= upper_bound) counts as 0.
+    """
+    if value is None or not success:
+        return 0.
+    value = max(value, lower_bound)
+    value = min(value, upper_bound)
+    raw_score = math.log(value) - math.log(upper_bound)
+    best_raw_score = math.log(lower_bound) - math.log(upper_bound)
+    return raw_score / best_raw_score
 
 
 class Properties(dict):
