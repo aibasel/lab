@@ -8,6 +8,7 @@ import math
 import re
 import sys
 
+from lab import tools
 from lab.parser import Parser
 
 
@@ -108,19 +109,11 @@ def add_scores(content, props):
     to solve a task and worst performance are counted as 0.
 
     """
-
-    def log_score(value, min_bound, max_bound):
-        if value is None or not props["coverage"]:
-            return 0
-        value = max(value, min_bound)
-        value = min(value, max_bound)
-        raw_score = math.log(value) - math.log(max_bound)
-        best_raw_score = math.log(min_bound) - math.log(max_bound)
-        return raw_score / best_raw_score
+    success = props["coverage"] or props["unsolvable"]
 
     for attr in ("expansions", "evaluations", "generated"):
-        props["score_" + attr] = log_score(
-            props.get(attr), min_bound=100, max_bound=1e6
+        props["score_" + attr] = tools.compute_log_score(
+            success, props.get(attr), lower_bound=100, upper_bound=1e6
         )
 
     try:
@@ -128,11 +121,11 @@ def add_scores(content, props):
     except KeyError:
         print("search time limit missing -> can't compute time scores")
     else:
-        props["score_total_time"] = log_score(
-            props.get("total_time"), min_bound=1.0, max_bound=max_time
+        props["score_total_time"] = tools.compute_log_score(
+            success, props.get("total_time"), lower_bound=1.0, upper_bound=max_time
         )
-        props["score_search_time"] = log_score(
-            props.get("search_time"), min_bound=1.0, max_bound=max_time
+        props["score_search_time"] = tools.compute_log_score(
+            success, props.get("search_time"), lower_bound=1.0, upper_bound=max_time
         )
 
     try:
@@ -140,8 +133,8 @@ def add_scores(content, props):
     except KeyError:
         print("search memory limit missing -> can't compute memory score")
     else:
-        props["score_memory"] = log_score(
-            props.get("memory"), min_bound=2000, max_bound=max_memory_kb
+        props["score_memory"] = tools.compute_log_score(
+            success, props.get("memory"), lower_bound=2000, upper_bound=max_memory_kb
         )
 
 
