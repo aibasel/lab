@@ -4,7 +4,6 @@
 Regular expressions and functions for parsing single-search runs of Fast Downward.
 """
 
-import math
 import re
 import sys
 
