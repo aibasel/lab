@@ -14,6 +14,8 @@ Downward Lab
 * Fix header sizes in HTML reports (Jendrik Seipp).
 * Include domains in attribute overview tables even if none of their tasks has an
   attribute value for all algorithms (Jendrik Seipp).
+* Compute "score_planner_time" and "score_planner_memory" attributes in planner
+  parser (Jendrik Seipp).
 
 
 v7.0 (2021-10-24)
