@@ -75,6 +75,7 @@ class PlanningReport(Report):
         >>> # Use a filter function to select algorithms.
         >>> def only_blind_and_lmcut(run):
         ...     return run["algorithm"] in ["blind", "lmcut"]
+        ...
         >>> report = PlanningReport(filter=only_blind_and_lmcut)
 
         >>> # Use "filter_algorithm" to select and *order* algorithms.
@@ -96,6 +97,7 @@ class PlanningReport(Report):
         ...             times = [t for t in times if t is not None]
         ...             map[(domain, problem)] = min(times) if times else None
         ...         return str(map)
+        ...
 
         """
         # Set non-default options for some attributes.

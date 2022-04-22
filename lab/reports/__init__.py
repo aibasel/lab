@@ -200,6 +200,7 @@ class Report:
 
         >>> def low_init_h(run):
         ...     return run["initial_h_value"] <= 100
+        ...
         >>> report = Report(filter=low_init_h)
 
         Only include runs from "blocks" and "barman" with a timeout:
@@ -214,6 +215,7 @@ class Report:
         ...     if expansions is not None and time:
         ...         run["expansions_per_time"] = expansions / time
         ...     return run
+        ...
         >>> report = Report(
         ...     attributes=["expansions_per_time"], filter=[add_expansions_per_time]
         ... )
@@ -225,6 +227,7 @@ class Report:
         ...     paper_names = {"lama11": "LAMA 2011", "fdss_sat1": "FDSS 1"}
         ...     run["algorithm"] = paper_names[name]
         ...     return run
+        ...
 
         >>> # We want LAMA 2011 to be the leftmost column.
         >>> # filter_* filters are evaluated last, so we use the updated
@@ -471,6 +474,7 @@ class Table(collections.defaultdict):
         >>> t.add_row("prob2", {"cfg1": 15, "cfg2": 25})
         >>> def remove_quotes(s):
         ...     return s.replace('""', "")
+        ...
         >>> print(remove_quotes(str(t)))
         || expansions |  cfg1 |  cfg2 |
          | prob1 |  10 |  20 |

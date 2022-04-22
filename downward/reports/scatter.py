@@ -57,6 +57,7 @@ class ScatterPlotReport(PlanningReport):
         ...     # run2['domain'] has the same value, because we always
         ...     # compare two runs of the same problem.
         ...     return run1["domain"]
+        ...
 
         Example grouping by difficulty:
 
@@ -68,6 +69,7 @@ class ScatterPlotReport(PlanningReport):
         ...     if time1 == time2:
         ...         return "equal"
         ...     return "worse"
+        ...
 
         >>> from downward.experiment import FastDownwardExperiment
         >>> exp = FastDownwardExperiment()

@@ -2,6 +2,7 @@
 # Automatically rebuild Sphinx documentation when files change.
 
 DOCS="$( dirname "$0" )"
+DOCS="$( realpath "$DOCS" )"
 REPO="$( realpath "$DOCS/../" )"
 
 cd "$REPO/docs"
