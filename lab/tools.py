@@ -504,8 +504,7 @@ def get_unexplained_errors_message(run):
         return ""
     else:
         return (
-            f"Unexplained error(s) in {run['run_dir']}: please inspect"
-            f" output and error logs."
+            f"Unexplained error(s) in {run['run_dir']}: {unexplained_errors}"
         )
 
 
