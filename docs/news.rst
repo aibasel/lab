@@ -8,6 +8,7 @@ Lab
 ^^^
 * Revamp Singularity example experiment: use runsolver to limit resource usage
   (Silvan Sievers and Jendrik Seipp).
+* Run continuous integration tests for Python 3.10 (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^

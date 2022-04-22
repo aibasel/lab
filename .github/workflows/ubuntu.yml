@@ -1,7 +1,5 @@
 name: Ubuntu
 
-# see https://github.community/t5/GitHub-Actions/How-to-trigger-an-action-on-push-or-pull-request-but-not-both/m-p/35805
-# and https://github.community/t/duplicate-checks-on-push-and-pull-request-simultaneous-event/18012/6
 on: [push, pull_request]
 
 jobs:
@@ -16,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-18.04, ubuntu-20.04]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
 
     steps:
     - uses: actions/checkout@v2
