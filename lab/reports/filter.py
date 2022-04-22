@@ -9,6 +9,7 @@ class FilterReport(Report):
 
     >>> def remove_openstacks(run):
     ...     return "openstacks" not in run["domain"]
+    ...
 
     >>> from lab.experiment import Experiment
     >>> report = FilterReport(filter=remove_openstacks)

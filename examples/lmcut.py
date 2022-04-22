@@ -12,7 +12,7 @@ from downward.reports.scatter import ScatterPlotReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 
 
-ATTRIBUTES = ["coverage", "error", "expansions", "total_time"]
+ATTRIBUTES = ["coverage", "error", "expansions", "planner_memory", "planner_time"]
 
 NODE = platform.node()
 if NODE.endswith((".cluster.bc2.ch", ".scicore.unibas.ch")):

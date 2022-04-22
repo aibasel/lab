@@ -78,6 +78,7 @@ class CachedRevision:
         ...     rev = "main"
         ...     cr = CachedRevision(repo, rev, ["./build.py"], exclude=["experiments"])
         ...     # cr.cache(revision_cache)  # Uncomment to actually cache the code.
+        ...
 
         You can now copy the cached repo to your experiment:
 

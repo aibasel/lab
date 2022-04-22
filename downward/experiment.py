@@ -125,7 +125,7 @@ class FastDownwardExperiment(Experiment):
     #: "translator_peak_memory", "translator_time_done".
     #:
     #: Parsed attributes: "node", "planner_memory", "planner_time",
-    #: "planner_wall_clock_time".
+    #: "planner_wall_clock_time", "score_planner_memory", "score_planner_time".
     PLANNER_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "planner-parser.py")
 
     def __init__(self, path=None, environment=None, revision_cache=None):
