@@ -362,6 +362,7 @@ class FastDownwardExperiment(Experiment):
             )
 
     def _add_runs(self):
+        tasks = self._get_tasks()
         for algo in self._algorithms.values():
-            for task in self._get_tasks():
+            for task in tasks:
                 self.add_run(FastDownwardRun(self, algo, task))
