@@ -17,6 +17,8 @@ Downward Lab
 * Compute "score_planner_time" and "score_planner_memory" attributes in planner
   parser (Jendrik Seipp).
 * Only consider files ending with ".pddl" and ".sas" when building suites (Jendrik Seipp).
+* Explicitly left-align non-numeric cells to avoid \\multicolumn entries in Latex output
+  (Jendrik Seipp).
 
 
 v7.0 (2021-10-24)

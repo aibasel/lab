@@ -433,10 +433,12 @@ class Report:
 class CellFormatter:
     """Formating information for one cell in a table."""
 
-    def __init__(self, bold=False, count=None, link=None):
+    def __init__(self, bold=False, count=None, link=None, color=None, align_right=False):
         self.bold = bold
         self.count = count
         self.link = link
+        self.color = color
+        self.align_right = align_right
 
     def format_value(self, value):
         result = str(value)
@@ -446,6 +448,14 @@ class CellFormatter:
             result = f"{result} ({self.count})"
         if self.bold:
             result = f"**{result}**"
+        if self.color:
+            result = f"{{{result}|color:{self.color}}}"
+
+        if self.align_right:
+            result = " " + result
+        else:
+            result += " "
+
         return result
 
 
@@ -477,8 +487,8 @@ class Table(collections.defaultdict):
         ...
         >>> print(remove_quotes(str(t)))
         || expansions |  cfg1 |  cfg2 |
-         | prob1 |  10 |  20 |
-         | prob2 |  15 |  25 |
+         | prob1  |  10 |  20 |
+         | prob2  |  15 |  25 |
         >>> t.row_names
         ['prob1', 'prob2']
         >>> t.col_names
@@ -490,15 +500,15 @@ class Table(collections.defaultdict):
         >>> t.add_summary_function("SUM", sum)
         >>> print(remove_quotes(str(t)))
         || expansions |  cfg1 |  cfg2 |
-         | prob1 |  10 |  20 |
-         | prob2 |  15 |  25 |
-         | **SUM** |  25 |  45 |
+         | prob1  |  10 |  20 |
+         | prob2  |  15 |  25 |
+         | **SUM**  |  25 |  45 |
         >>> t.set_column_order(["cfg2", "cfg1"])
         >>> print(remove_quotes(str(t)))
         || expansions |  cfg2 |  cfg1 |
-         | prob1 |  20 |  10 |
-         | prob2 |  25 |  15 |
-         | **SUM** |  45 |  25 |
+         | prob1  |  20 |  10 |
+         | prob2  |  25 |  15 |
+         | **SUM**  |  45 |  25 |
         """
         collections.defaultdict.__init__(self, dict)
 
@@ -768,20 +778,11 @@ class Table(collections.defaultdict):
         default format.
         """
         formatter = self.cell_formatters.get(row_name, {}).get(col_name)
-        if formatter:
-            return formatter.format_value(value)
-
-        justify_right = isinstance(value, (float, int))
-
-        value_text = self._format_value(value)
-
-        if color is not None:
-            value_text = f"{{{value_text}|color:{color}}}"
-        if bold:
-            value_text = f"**{value_text}**"
-        if justify_right:
-            value_text = " " + value_text
-        return value_text
+        if not formatter:
+            align_right = isinstance(value, (float, int)) or value is None or value == "?"
+            value = self._format_value(value)
+            formatter = CellFormatter(bold=bold, color=color, align_right=align_right)
+        return formatter.format_value(value)
 
     def _get_markup(self, cells):
         """
