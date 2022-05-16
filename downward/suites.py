@@ -44,7 +44,7 @@ class Domain:
             [
                 p
                 for p in os.listdir(directory)
-                if "domain" not in p and not p.endswith(".py")
+                if "domain" not in p and p.endswith((".pddl", ".sas"))
             ]
         )
         self.problems = [
