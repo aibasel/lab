@@ -176,7 +176,8 @@ class FastDownwardExperiment(Experiment):
         """Add PDDL or SAS+ benchmarks to the experiment.
 
         *benchmarks_dir* must be a path to a benchmark directory. It must
-        contain domain directories, which in turn hold PDDL or SAS+ files.
+        contain domain directories, which in turn hold PDDL or SAS+ files
+        (ending with ".pddl" or ".sas").
 
         *suite* must be a list of domain or domain:task names. ::
 
@@ -187,14 +188,14 @@ class FastDownwardExperiment(Experiment):
             >>> exp.add_suite(benchmarks_dir, ["rubiks-cube:p01.sas"])
 
         One source for benchmarks is
-        https://github.com/aibasel/downward-benchmarks. After cloning the
-        repo, you can generate suites with the ``suites.py`` script. We
-        recommend using the suite ``optimal_strips`` for optimal STRIPS planners
-        and ``satisficing`` for satisficing planners::
+        https://github.com/aibasel/downward-benchmarks. After cloning the repo,
+        you can generate suites with the ``suites.py`` script. We recommend
+        using the suite ``optimal_strips`` for optimal STRIPS planners and
+        ``satisficing`` for satisficing planners::
 
-            # Create standard optimal planning suite.
-            $ path/to/downward-benchmarks/suites.py optimal_strips
-            ['airport', ..., 'zenotravel']
+            # Create standard optimal planning suite. $
+            path/to/downward-benchmarks/suites.py optimal_strips ['airport',
+            ..., 'zenotravel']
 
         Then you can copy the generated list into your experiment script::
 
