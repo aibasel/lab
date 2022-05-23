@@ -433,7 +433,9 @@ class Report:
 class CellFormatter:
     """Formating information for one cell in a table."""
 
-    def __init__(self, bold=False, count=None, link=None, color=None, align_right=False):
+    def __init__(
+        self, bold=False, count=None, link=None, color=None, align_right=False
+    ):
         self.bold = bold
         self.count = count
         self.link = link
@@ -779,7 +781,9 @@ class Table(collections.defaultdict):
         """
         formatter = self.cell_formatters.get(row_name, {}).get(col_name)
         if not formatter:
-            align_right = isinstance(value, (float, int)) or value is None or value == "?"
+            align_right = (
+                isinstance(value, (float, int)) or value is None or value == "?"
+            )
             value = self._format_value(value)
             formatter = CellFormatter(bold=bold, color=color, align_right=align_right)
         return formatter.format_value(value)
