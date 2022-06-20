@@ -23,8 +23,8 @@ if [[ $retcode != 0 ]]; then
     exit 1
 fi
 
-if [[ $(git rev-parse --abbrev-ref HEAD) != master ]]; then
-    echo "Must be on master for release"
+if [[ $(git rev-parse --abbrev-ref HEAD) != main ]]; then
+    echo "Must be on main branch for release"
     exit 1
 fi
 
