@@ -4,6 +4,12 @@ repos:
     hooks:
       - id: black
 
+  - repo: https://github.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        args: ['--extend-ignore=E203', '--exclude=build,data,revision-cache,conf.py,.git,.tox,.venv', '--max-line-length=90']
+
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.18.3
     hooks:
