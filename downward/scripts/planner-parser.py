@@ -7,18 +7,24 @@ from lab.parser import Parser
 def add_planner_memory(content, props):
     try:
         props["planner_memory"] = max(props["translator_peak_memory"], props["memory"])
+        assert props["coverage"]
     except KeyError:
         pass
 
 
 def add_planner_time(content, props):
-    # Newer planner versions print planner time and we parse it below. Don't overwrite it.
-    if "planner_time" in props:
-        return
-    try:
-        props["planner_time"] = props["translator_time_done"] + props["total_time"]
-    except KeyError:
-        pass
+    # Only add planner_time for successful runs.
+    if props["coverage"]:
+        # Newer planner versions print planner time and we parse it below. Don't overwrite it.
+        if "planner_time" not in props:
+            try:
+                props["planner_time"] = (
+                    props["translator_time_done"] + props["total_time"]
+                )
+            except KeyError:
+                pass
+    elif "planner_time" in props:
+        del props["planner_time"]
 
 
 def add_planner_scores(content, props):
