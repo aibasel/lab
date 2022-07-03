@@ -5,11 +5,14 @@ from lab.parser import Parser
 
 
 def add_planner_memory(content, props):
-    try:
-        props["planner_memory"] = max(props["translator_peak_memory"], props["memory"])
-        assert props["coverage"]
-    except KeyError:
-        pass
+    # Only add planner_memory for successful runs.
+    if props["coverage"]:
+        try:
+            props["planner_memory"] = max(
+                props["translator_peak_memory"], props["memory"]
+            )
+        except KeyError:
+            pass
 
 
 def add_planner_time(content, props):
