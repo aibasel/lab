@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v7.2 (unreleased)
+-----------------
+
+Lab
+^^^
+* No changes so far.
+
+Downward Lab
+^^^^^^^^^^^^
+* Parse peak memory in anytime search parser (Jendrik Seipp).
+
+
 v7.1 (2022-06-20)
 -----------------
 
