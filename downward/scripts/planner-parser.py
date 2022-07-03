@@ -15,7 +15,8 @@ def add_planner_memory(content, props):
 def add_planner_time(content, props):
     # Only add planner_time for successful runs.
     if props["coverage"]:
-        # Newer planner versions print planner time and we parse it below. Don't overwrite it.
+        # Newer planner versions print planner time and we parse it below.
+        # Don't overwrite it.
         if "planner_time" not in props:
             try:
                 props["planner_time"] = (
