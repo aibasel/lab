@@ -11,6 +11,7 @@ Lab
 Downward Lab
 ^^^^^^^^^^^^
 * Parse peak memory in anytime search parser (Jendrik Seipp).
+* Only store "planner_time" attribute for successful planner runs (Jendrik Seipp).
 
 
 v7.1 (2022-06-20)
