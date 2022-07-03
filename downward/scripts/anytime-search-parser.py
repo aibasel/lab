@@ -64,6 +64,7 @@ def main():
     parser.add_function(reduce_to_min("cost:all", "cost"))
     parser.add_function(reduce_to_min("steps:all", "steps"))
     parser.add_function(coverage)
+    parser.add_function(add_memory)
     parser.parse()
 
 
