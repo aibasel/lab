@@ -13,7 +13,7 @@ def add_planner_memory(content, props):
 
 def add_planner_time(content, props):
     # Newer planner versions print planner time and we parse it below. Don't overwrite it.
-    if "planner_time" not in props:
+    if "planner_time" in props:
         return
     try:
         props["planner_time"] = props["translator_time_done"] + props["total_time"]
