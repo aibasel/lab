@@ -1,0 +1,15 @@
+#! /bin/bash
+
+set -euo pipefail
+
+DIR=$(dirname ${0})
+DIR=$(realpath ${DIR})
+REPO=$(dirname ${DIR})
+EXPDIR=${DOWNWARD_REPO}/experiments/tmp-downward-lab-project
+
+rm -rf ${EXPDIR}/data/2020-09-11-*
+mkdir -p ${EXPDIR}
+cp ${REPO}/examples/downward/*.py ${EXPDIR}
+cp ${REPO}/examples/downward/bounds.json ${EXPDIR}
+${DIR}/run-example-experiment ${EXPDIR}/2020-09-11-A-cg-vs-ff.py
+${DIR}/run-example-experiment ${EXPDIR}/2020-09-11-B-bounded-cost.py
