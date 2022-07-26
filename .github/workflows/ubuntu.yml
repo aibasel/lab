@@ -134,7 +134,7 @@ jobs:
         echo CACHE: ${DOWNWARD_REVISION_CACHE}
 
         export DOWNWARD_REPO=${DOWNWARD_REPO}
-        time tox -e py,ff,singularity
+        time tox -e py,downward,ff,singularity
 
     - name: Test installation with pip
       run: |
