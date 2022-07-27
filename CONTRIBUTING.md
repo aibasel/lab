@@ -23,6 +23,17 @@ from GitHub in editable mode:
 For details on how to set everything up, please see the [GitHub actions
 file](.github/workflows/ubuntu.yml).
 
+# Setting up a pre-commit hook for style checks
+
+    python3 -m pip install pre-commit
+    pre-commit install
+
+Now the most important style checks are run for the changed files before each commit.
+
+# Fixing the code style
+
+    tox -e fix-style
+
 # Running tests
 
     cd lab
@@ -59,8 +70,4 @@ Now you can run the example Singularity experiment with `tox -e singularity`.
 
 ## Run all tests
 
-Once you have installed all dependecies, you can run all tests by executing `tox` without any options.
-
-# Fixing the code style
-
-    tox -e fix-style
+Once you have installed all dependencies, you can run all tests by executing `tox` without any options.
