@@ -2,6 +2,7 @@
 
 import json
 import os
+import os.path
 import shutil
 
 from downward import suites
@@ -11,7 +12,7 @@ from downward.experiment import (
     _get_solver_resource_name,
     FastDownwardRun,
 )
-from lab.experiment import Experiment
+from lab.experiment import Experiment, get_default_data_dir
 
 import project
 
@@ -22,10 +23,15 @@ SCP_LOGIN = "myname@myserver.com"
 REMOTE_REPOS_DIR = "/infai/seipp/projects"
 BOUNDS_FILE = "bounds.json"
 SUITE = ["depot:p01.pddl", "grid:prob01.pddl", "gripper:prob01.pddl"]
-# If REVISION_CACHE is None, the default ./data/revision-cache is used.
-REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
+REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE") or os.path.join(
+    get_default_data_dir(), "revision-cache"
+)
 if project.REMOTE:
-    ENV = project.BaselSlurmEnvironment(email="my.name@myhost.ch")
+    # ENV = project.BaselSlurmEnvironment(email="my.name@myhost.ch")
+    ENV = project.TetralithEnvironment(
+        email="first.last@liu.se", extra_options="#SBATCH --account=snic2022-5-341"
+    )
+    SUITE = project.SUITE_OPTIMAL_STRIPS
 else:
     ENV = project.LocalEnvironment(processes=2)
 
@@ -71,7 +77,7 @@ for rev, rev_nick in REVS:
         os.path.join(dest_path, "fast-downward.py"),
     )
     for config_nick, config in CONFIGS:
-        algo_name = f"{rev_nick}-{config_nick}"
+        algo_name = f"{rev_nick}-{config_nick}" if rev_nick else config_nick
 
         bounds = {}
         with open(BOUNDS_FILE) as f:

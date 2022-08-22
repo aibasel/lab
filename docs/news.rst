@@ -6,7 +6,7 @@ v7.2 (unreleased)
 
 Lab
 ^^^
-* For developers: document pre-commit hook in ``CONTRIBUTING.md`` file (Jendrik Seipp).
+* For contributors: document pre-commit hook in ``CONTRIBUTING.md`` file (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
