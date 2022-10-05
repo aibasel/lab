@@ -114,7 +114,9 @@ if not project.REMOTE:
     project.add_scp_step(exp, SCP_LOGIN, REMOTE_REPOS_DIR)
 
 project.add_absolute_report(
-    exp, attributes=ATTRIBUTES, filter=[project.add_evaluations_per_time]
+    exp,
+    attributes=ATTRIBUTES,
+    filter=[project.add_evaluations_per_time, project.group_domains],
 )
 
 exp.run_steps()
