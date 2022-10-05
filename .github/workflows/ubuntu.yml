@@ -1,7 +1,5 @@
 name: Ubuntu
 
-# see https://github.community/t5/GitHub-Actions/How-to-trigger-an-action-on-push-or-pull-request-but-not-both/m-p/35805
-# and https://github.community/t/duplicate-checks-on-push-and-pull-request-simultaneous-event/18012/6
 on: [push, pull_request]
 
 jobs:
@@ -9,14 +7,10 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch.
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
-
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        os: [ubuntu-20.04, ubuntu-22.04]
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
 
     steps:
     - uses: actions/checkout@v2
