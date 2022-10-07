@@ -6,7 +6,8 @@ v7.2 (unreleased)
 
 Lab
 ^^^
-* Run continuous integration tests for Python 3.10 (Jendrik Seipp).
+* Raise minimum supported Python version to 3.7 (Jendrik Seipp).
+* Add support for Python 3.10 (Jendrik Seipp).
 * For contributors: document pre-commit hook in ``CONTRIBUTING.md`` file (Jendrik Seipp).
 
 Downward Lab

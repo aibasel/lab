@@ -1,7 +1,7 @@
 Install Lab
 -----------
 
-Lab requires Python 3.6+ and Linux (e.g., Ubuntu). We recommend installing
+Lab requires Python 3.7+ and Linux (e.g., Ubuntu). We recommend installing
 Lab in a `Python virtual environment
 <https://docs.python.org/3/tutorial/venv.html>`_. This has the advantage
 that there are no modifications to the system-wide configuration, and that
@@ -18,7 +18,7 @@ for different papers) without conflicts::
     # If PYTHONPATH is set, unset it to obtain a clean environment.
     unset PYTHONPATH
 
-    # Create and activate a Python 3 virtual environment for Lab.
+    # Create and activate a Python virtual environment for Lab.
     python3 -m venv --prompt my-paper .venv
     source .venv/bin/activate
 

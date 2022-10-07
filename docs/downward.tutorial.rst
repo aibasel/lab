@@ -22,7 +22,7 @@ alternative that has proven to work well in practice.
 Installation
 ------------
 
-Lab requires **Python 3.6+** and **Linux**. To run Fast Downward
+Lab requires **Python 3.7+** and **Linux**. To run Fast Downward
 experiments, you'll need a **Fast Downward** repository, planning
 **benchmarks** and a plan **validator**. ::
 
