@@ -57,14 +57,18 @@ jobs:
     - name: Compile FF
       working-directory: ../deps
       run: |
-        sudo apt-get -y install g++ make flex bison
-        wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
-        tar -xzvf FF-v2.3.tgz
-        pushd FF-v2.3/
-        make -j
-        cp ff ../
-        popd
-        rm -r FF-v2.3/ FF-v2.3.tgz
+        # GCC 10 fails to compile FF 2.3, so we use a precompiled FF binary.
+        # sudo apt-get -y install g++ make flex bison
+        # wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
+        # tar -xzvf FF-v2.3.tgz
+        # pushd FF-v2.3/
+        # make -j
+        # cp ff ../
+        # popd
+        # rm -r FF-v2.3/ FF-v2.3.tgz
+        wget 'https://github.com/hectorpal/fast-forward-linux-binaries/raw/main/ff.gz'
+        gunzip ff.gz
+        chmod +x ff
 
     - name: Compile runsolver
       working-directory: ../deps
