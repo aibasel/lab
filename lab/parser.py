@@ -47,6 +47,12 @@ def _get_pattern_flags(s):
     return flags
 
 
+class _Function:
+    def __init__(self, function, filename):
+        self.function = function
+        self.filename = filename
+
+
 class _Pattern:
     def __init__(self, attribute, regex, required, type_, flags):
         self.attribute = attribute
@@ -81,15 +87,13 @@ class _Pattern:
 
 class _FileParser:
     """
-    Private class that parses a given file according to the added patterns
-    and functions.
+    Private class that parses a given file according to the added patterns.
     """
 
     def __init__(self):
         self.filename = None
         self.content = None
         self.patterns = []
-        self.functions = []
 
     def load_file(self, filename):
         self.filename = filename
@@ -99,20 +103,12 @@ class _FileParser:
     def add_pattern(self, pattern):
         self.patterns.append(pattern)
 
-    def add_function(self, function):
-        self.functions.append(function)
-
     def search_patterns(self):
         assert self.content is not None
         found_props = {}
         for pattern in self.patterns:
             found_props.update(pattern.search(self.content, self.filename))
         return found_props
-
-    def apply_functions(self, props):
-        assert self.content is not None
-        for function in self.functions:
-            function(self.content, props)
 
 
 class Parser:
@@ -124,6 +120,7 @@ class Parser:
     def __init__(self):
         tools.configure_logging()
         self.file_parsers = defaultdict(_FileParser)
+        self.functions = []
 
     def add_pattern(
         self, attribute, regex, file="run.log", type=int, flags="", required=False
@@ -163,7 +160,7 @@ class Parser:
         r"""Call ``function(open(file).read(), properties)`` during parsing.
 
         Functions are applied **after** all patterns have been
-        evaluated.
+        evaluated and in the order in which they are added to the parser.
 
         The function is passed the file contents and the properties
         dictionary. It must manipulate the passed properties
@@ -185,7 +182,7 @@ class Parser:
         run.
 
         """
-        self.file_parsers[file].add_function(function)
+        self.functions.append(_Function(function, file))
 
     def parse(self):
         """Search all patterns and apply all functions.
@@ -212,7 +209,9 @@ class Parser:
         for file_parser in self.file_parsers.values():
             self.props.update(file_parser.search_patterns())
 
-        for file_parser in self.file_parsers.values():
-            file_parser.apply_functions(self.props)
+        for function in self.functions:
+            with open(function.filename) as f:
+                content = f.read()
+            function.function(content, self.props)
 
         self.props.write()

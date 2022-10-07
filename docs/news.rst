@@ -8,6 +8,7 @@ Lab
 ^^^
 * Raise minimum supported Python version to 3.7 (Jendrik Seipp).
 * Add support for Python 3.10 (Jendrik Seipp).
+* Apply parsing functions in the order in which they were added (Jendrik Seipp).
 * For contributors: document pre-commit hook in ``CONTRIBUTING.md`` file (Jendrik Seipp).
 
 Downward Lab
