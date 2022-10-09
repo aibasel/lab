@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v7.2 (unreleased)
+v7.2 (2022-10-09)
 -----------------
 
 Lab
@@ -16,7 +16,7 @@ Downward Lab
 * Parse peak memory in anytime search parser (Jendrik Seipp).
 * Only store "planner_memory" and "planner_time" attributes for successful planner
   runs (Jendrik Seipp).
-* Add flexible example experiment for planners based on Fast Downward (Jendrik Seipp).
+* Add fully customizable example planner experiment without `FastDownwardExperiment` class (Jendrik Seipp).
 * Show how to group domain directories in example Fast Downward experiment (Jendrik Seipp).
 
 
