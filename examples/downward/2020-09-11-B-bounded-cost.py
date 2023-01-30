@@ -2,7 +2,7 @@
 
 import json
 import os
-import os.path
+from pathlib import Path
 import shutil
 
 from downward import suites
@@ -23,9 +23,10 @@ SCP_LOGIN = "myname@myserver.com"
 REMOTE_REPOS_DIR = "/infai/seipp/projects"
 BOUNDS_FILE = "bounds.json"
 SUITE = ["depot:p01.pddl", "grid:prob01.pddl", "gripper:prob01.pddl"]
-REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE") or os.path.join(
-    get_default_data_dir(), "revision-cache"
-)
+try:
+    REVISION_CACHE = Path(os.environ["DOWNWARD_REVISION_CACHE"])
+except KeyError:
+    REVISION_CACHE = Path(get_default_data_dir()) / "revision-cache"
 if project.REMOTE:
     # ENV = project.BaselSlurmEnvironment(email="my.name@myhost.ch")
     ENV = project.TetralithEnvironment(
@@ -67,14 +68,14 @@ exp = Experiment(environment=ENV)
 for rev, rev_nick in REVS:
     cached_rev = CachedFastDownwardRevision(REPO, rev, BUILD_OPTIONS)
     cached_rev.cache(REVISION_CACHE)
-    cache_path = os.path.join(REVISION_CACHE, cached_rev.name)
-    dest_path = "code-" + cached_rev.name
+    cache_path = REVISION_CACHE / cached_rev.name
+    dest_path = Path(f"code-{cached_rev.name}")
     exp.add_resource("", cache_path, dest_path)
     # Overwrite the script to set an environment variable.
     exp.add_resource(
         _get_solver_resource_name(cached_rev),
-        os.path.join(cache_path, "fast-downward.py"),
-        os.path.join(dest_path, "fast-downward.py"),
+        cache_path / "fast-downward.py",
+        dest_path / "fast-downward.py",
     )
     for config_nick, config in CONFIGS:
         algo_name = f"{rev_nick}-{config_nick}" if rev_nick else config_nick
