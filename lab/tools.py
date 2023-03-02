@@ -258,12 +258,12 @@ class Properties(dict):
             else:
                 return super().default(o)
 
-    JSON_ARGS = dict(
-        cls=_PropertiesEncoder,
-        indent=2,
-        separators=(",", ": "),
-        sort_keys=True,
-    )
+    JSON_ARGS = {
+        "cls": _PropertiesEncoder,
+        "indent": 2,
+        "separators": (",", ": "),
+        "sort_keys": True,
+    }
 
     """Transparently handle properties files compressed with xz."""
 
