@@ -13,6 +13,7 @@ IGNORE_PATTERNS = [
     "differs from the one in the portfolio file",
     "Terminated",
     "Killed",
+    "underlay of /etc/localtime required more than",
 ]
 
 
@@ -22,7 +23,7 @@ def main():
     if stderr.is_file():
         need_to_filter = False
         filtered_content = []
-        with open(stderr, "r") as f:
+        with open(stderr) as f:
             for line in f:
                 if any(pattern in line for pattern in IGNORE_PATTERNS):
                     need_to_filter = True
