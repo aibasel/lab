@@ -107,7 +107,10 @@ class Fetcher:
             os.path.join(src_dir, "runs-00001-00100")
         )
         if fetch_from_eval_dir:
-            src_props = tools.Properties(filename=os.path.join(src_dir, "properties"))
+            src_path = os.path.join(src_dir, "properties")
+            src_props = tools.Properties(filename=src_path)
+            if not src_props.is_file():
+                logging.critical(f"Properties file not found at {src_path}")
             run_filter.apply(src_props)
             combined_props.update(src_props)
             logging.info(f"Fetched properties of {len(src_props)} runs.")

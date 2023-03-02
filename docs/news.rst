@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v7.3 (unreleased)
+-----------------
+
+Lab
+^^^
+* Transparently handle xz-compressed properties files (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes yet.
+
+
 v7.2 (2022-10-09)
 -----------------
 

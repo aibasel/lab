@@ -2,6 +2,7 @@ import argparse
 import colorsys
 import functools
 import logging
+import lzma
 import math
 import os
 from pathlib import Path
@@ -257,24 +258,37 @@ class Properties(dict):
             else:
                 return super().default(o)
 
+    JSON_ARGS = dict(
+        cls=_PropertiesEncoder,
+        indent=2,
+        separators=(",", ": "),
+        sort_keys=True,
+    )
+
+    """Transparently handle properties files compressed with xz."""
+
     def __init__(self, filename=None):
         self.filename = filename
-        self.load(filename)
+        if self.filename:
+            self.filename = os.path.abspath(self.filename)
+            if not os.path.exists(self.filename) and os.path.exists(
+                self.filename + ".xz"
+            ):
+                self.filename += ".xz"
+        self.load(self.filename)
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(
-            self,
-            cls=self._PropertiesEncoder,
-            indent=2,
-            separators=(",", ": "),
-            sort_keys=True,
-        )
+        return json.dumps(self, *self.JSON_ARGS)
+
+    def is_file(self):
+        return self.filename and os.path.exists(self.filename)
 
     def load(self, filename):
         if not filename or not os.path.exists(filename):
             return
-        with open(filename) as f:
+        open_func = lzma.open if filename.endswith(".xz") else open
+        with open_func(filename) as f:
             try:
                 self.update(json.load(f))
             except ValueError as e:
@@ -287,7 +301,12 @@ class Properties(dict):
         """Write the properties to disk."""
         assert self.filename
         makedirs(os.path.dirname(self.filename))
-        write_file(self.filename, str(self))
+        if self.filename.endswith(".xz"):
+            with open(self.filename, "w") as f:
+                json.dump(self, f, *self.JSON_ARGS)
+        else:
+            with open(self.filename, "w") as f:
+                f.write(str(self))
 
 
 class RunFilter:
