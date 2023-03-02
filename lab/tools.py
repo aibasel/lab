@@ -301,12 +301,9 @@ class Properties(dict):
         """Write the properties to disk."""
         assert self.filename
         makedirs(os.path.dirname(self.filename))
-        if self.filename.endswith(".xz"):
-            with open(self.filename, "w") as f:
-                json.dump(self, f, *self.JSON_ARGS)
-        else:
-            with open(self.filename, "w") as f:
-                f.write(str(self))
+        open_func = lzma.open if self.filename.endswith(".xz") else open
+        with open_func(self.filename, "w") as f:
+            json.dump(self, f, *self.JSON_ARGS)
 
 
 class RunFilter:
