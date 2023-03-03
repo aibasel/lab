@@ -2,6 +2,7 @@ import argparse
 import colorsys
 import functools
 import logging
+import lzma
 import math
 import os
 from pathlib import Path
@@ -257,37 +258,50 @@ class Properties(dict):
             else:
                 return super().default(o)
 
+    JSON_ARGS = {
+        "cls": _PropertiesEncoder,
+        "indent": 2,
+        "separators": (",", ": "),
+        "sort_keys": True,
+    }
+
+    """Transparently handle properties files compressed with xz."""
+
     def __init__(self, filename=None):
-        self.filename = filename
-        self.load(filename)
+        self.path = filename
+        if self.path:
+            self.path = Path(self.path).resolve()
+            xz_path = self.path.with_suffix(".xz")
+            if self.path.is_file() and xz_path.is_file():
+                logging.critical(f"Only one of {self.path} and {xz_path} may exist")
+            if not self.path.is_file() and xz_path.is_file():
+                self.path = xz_path
+            if self.path.is_file():
+                self.load(self.path)
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(
-            self,
-            cls=self._PropertiesEncoder,
-            indent=2,
-            separators=(",", ": "),
-            sort_keys=True,
-        )
+        return json.dumps(self, **self.JSON_ARGS)
 
     def load(self, filename):
-        if not filename or not os.path.exists(filename):
-            return
-        with open(filename) as f:
+        path = Path(filename)
+        open_func = lzma.open if path.suffix == ".xz" else open
+        with open_func(path) as f:
             try:
                 self.update(json.load(f))
             except ValueError as e:
-                logging.critical(f"JSON parse error in file '{filename}': {e}")
+                logging.critical(f"JSON parse error in file '{path}': {e}")
 
     def add_unexplained_error(self, error):
         add_unexplained_error(self, error)
 
     def write(self):
         """Write the properties to disk."""
-        assert self.filename
-        makedirs(os.path.dirname(self.filename))
-        write_file(self.filename, str(self))
+        assert self.path
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        open_func = lzma.open if self.path.suffix == ".xz" else open
+        with open_func(self.path, "w") as f:
+            json.dump(self, f, **self.JSON_ARGS)
 
 
 class RunFilter:
