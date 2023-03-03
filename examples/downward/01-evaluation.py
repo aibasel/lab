@@ -25,7 +25,7 @@ exp.add_step(
 )
 
 project.fetch_algorithm(exp, "2020-09-11-A-cg-vs-ff", "20.06:01-cg", new_algo="cg")
-project.fetch_algorithm(exp, "2020-09-11-A-cg-vs-ff", "20.06:02-ff", new_algo="ff")
+project.fetch_algorithms(exp, "2020-09-11-B-bounded-cost")
 
 filters = [project.add_evaluations_per_time]
 
