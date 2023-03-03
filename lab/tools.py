@@ -279,7 +279,7 @@ class Properties(dict):
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, *self.JSON_ARGS)
+        return json.dumps(self, **self.JSON_ARGS)
 
     def is_file(self):
         return self.filename and os.path.exists(self.filename)
@@ -303,7 +303,7 @@ class Properties(dict):
         makedirs(os.path.dirname(self.filename))
         open_func = lzma.open if self.filename.endswith(".xz") else open
         with open_func(self.filename, "w") as f:
-            json.dump(self, f, *self.JSON_ARGS)
+            json.dump(self, f, **self.JSON_ARGS)
 
 
 class RunFilter:
