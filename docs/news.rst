@@ -1,16 +1,17 @@
 Changelog
 =========
 
-v7.3 (unreleased)
+v7.3 (2023-03-03)
 -----------------
 
 Lab
 ^^^
 * Transparently handle xz-compressed properties files (Jendrik Seipp).
+* Add CI tests for Python 3.11 (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
-* No changes yet.
+* Adapt code for Matplotlib version 3.7 (Jendrik Seipp).
 
 
 v7.2 (2022-10-09)
