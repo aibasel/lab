@@ -297,6 +297,28 @@ def fetch_algorithm(exp, expname, algo, *, new_algo=None):
     )
 
 
+def fetch_algorithms(exp, expname, *, algos=None, name=None, filters=None):
+    """
+    Fetch multiple or all algorithms.
+    """
+    assert not expname.rstrip("/").endswith("-eval")
+    algos = set(algos or [])
+    filters = filters or []
+    if algos:
+
+        def algo_filter(run):
+            return run["algorithm"] in algos
+
+        filters.append(algo_filter)
+
+    exp.add_fetcher(
+        f"data/{expname}-eval",
+        filter=filters,
+        name=name or f"fetch-from-{expname}",
+        merge=True,
+    )
+
+
 def add_absolute_report(exp, *, name=None, outfile=None, **kwargs):
     report = AbsoluteReport(**kwargs)
     if name and not outfile:
