@@ -283,9 +283,6 @@ class Properties(dict):
     def __str__(self):
         return json.dumps(self, **self.JSON_ARGS)
 
-    def is_file(self):
-        return self.path and self.path.is_file()
-
     def load(self, filename):
         path = Path(filename)
         open_func = lzma.open if path.suffix == ".xz" else open

@@ -415,14 +415,11 @@ class Report:
 
     def _load_data(self):
         props_file = os.path.join(self.eval_dir, "properties")
-        if not os.path.exists(props_file):
-            logging.critical(f"Properties file not found at {props_file}")
-
         logging.info("Reading properties file")
         self.props = tools.Properties(filename=props_file)
-        logging.info("Reading properties file finished")
         if not self.props:
-            logging.critical("properties file in evaluation dir is empty.")
+            logging.critical(f"No properties found in {self.eval_dir}")
+        logging.info("Reading properties file finished")
 
     def _apply_filter(self):
         self.run_filter.apply(self.props)
