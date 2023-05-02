@@ -1,0 +1,53 @@
+
+  ########################
+  # Submit description file for downward-lab
+  # https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html
+  ########################
+
+  batch_name = downward_lab_%(datetime)s
+
+  # True False
+  nice_user = %(nice_user)s
+
+  notify_user = %(email)s
+
+  # Never Complete Error or Always
+  notification = %(notification_mode)s
+
+  # True False list_of_variables (separated by comma, semicolon or space)
+  getenv = %(getenv)s
+
+  priority = %(priority)d
+
+  %(requirements_line)s
+
+  executable     = condor_plain_tree_structure/$(Process)/condor_run
+
+  # vanilla scheduler local grid java vm parallel docker
+  universe       = %(universe)s
+
+  output = $(Cluster).$(Process).out
+  log = $(Cluster).$(Process).log
+  error = $(Cluster).$(Process).err
+
+  request_memory = %(request_memory)s
+
+  should_transfer_files = IF_NEEDED
+
+  preserve_relative_paths = False
+
+  initial_dir = condor_plain_tree_structure/$(Process)
+
+  transfer_input_files = \
+  domain.pddl, \
+  problem.pddl, \
+  patched_run, \
+  run_task.py, \
+  condor_run, \
+  ../../requirements.txt, \%(parsers)s
+  %(code_dirs)s
+
+  %(custom_lines)s
+
+  queue %(n_tasks)d
+

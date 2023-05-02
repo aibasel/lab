@@ -1,0 +1,44 @@
+#! /usr/bin/env python
+
+import logging
+import os
+import multiprocessing
+import subprocess
+import sys
+
+from lab.experiment import get_run_dir
+from lab import tools
+
+tools.configure_logging()
+
+TASK_ID = %(task_id)s
+
+def process_task():
+    error = False
+    driver_log_file = "driver.log"
+
+    if os.path.exists(driver_log_file):
+        logging.info(f"The task {TASK_ID} has already been started --> skip it")
+        return False
+
+    with open(driver_log_file, "w") as driver_log:
+        with open("driver.err", "w") as driver_err:
+            logging.info(f"Starting task {TASK_ID}")
+            try:
+                subprocess.check_call(
+                    [tools.get_python_executable(), "patched_run"],
+                    stdout=driver_log, stderr=driver_err)
+            except subprocess.CalledProcessError:
+                error = True
+
+    # driver.log always has content for a successful run, so we never delete it.
+    if os.path.getsize(driver_err.name) == 0:
+        os.remove(driver_err.name)
+    else:
+        error = True
+
+    return error
+
+
+if __name__ == "__main__":
+    process_task()
