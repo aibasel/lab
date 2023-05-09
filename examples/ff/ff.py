@@ -7,10 +7,15 @@ Example experiment for the FF planner
 
 import os
 import platform
+import shutil
 
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
-from lab.environments import BaselSlurmEnvironment, LocalEnvironment
+from lab.environments import (
+    BaselSlurmEnvironment,
+    HTCondorEnvironment,
+    LocalEnvironment,
+)
 from lab.experiment import Experiment
 from lab.reports import Attribute, geometric_mean
 
@@ -33,6 +38,8 @@ REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 if REMOTE:
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")
+elif shutil.which("condor_q"):
+    ENV = HTCondorEnvironment()
 else:
     ENV = LocalEnvironment(processes=2)
 SUITE = ["grid", "gripper:prob01.pddl", "miconic:s1-0.pddl", "mystery:prob07.pddl"]
