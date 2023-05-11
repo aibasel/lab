@@ -624,9 +624,9 @@ Downward Lab
   (``build_successful``) is written in the cache directory. When
   the cached revision is requested later an error is shown if this
   file is missing.
-* Only use exit codes to reason about error reasons. Merge from FD master if your FD version does not produce meaningful exit codes.
+* Only use exit codes to reason about error reasons. Merge from FD main if your FD version does not produce meaningful exit codes.
 * Preprocess parser: only parse logs and never output files.
-* Never copy ``all.groups`` and ``test.groups`` files. Old Fast Downward branches need to merge from master.
+* Never copy ``all.groups`` and ``test.groups`` files. Old Fast Downward branches need to merge from main.
 * Always compress ``output.sas`` (also for ``compact=False``). Use ``xz`` for compressing.
 
 

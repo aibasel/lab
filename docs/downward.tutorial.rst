@@ -126,7 +126,7 @@ The files below are an experiment script for the example experiment, a
 experiments related to the project, a parser script, and a script for
 collecting results and making reports. You can use the files as a basis
 for your own experiments. They are available in the `Lab repo
-<https://github.com/aibasel/lab/tree/master/examples/downward>`_. Copy the
+<https://github.com/aibasel/lab/tree/main/examples/downward>`_. Copy the
 files into ``experiments/cg-vs-ff``.
 
 .. highlight:: bash
@@ -163,5 +163,5 @@ Run individual steps with ::
 
 The `Downward Lab API <downward.experiment.html>`_ shows you how to adjust
 this example to your needs. You may also find the `other example
-experiments <https://github.com/aibasel/lab/tree/master/examples/>`_
+experiments <https://github.com/aibasel/lab/tree/main/examples/>`_
 useful.
