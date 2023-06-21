@@ -32,7 +32,7 @@ DEFAULT_ENCODING = "utf-8"
 
 def get_string(s):
     if isinstance(s, bytes):
-        return s.decode(DEFAULT_ENCODING)
+        return s.decode(DEFAULT_ENCODING, errors="backslashreplace")
     else:
         raise ValueError("tools.get_string() only accepts byte strings")
 
