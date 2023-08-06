@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v7.4 (unreleased)
+-----------------
+
+Lab
+^^^
+* None yet.
+
+Downward Lab
+^^^^^^^^^^^^
+* Add *subdir* option for CachedFastDownwardRevision to support nested Fast Downward repos (Jendrik Seipp).
+
+
 v7.3 (2023-03-03)
 -----------------
 
