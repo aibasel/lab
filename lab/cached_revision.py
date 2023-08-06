@@ -124,31 +124,32 @@ class CachedRevision:
             with open(tar_archive, "w") as f:
                 retcode = tools.run_command(cmd, stdout=f, cwd=self.repo)
 
-            if retcode == 0:
-                with tarfile.open(tar_archive) as tf:
-                    tf.extractall(self.path)
-                tools.remove_path(tar_archive)
-
-                for exclude_dir in self.exclude:
-                    path = os.path.join(self.path, exclude_dir)
-                    if os.path.exists(path):
-                        tools.remove_path(path)
-
             if retcode != 0:
-                shutil.rmtree(self.path)
+                shutil.rmtree(self.path, ignore_errors=True)
                 logging.critical("Failed to make checkout.")
-            self._compile()
+
+            with tarfile.open(tar_archive) as tf:
+                tf.extractall(self.path)
+            tools.remove_path(tar_archive)
+
+            for exclude_dir in self.exclude:
+                path = os.path.join(self.path, exclude_dir)
+                if os.path.exists(path):
+                    tools.remove_path(path)
+
+            retcode = self._compile()
+            if retcode == 0:
+                tools.write_file(self._get_sentinel_file(), "")
+            else:
+                logging.critical(f"Build failed in {self.path}")
+
             self._cleanup()
 
     def _get_sentinel_file(self):
         return os.path.join(self.path, "build_successful")
 
     def _compile(self):
-        retcode = tools.run_command(self.build_cmd, cwd=self.path)
-        if retcode == 0:
-            tools.write_file(self._get_sentinel_file(), "")
-        else:
-            logging.critical(f"Build failed in {self.path}")
+        return tools.run_command(self.build_cmd, cwd=self.path)
 
     def _cleanup(self):
         pass
