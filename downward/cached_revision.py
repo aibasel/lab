@@ -16,7 +16,7 @@ class CachedFastDownwardRevision(CachedRevision):
         * *repo*: Path to Fast Downward repository.
         * *rev*: Fast Downward revision.
         * *build_options*: List of build.py options.
-        * *subdir*: relative path to nested Fast Downward repo.
+        * *subdir*: relative path from *repo* to Fast Downward subdir.
         """
         CachedRevision.__init__(
             self,

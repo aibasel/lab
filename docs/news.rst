@@ -6,11 +6,12 @@ v7.4 (unreleased)
 
 Lab
 ^^^
-* None yet.
+* Require *revision_cache* parameter in :class:`CachedRevision <lab.cached_revision.CachedRevision>` constructor (Jendrik Seipp).
+* Add *subdir* option for :class:`CachedRevision <lab.cached_revision.CachedRevision>` to support solvers residing in monolithic repos (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
-* Add *subdir* option for CachedFastDownwardRevision to support nested Fast Downward repos (Jendrik Seipp).
+* Add *subdir* option for :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` to support nested Fast Downward repos (Jendrik Seipp).
 
 
 v7.3 (2023-03-03)

@@ -67,6 +67,7 @@ class CachedRevision:
         * *exclude*: list of relative paths under *subdir* that are not needed for
           building and running the solver. Instead of this parameter, you can also
           use a ``.gitattributes`` file for Git repositories.
+        * *subdir*: relative path from *repo* to solver subdir.
 
         The following example caches a Fast Downward revision. When you
         use the :class:`FastDownwardExperiment
