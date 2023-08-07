@@ -7,10 +7,7 @@ import shutil
 
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
-from downward.experiment import (
-    _DownwardAlgorithm,
-    FastDownwardRun,
-)
+from downward.experiment import _DownwardAlgorithm, FastDownwardRun
 from lab.experiment import Experiment, get_default_data_dir
 
 import project
