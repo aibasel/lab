@@ -43,9 +43,9 @@ def parse_exit_code(content, props):
         props.add_unexplained_error(outcome.msg)
 
 
-class ExitCodeParser(Parser):
+class ExitcodeParser(Parser):
     def __init__(self):
-        Parser.__init__(self)
+        super().__init__()
         self.add_pattern(
             "planner_exit_code",
             r"planner exit code: (.+)\n",
@@ -56,9 +56,6 @@ class ExitCodeParser(Parser):
         self.add_function(parse_exit_code)
 
 
-def main():
-    parser = ExitCodeParser()
+if __name__ == "__main__":
+    parser = ExitcodeParser()
     parser.parse()
-
-
-main()

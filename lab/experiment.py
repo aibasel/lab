@@ -1,14 +1,14 @@
 """Main module for creating experiments."""
 
 from collections import OrderedDict
-from glob import glob
 import logging
 import os
-import subprocess
+from pathlib import Path
 import sys
 
 from lab import environments, tools
 from lab.fetcher import Fetcher
+from lab.parser import Parser
 from lab.steps import get_step, get_steps_text, Step
 
 
@@ -77,12 +77,11 @@ def _check_name(name, typ, extra_chars=""):
 
 
 class _Resource:
-    def __init__(self, name, source, dest, symlink, is_parser):
+    def __init__(self, name, source, dest, symlink):
         self.name = name
         self.source = source
         self.dest = dest
         self.symlink = symlink
-        self.is_parser = is_parser
 
 
 class _Buildable:
@@ -154,7 +153,7 @@ class _Buildable:
         if name:
             self._check_alias(name)
             self.env_vars_relative[name] = dest
-        self.resources.append(_Resource(name, source, dest, symlink, is_parser=False))
+        self.resources.append(_Resource(name, source, dest, symlink))
 
     def add_new_file(self, name, dest, content, permissions=0o644):
         """
@@ -287,10 +286,8 @@ class _Buildable:
             tools.write_file(filename, content)
             os.chmod(filename, permissions)
 
-    def _build_resources(self, only_parsers=False):
+    def _build_resources(self):
         for resource in self.resources:
-            if only_parsers and not resource.is_parser:
-                continue
             if not os.path.exists(resource.source):
                 logging.critical(f"Resource not found: {resource.source}")
             dest = self._get_abs_path(resource.dest)
@@ -349,6 +346,7 @@ class Experiment(_Buildable):
 
         self.steps = []
         self.runs = []
+        self.parsers = []
 
         self.set_property("experiment_file", self._script)
 
@@ -408,82 +406,44 @@ class Experiment(_Buildable):
             raise ValueError(f"Step names must be unique: {name}")
         self.steps.append(Step(name, function, *args, **kwargs))
 
-    def add_parser(self, path_to_parser):
+    def add_parser(self, parser):
         """
-        Add a parser to each run of the experiment.
+        Add a :class:`lab.parser.Parser` to each run of the experiment.
 
-        Add the parser as a resource to the experiment and add a command
-        that executes the parser to each run. Since commands are
-        executed in the order they are added, parsers should be added
-        after all other commands. If you need to change your parsers and
-        execute them again you can use the :meth:`.add_parse_again_step`
-        method.
-
-        *path_to_parser* must be the path to a Python script. The script
-        is executed in the run directory and manipulates the run's
-        "properties" file. The last part of the filename (without the
-        extension) is used as a resource name. Therefore, it must be
-        unique among all parsers and other resources. Also, it must
-        start with a letter and contain only letters, numbers,
-        underscores and dashes (which are converted to underscores
-        automatically).
-
-        For information about how to write parsers see :ref:`parsing`.
+        Each parser is executed in each run directory and manipulates the run's
+        "properties" file. For information about how to write parsers see
+        :ref:`parsing`.
 
         """
-        name, _ = os.path.splitext(os.path.basename(path_to_parser))
-        name = name.replace("-", "_")
-        self._check_alias(name)
-        if not os.path.isfile(path_to_parser):
-            logging.critical(f"Parser {path_to_parser} could not be found.")
+        if not isinstance(parser, Parser):
+            logging.critical(f"Parser '{parser}' must be a Parser instance")
+        self.parsers.append(parser)
 
-        dest = os.path.basename(path_to_parser)
-        self.env_vars_relative[name] = dest
-        self.resources.append(
-            _Resource(name, path_to_parser, dest, symlink=False, is_parser=True)
+    def parse(self):
+        """
+        Run all parsers that have been added to the experiment with
+        :meth:`.add_parser`.
+
+        After parsing, you'll want to run a "fetch" step to collect the parsed
+        data from the experiment into the evaluation directory.
+        """
+
+        if not os.path.isdir(self.path):
+            logging.critical(f"{self.path} is missing or not a directory")
+
+        run_dirs = sorted(Path(self.path).glob("runs-*-*/*"))
+        num_runs = len(run_dirs)
+        logging.info(
+            f"Running {len(self.parsers)} parsers in {num_runs:d} run directories."
         )
-        self.add_command(name, [tools.get_python_executable(), f"{{{name}}}"])
-
-    def add_parse_again_step(self):
-        """
-        Add a step that copies the parsers from their originally specified
-        locations to the experiment directory and runs all of them again. This
-        step overwrites the existing properties file in each run dir.
-
-        Do not forget to run the default fetch step again to overwrite
-        existing data in the -eval dir of the experiment.
-        """
-
-        def run_parsers():
-            if not os.path.isdir(self.path):
-                logging.critical(f"{self.path} is missing or not a directory")
-
-            # Copy all parsers from their source to their destination again.
-            self._build_resources(only_parsers=True)
-
-            run_dirs = sorted(glob(os.path.join(self.path, "runs-*-*", "*")))
-
-            total_dirs = len(run_dirs)
-            logging.info(f"Parsing properties in {total_dirs:d} run directories")
-            for index, run_dir in enumerate(run_dirs, start=1):
-                if os.path.exists(os.path.join(run_dir, "properties")):
-                    tools.remove_path(os.path.join(run_dir, "properties"))
-                loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(loglevel, f"Parsing run: {index:6d}/{total_dirs:d}")
-                for resource in self.resources:
-                    if resource.is_parser:
-                        parser_filename = self.env_vars_relative[resource.name]
-                        rel_parser = os.path.join("../../", parser_filename)
-                        # Since parsers often produce output which we would
-                        # rather not want to see for each individual run, we
-                        # suppress it here.
-                        subprocess.check_call(
-                            [tools.get_python_executable(), rel_parser],
-                            cwd=run_dir,
-                            stdout=subprocess.DEVNULL,
-                        )
-
-        self.add_step("parse-again", run_parsers)
+        for index, run_dir in enumerate(run_dirs, start=1):
+            props_path = run_dir / "properties"
+            if props_path.is_file():
+                props_path.unlink()
+            loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
+            logging.log(loglevel, f"Parsing run: {index:6d}/{num_runs:d}")
+            for parser in self.parsers:
+                parser.parse(run_dir)
 
     def add_fetcher(
         self, src=None, dest=None, merge=None, name=None, filter=None, **kwargs

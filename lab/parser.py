@@ -1,37 +1,28 @@
 """
-A parser can be any program that analyzes files in the run's directory
-(e.g. ``run.log``) and manipulates the ``properties`` file in the same
-directory.
+To parse logs or generated files, you can use the ``Parser`` class. Here is an
+example parser for the FF planner:
 
-To make parsing easier, however, you can use the ``Parser`` class. Here is
-an example parser for the FF planner:
-
-.. literalinclude:: ../examples/ff/ff-parser.py
+.. literalinclude:: ../examples/ff/ff_parser.py
    :caption:
 
-You can add this parser to all runs by using :meth:`add_parser()
+You can add a parser to all runs with :meth:`add_parser()
 <lab.experiment.Experiment.add_parser>`:
 
 >>> from pathlib import Path
 >>> from lab.experiment import Experiment
+>>> parser = Parser()
+>>> parser.add_pattern("exitcode", "retcode: (.+)\\n", type=int, file="run.log")
 >>> exp = Experiment()
->>> # The path can be absolute or relative to the working directory at build time.
->>> parser = Path(__file__).resolve().parents[1] / "examples/ff/ff-parser.py"
 >>> exp.add_parser(parser)
 
-All added parsers will be run in the order in which they were added after
-executing the run's commands.
-
-If you need to change your parsers and execute them again, use the
-:meth:`~lab.experiment.Experiment.add_parse_again_step` method to re-parse
-your results.
+Parsers are run in the order in which they were added.
 
 """
 
 from collections import defaultdict
 import errno
 import logging
-import os.path
+from pathlib import Path
 import re
 
 from lab import tools
@@ -118,7 +109,6 @@ class Parser:
     """
 
     def __init__(self):
-        tools.configure_logging()
         self.file_parsers = defaultdict(_FileParser)
         self.functions = []
 
@@ -184,19 +174,19 @@ class Parser:
         """
         self.functions.append(_Function(function, file))
 
-    def parse(self):
+    def parse(self, run_dir="."):
         """Search all patterns and apply all functions.
 
         The found values are written to the run's ``properties`` file.
 
         """
-        run_dir = os.path.abspath(".")
-        prop_file = os.path.join(run_dir, "properties")
+        run_dir = Path(run_dir).resolve()
+        prop_file = run_dir / "properties"
         self.props = tools.Properties(filename=prop_file)
 
         for filename, file_parser in list(self.file_parsers.items()):
             # If filename is absolute it will not be changed here.
-            path = os.path.join(run_dir, filename)
+            path = run_dir / filename
             try:
                 file_parser.load_file(path)
             except OSError as err:
@@ -210,7 +200,8 @@ class Parser:
             self.props.update(file_parser.search_patterns())
 
         for function in self.functions:
-            with open(function.filename) as f:
+            path = run_dir / function.filename
+            with open(path) as f:
                 content = f.read()
             function.function(content, self.props)
 

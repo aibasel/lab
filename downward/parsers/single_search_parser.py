@@ -162,9 +162,6 @@ class SingleSearchParser(Parser):
         self.add_function(add_scores)
 
 
-def main():
+if __name__ == "__main__":
     parser = SingleSearchParser()
     parser.parse()
-
-
-main()

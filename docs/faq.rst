@@ -38,12 +38,11 @@ again as above.
 I forgot to parse something. How can I run only the parsers again?
 ------------------------------------------------------------------
 
-See the `parsing documentation <lab.parser.html>`_ for how to write
-parsers. Once you have fixed your existing parsers or added new parsers,
-add ``exp.add_parse_again_step()`` to your experiment script
-``my-exp.py`` and then call ::
+Now that parsing is done in its own experiment step, simply consult `parsing
+documentation <lab.parser.html>`_ for how to amend your parsers and then run the
+"parse" experiment step again with ::
 
-    ./my-exp.py parse-again
+    ./my-exp.py parse
 
 
 How can I compute a new attribute from multiple runs?
