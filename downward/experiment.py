@@ -13,13 +13,8 @@ from downward.parsers.exitcode_parser import ExitcodeParser
 from downward.parsers.planner_parser import PlannerParser
 from downward.parsers.single_search_parser import SingleSearchParser
 from downward.parsers.translator_parser import TranslatorParser
-
 from lab import tools
 from lab.experiment import Experiment, get_default_data_dir, Run
-
-
-DIR = os.path.dirname(os.path.abspath(__file__))
-DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, "parsers")
 
 
 class FastDownwardRun(Run):

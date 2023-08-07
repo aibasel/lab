@@ -8,13 +8,13 @@ Example experiment for the FF planner
 import os
 import platform
 
+from ff_parser import FFParser
+
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
 from lab.reports import Attribute, geometric_mean
-
-from ff_parser import FFParser
 
 
 # Create custom report class with suitable info and error attributes.
