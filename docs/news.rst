@@ -8,6 +8,7 @@ Lab
 ^^^
 * Require *revision_cache* parameter in :class:`CachedRevision <lab.cached_revision.CachedRevision>` constructor (Jendrik Seipp).
 * Add *subdir* option for :class:`CachedRevision <lab.cached_revision.CachedRevision>` to support solvers residing in monolithic repos (Jendrik Seipp).
+* Add :meth:`CachedRevision <lab.cached_revision.CachedRevision.get_relative_exp_path>` method (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
