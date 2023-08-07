@@ -168,5 +168,5 @@ class CachedRevision:
     def _cleanup(self):
         pass
 
-    def get_relative_experiment_path(self, relpath=""):
+    def get_relative_exp_path(self, relpath=""):
         return os.path.join(f"code-{self.name}", relpath)

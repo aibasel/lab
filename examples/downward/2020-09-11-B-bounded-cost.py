@@ -64,7 +64,7 @@ exp = Experiment(environment=ENV)
 for rev, rev_nick in REVS:
     cached_rev = CachedFastDownwardRevision(REVISION_CACHE, REPO, rev, BUILD_OPTIONS)
     cached_rev.cache()
-    exp.add_resource("", cached_rev.path, cached_rev.get_relative_experiment_path())
+    exp.add_resource("", cached_rev.path, cached_rev.get_relative_exp_path())
     for config_nick, config in CONFIGS:
         algo_name = f"{rev_nick}-{config_nick}" if rev_nick else config_nick
 

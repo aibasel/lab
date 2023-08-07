@@ -40,7 +40,7 @@ class FastDownwardRun(Run):
 
         driver = os.path.join(
             exp.path,
-            algo.cached_revision.get_relative_experiment_path("fast-downward.py"),
+            algo.cached_revision.get_relative_exp_path("fast-downward.py"),
         )
         self.add_command(
             "planner",
@@ -352,7 +352,7 @@ class FastDownwardExperiment(Experiment):
     def _add_code(self):
         """Add the compiled code to the experiment."""
         for cached_rev in self._get_unique_cached_revisions():
-            dest_path = cached_rev.get_relative_experiment_path()
+            dest_path = cached_rev.get_relative_exp_path()
             self.add_resource("", cached_rev.path, dest_path)
 
     def _add_runs(self):
