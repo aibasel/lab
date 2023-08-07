@@ -302,7 +302,7 @@ class FastDownwardExperiment(Experiment):
         ] + (driver_options or [])
         algorithm = _DownwardAlgorithm(
             name,
-            CachedFastDownwardRevision(repo, rev, build_options),
+            CachedFastDownwardRevision(self.revision_cache, repo, rev, build_options),
             driver_options,
             component_options,
         )
@@ -347,7 +347,7 @@ class FastDownwardExperiment(Experiment):
 
     def _cache_revisions(self):
         for cached_rev in self._get_unique_cached_revisions():
-            cached_rev.cache(self.revision_cache)
+            cached_rev.cache()
 
     def _add_code(self):
         """Add the compiled code to the experiment."""

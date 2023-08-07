@@ -66,15 +66,14 @@ ATTRIBUTES = [
 
 exp = Experiment(environment=ENV)
 for rev, rev_nick in REVS:
-    cached_rev = CachedFastDownwardRevision(REPO, rev, BUILD_OPTIONS)
-    cached_rev.cache(REVISION_CACHE)
-    cache_path = REVISION_CACHE / cached_rev.name
+    cached_rev = CachedFastDownwardRevision(REVISION_CACHE, REPO, rev, BUILD_OPTIONS)
+    cached_rev.cache()
     dest_path = Path(f"code-{cached_rev.name}")
-    exp.add_resource("", cache_path, dest_path)
+    exp.add_resource("", cached_rev.path, dest_path)
     # Overwrite the script to set an environment variable.
     exp.add_resource(
         _get_solver_resource_name(cached_rev),
-        cache_path / "fast-downward.py",
+        cached_rev.path / "fast-downward.py",
         dest_path / "fast-downward.py",
     )
     for config_nick, config in CONFIGS:

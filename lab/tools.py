@@ -155,12 +155,10 @@ def confirm_overwrite_or_abort(path):
 
 
 def remove_path(path):
-    if os.path.isfile(path):
-        try:
-            os.remove(path)
-        except OSError:
-            pass
-    else:
+    path = Path(path)
+    if path.is_file():
+        path.unlink()
+    elif path.is_dir():
         shutil.rmtree(path)
 
 
