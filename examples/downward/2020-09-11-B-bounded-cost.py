@@ -64,14 +64,7 @@ exp = Experiment(environment=ENV)
 for rev, rev_nick in REVS:
     cached_rev = CachedFastDownwardRevision(REVISION_CACHE, REPO, rev, BUILD_OPTIONS)
     cached_rev.cache()
-    dest_path = Path(f"code-{cached_rev.name}")
-    exp.add_resource("", cached_rev.path, dest_path)
-    # Overwrite the script to set an environment variable.
-    exp.add_resource(
-        cached_rev.get_resource_name(),
-        cached_rev.path / "fast-downward.py",
-        dest_path / "fast-downward.py",
-    )
+    exp.add_resource("", cached_rev.path, cached_rev.get_relative_experiment_path())
     for config_nick, config in CONFIGS:
         algo_name = f"{rev_nick}-{config_nick}" if rev_nick else config_nick
 
