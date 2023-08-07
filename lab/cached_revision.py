@@ -167,3 +167,6 @@ class CachedRevision:
 
     def _cleanup(self):
         pass
+
+    def get_resource_name(self):
+        return f"solver_{self.name}"

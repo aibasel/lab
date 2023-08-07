@@ -9,7 +9,6 @@ from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
 from downward.experiment import (
     _DownwardAlgorithm,
-    _get_solver_resource_name,
     FastDownwardRun,
 )
 from lab.experiment import Experiment, get_default_data_dir
@@ -72,7 +71,7 @@ for rev, rev_nick in REVS:
     exp.add_resource("", cached_rev.path, dest_path)
     # Overwrite the script to set an environment variable.
     exp.add_resource(
-        _get_solver_resource_name(cached_rev),
+        cached_rev.get_resource_name(),
         cached_rev.path / "fast-downward.py",
         dest_path / "fast-downward.py",
     )
