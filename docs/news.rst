@@ -13,6 +13,7 @@ Lab
 Downward Lab
 ^^^^^^^^^^^^
 * Add *subdir* option for :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` to support nested Fast Downward repos (Jendrik Seipp).
+* Make ``_DownwardAlgorithm`` available as :class:`FastDownwardAlgorithm <downward.experiment.FastDownwardAlgorithm>` (Jendrik Seipp).
 
 
 v7.3 (2023-03-03)

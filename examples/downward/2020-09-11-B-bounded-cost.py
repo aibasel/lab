@@ -7,7 +7,7 @@ import shutil
 
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
-from downward.experiment import _DownwardAlgorithm, FastDownwardRun
+from downward.experiment import FastDownwardAlgorithm, FastDownwardRun
 from lab.experiment import Experiment, get_default_data_dir
 
 import project
@@ -79,7 +79,7 @@ for rev, rev_nick in REVS:
             config_with_bound[-1] = config_with_bound[-1].replace(
                 "bound=BOUND", f"bound={upper_bound}"
             )
-            algo = _DownwardAlgorithm(
+            algo = FastDownwardAlgorithm(
                 algo_name,
                 cached_rev,
                 DRIVER_OPTIONS,

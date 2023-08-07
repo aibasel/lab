@@ -86,6 +86,10 @@ class _DownwardAlgorithm:
         )
 
 
+# Make class available under nicer name, but keep old name for backwards compatibility.
+FastDownwardAlgorithm = _DownwardAlgorithm
+
+
 class FastDownwardExperiment(Experiment):
     """Conduct a Fast Downward experiment.
 
@@ -300,7 +304,7 @@ class FastDownwardExperiment(Experiment):
             "--overall-memory-limit",
             "3584M",
         ] + (driver_options or [])
-        algorithm = _DownwardAlgorithm(
+        algorithm = FastDownwardAlgorithm(
             name,
             CachedFastDownwardRevision(self.revision_cache, repo, rev, build_options),
             driver_options,
