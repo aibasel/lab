@@ -3,6 +3,16 @@
 .. autoclass:: downward.experiment.FastDownwardExperiment
    :members: add_algorithm, add_suite
 
+.. autoclass:: downward.experiment.FastDownwardAlgorithm
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+.. autoclass:: downward.cached_revision.CachedFastDownwardRevision
+   :members:
+   :undoc-members:
+   :inherited-members:
+
 .. _downward-parsers:
 
 Built-in parsers

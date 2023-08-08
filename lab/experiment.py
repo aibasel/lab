@@ -135,7 +135,7 @@ class _Buildable:
         Example::
 
         >>> exp = Experiment()
-        >>> exp.add_resource("planner", "path/to/planner")
+        >>> exp.add_resource("planner", "path/to/my-planner")
 
         includes my-planner in the experiment directory. You can use
         ``{planner}`` to reference my-planner in a run's commands::

@@ -104,8 +104,8 @@ class _FileParser:
 
 class Parser:
     """
-    Parse files in the current directory and write results into the
-    run's ``properties`` file.
+    Parse logs or files in a given directory and write results into the
+    ``properties`` file.
     """
 
     def __init__(self):
