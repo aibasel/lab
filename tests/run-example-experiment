@@ -4,13 +4,9 @@ set -euo pipefail
 
 check () {
     expname="$1"
-    if [[ "${expname}" == *"2020-09-11-A-cg-vs-ff" ]]; then
-        "./${expname}.py" 1 2 3 4 7 10
-    elif [[ "${expname}" == *"2020-09-11-B-bounded-cost" ]]; then
-        "./${expname}.py" 1 2 3 4 7
-    else
-        "./${expname}.py" --all
-    fi
+    shift 1
+    options=("$@")
+    "./${expname}.py" "${options[@]}"
     properties="data/$expname-eval/properties"
     if [[ ! -f "$properties" ]]; then
         echo "File not found: $properties"
@@ -27,6 +23,8 @@ check () {
 }
 
 SCRIPT="$1"
+shift 1  # Forget first argument.
+OPTIONS=("$@")  # All remaining arguments are script options.
 DIR=$(dirname "$SCRIPT")
 FILENAME=$(basename "$SCRIPT")
 FILENAME="${FILENAME%.*}"
@@ -36,4 +34,4 @@ cd $(dirname "$0")/../examples
 rm -rf "$DIR/data/$FILENAME"
 rm -rf "$DIR/data/$FILENAME-eval"
 pushd "$DIR"
-check "$FILENAME"
+check "$FILENAME" "${OPTIONS[@]}"
