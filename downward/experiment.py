@@ -50,6 +50,8 @@ _DownwardAlgorithm = FastDownwardAlgorithm
 
 
 class FastDownwardRun(Run):
+    """An experiment run that uses *algo* to solve *task*."""
+
     def __init__(
         self, exp: Experiment, algo: FastDownwardAlgorithm, task: suites.Problem
     ):

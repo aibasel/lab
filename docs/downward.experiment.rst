@@ -8,6 +8,10 @@
    :undoc-members:
    :inherited-members:
 
+.. autoclass:: downward.experiment.FastDownwardRun
+   :members:
+   :undoc-members:
+
 .. autoclass:: downward.cached_revision.CachedFastDownwardRevision
    :members:
    :undoc-members:
