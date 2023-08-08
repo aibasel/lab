@@ -18,14 +18,14 @@ from lab.experiment import Experiment, get_default_data_dir, Run
 
 
 class FastDownwardAlgorithm:
-    """Data class that holds information about a Fast Downward algorithm."""
+    """Collection of information about a Fast Downward algorithm."""
 
     def __init__(
         self,
         name: str,
         cached_revision: CachedFastDownwardRevision,
-        driver_options: list[str],
-        component_options: list[str],
+        driver_options,
+        component_options,
     ):
         #: Algorithm name, e.g., ``"rev123:astar-lmcut"``.
         self.name = name
