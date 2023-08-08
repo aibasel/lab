@@ -57,6 +57,15 @@ Custom command line arguments
    :exclude-members: build
 
 
+:class:`CachedRevision`
+-----------------------
+
+.. autoclass:: lab.cached_revision.CachedRevision
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+
 .. _parsing:
 
 :class:`Parser`

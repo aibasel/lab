@@ -16,9 +16,44 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, "scripts")
 
 
+class FastDownwardAlgorithm:
+    """Collection of information about a Fast Downward algorithm."""
+
+    def __init__(
+        self,
+        name: str,
+        cached_revision: CachedFastDownwardRevision,
+        driver_options,
+        component_options,
+    ):
+        #: Algorithm name, e.g., ``"rev123:astar-lmcut"``.
+        self.name = name
+        #: An instance of :class:`CachedFastDownwardRevision
+        #: <downward.cached_revision.CachedFastDownwardRevision>`.
+        self.cached_revision = cached_revision
+        #: Driver options, e.g., ``["--build", "debug"]``.
+        self.driver_options = driver_options
+        #: Component options, e.g., ``["--search", "astar(lmcut())"]``.
+        self.component_options = component_options
+
+    def __eq__(self, other):
+        """Return true iff all components (excluding the name) match."""
+        return (
+            self.cached_revision == other.cached_revision
+            and self.driver_options == other.driver_options
+            and self.component_options == other.component_options
+        )
+
+
+# Create alias for backwards compatibility.
+_DownwardAlgorithm = FastDownwardAlgorithm
+
+
 class FastDownwardRun(Run):
-    def __init__(self, exp, algo, task):
-        Run.__init__(self, exp)
+    def __init__(
+        self, exp: Experiment, algo: FastDownwardAlgorithm, task: suites.Problem
+    ):
+        super().__init__(exp)
         self.algo = algo
         self.task = task
 
@@ -28,7 +63,9 @@ class FastDownwardRun(Run):
             self.add_resource("task", self.task.problem_file, "task.sas", symlink=True)
             input_files = ["{task}"]
             # Without PDDL input files, we can't validate the solution.
-            self.driver_options.remove("--validate")
+            self.driver_options = [
+                opt for opt in self.driver_options if opt != "--validate"
+            ]
         else:
             self.add_resource(
                 "domain", self.task.domain_file, "domain.pddl", symlink=True
@@ -66,28 +103,7 @@ class FastDownwardRun(Run):
             self.set_property(key, value)
 
         self.set_property("experiment_name", self.experiment.name)
-
         self.set_property("id", [self.algo.name, self.task.domain, self.task.problem])
-
-
-class _DownwardAlgorithm:
-    def __init__(self, name, cached_revision, driver_options, component_options):
-        self.name = name
-        self.cached_revision = cached_revision
-        self.driver_options = driver_options
-        self.component_options = component_options
-
-    def __eq__(self, other):
-        """Return true iff all components (excluding the name) match."""
-        return (
-            self.cached_revision == other.cached_revision
-            and self.driver_options == other.driver_options
-            and self.component_options == other.component_options
-        )
-
-
-# Make class available under nicer name, but keep old name for backwards compatibility.
-FastDownwardAlgorithm = _DownwardAlgorithm
 
 
 class FastDownwardExperiment(Experiment):
