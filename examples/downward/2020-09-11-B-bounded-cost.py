@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import shutil
 
+import custom_parser
+
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
 from downward.experiment import FastDownwardAlgorithm, FastDownwardRun
@@ -43,9 +45,9 @@ DRIVER_OPTIONS = [
     "--overall-memory-limit",
     "3584M",
 ]
-# Pairs of revision identifier and revision nick.
-REVS = [
-    ("main", "main"),
+# Pairs of revision identifier and optional revision nick.
+REV_NICKS = [
+    ("main", ""),
 ]
 ATTRIBUTES = [
     "error",
@@ -61,7 +63,7 @@ ATTRIBUTES = [
 ]
 
 exp = Experiment(environment=ENV)
-for rev, rev_nick in REVS:
+for rev, rev_nick in REV_NICKS:
     cached_rev = CachedFastDownwardRevision(REVISION_CACHE, REPO, rev, BUILD_OPTIONS)
     cached_rev.cache()
     exp.add_resource("", cached_rev.path, cached_rev.get_relative_exp_path())
@@ -91,11 +93,12 @@ for rev, rev_nick in REVS:
 exp.add_parser(project.FastDownwardExperiment.EXITCODE_PARSER)
 exp.add_parser(project.FastDownwardExperiment.TRANSLATOR_PARSER)
 exp.add_parser(project.FastDownwardExperiment.SINGLE_SEARCH_PARSER)
-exp.add_parser(project.DIR / "parser.py")
+exp.add_parser(custom_parser.get_parser())
 exp.add_parser(project.FastDownwardExperiment.PLANNER_PARSER)
 
 exp.add_step("build", exp.build)
 exp.add_step("start", exp.start_runs)
+exp.add_step("parse", exp.parse)
 exp.add_fetcher(name="fetch")
 
 if not project.REMOTE:

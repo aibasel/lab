@@ -3,6 +3,8 @@
 import os
 import shutil
 
+import custom_parser
+
 import project
 
 
@@ -31,8 +33,8 @@ CONFIGS = [
 ]
 BUILD_OPTIONS = []
 DRIVER_OPTIONS = ["--overall-time-limit", "5m"]
-REVS = [
-    ("main", "main"),
+REV_NICKS = [
+    ("main", ""),
 ]
 ATTRIBUTES = [
     "error",
@@ -49,7 +51,7 @@ ATTRIBUTES = [
 
 exp = project.FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 for config_nick, config in CONFIGS:
-    for rev, rev_nick in REVS:
+    for rev, rev_nick in REV_NICKS:
         algo_name = f"{rev_nick}:{config_nick}" if rev_nick else config_nick
         exp.add_algorithm(
             algo_name,
@@ -64,11 +66,12 @@ exp.add_suite(BENCHMARKS_DIR, SUITE)
 exp.add_parser(exp.EXITCODE_PARSER)
 exp.add_parser(exp.TRANSLATOR_PARSER)
 exp.add_parser(exp.SINGLE_SEARCH_PARSER)
-exp.add_parser(project.DIR / "parser.py")
+exp.add_parser(custom_parser.get_parser())
 exp.add_parser(exp.PLANNER_PARSER)
 
 exp.add_step("build", exp.build)
 exp.add_step("start", exp.start_runs)
+exp.add_step("parse", exp.parse)
 exp.add_fetcher(name="fetch")
 
 if not project.REMOTE:
@@ -81,7 +84,7 @@ project.add_absolute_report(
 
 attributes = ["expansions"]
 pairs = [
-    ("20.06:01-cg", "20.06:02-ff"),
+    ("01-cg", "02-ff"),
 ]
 suffix = "-rel" if project.RELATIVE else ""
 for algo1, algo2 in pairs:

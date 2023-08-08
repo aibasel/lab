@@ -30,7 +30,7 @@ class CommonParser(Parser):
         self.add_function(search_from_bottom, file=file)
 
 
-def main():
+def get_parser():
     parser = CommonParser()
     parser.add_bottom_up_pattern(
         "search_start_time",
@@ -52,8 +52,4 @@ def main():
         r"New best heuristic value for .+: (\d+)\n",
         type=int,
     )
-    parser.parse()
-
-
-if __name__ == "__main__":
-    main()
+    return parser

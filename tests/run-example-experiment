@@ -4,8 +4,10 @@ set -euo pipefail
 
 check () {
     expname="$1"
-    if [[ "${expname}" == *"2020-09-11-"* ]]; then
-        "./${expname}.py" 1 2 3 6
+    if [[ "${expname}" == *"2020-09-11-A-cg-vs-ff" ]]; then
+        "./${expname}.py" 1 2 3 4 7 10
+    elif [[ "${expname}" == *"2020-09-11-B-bounded-cost" ]]; then
+        "./${expname}.py" 1 2 3 4 7
     else
         "./${expname}.py" --all
     fi
