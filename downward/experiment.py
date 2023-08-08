@@ -17,7 +17,10 @@ DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, "scripts")
 
 
 class FastDownwardAlgorithm:
-    """Collection of information about a Fast Downward algorithm."""
+    """
+    A Fast Downward algorithm is the combination of revision, driver options and
+    component options.
+    """
 
     def __init__(
         self,
