@@ -8,7 +8,7 @@ REPO="$( realpath "$DOCS/../" )"
 cd "$REPO/docs"
 
 # Build html documentation.
-make html
+make html || exit 1
 
 # Open documentation in browser.
 xdg-open "$DOCS/_build/html/index.html"
