@@ -571,7 +571,7 @@ class Experiment(_Buildable):
         if not write_to_disk:
             return
 
-        logging.info(f'Experiment path: "{self.path}"')
+        logging.info(f'Experiment path: "{tools.get_relative_path(self.path)}"')
         self._remove_experiment_dir()
         tools.makedirs(self.path)
         self.environment.write_main_script()

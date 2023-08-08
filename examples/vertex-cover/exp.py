@@ -11,6 +11,7 @@ import platform
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.experiment import Experiment
+from lab.parser import Parser
 from lab.reports import Attribute
 
 
@@ -54,12 +55,47 @@ ATTRIBUTES = [
     Attribute("solved", absolute=True),
 ]
 
+"""
+Create parser for the following example solver output:
+
+Algorithm: 2approx
+Cover: set([1, 3, 5, 6, 7, 8, 9])
+Cover size: 7
+Solve time: 0.000771s
+"""
+
+
+def make_parser():
+    def solved(content, props):
+        props["solved"] = int("cover" in props)
+
+    def error(content, props):
+        if props["solved"]:
+            props["error"] = "cover-found"
+        else:
+            props["error"] = "unsolved"
+
+    vc_parser = Parser()
+    vc_parser.add_pattern(
+        "node", r"node: (.+)\n", type=str, file="driver.log", required=True
+    )
+    vc_parser.add_pattern(
+        "solver_exit_code", r"solve exit code: (.+)\n", type=int, file="driver.log"
+    )
+    vc_parser.add_pattern("cover", r"Cover: (\{.*\})", type=str)
+    vc_parser.add_pattern("cover_size", r"Cover size: (\d+)\n", type=int)
+    vc_parser.add_pattern("solve_time", r"Solve time: (.+)s", type=float)
+    vc_parser.add_function(solved)
+    vc_parser.add_function(error)
+    return vc_parser
+
+
 # Create a new experiment.
 exp = Experiment(environment=ENV)
 # Add solver to experiment and make it available to all runs.
 exp.add_resource("solver", os.path.join(SCRIPT_DIR, "solver.py"))
 # Add custom parser.
-exp.add_parser("parser.py")
+exp.add_parser(make_parser())
 
 for algo in ALGORITHMS:
     for task in SUITE:
@@ -93,6 +129,9 @@ exp.add_step("build", exp.build)
 
 # Add step that executes all runs.
 exp.add_step("start", exp.start_runs)
+
+# Add step that parses the logs.
+exp.add_step("parse", exp.parse)
 
 # Add step that collects properties from run directories and
 # writes them to *-eval/properties.
