@@ -43,9 +43,9 @@ DRIVER_OPTIONS = [
     "--overall-memory-limit",
     "3584M",
 ]
-# Pairs of revision identifier and revision nick.
-REVS = [
-    ("main", "main"),
+# Pairs of revision identifier and optional revision nick.
+REV_NICKS = [
+    ("main", ""),
 ]
 ATTRIBUTES = [
     "error",
@@ -61,7 +61,7 @@ ATTRIBUTES = [
 ]
 
 exp = Experiment(environment=ENV)
-for rev, rev_nick in REVS:
+for rev, rev_nick in REV_NICKS:
     cached_rev = CachedFastDownwardRevision(REVISION_CACHE, REPO, rev, BUILD_OPTIONS)
     cached_rev.cache()
     exp.add_resource("", cached_rev.path, cached_rev.get_relative_exp_path())
