@@ -50,30 +50,27 @@ _DownwardAlgorithm = FastDownwardAlgorithm
 
 
 class FastDownwardRun(Run):
-    """An experiment run that uses *algo* to solve *task*."""
+    """An experiment run that uses *algo* to solve *task*.
+
+    See :py:class:`Run <lab.experiment.Run>` for inherited methods.
+
+    """
 
     def __init__(
         self, exp: Experiment, algo: FastDownwardAlgorithm, task: suites.Problem
     ):
         super().__init__(exp)
-        self.algo = algo
-        self.task = task
+        driver_options = algo.driver_options[:]
 
-        self.driver_options = algo.driver_options[:]
-
-        if self.task.domain_file is None:
-            self.add_resource("task", self.task.problem_file, "task.sas", symlink=True)
+        if task.domain_file is None:
+            self.add_resource("task", task.problem_file, "task.sas", symlink=True)
             input_files = ["{task}"]
             # Without PDDL input files, we can't validate the solution.
-            self.driver_options = [
-                opt for opt in self.driver_options if opt != "--validate"
-            ]
+            driver_options = [opt for opt in driver_options if opt != "--validate"]
         else:
+            self.add_resource("domain", task.domain_file, "domain.pddl", symlink=True)
             self.add_resource(
-                "domain", self.task.domain_file, "domain.pddl", symlink=True
-            )
-            self.add_resource(
-                "problem", self.task.problem_file, "problem.pddl", symlink=True
+                "problem", task.problem_file, "problem.pddl", symlink=True
             )
             input_files = ["{domain}", "{problem}"]
 
@@ -85,27 +82,27 @@ class FastDownwardRun(Run):
             "planner",
             [tools.get_python_executable()]
             + [driver]
-            + self.driver_options
+            + driver_options
             + input_files
             + algo.component_options,
         )
 
-        self._set_properties()
+        self._set_properties(algo, driver_options, task)
 
-    def _set_properties(self):
-        self.set_property("algorithm", self.algo.name)
-        self.set_property("repo", self.algo.cached_revision.repo)
-        self.set_property("local_revision", self.algo.cached_revision.local_rev)
-        self.set_property("global_revision", self.algo.cached_revision.global_rev)
-        self.set_property("build_options", self.algo.cached_revision.build_options)
-        self.set_property("driver_options", self.driver_options)
-        self.set_property("component_options", self.algo.component_options)
+    def _set_properties(self, algo, driver_options, task):
+        self.set_property("algorithm", algo.name)
+        self.set_property("repo", algo.cached_revision.repo)
+        self.set_property("local_revision", algo.cached_revision.local_rev)
+        self.set_property("global_revision", algo.cached_revision.global_rev)
+        self.set_property("build_options", algo.cached_revision.build_options)
+        self.set_property("driver_options", driver_options)
+        self.set_property("component_options", algo.component_options)
 
-        for key, value in self.task.properties.items():
+        for key, value in task.properties.items():
             self.set_property(key, value)
 
         self.set_property("experiment_name", self.experiment.name)
-        self.set_property("id", [self.algo.name, self.task.domain, self.task.problem])
+        self.set_property("id", [algo.name, task.domain, task.problem])
 
 
 class FastDownwardExperiment(Experiment):
