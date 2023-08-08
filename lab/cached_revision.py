@@ -86,7 +86,7 @@ class CachedRevision:
         ...     # cr.cache()  # Uncomment to actually cache the code.
         ...
 
-        You can now copy the cached repo to your experiment:
+        You can now copy the cached repo to your experiment::
 
         ...     from lab.experiment import Experiment
         ...     exp = Experiment()
@@ -119,6 +119,7 @@ class CachedRevision:
         return f"{self.global_rev}_{options_hash}"
 
     def cache(self):
+        """Check out the solver revision to *self.path* and compile the solver."""
         if os.path.exists(self.path):
             logging.info(f'Revision is already cached: "{self.path}"')
             if not os.path.exists(self._get_sentinel_file()):
@@ -169,4 +170,10 @@ class CachedRevision:
         pass
 
     def get_relative_exp_path(self, relpath=""):
+        """Return a path relative to the experiment directory.
+
+        Use this function to find out where files from the cache will be put in
+        the experiment directory.
+
+        """
         return os.path.join(f"code-{self.name}", relpath)
