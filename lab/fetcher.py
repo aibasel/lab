@@ -1,17 +1,17 @@
-from glob import glob
 import logging
-import os
+from pathlib import Path
 import sys
 
 from lab import tools
 import lab.experiment
 
 
-def _check_eval_dir(eval_dir):
-    if os.path.exists(eval_dir):
+def _check_eval_dir(eval_dir: Path):
+    if eval_dir.exists():
         answer = (
             input(
-                f"{eval_dir} already exists. Do you want to (o)verwrite it, "
+                f"{tools.get_relative_path(eval_dir)} already exists. "
+                f"Do you want to (o)verwrite it, "
                 f"(m)erge the results, or (c)ancel? "
             )
             .strip()
@@ -44,33 +44,30 @@ class Fetcher:
     """
 
     def fetch_dir(self, run_dir):
+        """Combine "static-properties" and "properties" from a run dir and return it."""
+        run_dir = Path(run_dir)
         static_props = tools.Properties(
-            filename=os.path.join(
-                run_dir, lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
-            )
+            filename=run_dir / lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
         )
-        dynamic_props = tools.Properties(filename=os.path.join(run_dir, "properties"))
+        dynamic_props = tools.Properties(filename=run_dir / "properties")
 
         props = tools.Properties()
         props.update(static_props)
         props.update(dynamic_props)
 
-        driver_log = os.path.join(run_dir, "driver.log")
-        if not os.path.exists(driver_log):
+        driver_log = run_dir / "driver.log"
+        if not driver_log.exists():
             props.add_unexplained_error(
                 "driver.log is missing. Probably the run was never started."
             )
 
-        driver_err = os.path.join(run_dir, "driver.err")
-        run_err = os.path.join(run_dir, "run.err")
+        driver_err = run_dir / "driver.err"
+        run_err = run_dir / "run.err"
         for logfile in [driver_err, run_err]:
-            if os.path.exists(logfile):
-                with open(logfile) as f:
-                    content = f.read()
+            if logfile.exists():
+                content = logfile.read_text()
                 if content:
-                    props.add_unexplained_error(
-                        f"{os.path.basename(logfile)}: {content}"
-                    )
+                    props.add_unexplained_error(f"{logfile.name}: {content}")
         return props
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None, **kwargs):
@@ -86,12 +83,17 @@ class Fetcher:
         description of the parameters.
 
         """
-        if not os.path.isdir(src_dir):
+        src_dir = Path(src_dir)
+        if not src_dir.is_dir():
             logging.critical(f"{src_dir} is missing or not a directory")
         run_filter = tools.RunFilter(filter, **kwargs)
 
-        eval_dir = eval_dir or src_dir.rstrip("/") + "-eval"
-        logging.info(f"Fetching properties from {src_dir} to {eval_dir}")
+        eval_dir = eval_dir or str(src_dir).rstrip("/") + "-eval"
+        eval_dir = Path(eval_dir)
+        logging.info(
+            f"Fetching properties from {tools.get_relative_path(src_dir)} "
+            f"to {tools.get_relative_path(eval_dir)}"
+        )
 
         if merge is None:
             _check_eval_dir(eval_dir)
@@ -102,12 +104,10 @@ class Fetcher:
             tools.remove_path(eval_dir)
 
         # Load properties in the eval_dir if there are any already.
-        combined_props = tools.Properties(os.path.join(eval_dir, "properties"))
-        fetch_from_eval_dir = not os.path.exists(
-            os.path.join(src_dir, "runs-00001-00100")
-        )
+        combined_props = tools.Properties(eval_dir / "properties")
+        fetch_from_eval_dir = not (src_dir / "runs-00001-00100").is_dir()
         if fetch_from_eval_dir:
-            src_path = os.path.join(src_dir, "properties")
+            src_path = src_dir / "properties"
             src_props = tools.Properties(filename=src_path)
             if not src_props:
                 logging.critical(f"No properties found in {src_dir}")
@@ -124,17 +124,19 @@ class Fetcher:
                 logging.error("There was output to *-grid-steps/slurm.err")
 
             new_props = tools.Properties()
-            run_dirs = sorted(glob(os.path.join(src_dir, "runs-*-*", "*")))
-            total_dirs = len(run_dirs)
-            logging.info(f"Scanning properties from {total_dirs:d} run directories")
+            run_dirs = sorted(src_dir.glob("runs-*-*/*"))
+            num_dirs = len(run_dirs)
+            logging.info(f"Collecting properties from {num_dirs:d} run directories")
             for index, run_dir in enumerate(run_dirs, start=1):
-                loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(loglevel, f"Scanning: {index:6d}/{total_dirs:d}")
                 props = self.fetch_dir(run_dir)
                 if slurm_err_content:
                     props.add_unexplained_error("output-to-slurm.err")
                 id_string = "-".join(props["id"])
                 new_props[id_string] = props
+                loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
+                logging.log(
+                    loglevel, f"Collected {index:6d}/{num_dirs} properties files"
+                )
             run_filter.apply(new_props)
             combined_props.update(new_props)
 
