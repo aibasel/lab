@@ -1,21 +1,28 @@
 #! /usr/bin/env python
 
 """
-Example experiment for running Singularity planner images.
+Example experiment for running Singularity/Apptainer planner images.
 
-The time and memory limits set with Lab can be circumvented by solvers
-that fork child processes. Their resource usage is not checked. If you're
-running solvers that don't check their resource usage like Fast Downward,
-we recommend using cgroups or the "runsolver" tool to enforce resource
-limits. Since setting time limits for solvers with cgroups is difficult,
-the experiment below uses the "runsolver" tool, which has been used in
-multiple SAT competitions to enforce resource limits. For the experiment
-to run, the runsolver binary needs to be on the PATH. You can obtain a
-runsolver copy from https://github.com/jendrikseipp/runsolver.
+The time and memory limits set with Lab can be circumvented by solvers that fork
+child processes. Their resource usage is not checked. If you're running solvers
+that don't check their resource usage like Fast Downward, we recommend using
+cgroups or the "runsolver" tool to enforce resource limits. Since setting time
+limits for solvers with cgroups is difficult, the experiment below uses the
+``runsolver`` tool, which has been used in multiple SAT competitions to enforce
+resource limits. For the experiment to run, the runsolver binary needs to be on
+the PATH. You can obtain a runsolver copy from
+https://github.com/jendrikseipp/runsolver.
 
-A note on running Singularity on clusters: reading large Singularity files
-over the network is not optimal, so we recommend copying the images to a
-local filesystem (e.g., /tmp/) before running experiments.
+Since Singularity (and Apptainer) reserve 1-2 GiB of *virtual* memory when
+starting the container, we recommend either enforcing a higher virtual memory
+limit with ``runsolver`` or limiting RSS memory with ``runsolver`` (like below).
+For limiting RSS memory, you can also use `runlim
+<https://github.com/arminbiere/runlim>`_, which is more actively maintained than
+runsolver.
+
+A note on running Singularity on clusters: reading large Singularity files over
+the network is not optimal, so we recommend copying the images to a local
+filesystem (e.g., /tmp/) before running experiments.
 """
 
 import os
@@ -116,13 +123,13 @@ for planner, _ in IMAGES:
             "run-planner",
             [
                 "runsolver",
-                "-C",
+                "--cpu-limit",
                 TIME_LIMIT,
-                "-V",
+                "--rss-swap-limit",
                 MEMORY_LIMIT,
-                "-w",
+                "--watcher-data",
                 "watch.log",
-                "-v",
+                "--var",
                 "values.log",
                 "{run_singularity}",
                 f"{{{planner}}}",

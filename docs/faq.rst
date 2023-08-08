@@ -38,7 +38,7 @@ again as above.
 I forgot to parse something. How can I run only the parsers again?
 ------------------------------------------------------------------
 
-Now that parsing is done in its own experiment step, simply consult `parsing
+Now that parsing is done in its own experiment step, simply consult the `parsing
 documentation <lab.parser.html>`_ for how to amend your parsers and then run the
 "parse" experiment step again with ::
 
