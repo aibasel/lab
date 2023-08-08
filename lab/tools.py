@@ -53,6 +53,17 @@ def get_lab_path():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def get_relative_path(dest):
+    """
+    Get relative path from cwd to *dest*.
+
+    Return *dest* unchanged if it's not below cwd."""
+    try:
+        return Path(dest).relative_to(Path.cwd())
+    except ValueError:
+        return dest
+
+
 def get_python_executable():
     return sys.executable or "python"
 
@@ -151,7 +162,10 @@ def confirm_or_abort(question):
 
 
 def confirm_overwrite_or_abort(path):
-    confirm_or_abort(f'The path "{path}" already exists. Do you want to overwrite it?')
+    confirm_or_abort(
+        f'The path "{get_relative_path(path)}" already exists. '
+        f"Do you want to overwrite it?"
+    )
 
 
 def remove_path(path):
@@ -519,7 +533,7 @@ def get_unexplained_errors_message(run):
 
 
 def get_slurm_err_content(src_dir):
-    grid_steps_dir = src_dir.rstrip("/") + "-grid-steps"
+    grid_steps_dir = str(src_dir).rstrip("/") + "-grid-steps"
     slurm_err_filename = os.path.join(grid_steps_dir, "slurm.err")
     with open(slurm_err_filename) as f:
         return f.read()
