@@ -27,5 +27,5 @@ Downward experiments, we recommend taking a look at the
 
 Here is a simple parser for FF:
 
-.. literalinclude:: ../examples/ff/ff-parser.py
+.. literalinclude:: ../examples/ff/ff_parser.py
    :caption:

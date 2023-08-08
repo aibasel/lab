@@ -11,7 +11,7 @@ Downward Lab.
 
 The experiment script needs a parser and a helper script:
 
-.. literalinclude:: ../examples/singularity/singularity-parser.py
+.. literalinclude:: ../examples/singularity/singularity_parser.py
    :caption:
 
 .. literalinclude:: ../examples/singularity/run-singularity.sh

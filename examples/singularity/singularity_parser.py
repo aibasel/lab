@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 import re
 import sys
 
@@ -71,8 +69,7 @@ def set_outcome(content, props):
         props["error"] = "unexpected-error"
 
 
-def main():
-    print("Running singularity parser")
+def get_parser():
     parser = Parser()
     parser.add_pattern(
         "planner_exit_code",
@@ -113,8 +110,4 @@ def main():
     parser.add_function(unsolvable)
     parser.add_function(parse_g_value_over_time)
     parser.add_function(set_outcome, file="values.log")
-    parser.parse()
-
-
-if __name__ == "__main__":
-    main()
+    return parser

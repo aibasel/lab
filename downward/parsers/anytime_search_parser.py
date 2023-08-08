@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """
 Parse anytime-search runs of Fast Downward. This includes iterated
 searches and portfolios.

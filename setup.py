@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 from lab import __version__ as version
 
@@ -8,7 +8,7 @@ from lab import __version__ as version
 with open("README.rst") as f1, open("INSTALL.rst") as f2:
     long_description = f1.read() + "\n\n" + f2.read()
 
-
+print(find_packages("."))
 setup(
     name="lab",
     version=version.rstrip("+"),
@@ -20,8 +20,8 @@ setup(
     author_email="jendrikseipp@gmail.com",
     url="https://github.com/aibasel/lab",
     license="GPL3+",
-    packages=["downward", "downward.reports", "lab", "lab.calls", "lab.reports"],
-    package_data={"downward": ["scripts/*.py"], "lab": ["data/*", "scripts/*.py"]},
+    packages=find_packages("."),
+    package_data={"lab": ["data/*", "scripts/*.py"]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",

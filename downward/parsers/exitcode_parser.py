@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """
 Parse Fast Downward exit code and store a message describing the outcome
 in the "error" attribute.

@@ -23,6 +23,8 @@ from pathlib import Path
 import platform
 import sys
 
+from singularity_parser import get_parser
+
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
@@ -81,8 +83,9 @@ ATTRIBUTES = [
 exp = Experiment(environment=ENVIRONMENT)
 exp.add_step("build", exp.build)
 exp.add_step("start", exp.start_runs)
+exp.add_step("parse", exp.parse)
 exp.add_fetcher(name="fetch")
-exp.add_parser(DIR / "singularity-parser.py")
+exp.add_parser(get_parser())
 
 
 def get_image(name):

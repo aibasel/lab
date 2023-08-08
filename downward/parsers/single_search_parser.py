@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """
 Regular expressions and functions for parsing single-search runs of Fast Downward.
 """
