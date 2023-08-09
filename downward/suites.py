@@ -1,9 +1,9 @@
-import os
+from pathlib import Path
 
 from lab import tools
 
 
-def find_domain_file(benchmarks_dir, domain, problem):
+def find_domain_file(benchmarks_dir, domain: str, problem: str):
     """Search for domain file in the directory *benchmarks_dir*/*domain*.
 
     For a given problem filename "<taskname>.<ext>", check the following
@@ -14,7 +14,8 @@ def find_domain_file(benchmarks_dir, domain, problem):
     and psr-small domains, where problem file names are p01-xxx.pddl and
     domain file names are p01-domain.pddl.
     """
-    problem_root, ext = os.path.splitext(problem)
+    problem_root = Path(problem).stem
+    ext = Path(problem).suffix
     domain_basenames = [
         "domain.pddl",
         problem_root + "-domain" + ext,
@@ -22,33 +23,31 @@ def find_domain_file(benchmarks_dir, domain, problem):
         "domain_" + problem,
         "domain-" + problem,
     ]
-    domain_dir = os.path.join(benchmarks_dir, domain)
+    domain_dir = Path(benchmarks_dir) / domain
     return tools.find_file(domain_basenames, domain_dir)
 
 
-def get_problem(benchmarks_dir, domain_name, problem_name):
-    problem_file = os.path.join(benchmarks_dir, domain_name, problem_name)
+def get_task(benchmarks_dir, domain: str, problem: str):
+    problem_file = Path(benchmarks_dir) / domain / problem
     domain_file = None
-    if problem_file.endswith(".pddl"):
-        domain_file = find_domain_file(benchmarks_dir, domain_name, problem_name)
-    return Problem(
-        domain_name, problem_name, problem_file=problem_file, domain_file=domain_file
-    )
+    if problem_file.suffix == ".pddl":
+        domain_file = find_domain_file(benchmarks_dir, domain, problem)
+    return Task(domain, problem, problem_file=problem_file, domain_file=domain_file)
 
 
 class Domain:
-    def __init__(self, benchmarks_dir, domain):
+    def __init__(self, benchmarks_dir, domain: str):
         self.domain = domain
-        directory = os.path.join(benchmarks_dir, domain)
+        directory = Path(benchmarks_dir) / domain
         problem_files = tools.natural_sort(
             [
-                p
-                for p in os.listdir(directory)
-                if "domain" not in p and p.endswith((".pddl", ".sas"))
+                p.name
+                for p in directory.iterdir()
+                if "domain" not in p.name and p.suffix in {".pddl", ".sas"}
             ]
         )
         self.problems = [
-            get_problem(benchmarks_dir, domain, problem) for problem in problem_files
+            get_task(benchmarks_dir, domain, problem) for problem in problem_files
         ]
 
     def __str__(self):
@@ -67,9 +66,9 @@ class Domain:
         return iter(self.problems)
 
 
-class Problem:
+class Task:
     def __init__(
-        self, domain, problem, problem_file, domain_file=None, properties=None
+        self, domain: str, problem: str, problem_file, domain_file=None, properties=None
     ):
         """
         *domain* and *problem* are the display names of the domain and
@@ -81,17 +80,13 @@ class Problem:
         added to the properties file of each run that uses this
         problem. ::
 
-            suite = [
-                Problem('gripper-original', 'prob01.pddl',
-                    problem_file='/path/to/original/problem.pddl',
-                    domain_file='/path/to/original/domain.pddl',
-                    properties={'relaxed': False}),
-                Problem('gripper-relaxed', 'prob01.pddl',
-                    problem_file='/path/to/relaxed/problem.pddl',
-                    domain_file='/path/to/relaxed/domain.pddl',
-                    properties={'relaxed': True}),
-                Problem('gripper', 'prob01.pddl', '/path/to/prob01.pddl')
-            ]
+            >>> task = Task(
+            ...     "gripper",
+            ...     "p01.pddl",
+            ...     problem_file="/path/to/prob01.pddl",
+            ...     domain_file="/path/to/domain.pddl",
+            ...     properties={"relaxed": False},
+            ... )
         """
         self.domain = domain
         self.problem = problem
@@ -104,8 +99,8 @@ class Problem:
 
     def __str__(self):
         return (
-            f"<Problem {self.domain}({self.domain_file}):{self.problem}"
-            f"({self.problem_file}):{self.properties}>"
+            f"<Task {self.domain}({self.domain_file}):{self.problem}"
+            f"({self.problem_file}) {self.properties}>"
         )
 
 
@@ -114,19 +109,22 @@ def _generate_problems(benchmarks_dir, description):
     Descriptions are either domains (e.g., "gripper") or problems
     (e.g., "gripper:prob01.pddl").
     """
-    if isinstance(description, Problem):
+    if isinstance(description, Task):
         yield description
     elif isinstance(description, Domain):
         yield from description
     elif ":" in description:
         domain_name, problem_name = description.split(":", 1)
-        yield get_problem(benchmarks_dir, domain_name, problem_name)
+        yield get_task(benchmarks_dir, domain_name, problem_name)
     else:
         yield from Domain(benchmarks_dir, description)
 
 
 def build_suite(benchmarks_dir, descriptions):
-    """
+    """Compute a list of :class:`Task <downward.suites.Task>` objects.
+
+    The path *benchmarks_dir* must contain a subdir for each domain.
+
     *descriptions* must be a list of domain or problem descriptions::
 
         build_suite(benchmarks_dir, ["gripper", "grid:prob01.pddl"])

@@ -8,12 +8,13 @@ Lab
 ^^^
 * Require *revision_cache* parameter in :class:`CachedRevision <lab.cached_revision.CachedRevision>` constructor (Jendrik Seipp).
 * Add *subdir* option for :class:`CachedRevision <lab.cached_revision.CachedRevision>` to support solvers residing in monolithic repos (Jendrik Seipp).
-* Add :meth:`CachedRevision.get_relative_exp_path() <lab.cached_revision.CachedRevision.get_relative_exp_path>` method (Jendrik Seipp).
+* Add :meth:`CachedRevision.get_relative_exp_path() <lab.cached_revision.CachedRevision.get_relative_exp_path>` method to query where cache artefacts will land (Jendrik Seipp).
+* Document :class:`CachedRevision <lab.cached_revision.CachedRevision>` class (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
 * Add *subdir* option for :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` to support nested Fast Downward repos (Jendrik Seipp).
-* Make ``_DownwardAlgorithm`` available as :class:`FastDownwardAlgorithm <downward.experiment.FastDownwardAlgorithm>` (Jendrik Seipp).
+* Document :class:`FastDownwardAlgorithm <downward.experiment.FastDownwardAlgorithm>`, :class:`FastDownwardRun <downward.experiment.FastDownwardRun>`and :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` classes (Jendrik Seipp).
 
 
 v7.3 (2023-03-03)

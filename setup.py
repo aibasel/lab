@@ -8,7 +8,7 @@ from lab import __version__ as version
 with open("README.rst") as f1, open("INSTALL.rst") as f2:
     long_description = f1.read() + "\n\n" + f2.read()
 
-print(find_packages("."))
+
 setup(
     name="lab",
     version=version.rstrip("+"),
