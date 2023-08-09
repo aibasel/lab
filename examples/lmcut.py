@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 
-"""Solve some tasks with A* and the LM-Cut heuristic."""
+"""Basic experiment that solves some tasks with A* and the LM-Cut heuristic.
+
+For more realistic Fast Downward experiments, see the ``examples/downward``
+directory.
+"""
 
 import os
 import os.path
