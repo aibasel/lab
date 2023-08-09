@@ -43,7 +43,7 @@ dependencies between the parsers.
    :inherited-members:
 
 :mod:`downward.suites` --- Select benchmarks
-============================================
+--------------------------------------------
 
 .. autoclass:: downward.suites.Task
    :members:
