@@ -3,26 +3,12 @@
 .. autoclass:: downward.experiment.FastDownwardExperiment
    :members: add_algorithm, add_suite
 
-.. autoclass:: downward.experiment.FastDownwardAlgorithm
-   :members:
-   :undoc-members:
-   :inherited-members:
-
-.. autoclass:: downward.experiment.FastDownwardRun
-   :members:
-   :undoc-members:
-
-.. autoclass:: downward.cached_revision.CachedFastDownwardRevision
-   :members:
-   :undoc-members:
-   :inherited-members:
-
 .. _downward-parsers:
 
-Built-in parsers
-----------------
+Bundled parsers
+---------------
 
-The following constants are paths to built-in parsers that can be passed
+The following constants are paths to default parsers that can be passed
 to :meth:`exp.add_parser() <lab.experiment.Experiment.add_parser>`. The
 "Used attributes" and "Parsed attributes" lists describe the
 dependencies between the parsers.
@@ -41,3 +27,26 @@ dependencies between the parsers.
 
 .. autoattribute:: downward.experiment.FastDownwardExperiment.PLANNER_PARSER
    :annotation:
+
+.. autoclass:: downward.experiment.FastDownwardAlgorithm
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+.. autoclass:: downward.experiment.FastDownwardRun
+   :members:
+   :undoc-members:
+
+.. autoclass:: downward.cached_revision.CachedFastDownwardRevision
+   :members:
+   :undoc-members:
+   :inherited-members:
+
+:mod:`downward.suites` --- Select benchmarks
+============================================
+
+.. autoclass:: downward.suites.Task
+   :members:
+   :undoc-members:
+
+.. autofunction:: downward.suites.build_suite
