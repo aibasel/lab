@@ -5,6 +5,7 @@ A module for running Fast Downward experiments.
 from collections import defaultdict, OrderedDict
 import logging
 import os.path
+from pathlib import Path
 
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
@@ -59,9 +60,7 @@ class FastDownwardRun(Run):
 
     """
 
-    def __init__(
-        self, exp: Experiment, algo: FastDownwardAlgorithm, task: suites.Problem
-    ):
+    def __init__(self, exp: Experiment, algo: FastDownwardAlgorithm, task: suites.Task):
         super().__init__(exp)
         driver_options = algo.driver_options[:]
 
@@ -226,8 +225,8 @@ class FastDownwardExperiment(Experiment):
         """
         if isinstance(suite, str):
             suite = [suite]
-        benchmarks_dir = os.path.abspath(benchmarks_dir)
-        if not os.path.exists(benchmarks_dir):
+        benchmarks_dir = Path(benchmarks_dir).resolve()
+        if not benchmarks_dir.is_dir():
             logging.critical(f"Benchmarks directory {benchmarks_dir} not found.")
         self._suites[benchmarks_dir].extend(suite)
 
@@ -344,12 +343,12 @@ class FastDownwardExperiment(Experiment):
         if not self._algorithms:
             logging.critical("You must add at least one algorithm.")
 
-        # We convert the problems in suites to strings to avoid errors when converting
-        # properties to JSON later. The clean but more complex solution would be to add
-        # a method to the JSONEncoder that recognizes and correctly serializes the class
-        # Problem.
+        # We convert the problems in suites to strings to avoid errors when
+        # converting properties to JSON later. The clean but more complex
+        # solution would be to add a method to the JSONEncoder that recognizes
+        # and correctly serializes the Path and Task classes.
         serialized_suites = {
-            benchmarks_dir: [str(problem) for problem in benchmarks]
+            str(benchmarks_dir): [str(problem) for problem in benchmarks]
             for benchmarks_dir, benchmarks in self._suites.items()
         }
         self.set_property("suite", serialized_suites)
