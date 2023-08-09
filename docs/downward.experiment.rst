@@ -4,7 +4,7 @@
 .. note::
 
    The :class:`FastDownwardExperiment
-   <downward.experiment.FastDownwardExperiment>` class makes it simply to write
+   <downward.experiment.FastDownwardExperiment>` class makes it easy to write
    "standard" experiments, but it assumes a rigid experiment structure: it only
    allows you to run each added algorithm on each added task, and individual
    runs cannot easily be customized. If you need more flexibility, you can use
