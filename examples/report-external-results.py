@@ -15,10 +15,9 @@ the attribute names and values that you want to make reports for, e.g.
 """
 
 import json
-import os.path
+from pathlib import Path
 
 from downward.reports.absolute import AbsoluteReport
-from lab import tools
 from lab.experiment import Experiment
 
 
@@ -41,8 +40,9 @@ PROPERTIES = {
 
 
 def write_properties(eval_dir):
-    tools.makedirs(eval_dir)
-    with open(os.path.join(eval_dir, "properties"), "w") as f:
+    eval_dir = Path(eval_dir)
+    eval_dir.mkdir(parents=True, exist_ok=True)
+    with open(eval_dir / "properties", "w") as f:
         json.dump(PROPERTIES, f)
 
 
