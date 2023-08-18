@@ -2,13 +2,12 @@
 
 import json
 import os
-from pathlib import Path
 import shutil
 
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
 from downward.experiment import FastDownwardAlgorithm, FastDownwardRun
-from lab.experiment import Experiment, get_default_data_dir
+from lab.experiment import Experiment
 
 import project
 
@@ -19,10 +18,8 @@ SCP_LOGIN = "myname@myserver.com"
 REMOTE_REPOS_DIR = "/infai/seipp/projects"
 BOUNDS_FILE = "bounds.json"
 SUITE = ["depot:p01.pddl", "grid:prob01.pddl", "gripper:prob01.pddl"]
-try:
-    REVISION_CACHE = Path(os.environ["DOWNWARD_REVISION_CACHE"])
-except KeyError:
-    REVISION_CACHE = Path(get_default_data_dir()) / "revision-cache"
+# If REVISION_CACHE is None, the default "./data/revision-cache/" is used.
+REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
 if project.REMOTE:
     # ENV = project.BaselSlurmEnvironment(email="my.name@myhost.ch")
     ENV = project.TetralithEnvironment(

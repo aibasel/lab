@@ -29,7 +29,7 @@ else:
 # Use path to your Fast Downward repository.
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
-# If REVISION_CACHE is None, the default ./data/revision-cache is used.
+# If REVISION_CACHE is None, the default "./data/revision-cache/" is used.
 REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
 REV = "main"
 
