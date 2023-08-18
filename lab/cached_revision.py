@@ -46,15 +46,7 @@ def _compute_md5_hash(mylist):
 
 
 class CachedRevision:
-    """This class represents checkouts of a solver.
-
-    It provides methods for compiling and caching given revisions.
-
-    .. warning::
-
-        The API for this class is experimental and subject to change.
-        Feedback is welcome!
-    """
+    """Cache compiled revisions of a solver for quick reuse."""
 
     def __init__(self, revision_cache, repo, rev, build_cmd, exclude=None, subdir=""):
         """

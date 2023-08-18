@@ -7,12 +7,8 @@ from lab.cached_revision import CachedRevision
 class CachedFastDownwardRevision(CachedRevision):
     """This class represents Fast Downward checkouts.
 
-    It provides methods for caching and compiling given revisions.
-
-    .. warning::
-
-        The API for this class is experimental and subject to change.
-        Feedback is welcome!
+    It provides methods for caching compiled revisions, so they can be reused
+    quickly in different experiments.
 
     """
 
