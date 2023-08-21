@@ -136,7 +136,7 @@ class _Buildable:
         Example::
 
         >>> exp = Experiment()
-        >>> exp.add_resource("planner", "path/to/planner")
+        >>> exp.add_resource("planner", "path/to/my-planner")
 
         includes my-planner in the experiment directory. You can use
         ``{planner}`` to reference my-planner in a run's commands::
@@ -611,7 +611,7 @@ class Experiment(_Buildable):
         if not write_to_disk:
             return
 
-        logging.info(f'Experiment path: "{self.path}"')
+        logging.info(f'Experiment path: "{tools.get_relative_path(self.path)}"')
         self._remove_experiment_dir()
         tools.makedirs(self.path)
 

@@ -64,7 +64,7 @@ How can I make reports and plots for results obtained without Lab?
 ------------------------------------------------------------------
 
 See `report-external-results.py
-<https://github.com/aibasel/lab/blob/master/examples/report-external-results.py>`_
+<https://github.com/aibasel/lab/blob/main/examples/report-external-results.py>`_
 for an example.
 
 
@@ -82,7 +82,7 @@ How can I contribute to Lab?
 
 If you'd like to contribute a feature or a bugfix to Lab or Downward Lab,
 please see `CONTRIBUTING.md
-<https://github.com/aibasel/lab/blob/master/CONTRIBUTING.md>`_.
+<https://github.com/aibasel/lab/blob/main/CONTRIBUTING.md>`_.
 
 
 How can I customize Lab?

@@ -10,7 +10,7 @@ REPO = project.get_repo_base()
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 SCP_LOGIN = "myname@myserver.com"
 REMOTE_REPOS_DIR = "/infai/seipp/projects"
-# If REVISION_CACHE is None, the default ./data/revision-cache is used.
+# If REVISION_CACHE is None, the default "./data/revision-cache/" is used.
 REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
 if project.REMOTE:
     SUITE = project.SUITE_SATISFICING
@@ -31,8 +31,8 @@ CONFIGS = [
 ]
 BUILD_OPTIONS = []
 DRIVER_OPTIONS = ["--overall-time-limit", "5m"]
-REVS = [
-    ("main", "main"),
+REV_NICKS = [
+    ("main", ""),
 ]
 ATTRIBUTES = [
     "error",
@@ -49,7 +49,7 @@ ATTRIBUTES = [
 
 exp = project.FastDownwardExperiment(environment=ENV, revision_cache=REVISION_CACHE)
 for config_nick, config in CONFIGS:
-    for rev, rev_nick in REVS:
+    for rev, rev_nick in REV_NICKS:
         algo_name = f"{rev_nick}:{config_nick}" if rev_nick else config_nick
         exp.add_algorithm(
             algo_name,
@@ -81,7 +81,7 @@ project.add_absolute_report(
 
 attributes = ["expansions"]
 pairs = [
-    ("20.06:01-cg", "20.06:02-ff"),
+    ("01-cg", "02-ff"),
 ]
 suffix = "-rel" if project.RELATIVE else ""
 for algo1, algo2 in pairs:

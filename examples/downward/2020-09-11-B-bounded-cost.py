@@ -2,17 +2,12 @@
 
 import json
 import os
-from pathlib import Path
 import shutil
 
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
-from downward.experiment import (
-    _DownwardAlgorithm,
-    _get_solver_resource_name,
-    FastDownwardRun,
-)
-from lab.experiment import Experiment, get_default_data_dir
+from downward.experiment import FastDownwardAlgorithm, FastDownwardRun
+from lab.experiment import Experiment
 
 import project
 
@@ -23,10 +18,8 @@ SCP_LOGIN = "myname@myserver.com"
 REMOTE_REPOS_DIR = "/infai/seipp/projects"
 BOUNDS_FILE = "bounds.json"
 SUITE = ["depot:p01.pddl", "grid:prob01.pddl", "gripper:prob01.pddl"]
-try:
-    REVISION_CACHE = Path(os.environ["DOWNWARD_REVISION_CACHE"])
-except KeyError:
-    REVISION_CACHE = Path(get_default_data_dir()) / "revision-cache"
+# If REVISION_CACHE is None, the default "./data/revision-cache/" is used.
+REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
 if project.REMOTE:
     # ENV = project.BaselSlurmEnvironment(email="my.name@myhost.ch")
     ENV = project.TetralithEnvironment(
@@ -47,9 +40,9 @@ DRIVER_OPTIONS = [
     "--overall-memory-limit",
     "3584M",
 ]
-# Pairs of revision identifier and revision nick.
-REVS = [
-    ("main", "main"),
+# Pairs of revision identifier and optional revision nick.
+REV_NICKS = [
+    ("main", ""),
 ]
 ATTRIBUTES = [
     "error",
@@ -65,18 +58,10 @@ ATTRIBUTES = [
 ]
 
 exp = Experiment(environment=ENV)
-for rev, rev_nick in REVS:
-    cached_rev = CachedFastDownwardRevision(REPO, rev, BUILD_OPTIONS)
-    cached_rev.cache(REVISION_CACHE)
-    cache_path = REVISION_CACHE / cached_rev.name
-    dest_path = Path(f"code-{cached_rev.name}")
-    exp.add_resource("", cache_path, dest_path)
-    # Overwrite the script to set an environment variable.
-    exp.add_resource(
-        _get_solver_resource_name(cached_rev),
-        cache_path / "fast-downward.py",
-        dest_path / "fast-downward.py",
-    )
+for rev, rev_nick in REV_NICKS:
+    cached_rev = CachedFastDownwardRevision(REVISION_CACHE, REPO, rev, BUILD_OPTIONS)
+    cached_rev.cache()
+    exp.add_resource("", cached_rev.path, cached_rev.get_relative_exp_path())
     for config_nick, config in CONFIGS:
         algo_name = f"{rev_nick}-{config_nick}" if rev_nick else config_nick
 
@@ -91,7 +76,7 @@ for rev, rev_nick in REVS:
             config_with_bound[-1] = config_with_bound[-1].replace(
                 "bound=BOUND", f"bound={upper_bound}"
             )
-            algo = _DownwardAlgorithm(
+            algo = FastDownwardAlgorithm(
                 algo_name,
                 cached_rev,
                 DRIVER_OPTIONS,

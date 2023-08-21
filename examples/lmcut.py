@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 
-"""Solve some tasks with A* and the LM-Cut heuristic."""
+"""Basic experiment that solves some tasks with A* and the LM-Cut heuristic.
+
+For more realistic Fast Downward experiments, see the ``examples/downward``
+directory.
+"""
 
 import os
 import os.path
@@ -25,7 +29,7 @@ else:
 # Use path to your Fast Downward repository.
 REPO = os.environ["DOWNWARD_REPO"]
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
-# If REVISION_CACHE is None, the default ./data/revision-cache is used.
+# If REVISION_CACHE is None, the default "./data/revision-cache/" is used.
 REVISION_CACHE = os.environ.get("DOWNWARD_REVISION_CACHE")
 REV = "main"
 

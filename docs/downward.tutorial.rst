@@ -121,13 +121,12 @@ directories containing a ``.venv`` subdirectory.
 Run tutorial experiment
 -----------------------
 
-The files below are an experiment script for the example experiment, a
-``project.py`` module that bundles common functionality for all
-experiments related to the project, a parser script, and a script for
-collecting results and making reports. You can use the files as a basis
-for your own experiments. They are available in the `Lab repo
-<https://github.com/aibasel/lab/tree/master/examples/downward>`_. Copy the
-files into ``experiments/cg-vs-ff``.
+The files below are two experiment scripts, a ``project.py`` module that bundles
+common functionality for all experiments related to the project, a parser
+script, and a script for collecting results and making reports. You can use the
+files as a basis for your own experiments. They are available in the `Lab repo
+<https://github.com/aibasel/lab/tree/main/examples/downward>`_. Copy the files
+into ``experiments/my-exp-dir``.
 
 .. highlight:: bash
 
@@ -147,9 +146,26 @@ Run individual steps with ::
     ./2020-09-11-A-cg-vs-ff.py 2
     ./2020-09-11-A-cg-vs-ff.py 3 6 7
 
+The ``2020-09-11-A-cg-vs-ff.py`` script uses the
+:class:`downward.experiment.FastDownwardExperiment` class, which reduces the
+amount of code you need to write, but assumes a rigid structure of the
+experiment: it only allows you to run each added algorithm on each added task,
+and individual runs cannot be customized. If you need more flexibility, you can
+employ the :class:`lab.experiment.Experiment` class instead and fill it by using
+:class:`FastDownwardAlgorithm <downward.experiment.FastDownwardAlgorithm>`,
+:class:`FastDownwardRun <downward.experiment.FastDownwardRun>`,
+:class:`CachedFastDownwardRevision
+<downward.cached_revision.CachedFastDownwardRevision>`, and :class:`Task
+<downward.suites.Task>` objects. The ``2020-09-11-A-cg-vs-ff.py`` script shows
+an example. See the `Downward Lab API <downward.experiment.html>`_ for a
+reference on all Downward Lab classes.
+
 .. highlight:: python
 
 .. literalinclude:: ../examples/downward/2020-09-11-A-cg-vs-ff.py
+   :caption:
+
+.. literalinclude:: ../examples/downward/2020-09-11-B-bounded-cost.py
    :caption:
 
 .. literalinclude:: ../examples/downward/project.py
@@ -163,5 +179,5 @@ Run individual steps with ::
 
 The `Downward Lab API <downward.experiment.html>`_ shows you how to adjust
 this example to your needs. You may also find the `other example
-experiments <https://github.com/aibasel/lab/tree/master/examples/>`_
+experiments <https://github.com/aibasel/lab/tree/main/examples/>`_
 useful.

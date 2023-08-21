@@ -1,6 +1,24 @@
 Changelog
 =========
 
+v7.4 (2023-08-18)
+-----------------
+
+Lab
+^^^
+* Require *revision_cache* parameter in :class:`CachedRevision <lab.cached_revision.CachedRevision>` constructor (Jendrik Seipp).
+* Add *subdir* option for :class:`CachedRevision <lab.cached_revision.CachedRevision>` to support solvers at deeper levels of a repo (Jendrik Seipp).
+* Add :meth:`CachedRevision.get_relative_exp_path() <lab.cached_revision.CachedRevision.get_relative_exp_path>` method to query where cache artefacts will land in the experiment directory (Jendrik Seipp).
+* Document :class:`CachedRevision <lab.cached_revision.CachedRevision>` class and stabilize its API (Jendrik Seipp).
+* Only use documented classes and functions in example experiments (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* Add *subdir* option for :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` to support Fast Downward checkouts at deeper levels of a repo (Jendrik Seipp).
+* Make :class:`FastDownwardAlgorithm <downward.experiment.FastDownwardAlgorithm>`, :class:`FastDownwardRun <downward.experiment.FastDownwardRun>` and :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` classes part of the documented, stable API (Jendrik Seipp).
+* Describe :ref:`two main alternatives <downward-experiment>` for running Fast Downward experiments (Jendrik Seipp).
+
+
 v7.3 (2023-03-03)
 -----------------
 
@@ -624,9 +642,9 @@ Downward Lab
   (``build_successful``) is written in the cache directory. When
   the cached revision is requested later an error is shown if this
   file is missing.
-* Only use exit codes to reason about error reasons. Merge from FD master if your FD version does not produce meaningful exit codes.
+* Only use exit codes to reason about error reasons. Merge from FD main if your FD version does not produce meaningful exit codes.
 * Preprocess parser: only parse logs and never output files.
-* Never copy ``all.groups`` and ``test.groups`` files. Old Fast Downward branches need to merge from master.
+* Never copy ``all.groups`` and ``test.groups`` files. Old Fast Downward branches need to merge from main.
 * Always compress ``output.sas`` (also for ``compact=False``). Use ``xz`` for compressing.
 
 

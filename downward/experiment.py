@@ -5,6 +5,7 @@ A module for running Fast Downward experiments.
 from collections import defaultdict, OrderedDict
 import logging
 import os.path
+from pathlib import Path
 
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
@@ -16,65 +17,27 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, "scripts")
 
 
-def _get_solver_resource_name(cached_rev):
-    return "fast_downward_" + cached_rev.name
+class FastDownwardAlgorithm:
+    """
+    A Fast Downward algorithm is the combination of revision, driver options and
+    component options.
+    """
 
-
-class FastDownwardRun(Run):
-    def __init__(self, exp, algo, task):
-        Run.__init__(self, exp)
-        self.algo = algo
-        self.task = task
-
-        self.driver_options = algo.driver_options[:]
-
-        if self.task.domain_file is None:
-            self.add_resource("task", self.task.problem_file, "task.sas", symlink=True)
-            input_files = ["{task}"]
-            # Without PDDL input files, we can't validate the solution.
-            self.driver_options.remove("--validate")
-        else:
-            self.add_resource(
-                "domain", self.task.domain_file, "domain.pddl", symlink=True
-            )
-            self.add_resource(
-                "problem", self.task.problem_file, "problem.pddl", symlink=True
-            )
-            input_files = ["{domain}", "{problem}"]
-
-        self.add_command(
-            "planner",
-            [tools.get_python_executable()]
-            + ["{" + _get_solver_resource_name(algo.cached_revision) + "}"]
-            + self.driver_options
-            + input_files
-            + algo.component_options,
-        )
-
-        self._set_properties()
-
-    def _set_properties(self):
-        self.set_property("algorithm", self.algo.name)
-        self.set_property("repo", self.algo.cached_revision.repo)
-        self.set_property("local_revision", self.algo.cached_revision.local_rev)
-        self.set_property("global_revision", self.algo.cached_revision.global_rev)
-        self.set_property("build_options", self.algo.cached_revision.build_options)
-        self.set_property("driver_options", self.driver_options)
-        self.set_property("component_options", self.algo.component_options)
-
-        for key, value in self.task.properties.items():
-            self.set_property(key, value)
-
-        self.set_property("experiment_name", self.experiment.name)
-
-        self.set_property("id", [self.algo.name, self.task.domain, self.task.problem])
-
-
-class _DownwardAlgorithm:
-    def __init__(self, name, cached_revision, driver_options, component_options):
+    def __init__(
+        self,
+        name: str,
+        cached_revision: CachedFastDownwardRevision,
+        driver_options,
+        component_options,
+    ):
+        #: Algorithm name, e.g., ``"rev123:astar-lmcut"``.
         self.name = name
+        #: An instance of :class:`CachedFastDownwardRevision
+        #: <downward.cached_revision.CachedFastDownwardRevision>`.
         self.cached_revision = cached_revision
+        #: Driver options, e.g., ``["--build", "debug"]``.
         self.driver_options = driver_options
+        #: Component options, e.g., ``["--search", "astar(lmcut())"]``.
         self.component_options = component_options
 
     def __eq__(self, other):
@@ -84,6 +47,64 @@ class _DownwardAlgorithm:
             and self.driver_options == other.driver_options
             and self.component_options == other.component_options
         )
+
+
+# Create alias for backwards compatibility.
+_DownwardAlgorithm = FastDownwardAlgorithm
+
+
+class FastDownwardRun(Run):
+    """An experiment run that uses *algo* to solve *task*.
+
+    See :py:class:`Run <lab.experiment.Run>` for inherited methods.
+
+    """
+
+    def __init__(self, exp: Experiment, algo: FastDownwardAlgorithm, task: suites.Task):
+        super().__init__(exp)
+        driver_options = algo.driver_options[:]
+
+        if task.domain_file is None:
+            self.add_resource("task", task.problem_file, "task.sas", symlink=True)
+            input_files = ["{task}"]
+            # Without PDDL input files, we can't validate the solution.
+            driver_options = [opt for opt in driver_options if opt != "--validate"]
+        else:
+            self.add_resource("domain", task.domain_file, "domain.pddl", symlink=True)
+            self.add_resource(
+                "problem", task.problem_file, "problem.pddl", symlink=True
+            )
+            input_files = ["{domain}", "{problem}"]
+
+        driver = os.path.join(
+            exp.path,
+            algo.cached_revision.get_relative_exp_path("fast-downward.py"),
+        )
+        self.add_command(
+            "planner",
+            [tools.get_python_executable()]
+            + [driver]
+            + driver_options
+            + input_files
+            + algo.component_options,
+        )
+
+        self._set_properties(algo, driver_options, task)
+
+    def _set_properties(self, algo, driver_options, task):
+        self.set_property("algorithm", algo.name)
+        self.set_property("repo", algo.cached_revision.repo)
+        self.set_property("local_revision", algo.cached_revision.local_rev)
+        self.set_property("global_revision", algo.cached_revision.global_rev)
+        self.set_property("build_options", algo.cached_revision.build_options)
+        self.set_property("driver_options", driver_options)
+        self.set_property("component_options", algo.component_options)
+
+        for key, value in task.properties.items():
+            self.set_property(key, value)
+
+        self.set_property("experiment_name", self.experiment.name)
+        self.set_property("id", [algo.name, task.domain, task.problem])
 
 
 class FastDownwardExperiment(Experiment):
@@ -204,8 +225,8 @@ class FastDownwardExperiment(Experiment):
         """
         if isinstance(suite, str):
             suite = [suite]
-        benchmarks_dir = os.path.abspath(benchmarks_dir)
-        if not os.path.exists(benchmarks_dir):
+        benchmarks_dir = Path(benchmarks_dir).resolve()
+        if not benchmarks_dir.is_dir():
             logging.critical(f"Benchmarks directory {benchmarks_dir} not found.")
         self._suites[benchmarks_dir].extend(suite)
 
@@ -300,9 +321,9 @@ class FastDownwardExperiment(Experiment):
             "--overall-memory-limit",
             "3584M",
         ] + (driver_options or [])
-        algorithm = _DownwardAlgorithm(
+        algorithm = FastDownwardAlgorithm(
             name,
-            CachedFastDownwardRevision(repo, rev, build_options),
+            CachedFastDownwardRevision(self.revision_cache, repo, rev, build_options),
             driver_options,
             component_options,
         )
@@ -322,12 +343,12 @@ class FastDownwardExperiment(Experiment):
         if not self._algorithms:
             logging.critical("You must add at least one algorithm.")
 
-        # We convert the problems in suites to strings to avoid errors when converting
-        # properties to JSON later. The clean but more complex solution would be to add
-        # a method to the JSONEncoder that recognizes and correctly serializes the class
-        # Problem.
+        # We convert the problems in suites to strings to avoid errors when
+        # converting properties to JSON later. The clean but more complex
+        # solution would be to add a method to the JSONEncoder that recognizes
+        # and correctly serializes the Path and Task classes.
         serialized_suites = {
-            benchmarks_dir: [str(problem) for problem in benchmarks]
+            str(benchmarks_dir): [str(problem) for problem in benchmarks]
             for benchmarks_dir, benchmarks in self._suites.items()
         }
         self.set_property("suite", serialized_suites)
@@ -347,20 +368,13 @@ class FastDownwardExperiment(Experiment):
 
     def _cache_revisions(self):
         for cached_rev in self._get_unique_cached_revisions():
-            cached_rev.cache(self.revision_cache)
+            cached_rev.cache()
 
     def _add_code(self):
         """Add the compiled code to the experiment."""
         for cached_rev in self._get_unique_cached_revisions():
-            cache_path = os.path.join(self.revision_cache, cached_rev.name)
-            dest_path = "code-" + cached_rev.name
-            self.add_resource("", cache_path, dest_path)
-            # Overwrite the script to set an environment variable.
-            self.add_resource(
-                _get_solver_resource_name(cached_rev),
-                os.path.join(cache_path, "fast-downward.py"),
-                os.path.join(dest_path, "fast-downward.py"),
-            )
+            dest_path = cached_rev.get_relative_exp_path()
+            self.add_resource("", cached_rev.path, dest_path)
 
     def _add_runs(self):
         tasks = self._get_tasks()
