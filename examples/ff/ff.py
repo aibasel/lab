@@ -7,7 +7,6 @@ Example experiment for the FF planner
 
 import os
 import platform
-import shutil
 
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
