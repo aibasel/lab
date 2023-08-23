@@ -1,4 +1,3 @@
-import datetime
 import logging
 import math
 import multiprocessing
@@ -485,6 +484,3 @@ class TetralithEnvironment(SlurmEnvironment):
     def is_present(cls):
         node = platform.node()
         return re.match(r"tetralith\d+\.nsc\.liu\.se|n\d+", node)
-
-
-
