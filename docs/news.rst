@@ -1,6 +1,19 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Provide support for HTCondor clusters in external repo and add link to docs (Martín Pozo).
+
+
+Downward Lab
+^^^^^^^^^^^^
+* no changes so far
+
+
 v7.4 (2023-08-18)
 -----------------
 
