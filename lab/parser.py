@@ -183,9 +183,11 @@ class Parser:
             else:
                 file_parser.search_patterns(str(path), content, self.props)
 
+        content_cache = {}
         for function in self.functions:
             path = run_dir / function.filename
-            content = path.read_text()
-            function.function(content, self.props)
+            if path not in content_cache:
+                content_cache[path] = path.read_text()
+            function.function(content_cache[path], self.props)
 
         self.props.write()
