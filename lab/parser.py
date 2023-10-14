@@ -20,7 +20,6 @@ Parsers are run in the order in which they were added.
 """
 
 from collections import defaultdict
-import errno
 import logging
 from pathlib import Path
 import re
@@ -78,28 +77,18 @@ class _Pattern:
 
 class _FileParser:
     """
-    Private class that parses a given file according to the added patterns.
+    Private class that searches a given file for the added patterns.
     """
 
     def __init__(self):
-        self.filename = None
-        self.content = None
         self.patterns = []
-
-    def load_file(self, filename):
-        self.filename = filename
-        with open(filename) as f:
-            self.content = f.read()
 
     def add_pattern(self, pattern):
         self.patterns.append(pattern)
 
-    def search_patterns(self):
-        assert self.content is not None
-        found_props = {}
+    def search_patterns(self, filename, content, props):
         for pattern in self.patterns:
-            found_props.update(pattern.search(self.content, self.filename))
-        return found_props
+            props.update(pattern.search(content, filename))
 
 
 class Parser:
@@ -184,25 +173,19 @@ class Parser:
         prop_file = run_dir / "properties"
         self.props = tools.Properties(filename=prop_file)
 
-        for filename, file_parser in list(self.file_parsers.items()):
-            # If filename is absolute it will not be changed here.
+        for filename, file_parser in self.file_parsers.items():
+            # If filename is absolute, path is set to filename.
             path = run_dir / filename
             try:
-                file_parser.load_file(path)
-            except OSError as err:
-                if err.errno == errno.ENOENT:
-                    logging.info(f'File "{path}" is missing and thus not parsed.')
-                    del self.file_parsers[filename]
-                else:
-                    logging.error(f'Failed to read "{path}": {err}')
-
-        for file_parser in self.file_parsers.values():
-            self.props.update(file_parser.search_patterns())
+                content = path.read_text()
+            except FileNotFoundError:
+                logging.info(f'File "{path}" is missing and thus not parsed.')
+            else:
+                file_parser.search_patterns(str(path), content, self.props)
 
         for function in self.functions:
             path = run_dir / function.filename
-            with open(path) as f:
-                content = f.read()
+            content = path.read_text()
             function.function(content, self.props)
 
         self.props.write()
