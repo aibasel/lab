@@ -173,21 +173,28 @@ class Parser:
         prop_file = run_dir / "properties"
         self.props = tools.Properties(filename=prop_file)
 
+        content_cache = {}
+
+        def get_content(path):
+            if path not in content_cache:
+                try:
+                    content_cache[path] = path.read_text()
+                except FileNotFoundError:
+                    logging.info(f'File "{path}" is missing and thus not parsed.')
+                    content_cache[path] = None
+            return content_cache[path]
+
         for filename, file_parser in self.file_parsers.items():
             # If filename is absolute, path is set to filename.
             path = run_dir / filename
-            try:
-                content = path.read_text()
-            except FileNotFoundError:
-                logging.info(f'File "{path}" is missing and thus not parsed.')
-            else:
+            content = get_content(path)
+            if content:
                 file_parser.search_patterns(str(path), content, self.props)
 
-        content_cache = {}
         for function in self.functions:
             path = run_dir / function.filename
-            if path not in content_cache:
-                content_cache[path] = path.read_text()
-            function.function(content_cache[path], self.props)
+            content = get_content(path)
+            if content:
+                function.function(content, self.props)
 
         self.props.write()
