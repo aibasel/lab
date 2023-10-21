@@ -69,9 +69,10 @@ To adapt your parsers to this new API, you need to make the following changes:
 
 * Your parser module (e.g., "custom_parser.py") does not have to be executable
   anymore, but it must be importable and expose a :class:`Parser
-  <lab.parser.Parser>` instance. Then, instead of
-  ``exp.add_parser("custom_parser.py")`` use ``from custom_parser import
-  MyParser`` and ``exp.add_parser(MyParser())``.
+  <lab.parser.Parser>` instance (see the changes to the `translator parser
+  <https://github.com/aibasel/lab/pull/117/files#diff-0a679939eb576c6b402a00ab9b08a3339ecefe3713dc96f9ac6b0e05de9ff4f2>`_
+  for an example). Then, instead of ``exp.add_parser("custom_parser.py")`` use
+  ``from custom_parser import MyParser`` and ``exp.add_parser(MyParser())``.
 * Remove ``exp.add_parse_again_step()`` and insert ``exp.add_step("parse",
   exp.parse)`` after ``exp.add_step("start", exp.start_runs)``.
 
