@@ -416,7 +416,7 @@ class Experiment(_Buildable):
 
         """
         if not isinstance(parser, Parser):
-            logging.critical(f"Parser '{parser}' must be a Parser instance")
+            raise TypeError(f'"{parser}" must be a Parser instance')
         self.parsers.append(parser)
 
     def parse(self):
