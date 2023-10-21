@@ -452,14 +452,14 @@ class Experiment(_Buildable):
         self, src=None, dest=None, merge=None, name=None, filter=None, **kwargs
     ):
         """
-        Add a step that fetches results from experiment or evaluation
-        directories into a new or existing evaluation directory.
+        Add a step that fetches results from an experiment or evaluation
+        directory into a new or existing evaluation directory.
 
         You can use this method to combine results from multiple
         experiments.
 
-        *src* can be an experiment or evaluation directory. It defaults
-        to ``exp.path``.
+        *src* can be an experiment or evaluation directory or a properties
+        file. It defaults to ``exp.path``.
 
         *dest* must be a new or existing evaluation directory. It
         defaults to ``exp.eval_dir``. If *dest* already contains

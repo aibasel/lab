@@ -283,7 +283,7 @@ class Properties(dict):
         self.path = Path(filename).resolve() if filename else None
         if self.path:
             xz_path = self.path.with_suffix(".xz")
-            if self.path.is_file() and xz_path.is_file():
+            if self.path != xz_path and self.path.is_file() and xz_path.is_file():
                 logging.critical(f"Only one of {self.path} and {xz_path} may exist")
             if not self.path.is_file() and xz_path.is_file():
                 self.path = xz_path

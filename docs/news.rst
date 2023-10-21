@@ -1,6 +1,18 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Allow passing properties files to fetchers directly (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* None.
+
+
 v8.0 (2023-10-21)
 -----------------
 

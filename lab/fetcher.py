@@ -83,20 +83,25 @@ class Fetcher:
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None, **kwargs):
         """
-        This method can be used to copy properties from an exp-dir or
-        eval-dir into an eval-dir. If the destination eval-dir already
-        exist, the data will be merged. This means *src_dir* can either
-        be an exp-dir or an eval-dir and *eval_dir* can be a new or
-        existing directory.
+        Copy properties from an exp-dir or eval-dir into an eval-dir.
 
-        We recommend using lab.Experiment.add_fetcher() to add fetchers
-        to an experiment. See the method's documentation for a
-        description of the parameters.
+        If the destination eval-dir already exist, the data will be merged. This
+        means *src_dir* can be an exp-dir, an eval-dir or a properties file, and
+        *eval_dir* can be a new or existing destination directory.
+
+        We recommend using lab.Experiment.add_fetcher() to add fetchers to an
+        experiment. See the method's documentation for a description of the
+        parameters.
 
         """
         src_dir = Path(src_dir)
-        if not src_dir.is_dir():
-            logging.critical(f"{src_dir} is missing or not a directory")
+        if not src_dir.exists():
+            logging.critical(f"{src_dir} is missing")
+
+        if src_dir.is_file():
+            src_props_file = src_dir
+        else:
+            src_props_file = src_dir / "properties"
         run_filter = tools.RunFilter(filter, **kwargs)
 
         eval_dir = eval_dir or str(src_dir).rstrip("/") + "-eval"
@@ -115,7 +120,6 @@ class Fetcher:
             tools.remove_path(eval_dir)
 
         # Load properties in the eval_dir if there are any already.
-        src_props_file = src_dir / "properties"
         fetch_from_eval_dir = src_props_file.exists()
         combined_props = tools.Properties(eval_dir / "properties")
         if fetch_from_eval_dir:
