@@ -8,6 +8,8 @@ Example experiment for the FF planner
 import os
 import platform
 
+from ff_parser import FFParser
+
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
@@ -51,7 +53,7 @@ MEMORY_LIMIT = 2048
 # Create a new experiment.
 exp = Experiment(environment=ENV)
 # Add custom parser for FF.
-exp.add_parser("ff-parser.py")
+exp.add_parser(FFParser())
 
 for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
     run = exp.add_run()
@@ -86,6 +88,9 @@ exp.add_step("build", exp.build)
 
 # Add step that executes all runs.
 exp.add_step("start", exp.start_runs)
+
+# Add step that parses log output into "properties" files.
+exp.add_step("parse", exp.parse)
 
 # Add step that collects properties from run directories and
 # writes them to *-eval/properties.

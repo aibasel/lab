@@ -1,40 +1,28 @@
 """
-A parser can be any program that analyzes files in the run's directory
-(e.g. ``run.log``) and manipulates the ``properties`` file in the same
-directory.
+To parse logs or generated files, you can use the ``Parser`` class. Here is an
+example parser for the FF planner:
 
-To make parsing easier, however, you can use the ``Parser`` class. Here is
-an example parser for the FF planner:
-
-.. literalinclude:: ../examples/ff/ff-parser.py
+.. literalinclude:: ../examples/ff/ff_parser.py
    :caption:
 
-You can add this parser to all runs by using :meth:`add_parser()
+You can add a parser to all runs with :meth:`add_parser()
 <lab.experiment.Experiment.add_parser>`:
 
 >>> from pathlib import Path
 >>> from lab.experiment import Experiment
+>>> parser = Parser()
+>>> parser.add_pattern("exitcode", "retcode: (.+)\\n", type=int, file="run.log")
 >>> exp = Experiment()
->>> # The path can be absolute or relative to the working directory at build time.
->>> parser = Path(__file__).resolve().parents[1] / "examples/ff/ff-parser.py"
 >>> exp.add_parser(parser)
 
-All added parsers will be run in the order in which they were added after
-executing the run's commands.
-
-If you need to change your parsers and execute them again, use the
-:meth:`~lab.experiment.Experiment.add_parse_again_step` method to re-parse
-your results.
+Parsers are run in the order in which they were added.
 
 """
 
 from collections import defaultdict
-import errno
 import logging
-import os.path
+from pathlib import Path
 import re
-
-from lab import tools
 
 
 def _get_pattern_flags(s):
@@ -87,38 +75,27 @@ class _Pattern:
 
 class _FileParser:
     """
-    Private class that parses a given file according to the added patterns.
+    Private class that searches a given file for the added patterns.
     """
 
     def __init__(self):
-        self.filename = None
-        self.content = None
         self.patterns = []
-
-    def load_file(self, filename):
-        self.filename = filename
-        with open(filename) as f:
-            self.content = f.read()
 
     def add_pattern(self, pattern):
         self.patterns.append(pattern)
 
-    def search_patterns(self):
-        assert self.content is not None
-        found_props = {}
+    def search_patterns(self, filename, content, props):
         for pattern in self.patterns:
-            found_props.update(pattern.search(self.content, self.filename))
-        return found_props
+            props.update(pattern.search(content, filename))
 
 
 class Parser:
     """
-    Parse files in the current directory and write results into the
-    run's ``properties`` file.
+    Parse logs or files in a given directory and write results into the
+    ``properties`` file.
     """
 
     def __init__(self):
-        tools.configure_logging()
         self.file_parsers = defaultdict(_FileParser)
         self.functions = []
 
@@ -184,34 +161,34 @@ class Parser:
         """
         self.functions.append(_Function(function, file))
 
-    def parse(self):
+    def parse(self, run_dir, props):
         """Search all patterns and apply all functions.
 
-        The found values are written to the run's ``properties`` file.
+        Add the found values to *props*.
 
         """
-        run_dir = os.path.abspath(".")
-        prop_file = os.path.join(run_dir, "properties")
-        self.props = tools.Properties(filename=prop_file)
+        run_dir = Path(run_dir).resolve()
 
-        for filename, file_parser in list(self.file_parsers.items()):
-            # If filename is absolute it will not be changed here.
-            path = os.path.join(run_dir, filename)
-            try:
-                file_parser.load_file(path)
-            except OSError as err:
-                if err.errno == errno.ENOENT:
+        content_cache = {}
+
+        def get_content(path):
+            if path not in content_cache:
+                try:
+                    content_cache[path] = path.read_text()
+                except FileNotFoundError:
                     logging.info(f'File "{path}" is missing and thus not parsed.')
-                    del self.file_parsers[filename]
-                else:
-                    logging.error(f'Failed to read "{path}": {err}')
+                    content_cache[path] = None
+            return content_cache[path]
 
-        for file_parser in self.file_parsers.values():
-            self.props.update(file_parser.search_patterns())
+        for filename, file_parser in self.file_parsers.items():
+            # If filename is absolute, path is set to filename.
+            path = run_dir / filename
+            content = get_content(path)
+            if content:
+                file_parser.search_patterns(str(path), content, props)
 
         for function in self.functions:
-            with open(function.filename) as f:
-                content = f.read()
-            function.function(content, self.props)
-
-        self.props.write()
+            path = run_dir / function.filename
+            content = get_content(path)
+            if content:
+                function.function(content, props)

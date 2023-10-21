@@ -130,11 +130,12 @@ exp.add_step("build", exp.build)
 # Add step that executes all runs.
 exp.add_step("start", exp.start_runs)
 
+# Add step that parses data from the logs into "properties" files.
+exp.add_step("parse", exp.parse)
+
 # Add step that collects properties from run directories and
 # writes them to *-eval/properties.
 exp.add_fetcher(name="fetch")
-
-exp.add_parse_again_step()
 
 
 # Define a filter.

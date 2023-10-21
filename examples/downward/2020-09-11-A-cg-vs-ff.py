@@ -3,6 +3,8 @@
 import os
 import shutil
 
+import custom_parser
+
 import project
 
 
@@ -64,11 +66,12 @@ exp.add_suite(BENCHMARKS_DIR, SUITE)
 exp.add_parser(exp.EXITCODE_PARSER)
 exp.add_parser(exp.TRANSLATOR_PARSER)
 exp.add_parser(exp.SINGLE_SEARCH_PARSER)
-exp.add_parser(project.DIR / "parser.py")
+exp.add_parser(custom_parser.get_parser())
 exp.add_parser(exp.PLANNER_PARSER)
 
 exp.add_step("build", exp.build)
 exp.add_step("start", exp.start_runs)
+exp.add_step("parse", exp.parse)
 exp.add_fetcher(name="fetch")
 
 if not project.REMOTE:

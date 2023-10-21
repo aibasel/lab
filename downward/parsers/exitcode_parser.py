@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """
 Parse Fast Downward exit code and store a message describing the outcome
 in the "error" attribute.
@@ -43,9 +41,9 @@ def parse_exit_code(content, props):
         props.add_unexplained_error(outcome.msg)
 
 
-class ExitCodeParser(Parser):
+class ExitcodeParser(Parser):
     def __init__(self):
-        Parser.__init__(self)
+        super().__init__()
         self.add_pattern(
             "planner_exit_code",
             r"planner exit code: (.+)\n",
@@ -54,11 +52,3 @@ class ExitCodeParser(Parser):
             required=True,
         )
         self.add_function(parse_exit_code)
-
-
-def main():
-    parser = ExitCodeParser()
-    parser.parse()
-
-
-main()

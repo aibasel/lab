@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """
 FF example output:
 
@@ -53,15 +51,21 @@ def trivially_unsolvable(content, props):
     )
 
 
-parser = Parser()
-parser.add_pattern("node", r"node: (.+)\n", type=str, file="driver.log", required=True)
-parser.add_pattern(
-    "planner_exit_code", r"run-planner exit code: (.+)\n", type=int, file="driver.log"
-)
-parser.add_pattern("evaluations", r"evaluating (\d+) states")
-parser.add_function(error)
-parser.add_function(coverage)
-parser.add_function(get_plan)
-parser.add_function(get_times)
-parser.add_function(trivially_unsolvable)
-parser.parse()
+class FFParser(Parser):
+    def __init__(self):
+        super().__init__()
+        self.add_pattern(
+            "node", r"node: (.+)\n", type=str, file="driver.log", required=True
+        )
+        self.add_pattern(
+            "planner_exit_code",
+            r"run-planner exit code: (.+)\n",
+            type=int,
+            file="driver.log",
+        )
+        self.add_pattern("evaluations", r"evaluating (\d+) states")
+        self.add_function(error)
+        self.add_function(coverage)
+        self.add_function(get_plan)
+        self.add_function(get_times)
+        self.add_function(trivially_unsolvable)

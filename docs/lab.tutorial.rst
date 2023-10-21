@@ -35,12 +35,7 @@ Select steps by name or index::
 
     ./exp.py build
     ./exp.py 2
-    ./exp.py 3 4
-
-Here is the parser that the experiment uses:
-
-.. literalinclude:: ../examples/vertex-cover/parser.py
-   :caption:
+    ./exp.py 3 4 5
 
 Find out how to create your own experiments by browsing the `Lab API
 <lab.experiment.html>`_.

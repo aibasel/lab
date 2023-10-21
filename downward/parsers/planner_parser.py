@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 from lab import tools
 from lab.parser import Parser
 
@@ -96,11 +94,3 @@ class PlannerParser(Parser):
         self.add_function(add_planner_memory)
         self.add_function(add_planner_time)
         self.add_function(add_planner_scores)
-
-
-def main():
-    parser = PlannerParser()
-    parser.parse()
-
-
-main()

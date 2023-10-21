@@ -280,9 +280,8 @@ class Properties(dict):
     """Transparently handle properties files compressed with xz."""
 
     def __init__(self, filename=None):
-        self.path = filename
+        self.path = Path(filename).resolve() if filename else None
         if self.path:
-            self.path = Path(self.path).resolve()
             xz_path = self.path.with_suffix(".xz")
             if self.path.is_file() and xz_path.is_file():
                 logging.critical(f"Only one of {self.path} and {xz_path} may exist")

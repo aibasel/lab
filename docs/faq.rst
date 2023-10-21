@@ -38,12 +38,43 @@ again as above.
 I forgot to parse something. How can I run only the parsers again?
 ------------------------------------------------------------------
 
-See the `parsing documentation <lab.parser.html>`_ for how to write
-parsers. Once you have fixed your existing parsers or added new parsers,
-add ``exp.add_parse_again_step()`` to your experiment script
-``my-exp.py`` and then call ::
+Now that parsing is done in its own experiment step, simply consult the `parsing
+documentation <lab.parser.html>`_ for how to amend your parsers and then run the
+"parse" experiment step again with ::
 
-    ./my-exp.py parse-again
+    ./my-exp.py parse
+
+
+.. _portparsers:
+
+How do I port my parsers to version 8.x?
+----------------------------------------
+
+Since version 8.0, Lab has a dedicated "parse" experiment step. First of all,
+what are the benefits of this?
+
+* No need to write parsers in separate files.
+* Log output from solvers and parsers remains separate.
+* No need for ``exp.add_parse_again_step()``. Parsing and re-parsing is now
+  exactly the same.
+* Parsers are checked for syntax errors before the experiment is run.
+* Parsing runs much faster (for an experiment with 3 algorithms and 5 parsers
+  the parsing time went down from 51 minutes to 5 minutes, both measured on
+  cold file system caches).
+* As before, you can let the Slurm environment do the parsing for you and get
+  notified when the report is finished: ``./myexp.py build start parse fetch
+  report``
+
+To adapt your parsers to this new API, you need to make the following changes:
+
+* Your parser module (e.g., "custom_parser.py") does not have to be executable
+  anymore, but it must be importable and expose a :class:`Parser
+  <lab.parser.Parser>` instance (see the changes to the `translator parser
+  <https://github.com/aibasel/lab/pull/117/files#diff-0a679939eb576c6b402a00ab9b08a3339ecefe3713dc96f9ac6b0e05de9ff4f2>`_
+  for an example). Then, instead of ``exp.add_parser("custom_parser.py")`` use
+  ``from custom_parser import MyParser`` and ``exp.add_parser(MyParser())``.
+* Remove ``exp.add_parse_again_step()`` and insert ``exp.add_step("parse",
+  exp.parse)`` after ``exp.add_step("start", exp.start_runs)``.
 
 
 How can I compute a new attribute from multiple runs?

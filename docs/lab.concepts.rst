@@ -4,12 +4,13 @@ Concepts
 ========
 
 An **experiment** consists of multiple **steps**. Most experiments will
-have steps for building and executing the experiment:
+have steps for building and executing the experiment, and parsing logs:
 
     >>> from lab.experiment import Experiment
     >>> exp = Experiment()
     >>> exp.add_step("build", exp.build)
     >>> exp.add_step("start", exp.start_runs)
+    >>> exp.add_step("parse", exp.parse)
 
 Moreover, there are usually steps for **fetching** the results and making
 **reports**:
@@ -18,11 +19,11 @@ Moreover, there are usually steps for **fetching** the results and making
 >>> exp.add_fetcher(name="fetch")
 >>> exp.add_report(Report(attributes=["error"]))
 
-The "build" step creates all necessary files for running the experiment in
-the **experiment directory**. After the "start" step has finished running
-the experiment, we can fetch the result from the experiment directory to
-the **evaluation directory**. All reports only operate on evaluation
-directories.
+The "build" step creates all necessary files for running the experiment in the
+**experiment directory**. After the "start" step has finished running the
+experiment, we can parse data from logs and generated files into "properties"
+files, and then fetch all properties files from the experiment directory to the
+**evaluation directory**. All reports only operate on evaluation directories.
 
 An experiment usually also has multiple **runs**, one for each pair of
 algorithm and benchmark.

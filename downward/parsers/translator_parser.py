@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """
 Regular expressions and functions for parsing translator logs.
 """
@@ -72,8 +70,3 @@ class TranslatorParser(Parser):
         self.add_function(parse_translator_timestamps)
         self.add_function(parse_old_statistics)
         self.add_function(parse_statistics)
-
-
-if __name__ == "__main__":
-    parser = TranslatorParser()
-    parser.parse()

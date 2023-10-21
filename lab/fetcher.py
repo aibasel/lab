@@ -49,7 +49,18 @@ class Fetcher:
         static_props = tools.Properties(
             filename=run_dir / lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
         )
-        dynamic_props = tools.Properties(filename=run_dir / "properties")
+        dynamic_props_path = run_dir / "properties"
+        dynamic_props = tools.Properties(filename=dynamic_props_path)
+        if not dynamic_props_path.exists():
+            logging.critical(
+                f'Properties file "{tools.get_relative_path(dynamic_props_path)}" is'
+                f' missing. Did you forget to add or run the "parse" step?'
+            )
+        elif not dynamic_props:
+            logging.critical(
+                f'Properties file "{tools.get_relative_path(dynamic_props_path)}" is'
+                f" empty. Have you added at least one parser?"
+            )
 
         props = tools.Properties()
         props.update(static_props)

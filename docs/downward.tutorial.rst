@@ -123,15 +123,15 @@ Run tutorial experiment
 
 The files below are two experiment scripts, a ``project.py`` module that bundles
 common functionality for all experiments related to the project, a parser
-script, and a script for collecting results and making reports. You can use the
+module, and a script for collecting results and making reports. You can use the
 files as a basis for your own experiments. They are available in the `Lab repo
 <https://github.com/aibasel/lab/tree/main/examples/downward>`_. Copy the files
 into ``experiments/my-exp-dir``.
 
 .. highlight:: bash
 
-Make sure the experiment script and the parser are executable. Then you
-can see the available steps with ::
+Make sure the experiment script is executable. Then you can see the available
+steps with ::
 
     ./2020-09-11-A-cg-vs-ff.py
 
@@ -171,7 +171,7 @@ reference on all Downward Lab classes.
 .. literalinclude:: ../examples/downward/project.py
    :caption:
 
-.. literalinclude:: ../examples/downward/parser.py
+.. literalinclude:: ../examples/downward/custom_parser.py
    :caption:
 
 .. literalinclude:: ../examples/downward/01-evaluation.py

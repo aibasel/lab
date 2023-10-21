@@ -9,12 +9,13 @@ from pathlib import Path
 
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
+from downward.parsers.anytime_search_parser import AnytimeSearchParser
+from downward.parsers.exitcode_parser import ExitcodeParser
+from downward.parsers.planner_parser import PlannerParser
+from downward.parsers.single_search_parser import SingleSearchParser
+from downward.parsers.translator_parser import TranslatorParser
 from lab import tools
 from lab.experiment import Experiment, get_default_data_dir, Run
-
-
-DIR = os.path.dirname(os.path.abspath(__file__))
-DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, "scripts")
 
 
 class FastDownwardAlgorithm:
@@ -122,6 +123,7 @@ class FastDownwardExperiment(Experiment):
         >>> exp = FastDownwardExperiment()
         >>> exp.add_step("build", exp.build)
         >>> exp.add_step("start", exp.start_runs)
+        >>> exp.add_step("parse", exp.parse)
         >>> exp.add_fetcher(name="fetch")
 
     """
@@ -129,25 +131,23 @@ class FastDownwardExperiment(Experiment):
     # Built-in parsers that can be passed to exp.add_parser().
 
     #: Parsed attributes: "error", "planner_exit_code", "unsolvable".
-    EXITCODE_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "exitcode-parser.py")
+    EXITCODE_PARSER = ExitcodeParser()
 
     #: Parsed attributes: "translator_peak_memory", "translator_time_done", etc.
-    TRANSLATOR_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "translator-parser.py")
+    TRANSLATOR_PARSER = TranslatorParser()
 
     #: Parsed attributes: "coverage", "memory", "total_time", etc.
-    SINGLE_SEARCH_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "single-search-parser.py")
+    SINGLE_SEARCH_PARSER = SingleSearchParser()
 
     #: Parsed attributes: "cost", "cost:all", "coverage".
-    ANYTIME_SEARCH_PARSER = os.path.join(
-        DOWNWARD_SCRIPTS_DIR, "anytime-search-parser.py"
-    )
+    ANYTIME_SEARCH_PARSER = AnytimeSearchParser()
 
     #: Used attributes: "memory", "total_time",
     #: "translator_peak_memory", "translator_time_done".
     #:
     #: Parsed attributes: "node", "planner_memory", "planner_time",
     #: "planner_wall_clock_time", "score_planner_memory", "score_planner_time".
-    PLANNER_PARSER = os.path.join(DOWNWARD_SCRIPTS_DIR, "planner-parser.py")
+    PLANNER_PARSER = PlannerParser()
 
     def __init__(self, path=None, environment=None, revision_cache=None):
         """

@@ -4,6 +4,8 @@ import json
 import os
 import shutil
 
+import custom_parser
+
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
 from downward.experiment import FastDownwardAlgorithm, FastDownwardRun
@@ -89,11 +91,12 @@ for rev, rev_nick in REV_NICKS:
 exp.add_parser(project.FastDownwardExperiment.EXITCODE_PARSER)
 exp.add_parser(project.FastDownwardExperiment.TRANSLATOR_PARSER)
 exp.add_parser(project.FastDownwardExperiment.SINGLE_SEARCH_PARSER)
-exp.add_parser(project.DIR / "parser.py")
+exp.add_parser(custom_parser.get_parser())
 exp.add_parser(project.FastDownwardExperiment.PLANNER_PARSER)
 
 exp.add_step("build", exp.build)
 exp.add_step("start", exp.start_runs)
+exp.add_step("parse", exp.parse)
 exp.add_fetcher(name="fetch")
 
 if not project.REMOTE:

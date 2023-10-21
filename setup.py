@@ -21,7 +21,7 @@ setup(
     url="https://github.com/aibasel/lab",
     license="GPL3+",
     packages=find_packages("."),
-    package_data={"downward": ["scripts/*.py"], "lab": ["data/*", "scripts/*.py"]},
+    package_data={"lab": ["data/*", "scripts/*.py"]},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",

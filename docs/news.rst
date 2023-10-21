@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v8.0 (2023-10-21)
+-----------------
+
+Lab
+^^^
+* Make parsing a separate experiment step, see :ref:`FAQs <portparsers>` for motivation and upgrade instructions (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* None.
+
+
 v7.5 (2023-10-21)
 -----------------
 
