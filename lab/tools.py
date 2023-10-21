@@ -294,7 +294,8 @@ class Properties(dict):
     def __str__(self):
         return json.dumps(self, **self.JSON_ARGS)
 
-    def load(self, path: Path):
+    def load(self, filename):
+        path = Path(filename)
         open_func = lzma.open if path.suffix == ".xz" else open
         with open_func(path) as f:
             try:
