@@ -1,20 +1,36 @@
 Changelog
 =========
 
-v7.4 (unreleased)
+v7.5 (2023-10-21)
+-----------------
+
+Lab
+^^^
+* Provide support for `HTCondor <https://htcondor.org/>`_ clusters in a `third-party repository <https://github.com/Martin1887/lab-htcondor-environment>`_ and add link to docs (Martín Pozo).
+* Add documentation for AI Basel's infai_3 partition (Silvan Sievers).
+* Don't rely on the existence of the 'runs-00001-00100' dir when fetching results (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* None.
+
+
+v7.4 (2023-08-18)
 -----------------
 
 Lab
 ^^^
 * Require *revision_cache* parameter in :class:`CachedRevision <lab.cached_revision.CachedRevision>` constructor (Jendrik Seipp).
-* Add *subdir* option for :class:`CachedRevision <lab.cached_revision.CachedRevision>` to support solvers residing in monolithic repos (Jendrik Seipp).
-* Add :meth:`CachedRevision.get_relative_exp_path() <lab.cached_revision.CachedRevision.get_relative_exp_path>` method to query where cache artefacts will land (Jendrik Seipp).
-* Document :class:`CachedRevision <lab.cached_revision.CachedRevision>` class (Jendrik Seipp).
+* Add *subdir* option for :class:`CachedRevision <lab.cached_revision.CachedRevision>` to support solvers at deeper levels of a repo (Jendrik Seipp).
+* Add :meth:`CachedRevision.get_relative_exp_path() <lab.cached_revision.CachedRevision.get_relative_exp_path>` method to query where cache artefacts will land in the experiment directory (Jendrik Seipp).
+* Document :class:`CachedRevision <lab.cached_revision.CachedRevision>` class and stabilize its API (Jendrik Seipp).
+* Only use documented classes and functions in example experiments (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
-* Add *subdir* option for :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` to support nested Fast Downward repos (Jendrik Seipp).
-* Document :class:`FastDownwardAlgorithm <downward.experiment.FastDownwardAlgorithm>`, :class:`FastDownwardRun <downward.experiment.FastDownwardRun>`and :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` classes (Jendrik Seipp).
+* Add *subdir* option for :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` to support Fast Downward checkouts at deeper levels of a repo (Jendrik Seipp).
+* Make :class:`FastDownwardAlgorithm <downward.experiment.FastDownwardAlgorithm>`, :class:`FastDownwardRun <downward.experiment.FastDownwardRun>` and :class:`CachedFastDownwardRevision <downward.cached_revision.CachedFastDownwardRevision>` classes part of the documented, stable API (Jendrik Seipp).
+* Describe :ref:`two main alternatives <downward-experiment>` for running Fast Downward experiments (Jendrik Seipp).
 
 
 v7.3 (2023-03-03)

@@ -82,6 +82,11 @@ Custom command line arguments
 --------------------
 
 .. autoclass:: lab.environments.Environment
+
+Lab supports several built-in environments below. Additionally, support for
+`HTCondor <https://htcondor.org/>`_ clusters is provided by a `third-party
+repository <https://github.com/Martin1887/lab-htcondor-environment>`_.
+
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.SlurmEnvironment
 .. autoclass:: lab.environments.BaselSlurmEnvironment

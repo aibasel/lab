@@ -140,6 +140,7 @@ class SlurmEnvironment(Environment):
 
     * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
     * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
+    * "infai_3": 12 nodes with 128 cores, 512GB memory, 240GB SSD
 
     *qos* must be a valid Slurm QOS name. In Basel this must be
     "normal".
@@ -155,11 +156,11 @@ class SlurmEnvironment(Environment):
     allocated for each core. The string must end with one of the
     letters K, M or G. The default is "3872M". The value for
     *memory_per_cpu* should not surpass the amount of memory that is
-    available per core, which is "3872M" for infai_1 and "6354M" for
-    infai_2. Processes that surpass the *memory_per_cpu* limit are
-    terminated with SIGKILL. To impose a soft limit that can be
-    caught from within your programs, you can use the
-    ``memory_limit`` kwarg of
+    available per core, which is "3872M" for infai_1, "6354M" for
+    infai_2, and "4028M" for infai_3. Processes that surpass the
+    *memory_per_cpu* limit are terminated with SIGKILL. To impose a
+    soft limit that can be caught from within your programs, you can
+    use the ``memory_limit`` kwarg of
     :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
     should set memory limits via the ``driver_options``.
 
@@ -178,6 +179,7 @@ class SlurmEnvironment(Environment):
 
     >>> env1 = BaselSlurmEnvironment(partition="infai_1", memory_per_cpu="3872M")
     >>> env2 = BaselSlurmEnvironment(partition="infai_2", memory_per_cpu="6354M")
+    >>> env3 = BaselSlurmEnvironment(partition="infai_3", memory_per_cpu="4028M")
 
     Example that reserves 12 GiB of memory on infai_1:
 
@@ -197,6 +199,16 @@ class SlurmEnvironment(Environment):
     ...     partition="infai_2",
     ...     memory_per_cpu="6G",
     ...     cpus_per_task=2,
+    ... )
+
+    Example that reserves 12 GiB of memory on infai_3:
+
+    >>> # 12 * 1024 / 4028 = 3.05 -> round to next int -> 4 cores per task
+    >>> # 12G / 4 = 3G per core
+    >>> env = BaselSlurmEnvironment(
+    ...     partition="infai_3",
+    ...     memory_per_cpu="3G",
+    ...     cpus_per_task=4,
     ... )
 
     Use *export* to specify a list of environment variables that

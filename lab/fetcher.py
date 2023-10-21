@@ -115,11 +115,11 @@ class Fetcher:
             tools.remove_path(eval_dir)
 
         # Load properties in the eval_dir if there are any already.
+        src_props_file = src_dir / "properties"
+        fetch_from_eval_dir = src_props_file.exists()
         combined_props = tools.Properties(eval_dir / "properties")
-        fetch_from_eval_dir = not (src_dir / "runs-00001-00100").is_dir()
         if fetch_from_eval_dir:
-            src_path = src_dir / "properties"
-            src_props = tools.Properties(filename=src_path)
+            src_props = tools.Properties(filename=src_props_file)
             if not src_props:
                 logging.critical(f"No properties found in {src_dir}")
             run_filter.apply(src_props)

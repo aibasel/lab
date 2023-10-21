@@ -577,12 +577,14 @@ class Experiment(_Buildable):
         logging.info(f'Experiment path: "{tools.get_relative_path(self.path)}"')
         self._remove_experiment_dir()
         tools.makedirs(self.path)
-        self.environment.write_main_script()
 
-        self._build_new_files()
         self._build_resources()
         self._build_runs()
         self._build_properties_file(STATIC_EXPERIMENT_PROPERTIES_FILENAME)
+
+        # The main script can need other experiment files and it adds new files
+        self.environment.write_main_script()
+        self._build_new_files()
 
     def start_runs(self):
         """Execute all runs that were added to the experiment.

@@ -1,3 +1,5 @@
+.. _downward-experiment:
+
 :mod:`downward.experiment` --- Fast Downward experiment
 =======================================================
 
@@ -5,17 +7,20 @@
 
    The :class:`FastDownwardExperiment
    <downward.experiment.FastDownwardExperiment>` class makes it easy to write
-   "standard" experiments, but it assumes a rigid experiment structure: it only
-   allows you to run each added algorithm on each added task, and individual
-   runs cannot easily be customized. If you need more flexibility, you can use
-   the :class:`lab.experiment.Experiment` class instead and fill it by using
+   "standard" experiments with little boilerplate code, but it assumes a rigid
+   experiment structure: it only allows you to run each added algorithm on each
+   added task, and individual runs cannot easily be customized. An example for
+   this is the `2020-09-11-A-cg-vs-ff.py
+   <https://github.com/aibasel/lab/tree/main/examples/downward/2020-09-11-A-cg-vs-ff.py>`_
+   experiment. If you need more flexibility, you can use the
+   :class:`lab.experiment.Experiment` class instead and fill it by using
    :class:`FastDownwardAlgorithm <downward.experiment.FastDownwardAlgorithm>`,
    :class:`FastDownwardRun <downward.experiment.FastDownwardRun>`,
    :class:`CachedFastDownwardRevision
    <downward.cached_revision.CachedFastDownwardRevision>`, and :class:`Task
-   <downward.suites.Task>` objects. The `2020-09-11-A-cg-vs-ff.py
-   <https://github.com/aibasel/lab/tree/main/examples/downward/2020-09-11-A-cg-vs-ff.py>`_
-   script shows an example. All classes are documented below.
+   <downward.suites.Task>` objects. The `2020-09-11-B-bounded-cost.py
+   <https://github.com/aibasel/lab/tree/main/examples/downward/2020-09-11-B-bounded-cost.py>`_
+   script shows an example. All of these classes are documented below.
 
 .. autoclass:: downward.experiment.FastDownwardExperiment
    :members: add_algorithm, add_suite

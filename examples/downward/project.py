@@ -8,7 +8,6 @@ from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
 from downward.reports.taskwise import TaskwiseReport
-from lab import tools
 from lab.environments import (
     BaselSlurmEnvironment,
     LocalEnvironment,
@@ -30,6 +29,8 @@ assert (
 
 
 DIR = Path(__file__).resolve().parent
+SCRIPT = Path(sys.argv[0]).resolve()
+
 NODE = platform.node()
 # Cover both the Basel and Linköping clusters for simplicity.
 REMOTE = NODE.endswith((".scicore.unibas.ch", ".cluster.bc2.ch")) or re.match(
@@ -231,7 +232,7 @@ def get_repo_base() -> Path:
     directory with a subdirectory named ".git" is found.
 
     Abort if the repo base cannot be found."""
-    path = Path(tools.get_script_path())
+    path = Path(SCRIPT)
     while path.parent != path:
         if (path / ".git").is_dir():
             return path
@@ -256,7 +257,7 @@ def add_evaluations_per_time(run):
 
 def _get_exp_dir_relative_to_repo():
     repo_name = get_repo_base().name
-    script = Path(tools.get_script_path())
+    script = Path(SCRIPT)
     script_dir = script.parent
     rel_script_dir = script_dir.relative_to(get_repo_base())
     expname = script.stem
