@@ -35,7 +35,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
-    "sphinx_search.extension",
+    # "sphinx_search.extension",  # Disable until search is improved.
 ]
 
 # Add any paths that contain templates here, relative to this directory.
