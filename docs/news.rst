@@ -1,17 +1,14 @@
 Changelog
 =========
 
-next (unreleased)
+v7.5 (2023-10-21)
 -----------------
 
 Lab
 ^^^
-* Provide support for HTCondor clusters in external repo and add link to docs (Martín Pozo).
-
-
-Downward Lab
-^^^^^^^^^^^^
-* no changes so far
+* Provide support for `HTCondor <https://htcondor.org/>`_ clusters in a `third-party repository <https://github.com/Martin1887/lab-htcondor-environment>`_ and add link to docs (Martín Pozo).
+* Add documentation for AI Basel's infai_3 partition (Silvan Sievers).
+* Don't rely on the existence of the 'runs-00001-00100' dir when fetching results (Jendrik Seipp).
 
 
 v7.4 (2023-08-18)
