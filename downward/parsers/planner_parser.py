@@ -94,8 +94,3 @@ class PlannerParser(Parser):
         self.add_function(add_planner_memory)
         self.add_function(add_planner_time)
         self.add_function(add_planner_scores)
-
-
-if __name__ == "__main__":
-    parser = PlannerParser()
-    parser.parse()

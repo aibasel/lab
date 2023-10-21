@@ -67,8 +67,3 @@ class AnytimeSearchParser(Parser):
         self.add_function(reduce_to_min("steps:all", "steps"))
         self.add_function(coverage)
         self.add_function(add_memory)
-
-
-if __name__ == "__main__":
-    parser = AnytimeSearchParser()
-    parser.parse()

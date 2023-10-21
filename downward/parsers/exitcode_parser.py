@@ -52,8 +52,3 @@ class ExitcodeParser(Parser):
             required=True,
         )
         self.add_function(parse_exit_code)
-
-
-if __name__ == "__main__":
-    parser = ExitcodeParser()
-    parser.parse()

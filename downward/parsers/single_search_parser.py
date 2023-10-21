@@ -158,8 +158,3 @@ class SingleSearchParser(Parser):
         self.add_function(add_initial_h_values)
         self.add_function(ensure_minimum_times)
         self.add_function(add_scores)
-
-
-if __name__ == "__main__":
-    parser = SingleSearchParser()
-    parser.parse()
