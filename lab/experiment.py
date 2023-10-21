@@ -440,10 +440,13 @@ class Experiment(_Buildable):
             props_path = run_dir / "properties"
             if props_path.is_file():
                 props_path.unlink()
+
             loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
             logging.log(loglevel, f"Parsing run: {index:6d}/{num_runs:d}")
+            props = tools.Properties(filename=props_path)
             for parser in self.parsers:
-                parser.parse(run_dir)
+                parser.parse(run_dir, props)
+            props.write()
 
     def add_fetcher(
         self, src=None, dest=None, merge=None, name=None, filter=None, **kwargs

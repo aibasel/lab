@@ -280,7 +280,7 @@ class Properties(dict):
     """Transparently handle properties files compressed with xz."""
 
     def __init__(self, filename=None):
-        self.path = filename
+        self.path = Path(filename) if filename else None
         if self.path:
             self.path = Path(self.path).resolve()
             xz_path = self.path.with_suffix(".xz")
@@ -295,8 +295,7 @@ class Properties(dict):
     def __str__(self):
         return json.dumps(self, **self.JSON_ARGS)
 
-    def load(self, filename):
-        path = Path(filename)
+    def load(self, path: Path):
         open_func = lzma.open if path.suffix == ".xz" else open
         with open_func(path) as f:
             try:

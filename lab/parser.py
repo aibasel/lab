@@ -24,8 +24,6 @@ import logging
 from pathlib import Path
 import re
 
-from lab import tools
-
 
 def _get_pattern_flags(s):
     flags = 0
@@ -163,15 +161,13 @@ class Parser:
         """
         self.functions.append(_Function(function, file))
 
-    def parse(self, run_dir="."):
+    def parse(self, run_dir, props):
         """Search all patterns and apply all functions.
 
-        The found values are written to the run's ``properties`` file.
+        Add the found values to *props*.
 
         """
         run_dir = Path(run_dir).resolve()
-        prop_file = run_dir / "properties"
-        self.props = tools.Properties(filename=prop_file)
 
         content_cache = {}
 
@@ -189,12 +185,10 @@ class Parser:
             path = run_dir / filename
             content = get_content(path)
             if content:
-                file_parser.search_patterns(str(path), content, self.props)
+                file_parser.search_patterns(str(path), content, props)
 
         for function in self.functions:
             path = run_dir / function.filename
             content = get_content(path)
             if content:
-                function.function(content, self.props)
-
-        self.props.write()
+                function.function(content, props)
