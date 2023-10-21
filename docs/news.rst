@@ -10,6 +10,10 @@ Lab
 * Add documentation for AI Basel's infai_3 partition (Silvan Sievers).
 * Don't rely on the existence of the 'runs-00001-00100' dir when fetching results (Jendrik Seipp).
 
+Downward Lab
+^^^^^^^^^^^^
+* None.
+
 
 v7.4 (2023-08-18)
 -----------------
