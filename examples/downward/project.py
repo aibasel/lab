@@ -107,6 +107,7 @@ SUITE_OPTIMAL_STRIPS = [
     "woodworking-opt08-strips", "woodworking-opt11-strips", "zenotravel",
 ]
 
+
 DOMAIN_GROUPS = {
     "airport": ["airport"],
     "assembly": ["assembly"],
@@ -125,11 +126,13 @@ DOMAIN_GROUPS = {
     "floortile": [
         "floortile-opt11-strips", "floortile-opt14-strips",
         "floortile-sat11-strips", "floortile-sat14-strips"],
+    "folding": ["folding-opt23-adl", "folding-sat23-adl"],
     "freecell": ["freecell"],
     "ged": ["ged-opt14-strips", "ged-sat14-strips"],
     "grid": ["grid"],
     "gripper": ["gripper"],
     "hiking": ["hiking-opt14-strips", "hiking-sat14-strips"],
+    "labyrinth": ["labyrinth-opt23-adl", "labyrinth-sat23-adl"],
     "logistics": ["logistics98", "logistics00"],
     "maintenance": ["maintenance-opt14-adl", "maintenance-sat14-adl"],
     "miconic": ["miconic", "miconic-strips"],
@@ -158,11 +161,16 @@ DOMAIN_GROUPS = {
     "pipes-nt": ["pipesworld-notankage"],
     "pipes-t": ["pipesworld-tankage"],
     "psr": ["psr-middle", "psr-large", "psr-small"],
+    "quantum-layout": ["quantum-layout-opt23-strips", "quantum-layout-sat23-strips"],
+    "recharging-robots": ["recharging-robots-opt23-adl", "recharging-robots-sat23-adl"],
+    "ricochet-robots": ["ricochet-robots-opt23-adl", "ricochet-robots-sat23-adl"],
     "rovers": ["rover", "rovers"],
+    "rubiks-cube": ["rubiks-cube-opt23-adl", "rubiks-cube-sat23-adl"],
     "satellite": ["satellite"],
     "scanalyzer": [
         "scanalyzer-08-strips", "scanalyzer-opt11-strips", "scanalyzer-sat11-strips"],
     "schedule": ["schedule"],
+    "slitherlink": ["slitherlink-opt23-adl", "slitherlink-sat23-adl"],
     "sokoban": [
         "sokoban-opt08-strips", "sokoban-opt11-strips",
         "sokoban-sat08-strips", "sokoban-sat11-strips"],
