@@ -7,6 +7,7 @@ next (unreleased)
 Lab
 ^^^
 * Allow passing properties files to fetchers directly (Jendrik Seipp).
+* Let fetch and report steps log onyl the total number of unexplained errors instead of printing all of them to stderr (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^

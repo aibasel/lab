@@ -136,7 +136,7 @@ class Fetcher:
                 slurm_err_content = ""
 
             if slurm_err_content:
-                logging.error("There was output to *-grid-steps/slurm.err")
+                logging.warning("There was output to *-grid-steps/slurm.err")
 
             new_props = tools.Properties()
             run_dirs = sorted(src_dir.glob("runs-*-*/*"))
@@ -159,12 +159,12 @@ class Fetcher:
         for props in combined_props.values():
             error_message = tools.get_unexplained_errors_message(props)
             if error_message:
-                logging.error(error_message)
                 unexplained_errors += 1
 
         tools.makedirs(eval_dir)
         combined_props.write()
-        logging.info(
-            f"Wrote properties file (contains {unexplained_errors} "
-            f"runs with unexplained errors)."
+        func = logging.info if unexplained_errors == 0 else logging.warning
+        func(
+            f"Wrote properties file. It contains {unexplained_errors} "
+            f"runs with unexplained errors."
         )

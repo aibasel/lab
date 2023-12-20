@@ -144,7 +144,7 @@ class PlanningReport(Report):
             int(bool(tools.get_unexplained_errors_message(run)))
             for run in self.runs.values()
         )
-        func = logging.info if num_unexplained_errors == 0 else logging.error
+        func = logging.info if num_unexplained_errors == 0 else logging.warning
         func(
             f"Report contains {num_unexplained_errors} runs with unexplained"
             f" errors."
@@ -227,7 +227,6 @@ class PlanningReport(Report):
         for run in self.runs.values():
             error_message = tools.get_unexplained_errors_message(run)
             if error_message:
-                logging.error(error_message)
                 run_dir = run["run_dir"]
                 for attr in self.ERROR_ATTRIBUTES:
                     value = run.get(attr, "?")
@@ -256,7 +255,7 @@ class PlanningReport(Report):
                     f"There was output to {slurm_err_file}. Below is the output without"
                     f'"memory cg" errors:\n```\n{slurm_err_content}\n```'
                 )
-            logging.error(f"There was output to {slurm_err_file}.")
+            logging.warning(f"There was output to {slurm_err_file}.")
 
         if table:
             errors.append(str(table))
