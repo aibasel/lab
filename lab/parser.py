@@ -171,28 +171,27 @@ class Parser:
 
         content_cache = {}
 
-        def get_content(path, file_required=False):
+        def get_content(path):
             if path not in content_cache:
                 try:
                     content_cache[path] = path.read_text()
                 except FileNotFoundError:
-                    if file_required:
-                        logging.error(
-                            f'File "{path}", required by some pattern(s), is missing.'
-                        )
-                    content_cache[path] = None
+                    content_cache[path] = ""
             return content_cache[path]
 
         for filename, file_parser in self.file_parsers.items():
             # If filename is absolute, path is set to filename.
             path = run_dir / filename
-            required_pattern = any(pattern.required for pattern in file_parser.patterns)
-            content = get_content(path, file_required=required_pattern)
-            if content:
-                file_parser.search_patterns(str(path), content, props)
+            content = get_content(path)
+            if not content and any(
+                pattern.required for pattern in file_parser.patterns
+            ):
+                logging.error(
+                    f'File "{path}", required by some pattern(s), is missing.'
+                )
+            file_parser.search_patterns(str(path), content, props)
 
         for function in self.functions:
             path = run_dir / function.filename
             content = get_content(path)
-            if content:
-                function.function(content, props)
+            function.function(content, props)
