@@ -8,6 +8,7 @@ Lab
 ^^^
 * Allow passing properties files to fetchers directly (Jendrik Seipp).
 * Let fetch and report steps log only the total number of unexplained errors instead of printing all of them to stderr (Jendrik Seipp).
+* Let parsers print an error if the file for a required pattern is missing. Call parser functions with empty string for missing files (Silvan Sievers).
 
 Downward Lab
 ^^^^^^^^^^^^

@@ -176,7 +176,6 @@ class Parser:
                 try:
                     content_cache[path] = path.read_text()
                 except FileNotFoundError:
-                    logging.info(f'File "{path}" is missing and thus not parsed.')
                     content_cache[path] = None
             return content_cache[path]
 
@@ -184,11 +183,14 @@ class Parser:
             # If filename is absolute, path is set to filename.
             path = run_dir / filename
             content = get_content(path)
-            if content:
+            if content is None:
+                if any(pattern.required for pattern in file_parser.patterns):
+                    logging.error(f'Required file "{path}" is missing.')
+            else:
                 file_parser.search_patterns(str(path), content, props)
 
         for function in self.functions:
             path = run_dir / function.filename
-            content = get_content(path)
-            if content:
-                function.function(content, props)
+            # Call function with empty string if file is missing.
+            content = get_content(path) or ""
+            function.function(content, props)
