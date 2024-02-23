@@ -249,17 +249,14 @@ class _Buildable:
         if not command:
             logging.critical(f'Command "{name}" must not be empty')
 
-        # Abort or at least warn if the command calls a Python script directly.
+        # Raise an error if the command calls a Python script directly.
         msg = (
-            'Command "{name}" appears to call the Python script "{part}" directly. '
+            'Command "{name}" calls the Python script "{part}" directly. '
             "To make sure the script uses the right Python interpreter, "
-            'please use "[..., sys.executable, "{part}", ...] instead.'
+            'please use "[sys.executable, "{part}", ...] instead.'
         )
         if command[0].endswith(".py"):
             raise ValueError(msg.format(name=name, part=command[0]))
-        for part in command:
-            if part.endswith(".py"):
-                logging.warning(msg.format(name=name, part=part))
 
         if "stdin" in kwargs:
             logging.critical("redirecting stdin is not supported")
