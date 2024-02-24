@@ -21,6 +21,9 @@ CSS = """\
         padding-bottom: 4px;
         background-color: #aaa;
         color: #ffffff;
+        /* Make table headers sticky. */
+        position: sticky;
+        top: 0;
     }
 </style>
 """
