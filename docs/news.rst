@@ -1,6 +1,17 @@
 Changelog
 =========
 
+v8.2 (unreleased)
+-----------------
+
+Lab
+^^^
+* Gracefully handle programs that write garbled output by replacing problematic characters (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* None.
+
 v8.1 (2024-02-28)
 -----------------
 
