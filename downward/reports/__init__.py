@@ -263,12 +263,6 @@ class PlanningReport(Report):
         if table:
             errors.append(str(table))
 
-        infai_1_nodes = {f"ase{i:02d}.cluster.bc2.ch" for i in range(1, 25)}
-        infai_2_nodes = {f"ase{i:02d}.cluster.bc2.ch" for i in range(31, 55)}
-        nodes = self._get_node_names()
-        if nodes & infai_1_nodes and nodes & infai_2_nodes:
-            errors.append("Report combines runs from infai_1 and infai_2 partitions.")
-
         return "\n".join(errors)
 
     def _get_algorithm_order(self):
