@@ -24,6 +24,8 @@ import logging
 from pathlib import Path
 import re
 
+from lab import tools
+
 
 def _get_pattern_flags(s):
     flags = 0
@@ -31,7 +33,7 @@ def _get_pattern_flags(s):
         try:
             flags |= getattr(re, char)
         except AttributeError:
-            logging.critical(f"Unknown pattern flag: {char}")
+            raise ValueError(f"Unknown pattern flag: {char}")
     return flags
 
 
@@ -51,22 +53,25 @@ class _Pattern:
         flags = _get_pattern_flags(flags)
         self.regex = re.compile(regex, flags)
 
-    def search(self, content, filename):
+    def search(self, filename, content, props):
         found_props = {}
         match = self.regex.search(content)
         if match:
             try:
                 value = match.group(self.group)
             except IndexError:
-                logging.error(
+                tools.add_unexplained_error(
+                    props,
                     f"Attribute {self.attribute} not found for pattern {self} in "
-                    f"file {filename}."
+                    f"file {filename}.",
                 )
             else:
                 value = self.type_(value)
                 found_props[self.attribute] = value
         elif self.required:
-            logging.error(f'Pattern "{self}" not found in {filename}')
+            tools.add_unexplained_error(
+                props, f'Pattern "{self}" not found in {filename}'
+            )
         return found_props
 
     def __str__(self):
@@ -86,7 +91,7 @@ class _FileParser:
 
     def search_patterns(self, filename, content, props):
         for pattern in self.patterns:
-            props.update(pattern.search(content, filename))
+            props.update(pattern.search(filename, content, props))
 
 
 class Parser:
@@ -185,7 +190,9 @@ class Parser:
             content = get_content(path)
             if content is None:
                 if any(pattern.required for pattern in file_parser.patterns):
-                    logging.error(f'Required file "{path}" is missing.')
+                    tools.add_unexplained_error(
+                        props, f'Required file "{path}" is missing.'
+                    )
             else:
                 file_parser.search_patterns(str(path), content, props)
 
