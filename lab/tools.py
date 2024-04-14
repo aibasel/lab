@@ -519,16 +519,12 @@ def rgb_fractions_to_html_color(r, g, b):
     return f"rgb({int(r * 255)},{int(g * 255)},{int(b * 255)})"
 
 
-def get_unexplained_errors_message(run):
+def has_unexplained_error(run):
     """
-    Return an error message if an unexplained error occured in the given run,
-    otherwise return None.
+    Return whether the run has an unexplained error apart from Slurm writing to stderr.
     """
     unexplained_errors = run.get("unexplained_errors", [])
-    if not unexplained_errors or unexplained_errors == ["output-to-slurm.err"]:
-        return ""
-    else:
-        return f"Unexplained error(s) in {run['run_dir']}: {unexplained_errors}"
+    return bool(unexplained_errors) and unexplained_errors != ["output-to-slurm.err"]
 
 
 def get_slurm_err_content(src_dir):

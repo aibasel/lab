@@ -141,8 +141,7 @@ class PlanningReport(Report):
         self.algorithms = self._get_algorithm_order()
 
         num_unexplained_errors = sum(
-            int(bool(tools.get_unexplained_errors_message(run)))
-            for run in self.runs.values()
+            int(tools.has_unexplained_error(run)) for run in self.runs.values()
         )
         func = logging.info if num_unexplained_errors == 0 else logging.warning
         func(
@@ -224,17 +223,21 @@ class PlanningReport(Report):
             for run in self.runs.values()
         )
 
+        unique_error_messages = defaultdict(list)
         for run in self.runs.values():
-            error_message = tools.get_unexplained_errors_message(run)
-            if error_message:
+            if tools.has_unexplained_error(run):
                 run_dir = run["run_dir"]
                 for attr in self.ERROR_ATTRIBUTES:
                     value = run.get(attr, "?")
                     if attr == "unexplained_errors":
                         value = self._format_unexplained_errors(value)
+                        unique_error_messages[value].append(run["run_dir"])
                         # Use formatted value as-is.
                         table.cell_formatters[run_dir][attr] = reports.CellFormatter()
                     table.add_cell(run_dir, attr, value)
+
+        if unique_error_messages:
+            logging.info(f"Unique unexplained errors: {len(unique_error_messages)}")
 
         errors = []
 
