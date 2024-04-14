@@ -255,8 +255,8 @@ class PlanningReport(Report):
             else:
                 slurm_err_content = tools.filter_slurm_err_content(slurm_err_content)
                 errors.append(
-                    f"There was output to {slurm_err_file}. Below is the output without"
-                    f'"memory cg" errors:\n```\n{slurm_err_content}\n```'
+                    f"There was output to {slurm_err_file}:\n"
+                    f"```\n{slurm_err_content}\n```"
                 )
             logging.warning(f"There was output to {slurm_err_file}.")
 
