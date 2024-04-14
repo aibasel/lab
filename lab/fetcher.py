@@ -157,8 +157,7 @@ class Fetcher:
 
         unexplained_errors = 0
         for props in combined_props.values():
-            error_message = tools.get_unexplained_errors_message(props)
-            if error_message:
+            if tools.has_unexplained_error(props):
                 unexplained_errors += 1
 
         tools.makedirs(eval_dir)
