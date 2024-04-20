@@ -10,7 +10,8 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* None.
+* Group rows in unexplained errors table by error message (Jendrik Seipp).
+
 
 v8.1 (2024-02-28)
 -----------------

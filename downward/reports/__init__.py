@@ -50,9 +50,9 @@ class PlanningReport(Report):
 
     #: Attributes shown in the unexplained-errors table.
     ERROR_ATTRIBUTES = [
+        "algorithm",
         "domain",
         "problem",
-        "algorithm",
         "unexplained_errors",
         "error",
         "planner_wall_clock_time",
@@ -196,15 +196,14 @@ class PlanningReport(Report):
         ERROR_LOG_MAX_LINES lines, omit lines in the middle of the text.
         """
         linebreak = "\\\\"
-        text = f"''{errors}''".replace("\\n", linebreak).replace(
-            " ", markup.ESCAPE_WHITESPACE
+        text = (
+            str(errors).replace("\\n", linebreak).replace(" ", markup.ESCAPE_WHITESPACE)
         )
         lines = text.split(linebreak)
         if len(lines) <= self.ERROR_LOG_MAX_LINES:
             return text
         index = (self.ERROR_LOG_MAX_LINES - 2) // 2
         text = linebreak.join(lines[:index] + ["", "[...]", ""] + lines[-index:])
-        assert text.startswith("''") and text.endswith("''"), text
         return text
 
     def _get_warnings_text_and_table(self):
@@ -233,28 +232,77 @@ class PlanningReport(Report):
                 )
             logging.warning(f"There was output to {slurm_err_file}.")
 
-        if not self.ERROR_ATTRIBUTES:
-            raise ValueError("The ERROR_ATTRIBUTES list must not be empty.")
-        table = reports.Table(title="Unexplained errors")
-        table.set_column_order(self.ERROR_ATTRIBUTES)
-        unique_error_messages = defaultdict(list)
-        for run in self.runs.values():
-            if tools.has_unexplained_error(run):
-                run_dir = run["run_dir"]
-                for attr in self.ERROR_ATTRIBUTES:
-                    value = run.get(attr, "?")
-                    if attr == "unexplained_errors":
-                        value = self._format_unexplained_errors(value)
-                        unique_error_messages[value].append(run["run_dir"])
-                        # Use formatted value as-is.
-                        table.cell_formatters[run_dir][attr] = reports.CellFormatter()
-                    table.add_cell(run_dir, attr, value)
+        if self.output_format == "html":
+            unique_error_messages = defaultdict(list)
+            for run in self.runs.values():
+                if tools.has_unexplained_error(run):
+                    msg = self._format_unexplained_errors(
+                        run.get("unexplained_errors", "?")
+                    )
+                    unique_error_messages[msg].append(run)
 
-        if unique_error_messages:
-            logging.info(f"Unique unexplained errors: {len(unique_error_messages)}")
+            error_atributes = [
+                attr for attr in self.ERROR_ATTRIBUTES if attr != "unexplained_errors"
+            ]
+            if "run_dir" not in self.ERROR_ATTRIBUTES:
+                error_atributes.append("run_dir")
 
-        if table:
-            errors.append(str(table))
+            def get_row(run):
+                return " ".join(
+                    f"<td>{run.get(attr, '?')}</td>" for attr in error_atributes
+                )
+
+            table = [
+                '<button type="button" class="toggle-table" '
+                'onclick="toggle_table(this)">Show table</button><p></p>',
+                '<table class="tableborder" style="display:none">',
+                "<tr>",
+                "<th>Unexplained errors</th> "
+                + " ".join(f"<th>{attr}</th>" for attr in error_atributes),
+                "</tr>",
+            ]
+            for msg, runs in sorted(
+                unique_error_messages.items(), key=lambda x: len(x[0])
+            ):
+                runs.sort(
+                    key=lambda run: (run["algorithm"], run["domain"], run["problem"])
+                )
+                table.append("<tr>")
+                table.append(f'<td rowspan="{len(runs)}">{msg}</td>')
+                table.append(get_row(runs[0]))
+                table.append("</tr>")
+                for run in runs[1:]:
+                    table.append(f"<tr>{get_row(run)}</tr>")
+            table.append("</table>")
+            errors.append("\n'''\n" + "\n".join(table) + "\n'''")
+        else:
+            if not self.ERROR_ATTRIBUTES:
+                raise ValueError("The ERROR_ATTRIBUTES list must not be empty.")
+            table = reports.Table(title="Unexplained errors")
+            table.set_column_order(self.ERROR_ATTRIBUTES)
+            unique_error_messages = defaultdict(list)
+            for run in sorted(
+                self.runs.values(),
+                key=lambda run: (run["algorithm"], run["domain"], run["problem"]),
+            ):
+                if tools.has_unexplained_error(run):
+                    run_dir = run["run_dir"]
+                    for attr in self.ERROR_ATTRIBUTES:
+                        value = run.get(attr, "?")
+                        if attr == "unexplained_errors":
+                            value = self._format_unexplained_errors(value)
+                            unique_error_messages[value].append(run["run_dir"])
+                            # Use formatted value as-is.
+                            table.cell_formatters[run_dir][
+                                attr
+                            ] = reports.CellFormatter()
+                        table.add_cell(run_dir, attr, value)
+
+            if unique_error_messages:
+                logging.info(f"Unique unexplained errors: {len(unique_error_messages)}")
+
+            if table:
+                errors.append(str(table))
 
         return "\n".join(errors)
 
