@@ -208,39 +208,12 @@ class PlanningReport(Report):
         return text
 
     def _get_warnings_text_and_table(self):
-        """
-        Return a :py:class:`Table <lab.reports.Table>` containing one line for
-        each run where an unexplained error occured.
-        """
-        if not self.ERROR_ATTRIBUTES:
-            logging.critical("The list of error attributes must not be empty.")
-
-        table = reports.Table(title="Unexplained errors")
-        table.set_column_order(self.ERROR_ATTRIBUTES)
+        errors = []
 
         wrote_to_slurm_err = any(
             "output-to-slurm.err" in run.get("unexplained_errors", [])
             for run in self.runs.values()
         )
-
-        unique_error_messages = defaultdict(list)
-        for run in self.runs.values():
-            if tools.has_unexplained_error(run):
-                run_dir = run["run_dir"]
-                for attr in self.ERROR_ATTRIBUTES:
-                    value = run.get(attr, "?")
-                    if attr == "unexplained_errors":
-                        value = self._format_unexplained_errors(value)
-                        unique_error_messages[value].append(run["run_dir"])
-                        # Use formatted value as-is.
-                        table.cell_formatters[run_dir][attr] = reports.CellFormatter()
-                    table.add_cell(run_dir, attr, value)
-
-        if unique_error_messages:
-            logging.info(f"Unique unexplained errors: {len(unique_error_messages)}")
-
-        errors = []
-
         if wrote_to_slurm_err:
             src_dir = self.eval_dir.rstrip("/")[: -len("-eval")]
             slurm_err_file = src_dir + "-grid-steps/slurm.err"
@@ -259,6 +232,26 @@ class PlanningReport(Report):
                     f"```\n{slurm_err_content}\n```"
                 )
             logging.warning(f"There was output to {slurm_err_file}.")
+
+        if not self.ERROR_ATTRIBUTES:
+            raise ValueError("The ERROR_ATTRIBUTES list must not be empty.")
+        table = reports.Table(title="Unexplained errors")
+        table.set_column_order(self.ERROR_ATTRIBUTES)
+        unique_error_messages = defaultdict(list)
+        for run in self.runs.values():
+            if tools.has_unexplained_error(run):
+                run_dir = run["run_dir"]
+                for attr in self.ERROR_ATTRIBUTES:
+                    value = run.get(attr, "?")
+                    if attr == "unexplained_errors":
+                        value = self._format_unexplained_errors(value)
+                        unique_error_messages[value].append(run["run_dir"])
+                        # Use formatted value as-is.
+                        table.cell_formatters[run_dir][attr] = reports.CellFormatter()
+                    table.add_cell(run_dir, attr, value)
+
+        if unique_error_messages:
+            logging.info(f"Unique unexplained errors: {len(unique_error_messages)}")
 
         if table:
             errors.append(str(table))
