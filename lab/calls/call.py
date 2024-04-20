@@ -183,8 +183,8 @@ class Call:
                 bytes_written = fd_to_bytes[fd]
                 if soft_limit is not None and bytes_written > soft_limit:
                     logging.error(
-                        f"{self.name} finished and wrote {bytes_written / 1024} KiB "
-                        f"to {outfile.name} (soft limit: {soft_limit / 1024} KiB)"
+                        f"{self.name} finished and wrote {bytes_written / 1024:.2f} KiB "
+                        f"to {outfile.name} (soft limit: {soft_limit / 1024:.2f} KiB)"
                     )
 
     def wait(self):
