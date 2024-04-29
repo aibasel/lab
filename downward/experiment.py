@@ -335,11 +335,7 @@ class FastDownwardExperiment(Experiment):
         self._algorithms[name] = algorithm
 
     def build(self, **kwargs):
-        """Add Fast Downward code, runs and write everything to disk.
-
-        This method is called by the second experiment step.
-
-        """
+        """Add Fast Downward code and runs, and write everything to disk."""
         if not self._algorithms:
             logging.critical("You must add at least one algorithm.")
 
