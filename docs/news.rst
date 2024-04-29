@@ -7,6 +7,8 @@ v8.2 (unreleased)
 Lab
 ^^^
 * Gracefully handle programs that write garbled output by replacing problematic characters (Jendrik Seipp).
+* Add parsing errors to properties file directly instead of writing them to stderr (Jendrik Seipp).
+* Remove special treatment of Slurm "memory cg" errors, since they don't seem to occur anymore (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
