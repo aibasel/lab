@@ -2,12 +2,12 @@
 Module that permits generating planner reports by reading properties files.
 """
 
+import logging
 from collections import defaultdict
 from fnmatch import fnmatch
-import logging
 
 from lab import reports, tools
-from lab.reports import Attribute, geometric_mean, markup, Report
+from lab.reports import Attribute, Report, geometric_mean, markup
 
 
 class PlanningReport(Report):

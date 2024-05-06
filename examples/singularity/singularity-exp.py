@@ -26,9 +26,9 @@ filesystem (e.g., /tmp/) before running experiments.
 """
 
 import os
-from pathlib import Path
 import platform
 import sys
+from pathlib import Path
 
 from singularity_parser import get_parser
 

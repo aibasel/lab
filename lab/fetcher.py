@@ -1,9 +1,9 @@
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 
-from lab import tools
 import lab.experiment
+from lab import tools
 
 
 def _check_eval_dir(eval_dir: Path):

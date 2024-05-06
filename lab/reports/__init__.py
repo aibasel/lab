@@ -3,19 +3,19 @@ Module that permits generating reports by reading properties files
 """
 
 import collections
-from collections import defaultdict
 import fnmatch
 import logging
 import math
 import numbers
 import os
 import sys
+from collections import defaultdict
 
 import txt2tags
 
 from lab import tools
 from lab.reports import markup
-from lab.reports.markup import Document, ESCAPE_WORDBREAK
+from lab.reports.markup import ESCAPE_WORDBREAK, Document
 
 
 def arithmetic_mean(values):

@@ -4,7 +4,6 @@ import os
 import shutil
 
 import custom_parser
-
 import project
 
 

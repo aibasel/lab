@@ -5,12 +5,12 @@ import logging
 import lzma
 import math
 import os
-from pathlib import Path
 import pkgutil
 import re
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 
 # Use simplejson where it's available, because it is compatible (just separately

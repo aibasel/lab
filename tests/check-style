@@ -1,5 +1,0 @@
-#! /bin/bash
-
-set -exuo pipefail
-
-python -m isort --check-only downward/ examples/ lab/ tests/ setup.py

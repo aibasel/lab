@@ -3,11 +3,11 @@
 This experiment demonstrates most of the available options.
 """
 
-from collections import defaultdict
 import os
 import os.path
-from pathlib import Path
 import platform
+from collections import defaultdict
+from pathlib import Path
 from subprocess import call
 
 from downward.experiment import FastDownwardExperiment

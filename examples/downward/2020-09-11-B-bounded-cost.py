@@ -5,13 +5,12 @@ import os
 import shutil
 
 import custom_parser
+import project
 
 from downward import suites
 from downward.cached_revision import CachedFastDownwardRevision
 from downward.experiment import FastDownwardAlgorithm, FastDownwardRun
 from lab.experiment import Experiment
-
-import project
 
 
 REPO = project.get_repo_base()

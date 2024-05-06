@@ -1,8 +1,8 @@
-from collections import defaultdict
 import itertools
 import logging
 import math
 import os
+from collections import defaultdict
 
 from downward.reports import PlanningReport
 from downward.reports.scatter_matplotlib import ScatterMatplotlib

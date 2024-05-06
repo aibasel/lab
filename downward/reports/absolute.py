@@ -1,6 +1,6 @@
-from collections import defaultdict
 import logging
 import re
+from collections import defaultdict
 
 from downward import outcomes
 from downward.reports import PlanningReport

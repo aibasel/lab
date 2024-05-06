@@ -2,10 +2,10 @@ import functools
 import hashlib
 import logging
 import os.path
-from pathlib import Path
 import shutil
 import subprocess
 import tarfile
+from pathlib import Path
 
 from lab import tools
 

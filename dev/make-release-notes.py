@@ -3,6 +3,7 @@
 import re
 import sys
 
+
 _, VERSION, CHANGELOG, LIST = sys.argv
 
 REGEX = rf"""

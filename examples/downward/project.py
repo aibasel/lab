@@ -1,8 +1,8 @@
-from pathlib import Path
 import platform
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport

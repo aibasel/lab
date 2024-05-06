@@ -19,10 +19,10 @@ Parsers are run in the order in which they were added.
 
 """
 
-from collections import defaultdict
 import logging
-from pathlib import Path
 import re
+from collections import defaultdict
+from pathlib import Path
 
 from lab import tools
 
