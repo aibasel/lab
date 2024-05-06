@@ -4,6 +4,7 @@ from collections import OrderedDict
 import logging
 import os
 from pathlib import Path
+import re
 import sys
 
 from lab import environments, tools
@@ -249,13 +250,22 @@ class _Buildable:
         if not command:
             logging.critical(f'Command "{name}" must not be empty')
 
-        # Raise an error if the command calls a Python script directly.
-        msg = (
-            'Command "{name}" calls the Python script "{part}" directly. '
-            "To make sure the script uses the right Python interpreter, "
-            'please use "[sys.executable, "{part}", ...] instead.'
-        )
-        if command[0].endswith(".py"):
+        # Raise an error if the command calls Python directly.
+        if re.match(r"^python[0-9\.]*$", command[0]):
+            msg = (
+                'Command "{name}" calls Python directly. '
+                "To make sure the command uses the correct Python interpreter, "
+                "please use {part} instead."
+            )
+            raise ValueError(
+                msg.format(name=name, part=["sys.executable"] + command[1:])
+            )
+        elif command[0].endswith(".py"):
+            msg = (
+                'Command "{name}" calls the Python script "{part}" directly. '
+                "To make sure the script uses the correct Python interpreter, "
+                'please use "[sys.executable, "{part}", ...] instead.'
+            )
             raise ValueError(msg.format(name=name, part=command[0]))
 
         if "stdin" in kwargs:
