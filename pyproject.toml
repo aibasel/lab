@@ -23,7 +23,7 @@ target-version = "py38"
 # ruff enables Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
 select = [
   "F", # pyflakes
-  "E4", "E7", "E9", # pycodestyle
+  "E", # pycodestyle
   "B", # flake8-bugbear
   "C4", # comprehensions
   "UP", # pyupgrade

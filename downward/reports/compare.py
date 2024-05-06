@@ -124,11 +124,11 @@ class DiffColumnsModule(reports.DynamicDataModule):
 
     def collect(self, table, cells):
         """
-        Add cells for the specified diff columns and dynamically compute their values
-        from the respective data columns. If one of the values is None, set the difference
-        to the string '-'. Calculate the summary functions over all values were both
-        columns have a value. Also add an empty header for a dummy column after every diff
-        column.
+        Add cells for the specified diff columns and dynamically compute their
+        values from the respective data columns. If one of the values is None,
+        set the difference to the string '-'. Calculate the summary functions
+        over all values were both columns have a value. Also add an empty header
+        for a dummy column after every diff column.
         """
         for col_names, diff_col_header, diff_col_name in self.header_names:
             non_none_values = []
@@ -152,11 +152,11 @@ class DiffColumnsModule(reports.DynamicDataModule):
 
     def format(self, table, formatted_cells):
         """
-        Format all columns added by this module. Diff values are green if they are better
-        in the second column, red if they are worse and grey if there is no difference.
-        "Better" and "worse" are with respect to the min_wins information of the table for
-        each row.
-        Do not format dummy columns and summary functions.
+        Format all columns added by this module. Diff values are green if they
+        are better in the second column, red if they are worse and grey if there
+        is no difference. "Better" and "worse" are with respect to the min_wins
+        information of the table for each row. Do not format dummy columns and
+        summary functions.
         """
         for _, _, diff_col_name in self.header_names:
             for row_name in table.row_names:
@@ -192,7 +192,8 @@ class DiffColumnsModule(reports.DynamicDataModule):
 
     def modify_printable_row_order(self, table, row_order):
         """
-        Append lines for all summary functions that are not already used to the row order.
+        Append lines for all summary functions that are not already used to the
+        row order.
         """
         for func in self.summary_functions:
             func_name = self._get_function_name(func)

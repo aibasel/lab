@@ -150,7 +150,8 @@ DOMAIN_GROUPS = {
         "openstacks-opt08-adl", "openstacks-sat08-adl"],
     "optical-telegraphs": ["optical-telegraphs"],
     "parcprinter": [
-        "parcprinter-08-strips", "parcprinter-opt11-strips", "parcprinter-sat11-strips"],
+        "parcprinter-08-strips", "parcprinter-opt11-strips",
+        "parcprinter-sat11-strips"],
     "parking": [
         "parking-opt11-strips", "parking-opt14-strips",
         "parking-sat11-strips", "parking-sat14-strips"],
