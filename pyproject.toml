@@ -1,14 +1,8 @@
 [tool.ruff]
 exclude = [
-  ".eggs",
   ".git",
-  "_build",
   "build",
   "dist",
-  "htmlcov",
-  "vulture.egg-info",
-  ".cache",
-  ".coverage",
   ".pytest_cache",
   ".tox",
   ".venv",
@@ -16,17 +10,17 @@ exclude = [
   # Custom
   "data",
   "external",
+  "lab.egg-info",
   "revision-cache",
 ]
 
-# Same as Black.
 line-length = 88
 indent-width = 4
 
 target-version = "py38"
 
 [tool.ruff.lint]
-# ruff enables Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# ruff enables Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
 select = [
   "F", # pyflakes
   "E4", "E7", "E9", # pycodestyle
