@@ -2,9 +2,4 @@
 
 set -exuo pipefail
 
-python -m black --check --diff .
-python -m blackdoc --check .
-# E203: whitespace before ':' (not compliant with PEP 8)
-python -m flake8 --extend-ignore E203 --exclude=build,data,revision-cache,conf.py,.git,.tox,.venv --max-line-length=90
 python -m isort --check-only downward/ examples/ lab/ tests/ setup.py
-python -m pyupgrade --py37-plus `find downward lab tests -name "*.py"`

@@ -33,7 +33,7 @@ def _get_pattern_flags(s):
         try:
             flags |= getattr(re, char)
         except AttributeError:
-            raise ValueError(f"Unknown pattern flag: {char}")
+            raise ValueError(f"Unknown pattern flag: {char}") from None
     return flags
 
 

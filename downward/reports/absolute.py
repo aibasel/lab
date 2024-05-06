@@ -153,7 +153,7 @@ class AbsoluteReport(PlanningReport):
 
             parts = []
             toc_line = []
-            for (domain, table) in tables:
+            for domain, table in tables:
                 if domain:
                     assert table
                     toc_line.append(f"[''{domain}'' #{attribute}-{domain}]")

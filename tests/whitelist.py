@@ -4,12 +4,12 @@ from lab.calls.call import Call
 from lab.environments import TetralithEnvironment
 
 
-reports.Table.add_col
-reports.Table.get_row
-reports.Table.set_row_order
-lab.tools.deprecated
-lab.tools.get_lab_path
+assert reports.Table.add_col
+assert reports.Table.get_row
+assert reports.Table.set_row_order
+assert lab.tools.deprecated
+assert lab.tools.get_lab_path
 
-Call
+assert Call
 
 TetralithEnvironment.is_present()
