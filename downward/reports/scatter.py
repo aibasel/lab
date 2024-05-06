@@ -1,8 +1,8 @@
-from collections import defaultdict
 import itertools
 import logging
 import math
 import os
+from collections import defaultdict
 
 from downward.reports import PlanningReport
 from downward.reports.scatter_matplotlib import ScatterMatplotlib
@@ -176,7 +176,7 @@ class ScatterPlotReport(PlanningReport):
                 logging.critical(f"Scale {scale} not in {scales}")
 
     def has_multiple_categories(self):
-        return any(key is not None for key in self.categories.keys())
+        return any(key is not None for key in self.categories)
 
     def _fill_categories(self):
         """Map category names to coordinate lists."""
@@ -372,7 +372,7 @@ class ScatterPlotReport(PlanningReport):
         self.writer.write(self, filename)
 
     def write(self):
-        if not len(self.algorithms) == 2:
+        if len(self.algorithms) != 2:
             logging.critical(
                 f"Scatter plots need exactly 2 algorithms: {self.algorithms}"
             )

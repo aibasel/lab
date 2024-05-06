@@ -163,8 +163,8 @@ class Call:
                             # Don't write to this outfile in subsequent rounds.
                             fd_to_outfile[fd] = None
                             logging.error(
-                                f"{self.name} wrote {hard_limit / 1024} KiB (hard limit) "
-                                f"to {outfile.name} -> abort command"
+                                f"{self.name} wrote {hard_limit / 1024} KiB "
+                                f"(hard limit) to {outfile.name} -> abort command"
                             )
                             self.process.terminate()
                             # Strip extra bytes.
@@ -183,8 +183,9 @@ class Call:
                 bytes_written = fd_to_bytes[fd]
                 if soft_limit is not None and bytes_written > soft_limit:
                     logging.error(
-                        f"{self.name} finished and wrote {bytes_written / 1024:.2f} KiB "
-                        f"to {outfile.name} (soft limit: {soft_limit / 1024:.2f} KiB)"
+                        f"{self.name} finished and wrote "
+                        f"{bytes_written / 1024:.2f} KiB to {outfile.name} "
+                        f"(soft limit: {soft_limit / 1024:.2f} KiB)"
                     )
 
     def wait(self):

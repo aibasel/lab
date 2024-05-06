@@ -1,9 +1,9 @@
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 
-from lab import tools
 import lab.experiment
+from lab import tools
 
 
 def _check_eval_dir(eval_dir: Path):
@@ -98,10 +98,7 @@ class Fetcher:
         if not src_dir.exists():
             logging.critical(f"{src_dir} is missing")
 
-        if src_dir.is_file():
-            src_props_file = src_dir
-        else:
-            src_props_file = src_dir / "properties"
+        src_props_file = src_dir if src_dir.is_file() else src_dir / "properties"
         run_filter = tools.RunFilter(filter, **kwargs)
 
         eval_dir = eval_dir or str(src_dir).rstrip("/") + "-eval"

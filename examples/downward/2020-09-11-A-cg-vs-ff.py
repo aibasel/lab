@@ -4,9 +4,7 @@ import os
 import shutil
 
 import custom_parser
-
 import project
-
 
 REPO = project.get_repo_base()
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]

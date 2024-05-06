@@ -2,10 +2,9 @@
 
 from pathlib import Path
 
-from lab.experiment import Experiment
-
 import project
 
+from lab.experiment import Experiment
 
 ATTRIBUTES = [
     "error",

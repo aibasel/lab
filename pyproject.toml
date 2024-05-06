@@ -1,38 +1,78 @@
-# NOTE: you have to use single-quoted strings in TOML for regular expressions.
-# It's the equivalent of r-strings in Python.  Multiline strings are treated as
-# verbose regular expressions by Black.  Use [ ] to denote a significant space
-# character.
-
-[tool.black]
-line-length = 88
-target-version = ['py37', 'py38', 'py39', 'py310']
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.tox
-  | \.venv
-  | _build
-  | build
-  | dist
+[tool.ruff]
+exclude = [
+  ".git",
+  "build",
+  "dist",
+  ".pytest_cache",
+  ".tox",
+  ".venv",
+  ".vscode",
   # Custom
-  | data
-  | external
-  | revision-cache
-)/
-'''
+  "data",
+  "external",
+  "lab.egg-info",
+  "revision-cache",
+]
 
-[tool.isort]
-case_sensitive = false
-force_single_line = false
-force_sort_within_sections = true
-include_trailing_comma = true
-known_first_party = "downward,lab"
-known_project = "project"  # Put "import project" below other imports.
-line_length = 88
-lines_after_imports = 2  # -1 puts 2 lines before classes and functions, otherwise 1 line
-multi_line_output = 3
-order_by_type = false
-sections = ['FUTURE', 'STDLIB', 'THIRDPARTY', 'FIRSTPARTY', 'LOCALFOLDER', 'PROJECT']
-skip = "data"
+line-length = 88
+indent-width = 4
+
+target-version = "py38"
+
+[tool.ruff.lint]
+# ruff enables Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
+select = [
+  "B", # flake8-bugbear
+  "C4", # comprehensions
+  "F", # pyflakes
+  "E", # pycodestyle
+  "I001", # isort
+  "UP", # pyupgrade,
+  "SIM", # flake8-simplify
+]
+ignore = [
+  "C408", # unnecessary dict call
+  "SIM115", # Use context handler for opening files
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"vulture/whitelists/*.py" = ["B018"]
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = false
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
+
+[tool.vulture]
+min_confidence = 0
+paths = ["lab", "downward", "examples", "tests"]
+exclude = ["data"]

@@ -1,17 +1,16 @@
 """Main module for creating experiments."""
 
-from collections import OrderedDict
 import logging
 import os
-from pathlib import Path
 import re
 import sys
+from collections import OrderedDict
+from pathlib import Path
 
 from lab import environments, tools
 from lab.fetcher import Fetcher
 from lab.parser import Parser
-from lab.steps import get_step, get_steps_text, Step
-
+from lab.steps import Step, get_step, get_steps_text
 
 # How many tasks to group into one top-level directory.
 SHARD_SIZE = 100
@@ -697,10 +696,7 @@ class Run(_Buildable):
                     return repr(str(arg))
 
             def format_key_value_pair(key, val):
-                if isinstance(val, str):
-                    formatted_value = format_arg(val)
-                else:
-                    formatted_value = repr(val)
+                formatted_value = format_arg(val) if isinstance(val, str) else repr(val)
                 return f"{key}={formatted_value}"
 
             cmd_string = f"[{', '.join([format_arg(arg) for arg in cmd])}]"

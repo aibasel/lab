@@ -2,12 +2,12 @@
 Module that permits generating planner reports by reading properties files.
 """
 
+import logging
 from collections import defaultdict
 from fnmatch import fnmatch
-import logging
 
 from lab import reports, tools
-from lab.reports import Attribute, geometric_mean, markup, Report
+from lab.reports import Attribute, Report, geometric_mean, markup
 
 
 class PlanningReport(Report):
@@ -296,11 +296,12 @@ class PlanningReport(Report):
         """
         all_algos = {run["algorithm"] for run in self.props.values()}
         if self.filter_algorithm:
-            # Other filters may have changed the set of available algorithms by either
-            # removing all runs for one algorithm or changing run['algorithm'] for a run.
-            # Maintain the original order of algorithms and only keep algorithms that
-            # still have runs after filtering. Then add all new algorithms
-            # sorted naturally at the end.
+            # Other filters may have changed the set of available algorithms by
+            # either removing all runs for one algorithm or changing
+            # run['algorithm'] for a run. Maintain the original order of
+            # algorithms and only keep algorithms that still have runs after
+            # filtering. Then add all new algorithms sorted naturally at the
+            # end.
             algo_order = [
                 c for c in self.filter_algorithm if c in all_algos
             ] + tools.natural_sort(all_algos - set(self.filter_algorithm))

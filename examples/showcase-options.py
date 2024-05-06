@@ -3,11 +3,11 @@
 This experiment demonstrates most of the available options.
 """
 
-from collections import defaultdict
 import os
 import os.path
-from pathlib import Path
 import platform
+from collections import defaultdict
+from pathlib import Path
 from subprocess import call
 
 from downward.experiment import FastDownwardExperiment
@@ -19,7 +19,6 @@ from lab import reports
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.reports import Attribute
 from lab.reports.filter import FilterReport
-
 
 DIR = Path(__file__).resolve().parent
 NODE = platform.node()

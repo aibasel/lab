@@ -1,16 +1,13 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 22.3.0
+# Check and format code.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.3
     hooks:
-      - id: black
+      - id: ruff
+      - id: ruff-format
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 4.0.1
+  # Find unused Python code.
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.11
     hooks:
-      - id: flake8
-        args: ['--extend-ignore=E203', '--exclude=build,data,revision-cache,conf.py,.git,.tox,.venv', '--max-line-length=90']
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
-    hooks:
-      - id: pyupgrade
+      - id: vulture

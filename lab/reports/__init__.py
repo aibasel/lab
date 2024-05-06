@@ -3,19 +3,19 @@ Module that permits generating reports by reading properties files
 """
 
 import collections
-from collections import defaultdict
 import fnmatch
 import logging
 import math
 import numbers
 import os
 import sys
+from collections import defaultdict
 
 import txt2tags
 
 from lab import tools
 from lab.reports import markup
-from lab.reports.markup import Document, ESCAPE_WORDBREAK
+from lab.reports.markup import ESCAPE_WORDBREAK, Document
 
 
 def arithmetic_mean(values):
@@ -326,9 +326,7 @@ class Report:
 
     def _get_numerical_attributes(self):
         return [
-            attr
-            for attr in self._all_attributes.keys()
-            if self.attribute_is_numeric(attr)
+            attr for attr in self._all_attributes if self.attribute_is_numeric(attr)
         ]
 
     def attribute_is_numeric(self, attribute):

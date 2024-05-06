@@ -19,10 +19,10 @@ Parsers are run in the order in which they were added.
 
 """
 
-from collections import defaultdict
 import logging
-from pathlib import Path
 import re
+from collections import defaultdict
+from pathlib import Path
 
 from lab import tools
 
@@ -33,7 +33,7 @@ def _get_pattern_flags(s):
         try:
             flags |= getattr(re, char)
         except AttributeError:
-            raise ValueError(f"Unknown pattern flag: {char}")
+            raise ValueError(f"Unknown pattern flag: {char}") from None
     return flags
 
 

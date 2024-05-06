@@ -15,7 +15,6 @@ from downward.reports.absolute import AbsoluteReport
 from downward.reports.scatter import ScatterPlotReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 
-
 ATTRIBUTES = ["coverage", "error", "expansions", "planner_memory", "planner_time"]
 
 NODE = platform.node()

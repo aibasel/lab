@@ -1,8 +1,9 @@
-from pathlib import Path
+import contextlib
 import platform
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
@@ -15,7 +16,6 @@ from lab.environments import (
 )
 from lab.experiment import ARGPARSER
 from lab.reports import Attribute, geometric_mean
-
 
 # Silence import-unused messages. Experiment scripts may use these imports.
 assert (
@@ -150,7 +150,8 @@ DOMAIN_GROUPS = {
         "openstacks-opt08-adl", "openstacks-sat08-adl"],
     "optical-telegraphs": ["optical-telegraphs"],
     "parcprinter": [
-        "parcprinter-08-strips", "parcprinter-opt11-strips", "parcprinter-sat11-strips"],
+        "parcprinter-08-strips", "parcprinter-opt11-strips",
+        "parcprinter-sat11-strips"],
     "parking": [
         "parking-opt11-strips", "parking-opt14-strips",
         "parking-sat11-strips", "parking-sat14-strips"],
@@ -249,10 +250,8 @@ def get_repo_base() -> Path:
 
 
 def remove_file(path: Path):
-    try:
+    with contextlib.suppress(FileNotFoundError):
         path.unlink()
-    except FileNotFoundError:
-        pass
 
 
 def add_evaluations_per_time(run):

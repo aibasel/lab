@@ -3,7 +3,6 @@ import logging
 
 import txt2tags
 
-
 ESCAPE_WORDBREAK = "xWBRx"
 ESCAPE_WHITESPACE = "xWHITESPACEx"
 

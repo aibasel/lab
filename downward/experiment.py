@@ -2,9 +2,9 @@
 A module for running Fast Downward experiments.
 """
 
-from collections import defaultdict, OrderedDict
 import logging
 import os.path
+from collections import OrderedDict, defaultdict
 from pathlib import Path
 
 from downward import suites
@@ -15,7 +15,7 @@ from downward.parsers.planner_parser import PlannerParser
 from downward.parsers.single_search_parser import SingleSearchParser
 from downward.parsers.translator_parser import TranslatorParser
 from lab import tools
-from lab.experiment import Experiment, get_default_data_dir, Run
+from lab.experiment import Experiment, Run, get_default_data_dir
 
 
 class FastDownwardAlgorithm:

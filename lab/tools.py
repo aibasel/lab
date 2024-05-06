@@ -1,17 +1,17 @@
 import argparse
 import colorsys
+import contextlib
 import functools
 import logging
 import lzma
 import math
 import os
-from pathlib import Path
 import pkgutil
 import re
 import shutil
 import subprocess
 import sys
-
+from pathlib import Path
 
 # Use simplejson where it's available, because it is compatible (just separately
 # maintained), puts no blanks at line endings and loads json much faster:
@@ -148,16 +148,13 @@ def makedirs(path):
     """
     os.makedirs() variant that doesn't complain if the path already exists.
     """
-    try:
+    with contextlib.suppress(OSError):
         os.makedirs(path)
-    except OSError:
-        # Directory probably already exists.
-        pass
 
 
 def confirm_or_abort(question):
     answer = input(f"{question} (y/N): ").strip()
-    if not answer.lower() == "y":
+    if answer.lower() != "y":
         sys.exit("Aborted")
 
 
@@ -382,10 +379,7 @@ def fast_updatetree(src, dst, symlinks=False, ignore=None):
     Code taken and adapted from python docs.
     """
     names = os.listdir(src)
-    if ignore is not None:
-        ignored_names = ignore(src, names)
-    else:
-        ignored_names = set()
+    ignored_names = ignore(src, names) if ignore is not None else set()
 
     makedirs(dst)
 
@@ -458,7 +452,7 @@ def get_color(fraction, min_wins):
 
 
 def get_colors(cells, min_wins):
-    result = {col: (0.5, 0.5, 0.5) for col in cells.keys()}
+    result = {col: (0.5, 0.5, 0.5) for col in cells}
     min_value, max_value = get_min_max(cells.values())
 
     if min_value == max_value:
@@ -480,10 +474,7 @@ def get_colors(cells, min_wins):
 
     for col, val in cells.items():
         if val is not None:
-            if diff == 0:
-                fraction = 0
-            else:
-                fraction = (val - min_value) / diff
+            fraction = 0 if diff == 0 else (val - min_value) / diff
             result[col] = get_color(fraction, min_wins)
     return result
 
@@ -555,11 +546,14 @@ class RawAndDefaultsHelpFormatter(argparse.HelpFormatter):
 
     def _get_help_string(self, action):
         help = action.help
-        if "%(default)" not in action.help and "default" not in action.help:
-            if action.default is not argparse.SUPPRESS:
-                defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
-                if action.option_strings or action.nargs in defaulting_nargs:
-                    help += " (default: %(default)s)"
+        if (
+            "%(default)" not in action.help
+            and "default" not in action.help
+            and action.default is not argparse.SUPPRESS
+        ):
+            defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
+            if action.option_strings or action.nargs in defaulting_nargs:
+                help += " (default: %(default)s)"
         return help
 
 

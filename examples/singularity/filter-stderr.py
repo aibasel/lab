@@ -2,9 +2,8 @@
 
 """Filter lines from run.err that stem from "expected errors"."""
 
-from pathlib import Path
 import shutil
-
+from pathlib import Path
 
 IGNORE_PATTERNS = [
     "CPU time limit exceeded",
