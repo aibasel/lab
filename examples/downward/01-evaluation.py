@@ -6,7 +6,6 @@ import project
 
 from lab.experiment import Experiment
 
-
 ATTRIBUTES = [
     "error",
     "run_dir",

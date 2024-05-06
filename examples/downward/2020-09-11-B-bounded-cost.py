@@ -12,7 +12,6 @@ from downward.cached_revision import CachedFastDownwardRevision
 from downward.experiment import FastDownwardAlgorithm, FastDownwardRun
 from lab.experiment import Experiment
 
-
 REPO = project.get_repo_base()
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 SCP_LOGIN = "myname@myserver.com"

@@ -3,7 +3,6 @@ import os
 
 from lab import tools
 
-
 base = os.path.join("/tmp", str(datetime.datetime.now()))
 os.mkdir(base)
 

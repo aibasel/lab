@@ -5,7 +5,6 @@
 import shutil
 from pathlib import Path
 
-
 IGNORE_PATTERNS = [
     "CPU time limit exceeded",
     "std::bad_alloc",

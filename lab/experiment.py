@@ -12,7 +12,6 @@ from lab.fetcher import Fetcher
 from lab.parser import Parser
 from lab.steps import Step, get_step, get_steps_text
 
-
 # How many tasks to group into one top-level directory.
 SHARD_SIZE = 100
 

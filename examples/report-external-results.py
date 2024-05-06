@@ -20,7 +20,6 @@ from pathlib import Path
 from downward.reports.absolute import AbsoluteReport
 from lab.experiment import Experiment
 
-
 PROPERTIES = {
     "ff-gripper-prob01.pddl": {
         "domain": "gripper",

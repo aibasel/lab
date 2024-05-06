@@ -20,7 +20,6 @@ from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 from lab.reports import Attribute
 from lab.reports.filter import FilterReport
 
-
 DIR = Path(__file__).resolve().parent
 NODE = platform.node()
 REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")

@@ -13,7 +13,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 # Use simplejson where it's available, because it is compatible (just separately
 # maintained), puts no blanks at line endings and loads json much faster:
 # json_dump: 44.41s, simplejson_dump: 45.90s

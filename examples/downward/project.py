@@ -17,7 +17,6 @@ from lab.environments import (
 from lab.experiment import ARGPARSER
 from lab.reports import Attribute, geometric_mean
 
-
 # Silence import-unused messages. Experiment scripts may use these imports.
 assert (
     BaselSlurmEnvironment
