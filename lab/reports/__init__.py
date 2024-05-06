@@ -326,9 +326,7 @@ class Report:
 
     def _get_numerical_attributes(self):
         return [
-            attr
-            for attr in self._all_attributes.keys()
-            if self.attribute_is_numeric(attr)
+            attr for attr in self._all_attributes if self.attribute_is_numeric(attr)
         ]
 
     def attribute_is_numeric(self, attribute):

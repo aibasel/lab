@@ -22,15 +22,17 @@ target-version = "py38"
 [tool.ruff.lint]
 # ruff enables Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
 select = [
-  "F", # pyflakes
-  "E", # pycodestyle
   "B", # flake8-bugbear
   "C4", # comprehensions
-  "UP", # pyupgrade
+  "F", # pyflakes
+  "E", # pycodestyle
   "I001", # isort
+  "UP", # pyupgrade,
+  "SIM", # flake8-simplify
 ]
 ignore = [
   "C408", # unnecessary dict call
+  "SIM115", # Use context handler for opening files
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

@@ -117,14 +117,14 @@ class AbsoluteReport(PlanningReport):
                     # Txt2tags seems to only allow letters, "-" and "_" in anchors.
                     pseudo_attribute = "error-" + error
                     table = self._get_empty_table(title=pseudo_attribute)
-                    min_wins = error_to_min_wins.get(error, None)
+                    min_wins = error_to_min_wins.get(error)
                     table.min_wins = min_wins
                     table.colored = min_wins is not None
                     for domain in self.domains:
                         if self.use_domain_links:
-                            table.cell_formatters[domain][
-                                table.header_column
-                            ] = reports.CellFormatter(link=f"#error-{domain}")
+                            table.cell_formatters[domain][table.header_column] = (
+                                reports.CellFormatter(link=f"#error-{domain}")
+                            )
                         for algorithm in self.algorithms:
                             count = error_counter.get((algorithm, domain, error), 0)
                             table.add_cell(domain, algorithm, count)

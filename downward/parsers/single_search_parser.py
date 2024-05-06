@@ -65,10 +65,7 @@ def add_initial_h_values(content, props):
         r"Initial heuristic value for (.+): ([-]?\d+|infinity)$", content, flags=re.M
     )
     for heuristic, init_h in matches:
-        if init_h == "infinity":
-            init_h = sys.maxsize
-        else:
-            init_h = int(init_h)
+        init_h = sys.maxsize if init_h == "infinity" else int(init_h)
         if heuristic in initial_h_values:
             props.add_unexplained_error(
                 f"multiple initial h values found for {heuristic}"

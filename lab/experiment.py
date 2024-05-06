@@ -697,10 +697,7 @@ class Run(_Buildable):
                     return repr(str(arg))
 
             def format_key_value_pair(key, val):
-                if isinstance(val, str):
-                    formatted_value = format_arg(val)
-                else:
-                    formatted_value = repr(val)
+                formatted_value = format_arg(val) if isinstance(val, str) else repr(val)
                 return f"{key}={formatted_value}"
 
             cmd_string = f"[{', '.join([format_arg(arg) for arg in cmd])}]"

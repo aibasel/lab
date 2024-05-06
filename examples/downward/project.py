@@ -1,3 +1,4 @@
+import contextlib
 import platform
 import re
 import subprocess
@@ -250,10 +251,8 @@ def get_repo_base() -> Path:
 
 
 def remove_file(path: Path):
-    try:
+    with contextlib.suppress(FileNotFoundError):
         path.unlink()
-    except FileNotFoundError:
-        pass
 
 
 def add_evaluations_per_time(run):
