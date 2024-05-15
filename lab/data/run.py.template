@@ -11,8 +11,8 @@ tools.configure_logging()
 
 logging.info(f"node: {platform.node()}")
 
-run_log = open("run.log", "w")
-run_err = open("run.err", "w", buffering=1)  # line buffering
+run_log = open("run.log", "wb")
+run_err = open("run.err", "wb", buffering=0)  # disable buffering
 redirects = {"stdout": run_log, "stderr": run_err}
 
 # Make sure we're in the run directory.

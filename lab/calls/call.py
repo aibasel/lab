@@ -7,8 +7,6 @@ import subprocess
 import sys
 import time
 
-from lab import tools
-
 
 def set_limit(kind, soft_limit, hard_limit):
     try:
@@ -59,7 +57,7 @@ class Call:
         for stream_name in ["stdout", "stderr"]:
             stream = kwargs.get(stream_name)
             if isinstance(stream, str):
-                file = open(stream, mode="w")
+                file = open(stream, mode="wb")
                 kwargs[stream_name] = file
                 self.opened_files.append(file)
 
@@ -169,7 +167,7 @@ class Call:
                             self.process.terminate()
                             # Strip extra bytes.
                             data = data[: hard_limit - fd_to_bytes[fd]]
-                        outfile.write(tools.get_string(data))
+                        outfile.write(data)
                         fd_to_bytes[fd] += len(data)
                 else:
                     # Ignore hang up or errors.

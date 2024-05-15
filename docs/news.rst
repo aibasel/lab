@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v8.3 (unreleased)
+-----------------
+
+Lab
+^^^
+* Open ``run.log`` and ``run.err`` in binary mode to avoid decoding byte strings (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes
+
+
 v8.2 (2024-05-06)
 -----------------
 

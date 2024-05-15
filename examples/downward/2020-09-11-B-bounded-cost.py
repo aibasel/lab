@@ -67,7 +67,7 @@ for rev, rev_nick in REV_NICKS:
         algo_name = f"{rev_nick}-{config_nick}" if rev_nick else config_nick
 
         bounds = {}
-        with open(BOUNDS_FILE) as f:
+        with open(BOUNDS_FILE, "rb") as f:
             bounds = json.load(f)
         for task in suites.build_suite(BENCHMARKS_DIR, SUITE):
             upper_bound = bounds[f"{task.domain}:{task.problem}"]
