@@ -43,6 +43,9 @@ class Fetcher:
 
     """
 
+    def __init__(self, exp):
+        self.exp = exp
+
     def fetch_dir(self, run_dir):
         """Combine "static-properties" and "properties" from a run dir and return it."""
         run_dir = Path(run_dir)
@@ -159,6 +162,7 @@ class Fetcher:
 
         tools.makedirs(eval_dir)
         combined_props.write()
+        self.exp.props = combined_props
         func = logging.info if unexplained_errors == 0 else logging.warning
         func(
             f"Wrote properties file. It contains {unexplained_errors} "

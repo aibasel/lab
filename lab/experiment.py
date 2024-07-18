@@ -366,6 +366,9 @@ class Experiment(_Buildable):
         self.runs = []
         self.parsers = []
 
+        # This attribute will be set by the first report that loads data.
+        self.props = tools.Properties()
+
         self.set_property("experiment_file", self._script)
 
     @property
@@ -516,7 +519,9 @@ class Experiment(_Buildable):
         src = src or self.path
         dest = dest or self.eval_dir
         name = name or f"fetch-{os.path.basename(src.rstrip('/'))}"
-        self.add_step(name, Fetcher(), src, dest, merge=merge, filter=filter, **kwargs)
+        self.add_step(
+            name, Fetcher(self), src, dest, merge=merge, filter=filter, **kwargs
+        )
 
     def add_report(self, report, name="", eval_dir="", outfile=""):
         """Add *report* to the list of experiment steps.
@@ -538,6 +543,7 @@ class Experiment(_Buildable):
         >>> exp.add_report(AbsoluteReport(attributes=["coverage"]))
 
         """
+        report.exp = self
         name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
         eval_dir = eval_dir or self.eval_dir
         outfile = outfile or f"{name}.{report.output_format}"
