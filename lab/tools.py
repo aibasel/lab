@@ -13,19 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Use simplejson where it's available, because it is compatible (just separately
-# maintained), puts no blanks at line endings and loads json much faster:
-# json_dump: 44.41s, simplejson_dump: 45.90s
-# json_load: 7.32s, simplejson_load: 2.92s
-# We cannot use cjson or ujson for dumping, because the resulting files are
-# hard to read for humans (cjson_dump: 5.78, ujson_dump: 2.44). Using ujson for
-# loading might be feasible, but it would only result in a very small speed gain
-# (ujson_load: 2.49). cjson loads even slower than simplejson (cjson_load: 3.28).
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
+import orjson as json
 
 DEFAULT_ENCODING = "utf-8"
 
@@ -260,19 +248,18 @@ def compute_log_score(success, value, lower_bound, upper_bound):
 
 
 class Properties(dict):
-    class _PropertiesEncoder(json.JSONEncoder):
-        def default(self, o):
-            if isinstance(o, Path):
-                return str(o)
-            else:
-                return super().default(o)
+    def default(self, o):
+        if isinstance(o, Path):
+            return str(o)
+        else:
+            return super().default(o)
 
-    JSON_ARGS = {
-        "cls": _PropertiesEncoder,
-        "indent": 2,
-        "separators": (",", ": "),
-        "sort_keys": True,
-    }
+    # JSON_ARGS = {
+    #     "cls": _PropertiesEncoder,
+    #     "indent": 2,
+    #     "separators": (",", ": "),
+    #     "sort_keys": True,
+    # }
 
     """Transparently handle properties files compressed with xz."""
 
@@ -289,14 +276,16 @@ class Properties(dict):
         dict.__init__(self)
 
     def __str__(self):
-        return json.dumps(self, **self.JSON_ARGS)
+        return json.dumps(
+            self, default=self.default, option=json.OPT_INDENT_2 | json.OPT_SORT_KEYS
+        )
 
     def load(self, filename):
         path = Path(filename)
         open_func = lzma.open if path.suffix == ".xz" else open
-        with open_func(path) as f:
+        with open_func(path, "rb") as f:
             try:
-                self.update(json.load(f))
+                self.update(json.loads(f.read()))
             except ValueError as e:
                 logging.critical(f"JSON parse error in file '{path}': {e}")
 
@@ -308,8 +297,8 @@ class Properties(dict):
         assert self.path
         self.path.parent.mkdir(parents=True, exist_ok=True)
         open_func = lzma.open if self.path.suffix == ".xz" else open
-        with open_func(self.path, "w") as f:
-            json.dump(self, f, **self.JSON_ARGS)
+        with open_func(self.path, "wb") as f:
+            f.write(self.__str__())
 
 
 class RunFilter:
