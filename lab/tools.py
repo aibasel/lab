@@ -276,6 +276,9 @@ class Properties(dict):
         dict.__init__(self)
 
     def __str__(self):
+        return self.to_bytes().decode()
+
+    def to_bytes(self):
         return json.dumps(
             self, default=self.default, option=json.OPT_INDENT_2 | json.OPT_SORT_KEYS
         )
@@ -298,7 +301,7 @@ class Properties(dict):
         self.path.parent.mkdir(parents=True, exist_ok=True)
         open_func = lzma.open if self.path.suffix == ".xz" else open
         with open_func(self.path, "wb") as f:
-            f.write(self.__str__())
+            f.write(self.to_bytes())
 
 
 class RunFilter:
