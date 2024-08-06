@@ -414,15 +414,15 @@ class Report:
         self._all_attributes = self._get_type_map(attributes)
 
     def _load_data(self):
-        if not self.exp.props:
+        if self.eval_dir not in self.exp.props or not self.exp.props[self.eval_dir]:
             props_file = os.path.join(self.eval_dir, "properties")
             logging.info("Reading properties file")
-            self.exp.props = tools.Properties(filename=props_file)
-            if not self.exp.props:
+            self.exp.props[self.eval_dir] = tools.Properties(filename=props_file)
+            if not self.exp.props[self.eval_dir]:
                 logging.critical(f"No properties found in {self.eval_dir}")
             logging.info("Reading properties file finished")
 
-        self.props = self.exp.props
+        self.props = self.exp.props[self.eval_dir]
 
     def _apply_filter(self):
         # Removing elements would require a deepcopy of self.exp.props, with

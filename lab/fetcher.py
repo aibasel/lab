@@ -162,7 +162,7 @@ class Fetcher:
 
         tools.makedirs(eval_dir)
         combined_props.write()
-        self.exp.props = combined_props
+        self.exp.props[eval_dir] = combined_props
         func = logging.info if unexplained_errors == 0 else logging.warning
         func(
             f"Wrote properties file. It contains {unexplained_errors} "

@@ -378,7 +378,7 @@ class Experiment(_Buildable):
         self.parsers = []
 
         # This attribute will be set by the first report that loads data.
-        self.props = tools.Properties()
+        self.props = {}
 
         self.set_property("experiment_file", self._script)
 
