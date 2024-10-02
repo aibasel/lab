@@ -11,6 +11,6 @@ rm -rf ${EXPDIR}/data/
 mkdir -p ${EXPDIR}
 cp ${REPO}/examples/downward/*.py ${EXPDIR}
 cp ${REPO}/examples/downward/bounds.json ${EXPDIR}
-${DIR}/run-example-experiment ${EXPDIR}/2020-09-11-A-cg-vs-ff.py 1 2 3 4 7 10
-${DIR}/run-example-experiment ${EXPDIR}/2020-09-11-B-bounded-cost.py 1 2 3 4 7
+${DIR}/run-example-experiment ${EXPDIR}/2020-09-11-A-cg-vs-ff.py 1 2 3 4 6 8
+${DIR}/run-example-experiment ${EXPDIR}/2020-09-11-B-bounded-cost.py 1 2 3 4 6
 ${DIR}/run-example-experiment ${EXPDIR}/01-evaluation.py 1 2 3 4

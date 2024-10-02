@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import os
-import shutil
 
 import custom_parser
 import project
@@ -73,7 +72,6 @@ exp.add_step("parse", exp.parse)
 exp.add_fetcher(name="fetch")
 
 if not project.REMOTE:
-    exp.add_step("remove-eval-dir", shutil.rmtree, exp.eval_dir, ignore_errors=True)
     project.add_scp_step(exp, SCP_LOGIN, REMOTE_REPOS_DIR)
 
 project.add_absolute_report(
