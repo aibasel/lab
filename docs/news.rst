@@ -7,6 +7,7 @@ v8.3 (unreleased)
 Lab
 ^^^
 * Add support for Python 3.12 and 3.13 (Jendrik Seipp).
+* Run parser functions in run directories (Jendrik Seipp).
 * Open ``run.log`` and ``run.err`` in binary mode to avoid decoding byte strings (Jendrik Seipp).
 
 Downward Lab

@@ -20,6 +20,7 @@ Parsers are run in the order in which they were added.
 """
 
 import logging
+import os
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -200,4 +201,9 @@ class Parser:
             path = run_dir / function.filename
             # Call function with empty string if file is missing.
             content = get_content(path) or ""
+
+            # Run function in the run directory.
+            old_cwd = Path.cwd()
+            os.chdir(run_dir)
             function.function(content, props)
+            os.chdir(old_cwd)
