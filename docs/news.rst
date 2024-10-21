@@ -12,7 +12,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* No changes
+* Gracefully handle missing planner exit codes in ``driver.log`` (Jendrik Seipp).
 
 
 v8.2 (2024-05-06)

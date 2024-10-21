@@ -28,7 +28,7 @@ def parse_exit_code(content, props):
             use_legacy_exit_codes = False
             break
 
-    exitcode = props["planner_exit_code"]
+    exitcode = props.get("planner_exit_code")
     outcome = outcomes.get_outcome(exitcode, use_legacy_exit_codes)
     props["error"] = outcome.msg
     if use_legacy_exit_codes:
