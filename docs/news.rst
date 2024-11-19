@@ -1,6 +1,18 @@
 Changelog
 =========
 
+v8.4 (unreleased)
+-----------------
+
+Lab
+^^^
+* Allow fetching from compressed properties files (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes.
+
+
 v8.3 (2024-10-22)
 -----------------
 
