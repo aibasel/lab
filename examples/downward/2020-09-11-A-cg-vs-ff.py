@@ -97,4 +97,6 @@ for algo1, algo2 in pairs:
             name=f"{exp.name}-{algo1}-vs-{algo2}-{attr}{suffix}",
         )
 
+project.add_compress_exp_dir_step(exp)
+
 exp.run_steps()
