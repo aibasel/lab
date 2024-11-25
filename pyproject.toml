@@ -24,11 +24,11 @@ target-version = "py38"
 select = [
   "B", # flake8-bugbear
   "C4", # comprehensions
-  "F", # pyflakes
   "E", # pycodestyle
+  "F", # pyflakes
   "I001", # isort
-  "UP", # pyupgrade,
   "SIM", # flake8-simplify
+  "UP", # pyupgrade
 ]
 ignore = [
   "C408", # unnecessary dict call
