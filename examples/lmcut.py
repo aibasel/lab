@@ -7,7 +7,6 @@ directory.
 """
 
 import os
-import os.path
 import platform
 
 from downward.experiment import FastDownwardExperiment
