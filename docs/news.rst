@@ -10,7 +10,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* No changes.
+* Add ``add_compress_exp_dir_step()`` to example Fast Downward experiment (Jendrik Seipp).
 
 
 v8.3 (2024-10-22)
