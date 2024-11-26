@@ -1,8 +1,10 @@
 import contextlib
 import platform
 import re
+import shutil
 import subprocess
 import sys
+import tarfile
 from collections import defaultdict
 from pathlib import Path
 
@@ -294,22 +296,19 @@ def add_scp_step(exp, login, repos_dir):
 
 
 def add_compress_exp_dir_step(exp):
-    exp.add_step(
-        "compress-exp-dir",
-        subprocess.call,
-        [
-            "tar",
-            "--verbose",
-            "--create",
-            "--dereference",
-            "--remove-files",
-            "--xz",
-            "--file",
-            f"{exp.name}.tar.xz",
-            exp.name,
-        ],
-        cwd=Path(exp.path).parent,
-    )
+    def compress_exp_dir():
+        tar_file_path = Path(exp.path).parent / f"{exp.name}.tar.xz"
+        exp_dir_path = Path(exp.path)
+
+        with tarfile.open(tar_file_path, mode="w:xz", dereference=True) as tar:
+            for file in exp_dir_path.rglob("*"):
+                relpath = file.relative_to(exp_dir_path.parent)
+                print(f"Adding {relpath}")
+                tar.add(file, arcname=relpath)
+
+        shutil.rmtree(exp_dir_path)
+
+    exp.add_step("compress-exp-dir", compress_exp_dir)
 
 
 def fetch_algorithm(exp, expname, algo, *, new_algo=None):
