@@ -23,7 +23,9 @@ REVISION_CACHE = (
 if project.REMOTE:
     # ENV = project.BaselSlurmEnvironment(email="my.name@myhost.ch")
     ENV = project.TetralithEnvironment(
-        email="first.last@liu.se", extra_options="#SBATCH --account=snic2022-5-341"
+        memory_per_cpu="8704M",  # leave 500 MiB for the scripts
+        email="first.last@liu.se",
+        extra_options="#SBATCH --account=snic2022-5-341",
     )
     SUITE = project.SUITE_OPTIMAL_STRIPS
 else:
@@ -38,7 +40,7 @@ DRIVER_OPTIONS = [
     "--overall-time-limit",
     "5m",
     "--overall-memory-limit",
-    "3584M",
+    "8G",
 ]
 # Pairs of revision identifier and optional revision nick.
 REV_NICKS = [

@@ -143,8 +143,9 @@ class SlurmEnvironment(Environment):
     * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
     * "infai_3": 12 nodes with 128 cores, 512GB memory, 240GB SSD
 
-    *qos* must be a valid Slurm QOS name. In Basel this must be
-    "normal".
+    For Tetralith, omit the argument or use the default "tetralith".
+
+    *qos* must be a valid Slurm QOS name (default: "normal").
 
     *time_limit_per_task* sets the wall-clock time limit for each Slurm task.
     The BaselSlurmEnvironment subclass uses a default of "0", i.e., no limit.
@@ -155,13 +156,10 @@ class SlurmEnvironment(Environment):
 
     *memory_per_cpu* must be a string specifying the memory
     allocated for each core. The string must end with one of the
-    letters K, M or G. The default is "3872M". The value for
-    *memory_per_cpu* should not surpass the amount of memory that is
-    available per core, which is "3872M" for infai_1, "6354M" for
-    infai_2, and "4028M" for infai_3. Processes that surpass the
-    *memory_per_cpu* limit are terminated with SIGKILL. To impose a
-    soft limit that can be caught from within your programs, you can
-    use the ``memory_limit`` kwarg of
+    letters K, M or G. The default is "3872M" in Basel and "9G" on Tetralith.
+    Processes that surpass the *memory_per_cpu* limit are terminated with
+    SIGKILL. To impose a soft limit that can be caught from within your
+    programs, you use the ``memory_limit`` kwarg of
     :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
     should set memory limits via the ``driver_options``.
 
@@ -176,11 +174,11 @@ class SlurmEnvironment(Environment):
     *cpus_per_task* sets the number of cores to be allocated per Slurm
     task (default: 1).
 
-    Examples that reserve the maximum amount of memory available per core:
-
-    >>> env1 = BaselSlurmEnvironment(partition="infai_1", memory_per_cpu="3872M")
-    >>> env2 = BaselSlurmEnvironment(partition="infai_2", memory_per_cpu="6354M")
-    >>> env3 = BaselSlurmEnvironment(partition="infai_3", memory_per_cpu="4028M")
+    For the autonice script used on the Basel cluster,
+    the value for *memory_per_cpu* should not surpass the amount of
+    memory that is available per core, which is "3872M" for infai_1,
+    "6354M" for infai_2, and "4028M" for infai_3. The solution is to
+    artificially reserve multiple cores per task, see examples below.
 
     Example that reserves 12 GiB of memory on infai_1:
 
@@ -483,10 +481,8 @@ class TetralithEnvironment(SlurmEnvironment):
     # memory and 64 nodes have 384 GB of memory. All nodes have 32 cores.
     # So for the vast majority of nodes, we have 2979 MiB per core. The
     # slurm.conf file sets DefMemPerCPU=2904. Since this is rather low, we
-    # use the default value from the BaselSlurmEnvironment. This also
-    # allows us to keep the default memory limit in the
-    # FastDownwardExperiment class.
-    DEFAULT_MEMORY_PER_CPU = "3872M"
+    # simply set our own default: 8 GiB for the solver and 1 GiB for scripts.
+    DEFAULT_MEMORY_PER_CPU = "9G"
     # See slurm.conf
     MAX_TASKS = 2000
 

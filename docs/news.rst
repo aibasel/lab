@@ -8,6 +8,8 @@ Lab
 ^^^
 * Allow fetching from compressed properties files (Jendrik Seipp).
 * Use absolute paths in Slurm scripts to safeguard against ``.bashrc`` changing directories (Jendrik Seipp).
+* Use 9 GiB memory limit for Slurm jobs on Tetralith by default (Jendrik Seipp).
+* Revise documentation about memory limits (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
