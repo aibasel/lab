@@ -7,6 +7,7 @@ import random
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 from lab import tools
 
@@ -40,7 +41,7 @@ class Environment:
         even though the logs say the runs are finished.
 
         """
-        self.exp = None
+        self.exp = None  # Set by Experiment.
         self.randomize_task_order = randomize_task_order
 
     def _get_task_order(self, num_tasks):
@@ -337,7 +338,7 @@ class SlurmEnvironment(Environment):
         logging.info(f"Grouping {num_runs} runs into {num_tasks} Slurm tasks.")
         return tools.fill_template(
             self.RUN_JOB_BODY_TEMPLATE_FILE,
-            exp_path="../" + self.exp.name,
+            exp_path=self.exp.path,
             num_runs=num_runs,
             python=tools.get_python_executable(),
             runs_per_task=self._get_num_runs_per_task(),
@@ -374,39 +375,36 @@ class SlurmEnvironment(Environment):
         self.exp.build(write_to_disk=False)
 
         # Prepare job dir.
-        job_dir = self.exp.path + "-grid-steps"
-        if os.path.exists(job_dir):
+        self.job_dir = Path(self.exp.path + "-grid-steps")
+        if self.job_dir.exists():
             tools.confirm_or_abort(
-                f'The path "{job_dir}" already exists, so the experiment has '
+                f'The path "{self.job_dir}" already exists, so the experiment has '
                 f"already been submitted. Are you sure you want to "
                 f"delete the grid-steps and submit it again?"
             )
-            tools.remove_path(job_dir)
+            tools.remove_path(self.job_dir)
 
         # Overwrite exp dir if it exists.
         if any(is_build_step(step) for step in steps):
             self.exp._remove_experiment_dir()
 
         # Remove eval dir if it exists.
-        if os.path.exists(self.exp.eval_dir):
+        if Path(self.exp.eval_dir).exists():
             tools.confirm_or_abort(
                 f'The evaluation directory "{self.exp.eval_dir}" already exists. '
                 f"Do you want to remove it?"
             )
             tools.remove_path(self.exp.eval_dir)
 
-        # Create job dir only when we need it.
-        tools.makedirs(job_dir)
+        self.job_dir.mkdir(parents=True, exist_ok=True)
 
         prev_job_id = None
         for step in steps:
             job_name = self._get_job_name(step)
-            job_file = os.path.join(job_dir, job_name)
+            job_file = self.job_dir / job_name
             job_content = self._get_job(step, is_last=(step == steps[-1]))
             tools.write_file(job_file, job_content)
-            prev_job_id = self._submit_job(
-                job_name, job_file, job_dir, dependency=prev_job_id
-            )
+            prev_job_id = self._submit_job(job_name, job_file, dependency=prev_job_id)
 
     def _get_job_params(self, step, is_last):
         job_params = {
@@ -420,8 +418,8 @@ class SlurmEnvironment(Environment):
         # Let all tasks write into the same two files. We could use %a
         # (which is replaced by the array ID) to prevent mangled up logs,
         # but we don't want so many files.
-        job_params["logfile"] = "slurm.log"
-        job_params["errfile"] = "slurm.err"
+        job_params["logfile"] = self.job_dir / "slurm.log"
+        job_params["errfile"] = self.job_dir / "slurm.err"
 
         job_params["partition"] = self.partition
         job_params["qos"] = self.qos
@@ -444,15 +442,15 @@ class SlurmEnvironment(Environment):
 
         return job_params
 
-    def _submit_job(self, job_name, job_file, job_dir, dependency=None):
+    def _submit_job(self, job_name, job_file, dependency=None):
         submit = ["sbatch"]
         if self.export:
             submit += ["--export", ",".join(self.export)]
         if dependency:
             submit.extend(["-d", "afterany:" + dependency, "--kill-on-invalid-dep=yes"])
-        submit.append(job_file)
+        submit.append(str(job_file))
         logging.info(f"Executing {' '.join(submit)}")
-        out = subprocess.check_output(submit, cwd=job_dir).decode()
+        out = subprocess.check_output(submit, cwd=self.job_dir).decode()
         logging.info(f"Output: {out.strip()}")
         match = re.match(r"Submitted batch job (\d*)", out)
         assert match, f"Submitting job with sbatch failed: '{out}'"

@@ -7,6 +7,7 @@ v8.4 (unreleased)
 Lab
 ^^^
 * Allow fetching from compressed properties files (Jendrik Seipp).
+* Use absolute paths in Slurm scripts to safeguard against ``.bashrc`` changing directories (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^

@@ -174,8 +174,8 @@ def remove_path(path):
 
 
 def write_file(filename, content):
-    with open(filename, "w") as f:
-        f.write(content)
+    path = Path(filename)
+    path.write_text(content)
 
 
 def fill_template(template_name, **parameters):
