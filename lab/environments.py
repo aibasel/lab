@@ -133,7 +133,7 @@ class SlurmEnvironment(Environment):
     projects). ::
 
         extra_options="#SBATCH --nodelist=ase[1-5,7,10]"
-        extra_options="#SBATCH --account=snic2021-5-330"
+        extra_options="#SBATCH --account=naiss2024-5-421"
 
 
     *partition* must be a valid Slurm partition name. In Basel you
