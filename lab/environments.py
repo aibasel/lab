@@ -163,14 +163,6 @@ class SlurmEnvironment(Environment):
     :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
     should set memory limits via the ``driver_options``.
 
-    Slurm limits the memory with cgroups. Unfortunately, this often
-    fails on our nodes, so we set our own soft memory limit for all
-    Slurm jobs. We derive the soft memory limit by multiplying the
-    value denoted by the *memory_per_cpu* parameter with 0.98 (the
-    Slurm config file contains "AllowedRAMSpace=99" and we add some
-    slack). We use a soft instead of a hard limit so that child
-    processes can raise the limit.
-
     *cpus_per_task* sets the number of cores to be allocated per Slurm
     task (default: 1).
 
@@ -287,23 +279,6 @@ class SlurmEnvironment(Environment):
         self.cpus_per_task = cpus_per_task
         self.export = export
         self.setup = setup
-
-    @staticmethod
-    def _get_memory_in_kb(limit):
-        match = re.match(r"^(\d+)(k|m|g)?$", limit, flags=re.I)
-        if not match:
-            logging.critical(f"malformed memory_per_cpu parameter: {limit}")
-        memory = int(match.group(1))
-        suffix = match.group(2)
-        if suffix is not None:
-            suffix = suffix.lower()
-        if suffix == "k":
-            pass
-        elif suffix is None or suffix == "m":
-            memory *= 1024
-        elif suffix == "g":
-            memory *= 1024 * 1024
-        return memory
 
     def start_runs(self):
         # The queue will start the experiment by itself.
@@ -424,10 +399,6 @@ class SlurmEnvironment(Environment):
         job_params["time_limit_per_task"] = self.time_limit_per_task
         job_params["memory_per_cpu"] = self.memory_per_cpu
         job_params["cpus_per_task"] = self.cpus_per_task
-        memory_per_cpu_kb = SlurmEnvironment._get_memory_in_kb(self.memory_per_cpu)
-        job_params["soft_memory_limit"] = int(
-            self.cpus_per_task * memory_per_cpu_kb * 0.98
-        )
         job_params["nice"] = self.NICE_VALUE if is_run_step(step) else 0
         job_params["environment_setup"] = self.setup
 
