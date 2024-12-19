@@ -156,10 +156,10 @@ class SlurmEnvironment(Environment):
 
     *memory_per_cpu* must be a string specifying the memory
     allocated for each core. The string must end with one of the
-    letters K, M or G. The default is "3872M" in Basel and "9G" on Tetralith.
-    Processes that surpass the *memory_per_cpu* limit are terminated with
-    SIGKILL. To impose a soft limit that can be caught from within your
-    programs, you use the ``memory_limit`` kwarg of
+    letters K, M or G. The default is "3872M" for the Basel cluster and
+    "9G" on Tetralith. Processes that surpass the *memory_per_cpu* limit
+    are terminated with SIGKILL. To impose a soft limit that can be caught
+    from within your programs, use the ``memory_limit`` kwarg of
     :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
     should set memory limits via the ``driver_options``.
 
@@ -170,19 +170,8 @@ class SlurmEnvironment(Environment):
     the value for *memory_per_cpu* should not surpass the amount of
     memory that is available per core, which is "3872M" for infai_1,
     "6354M" for infai_2, and "4028M" for infai_3. The solution is to
-    artificially reserve multiple cores per task, see examples below.
-
-    Example that reserves 12 GiB of memory on infai_1:
-
-    >>> # 12 * 1024 / 3872 = 3.17 -> round to next int -> 4 cores per task
-    >>> # 12G / 4 = 3G per core
-    >>> env = BaselSlurmEnvironment(
-    ...     partition="infai_1",
-    ...     memory_per_cpu="3G",
-    ...     cpus_per_task=4,
-    ... )
-
-    Example that reserves 12 GiB of memory on infai_2:
+    artificially reserve multiple cores per task, see this example
+    that reserves 12 GiB of memory on infai_2:
 
     >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
     >>> # 12G / 2 = 6G per core
@@ -190,16 +179,6 @@ class SlurmEnvironment(Environment):
     ...     partition="infai_2",
     ...     memory_per_cpu="6G",
     ...     cpus_per_task=2,
-    ... )
-
-    Example that reserves 12 GiB of memory on infai_3:
-
-    >>> # 12 * 1024 / 4028 = 3.05 -> round to next int -> 4 cores per task
-    >>> # 12G / 4 = 3G per core
-    >>> env = BaselSlurmEnvironment(
-    ...     partition="infai_3",
-    ...     memory_per_cpu="3G",
-    ...     cpus_per_task=4,
     ... )
 
     Use *export* to specify a list of environment variables that
@@ -377,7 +356,7 @@ class SlurmEnvironment(Environment):
             job_file = self.job_dir / job_name
             job_content = self._get_job(step, is_last=(step == steps[-1]))
             tools.write_file(job_file, job_content)
-            prev_job_id = self._submit_job(job_name, job_file, dependency=prev_job_id)
+            prev_job_id = self._submit_job(job_file, dependency=prev_job_id)
 
     def _get_job_params(self, step, is_last):
         job_params = {
@@ -411,7 +390,7 @@ class SlurmEnvironment(Environment):
 
         return job_params
 
-    def _submit_job(self, job_name, job_file, dependency=None):
+    def _submit_job(self, job_file, dependency=None):
         submit = ["sbatch"]
         if self.export:
             submit += ["--export", ",".join(self.export)]
