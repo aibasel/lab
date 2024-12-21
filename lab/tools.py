@@ -13,7 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-import orjson as json
+import orjson
 
 DEFAULT_ENCODING = "utf-8"
 
@@ -248,18 +248,11 @@ def compute_log_score(success, value, lower_bound, upper_bound):
 
 
 class Properties(dict):
-    def default(self, o):
-        if isinstance(o, Path):
-            return str(o)
+    def default(self, obj):
+        if isinstance(obj, Path):
+            return str(obj)
         else:
-            return super().default(o)
-
-    # JSON_ARGS = {
-    #     "cls": _PropertiesEncoder,
-    #     "indent": 2,
-    #     "separators": (",", ": "),
-    #     "sort_keys": True,
-    # }
+            return obj
 
     """Transparently handle properties files compressed with xz."""
 
@@ -279,8 +272,10 @@ class Properties(dict):
         return self.to_bytes().decode()
 
     def to_bytes(self):
-        return json.dumps(
-            self, default=self.default, option=json.OPT_INDENT_2 | json.OPT_SORT_KEYS
+        return orjson.dumps(
+            self,
+            default=self.default,
+            option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
         )
 
     def load(self, filename):
@@ -288,7 +283,7 @@ class Properties(dict):
         open_func = lzma.open if path.suffix == ".xz" else open
         with open_func(path, "rb") as f:
             try:
-                self.update(json.loads(f.read()))
+                self.update(orjson.loads(f.read()))
             except ValueError as e:
                 logging.critical(f"JSON parse error in file '{path}': {e}")
 
