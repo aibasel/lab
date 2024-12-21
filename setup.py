@@ -38,7 +38,7 @@ setup(
     ],
     install_requires=[
         "matplotlib",  # for scatter plots
-        "simplejson",  # optional, speeds up reading properties files
+        "orjson",
         "txt2tags>=3.6",  # for HTML and Latex reports
     ],
     python_requires=">=3.7",
