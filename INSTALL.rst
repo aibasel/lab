@@ -1,7 +1,7 @@
 Install Lab
 -----------
 
-Lab requires Python 3.7+ and Linux (e.g., Ubuntu). We recommend installing
+Lab requires Python 3 and Linux (e.g., Ubuntu). We recommend installing
 Lab in a `Python virtual environment
 <https://docs.python.org/3/tutorial/venv.html>`_. This has the advantage
 that there are no modifications to the system-wide configuration, and that

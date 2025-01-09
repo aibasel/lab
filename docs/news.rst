@@ -11,6 +11,7 @@ Lab
 * Use 9 GiB memory limit for Slurm jobs on Tetralith by default (Jendrik Seipp).
 * Revise documentation about memory limits (Jendrik Seipp).
 * Remove soft memory limit from Slurm jobs that used to guard against an old problem of the cgroup mechanism failing (Jendrik Seipp).
+* Raise minimum supported Python version to 3.8 (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
