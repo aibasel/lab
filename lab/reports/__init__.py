@@ -130,6 +130,9 @@ class Attribute(str):
         self.scale = scale
         self.digits = digits
 
+    def __repr__(self):
+        return f"Attribute({str(self)!r}, min_wins={self.min_wins}, ...)"
+
     def copy(self, name):
         return Attribute(
             name,
@@ -236,7 +239,11 @@ class Report:
         >>> report = Report(filter=rename_algorithms, filter_algorithm=algorithms)
 
         """
-        self.attributes = tools.make_list(attributes)
+        # Turn strings into Attribute objects and set non-default options for some.
+        self.attributes = [
+            self._prepare_attribute(attr) for attr in tools.make_list(attributes)
+        ]
+
         if format not in txt2tags.TARGETS + ["eps", "pdf", "pgf", "png", "py"]:
             raise ValueError(f"invalid format: {format}")
         self.output_format = format
@@ -271,9 +278,6 @@ class Report:
         self._load_data()
         self._apply_filter()
         self._scan_data()
-
-        # Turn string attributes into instances of Attribute.
-        self.attributes = [self._prepare_attribute(attr) for attr in self.attributes]
 
         # Expand glob characters.
         self.attributes = self._glob_attributes(self.attributes)
@@ -400,16 +404,13 @@ class Report:
         # Attribute is None in all runs.
         return None
 
-    def _get_type_map(self, attributes):
-        return {
-            self._prepare_attribute(attr): self._get_type(attr) for attr in attributes
-        }
-
     def _scan_data(self):
         attributes = set()
         for run in self.props.values():
             attributes |= set(run.keys())
-        self._all_attributes = self._get_type_map(attributes)
+        self._all_attributes = {
+            self._prepare_attribute(attr): self._get_type(attr) for attr in attributes
+        }
 
     def _load_data(self):
         props_file = os.path.join(self.eval_dir, "properties")

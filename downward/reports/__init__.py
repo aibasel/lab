@@ -100,18 +100,16 @@ class PlanningReport(Report):
         ...
 
         """
-        # Set non-default options for some attributes.
-        attributes = tools.make_list(kwargs.get("attributes"))
-        kwargs["attributes"] = [self._prepare_attribute(attr) for attr in attributes]
-
         # Remember the order of algorithms if it is given as a keyword argument filter.
         self.filter_algorithm = tools.make_list(kwargs.get("filter_algorithm"))
 
         Report.__init__(self, **kwargs)
 
     def _prepare_attribute(self, attr):
-        predefined = {str(attr): attr for attr in self.PREDEFINED_ATTRIBUTES}
         if not isinstance(attr, Attribute):
+            predefined = {
+                str(attribute): attribute for attribute in self.PREDEFINED_ATTRIBUTES
+            }
             if attr in predefined:
                 return predefined[attr]
             for pattern in predefined.values():
