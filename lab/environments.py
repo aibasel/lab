@@ -132,14 +132,13 @@ class SlurmEnvironment(Environment):
     specify a project account (needed on NSC if you're part of multiple
     projects). ::
 
-        extra_options="#SBATCH --nodelist=ase[1-5,7,10]"
+        extra_options="#SBATCH --nodelist=ica[1-5,7,10]"
         extra_options="#SBATCH --account=naiss2024-5-421"
 
 
     *partition* must be a valid Slurm partition name. In Basel you
     can choose from
 
-    * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
     * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
     * "infai_3": 12 nodes with 128 cores, 512GB memory, 240GB SSD
 
@@ -408,9 +407,9 @@ class SlurmEnvironment(Environment):
 class BaselSlurmEnvironment(SlurmEnvironment):
     """Environment for Basel's AI group."""
 
-    DEFAULT_PARTITION = "infai_1"
-    DEFAULT_QOS = "normal"
-    # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
+    DEFAULT_PARTITION = "infai_2"
+    DEFAULT_QOS = "infai"
+    # infai_2 nodes have 77440 MiB and 20 cores => 3872 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = "3872M"
     MAX_TASKS = 150000 - 1  # see slurm.conf
