@@ -27,6 +27,7 @@ filesystem (e.g., /tmp/) before running experiments.
 
 import os
 import platform
+import re
 import sys
 from pathlib import Path
 
@@ -52,7 +53,7 @@ class BaseReport(AbsoluteReport):
 
 
 NODE = platform.node()
-RUNNING_ON_CLUSTER = NODE.endswith((".scicore.unibas.ch", ".cluster.bc2.ch"))
+RUNNING_ON_CLUSTER = re.fullmatch(r"login12|ic[ab]\d\d", NODE)
 DIR = Path(__file__).resolve().parent
 REPO = DIR.parent
 IMAGES_DIR = Path(os.environ["SINGULARITY_IMAGES"])
@@ -62,7 +63,7 @@ MEMORY_LIMIT = 3584  # MiB
 if RUNNING_ON_CLUSTER:
     SUITE = ["depot", "freecell", "gripper", "zenotravel"]
     ENVIRONMENT = BaselSlurmEnvironment(
-        partition="infai_1",
+        partition="infai_2",
         email="my.name@unibas.ch",
         memory_per_cpu="3872M",
         export=["PATH"],

@@ -165,12 +165,11 @@ class SlurmEnvironment(Environment):
     *cpus_per_task* sets the number of cores to be allocated per Slurm
     task (default: 1).
 
-    For the autonice script used on the Basel cluster,
-    the value for *memory_per_cpu* should not surpass the amount of
-    memory that is available per core, which is "3872M" for infai_1,
-    "6354M" for infai_2, and "4028M" for infai_3. The solution is to
-    artificially reserve multiple cores per task, see this example
-    that reserves 12 GiB of memory on infai_2:
+    For the autonice script used on the Basel cluster, the value for
+    *memory_per_cpu* should not surpass the amount of memory that is available
+    per core, which is "6354M" for infai_2, and "4028M" for infai_3. The
+    solution is to artificially reserve multiple cores per task, see this
+    example that reserves 12 GiB of memory on infai_2:
 
     >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
     >>> # 12G / 2 = 6G per core
