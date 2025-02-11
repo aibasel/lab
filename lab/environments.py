@@ -132,14 +132,13 @@ class SlurmEnvironment(Environment):
     specify a project account (needed on NSC if you're part of multiple
     projects). ::
 
-        extra_options="#SBATCH --nodelist=ase[1-5,7,10]"
+        extra_options="#SBATCH --nodelist=ica[1-5,7,10]"
         extra_options="#SBATCH --account=naiss2024-5-421"
 
 
     *partition* must be a valid Slurm partition name. In Basel you
     can choose from
 
-    * "infai_1": 24 nodes with 16 cores, 64GB memory, 500GB Sata (default)
     * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
     * "infai_3": 12 nodes with 128 cores, 512GB memory, 240GB SSD
 
@@ -166,12 +165,11 @@ class SlurmEnvironment(Environment):
     *cpus_per_task* sets the number of cores to be allocated per Slurm
     task (default: 1).
 
-    For the autonice script used on the Basel cluster,
-    the value for *memory_per_cpu* should not surpass the amount of
-    memory that is available per core, which is "3872M" for infai_1,
-    "6354M" for infai_2, and "4028M" for infai_3. The solution is to
-    artificially reserve multiple cores per task, see this example
-    that reserves 12 GiB of memory on infai_2:
+    For the autonice script used on the Basel cluster, the value for
+    *memory_per_cpu* should not surpass the amount of memory that is available
+    per core, which is "6354M" for infai_2, and "4028M" for infai_3. The
+    solution is to artificially reserve multiple cores per task, see this
+    example that reserves 12 GiB of memory on infai_2:
 
     >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
     >>> # 12G / 2 = 6G per core
@@ -408,9 +406,9 @@ class SlurmEnvironment(Environment):
 class BaselSlurmEnvironment(SlurmEnvironment):
     """Environment for Basel's AI group."""
 
-    DEFAULT_PARTITION = "infai_1"
-    DEFAULT_QOS = "normal"
-    # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
+    DEFAULT_PARTITION = "infai_2"
+    DEFAULT_QOS = "infai"
+    # infai_2 nodes have 77440 MiB and 20 cores => 3872 MiB per core
     # (see http://issues.fast-downward.org/issue733).
     DEFAULT_MEMORY_PER_CPU = "3872M"
     MAX_TASKS = 150000 - 1  # see slurm.conf
