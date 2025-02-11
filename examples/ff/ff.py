@@ -6,7 +6,6 @@ Example experiment for the FF planner
 """
 
 import os
-import platform
 
 from ff_parser import FFParser
 
@@ -30,8 +29,7 @@ class BaseReport(AbsoluteReport):
     ]
 
 
-NODE = platform.node()
-REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
+REMOTE = BaselSlurmEnvironment.is_present()
 BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 if REMOTE:
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")

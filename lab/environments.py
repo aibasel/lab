@@ -257,6 +257,11 @@ class SlurmEnvironment(Environment):
         self.export = export
         self.setup = setup
 
+    @classmethod
+    def is_present(cls):
+        """Return True if the environment is present on the current node."""
+        raise NotImplementedError
+
     def start_runs(self):
         # The queue will start the experiment by itself.
         pass
@@ -415,6 +420,11 @@ class BaselSlurmEnvironment(SlurmEnvironment):
     # Prioritize jobs from Autonice users on Basel grid.
     NICE_VALUE = 5000
 
+    @classmethod
+    def is_present(cls):
+        node = platform.node()
+        return bool(re.fullmatch(r"login12|ic[ab]\d\d", node))
+
 
 class TetralithEnvironment(SlurmEnvironment):
     """Environment for the NSC Tetralith cluster in Linköping."""
@@ -437,4 +447,4 @@ class TetralithEnvironment(SlurmEnvironment):
     @classmethod
     def is_present(cls):
         node = platform.node()
-        return re.match(r"tetralith\d+\.nsc\.liu\.se|n\d+", node)
+        return bool(re.match(r"tetralith\d+\.nsc\.liu\.se|n\d+", node))

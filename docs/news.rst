@@ -12,6 +12,8 @@ Lab
 * Revise documentation about memory limits (Jendrik Seipp).
 * Remove soft memory limit from Slurm jobs that used to guard against an old problem of the cgroup mechanism failing (Jendrik Seipp).
 * Raise minimum supported Python version to 3.8 (Jendrik Seipp).
+* Remove documentation about obsolete ``infai_1`` partition in Basel (Florian Pommerening).
+* Add :meth:`SlurmEnvironment.is_present() <lab.environments.SlurmEnvironment.is_present>` method for testing whether the script is run within a given grid environment (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^

@@ -6,7 +6,6 @@ Example experiment using a simple vertex cover solver.
 
 import glob
 import os
-import platform
 
 from downward.reports.absolute import AbsoluteReport
 from lab.environments import BaselSlurmEnvironment, LocalEnvironment
@@ -28,8 +27,7 @@ class BaseReport(AbsoluteReport):
     ]
 
 
-NODE = platform.node()
-REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
+REMOTE = BaselSlurmEnvironment.is_present()
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BENCHMARKS_DIR = os.path.join(SCRIPT_DIR, "benchmarks")
 BHOSLIB_GRAPHS = sorted(glob.glob(os.path.join(BENCHMARKS_DIR, "bhoslib", "*.mis")))

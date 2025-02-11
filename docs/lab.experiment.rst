@@ -89,6 +89,7 @@ repository <https://github.com/Martin1887/lab-htcondor-environment>`_.
 
 .. autoclass:: lab.environments.LocalEnvironment
 .. autoclass:: lab.environments.SlurmEnvironment
+   :members: is_present
 .. autoclass:: lab.environments.BaselSlurmEnvironment
 .. autoclass:: lab.environments.TetralithEnvironment
 

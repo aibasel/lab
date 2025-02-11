@@ -5,7 +5,6 @@ This experiment demonstrates most of the available options.
 
 import os
 import os.path
-import platform
 from collections import defaultdict
 from pathlib import Path
 from subprocess import call
@@ -21,8 +20,7 @@ from lab.reports import Attribute
 from lab.reports.filter import FilterReport
 
 DIR = Path(__file__).resolve().parent
-NODE = platform.node()
-REMOTE = NODE.endswith(".scicore.unibas.ch") or NODE.endswith(".cluster.bc2.ch")
+REMOTE = BaselSlurmEnvironment.is_present()
 if REMOTE:
     ENV = BaselSlurmEnvironment("my.name@unibas.ch")
 else:

@@ -7,7 +7,6 @@ directory.
 """
 
 import os
-import platform
 
 from downward.experiment import FastDownwardExperiment
 from downward.reports.absolute import AbsoluteReport
@@ -16,8 +15,7 @@ from lab.environments import BaselSlurmEnvironment, LocalEnvironment
 
 ATTRIBUTES = ["coverage", "error", "expansions", "planner_memory", "planner_time"]
 
-NODE = platform.node()
-if NODE.endswith((".cluster.bc2.ch", ".scicore.unibas.ch")):
+if BaselSlurmEnvironment.is_present():
     # Create bigger suites with suites.py from the downward-benchmarks repo.
     SUITE = ["depot", "freecell", "gripper", "zenotravel"]
     ENV = BaselSlurmEnvironment(email="my.name@unibas.ch")

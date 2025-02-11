@@ -1,6 +1,4 @@
 import contextlib
-import platform
-import re
 import shutil
 import subprocess
 import sys
@@ -35,11 +33,8 @@ assert (
 DIR = Path(__file__).resolve().parent
 SCRIPT = Path(sys.argv[0]).resolve()
 
-NODE = platform.node()
 # Cover both the Basel and Linköping clusters for simplicity.
-REMOTE = NODE.endswith((".scicore.unibas.ch", ".cluster.bc2.ch")) or re.match(
-    r"tetralith\d+\.nsc\.liu\.se|n\d+", NODE
-)
+REMOTE = BaselSlurmEnvironment.is_present() or TetralithEnvironment.is_present()
 
 
 def parse_args():
