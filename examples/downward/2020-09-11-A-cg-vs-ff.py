@@ -71,12 +71,12 @@ exp.add_step("start", exp.start_runs)
 exp.add_step("parse", exp.parse)
 exp.add_fetcher(name="fetch")
 
-if not project.REMOTE:
-    project.add_scp_step(exp, SCP_LOGIN, REMOTE_REPOS_DIR)
-
 project.add_absolute_report(
     exp, attributes=ATTRIBUTES, filter=[project.add_evaluations_per_time]
 )
+
+if not project.REMOTE:
+    project.add_scp_step(exp, SCP_LOGIN, REMOTE_REPOS_DIR)
 
 attributes = ["expansions"]
 pairs = [
