@@ -30,7 +30,7 @@ else:
     ENV = project.LocalEnvironment(processes=2)
 
 CONFIGS = [
-    ("ff", ["--search", "lazy_greedy([ff()])"]),
+    ("ff", ["--search", "lazy_greedy([ff()], bound=100)"]),
 ]
 BUILD_OPTIONS = []
 DRIVER_OPTIONS = [
