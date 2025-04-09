@@ -1,5 +1,12 @@
 #! /usr/bin/env python
 
+"""
+This script uses the FastDownwardExperiment class, which makes the script very
+concise, but harder to extend once you go beyond "standard" experiments.
+Therefore, we recommend using the Experiment class directly. See the script in
+examples/downward/2020-09-11-B-bounded-cost.py for an example.
+"""
+
 import os
 
 import custom_parser
