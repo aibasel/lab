@@ -1,23 +1,19 @@
-# Setup instructions
+# Instructions
 
-Create a [virtual environment](https://docs.python.org/3/tutorial/venv.html),
-activate it and install all dependencies:
+Install `uv`:
 
-    sudo apt install python3 python3-venv
-    python3 -m venv --prompt myvenv .venv
-    source .venv/bin/activate
-    pip install --upgrade pip wheel
-    pip install -r requirements.txt
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 
-If the last step fails, try regenerating a new `requirements.txt` from
-`requirements.in` for your Python version:
+## Create a new project (pyproject.toml, .python-version, uv.lock)
 
-    source .venv/bin/activate
-    pip install pip-tools
-    pip-compile
-    pip install -r requirements.txt
+Initialize a new `uv` project in the current directory:
 
-Please note that before running an experiment script you need to
-activate the virtual environment with
+    uv init --bare --no-workspace --pin-python
 
-    source .venv/bin/activate
+Install dependencies:
+
+    uv add lab
+
+## Run a script in an existing project
+
+    uv run 2020-09-11-B-bounded-cost.py
