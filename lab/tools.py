@@ -272,6 +272,7 @@ class Properties(dict):
         "indent": 2,
         "separators": (",", ": "),
         "sort_keys": True,
+        "allow_nan": True
     }
 
     """Transparently handle properties files compressed with xz."""
@@ -296,7 +297,7 @@ class Properties(dict):
         open_func = lzma.open if path.suffix == ".xz" else open
         with open_func(path) as f:
             try:
-                self.update(json.load(f))
+                self.update(json.load(f,allow_nan=True))
             except ValueError as e:
                 logging.critical(f"JSON parse error in file '{path}': {e}")
 
