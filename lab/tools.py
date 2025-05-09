@@ -272,6 +272,7 @@ class Properties(dict):
         "indent": 2,
         "separators": (",", ": "),
         "sort_keys": True,
+        "allow_nan": True,
     }
 
     """Transparently handle properties files compressed with xz."""
@@ -296,7 +297,7 @@ class Properties(dict):
         open_func = lzma.open if path.suffix == ".xz" else open
         with open_func(path) as f:
             try:
-                self.update(json.load(f))
+                self.update(json.load(f, allow_nan=True))
             except ValueError as e:
                 logging.critical(f"JSON parse error in file '{path}': {e}")
 
@@ -454,7 +455,6 @@ def get_color(fraction, min_wins):
 def get_colors(cells, min_wins):
     result = {col: (0.5, 0.5, 0.5) for col in cells}
     min_value, max_value = get_min_max(cells.values())
-
     if min_value == max_value:
         if min_value is None or None not in cells.values():
             # Either there are no float values in this row or
@@ -474,7 +474,7 @@ def get_colors(cells, min_wins):
 
     for col, val in cells.items():
         if val is not None:
-            fraction = 0 if diff == 0 else (val - min_value) / diff
+            fraction = 0 if diff == 0 or math.isnan(diff) else (val - min_value) / diff
             result[col] = get_color(fraction, min_wins)
     return result
 
