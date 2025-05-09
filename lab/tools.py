@@ -455,7 +455,6 @@ def get_color(fraction, min_wins):
 def get_colors(cells, min_wins):
     result = {col: (0.5, 0.5, 0.5) for col in cells}
     min_value, max_value = get_min_max(cells.values())
-
     if min_value == max_value:
         if min_value is None or None not in cells.values():
             # Either there are no float values in this row or
@@ -475,7 +474,7 @@ def get_colors(cells, min_wins):
 
     for col, val in cells.items():
         if val is not None:
-            fraction = 0 if diff == 0 else (val - min_value) / diff
+            fraction = 0 if diff == 0 or math.isnan(diff) else (val - min_value) / diff
             result[col] = get_color(fraction, min_wins)
     return result
 
