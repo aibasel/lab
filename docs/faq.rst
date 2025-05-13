@@ -34,6 +34,21 @@ started, but you want to rerun them anyway, go to their run directories,
 remove the ``driver.log`` files and then run the "start" experiment step
 again as above.
 
+How can I ignore unexplained errors for which I know the cause?
+---------------------------------------------------------------
+
+You can add a filter to the report (or fetcher) that removes all unexplained
+errors that you actually can explain. Here's an example filter that does so::
+
+    def remove_explained_errors(run):
+        explained_messages = ["out of memory", "MemoryError"]
+        errors = run.get("unexplained_errors")
+        if errors:
+            run["unexplained_errors"] = [
+                error for error in errors
+                if all(msg not in error for msg in explained_messages)]
+        return True
+
 
 I forgot to parse something. How can I run only the parsers again?
 ------------------------------------------------------------------
