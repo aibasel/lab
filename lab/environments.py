@@ -169,7 +169,7 @@ class SlurmEnvironment(Environment):
     amount of memory that is available per core, which is "2840M" for thin
     Tetralith nodes, "11360M" for fat Tetralith nodes, "6354M" for infai_2
     and "4028M" for infai_3. If you need more memory, please reserve multiple
-    cores per task, see this example that reserves 12 GiB of memory on infai_2:
+    cores per task. Here is an example that reserves 12 GiB of memory on infai_2:
 
     >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
     >>> # 12G / 2 = 6G per core
@@ -177,6 +177,16 @@ class SlurmEnvironment(Environment):
     ...     partition="infai_2",
     ...     memory_per_cpu="6G",
     ...     cpus_per_task=2,
+    ... )
+
+    Here is the code for reserving 128 GiB of memory on fat Tetralith nodes:
+
+    >>> # 128 * 1024 / 11360 = 11.5 -> round to next int -> 12 cores per task
+    >>> # 128G / 12 = 10.67G -> round to next int -> 11G per core
+    >>> env = TetralithEnvironment(
+    ...     memory_per_cpu="11G",
+    ...     cpus_per_task=12,
+    ...     extra_options="#SBATCH -C fat",
     ... )
 
     Use *export* to specify a list of environment variables that
