@@ -8,14 +8,14 @@ The script below shows how to run the `FF planner
 <http://fai.cs.uni-saarland.de/hoffmann/ff.html>`_ on a number of
 classical planning benchmarks. You can see the available steps with ::
 
-    ./ff.py
+    uv run ff.py
 
 
 Select steps by name or index::
 
-    ./ff.py build
-    ./ff.py 2
-    ./ff.py 3 4
+    uv run ff.py build
+    uv run ff.py 2
+    uv run ff.py 3 4
 
 
 You can use this file as a basis for your own experiments. For Fast

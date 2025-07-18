@@ -1,39 +1,16 @@
 Install Lab
 -----------
 
-Lab requires Python 3 and Linux (e.g., Ubuntu). We recommend installing
-Lab in a `Python virtual environment
-<https://docs.python.org/3/tutorial/venv.html>`_. This has the advantage
-that there are no modifications to the system-wide configuration, and that
-you can create multiple environments with different Lab versions (e.g.,
-for different papers) without conflicts::
+Lab requires Python 3 and Linux (e.g., Ubuntu). ::
 
-    # Install required packages, including virtualenv.
-    sudo apt install python3 python3-venv
+    # Install uv.
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 
-    # Create a new directory for your experiments.
-    mkdir experiments-for-my-paper
-    cd experiments-for-my-paper
+    # Create a uv project in the current directory.
+    uv init --bare --no-workspace --pin-python
 
-    # If PYTHONPATH is set, unset it to obtain a clean environment.
-    unset PYTHONPATH
+    # Install Lab.
+    uv add lab
 
-    # Create and activate a Python virtual environment for Lab.
-    python3 -m venv --prompt my-paper .venv
-    source .venv/bin/activate
-
-    # Install Lab in the virtual environment.
-    pip install -U pip wheel
-    pip install lab  # or preferably a specific version with lab==x.y
-
-    # Store installed packages and exact versions for reproducibility.
-    # Ignore pkg-resources package (https://github.com/pypa/pip/issues/4022).
-    pip freeze | grep -v "pkg-resources" > requirements.txt
-
-Please note that before running an experiment script you need to
-activate the virtual environment with::
-
-    source .venv/bin/activate
-
-We recommend clearing the ``PYTHONPATH`` variable before activating the
-virtual environment.
+    # Add uv files to version control.
+    git add pyproject.toml .python-version uv.lock

@@ -57,7 +57,7 @@ Now that parsing is done in its own experiment step, simply consult the `parsing
 documentation <lab.parser.html>`_ for how to amend your parsers and then run the
 "parse" experiment step again with ::
 
-    ./my-exp.py parse
+    uv run my-exp.py parse
 
 
 .. _portparsers:
@@ -77,7 +77,7 @@ what are the benefits of this?
   the parsing time went down from 51 minutes to 5 minutes, both measured on
   cold file system caches).
 * As before, you can let the Slurm environment do the parsing for you and get
-  notified when the report is finished: ``./myexp.py build start parse fetch
+  notified when the report is finished: ``uv run myexp.py build start parse fetch
   report``
 
 To adapt your parsers to this new API, you need to make the following changes:
@@ -146,7 +146,7 @@ or when you want to run the latest Lab development version, you can clone
 the Lab repo and install it (preferable in a virtual environment)::
 
     git clone https://github.com/aibasel/lab.git /path/to/lab
-    pip install --editable /path/to/lab
+    uv pip install --editable /path/to/lab
 
 The ``--editable`` flag installs the project in "editable mode", which
 makes any changes under ``/path/to/lab`` appear immediately in the virtual

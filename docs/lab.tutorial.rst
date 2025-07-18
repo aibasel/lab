@@ -28,14 +28,13 @@ cover solver on a set of benchmarks.
 
 You can see the available steps with ::
 
-    ./exp.py
-
+    uv run exp.py
 
 Select steps by name or index::
 
-    ./exp.py build
-    ./exp.py 2
-    ./exp.py 3 4 5
+    uv run exp.py build
+    uv run exp.py 2
+    uv run exp.py 3 4 5
 
 Find out how to create your own experiments by browsing the `Lab API
 <lab.experiment.html>`_.

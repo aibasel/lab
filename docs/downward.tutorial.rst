@@ -22,9 +22,8 @@ alternative that has proven to work well in practice.
 Installation
 ------------
 
-Lab requires **Python 3** and **Linux**. To run Fast Downward
-experiments, you'll need a **Fast Downward** repository, planning
-**benchmarks** and a plan **validator**. ::
+To run Fast Downward experiments, you'll need a **Fast Downward** repository,
+planning **benchmarks** and a plan **validator**. ::
 
     # Install required packages.
     sudo apt install bison cmake flex g++ git make python3 python3-venv
@@ -72,32 +71,7 @@ experiment scripts with your collaborators. ::
     mkdir cg-vs-ff
     cd cg-vs-ff
 
-Now it's time to install Lab. We install it in a `Python virtual
-environment <https://docs.python.org/3/tutorial/venv.html>`_ specific to
-the cg-vs-ff project. This has the advantage that there are no
-modifications to the system-wide configuration, and that you can have
-multiple projects with different Lab versions (e.g., for different
-papers). ::
-
-    # Create and activate a Python 3 virtual environment for Lab.
-    python3 -m venv --prompt cg-vs-ff .venv
-    source .venv/bin/activate
-
-    # Install Lab in the virtual environment.
-    pip install -U pip wheel  # It's good to have new versions of these.
-    pip install lab  # or preferably a specific version with lab==x.y
-
-    # Store installed packages and exact versions for reproducibility.
-    # Ignore pkg-resources package (https://github.com/pypa/pip/issues/4022).
-    pip freeze | grep -v "pkg-resources" > requirements.txt
-    git add requirements.txt
-    git commit -m "Store requirements for experiments."
-
-To use the same versions of your requirements on a different computer, use
-``pip install -r requirements.txt`` instead of the ``pip install``
-commands above.
-
-Add to your ``~/.bashrc`` file::
+Add to your ``~/.bashrc`` file and reload it with ``source ~/.bashrc``::
 
     # Make executables in ~/bin directory available globally.
     export PATH="${PATH}:${HOME}/bin"
@@ -105,17 +79,8 @@ Add to your ``~/.bashrc`` file::
     export DOWNWARD_BENCHMARKS=/path/to/downward-projects/benchmarks  # Adapt path
     export DOWNWARD_REPO=/path/to/downward-projects/downward  # Adapt path
 
-Add to your ``~/.bash_aliases`` file::
-
-    # Activate virtualenv and unset PYTHONPATH to obtain isolated virtual environments.
-    alias venv="unset PYTHONPATH; source .venv/bin/activate"
-
-Finally, reload ``.bashrc`` (which usually also reloads ``~/.bash_aliases``)::
-
-    source ~/.bashrc
-
-You can activate virtual environments now by running ``venv`` in
-directories containing a ``.venv`` subdirectory.
+.. highlight:: bash
+.. include:: ../INSTALL.rst
 
 
 Run tutorial experiment
@@ -133,18 +98,17 @@ into ``experiments/my-exp-dir``.
 Make sure the experiment script is executable. Then you can see the available
 steps with ::
 
-    ./2020-09-11-A-cg-vs-ff.py
+    uv run 2020-09-11-A-cg-vs-ff.py
 
 Run all steps with ::
 
-    ./2020-09-11-A-cg-vs-ff.py --all
-
+    uv run 2020-09-11-A-cg-vs-ff.py --all
 
 Run individual steps with ::
 
-    ./2020-09-11-A-cg-vs-ff.py build
-    ./2020-09-11-A-cg-vs-ff.py 2
-    ./2020-09-11-A-cg-vs-ff.py 3 6 7
+    uv run 2020-09-11-A-cg-vs-ff.py build
+    uv run 2020-09-11-A-cg-vs-ff.py 2
+    uv run 2020-09-11-A-cg-vs-ff.py 3 6 7
 
 The ``2020-09-11-A-cg-vs-ff.py`` script uses the
 :class:`downward.experiment.FastDownwardExperiment` class, which reduces the
