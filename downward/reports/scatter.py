@@ -364,8 +364,6 @@ class ScatterPlotReport(PlanningReport):
             self.categories = self._handle_missing_values(self.categories)
         if not self.categories:
             logging.critical("Plot contains no points.")
-        for category, coords in self.categories.items():
-            self.categories[category] = list(set(coords))
 
         self.xlabel = self._get_axis_label(self.xlabel, self.algorithms[0], x_wins)
         self.ylabel = self._get_axis_label(self.ylabel, self.algorithms[1], y_wins)
