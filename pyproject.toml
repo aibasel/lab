@@ -42,7 +42,7 @@ path = "lab/__init__.py"
 expression = "__version__.rstrip('+')"
 
 [tool.hatch.build.targets.wheel]
-packages = ["lab"]
+packages = ["downward", "lab"]
 
 [tool.ruff]
 exclude = [
