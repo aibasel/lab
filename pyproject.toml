@@ -1,3 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lab"
+dynamic = ["version"]
+description = "Benchmark your code"
+readme = {file = "README.rst", content-type = "text/x-rst"}
+keywords = ["benchmarks", "cluster", "grid"]
+authors = [
+    {name = "Jendrik Seipp", email = "jendrikseipp@gmail.com"},
+]
+license = {text = "GPL3+"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "matplotlib",  # for scatter plots
+    "simplejson",  # optional, speeds up reading properties files
+    "txt2tags>=3.6",  # for HTML and Latex reports
+]
+
+[project.urls]
+Homepage = "https://github.com/aibasel/lab"
+
+[tool.hatch.version]
+source = "code"
+path = "lab/__init__.py"
+expression = "__version__.rstrip('+')"
+
+[tool.hatch.build.targets.wheel]
+packages = ["lab"]
+
 [tool.ruff]
 exclude = [
   ".git",
