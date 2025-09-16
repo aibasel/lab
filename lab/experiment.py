@@ -464,7 +464,13 @@ class Experiment(_Buildable):
             props = tools.Properties(filename=props_path)
             for parser in self.parsers:
                 parser.parse(run_dir, props)
-            props.write()
+            try:
+                props.write()
+            except ValueError as err:
+                logging.critical(
+                    f"Failed to write properties file in {run_dir}: {err}\n"
+                    "Often the solution is to revise a parser."
+                )
 
     def add_fetcher(
         self, src=None, dest=None, merge=None, name=None, filter=None, **kwargs
