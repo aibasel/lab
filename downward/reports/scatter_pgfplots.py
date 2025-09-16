@@ -20,7 +20,7 @@ class ScatterPgfplots:
             lines.append(
                 "\\addplot+[{}] coordinates {{\n{}\n}};".format(
                     cls._format_options({"only marks": True}),
-                    " ".join(str(c) for c in set(coords)),
+                    " ".join(str(c) for c in sorted(set(coords))),
                 )
             )
             if category:
