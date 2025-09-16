@@ -14,11 +14,13 @@ class ScatterPgfplots:
         if report.y_upper is not None:
             options["ymax"] = report.y_upper
         lines.append(f"\\begin{{axis}}[{cls._format_options(options)}]")
+        lines.append(r"% For each category, each mark is listed only once.")
         for category, coords in sorted(report.categories.items()):
+            # For each category, print each coordinate only once.
             lines.append(
                 "\\addplot+[{}] coordinates {{\n{}\n}};".format(
                     cls._format_options({"only marks": True}),
-                    " ".join(str(c) for c in coords),
+                    " ".join(str(c) for c in sorted(set(coords))),
                 )
             )
             if category:
