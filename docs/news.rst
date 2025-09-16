@@ -7,8 +7,11 @@ v8.5 (2025-09-16)
 Lab
 ^^^
 * Allow `nan`, `-inf` and `inf` values in properties files (Paul Höft).
+* Revise docs. For example, recommend using `uv` instead of `pip` (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
 * Only list each coordinate once (per category) in pgfplots scatter plots (Paul Höft).
-* Revise docs. E.g., recommend using `uv` instead of `pip` (Jendrik Seipp).
 
 
 v8.4 (2025-02-11)
