@@ -1,16 +1,13 @@
 Changelog
 =========
 
-v8.5 (unreleased)
+v8.5 (2025-09-16)
 -----------------
 
 Lab
 ^^^
-* Allow nan, -inf and inf values in JSON files (Paul Höft).
-
-Downward Lab
-^^^^^^^^^^^^
-* No changes so far.
+* Allow `nan`, `-inf` and `inf` values in properties files (Paul Höft).
+* Revise docs. E.g., recommend using `uv` instead of `pip` (Jendrik Seipp).
 
 
 v8.4 (2025-02-11)
