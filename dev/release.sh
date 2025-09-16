@@ -31,16 +31,16 @@ fi
 tox
 
 set_version "$VERSION"
-git commit -am "Update version number to ${VERSION} for release."
+git commit -am "Update version number to ${VERSION} for release." || true
 
 # Requirements:
 #   Install uv: https://github.com/astral-sh/uv (e.g., curl -LsSf https://astral.sh/uv/install.sh | sh)
 # Authentication:
 #   Either export UV_PUBLISH_TOKEN=<pypi-token> or configure ~/.pypirc (uv will pick it up).
-# Build both sdist and wheel into dist/
+# Build both sdist and wheel into dist/.
 uv build
-# Publish previously built artifacts (skip rebuild to ensure we publish exactly what we inspected)
-uv publish --no-build
+# Publish previously built artifacts.
+uv publish
 
 git tag -a "v$VERSION" -m "v$VERSION" HEAD
 set_version "${VERSION}+"
