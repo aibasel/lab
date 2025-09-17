@@ -252,6 +252,9 @@ def compute_log_score(success, value, lower_bound, upper_bound):
     """
     if value is None or not success:
         return 0.0
+    # Handle degenerate interval to avoid division by zero (e.g., lower == upper == 1).
+    if lower_bound == upper_bound:
+        return 1.0 if value <= lower_bound else 0.0
     value = max(value, lower_bound)
     value = min(value, upper_bound)
     raw_score = math.log(value) - math.log(upper_bound)
