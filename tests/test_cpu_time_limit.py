@@ -124,9 +124,9 @@ grandchild_code += 'while time.time() - start < 1: x = sum(range(1000000))'
 
 # Child script that spawns grandchild
 child_code = 'import subprocess, sys, time\\n'
-child_code += 'grandchild = \\'import time; start = time.time()\\\\n\\'\\n'
-child_code += 'grandchild += \\'while time.time() - start < 1: x = sum(range(1000000))\\'\\n'
-child_code += 'proc = subprocess.Popen([sys.executable, \\"-c\\", grandchild])\\n'
+child_code += 'gc = \\'import time; start = time.time()\\\\n\\'\\n'
+child_code += 'gc += \\'while time.time() - start < 1: x = sum(range(1000000))\\'\\n'
+child_code += 'proc = subprocess.Popen([sys.executable, \\"-c\\", gc])\\n'
 child_code += 'start = time.time()\\n'
 child_code += 'while time.time() - start < 0.7: x = sum(range(1000000))\\n'
 child_code += 'proc.wait()'
@@ -289,13 +289,14 @@ print("Parent done")
     assert retcode == 0, "Process should complete successfully"
     assert not call.cpu_time_limit_exceeded(), "Should not exceed limit"
 
-    # The key assertion: we should have captured the child's ~1s + parent's ~1s = ~2s total
-    # even though the child terminated before the final measurement.
+    # The key assertion: we should have captured the child's ~1s + parent's ~1s
+    # = ~2s total even though the child terminated before the final measurement.
     # We use >= 1.4 to account for slight timing variations.
     assert call.cpu_time is not None, "Should have CPU time measurement"
     assert call.cpu_time >= 1.4, (
-        f"Should capture parent + child CPU time (at least 1.4s), but got {call.cpu_time:.2f}s. "
-        f"This indicates terminated child's CPU time was not properly captured."
+        f"Should capture parent + child CPU time (>= 1.4s), but got "
+        f"{call.cpu_time:.2f}s. This indicates terminated child's CPU time was "
+        f"not properly captured."
     )
 
 
@@ -356,10 +357,10 @@ print("Parent done")
     assert retcode == 0, "Process should complete successfully"
     assert not call.cpu_time_limit_exceeded(), "Should not exceed limit"
 
-    # Critical assertion: total should be ~1.5s (child1 + child2)
-    # We use >= 1.2 to account for timing variations while ensuring both children are counted
+    # Critical assertion: total should be ~1.5s (child1 + child2). We use >= 1.2
+    # to account for timing variations while ensuring both children are counted.
     assert call.cpu_time is not None, "Should have CPU time measurement"
     assert call.cpu_time >= 1.2, (
-        f"Should accumulate sequential children's CPU time (child1's ~1s + child2's ~0.5s = ~1.5s), "
-        f"but got {call.cpu_time:.2f}s. This indicates sequential children bug is present."
+        f"Should accumulate sequential children's CPU time (~1s + ~0.5s = ~1.5s), "
+        f"but got {call.cpu_time:.2f}s."
     )

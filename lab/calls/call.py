@@ -98,6 +98,9 @@ def get_process_tree_pids_and_times(pid):
 
 
 class Call:
+    # CPU time monitoring check interval in seconds.
+    CPU_TIME_CHECK_INTERVAL = 1.0
+
     def __init__(
         self,
         args,
@@ -225,7 +228,6 @@ class Call:
         Monitor the CPU time of the process and all its children.
         Terminate the process if it exceeds the time limit.
         """
-        check_interval = 1.0  # Check every second.
         while self.process.poll() is None:
             total_cpu_time = self._update_cpu_time()
 
@@ -233,8 +235,12 @@ class Call:
                 # Process may have terminated.
                 break
 
-            if self.time_limit is not None and total_cpu_time > self.time_limit:
-                logging.warning(
+            # Check if CPU time limit is exceeded, accounting for check interval.
+            if (
+                self.time_limit is not None
+                and total_cpu_time > self.time_limit + self.CPU_TIME_CHECK_INTERVAL
+            ):
+                logging.error(
                     f"{self.name} exceeded CPU time limit: "
                     f"{total_cpu_time:.2f}s > {self.time_limit}s"
                 )
@@ -245,7 +251,7 @@ class Call:
                     self.process.kill()
                 break
 
-            time.sleep(check_interval)
+            time.sleep(self.CPU_TIME_CHECK_INTERVAL)
 
     def cpu_time_limit_exceeded(self):
         """
@@ -382,15 +388,8 @@ class Call:
         logging.info(f"{self.name} wall-clock time: {wall_clock_time:.2f}s")
 
         # Report CPU time including children.
-        if self.time_limit is not None:
-            if self.cpu_time is not None:
-                logging.info(f"{self.name} CPU time: {self.cpu_time:.2f}s")
-
-            if self.cpu_time_limit_exceeded():
-                logging.error(
-                    f"CPU time limit exceeded for {self.name}: "
-                    f"{self.cpu_time:.2f}s > {self.time_limit}s"
-                )
+        if self.cpu_time is not None:
+            logging.info(f"{self.name} CPU time: {self.cpu_time:.2f}s")
 
         if (
             self.wall_clock_time_limit is not None
