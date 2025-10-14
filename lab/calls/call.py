@@ -186,51 +186,65 @@ class Call:
             else:
                 raise
 
+    def _update_cpu_time(self):
+        """
+        Update CPU time tracking by measuring current process tree.
+
+        Tracks each PID individually and accumulates CPU time from terminated
+        processes to handle sequential children correctly.
+
+        Returns the total CPU time or None if measurement fails.
+        """
+        try:
+            # Get current PIDs and their CPU times.
+            current_pids_times = get_process_tree_pids_and_times(self.process.pid)
+
+            # Find PIDs that have terminated since last check.
+            previous_pids = set(self.pid_cpu_times.keys())
+            current_pids = set(current_pids_times.keys())
+            terminated_pids = previous_pids - current_pids
+
+            # Accumulate CPU time from terminated PIDs.
+            for pid in terminated_pids:
+                self.finalized_cpu_time += self.pid_cpu_times[pid]
+
+            # Update tracking with current PIDs.
+            self.pid_cpu_times = current_pids_times
+
+            # Calculate total: finalized + current
+            current_total = sum(current_pids_times.values())
+            total_cpu_time = self.finalized_cpu_time + current_total
+            self.cpu_time = total_cpu_time
+
+            return total_cpu_time
+        except (OSError, AttributeError):
+            return None
+
     def _monitor_cpu_time(self):
         """
         Monitor the CPU time of the process and all its children.
         Terminate the process if it exceeds the time limit.
-
-        To handle sequential children correctly, we track each PID individually
-        and accumulate CPU time from terminated processes.
         """
         check_interval = 1.0  # Check every second.
         while self.process.poll() is None:
-            try:
-                # Get current PIDs and their CPU times.
-                current_pids_times = get_process_tree_pids_and_times(self.process.pid)
+            total_cpu_time = self._update_cpu_time()
 
-                # Find PIDs that have terminated since last check.
-                previous_pids = set(self.pid_cpu_times.keys())
-                current_pids = set(current_pids_times.keys())
-                terminated_pids = previous_pids - current_pids
-
-                # Accumulate CPU time from terminated PIDs.
-                for pid in terminated_pids:
-                    self.finalized_cpu_time += self.pid_cpu_times[pid]
-
-                # Update tracking with current PIDs.
-                self.pid_cpu_times = current_pids_times
-
-                # Calculate total: finalized + current
-                current_total = sum(current_pids_times.values())
-                total_cpu_time = self.finalized_cpu_time + current_total
-                self.cpu_time = total_cpu_time
-
-                if self.time_limit is not None and total_cpu_time > self.time_limit:
-                    logging.warning(
-                        f"{self.name} exceeded CPU time limit: "
-                        f"{total_cpu_time:.2f}s > {self.time_limit}s"
-                    )
-                    self.process.terminate()
-                    # Give it a moment to terminate gracefully.
-                    time.sleep(1)
-                    if self.process.poll() is None:
-                        self.process.kill()
-                    break
-            except OSError:
-                # Process may have terminated, that's okay.
+            if total_cpu_time is None:
+                # Process may have terminated.
                 break
+
+            if self.time_limit is not None and total_cpu_time > self.time_limit:
+                logging.warning(
+                    f"{self.name} exceeded CPU time limit: "
+                    f"{total_cpu_time:.2f}s > {self.time_limit}s"
+                )
+                self.process.terminate()
+                # Give it a moment to terminate gracefully.
+                time.sleep(1)
+                if self.process.poll() is None:
+                    self.process.kill()
+                break
+
             time.sleep(check_interval)
 
     def cpu_time_limit_exceeded(self):
@@ -351,6 +365,10 @@ class Call:
         if monitor_thread is not None:
             monitor_thread.join(timeout=1)
 
+            # Do a final CPU time measurement to capture any time accumulated
+            # between the last monitoring check and process termination.
+            self._update_cpu_time()
+
         for stream, _ in self.redirected_streams_and_limits.values():
             # Write output to disk before the next Call starts.
             stream.flush()
@@ -365,8 +383,6 @@ class Call:
 
         # Report CPU time including children.
         if self.time_limit is not None:
-            # The monitoring thread has already calculated the final total
-            # including both finalized (terminated) and active processes.
             if self.cpu_time is not None:
                 logging.info(f"{self.name} CPU time: {self.cpu_time:.2f}s")
 
