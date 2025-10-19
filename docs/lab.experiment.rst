@@ -20,7 +20,7 @@ Custom command line arguments
 
    `ArgumentParser <http://docs.python.org/library/argparse.html>`_
    instance that can be used to add custom command line arguments.
-   You can import it, add your arguments and call its ``parse_args()``
+   You can import it, add your arguments and call its ``parse_known_args()``
    method to retrieve the argument values. To avoid confusion with step
    names you shouldn't use positional arguments.
 
@@ -34,17 +34,14 @@ Custom command line arguments
         from lab.experiment import ARGPARSER
 
         ARGPARSER.add_argument(
-            "--test",
-            choices=["yes", "no"],
-            required=True,
-            dest="test_run",
-            help="run experiment on small suite locally")
+            "--tex", action="store_true", help="produce LaTeX output"
+        )
 
-        args = ARGPARSER.parse_args()
-        if args.test_run:
-            print "perform test run"
+        args = ARGPARSER.parse_known_args()
+        if args.tex:
+            print("writing LaTeX output")
         else:
-            print "run real experiment"
+            print("writing HTML output")
 
 
 :class:`Run`
