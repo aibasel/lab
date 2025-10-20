@@ -235,10 +235,10 @@ class Call:
                 # Process may have terminated.
                 break
 
-            # Check if CPU time limit is exceeded, accounting for check interval.
+            # Check if CPU time limit is exceeded, accounting for interval and slack.
             if (
                 self.time_limit is not None
-                and total_cpu_time > self.time_limit + self.CPU_TIME_CHECK_INTERVAL
+                and total_cpu_time > self.time_limit + self.CPU_TIME_CHECK_INTERVAL + 1
             ):
                 logging.error(
                     f"{self.name} exceeded CPU time limit: "
