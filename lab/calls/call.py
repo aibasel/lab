@@ -235,12 +235,9 @@ class Call:
                 # Process may have terminated.
                 break
 
-            # Check if CPU time limit is exceeded, accounting for interval and slack.
-            if (
-                self.time_limit is not None
-                and total_cpu_time > self.time_limit + self.CPU_TIME_CHECK_INTERVAL + 1
-            ):
-                logging.error(
+            # Check if CPU time limit is exceeded.
+            if self.time_limit is not None and total_cpu_time > self.time_limit:
+                logging.info(
                     f"{self.name} exceeded CPU time limit: "
                     f"{total_cpu_time:.2f}s > {self.time_limit}s"
                 )
@@ -389,7 +386,14 @@ class Call:
 
         # Report CPU time including children.
         if self.cpu_time is not None:
+            assert self.time_limit is not None
             logging.info(f"{self.name} CPU time: {self.cpu_time:.2f}s")
+            # Report if CPU time limit was exceeded, accounting for interval and slack.
+            if self.cpu_time > self.time_limit + self.CPU_TIME_CHECK_INTERVAL + 1:
+                logging.error(
+                    f"{self.name} exceeded CPU time limit beyond allowed slack: "
+                    f"{self.cpu_time:.2f}s > {self.time_limit}s"
+                )
 
         if (
             self.wall_clock_time_limit is not None
