@@ -1,6 +1,18 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Limit CPU time for descendant processes, not only the main process of a command (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes so far.
+
+
 v8.5 (2025-09-16)
 -----------------
 

@@ -1,5 +1,6 @@
 import errno
 import logging
+import math
 import os
 import resource
 import select
@@ -138,7 +139,7 @@ class Call:
         if time_limit is None:
             self.wall_clock_time_limit = None
         else:
-            # Enforce miminum on wall-clock limit to account for disk latencies.
+            # Enforce minimum on wall-clock limit to account for disk latencies.
             self.wall_clock_time_limit = max(30, time_limit * 1.5)
 
         def get_bytes(limit):
@@ -172,7 +173,8 @@ class Call:
             # reach the higher hard time limit, SIGKILL is sent. Having some
             # padding between the two limits allows programs to handle SIGXCPU.
             if time_limit is not None:
-                set_limit(resource.RLIMIT_CPU, time_limit, time_limit + 5)
+                cpu_soft_limit = max(1, math.ceil(time_limit))
+                set_limit(resource.RLIMIT_CPU, cpu_soft_limit, cpu_soft_limit + 5)
             if memory_limit is not None:
                 _, hard_mem_limit = resource.getrlimit(resource.RLIMIT_AS)
                 # Convert memory from MiB to Bytes.
@@ -250,16 +252,20 @@ class Call:
 
             time.sleep(self.CPU_TIME_CHECK_INTERVAL)
 
-    def cpu_time_limit_exceeded(self):
+    def cpu_time_limit_exceeded(self, use_slack=False):
         """
         Check if the CPU time limit was exceeded.
-        Return True iff a time limit was set and the final CPU time exceeded it.
+
+        If use_slack is True, add check interval as slack to account for
+        measurement granularity.
+
         """
-        return (
-            self.time_limit is not None
-            and self.cpu_time is not None
-            and self.cpu_time > self.time_limit
-        )
+        if self.time_limit is None or self.cpu_time is None:
+            return False
+        limit = self.time_limit
+        if use_slack:
+            limit += self.CPU_TIME_CHECK_INTERVAL
+        return self.cpu_time > limit
 
     def _redirect_streams(self):
         """
@@ -351,7 +357,7 @@ class Call:
                     )
 
     def wait(self):
-        wall_clock_start_time = time.time()
+        wall_clock_start_time = time.monotonic()
 
         # Start CPU time monitoring thread if time limit is set.
         monitor_thread = None
@@ -381,19 +387,12 @@ class Call:
         for file in self.opened_files:
             file.close()
 
-        wall_clock_time = time.time() - wall_clock_start_time
+        wall_clock_time = time.monotonic() - wall_clock_start_time
         logging.info(f"{self.name} wall-clock time: {wall_clock_time:.2f}s")
 
         # Report CPU time including children.
         if self.cpu_time is not None:
-            assert self.time_limit is not None
             logging.info(f"{self.name} CPU time: {self.cpu_time:.2f}s")
-            # Report if CPU time limit was exceeded, accounting for interval and slack.
-            if self.cpu_time > self.time_limit + self.CPU_TIME_CHECK_INTERVAL + 1:
-                logging.error(
-                    f"{self.name} exceeded CPU time limit beyond allowed slack: "
-                    f"{self.cpu_time:.2f}s > {self.time_limit}s"
-                )
 
         if (
             self.wall_clock_time_limit is not None
@@ -401,7 +400,7 @@ class Call:
         ):
             logging.error(
                 f"wall-clock time for {self.name} too high: "
-                f"{wall_clock_time:.2f} > {self.wall_clock_time_limit}"
+                f"{wall_clock_time:.2f}s > {self.time_limit}s"
             )
         logging.info(f"{self.name} exit code: {retcode}")
         return retcode

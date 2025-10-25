@@ -65,6 +65,7 @@ print("Done!")
     retcode = call.wait()
 
     # Process should be terminated by RLIMIT_CPU (SIGXCPU = signal 24)
+    # or by monitoring thread (SIGTERM/SIGKILL)
     # Return code is negative signal number
     assert retcode != 0, "Process should be terminated by CPU limit"
     assert retcode < 0, "Process should be killed by signal"
