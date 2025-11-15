@@ -374,6 +374,29 @@ class RunFilter:
                     new_run_id = "-".join(new_run["id"]) if "id" in run else old_run_id
                     props[new_run_id] = new_run
 
+    def mirror(self, props):
+        for attribute in self.filtered_attributes:
+            if not any(attribute in run for run in props.values()):
+                logging.critical(
+                    f'No run has the attribute "{attribute}" (from '
+                    f'"filter_{attribute}"). Is this a typo?'
+                )
+        if not self.filters:
+            return props
+        else:
+            filtered_props = {}
+            for filter_ in self.filters:
+                for old_run_id, run in list(props.items()):
+                    new_run = self.apply_filter_to_run(filter_, run)
+                    if new_run:
+                        # Filters may change the ID. Don't complain if ID is missing.
+                        new_run_id = (
+                            "-".join(new_run["id"]) if "id" in run else old_run_id
+                        )
+                        filtered_props[new_run_id] = new_run
+
+            return filtered_props
+
 
 def fast_updatetree(src, dst, symlinks=False, ignore=None):
     """
