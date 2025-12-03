@@ -12,19 +12,18 @@ authors = [
     {name = "Jendrik Seipp", email = "jendrikseipp@gmail.com"},
 ]
 license = {text = "GPL3+"}
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
@@ -63,7 +62,7 @@ exclude = [
 line-length = 88
 indent-width = 4
 
-target-version = "py38"
+target-version = "py310"
 
 [tool.ruff.lint]
 # ruff enables Pyflakes (`F`) and a subset of the pycodestyle (`E`) codes by default.
