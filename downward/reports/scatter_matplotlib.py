@@ -74,7 +74,7 @@ class ScatterMatplotlib:
         axes.grid(True, linestyle="-", color="0.75")
 
         for category, coords in sorted(report.categories.items()):
-            x_vals, y_vals = zip(*coords)
+            x_vals, y_vals = zip(*coords, strict=True)
             axes.scatter(
                 x_vals, y_vals, clip_on=False, label=category, **report.styles[category]
             )

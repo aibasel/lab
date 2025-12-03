@@ -138,7 +138,7 @@ def make_list(value):
         return []
     elif isinstance(value, list):
         return value[:]
-    elif isinstance(value, (tuple, set)):
+    elif isinstance(value, tuple | set):
         return list(value)
     else:
         return [value]
@@ -333,7 +333,7 @@ class RunFilter:
         def property_filter(run):
             # We cannot use collections.Iterable here since we don't want
             # membership testing for str.
-            if isinstance(value, (list, tuple, set)):
+            if isinstance(value, list | tuple | set):
                 return run.get(prop) in value
             elif callable(value):
                 logging.critical(f"filter_{prop} doesn't accept functions.")
@@ -348,7 +348,7 @@ class RunFilter:
         # the filter returns True. In this case modified_run is not changed.
         modified_run = run
         result = filter_(modified_run)
-        if not isinstance(result, (dict, bool)):
+        if not isinstance(result, dict | bool):
             logging.critical("Filters must return a dictionary or Boolean")
         # If a dict is returned, use it as the new run, otherwise take the old one.
         if isinstance(result, dict):

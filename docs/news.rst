@@ -1,6 +1,18 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Remove tests for Python 3.8 and 3.9. Add tests for Python 3.14 (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
+* No changes so far.
+
+
 v8.6 (2025-12-03)
 -----------------
 
