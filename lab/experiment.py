@@ -199,12 +199,12 @@ class _Buildable:
         *command* has to be a list of strings where the first item is
         the executable.
 
-        After *time_limit* seconds the signal SIGXCPU is sent to the
-        command. The process can catch this signal and exit gracefully.
-        If it doesn't catch the SIGXCPU signal, the command is aborted
-        with SIGKILL after five additional seconds. The time spent by a
-        command is the sum of time spent across all threads of the
-        process and its descendants.
+        After *time_limit* seconds one of SIGXCPU or SIGTERM is sent to
+        the command. The command can catch this signal and exit
+        gracefully. After five additional seconds, the command is
+        aborted with SIGKILL. The time spent by a command is the sum of
+        time spent across all threads of the command is the sum of time
+        spent across all threads of the command and its descendants.
 
         The command is aborted with SIGKILL when any of its threads
         uses more than *memory_limit* MiB.
