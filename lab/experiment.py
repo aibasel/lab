@@ -204,10 +204,10 @@ class _Buildable:
         If it doesn't catch the SIGXCPU signal, the command is aborted
         with SIGKILL after five additional seconds. The time spent by a
         command is the sum of time spent across all threads of the
-        process.
+        process and its descendants.
 
-        The command is aborted with SIGKILL when it uses more than
-        *memory_limit* MiB.
+        The command is aborted with SIGKILL when any of its threads
+        uses more than *memory_limit* MiB.
 
         You can limit the log size (in KiB) with a soft and hard limit
         for both stdout and stderr. When the soft limit is hit, an
