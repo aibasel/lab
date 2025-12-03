@@ -1,16 +1,16 @@
 Changelog
 =========
 
-next (unreleased)
+v8.6 (2025-12-03)
 -----------------
 
 Lab
 ^^^
-* Limit CPU time for descendant processes, not only the main process of a command (Jendrik Seipp).
+* Limit the sum of CPU time used by all descendants of a command, not only its main process (Jendrik Seipp).
 
 Downward Lab
 ^^^^^^^^^^^^
-* No changes so far.
+* Fix computation of scores in single search parser by avoiding division by zero (Jendrik Seipp).
 
 
 v8.5 (2025-09-16)
