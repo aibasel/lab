@@ -354,7 +354,7 @@ class Report:
             for key, value in run.items():
                 if key not in self.attributes:
                     continue
-                if isinstance(value, (list, tuple)):
+                if isinstance(value, list | tuple):
                     key = "-".join(str(item) for item in value)
                 row[key] = value
             table.add_row(run_id, row)
@@ -778,7 +778,7 @@ class Table(collections.defaultdict):
         formatter = self.cell_formatters.get(row_name, {}).get(col_name)
         if not formatter:
             align_right = (
-                isinstance(value, (float, int)) or value is None or value == "?"
+                isinstance(value, float | int) or value is None or value == "?"
             )
             value = self._format_value(value)
             formatter = CellFormatter(bold=bold, color=color, align_right=align_right)

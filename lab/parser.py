@@ -130,7 +130,7 @@ class Parser:
         >>> parser.add_pattern("facts", r"Facts: (\d+)", type=int)
 
         """
-        if type == bool:
+        if type is bool:
             logging.warning(
                 "Casting any non-empty string to boolean will always "
                 "evaluate to true. Are you sure you want to use type=bool?"

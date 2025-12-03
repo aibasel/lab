@@ -738,7 +738,7 @@ class Run(_Buildable):
         run_id = self.properties.get("id")
         if run_id is None:
             logging.critical("Each run must have an id")
-        if not isinstance(run_id, (list, tuple)):
+        if not isinstance(run_id, list | tuple):
             logging.critical(f"id must be a list: {run_id}")
         for id_part in run_id:
             if not isinstance(id_part, str):

@@ -55,7 +55,7 @@ EVALUATIONS_PER_TIME = Attribute(
 )
 
 UNSOLVABLE_TASKS = {
-    "mystery:prob%02d.pddl" % index
+    f"mystery:prob{index:02d}.pddl"
     for index in [4, 5, 7, 8, 12, 16, 18, 21, 22, 23, 24]
 }
 

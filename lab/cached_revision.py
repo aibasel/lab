@@ -10,7 +10,7 @@ from pathlib import Path
 from lab import tools
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _get_id(cmd):
     p = subprocess.run(cmd, stdout=subprocess.PIPE)
     try:
