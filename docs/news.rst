@@ -1,7 +1,7 @@
 Changelog
 =========
 
-next (unreleased)
+v8.7 (2026-01-15)
 -----------------
 
 Lab
@@ -11,7 +11,7 @@ Lab
 
 Downward Lab
 ^^^^^^^^^^^^
-* No changes so far.
+* No changes.
 
 
 v8.6 (2025-12-03)
