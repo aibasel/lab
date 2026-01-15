@@ -107,6 +107,7 @@ class Call:
         args,
         name,
         time_limit=None,
+        wall_time_limit=None,
         memory_limit=None,
         soft_stdout_limit=None,
         hard_stdout_limit=None,
@@ -124,23 +125,33 @@ class Call:
         2. Monitoring the cumulative CPU time of the process and all its child
            processes, terminating the process tree if the total exceeds the limit.
 
+        The *wall_time_limit* parameter enforces a wall-clock time limit. If not
+        set and *time_limit* is provided, it defaults to
+        max(30, time_limit * 1.5) seconds. If both *time_limit* and
+        *wall_time_limit* are None, no wall-clock time limit is enforced.
+
         See also the documentation for
         ``lab.experiment._Buildable.add_command()``.
 
         """
         assert "stdin" not in kwargs, "redirecting stdin is not supported"
         self.name = name
-        self.time_limit = time_limit
+        self.cpu_time_limit = time_limit
         self.cpu_time = None
+        self.wall_clock_start_time = None
         # Track CPU time per PID to handle sequential children.
         self.pid_cpu_times = {}  # {pid: last_observed_cpu_time}
         self.finalized_cpu_time = 0.0  # Accumulated CPU time from terminated processes
 
-        if time_limit is None:
-            self.wall_clock_time_limit = None
-        else:
-            # Enforce minimum on wall-clock limit to account for disk latencies.
+        # Set wall-clock time limit
+        if wall_time_limit is not None:
+            self.wall_clock_time_limit = wall_time_limit
+        elif time_limit is not None:
+            # Default: Enforce minimum on wall-clock limit to account for
+            # disk latencies.
             self.wall_clock_time_limit = max(30, time_limit * 1.5)
+        else:
+            self.wall_clock_time_limit = None
 
         def get_bytes(limit):
             return None if limit is None else int(limit * 1024)
@@ -225,23 +236,23 @@ class Call:
         except (OSError, AttributeError):
             return None
 
-    def _monitor_cpu_time(self):
+    def _monitor_time_limits(self):
         """
-        Monitor the CPU time of the process and all its children.
-        Terminate the process if it exceeds the time limit.
+        Monitor the CPU time and wall-clock time of the process.
+        Terminate the process if it exceeds either limit.
         """
         while self.process.poll() is None:
+            # Check CPU time limit
             total_cpu_time = self._update_cpu_time()
 
             if total_cpu_time is None:
                 # Process may have terminated.
                 break
 
-            # Check if CPU time limit is exceeded.
-            if self.time_limit is not None and total_cpu_time > self.time_limit:
+            if self.cpu_time_limit is not None and total_cpu_time > self.cpu_time_limit:
                 logging.info(
                     f"{self.name} exceeded CPU time limit: "
-                    f"{total_cpu_time:.2f}s > {self.time_limit}s"
+                    f"{total_cpu_time:.2f}s > {self.cpu_time_limit}s"
                 )
                 self.process.terminate()
                 # Give it a moment to terminate gracefully.
@@ -249,6 +260,22 @@ class Call:
                 if self.process.poll() is None:
                     self.process.kill()
                 break
+
+            # Check wall-clock time limit
+            if self.wall_clock_time_limit is not None:
+                assert self.wall_clock_start_time is not None
+                wall_clock_time = time.monotonic() - self.wall_clock_start_time
+                if wall_clock_time > self.wall_clock_time_limit:
+                    logging.info(
+                        f"{self.name} exceeded wall-clock time limit: "
+                        f"{wall_clock_time:.2f}s > {self.wall_clock_time_limit}s"
+                    )
+                    self.process.terminate()
+                    # Give it a moment to terminate gracefully.
+                    time.sleep(1)
+                    if self.process.poll() is None:
+                        self.process.kill()
+                    break
 
             time.sleep(self.CPU_TIME_CHECK_INTERVAL)
 
@@ -260,9 +287,9 @@ class Call:
         measurement granularity.
 
         """
-        if self.time_limit is None or self.cpu_time is None:
+        if self.cpu_time_limit is None or self.cpu_time is None:
             return False
-        limit = self.time_limit
+        limit = self.cpu_time_limit
         if use_slack:
             limit += self.CPU_TIME_CHECK_INTERVAL
         return self.cpu_time > limit
@@ -357,13 +384,13 @@ class Call:
                     )
 
     def wait(self):
-        wall_clock_start_time = time.monotonic()
+        self.wall_clock_start_time = time.monotonic()
 
-        # Start CPU time monitoring thread if time limit is set.
+        # Start monitoring thread if any time limit is set.
         monitor_thread = None
-        if self.time_limit is not None:
+        if self.cpu_time_limit is not None or self.wall_clock_time_limit is not None:
             monitor_thread = threading.Thread(
-                target=self._monitor_cpu_time, daemon=True
+                target=self._monitor_time_limits, daemon=True
             )
             monitor_thread.start()
 
@@ -387,20 +414,12 @@ class Call:
         for file in self.opened_files:
             file.close()
 
-        wall_clock_time = time.monotonic() - wall_clock_start_time
+        wall_clock_time = time.monotonic() - self.wall_clock_start_time
         logging.info(f"{self.name} wall-clock time: {wall_clock_time:.2f}s")
 
         # Report CPU time including children.
         if self.cpu_time is not None:
             logging.info(f"{self.name} CPU time: {self.cpu_time:.2f}s")
 
-        if (
-            self.wall_clock_time_limit is not None
-            and wall_clock_time > self.wall_clock_time_limit
-        ):
-            logging.error(
-                f"wall-clock time for {self.name} too high: "
-                f"{wall_clock_time:.2f}s > {self.time_limit}s"
-            )
         logging.info(f"{self.name} exit code: {retcode}")
         return retcode

@@ -6,6 +6,7 @@ next (unreleased)
 
 Lab
 ^^^
+* Add ``wall_time_limit`` parameter to ``add_command()`` to allow explicit wall-clock time limits (Jendrik Seipp).
 * Remove tests for Python 3.8 and 3.9. Add tests for Python 3.14 (Jendrik Seipp).
 
 Downward Lab
