@@ -365,3 +365,111 @@ print("Parent done")
         f"Should accumulate sequential children's CPU time (~1s + ~0.5s = ~1.5s), "
         f"but got {call.cpu_time:.2f}s."
     )
+
+
+def test_wall_time_default_calculation(temp_script):
+    """Test that wall_time defaults to max(30, time_limit * 1.5) when not specified."""
+    # When time_limit = 10, wall_time should be max(30, 10 * 1.5) = 30
+    call = Call(
+        [sys.executable, "-c", "print('test')"],
+        name="wall-time-default-30",
+        time_limit=10,
+    )
+    call.wait()
+    assert call.wall_clock_time_limit == 30
+
+    # When time_limit = 100, wall_time should be max(30, 100 * 1.5) = 150
+    call = Call(
+        [sys.executable, "-c", "print('test')"],
+        name="wall-time-default-150",
+        time_limit=100,
+    )
+    call.wait()
+    assert call.wall_clock_time_limit == 150
+
+    # When time_limit is None, wall_time should be None
+    call = Call(
+        [sys.executable, "-c", "print('test')"],
+        name="wall-time-none",
+        time_limit=None,
+    )
+    call.wait()
+    assert call.wall_clock_time_limit is None
+
+
+def test_wall_time_explicit_parameter(temp_script):
+    """Test that explicit wall_time_limit parameter overrides the default."""
+    # Set explicit wall_time_limit = 60, even though time_limit would suggest 30
+    call = Call(
+        [sys.executable, "-c", "print('test')"],
+        name="wall-time-explicit",
+        time_limit=10,
+        wall_time_limit=60,
+    )
+    call.wait()
+    assert call.wall_clock_time_limit == 60
+
+    # Set wall_time_limit without time_limit
+    call = Call(
+        [sys.executable, "-c", "print('test')"],
+        name="wall-time-only",
+        time_limit=None,
+        wall_time_limit=45,
+    )
+    call.wait()
+    assert call.wall_clock_time_limit == 45
+
+
+def test_wall_time_logging(temp_script, caplog):
+    """Test that wall-clock time is properly logged after command execution."""
+    import logging
+
+    script = temp_script("""
+import time
+time.sleep(0.5)
+print('Done')
+""")
+
+    with caplog.at_level(logging.INFO):
+        call = Call(
+            [sys.executable, script],
+            name="wall-time-logging",
+            time_limit=10,
+        )
+        call.wait()
+
+    # Check that wall-clock time is logged
+    assert any(
+        "wall-time-logging wall-clock time:" in record.message
+        for record in caplog.records
+    )
+
+
+def test_wall_time_limit_exceeded(temp_script, caplog):
+    """Test that exceeding wall-clock time limit terminates the process."""
+    import logging
+
+    script = temp_script("""
+import time
+# Sleep longer than the wall-clock time limit
+time.sleep(5)
+print('Done')
+""")
+
+    with caplog.at_level(logging.INFO):
+        call = Call(
+            [sys.executable, script],
+            name="wall-time-exceeded",
+            time_limit=None,
+            wall_time_limit=1,
+        )
+        retcode = call.wait()
+
+    # Check that wall-clock time limit exceeded is logged
+    assert any(
+        "wall-time-exceeded exceeded wall-clock time limit:" in record.message
+        for record in caplog.records
+    ), "Should log info when wall-clock time limit is exceeded"
+
+    # Process should have been terminated (negative return code or specific exit code)
+    assert retcode != 0, "Process should have been terminated"

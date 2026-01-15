@@ -179,6 +179,7 @@ class _Buildable:
         name,
         command,
         time_limit=None,
+        wall_time_limit=None,
         memory_limit=None,
         soft_stdout_limit=1024,
         hard_stdout_limit=10 * 1024,
@@ -205,6 +206,11 @@ class _Buildable:
         aborted with SIGKILL. The time spent by a command is the sum of
         time spent across all threads of the command is the sum of time
         spent across all threads of the command and its descendants.
+
+        The *wall_time_limit* parameter specifies the wall-clock time limit in
+        seconds. If not set and *time_limit* is provided, it defaults to
+        max(30, time_limit * 1.5) seconds. If both *time_limit* and
+        *wall_time_limit* are None, no wall-clock time limit is enforced.
 
         The command is aborted with SIGKILL when any of its threads
         uses more than *memory_limit* MiB.
@@ -270,6 +276,7 @@ class _Buildable:
         if "stdin" in kwargs:
             logging.critical("redirecting stdin is not supported")
         kwargs["time_limit"] = time_limit
+        kwargs["wall_time_limit"] = wall_time_limit
         kwargs["memory_limit"] = memory_limit
         kwargs["soft_stdout_limit"] = soft_stdout_limit
         kwargs["hard_stdout_limit"] = hard_stdout_limit
