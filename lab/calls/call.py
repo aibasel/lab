@@ -1,9 +1,11 @@
+import contextlib
 import errno
 import logging
 import math
 import os
 import resource
 import select
+import signal
 import subprocess
 import sys
 import threading
@@ -180,6 +182,8 @@ class Call:
                 kwargs[stream_name] = subprocess.PIPE
 
         def prepare_call():
+            # Create a new process group so we can kill the entire group later
+            os.setpgrp()
             # When the soft time limit is reached, SIGXCPU is emitted. Once we
             # reach the higher hard time limit, SIGKILL is sent. Having some
             # padding between the two limits allows programs to handle SIGXCPU.
@@ -236,6 +240,16 @@ class Call:
         except (OSError, AttributeError):
             return None
 
+    def _terminate_process_group(self):
+        """Terminate the entire process group (parent and all children)."""
+        with contextlib.suppress(OSError, ProcessLookupError):
+            os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+        # Give it a moment to terminate gracefully.
+        time.sleep(1)
+        if self.process.poll() is None:
+            with contextlib.suppress(OSError, ProcessLookupError):
+                os.killpg(os.getpgid(self.process.pid), signal.SIGKILL)
+
     def _monitor_time_limits(self):
         """
         Monitor the CPU time and wall-clock time of the process.
@@ -254,11 +268,7 @@ class Call:
                     f"{self.name} exceeded CPU time limit: "
                     f"{total_cpu_time:.2f}s > {self.cpu_time_limit}s"
                 )
-                self.process.terminate()
-                # Give it a moment to terminate gracefully.
-                time.sleep(1)
-                if self.process.poll() is None:
-                    self.process.kill()
+                self._terminate_process_group()
                 break
 
             # Check wall-clock time limit
@@ -270,11 +280,7 @@ class Call:
                         f"{self.name} exceeded wall-clock time limit: "
                         f"{wall_clock_time:.2f}s > {self.wall_clock_time_limit}s"
                     )
-                    self.process.terminate()
-                    # Give it a moment to terminate gracefully.
-                    time.sleep(1)
-                    if self.process.poll() is None:
-                        self.process.kill()
+                    self._terminate_process_group()
                     break
 
             time.sleep(self.CPU_TIME_CHECK_INTERVAL)
