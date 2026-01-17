@@ -1,10 +1,7 @@
 Install Lab
 -----------
 
-Lab requires Python 3 and Linux (e.g., Ubuntu). ::
-
-    # Install uv.
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+Lab requires Linux and we recommend using `uv <https://docs.astral.sh/uv/>`_. ::
 
     # Create a uv project in the current directory.
     uv init --bare --no-workspace --pin-python
