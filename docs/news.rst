@@ -1,6 +1,13 @@
 Changelog
 =========
 
+v8.8 (2026-01-17)
+-----------------
+
+Lab
+^^^
+* Kill whole process group instead of only the main process when enforcing CPU and wall-clock time limits (Jendrik Seipp).
+
 v8.7 (2026-01-15)
 -----------------
 
@@ -8,11 +15,6 @@ Lab
 ^^^
 * Add ``wall_time_limit`` parameter to ``add_command()`` to allow explicit wall-clock time limits (Jendrik Seipp).
 * Remove tests for Python 3.8 and 3.9. Add tests for Python 3.14 (Jendrik Seipp).
-
-Downward Lab
-^^^^^^^^^^^^
-* No changes.
-
 
 v8.6 (2025-12-03)
 -----------------
@@ -98,21 +100,12 @@ Lab
 * Raise an error if a run command calls a Python script directly, because this would bypass the virtual environment (Jendrik Seipp).
 * Make HTML table headers sticky (Jendrik Seipp).
 
-Downward Lab
-^^^^^^^^^^^^
-* None.
-
-
 v8.0 (2023-10-21)
 -----------------
 
 Lab
 ^^^
 * Make parsing a separate experiment step, see :ref:`FAQs <portparsers>` for motivation and upgrade instructions (Jendrik Seipp).
-
-Downward Lab
-^^^^^^^^^^^^
-* None.
 
 
 v7.5 (2023-10-21)
@@ -123,10 +116,6 @@ Lab
 * Provide support for `HTCondor <https://htcondor.org/>`_ clusters in a `third-party repository <https://github.com/Martin1887/lab-htcondor-environment>`_ and add link to docs (Martín Pozo).
 * Add documentation for AI Basel's infai_3 partition (Silvan Sievers).
 * Don't rely on the existence of the 'runs-00001-00100' dir when fetching results (Jendrik Seipp).
-
-Downward Lab
-^^^^^^^^^^^^
-* None.
 
 
 v7.4 (2023-08-18)
@@ -240,10 +229,6 @@ Lab
 * Add ``cpus_per_task`` parameter to ``SlurmEnvironment`` (#98, Lucas Galery Käser).
 * Catch OverflowError when casting large ints to floats (#95, Silvan Sievers).
 
-Downward Lab
-^^^^^^^^^^^^
-* None.
-
 
 v6.3 (2021-02-14)
 -----------------
@@ -305,10 +290,6 @@ Lab
   Please note that the interface to the class is experimental and may change
   in the future. Feedback is welcome!
 * Let tests fail if any example experiment produces unexplained errors.
-
-Downward Lab
-^^^^^^^^^^^^
-* No changes.
 
 
 v5.5 (2020-03-13)
