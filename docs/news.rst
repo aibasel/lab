@@ -1,6 +1,14 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Downward Lab
+^^^
+* Add buttons for revealing and hiding all tables in an AbsoluteReport section (Jendrik Seipp).
+
+
 v8.8 (2026-01-17)
 -----------------
 

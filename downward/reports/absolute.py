@@ -4,6 +4,7 @@ from collections import defaultdict
 from downward import outcomes
 from downward.reports import PlanningReport
 from lab import reports
+from lab.reports import markup
 
 
 class AbsoluteReport(PlanningReport):
@@ -131,7 +132,17 @@ class AbsoluteReport(PlanningReport):
 
             toc_lines.append(f"- **[''{attribute}'' #{attribute}]**")
             toc_lines.append("  - " + " ".join(toc_line))
-            sections.append((attribute, "\n".join(parts)))
+
+            # Add show/hide all buttons for HTML output
+            section_content = "\n".join(parts)
+            if self.output_format == "html" and len(tables) > 1:
+                buttons = (
+                    f"{markup.ESCAPE_SHOW_ALL_BUTTON}{{{attribute}}} "
+                    f"{markup.ESCAPE_HIDE_ALL_BUTTON}{{{attribute}}}\n\n"
+                )
+                section_content = buttons + section_content
+
+            sections.append((attribute, section_content))
 
         # Add summary before main content. This is done after creating the main content
         # because the summary table is extracted from all other tables.

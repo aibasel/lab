@@ -5,6 +5,8 @@ import txt2tags
 
 ESCAPE_WORDBREAK = "xWBRx"
 ESCAPE_WHITESPACE = "xWHITESPACEx"
+ESCAPE_SHOW_ALL_BUTTON = "xSHOWALLBUTTONx"
+ESCAPE_HIDE_ALL_BUTTON = "xHIDEALLBUTTONx"
 
 CSS = """\
 <style type="text/css">
@@ -60,6 +62,36 @@ function show_table(section) {
     var table = find_next(toggle_button, "TABLE");
     table.style.display = "";
     toggle_button.innerHTML = "Hide table";
+}
+
+function show_all_tables_in_section(section_id) {
+    var section = document.getElementById(section_id);
+    if (!section) return;
+
+    var tables = section.getElementsByTagName('table');
+    var buttons = section.getElementsByClassName('toggle-table');
+
+    for (var i = 0; i < tables.length; i++) {
+        tables[i].style.display = "";
+    }
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].innerHTML = "Hide table";
+    }
+}
+
+function hide_all_tables_in_section(section_id) {
+    var section = document.getElementById(section_id);
+    if (!section) return;
+
+    var tables = section.getElementsByTagName('table');
+    var buttons = section.getElementsByClassName('toggle-table');
+
+    for (var i = 0; i < tables.length; i++) {
+        tables[i].style.display = "none";
+    }
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].innerHTML = "Show table";
+    }
 }
 
 function show_main_tables() {
@@ -122,6 +154,24 @@ def _get_config(target):
         config["postproc"].append([ESCAPE_WORDBREAK, r"<wbr>"])
 
         config["postproc"].append([ESCAPE_WHITESPACE, r"&nbsp;"])
+
+        # Replace escaped show/hide all button markers with actual HTML
+        config["postproc"].append(
+            [
+                ESCAPE_SHOW_ALL_BUTTON + r"\{(.+?)\}",
+                r'<button type="button" onclick="show_all_tables_in_section('
+                r"'\1')"
+                r'">Show all tables</button>',
+            ]
+        )
+        config["postproc"].append(
+            [
+                ESCAPE_HIDE_ALL_BUTTON + r"\{(.+?)\}",
+                r'<button type="button" onclick="hide_all_tables_in_section('
+                r"'\1')"
+                r'">Hide all tables</button>',
+            ]
+        )
 
         # Hide tables by default.
         config["postproc"].append(
@@ -193,6 +243,8 @@ def _get_config(target):
     config["postproc"].append([r"BEGINCOLOR(.*?)SEP(.*?)ENDCOLOR", r"\1"])
     config["postproc"].append([ESCAPE_WORDBREAK, r""])
     config["postproc"].append([ESCAPE_WHITESPACE, r" "])
+    config["postproc"].append([ESCAPE_SHOW_ALL_BUTTON + r"\{.+?\}", r""])
+    config["postproc"].append([ESCAPE_HIDE_ALL_BUTTON + r"\{.+?\}", r""])
 
     return config
 
