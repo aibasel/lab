@@ -44,7 +44,7 @@ def extract_subsection(block_text: str, title: str) -> str:
         flags=re.MULTILINE | re.DOTALL,
     )
     m = subsection_re.search(block_text)
-    return (m.group("body").strip() if m else "")
+    return m.group("body").strip() if m else ""
 
 
 with open(CHANGELOG) as f:
