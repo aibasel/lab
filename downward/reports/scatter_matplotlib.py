@@ -1,11 +1,12 @@
 import logging
+import math
 import sys
 
 import matplotlib
 from matplotlib import figure
 from matplotlib import lines as mlines
 from matplotlib.backends import backend_agg
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import FuncFormatter, MaxNLocator, ScalarFormatter
 
 
 class MatplotlibPlot:
@@ -82,6 +83,69 @@ class ScatterMatplotlib:
         axes.set_xbound(upper=report.x_upper)
         axes.set_ybound(upper=report.y_upper)
 
+    @staticmethod
+    def _format_log_value(x, show_power_of_10=True):
+        """Format a value for log scale axis labels.
+
+        Args:
+            x: The value to format
+            show_power_of_10: If True, show clean powers of 10 as 10^n notation
+
+        Returns:
+            Formatted string for matplotlib
+        """
+        if x <= 0:
+            return ""
+
+        if show_power_of_10:
+            exponent = math.log10(x)
+            if abs(exponent - round(exponent)) < 1e-10:
+                # It's a power of 10, show as 10^n
+                return f"$10^{{{int(round(exponent))}}}$"
+
+        # Not a clean power of 10, show with 2 decimal places
+        if x >= 1000 or x <= 0.001:
+            return f"${x:.2e}$"
+        else:
+            return f"${x:.2f}$"
+
+    @classmethod
+    def _ensure_all_major_ticks_labeled(cls, axes):
+        """Ensure all major ticks have labels on both axes.
+
+        This is especially important for log scale axes where matplotlib
+        may omit labels on some major ticks by default.
+        """
+        for axis in [axes.xaxis, axes.yaxis]:
+            scale = axis.get_scale()
+            if scale == "log":
+                formatter = FuncFormatter(
+                    lambda x, pos: cls._format_log_value(x, show_power_of_10=True)
+                )
+                axis.set_major_formatter(formatter)
+            elif scale == "linear":
+                # For linear scale, use ScalarFormatter
+                formatter = ScalarFormatter()
+                formatter.set_useOffset(False)
+                axis.set_major_formatter(formatter)
+
+    @classmethod
+    def _add_minor_tick_labels(cls, axes):
+        """Add labels to minor ticks on y-axis in a smaller font.
+
+        This is used for relative plots to provide more detailed scale information.
+        """
+        axis = axes.yaxis
+        scale = axis.get_scale()
+        if scale == "log":
+            formatter = FuncFormatter(
+                lambda x, pos: cls._format_log_value(x, show_power_of_10=False)
+            )
+            axis.set_minor_formatter(formatter)
+            # Make minor tick labels smaller
+            for label in axis.get_minorticklabels():
+                label.set_fontsize(label.get_fontsize() * 0.7)
+
     @classmethod
     def write(cls, report, filename):
         MatplotlibPlot.set_rc_params(report.matplotlib_options)
@@ -101,8 +165,14 @@ class ScatterMatplotlib:
             plot.plot_horizontal_line()
             # Ask for more ticks on y axis in relative plots.
             plot.axes.yaxis.set_major_locator(MaxNLocator(nbins="auto"))
+            # Ensure all major grid lines have labels in relative plots.
+            cls._ensure_all_major_ticks_labeled(plot.axes)
+            # Add labels to minor ticks in smaller font for relative plots.
+            cls._add_minor_tick_labels(plot.axes)
         if report.plot_diagonal_line:
             plot.plot_diagonal_line()
+            # Ensure all major grid lines have labels in diagonal plots.
+            cls._ensure_all_major_ticks_labeled(plot.axes)
 
         if report.has_multiple_categories():
             plot.create_legend()
