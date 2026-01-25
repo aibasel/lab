@@ -120,7 +120,7 @@ class ScatterMatplotlib:
             scale = axis.get_scale()
             if scale == "log":
                 formatter = FuncFormatter(
-                    lambda x, pos: cls._format_log_value(x, show_power_of_10=True)
+                    lambda x, _pos: cls._format_log_value(x, show_power_of_10=True)
                 )
                 axis.set_major_formatter(formatter)
             elif scale == "linear":
@@ -139,7 +139,7 @@ class ScatterMatplotlib:
         scale = axis.get_scale()
         if scale == "log":
             formatter = FuncFormatter(
-                lambda x, pos: cls._format_log_value(x, show_power_of_10=False)
+                lambda x, _pos: cls._format_log_value(x, show_power_of_10=False)
             )
             axis.set_minor_formatter(formatter)
             # Make minor tick labels smaller
