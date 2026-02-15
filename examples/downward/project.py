@@ -2,7 +2,6 @@ import contextlib
 import shutil
 import subprocess
 import sys
-import tarfile
 from collections import defaultdict
 from pathlib import Path
 
@@ -295,11 +294,17 @@ def add_compress_exp_dir_step(exp):
         tar_file_path = Path(exp.path).parent / f"{exp.name}.tar.xz"
         exp_dir_path = Path(exp.path)
 
-        with tarfile.open(tar_file_path, mode="w:xz", dereference=True) as tar:
-            for file in exp_dir_path.rglob("*"):
-                relpath = file.relative_to(exp_dir_path.parent)
-                print(f"Adding {relpath}")
-                tar.add(file, arcname=relpath)
+        subprocess.run(
+            [
+                "tar",
+                "-cJvf",
+                str(tar_file_path),
+                "-C",
+                str(exp_dir_path.parent),
+                exp.name,
+            ],
+            check=True,
+        )
 
         shutil.rmtree(exp_dir_path)
 
