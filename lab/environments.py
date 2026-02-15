@@ -307,7 +307,7 @@ class SlurmEnvironment(Environment):
             num_runs=num_runs,
             python=tools.get_python_executable(),
             runs_per_task=self._get_num_runs_per_task(),
-            task_order=" ".join(str(i) for i in self._get_task_order(num_tasks)),
+            run_order=" ".join(str(i) for i in self._get_task_order(num_runs)),
         )
 
     def _get_step_job_body(self, step):

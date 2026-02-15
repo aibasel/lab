@@ -4,8 +4,12 @@ Changelog
 next (unreleased)
 -----------------
 
-Downward Lab
+Lab
 ^^^
+* SlurmEnvironment: assign runs randomly to Slurm tasks, instead of assigning sequential blocks of runs to tasks that are then shuffled (Jendrik Seipp).
+
+Downward Lab
+^^^^^^^^^^^^
 * Add buttons for revealing and hiding all tables in an AbsoluteReport section (Jendrik Seipp).
 * Label more ticks in relative scatter plots (Jendrik Seipp).
 

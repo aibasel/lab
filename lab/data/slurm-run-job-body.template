@@ -30,21 +30,22 @@ function execute_run {
     fi
 }
 
-# Shuffle tasks to avoid systematic bias.
-declare -a SHUFFLED_TASK_IDS=(%(task_order)s)
-TASK_ID=${SHUFFLED_TASK_IDS[$SLURM_ARRAY_TASK_ID - 1]}
-
-# Compute which runs belong to the Slurm task.
+# Shuffle runs to avoid systematic bias.
+declare -a SHUFFLED_RUN_IDS=(%(run_order)s)
 NUM_RUNS=%(num_runs)d
 RUNS_PER_TASK=%(runs_per_task)d
-let "FIRST_RUN_ID=(TASK_ID - 1) * RUNS_PER_TASK + 1"
-let "LAST_RUN_ID=FIRST_RUN_ID + RUNS_PER_TASK - 1"
-if [ $LAST_RUN_ID -gt $NUM_RUNS ]; then
-    LAST_RUN_ID="$NUM_RUNS"
+
+# Compute which indices belong to the Slurm task.
+let "START_INDEX=($SLURM_ARRAY_TASK_ID - 1) * RUNS_PER_TASK"
+let "END_INDEX=START_INDEX + RUNS_PER_TASK - 1"
+
+if [ $END_INDEX -ge $NUM_RUNS ]; then
+    let "END_INDEX=$NUM_RUNS - 1"
 fi
 
-# Execute runs in shuffled order.
-for run_id in $(seq $FIRST_RUN_ID $LAST_RUN_ID | shuf); do
+# Execute runs.
+for index in $(seq $START_INDEX $END_INDEX); do
+    run_id=${SHUFFLED_RUN_IDS[$index]}
     run_dir=$(print_run_dir ${run_id})
     (cd "%(exp_path)s/$run_dir" && execute_run ${run_id})
 done
