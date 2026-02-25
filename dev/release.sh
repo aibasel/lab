@@ -25,11 +25,12 @@ fi
 
 if [[ $(git rev-parse --abbrev-ref HEAD) != main ]]; then
     echo "Must be on main branch for release"
-    echo "Run 'jj tug && git checkout main'
+    echo "Run 'jj tug && git checkout main'"
     exit 1
 fi
 
 tox
+./dev/make-release-notes.py "$VERSION" docs/news.rst "$CHANGES"
 
 set_version "$VERSION"
 git commit -am "Update version number to ${VERSION} for release." || true
@@ -44,5 +45,4 @@ git push --tags
 # PyPI release is created via GitHub Actions on tag push.
 
 # Add changelog to GitHub release.
-./dev/make-release-notes.py "$VERSION" docs/news.rst "$CHANGES"
 gh release create v"$VERSION" --notes-file "$CHANGES"
