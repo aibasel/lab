@@ -1,7 +1,7 @@
 Changelog
 =========
 
-next (unreleased)
+v8.9 (2026-02-25)
 -----------------
 
 Lab
