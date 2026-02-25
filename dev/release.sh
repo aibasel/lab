@@ -25,6 +25,7 @@ fi
 
 if [[ $(git rev-parse --abbrev-ref HEAD) != main ]]; then
     echo "Must be on main branch for release"
+    echo "Run 'jj tug && git checkout main'
     exit 1
 fi
 
