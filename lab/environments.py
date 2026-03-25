@@ -205,6 +205,12 @@ class SlurmEnvironment(Environment):
     variable. Lab groups `ceil(runs/MAX_TASKS)` runs in one array
     task.
 
+    .. note::
+
+        If you use the TetralithEnvironment class and have few and short
+        runs, the grid admins want you to reduce `TetralithEnvironment.MAX_TASKS`
+        from 2000 to a smaller value to avoid producing short-running Slurm tasks.
+
     See :py:class:`~lab.environments.Environment` for inherited
     parameters.
 
