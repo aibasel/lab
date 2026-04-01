@@ -10,6 +10,7 @@ from pathlib import Path
 from lab import environments, tools
 from lab.fetcher import Fetcher
 from lab.parser import Parser
+from lab.reports import Report
 from lab.steps import Step, get_step, get_steps_text
 
 # How many tasks to group into one top-level directory.
@@ -24,10 +25,20 @@ steps_group.add_argument(
     metavar="step",
     nargs="*",
     default=[],
-    help="Name or number of a step below. If none is given, print help.",
+    help=(
+        "Name or number of a step below. If none is given, print help. "
+        "For more than one step, separate intervals by using commas. "
+        "An interval is a single number of two numbers separated by a dash. "
+        "Examples of valid arguments:\n"
+        "1\n1-10. 1,4,5,7. 1,2-4,8-10,15-20. "
+        "You can also separate single steps by spaces."
+    ),
 )
 steps_group.add_argument(
     "--all", dest="run_all_steps", action="store_true", help="Run all steps."
+)
+steps_group.add_argument(
+    "--reports", dest="run_only_reports", action="store_true", help="Run only reports."
 )
 
 STATIC_EXPERIMENT_PROPERTIES_FILENAME = "static-experiment-properties"
@@ -373,6 +384,9 @@ class Experiment(_Buildable):
         self.runs = []
         self.parsers = []
 
+        # This attribute will be set by the first report that loads data.
+        self.props = {}
+
         self.set_property("experiment_file", self._script)
 
     @property
@@ -529,7 +543,9 @@ class Experiment(_Buildable):
         src = src or self.path
         dest = dest or self.eval_dir
         name = name or f"fetch-{os.path.basename(src.rstrip('/'))}"
-        self.add_step(name, Fetcher(), src, dest, merge=merge, filter=filter, **kwargs)
+        self.add_step(
+            name, Fetcher(self), src, dest, merge=merge, filter=filter, **kwargs
+        )
 
     def add_report(self, report, name="", eval_dir="", outfile=""):
         """Add *report* to the list of experiment steps.
@@ -551,6 +567,7 @@ class Experiment(_Buildable):
         >>> exp.add_report(AbsoluteReport(attributes=["coverage"]))
 
         """
+        report.exp = self
         name = name or os.path.basename(outfile) or report.__class__.__name__.lower()
         eval_dir = eval_dir or self.eval_dir
         outfile = outfile or f"{name}.{report.output_format}"
@@ -569,16 +586,47 @@ class Experiment(_Buildable):
         self.runs.append(run)
         return run
 
+    def parse_steps(self, steps_arg, run_all_steps, run_only_reports):
+        if run_all_steps:
+            return self.steps
+        elif run_only_reports:
+            return [step for step in self.steps if isinstance(step.func, Report)]
+
+        if len(steps_arg) > 1:
+            return [get_step(self.steps, name) for name in steps_arg]
+        else:
+            parsed_steps = []
+            for interval in steps_arg[0].split(","):
+                if "-" in interval:
+                    # The interval must have exactly 2 members: init and end.
+                    split = interval.split("-")
+                    if len(split) != 2:
+                        logging.critical(
+                            "Intervals must have exactly 2 elements: init and end"
+                        )
+                        ARGPARSER.print_help()
+                        sys.exit(1)
+                    else:
+                        for i in range(int(split[0]), int(split[1]) + 1):
+                            parsed_steps.append(str(i))
+                else:
+                    parsed_steps.append(interval)
+
+            return [get_step(self.steps, name) for name in parsed_steps]
+
     def run_steps(self):
         """Parse the commandline and run selected steps."""
         ARGPARSER.epilog = get_steps_text(self.steps)
         args = ARGPARSER.parse_args()
-        assert not args.steps or not args.run_all_steps
-        if not args.steps and not args.run_all_steps:
+        assert not args.steps or (not args.run_all_steps and not args.run_only_reports)
+        if args.steps:
+            assert not args.run_all_steps and not args.run_only_reports
+        else:
+            assert not args.run_all_steps or not args.run_only_reports
+        if not args.steps and not args.run_all_steps and not args.run_only_reports:
             ARGPARSER.print_help()
             return
-        # Run all steps if --all is passed.
-        steps = [get_step(self.steps, name) for name in args.steps] or self.steps
+        steps = self.parse_steps(args.steps, args.run_all_steps, args.run_only_reports)
         # Use LocalEnvironment if the main experiment step is inactive.
         if any(environments.is_run_step(step) for step in steps):
             env = self.environment
