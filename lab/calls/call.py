@@ -242,13 +242,19 @@ class Call:
 
     def _terminate_process_group(self):
         """Terminate the entire process group (parent and all children)."""
+        try:
+            pgid = os.getpgid(self.process.pid)
+        except (OSError, ProcessLookupError):
+            return
+
         with contextlib.suppress(OSError, ProcessLookupError):
-            os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+            os.killpg(pgid, signal.SIGTERM)
+
         # Give it a moment to terminate gracefully.
         time.sleep(1)
-        if self.process.poll() is None:
-            with contextlib.suppress(OSError, ProcessLookupError):
-                os.killpg(os.getpgid(self.process.pid), signal.SIGKILL)
+
+        with contextlib.suppress(OSError, ProcessLookupError):
+            os.killpg(pgid, signal.SIGKILL)
 
     def _monitor_time_limits(self):
         """
