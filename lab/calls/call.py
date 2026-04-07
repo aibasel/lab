@@ -246,16 +246,15 @@ class Call:
             pgid = os.getpgid(self.process.pid)
         except (OSError, ProcessLookupError):
             return
-    
+
         with contextlib.suppress(OSError, ProcessLookupError):
             os.killpg(pgid, signal.SIGTERM)
 
         # Give it a moment to terminate gracefully.
         time.sleep(1)
-    
+
         with contextlib.suppress(OSError, ProcessLookupError):
             os.killpg(pgid, signal.SIGKILL)
-
 
     def _monitor_time_limits(self):
         """
