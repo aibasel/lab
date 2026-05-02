@@ -1,6 +1,14 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Fix process group termination: always escalate to ``SIGKILL`` after ``SIGTERM``, since the previous ``poll()``-based check on the leader missed cases where a wrapper script exited cleanly while its children kept running (Travis Rivera Petit).
+
+
 v8.9 (2026-02-25)
 -----------------
 
