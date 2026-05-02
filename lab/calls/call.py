@@ -242,6 +242,9 @@ class Call:
 
     def _terminate_process_group(self):
         """Terminate the entire process group (parent and all children)."""
+        # Resolve the pgid once: after SIGTERM the leader may exit and be
+        # reaped, making a later os.getpgid(self.process.pid) fail even
+        # though children in the group are still running.
         try:
             pgid = os.getpgid(self.process.pid)
         except (OSError, ProcessLookupError):
@@ -252,6 +255,17 @@ class Call:
 
         # Give it a moment to terminate gracefully.
         time.sleep(1)
+
+        # We can't use self.process.poll() to decide whether to escalate:
+        # poll() only tracks the leader, but a wrapper leader (e.g.
+        # fast-downward.py) can exit cleanly after SIGTERM while its
+        # children (translate, search) keep running in the group. Probing
+        # the group with signal 0 tells us whether any member is still
+        # alive.
+        try:
+            os.killpg(pgid, 0)
+        except (OSError, ProcessLookupError):
+            return
 
         with contextlib.suppress(OSError, ProcessLookupError):
             os.killpg(pgid, signal.SIGKILL)
