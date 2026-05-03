@@ -249,6 +249,8 @@ class Report:
         self.output_format = format
         self.toc = True
         self.run_filter = tools.RunFilter(filter, **kwargs)
+        # The exp is set by experiment.py in add_report function.
+        self.exp = None
 
     def __call__(self, eval_dir, outfile):
         """Make the report.
@@ -413,15 +415,21 @@ class Report:
         }
 
     def _load_data(self):
-        props_file = os.path.join(self.eval_dir, "properties")
-        logging.info("Reading properties file")
-        self.props = tools.Properties(filename=props_file)
-        if not self.props:
-            logging.critical(f"No properties found in {self.eval_dir}")
-        logging.info("Reading properties file finished")
+        if self.eval_dir not in self.exp.props or not self.exp.props[self.eval_dir]:
+            props_file = os.path.join(self.eval_dir, "properties")
+            logging.info("Reading properties file")
+            self.exp.props[self.eval_dir] = tools.Properties(filename=props_file)
+            if not self.exp.props[self.eval_dir]:
+                logging.critical(f"No properties found in {self.eval_dir}")
+            logging.info("Reading properties file finished")
+
+        self.props = self.exp.props[self.eval_dir]
 
     def _apply_filter(self):
-        self.run_filter.apply(self.props)
+        # Removing elements would require a deepcopy of self.exp.props, with
+        # the resulting overhead in time and memory. Instead, a new dict
+        # containing only references to the non-filtered elements is generated.
+        self.props = self.run_filter.mirror(self.props)
         if not self.props:
             logging.critical("All runs have been filtered -> Nothing to report.")
 
