@@ -7,6 +7,7 @@ next (unreleased)
 Lab
 ^^^
 * Fix process group termination: always escalate to ``SIGKILL`` after ``SIGTERM``, since the previous ``poll()``-based check on the leader missed cases where a wrapper script exited cleanly while its children kept running (Travis Rivera Petit).
+* Configure logging when lab is imported so that ``logging.critical()`` reliably aborts the program even when no experiment is constructed, e.g., when generating reports (Jendrik Seipp).
 
 
 v8.9 (2026-02-25)

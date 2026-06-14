@@ -73,7 +73,8 @@ def configure_logging(level=logging.INFO):
     # function is called. We therefore remove all handlers that have
     # been added automatically.
     root_logger = logging.getLogger("")
-    for handler in root_logger.handlers:
+    # Iterate over a copy since removeHandler() mutates the list.
+    for handler in root_logger.handlers[:]:
         root_logger.removeHandler(handler)
 
     class ErrorAbortHandler(logging.StreamHandler):
