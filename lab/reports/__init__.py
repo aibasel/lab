@@ -261,6 +261,9 @@ class Report:
 
         The report will be written to *outfile*.
         """
+        # Configure logging here so that logging.critical() aborts the program
+        # even when a report is generated without constructing an Experiment.
+        tools.configure_logging()
         if not eval_dir.endswith("-eval"):
             logging.info(
                 'The source directory does not end with "-eval". '

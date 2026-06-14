@@ -94,6 +94,9 @@ class Fetcher:
         parameters.
 
         """
+        # Configure logging here so that logging.critical() aborts the program
+        # even when a fetcher is run without constructing an Experiment.
+        tools.configure_logging()
         src_dir = Path(src_dir)
         if not src_dir.exists():
             logging.critical(f"{src_dir} is missing")
