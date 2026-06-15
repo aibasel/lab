@@ -39,7 +39,7 @@ NEW_OUTCOMES = [
     ),
     Outcome(10, "translate-unsolvable", explained=True, min_wins=False),
     Outcome(11, "search-unsolvable", explained=True, min_wins=False),
-    Outcome(12, "search-unsolvable-incomplete", explained=True, min_wins=None),
+    Outcome(12, "search-unsolved-incomplete", explained=True, min_wins=None),
     Outcome(20, "translate-out-of-memory", explained=True, min_wins=True),
     Outcome(21, "translate-out-of-time", explained=True, min_wins=True),
     Outcome(22, "search-out-of-memory", explained=True, min_wins=True),

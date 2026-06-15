@@ -399,7 +399,7 @@ def check_initial_h_value(run):
 def check_search_started(run):
     if "search_start_time" not in run:
         error = run.get("error")
-        if error not in ["search-unsolvable-incomplete", "translate-out-of-memory"]:
+        if error not in ["search-unsolved-incomplete", "translate-out-of-memory"]:
             tools.add_unexplained_error(run, f"search not started due to {error}")
     return True
 
