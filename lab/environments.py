@@ -464,3 +464,20 @@ class TetralithEnvironment(SlurmEnvironment):
     def is_present(cls):
         node = platform.node()
         return bool(re.match(r"tetralith\d+\.nsc\.liu\.se|n\d+", node))
+
+
+class ArrheniusEnvironment(SlurmEnvironment):
+    """Environment for the NAISS Arrhenius cluster."""
+
+    DEFAULT_PARTITION = "cpu"
+    DEFAULT_QOS = "normal"
+    # cpu nodes have 773500 MiB and 256 cores => ~3021 MiB per core.
+    DEFAULT_MEMORY_PER_CPU = "3G"
+    DEFAULT_TIME_LIMIT_PER_TASK = "24:00:00"
+    # MaxArraySize = 1001 (from slurm.conf)
+    MAX_TASKS = 1000
+
+    @classmethod
+    def is_present(cls):
+        node = platform.node()
+        return bool(re.match(r"arrhenius\d+\.hpc\.arrhenius\.naiss\.se|n\d+", node))

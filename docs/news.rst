@@ -6,6 +6,7 @@ next (unreleased)
 
 Lab
 ^^^
+* Add support for the NAISS Arrhenius cluster (Damien Van Meerbeeck).
 * Fix process group termination: always escalate to ``SIGKILL`` after ``SIGTERM``, since the previous ``poll()``-based check on the leader missed cases where a wrapper script exited cleanly while its children kept running (Travis Rivera Petit).
 * Configure logging when reports and fetchers run so that ``logging.critical()`` reliably aborts the program even when no experiment is constructed (Jendrik Seipp).
 
