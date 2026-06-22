@@ -4,7 +4,7 @@ from pathlib import Path
 import lab
 from lab import reports
 from lab.calls.call import Call
-from lab.environments import TetralithEnvironment
+from lab.environments import ArrheniusEnvironment, TetralithEnvironment
 
 assert reports.Table.add_col
 assert reports.Table.get_row
@@ -15,6 +15,7 @@ assert lab.tools.get_lab_path
 assert Call
 
 TetralithEnvironment.is_present()
+ArrheniusEnvironment.is_present()
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / "examples" / "downward"))
 import project  # noqa: E402
