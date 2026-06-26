@@ -40,7 +40,7 @@ def extract_subsection(block_text: str, title: str) -> str:
     # ^^^
     # <body>
     subsection_re = re.compile(
-        rf"^{re.escape(title)}\n\^+\n(?P<body>.*?)(?=\n\S.*\n\^+\n|\Z)",
+        rf"^{re.escape(title)}\n\^+\n(?P<body>.*?)(?=\n\S[^\n]*\n\^+\n|\Z)",
         flags=re.MULTILINE | re.DOTALL,
     )
     m = subsection_re.search(block_text)
