@@ -29,8 +29,8 @@ CONFIGS = [
     (f"{index:02d}-{h_nick}", ["--search", f"eager_greedy([{h}])"])
     for index, (h_nick, h) in enumerate(
         [
-            ("cg", "cg(transform=adapt_costs(one))"),
-            ("ff", "ff(transform=adapt_costs(one))"),
+            ("cg", "eval_modify_costs(cg(), cost_type=one)"),
+            ("ff", "eval_modify_costs(ff(), cost_type=one)"),
         ],
         start=1,
     )
