@@ -11,29 +11,29 @@ from downward.reports.scatter import ScatterPlotReport
 from downward.reports.taskwise import TaskwiseReport
 from lab import tools
 from lab.environments import (
+    ArrheniusEnvironment,
     BaselSlurmEnvironment,
     LocalEnvironment,
-    TetralithEnvironment,
 )
 from lab.experiment import ARGPARSER
 from lab.reports import Attribute, geometric_mean
 
 # Silence import-unused messages. Experiment scripts may use these imports.
 assert (
-    BaselSlurmEnvironment
+    ArrheniusEnvironment
+    and BaselSlurmEnvironment
     and FastDownwardExperiment
     and LocalEnvironment
     and ScatterPlotReport
     and TaskwiseReport
-    and TetralithEnvironment
 )
 
 
 DIR = Path(__file__).resolve().parent
 SCRIPT = Path(sys.argv[0]).resolve()
 
-# Cover both the Basel and Linköping clusters for simplicity.
-REMOTE = BaselSlurmEnvironment.is_present() or TetralithEnvironment.is_present()
+# Cover both the Arrhenius and Basel clusters for simplicity.
+REMOTE = ArrheniusEnvironment.is_present() or BaselSlurmEnvironment.is_present()
 
 
 def parse_args():

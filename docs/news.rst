@@ -1,6 +1,15 @@
 Changelog
 =========
 
+next (unreleased)
+-----------------
+
+Lab
+^^^
+* Use ``ArrheniusEnvironment`` in example experiments and recommend Arrhenius's
+  ``fat`` partition (Jendrik Seipp).
+
+
 v8.10 (2026-06-26)
 ------------------
 

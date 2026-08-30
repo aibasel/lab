@@ -20,7 +20,8 @@ REVISION_CACHE = (
 )
 if project.REMOTE:
     # ENV = project.BaselSlurmEnvironment(email="my.name@myhost.ch")
-    ENV = project.TetralithEnvironment(
+    ENV = project.ArrheniusEnvironment(
+        partition="fat",
         memory_per_cpu="9G",  # leave some space for the scripts
         email="first.last@liu.se",
         extra_options="#SBATCH --account=naiss2024-5-421",

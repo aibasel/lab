@@ -33,7 +33,7 @@ from singularity_parser import get_parser
 
 from downward import suites
 from downward.reports.absolute import AbsoluteReport
-from lab.environments import LocalEnvironment, TetralithEnvironment
+from lab.environments import ArrheniusEnvironment, LocalEnvironment
 from lab.experiment import Experiment
 
 
@@ -50,7 +50,7 @@ class BaseReport(AbsoluteReport):
     ]
 
 
-RUNNING_ON_CLUSTER = TetralithEnvironment.is_present()
+RUNNING_ON_CLUSTER = ArrheniusEnvironment.is_present()
 DIR = Path(__file__).resolve().parent
 REPO = DIR.parent
 IMAGES_DIR = Path(os.environ["SINGULARITY_IMAGES"])
@@ -59,8 +59,9 @@ BENCHMARKS_DIR = os.environ["DOWNWARD_BENCHMARKS"]
 MEMORY_LIMIT = 3584  # MiB
 if RUNNING_ON_CLUSTER:
     SUITE = ["depot", "freecell", "gripper", "zenotravel"]
-    ENVIRONMENT = TetralithEnvironment(
+    ENVIRONMENT = ArrheniusEnvironment(
         email="my.name@liu.se",
+        partition="fat",
         memory_per_cpu="9G",
         extra_options="#SBATCH --account=naiss2024-5-421",
         export=["PATH"],

@@ -143,24 +143,26 @@ class SlurmEnvironment(Environment):
     * "infai_3": 12 nodes with 128 cores, 512GB memory, 240GB SSD
 
     For Tetralith, omit the argument or use the default "tetralith".
+    For Arrhenius, omit the argument or use the default "cpu" for standard
+    nodes. We recommend the "fat" partition for memory-intensive experiments.
 
     *qos* must be a valid Slurm QOS name (default: "normal").
 
     *time_limit_per_task* sets the wall-clock time limit for each Slurm task.
     The BaselSlurmEnvironment subclass uses a default of "0", i.e., no limit.
     (Note that there may still be an external limit set in slurm.conf.)
-    The TetralithEnvironment class uses a default of "24:00:00", i.e., 24
-    hours. This is because in certain situations, the scheduler prefers to
-    schedule tasks shorter than 24 hours.
+    The TetralithEnvironment and ArrheniusEnvironment classes use a default of
+    "24:00:00", i.e., 24 hours. This is because in certain situations, the
+    scheduler prefers to schedule tasks shorter than 24 hours.
 
     *memory_per_cpu* must be a string specifying the memory
     allocated for each core. The string must end with one of the
     letters K, M or G. The default is "3872M" for the Basel cluster and
-    "9G" on Tetralith. Processes that surpass the *memory_per_cpu* limit
-    are terminated with SIGKILL. To impose a soft limit that can be caught
-    from within your programs, use the ``memory_limit`` kwarg of
-    :py:func:`~lab.experiment.Run.add_command`. Fast Downward users
-    should set memory limits via the ``driver_options``.
+    "3G" on Arrhenius and "9G" on Tetralith. Processes that surpass the
+    *memory_per_cpu* limit are terminated with SIGKILL. To impose a soft limit
+    that can be caught from within your programs, use the ``memory_limit`` kwarg
+    of :py:func:`~lab.experiment.Run.add_command`. Fast Downward users should set
+    memory limits via the ``driver_options``.
 
     *cpus_per_task* sets the number of cores to be allocated per Slurm
     task (default: 1).
@@ -179,14 +181,29 @@ class SlurmEnvironment(Environment):
     ...     cpus_per_task=2,
     ... )
 
-    Here is the code for reserving 128 GiB of memory on fat Tetralith nodes:
+    On Arrhenius, we recommend the ``fat`` partition with 11 GiB of memory per
+    core instead of the default ``cpu`` partition, which provides less than
+    3 GiB per core. According to the `official resource description
+    <https://supr.naiss.se/resource/arrhenius-cpu/>`_, Arrhenius has 192 thin
+    nodes in the ``cpu`` partition with 768 GB RAM and 20 nodes in the ``fat``
+    partition with 3072 GB RAM. Each node has 256 cores, giving
+    3 GB and 12 GB per core, respectively.
+    Here is the code for reserving 9 GiB of memory:
 
-    >>> # 128 * 1024 / 11360 = 11.5 -> round to next int -> 12 cores per task
-    >>> # 128G / 12 = 10.67G -> round to next int -> 11G per core
-    >>> env = TetralithEnvironment(
-    ...     memory_per_cpu="11G",
-    ...     cpus_per_task=12,
-    ...     extra_options="#SBATCH -C fat",
+    >>> # 9G / 11G -> round to next int -> 1 core per task
+    >>> env = ArrheniusEnvironment(
+    ...     partition="fat",
+    ...     memory_per_cpu="9G",
+    ...     cpus_per_task=1,
+    ... )
+
+    The same requirements are billed 3 cores on the "cpu" partition:
+
+    >>> # 9G / 3G -> round to next int -> 3 cores per task billed
+    >>> env = ArrheniusEnvironment(
+    ...     partition="cpu",
+    ...     memory_per_cpu="9G",
+    ...     cpus_per_task=1,
     ... )
 
     Use *export* to specify a list of environment variables that
