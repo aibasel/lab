@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from lab import tools
+from lab import archive, tools
 
 
 def _get_job_prefix(exp_name):
@@ -88,6 +88,9 @@ class LocalEnvironment(Environment):
         self.processes = processes
 
     def write_main_script(self):
+        if self.exp.archive:
+            # start_runs() executes archived runs directly.
+            return
         script = tools.fill_template(
             "local-job.py",
             task_order=self._get_task_order(len(self.exp.runs)),
@@ -97,9 +100,27 @@ class LocalEnvironment(Environment):
         self.exp.add_new_file("", self.EXP_RUN_SCRIPT, script, permissions=0o755)
 
     def start_runs(self):
+        if self.exp.archive:
+            self._start_archived_runs()
+            return
         tools.run_command(
             [tools.get_python_executable(), self.EXP_RUN_SCRIPT], cwd=self.exp.path
         )
+
+    def _start_archived_runs(self):
+        from lab.experiment import get_run_dir
+
+        run_dirs = [
+            get_run_dir(run_id) for run_id in self._get_task_order(len(self.exp.runs))
+        ]
+        chunks = [run_dirs[i :: self.processes] for i in range(self.processes)]
+        with multiprocessing.Pool(processes=self.processes) as pool:
+            failed = pool.starmap(
+                archive.execute_runs,
+                [(self.exp.archive_path, chunk) for chunk in chunks if chunk],
+            )
+        if any(failed):
+            sys.exit("Error: At least one run failed.")
 
     def run_steps(self, steps):
         for step in steps:
@@ -249,6 +270,7 @@ class SlurmEnvironment(Environment):
     NICE_VALUE = 0
     JOB_HEADER_TEMPLATE_FILE = "slurm-job-header"
     RUN_JOB_BODY_TEMPLATE_FILE = "slurm-run-job-body"
+    ARCHIVED_RUN_JOB_BODY_TEMPLATE_FILE = "slurm-archived-run-job-body"
     STEP_JOB_BODY_TEMPLATE_FILE = "slurm-step-job-body"
 
     def __init__(
@@ -325,7 +347,10 @@ class SlurmEnvironment(Environment):
         num_tasks = self._get_num_tasks(run_step)
         logging.info(f"Grouping {num_runs} runs into {num_tasks} Slurm tasks.")
         return tools.fill_template(
-            self.RUN_JOB_BODY_TEMPLATE_FILE,
+            self.ARCHIVED_RUN_JOB_BODY_TEMPLATE_FILE
+            if self.exp.archive
+            else self.RUN_JOB_BODY_TEMPLATE_FILE,
+            archive_path=self.exp.archive_path,
             exp_path=self.exp.path,
             num_runs=num_runs,
             python=tools.get_python_executable(),

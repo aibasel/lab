@@ -77,8 +77,11 @@ class FastDownwardRun(Run):
             )
             input_files = ["{domain}", "{problem}"]
 
+        # Runs execute in their run directory, two levels below the
+        # experiment directory.
         driver = os.path.join(
-            exp.path,
+            "..",
+            "..",
             algo.cached_revision.get_relative_exp_path("fast-downward.py"),
         )
         self.add_command(
@@ -149,10 +152,10 @@ class FastDownwardExperiment(Experiment):
     #: "planner_wall_clock_time", "score_planner_memory", "score_planner_time".
     PLANNER_PARSER = PlannerParser()
 
-    def __init__(self, path=None, environment=None, revision_cache=None):
+    def __init__(self, path=None, environment=None, revision_cache=None, archive=False):
         """
         See :class:`lab.experiment.Experiment` for an explanation of
-        the *path* and *environment* parameters.
+        the *path*, *environment* and *archive* parameters.
 
         *revision_cache* is the directory for caching Fast Downward
         revisions. It defaults to ``<scriptdir>/data/revision-cache``.
@@ -176,7 +179,7 @@ class FastDownwardExperiment(Experiment):
         >>> exp.add_parser(exp.PLANNER_PARSER)
 
         """
-        Experiment.__init__(self, path=path, environment=environment)
+        Experiment.__init__(self, path=path, environment=environment, archive=archive)
 
         self.revision_cache = revision_cache or os.path.join(
             get_default_data_dir(), "revision-cache"

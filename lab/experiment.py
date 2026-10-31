@@ -3,11 +3,18 @@
 import logging
 import os
 import re
+import shutil
 import sys
+import tempfile
 from collections import OrderedDict
 from pathlib import Path
 
 from lab import environments, tools
+from lab.archive import (
+    ArchiveBuilder,
+    ExperimentArchive,
+    get_archive_path,
+)
 from lab.fetcher import Fetcher
 from lab.parser import Parser
 from lab.steps import Step, get_step, get_steps_text
@@ -82,6 +89,24 @@ class _Resource:
         self.source = source
         self.dest = dest
         self.symlink = symlink
+
+
+class _DirectoryBuilder:
+    """Write the files of an experiment into its directory during the build step."""
+
+    def makedirs(self, path):
+        tools.makedirs(path)
+
+    def write_file(self, path, content, permissions=None):
+        tools.write_file(path, content)
+        if permissions is not None:
+            os.chmod(path, permissions)
+
+    def copy(self, source, path):
+        tools.copy(source, path)
+
+    def symlink(self, source, path, start):
+        os.symlink(os.path.relpath(source, start=start), path)
 
 
 class _Buildable:
@@ -298,20 +323,19 @@ class _Buildable:
     def _get_rel_path(self, abs_path):
         return os.path.relpath(abs_path, start=self.path)
 
-    def _build_properties_file(self, properties_filename):
-        combined_props = tools.Properties(self._get_abs_path(properties_filename))
-        combined_props.update(self.properties)
-        combined_props.write()
+    def _build_properties_file(self, builder, properties_filename):
+        builder.write_file(
+            self._get_abs_path(properties_filename), str(self.properties)
+        )
 
-    def _build_new_files(self):
+    def _build_new_files(self, builder):
         for dest, content, permissions in self.new_files:
             filename = self._get_abs_path(dest)
-            tools.makedirs(os.path.dirname(filename))
+            builder.makedirs(os.path.dirname(filename))
             logging.debug(f'Writing file "{filename}"')
-            tools.write_file(filename, content)
-            os.chmod(filename, permissions)
+            builder.write_file(filename, content, permissions)
 
-    def _build_resources(self):
+    def _build_resources(self, builder):
         for resource in self.resources:
             if not os.path.exists(resource.source):
                 logging.critical(f"Resource not found: {resource.source}")
@@ -320,18 +344,14 @@ class _Buildable:
                 # Only copy resources that reside in the experiment/run dir.
                 continue
             if resource.symlink:
-                # Do not create a symlink if the file doesn't exist.
-                if not os.path.exists(resource.source):
-                    continue
-                source = self._get_rel_path(resource.source)
-                os.symlink(source, dest)
-                logging.debug(f"Linking from {source} to {dest}")
+                logging.debug(f"Linking from {resource.source} to {dest}")
+                builder.symlink(resource.source, dest, start=self.path)
                 continue
 
             # Even if the directory containing a resource has already been added,
             # we copy the resource since we might want to overwrite it.
             logging.debug(f"Copying {resource.source} to {dest}")
-            tools.copy(resource.source, dest)
+            builder.copy(resource.source, dest)
 
 
 class Experiment(_Buildable):
@@ -342,12 +362,21 @@ class Experiment(_Buildable):
 
     """
 
-    def __init__(self, path=None, environment=None):
+    def __init__(self, path=None, environment=None, archive=False):
         """
         The experiment will be built at *path*. It defaults to
         ``<scriptdir>/data/<scriptname>/``. E.g., for the script
         ``experiments/myexp.py``, the default *path* will be
         ``experiments/data/myexp/``.
+
+        If *archive* is True, the experiment directory is stored in the
+        single uncompressed tar file ``<path>.tar`` from the build step
+        on, which saves inodes on cluster file systems. Each run extracts
+        its files into a temporary directory (respecting ``TMPDIR``) and
+        appends the files it creates or changes to the archive. The parse
+        and fetch steps read the archive directly. Custom steps that
+        expect the directory ``<path>`` don't work with archived
+        experiments.
 
         *environment* must be an :ref:`Environment <environments>`
         instance. You can use
@@ -366,6 +395,7 @@ class Experiment(_Buildable):
         self.path = os.path.abspath(path)
         if any(char in self.path for char in (":", ",")):
             logging.critical(f"Path contains commas or colons: {self.path}")
+        self.archive = archive
         self.environment = environment or environments.LocalEnvironment()
         self.environment.exp = self
 
@@ -379,6 +409,15 @@ class Experiment(_Buildable):
     def name(self):
         """Return the directory name of the experiment's ``path``."""
         return os.path.basename(self.path)
+
+    @property
+    def archive_path(self):
+        """Return the path of the archive that stores an archived experiment."""
+        return get_archive_path(self.path)
+
+    @property
+    def _data_path(self):
+        return self.archive_path if self.archive else self.path
 
     @property
     def eval_dir(self):
@@ -453,6 +492,10 @@ class Experiment(_Buildable):
         data from the experiment into the evaluation directory.
         """
 
+        if self.archive:
+            self._parse_archive()
+            return
+
         if not os.path.isdir(self.path):
             logging.critical(f"{self.path} is missing or not a directory")
 
@@ -465,19 +508,43 @@ class Experiment(_Buildable):
             props_path = run_dir / "properties"
             if props_path.is_file():
                 props_path.unlink()
+            self._parse_run_dir(run_dir, index, num_runs)
 
-            loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-            logging.log(loglevel, f"Parsing run: {index:6d}/{num_runs:d}")
-            props = tools.Properties(filename=props_path)
-            for parser in self.parsers:
-                parser.parse(run_dir, props)
-            try:
-                props.write()
-            except ValueError as err:
-                logging.critical(
-                    f"Failed to write properties file in {run_dir}: {err}\n"
-                    "Often the solution is to revise a parser."
+    def _parse_run_dir(self, run_dir, index, num_runs):
+        loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
+        logging.log(loglevel, f"Parsing run: {index:6d}/{num_runs:d}")
+        props = tools.Properties(filename=run_dir / "properties")
+        for parser in self.parsers:
+            parser.parse(run_dir, props)
+        try:
+            props.write()
+        except ValueError as err:
+            logging.critical(
+                f"Failed to write properties file in {run_dir}: {err}\n"
+                "Often the solution is to revise a parser."
+            )
+
+    def _parse_archive(self):
+        if not os.path.isfile(self.archive_path):
+            logging.critical(f"{self.archive_path} is missing or not a file")
+
+        archive = ExperimentArchive(self.archive_path)
+        groups = archive.group_by_run_dir(archive.members())
+        run_dirs = sorted(run_dir for run_dir in groups if run_dir is not None)
+        num_runs = len(run_dirs)
+        logging.info(
+            f"Running {len(self.parsers)} parsers in {num_runs:d} archived run "
+            f"directories."
+        )
+        with tempfile.TemporaryDirectory(prefix="lab-") as scratch:
+            for index, run_dir in enumerate(run_dirs, start=1):
+                props_name = f"{run_dir}/properties"
+                archive.extract(
+                    [m for m in groups[run_dir] if m.name != props_name], scratch
                 )
+                self._parse_run_dir(Path(scratch) / run_dir, index, num_runs)
+                archive.append(scratch, [props_name])
+                shutil.rmtree(Path(scratch) / run_dir)
 
     def add_fetcher(
         self, src=None, dest=None, merge=None, name=None, filter=None, **kwargs
@@ -489,8 +556,9 @@ class Experiment(_Buildable):
         You can use this method to combine results from multiple
         experiments.
 
-        *src* can be an experiment or evaluation directory or a properties
-        file. It defaults to ``exp.path``.
+        *src* can be an experiment or evaluation directory, an experiment
+        archive or a properties file. It defaults to ``exp.path`` or, for
+        archived experiments, ``exp.archive_path``.
 
         *dest* must be a new or existing evaluation directory. It
         defaults to ``exp.eval_dir``. If *dest* already contains
@@ -526,7 +594,7 @@ class Experiment(_Buildable):
         >>> exp.add_fetcher(filter_algorithm=["algo_1", "algo_5"])
 
         """
-        src = src or self.path
+        src = src or self._data_path
         dest = dest or self.eval_dir
         name = name or f"fetch-{os.path.basename(src.rstrip('/'))}"
         self.add_step(name, Fetcher(), src, dest, merge=merge, filter=filter, **kwargs)
@@ -587,9 +655,9 @@ class Experiment(_Buildable):
         env.run_steps(steps)
 
     def _remove_experiment_dir(self):
-        if os.path.exists(self.path):
-            tools.confirm_overwrite_or_abort(self.path)
-            tools.remove_path(self.path)
+        if os.path.exists(self._data_path):
+            tools.confirm_overwrite_or_abort(self._data_path)
+            tools.remove_path(self._data_path)
 
     def build(self, write_to_disk=True):
         """
@@ -605,17 +673,25 @@ class Experiment(_Buildable):
         if not write_to_disk:
             return
 
-        logging.info(f'Experiment path: "{tools.get_relative_path(self.path)}"')
+        logging.info(f'Experiment path: "{tools.get_relative_path(self._data_path)}"')
         self._remove_experiment_dir()
-        tools.makedirs(self.path)
+        if self.archive:
+            archive = ExperimentArchive(self.archive_path)
+            archive.create()
+            with archive.writer(dereference=True) as tar:
+                self._build(ArchiveBuilder(tar, self.path))
+        else:
+            self._build(_DirectoryBuilder())
 
-        self._build_resources()
-        self._build_runs()
-        self._build_properties_file(STATIC_EXPERIMENT_PROPERTIES_FILENAME)
+    def _build(self, builder):
+        builder.makedirs(self.path)
+        self._build_resources(builder)
+        self._build_runs(builder)
+        self._build_properties_file(builder, STATIC_EXPERIMENT_PROPERTIES_FILENAME)
 
         # The main script can need other experiment files and it adds new files
         self.environment.write_main_script()
-        self._build_new_files()
+        self._build_new_files(builder)
 
     def start_runs(self):
         """Execute all runs that were added to the experiment.
@@ -626,7 +702,7 @@ class Experiment(_Buildable):
         """
         self.environment.start_runs()
 
-    def _build_runs(self):
+    def _build_runs(self, builder):
         """
         Uses the relative directory information and writes all runs to disc.
         """
@@ -640,7 +716,7 @@ class Experiment(_Buildable):
                 logging.info(f"Build run {index:6}/{num_runs}")
             for name, (command, kwargs) in self.commands.items():
                 run.add_command(name, command, **kwargs)
-            run.build(index)
+            run.build(index, builder)
         logging.info("Finished building runs")
 
 
@@ -660,8 +736,8 @@ class Run(_Buildable):
         self.experiment = experiment
         self.path = None
 
-    def build(self, run_id):
-        """Write the run's files to disk.
+    def build(self, run_id, builder):
+        """Write the run's files with *builder*.
 
         This method is called automatically by the experiment.
 
@@ -669,15 +745,15 @@ class Run(_Buildable):
         rel_run_dir = get_run_dir(run_id)
         self.set_property("run_dir", rel_run_dir)
         self.path = os.path.join(self.experiment.path, rel_run_dir)
-        os.makedirs(self.path)
+        builder.makedirs(self.path)
 
         # We need to build the run script before the resources, because
         # the run script is added as a resource.
         self._build_run_script()
-        self._build_new_files()
-        self._build_resources()
+        self._build_new_files(builder)
+        self._build_resources(builder)
         self._check_id()
-        self._build_properties_file(STATIC_RUN_PROPERTIES_FILENAME)
+        self._build_properties_file(builder, STATIC_RUN_PROPERTIES_FILENAME)
 
     def _build_run_script(self):
         if not self.commands:
