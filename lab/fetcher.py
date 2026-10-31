@@ -1,9 +1,11 @@
+import json
 import logging
 import sys
 from pathlib import Path
 
 import lab.experiment
 from lab import tools
+from lab.archive import ExperimentArchive
 
 
 def _check_eval_dir(eval_dir: Path):
@@ -46,40 +48,67 @@ class Fetcher:
     def fetch_dir(self, run_dir):
         """Combine "static-properties" and "properties" from a run dir and return it."""
         run_dir = Path(run_dir)
-        static_props = tools.Properties(
-            filename=run_dir / lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
-        )
         dynamic_props_path = run_dir / "properties"
-        dynamic_props = tools.Properties(filename=dynamic_props_path)
-        if not dynamic_props_path.exists():
-            logging.critical(
-                f'Properties file "{tools.get_relative_path(dynamic_props_path)}" is'
-                f' missing. Did you forget to add or run the "parse" step?'
-            )
-        elif not dynamic_props:
-            logging.critical(
-                f'Properties file "{tools.get_relative_path(dynamic_props_path)}" is'
-                f" empty. Have you added at least one parser?"
-            )
+        return _combine_run_properties(
+            static_props=tools.Properties(
+                filename=run_dir / lab.experiment.STATIC_RUN_PROPERTIES_FILENAME
+            ),
+            dynamic_props=tools.Properties(filename=dynamic_props_path),
+            dynamic_props_name=tools.get_relative_path(dynamic_props_path),
+            has_dynamic_props=dynamic_props_path.exists(),
+            has_driver_log=(run_dir / "driver.log").exists(),
+            logs={
+                name: (run_dir / name).read_text()
+                for name in ["driver.err", "run.err"]
+                if (run_dir / name).exists()
+            },
+        )
 
-        props = tools.Properties()
-        props.update(static_props)
-        props.update(dynamic_props)
+    def _fetch_archive(self, archive_path):
+        """Yield the combined properties of each run in an experiment archive."""
+        archive = ExperimentArchive(archive_path)
+        with archive.reader() as tar:
+            members = {member.name: member for member in tar}
+            groups = archive.group_by_run_dir(members)
+            run_dirs = sorted(run_dir for run_dir in groups if run_dir is not None)
+            num_runs = len(run_dirs)
+            logging.info(f"Collecting properties from {num_runs:d} archived runs")
 
-        driver_log = run_dir / "driver.log"
-        if not driver_log.exists():
-            props.add_unexplained_error(
-                "driver.log is missing. Probably the run was never started."
-            )
+            def read(name):
+                return tar.extractfile(members[name]).read().decode()
 
-        driver_err = run_dir / "driver.err"
-        run_err = run_dir / "run.err"
-        for logfile in [driver_err, run_err]:
-            if logfile.exists():
-                content = logfile.read_text()
-                if content:
-                    props.add_unexplained_error(f"{logfile.name}: {content}")
-        return props
+            def read_props(name):
+                props = tools.Properties()
+                if name in members:
+                    props.update(json.loads(read(name)))
+                return props
+
+            for index, run_dir in enumerate(run_dirs, start=1):
+                props_name = f"{run_dir}/properties"
+                _log_progress(index, num_runs)
+                yield _combine_run_properties(
+                    static_props=read_props(
+                        f"{run_dir}/{lab.experiment.STATIC_RUN_PROPERTIES_FILENAME}"
+                    ),
+                    dynamic_props=read_props(props_name),
+                    dynamic_props_name=f"{archive_path}:{props_name}",
+                    has_dynamic_props=props_name in members,
+                    has_driver_log=f"{run_dir}/driver.log" in members,
+                    logs={
+                        name: read(f"{run_dir}/{name}")
+                        for name in ["driver.err", "run.err"]
+                        if f"{run_dir}/{name}" in members
+                    },
+                )
+
+    def _fetch_dirs(self, src_dir):
+        """Yield the combined properties of each run in an experiment directory."""
+        run_dirs = sorted(src_dir.glob("runs-*-*/*"))
+        num_dirs = len(run_dirs)
+        logging.info(f"Collecting properties from {num_dirs:d} run directories")
+        for index, run_dir in enumerate(run_dirs, start=1):
+            _log_progress(index, num_dirs)
+            yield self.fetch_dir(run_dir)
 
     def __call__(self, src_dir, eval_dir=None, merge=None, filter=None, **kwargs):
         """
@@ -100,8 +129,12 @@ class Fetcher:
         src_dir = Path(src_dir)
         if not src_dir.exists():
             logging.critical(f"{src_dir} is missing")
+        is_archive = src_dir.suffix == ".tar"
+        # For archived experiments, the eval and grid-steps directories are
+        # named after the experiment directory.
+        exp_dir = src_dir.with_suffix("") if is_archive else src_dir
 
-        eval_dir = eval_dir or str(src_dir).rstrip("/") + "-eval"
+        eval_dir = eval_dir or str(exp_dir).rstrip("/") + "-eval"
         eval_dir = Path(eval_dir)
         logging.info(
             f"Fetching properties from {tools.get_relative_path(src_dir)} "
@@ -122,7 +155,7 @@ class Fetcher:
             if not src_props_file.is_file() and path.is_file():
                 src_props_file = path
                 break
-        fetch_from_eval_dir = src_props_file.exists()
+        fetch_from_eval_dir = not is_archive and src_props_file.exists()
         combined_props = tools.Properties(eval_dir / "properties")
         run_filter = tools.RunFilter(filter, **kwargs)
         if fetch_from_eval_dir:
@@ -134,7 +167,7 @@ class Fetcher:
             logging.info(f"Fetched properties of {len(src_props)} runs.")
         else:
             try:
-                slurm_err_content = tools.get_slurm_err_content(src_dir)
+                slurm_err_content = tools.get_slurm_err_content(exp_dir)
             except FileNotFoundError:
                 slurm_err_content = ""
 
@@ -142,19 +175,16 @@ class Fetcher:
                 logging.warning("There was output to *-grid-steps/slurm.err")
 
             new_props = tools.Properties()
-            run_dirs = sorted(src_dir.glob("runs-*-*/*"))
-            num_dirs = len(run_dirs)
-            logging.info(f"Collecting properties from {num_dirs:d} run directories")
-            for index, run_dir in enumerate(run_dirs, start=1):
-                props = self.fetch_dir(run_dir)
+            runs = (
+                self._fetch_archive(src_dir)
+                if is_archive
+                else self._fetch_dirs(src_dir)
+            )
+            for props in runs:
                 if slurm_err_content:
                     props.add_unexplained_error("output-to-slurm.err")
                 id_string = "-".join(props["id"])
                 new_props[id_string] = props
-                loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
-                logging.log(
-                    loglevel, f"Collected {index:6d}/{num_dirs} properties files"
-                )
             run_filter.apply(new_props)
             combined_props.update(new_props)
 
@@ -170,3 +200,42 @@ class Fetcher:
             f"Wrote properties file. It contains {unexplained_errors} "
             f"runs with unexplained errors."
         )
+
+
+def _combine_run_properties(
+    static_props,
+    dynamic_props,
+    dynamic_props_name,
+    has_dynamic_props,
+    has_driver_log,
+    logs,
+):
+    if not has_dynamic_props:
+        logging.critical(
+            f'Properties file "{dynamic_props_name}" is'
+            f' missing. Did you forget to add or run the "parse" step?'
+        )
+    elif not dynamic_props:
+        logging.critical(
+            f'Properties file "{dynamic_props_name}" is'
+            f" empty. Have you added at least one parser?"
+        )
+
+    props = tools.Properties()
+    props.update(static_props)
+    props.update(dynamic_props)
+
+    if not has_driver_log:
+        props.add_unexplained_error(
+            "driver.log is missing. Probably the run was never started."
+        )
+
+    for name, content in logs.items():
+        if content:
+            props.add_unexplained_error(f"{name}: {content}")
+    return props
+
+
+def _log_progress(index, num_runs):
+    loglevel = logging.INFO if index % 100 == 0 else logging.DEBUG
+    logging.log(loglevel, f"Collected {index:6d}/{num_runs} properties files")

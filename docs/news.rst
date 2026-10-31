@@ -8,6 +8,11 @@ Lab
 ^^^
 * Use ``ArrheniusEnvironment`` in example experiments and recommend Arrhenius's
   ``fat`` partition (Jendrik Seipp).
+* Add ``Experiment(archive=True)``, which stores the experiment directory in
+  the single tar file ``<path>.tar`` from the build step on to save inodes on
+  cluster file systems. Runs execute in temporary directories and append their
+  files to the archive; the parse and fetch steps read the archive directly
+  (Markus Fritzsche).
 
 
 v8.10 (2026-06-26)

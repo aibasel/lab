@@ -1,0 +1,16 @@
+# Shuffle runs to avoid systematic bias.
+declare -a SHUFFLED_RUN_IDS=(%(run_order)s)
+NUM_RUNS=%(num_runs)d
+RUNS_PER_TASK=%(runs_per_task)d
+
+# Compute which indices belong to the Slurm task.
+let "START_INDEX=($SLURM_ARRAY_TASK_ID - 1) * RUNS_PER_TASK"
+let "END_INDEX=START_INDEX + RUNS_PER_TASK - 1"
+
+if [ $END_INDEX -ge $NUM_RUNS ]; then
+    let "END_INDEX=$NUM_RUNS - 1"
+fi
+
+# Execute runs in a temporary directory and append their files to the archive.
+"%(python)s" -m lab.archive "%(archive_path)s" \
+    "${SHUFFLED_RUN_IDS[@]:$START_INDEX:$((END_INDEX - START_INDEX + 1))}"
