@@ -128,9 +128,8 @@ class SlurmEnvironment(Environment):
     Use *extra_options* to pass additional options. The *extra_options*
     string may contain newlines. The first example below uses only a given
     set of nodes (additional nodes will be used if the given ones don't
-    satisfy the resource constraints). The second example shows show to
-    specify a project account (needed on NSC if you're part of multiple
-    projects). ::
+    satisfy the resource constraints). The second example shows how to
+    specify a project account (needed on Arrhenius). ::
 
         extra_options="#SBATCH --nodelist=ica[1-5,7,10]"
         extra_options="#SBATCH --account=naiss2024-5-421"
@@ -142,36 +141,36 @@ class SlurmEnvironment(Environment):
     * "infai_2": 24 nodes with 20 cores, 128GB memory, 240GB SSD
     * "infai_3": 12 nodes with 128 cores, 512GB memory, 240GB SSD
 
-    For Tetralith, omit the argument or use the default "tetralith".
-    For Arrhenius, omit the argument or use the default "cpu" for standard
-    nodes. We recommend the "fat" partition for memory-intensive experiments.
+    For Arrhenius, omit the argument or use the default "fat", which has
+    20 nodes with 256 cores and 3072 GB of memory each. Alternatively, use
+    "cpu", which has 192 nodes with 256 cores and 768 GB of memory each.
 
     *qos* must be a valid Slurm QOS name (default: "normal").
 
     *time_limit_per_task* sets the wall-clock time limit for each Slurm task.
     The BaselSlurmEnvironment subclass uses a default of "0", i.e., no limit.
     (Note that there may still be an external limit set in slurm.conf.)
-    The TetralithEnvironment and ArrheniusEnvironment classes use a default of
-    "24:00:00", i.e., 24 hours. This is because in certain situations, the
-    scheduler prefers to schedule tasks shorter than 24 hours.
+    The ArrheniusEnvironment class uses a default of "24:00:00", i.e., 24
+    hours. This is because in certain situations, the scheduler prefers to
+    schedule tasks shorter than 24 hours.
 
     *memory_per_cpu* must be a string specifying the memory
     allocated for each core. The string must end with one of the
     letters K, M or G. The default is "3872M" for the Basel cluster and
-    "3G" on Arrhenius and "9G" on Tetralith. Processes that surpass the
-    *memory_per_cpu* limit are terminated with SIGKILL. To impose a soft limit
-    that can be caught from within your programs, use the ``memory_limit`` kwarg
-    of :py:func:`~lab.experiment.Run.add_command`. Fast Downward users should set
+    "9G" on Arrhenius. Processes that surpass the *memory_per_cpu* limit are
+    terminated with SIGKILL. To impose a soft limit that can be caught from
+    within your programs, use the ``memory_limit`` kwarg of
+    :py:func:`~lab.experiment.Run.add_command`. Fast Downward users should set
     memory limits via the ``driver_options``.
 
     *cpus_per_task* sets the number of cores to be allocated per Slurm
     task (default: 1).
 
     The value for *memory_per_cpu* should not be (much) higher than the
-    amount of memory that is available per core, which is "2840M" for thin
-    Tetralith nodes, "11360M" for fat Tetralith nodes, "6354M" for infai_2
-    and "4028M" for infai_3. If you need more memory, please reserve multiple
-    cores per task. Here is an example that reserves 12 GiB of memory on infai_2:
+    amount of memory that is available per core, which is "6354M" for infai_2
+    and "4028M" for infai_3 (see below for Arrhenius). If you need more memory,
+    please reserve multiple cores per task. Here is an example that reserves
+    12 GiB of memory on infai_2:
 
     >>> # 12 * 1024 / 6354 = 1.93 -> round to next int -> 2 cores per task
     >>> # 12G / 2 = 6G per core
@@ -181,25 +180,30 @@ class SlurmEnvironment(Environment):
     ...     cpus_per_task=2,
     ... )
 
-    On Arrhenius, we recommend the ``fat`` partition with 11 GiB of memory per
-    core instead of the default ``cpu`` partition, which provides less than
-    3 GiB per core. According to the `official resource description
-    <https://supr.naiss.se/resource/arrhenius-cpu/>`_, Arrhenius has 192 thin
-    nodes in the ``cpu`` partition with 768 GB RAM and 20 nodes in the ``fat``
-    partition with 3072 GB RAM. Each node has 256 cores, giving
-    3 GB and 12 GB per core, respectively.
-    Here is the code for reserving 9 GiB of memory:
+    According to the `official resource description
+    <https://supr.naiss.se/resource/arrhenius-cpu/>`_, Arrhenius has 192
+    nodes in the ``cpu`` partition with 768 GB of memory and 20 nodes in the
+    ``fat`` partition with 3072 GB of memory. Each node has 256 cores. All
+    nodes are shared, and each job is billed for the number of cores or for
+    the amount of memory it requests, whichever is larger. Slurm reserves
+    64 GiB of memory per node for the system and divides the rest evenly
+    among the 256 cores (see slurm.conf). Each core therefore comes with
+    "2765M" (2.7 GiB) of memory in the ``cpu`` partition and with "11837M"
+    (11.56 GiB) in the ``fat`` partition. ArrheniusEnvironment uses the
+    ``fat`` partition with 9 GiB of memory per core by default, which leaves
+    8 GiB for the solver and 1 GiB for Lab's scripts:
 
-    >>> # 9G / 11G -> round to next int -> 1 core per task
+    >>> # 9G / 11.56G = 0.78 -> 1 core per task billed
     >>> env = ArrheniusEnvironment(
     ...     partition="fat",
     ...     memory_per_cpu="9G",
     ...     cpus_per_task=1,
     ... )
 
-    The same requirements are billed 3 cores on the "cpu" partition:
+    The same requirements are billed 3 cores on the "cpu" partition (Slurm
+    rounds the billed amount down):
 
-    >>> # 9G / 3G -> round to next int -> 3 cores per task billed
+    >>> # 9G / 2.7G = 3.33 -> round down -> 3 cores per task billed
     >>> env = ArrheniusEnvironment(
     ...     partition="cpu",
     ...     memory_per_cpu="9G",
@@ -221,12 +225,6 @@ class SlurmEnvironment(Environment):
     appropriate value for your cluster in the *MAX_TASKS* class
     variable. Lab groups `ceil(runs/MAX_TASKS)` runs in one array
     task.
-
-    .. note::
-
-        If you use the TetralithEnvironment class and have few and short
-        runs, the grid admins want you to reduce `TetralithEnvironment.MAX_TASKS`
-        from 2000 to a smaller value to avoid producing short-running Slurm tasks.
 
     See :py:class:`~lab.environments.Environment` for inherited
     parameters.
@@ -459,37 +457,16 @@ class BaselSlurmEnvironment(SlurmEnvironment):
         return bool(re.fullmatch(r"login12|ic[ab]\d\d", node))
 
 
-class TetralithEnvironment(SlurmEnvironment):
-    """Environment for the NSC Tetralith cluster in Linköping."""
-
-    DEFAULT_PARTITION = "tetralith"
-    DEFAULT_QOS = "normal"
-    # The maximum wall-clock time limit for a task is 7 days. The default
-    # is 2 hours. In certain situations, the scheduler prefers to schedule
-    # tasks shorter than 24 hours.
-    DEFAULT_TIME_LIMIT_PER_TASK = "24:00:00"
-    # There are 1908 nodes. 1844 nodes have 93.1 GiB (97637616 KiB) of
-    # memory and 64 nodes have 384 GB of memory. All nodes have 32 cores.
-    # So for the vast majority of nodes, we have 2979 MiB per core. The
-    # slurm.conf file sets DefMemPerCPU=2904. Since this is rather low, we
-    # simply set our own default: 8 GiB for the solver and 1 GiB for scripts.
-    DEFAULT_MEMORY_PER_CPU = "9G"
-    # See slurm.conf
-    MAX_TASKS = 2000
-
-    @classmethod
-    def is_present(cls):
-        node = platform.node()
-        return bool(re.match(r"tetralith\d+\.nsc\.liu\.se|n\d+", node))
-
-
 class ArrheniusEnvironment(SlurmEnvironment):
     """Environment for the NAISS Arrhenius cluster."""
 
-    DEFAULT_PARTITION = "cpu"
+    DEFAULT_PARTITION = "fat"
     DEFAULT_QOS = "normal"
-    # cpu nodes have 773500 MiB and 256 cores => ~3021 MiB per core.
-    DEFAULT_MEMORY_PER_CPU = "3G"
+    # Jobs are billed for their cores or their memory, whichever is larger.
+    # In slurm.conf, DefMemPerCPU = (RealMemory - MemSpecLimit) / CPUs, which
+    # is 2765 MiB for cpu nodes and 11837 MiB for fat nodes. We use 8 GiB for
+    # the solver and 1 GiB for Lab's scripts, which is billed as one fat core.
+    DEFAULT_MEMORY_PER_CPU = "9G"
     DEFAULT_TIME_LIMIT_PER_TASK = "24:00:00"
     # MaxArraySize = 1001 (from slurm.conf)
     MAX_TASKS = 1000
