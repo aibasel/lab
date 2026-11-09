@@ -89,7 +89,6 @@ repository <https://github.com/Martin1887/lab-htcondor-environment>`_.
    :members: is_present
 .. autoclass:: lab.environments.ArrheniusEnvironment
 .. autoclass:: lab.environments.BaselSlurmEnvironment
-.. autoclass:: lab.environments.TetralithEnvironment
 
 
 Various

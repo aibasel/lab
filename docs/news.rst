@@ -6,8 +6,12 @@ next (unreleased)
 
 Lab
 ^^^
-* Use ``ArrheniusEnvironment`` in example experiments and recommend Arrhenius's
-  ``fat`` partition (Jendrik Seipp).
+* Use ``ArrheniusEnvironment`` in example experiments (Jendrik Seipp).
+* ArrheniusEnvironment: use the ``fat`` partition with 9 GiB of memory per core
+  by default. Pass ``partition="cpu"`` and a lower ``memory_per_cpu`` value to
+  use the ``cpu`` partition instead (Jendrik Seipp).
+* Remove ``TetralithEnvironment``, since the Tetralith cluster has been
+  discontinued (Jendrik Seipp).
 
 
 v8.10 (2026-06-26)
