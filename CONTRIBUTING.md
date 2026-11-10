@@ -55,7 +55,8 @@ to skip their tests locally.
     wget http://fai.cs.uni-saarland.de/hoffmann/ff/FF-v2.3.tgz
     tar -xzvf FF-v2.3.tgz
     cd FF-v2.3/
-    make -j
+    # GCC 10 and newer need -fcommon to compile FF.
+    make -j ADDONS=-fcommon
 
 and add the resulting `ff` binary to your `PATH`. Now you can run the example FF experiment with `tox -e ff`.
 
